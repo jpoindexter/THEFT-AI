@@ -27,6 +27,7 @@ import {
   Rocket,
   Eye,
   Users,
+  ShieldCheck,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -43,11 +44,13 @@ export default function LayoutHeader({
   orgSlug,
   founderInitial,
   hasPlan,
+  orgs = [],
 }: {
   orgName: string;
   orgSlug: string;
   founderInitial: string;
   hasPlan: boolean;
+  orgs?: { slug: string; name: string }[];
 }) {
   const router = useRouter();
   const pathname = usePathname();
@@ -93,6 +96,8 @@ export default function LayoutHeader({
     tasks: "Tasks",
     library: "Library",
     review: "Review",
+    "managed-services": "Managed services",
+    preview: "Preview",
   };
   const subLabel =
     subSegment && SUB_LABELS[subSegment]
@@ -121,10 +126,41 @@ export default function LayoutHeader({
               </button>
             }
           />
-          <DropdownMenuContent align="start" className="w-48">
-            <div className="px-2 py-1.5 text-[10px] uppercase tracking-wider text-stone-500">
-              {orgName}
-            </div>
+          <DropdownMenuContent align="start" className="w-56">
+            {orgs.length > 1 && (
+              <>
+                <div className="px-2 py-1.5 text-[10px] uppercase tracking-wider text-stone-500">
+                  Workspaces
+                </div>
+                {orgs.map((o) => (
+                  <MenuRow
+                    key={o.slug}
+                    onSelect={goto(`/${o.slug}`)}
+                    icon={
+                      <span
+                        className={`size-3.5 rounded-sm ${
+                          o.slug === orgSlug
+                            ? "bg-stone-900"
+                            : "bg-stone-200"
+                        }`}
+                      />
+                    }
+                    label={o.name}
+                  />
+                ))}
+                <MenuRow
+                  onSelect={goto("/onboarding")}
+                  icon={<span className="size-3.5 inline-flex items-center justify-center text-stone-500">+</span>}
+                  label="New workspace"
+                />
+                <DropdownMenuSeparator />
+              </>
+            )}
+            {orgs.length <= 1 && (
+              <div className="px-2 py-1.5 text-[10px] uppercase tracking-wider text-stone-500">
+                {orgName}
+              </div>
+            )}
             <MenuRow
               onSelect={goto(`/${orgSlug}/settings`)}
               icon={<Settings className="size-3.5" />}
@@ -200,6 +236,11 @@ export default function LayoutHeader({
               onSelect={goto(`/${orgSlug}/database`)}
               icon={<Database className="size-3.5" />}
               label="Database"
+            />
+            <MenuRow
+              onSelect={goto(`/${orgSlug}/managed-services`)}
+              icon={<ShieldCheck className="size-3.5" />}
+              label="Managed services"
             />
             <MenuRow
               onSelect={goto(`/${orgSlug}/settings/billing`)}

@@ -76,6 +76,12 @@ export default async function PublishingPage({
               </div>
               <div className="flex justify-end gap-2">
                 <Link
+                  href={`/${org}/preview/${t.slug === "app" ? "feat-subscriptions-table" : "fix-canvas-pan"}`}
+                  className="text-[11px] rounded-md border border-stone-200 bg-white px-2 py-1 hover:border-stone-400"
+                >
+                  Open preview
+                </Link>
+                <Link
                   href={`/${org}/${t.slug === "app" ? "engineering" : "marketing"}`}
                   className="text-[11px] rounded-md border border-stone-200 bg-white px-2 py-1 hover:border-stone-400"
                 >

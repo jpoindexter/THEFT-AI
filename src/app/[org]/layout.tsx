@@ -14,6 +14,7 @@ export default async function OrgLayout({
   const { org: orgSlug } = await params;
   const organization = await db.getOrgBySlug(orgSlug);
   if (!organization) notFound();
+  const allOrgs = await db.listOrgs();
 
   const hasPlan =
     !!organization.business_plan &&
@@ -21,12 +22,13 @@ export default async function OrgLayout({
       0;
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#ececec] text-stone-900">
+    <div className="min-h-screen flex flex-col bg-cream text-ink">
       <LayoutHeader
         orgName={organization.name}
         orgSlug={organization.slug}
         founderInitial={"J"}
         hasPlan={hasPlan}
+        orgs={allOrgs.map((o) => ({ slug: o.slug, name: o.name }))}
       />
       <div className="flex-1 grid grid-cols-[1fr_360px] gap-2 px-2 pb-2">
         <LayoutCanvas hasPlan={hasPlan}>{children}</LayoutCanvas>
