@@ -110,6 +110,8 @@ export default function LayoutHeader({
     billing: "Billing",
     sandbox: "Sandbox",
     diagnostics: "Diagnostics",
+    "whats-new": "What's new",
+    help: "Help",
   };
   const subLabel =
     subSegment && SUB_LABELS[subSegment]
