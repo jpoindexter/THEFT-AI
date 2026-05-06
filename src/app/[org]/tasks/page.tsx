@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { db } from "@/lib/db/store";
 import { ChevronRight, Plus } from "lucide-react";
+import EmptyState from "@/components/empty-state";
 
 const SECTIONS: {
   key: "needs_action" | "ongoing" | "done" | "todo";
@@ -63,12 +64,27 @@ export default async function TasksPage({
               Track running work, review completed work, and open task details.
             </p>
           </div>
-          <button className="inline-flex items-center gap-1 rounded-md bg-ink text-paper px-3 py-1.5 text-[12px]">
+          <Link
+            href={`/${orgSlug}/tasks/new`}
+            className="inline-flex items-center gap-1 rounded-md bg-ink text-paper px-3 py-1.5 text-[12px]"
+          >
             <Plus className="size-3.5" /> New task
-          </button>
+          </Link>
         </header>
 
-        {SECTIONS.map((s) => {
+        {tasks.length === 0 && (
+          <EmptyState
+            Icon={Plus}
+            title="No tasks yet"
+            body="Tasks are how you give an agent work. Either type one, or kick one off from a tech-tree node."
+            actions={[
+              { label: "New task", href: `/${orgSlug}/tasks/new`, primary: true },
+              { label: "Open roadmap", href: `/${orgSlug}/roadmap` },
+            ]}
+          />
+        )}
+
+        {tasks.length > 0 && SECTIONS.map((s) => {
           const bucket = buckets[s.key];
           return (
             <section key={s.key} className="space-y-2">

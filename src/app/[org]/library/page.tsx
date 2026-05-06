@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { db } from "@/lib/db/store";
 import { Search, Upload, Pin } from "lucide-react";
+import EmptyState from "@/components/empty-state";
 
 const COVER: Record<string, string> = {
   engineering: "linear-gradient(135deg,#fde7c0,#f5d6a8)",
@@ -105,6 +106,17 @@ export default async function LibraryPage({
             })}
           </div>
         </section>
+
+        {artifacts.length === 0 && (
+          <EmptyState
+            Icon={Upload}
+            title="Library is empty"
+            body="Drop a brief, brand kit, prospect list, or anything agents should reference. Pinned files travel with every prompt."
+            actions={[
+              { label: "Upload artifact", href: `/${orgSlug}/library/upload`, primary: true },
+            ]}
+          />
+        )}
 
         {artifacts.length > 0 && (
           <section className="space-y-2">
