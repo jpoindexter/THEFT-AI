@@ -13,6 +13,7 @@ import {
   ButtonPrimary,
   Pill,
 } from "@/components/ui/primitives";
+import SlashMenu from "@/components/slash-menu";
 
 type Agent = { id: string; slug: string; name: string };
 
@@ -24,6 +25,8 @@ export default function NewTaskPage() {
   const [agentId, setAgentId] = useState<string>("auto");
   const [mode, setMode] = useState<"plan" | "execute">("execute");
   const [busy, setBusy] = useState(false);
+  const slashOpen = description.startsWith("/") && !description.includes(" ");
+  const slashQ = slashOpen ? description.slice(1) : "";
 
   useEffect(() => {
     void fetch(`/api/${params.org}/agents`)
@@ -72,14 +75,25 @@ export default function NewTaskPage() {
 
         <Card>
           <CardBody>
-            <textarea
-              autoFocus
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              placeholder="e.g. Add a Stripe checkout flow for the new pricing page and verify the happy path."
-              rows={6}
-              className="w-full text-base resize-none focus:outline-none placeholder:text-ink-soft bg-transparent"
-            />
+            <div className="relative">
+              <textarea
+                autoFocus
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                placeholder='e.g. Add Stripe checkout. Type "/" for commands.'
+                rows={6}
+                className="w-full text-base resize-none focus:outline-none placeholder:text-ink-soft bg-transparent"
+              />
+              {slashOpen && (
+                <SlashMenu
+                  q={slashQ}
+                  onPick={(cmd) => setDescription(cmd.label + " ")}
+                  onClose={() =>
+                    setDescription(description.replace(/^\//, ""))
+                  }
+                />
+              )}
+            </div>
             <div className="border-t border-line/60 -mx-4 mt-3" />
             <div className="flex flex-wrap items-center gap-2 pt-3 text-xs">
               <button

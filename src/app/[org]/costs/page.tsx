@@ -22,12 +22,20 @@ export default async function CostsPage({
               Token usage, model spend, and per-agent costs across the workspace.
             </p>
           </div>
-          <Link
-            href={`/${org}/costs/budget`}
-            className="text-[11px] rounded-md border border-line bg-paper px-2 py-1 hover:border-line-strong"
-          >
-            Budget & limits
-          </Link>
+          <div className="flex items-center gap-1">
+            <a
+              href={`/api/${org}/costs/export`}
+              className="text-[11px] rounded-md border border-line bg-paper px-2 py-1 hover:border-line-strong"
+            >
+              Export CSV
+            </a>
+            <Link
+              href={`/${org}/costs/budget`}
+              className="text-[11px] rounded-md border border-line bg-paper px-2 py-1 hover:border-line-strong"
+            >
+              Budget & limits
+            </Link>
+          </div>
         </header>
 
         <section className="rounded-lg border border-line/70 bg-paper p-4 space-y-2">
