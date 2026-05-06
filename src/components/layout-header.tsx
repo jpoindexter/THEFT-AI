@@ -57,11 +57,17 @@ export default function LayoutHeader({
       if ((e.metaKey || e.ctrlKey) && e.key === "/") {
         e.preventDefault();
         setShortcutsOpen(true);
+      } else if ((e.metaKey || e.ctrlKey) && e.key === "k") {
+        e.preventDefault();
+        router.push(`/${orgSlug}/search`);
+      } else if ((e.metaKey || e.ctrlKey) && e.key === ".") {
+        e.preventDefault();
+        router.push(`/${orgSlug}/review`);
       }
     }
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, []);
+  }, [router, orgSlug]);
   const segments = pathname.replace(/^\/+|\/+$/g, "").split("/");
   const after = segments.slice(1);
   const isSubpage = after.length > 0;
