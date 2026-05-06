@@ -120,6 +120,7 @@ export default function LayoutHeader({
     share: "Share",
     team: "Team",
     import: "Import",
+    marketplace: "Marketplace",
   };
   const subLabel =
     subSegment && SUB_LABELS[subSegment]
@@ -212,6 +213,11 @@ export default function LayoutHeader({
               onSelect={goto(`/${orgSlug}/skills`)}
               icon={<Sparkles className="size-3.5" />}
               label="Skills"
+            />
+            <MenuRow
+              onSelect={goto(`/${orgSlug}/marketplace`)}
+              icon={<Sparkles className="size-3.5" />}
+              label="Marketplace"
             />
             <MenuRow
               onSelect={goto(`/${orgSlug}/roadmap`)}
