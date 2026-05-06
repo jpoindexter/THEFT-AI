@@ -33,6 +33,9 @@ export default function LayoutCanvas({
         className="absolute bottom-3 left-3 size-8 rounded-full bg-paper border border-line/70 inline-flex items-center justify-center hover:border-line-strong z-20"
       >
         <Bell className="size-3.5 text-ink-muted" />
+        <span className="absolute -top-1 -right-1 size-3.5 rounded-full bg-mustard text-mustard-ink text-[9px] font-medium inline-flex items-center justify-center border border-paper">
+          2
+        </span>
       </button>
 
       {inboxOpen && (

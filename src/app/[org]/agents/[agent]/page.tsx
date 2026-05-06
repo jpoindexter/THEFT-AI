@@ -27,12 +27,20 @@ export default async function AgentDetailPage({
           >
             <ArrowLeft className="size-3" /> Back
           </Link>
-          <Link
-            href={`/${orgSlug}/agents/${agentSlug}/edit`}
-            className="text-[11px] rounded-md border border-line bg-paper px-2 py-1 hover:border-line-strong"
-          >
-            Edit
-          </Link>
+          <div className="flex items-center gap-1">
+            <Link
+              href={`/${orgSlug}/agents/${agentSlug}/runs`}
+              className="text-[11px] rounded-md border border-line bg-paper px-2 py-1 hover:border-line-strong"
+            >
+              Run history
+            </Link>
+            <Link
+              href={`/${orgSlug}/agents/${agentSlug}/edit`}
+              className="text-[11px] rounded-md border border-line bg-paper px-2 py-1 hover:border-line-strong"
+            >
+              Edit
+            </Link>
+          </div>
         </div>
 
         <header className="space-y-1">
@@ -55,14 +63,22 @@ export default async function AgentDetailPage({
         </section>
 
         <section className="rounded-lg border border-line/70 bg-paper p-4 space-y-2">
-          <div className="text-[10px] uppercase tracking-wider text-ink-soft">
-            Skills attached ({agent.attached_skills.length})
+          <div className="flex items-center justify-between">
+            <div className="text-[10px] uppercase tracking-wider text-ink-soft">
+              Skills attached ({agent.attached_skills.length})
+            </div>
+            <Link
+              href={`/${orgSlug}/agents/${agentSlug}/edit`}
+              className="text-[11px] rounded-md border border-line bg-paper px-2 py-0.5 hover:border-line-strong"
+            >
+              Manage
+            </Link>
           </div>
           <div className="flex flex-wrap gap-1">
             {agent.attached_skills.map((s) => (
               <Link
                 key={s}
-                href={`/${orgSlug}/skills`}
+                href={`/${orgSlug}/skills/${s}`}
                 className="text-[11px] font-mono px-1.5 py-0.5 rounded bg-cream text-ink hover:bg-line"
               >
                 {s}
