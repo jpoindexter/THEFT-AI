@@ -30,6 +30,7 @@ import {
   ShieldCheck,
   Brain,
   Stethoscope,
+  LayoutDashboard,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -113,6 +114,7 @@ export default function LayoutHeader({
     "whats-new": "What's new",
     help: "Help",
     feed: "Feed",
+    studio: "Studio",
   };
   const subLabel =
     subSegment && SUB_LABELS[subSegment]
@@ -176,6 +178,11 @@ export default function LayoutHeader({
                 {orgName}
               </div>
             )}
+            <MenuRow
+              onSelect={goto(`/${orgSlug}/studio`)}
+              icon={<LayoutDashboard className="size-3.5" />}
+              label="Studio"
+            />
             <MenuRow
               onSelect={goto(`/${orgSlug}/settings`)}
               icon={<Settings className="size-3.5" />}

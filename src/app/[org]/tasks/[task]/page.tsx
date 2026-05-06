@@ -3,6 +3,7 @@ import { db } from "@/lib/db/store";
 import Link from "next/link";
 import { ArrowLeft, MoreHorizontal } from "lucide-react";
 import AgentRunConsole from "@/components/agent-run-console";
+import TaskCloseControls from "@/components/task-close-controls";
 
 export default async function TaskDetailPage({
   params,
@@ -101,22 +102,12 @@ export default async function TaskDetailPage({
           </div>
         </section>
 
-        <section className="rounded-lg border border-line/70 bg-paper p-4 flex items-center justify-between">
-          <div className="text-[12px]">
-            <div className="font-medium">Created</div>
-            <div className="text-ink-muted">
-              {new Date(task.created_at).toLocaleString()}
-            </div>
-          </div>
-          <div className="flex gap-1">
-            <button className="text-[11px] rounded-md border border-line px-2 py-1 hover:border-line-strong">
-              Report issue
-            </button>
-            <button className="text-[11px] rounded-md bg-ink text-paper px-2 py-1">
-              Mark complete
-            </button>
-          </div>
+        <section className="rounded-lg border border-line/70 bg-paper p-3 text-[12px] flex items-center justify-between text-ink-muted">
+          <span>Created {new Date(task.created_at).toLocaleString()}</span>
+          <span>Updated {new Date(task.updated_at).toLocaleString()}</span>
         </section>
+
+        <TaskCloseControls taskId={task.id} status={task.status} />
       </div>
     </div>
   );
