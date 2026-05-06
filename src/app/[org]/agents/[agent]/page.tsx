@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { db } from "@/lib/db/store";
 import { ArrowLeft } from "lucide-react";
+import AgentControls from "@/components/agent-controls";
 
 export default async function AgentDetailPage({
   params,
@@ -52,6 +53,21 @@ export default async function AgentDetailPage({
             <p className="text-[13px] text-ink-muted">{agent.title}</p>
           )}
         </header>
+
+        <AgentControls
+          initial={
+            agent.status === "running"
+              ? "running"
+              : agent.status === "paused"
+                ? "paused"
+                : agent.status === "error"
+                  ? "error"
+                  : agent.status === "terminated"
+                    ? "terminated"
+                    : "idle"
+          }
+          agentName={agent.name}
+        />
 
         <section className="rounded-lg border border-line/70 bg-paper p-4 space-y-2">
           <div className="text-[10px] uppercase tracking-wider text-ink-soft">
