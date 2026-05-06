@@ -283,6 +283,11 @@ export default function LayoutHeader({
               label="Join Discord"
             />
             <MenuRow
+              onSelect={goto(`/${orgSlug}/help`)}
+              icon={<LifeBuoy className="size-3.5" />}
+              label="Help"
+            />
+            <MenuRow
               onSelect={goto(`/${orgSlug}/settings/support`)}
               icon={<LifeBuoy className="size-3.5" />}
               label="Support ticket"

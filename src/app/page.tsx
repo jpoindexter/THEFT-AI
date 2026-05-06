@@ -6,7 +6,7 @@ export default async function Home() {
   const continueHref = orgs.length > 0 ? `/${orgs[0].slug}` : "/onboarding";
 
   return (
-    <div className="min-h-screen bg-[#f3f1ec] text-ink flex flex-col">
+    <div className="min-h-screen bg-cream text-ink flex flex-col">
       {/* Hero */}
       <section className="relative overflow-hidden">
         <div className="absolute inset-0">
