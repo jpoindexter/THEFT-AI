@@ -31,15 +31,20 @@ const RESULTS = [
   },
 ];
 
+const KINDS = ["all", "task", "agent", "artifact", "node", "skill"] as const;
+type Kind = (typeof KINDS)[number];
+
 export default function SearchPage() {
   const [q, setQ] = useState("");
-  const filtered = q
-    ? RESULTS.filter(
-        (r) =>
-          r.title.toLowerCase().includes(q.toLowerCase()) ||
-          r.sub.toLowerCase().includes(q.toLowerCase()),
-      )
-    : RESULTS;
+  const [kind, setKind] = useState<Kind>("all");
+  const filtered = RESULTS.filter((r) => {
+    if (kind !== "all" && r.kind !== kind) return false;
+    if (!q) return true;
+    return (
+      r.title.toLowerCase().includes(q.toLowerCase()) ||
+      r.sub.toLowerCase().includes(q.toLowerCase())
+    );
+  });
 
   return (
     <div className="absolute inset-0 overflow-y-auto p-6">
@@ -55,6 +60,25 @@ export default function SearchPage() {
               placeholder="Search tasks, agents, artifacts, tech tree, skills…"
               className="flex-1 text-[13px] focus:outline-none bg-transparent"
             />
+          </div>
+          <div className="flex flex-wrap gap-1 mt-2">
+            {KINDS.map((k) => {
+              const on = kind === k;
+              return (
+                <button
+                  key={k}
+                  type="button"
+                  onClick={() => setKind(k)}
+                  className={`text-[11px] uppercase tracking-wider rounded px-2 py-0.5 transition-colors ${
+                    on
+                      ? "bg-stone-900 text-white"
+                      : "bg-stone-100 text-stone-600 hover:bg-stone-200"
+                  }`}
+                >
+                  {k}
+                </button>
+              );
+            })}
           </div>
         </header>
 
