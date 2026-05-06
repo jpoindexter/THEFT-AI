@@ -1,17 +1,53 @@
-const SERIES = [3, 8, 5, 12, 18, 14, 22, 30, 28, 36, 41, 38, 47, 52];
+import Link from "next/link";
 
-export default function CostsPage() {
+const SERIES = [3, 8, 5, 12, 18, 14, 22, 30, 28, 36, 41, 38, 47, 52];
+const MONTHLY_BUDGET = 800;
+
+export default async function CostsPage({
+  params,
+}: {
+  params: Promise<{ org: string }>;
+}) {
+  const { org } = await params;
   const max = Math.max(...SERIES);
   const total = SERIES.reduce((a, b) => a + b, 0);
+  const pctOfBudget = Math.min(100, (total / MONTHLY_BUDGET) * 100);
   return (
     <div className="absolute inset-0 overflow-y-auto p-6">
       <div className="max-w-4xl mx-auto space-y-6">
-        <header>
-          <h1 className="text-xl tracking-tight">Costs</h1>
-          <p className="text-[12px] text-stone-500">
-            Token usage, model spend, and per-agent costs across the workspace.
-          </p>
+        <header className="flex items-center justify-between">
+          <div>
+            <h1 className="text-xl tracking-tight">Costs</h1>
+            <p className="text-[12px] text-stone-500">
+              Token usage, model spend, and per-agent costs across the workspace.
+            </p>
+          </div>
+          <Link
+            href={`/${org}/costs/budget`}
+            className="text-[11px] rounded-md border border-stone-200 bg-white px-2 py-1 hover:border-stone-400"
+          >
+            Budget & limits
+          </Link>
         </header>
+
+        <section className="rounded-lg border border-stone-200/70 bg-white p-4 space-y-2">
+          <div className="flex items-center justify-between text-[11px]">
+            <span className="text-stone-500">
+              ${total.toFixed(2)} of ${MONTHLY_BUDGET} monthly budget
+            </span>
+            <span className="font-mono text-stone-400">
+              {pctOfBudget.toFixed(0)}%
+            </span>
+          </div>
+          <div className="h-2 rounded-full bg-stone-100 overflow-hidden">
+            <div
+              className={`h-full ${
+                pctOfBudget > 80 ? "bg-red-500" : "bg-emerald-500"
+              }`}
+              style={{ width: `${pctOfBudget}%` }}
+            />
+          </div>
+        </section>
 
         <div className="grid grid-cols-3 gap-3">
           <Stat label="This month" value={`$${total.toFixed(2)}`} />

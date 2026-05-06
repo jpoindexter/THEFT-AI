@@ -31,9 +31,10 @@ export default async function IntegrationsPage({
           </div>
           <div className="grid grid-cols-2 gap-3">
             {BUILT_IN.map((i) => (
-              <div
+              <Link
                 key={i.slug}
-                className="rounded-lg border border-stone-200/70 bg-white p-3 flex items-start justify-between gap-3"
+                href={`/${org}/integrations/${i.slug}`}
+                className="rounded-lg border border-stone-200/70 bg-white p-3 flex items-start justify-between gap-3 hover:border-stone-400 transition-colors"
               >
                 <div>
                   <div className="text-[13px] font-medium">{i.name}</div>
@@ -41,10 +42,10 @@ export default async function IntegrationsPage({
                     {i.desc}
                   </p>
                 </div>
-                <span className="text-[10px] uppercase tracking-wider rounded bg-stone-100 text-stone-600 px-1.5 py-0.5">
+                <span className="text-[10px] uppercase tracking-wider rounded bg-stone-100 text-stone-600 px-1.5 py-0.5 shrink-0">
                   Connected
                 </span>
-              </div>
+              </Link>
             ))}
           </div>
         </section>
