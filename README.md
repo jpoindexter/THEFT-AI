@@ -1,36 +1,62 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# THEFT AI
 
-## Getting Started
+AI workspace platform — run a company with agents.
 
-First, run the development server:
+## Run it (zero setup)
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
+```sh
+pnpm install
 pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open http://localhost:3000 — no database, no auth, no env required for the UI.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+For real Cofounder chat replies (instead of stub echoes), add an Anthropic key:
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```sh
+cp .env.local.example .env.local
+# fill in ANTHROPIC_API_KEY
+```
 
-## Learn More
+All app data is written to `.theft-data/*.json` files (gitignored). Delete the
+folder to reset everything.
 
-To learn more about Next.js, take a look at the following resources:
+## What's in the box
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- **Onboarding** — 3-question wizard → company create
+- **Org chart** — radial layout, 8 departments
+- **Department pages** — agent list with attached skills + tasks
+- **Tech tree / roadmap** — 27 nodes across 7 stages, dependency-aware
+- **Cofounder chat** — Claude-backed chat panel (Anthropic SDK)
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Where the data lives
 
-## Deploy on Vercel
+```
+.theft-data/
+├── organizations.json
+├── departments.json
+├── agents.json
+├── tasks.json
+├── cofounder_messages.json
+├── artifacts.json
+└── tech_tree_status.json
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+When ready for real persistence, replace `src/lib/db/store.ts` with a Supabase
+or Postgres adapter. Same shape, swap the implementation.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Next
+
+- [ ] Business brief 4-question flow → BusinessPlan artifact
+- [ ] Task creation + agent execution loop
+- [ ] Library file browser
+- [ ] Settings pages
+- [ ] Brand kit agent (using `web-design-guidelines` annotation templates)
+
+## Stack
+
+- Next.js 16 + App Router + Turbopack
+- Anthropic SDK (Claude Sonnet 4.6)
+- shadcn/ui + Tailwind v4
+- Zod validation
+- File-backed JSON store (no DB needed for v0)

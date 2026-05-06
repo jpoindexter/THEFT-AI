@@ -1,0 +1,87 @@
+const SERIES = [3, 8, 5, 12, 18, 14, 22, 30, 28, 36, 41, 38, 47, 52];
+
+export default function CostsPage() {
+  const max = Math.max(...SERIES);
+  const total = SERIES.reduce((a, b) => a + b, 0);
+  return (
+    <div className="absolute inset-0 overflow-y-auto p-6">
+      <div className="max-w-4xl mx-auto space-y-6">
+        <header>
+          <h1 className="text-xl tracking-tight">Costs</h1>
+          <p className="text-[12px] text-stone-500">
+            Token usage, model spend, and per-agent costs across the workspace.
+          </p>
+        </header>
+
+        <div className="grid grid-cols-3 gap-3">
+          <Stat label="This month" value={`$${total.toFixed(2)}`} />
+          <Stat label="Last month" value="$214.83" />
+          <Stat label="Daily average" value="$3.71" />
+        </div>
+
+        <section className="rounded-lg border border-stone-200/70 bg-white p-4">
+          <div className="flex items-center justify-between mb-3">
+            <div className="text-[10px] uppercase tracking-wider text-stone-400">
+              Last 14 days
+            </div>
+            <select className="text-[11px] rounded-md border border-stone-200 bg-white px-2 py-0.5">
+              <option>By day</option>
+              <option>By agent</option>
+              <option>By model</option>
+            </select>
+          </div>
+          <div className="flex items-end gap-1.5 h-32">
+            {SERIES.map((v, i) => (
+              <div
+                key={i}
+                className="flex-1 rounded-sm bg-amber-200/80"
+                style={{ height: `${(v / max) * 100}%` }}
+                title={`Day ${i + 1}: $${v}`}
+              />
+            ))}
+          </div>
+        </section>
+
+        <section className="rounded-lg border border-stone-200/70 bg-white">
+          <header className="px-4 py-2 border-b border-stone-200/70 text-[10px] uppercase tracking-wider text-stone-400">
+            Per agent
+          </header>
+          <div className="divide-y divide-stone-100">
+            {[
+              { agent: "Engineer", model: "claude-sonnet-4-6", spent: 142.5 },
+              { agent: "Marketing", model: "claude-sonnet-4-6", spent: 38.2 },
+              { agent: "Design", model: "claude-opus-4-7", spent: 76.4 },
+              { agent: "Sales", model: "claude-sonnet-4-6", spent: 12.0 },
+            ].map((r) => (
+              <div
+                key={r.agent}
+                className="px-4 py-2 flex items-center justify-between text-[13px]"
+              >
+                <div>
+                  <div className="font-medium">{r.agent}</div>
+                  <div className="text-[10px] text-stone-500 font-mono">
+                    {r.model}
+                  </div>
+                </div>
+                <div className="font-mono text-[12px]">
+                  ${r.spent.toFixed(2)}
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+      </div>
+    </div>
+  );
+}
+
+function Stat({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="rounded-lg border border-stone-200/70 bg-white p-3">
+      <div className="text-[10px] uppercase tracking-wider text-stone-400">
+        {label}
+      </div>
+      <div className="text-2xl tracking-tight font-medium mt-1">{value}</div>
+    </div>
+  );
+}

@@ -1,0 +1,214 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import { useParams, useRouter } from "next/navigation";
+
+const DEPARTMENTS = [
+  "engineering",
+  "design",
+  "marketing",
+  "sales",
+  "operations",
+  "finance",
+  "legal",
+  "support",
+];
+
+const MODELS = [
+  "claude-sonnet-4-6",
+  "claude-opus-4-7",
+  "claude-haiku-4-5",
+];
+
+type Skill = { slug: string; name: string };
+
+export default function NewAgentPage() {
+  const params = useParams<{ org: string }>();
+  const router = useRouter();
+  const [name, setName] = useState("");
+  const [role, setRole] = useState("");
+  const [department, setDepartment] = useState("operations");
+  const [model, setModel] = useState("claude-sonnet-4-6");
+  const [instructions, setInstructions] = useState("");
+  const [budget, setBudget] = useState(50);
+  const [skills, setSkills] = useState<Skill[]>([]);
+  const [attached, setAttached] = useState<string[]>([]);
+
+  useEffect(() => {
+    void fetch(`/api/${params.org}/skills`)
+      .then((r) => r.ok ? r.json() : { skills: [] })
+      .then((j: { skills: Skill[] }) => setSkills(j.skills ?? []))
+      .catch(() => undefined);
+  }, [params.org]);
+
+  function toggle(slug: string) {
+    setAttached((cur) =>
+      cur.includes(slug) ? cur.filter((s) => s !== slug) : [...cur, slug],
+    );
+  }
+
+  return (
+    <div className="absolute inset-0 overflow-y-auto p-6">
+      <div className="max-w-3xl mx-auto space-y-6">
+        <header>
+          <h1 className="text-xl tracking-tight">New agent</h1>
+          <p className="text-[12px] text-stone-500">
+            A custom agent with its own instructions, model, integrations, and
+            attached skills.
+          </p>
+        </header>
+
+        <Section title="Identity">
+          <Field label="Name">
+            <input
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="e.g. Outbound Researcher"
+              className="w-full h-9 rounded-md border border-stone-200 bg-white px-3 text-[13px] focus:outline-none focus:border-stone-400"
+            />
+          </Field>
+          <Field label="Role">
+            <input
+              value={role}
+              onChange={(e) => setRole(e.target.value)}
+              placeholder="e.g. researcher"
+              className="w-full h-9 rounded-md border border-stone-200 bg-white px-3 text-[13px] focus:outline-none focus:border-stone-400"
+            />
+          </Field>
+          <Field label="Department">
+            <select
+              value={department}
+              onChange={(e) => setDepartment(e.target.value)}
+              className="w-full h-9 rounded-md border border-stone-200 bg-white px-2 text-[13px]"
+            >
+              {DEPARTMENTS.map((d) => (
+                <option key={d} value={d}>
+                  {d[0].toUpperCase() + d.slice(1)}
+                </option>
+              ))}
+            </select>
+          </Field>
+        </Section>
+
+        <Section title="Reasoning">
+          <Field label="Model">
+            <select
+              value={model}
+              onChange={(e) => setModel(e.target.value)}
+              className="w-full h-9 rounded-md border border-stone-200 bg-white px-2 text-[13px]"
+            >
+              {MODELS.map((m) => (
+                <option key={m} value={m}>
+                  {m}
+                </option>
+              ))}
+            </select>
+          </Field>
+          <Field label="Instructions" hint="Tell the agent what it owns and how to behave.">
+            <textarea
+              value={instructions}
+              onChange={(e) => setInstructions(e.target.value)}
+              rows={5}
+              placeholder="You are a research agent. You ..."
+              className="w-full rounded-md border border-stone-200 bg-white px-3 py-2 text-[13px] focus:outline-none focus:border-stone-400"
+            />
+          </Field>
+          <Field label="Monthly budget" hint="USD. Hard cap on token spend.">
+            <input
+              type="number"
+              value={budget}
+              onChange={(e) => setBudget(Number(e.target.value))}
+              className="w-32 h-9 rounded-md border border-stone-200 bg-white px-3 text-[13px] focus:outline-none focus:border-stone-400"
+            />
+          </Field>
+        </Section>
+
+        <Section title="Skills" hint="Reusable guidance attached to this agent.">
+          {skills.length === 0 ? (
+            <p className="text-[12px] text-stone-500">
+              No skills found in <code>/skills/</code>.
+            </p>
+          ) : (
+            <div className="grid grid-cols-2 gap-1.5">
+              {skills.map((s) => {
+                const on = attached.includes(s.slug);
+                return (
+                  <button
+                    key={s.slug}
+                    type="button"
+                    onClick={() => toggle(s.slug)}
+                    className={`text-left rounded-md border px-2 py-1.5 text-[12px] transition-colors ${
+                      on
+                        ? "border-stone-900 bg-stone-100"
+                        : "border-stone-200 hover:border-stone-400"
+                    }`}
+                  >
+                    <div className="font-medium">{s.name}</div>
+                    <div className="font-mono text-[10px] text-stone-500">
+                      {s.slug}
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+          )}
+        </Section>
+
+        <div className="flex justify-end gap-2 pt-2">
+          <button
+            type="button"
+            onClick={() => router.back()}
+            className="text-[12px] rounded-md border border-stone-200 bg-white px-3 py-1.5 hover:border-stone-400"
+          >
+            Cancel
+          </button>
+          <button
+            type="button"
+            disabled={!name || !role}
+            className="text-[12px] rounded-md bg-stone-900 text-white px-3 py-1.5 disabled:opacity-40"
+          >
+            Create agent
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function Section({
+  title,
+  hint,
+  children,
+}: {
+  title: string;
+  hint?: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <section className="rounded-lg border border-stone-200/70 bg-white p-4 space-y-3">
+      <div>
+        <h2 className="text-[14px] font-medium tracking-tight">{title}</h2>
+        {hint && <p className="text-[11px] text-stone-500">{hint}</p>}
+      </div>
+      {children}
+    </section>
+  );
+}
+
+function Field({
+  label,
+  hint,
+  children,
+}: {
+  label: string;
+  hint?: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="space-y-1">
+      <div className="text-[12px] text-stone-700">{label}</div>
+      {children}
+      {hint && <p className="text-[11px] text-stone-500">{hint}</p>}
+    </div>
+  );
+}
