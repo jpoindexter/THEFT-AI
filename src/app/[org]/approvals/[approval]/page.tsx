@@ -2,12 +2,10 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import {
   ArrowLeft,
-  CheckCircle2,
-  XCircle,
-  AlertCircle,
   Clock,
   ShieldAlert,
 } from "lucide-react";
+import ApprovalActions from "@/components/approval-actions";
 
 const APPROVALS: Record<
   string,
@@ -155,17 +153,7 @@ export default async function ApprovalDetailPage({
           </pre>
         </section>
 
-        <div className="flex justify-end gap-2 pt-1">
-          <button className="inline-flex items-center gap-1 text-[12px] rounded-md border border-line bg-paper px-3 py-1.5 hover:border-line-strong">
-            <AlertCircle className="size-3" /> Discuss
-          </button>
-          <button className="inline-flex items-center gap-1 text-[12px] rounded-md border border-red-300 bg-paper text-red-700 px-3 py-1.5 hover:bg-red-50">
-            <XCircle className="size-3" /> Decline
-          </button>
-          <button className="inline-flex items-center gap-1 text-[12px] rounded-md bg-ink text-paper px-3 py-1.5">
-            <CheckCircle2 className="size-3" /> Approve
-          </button>
-        </div>
+        <ApprovalActions org={org} id={approval} />
       </div>
     </div>
   );
