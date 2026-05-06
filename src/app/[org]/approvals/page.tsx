@@ -1,4 +1,5 @@
 import { CheckCircle2, XCircle, AlertCircle } from "lucide-react";
+import Link from "next/link";
 
 const APPROVALS = [
   {
@@ -27,7 +28,12 @@ const APPROVALS = [
   },
 ];
 
-export default function ApprovalsPage() {
+export default async function ApprovalsPage({
+  params,
+}: {
+  params: Promise<{ org: string }>;
+}) {
+  const { org } = await params;
   return (
     <div className="absolute inset-0 overflow-y-auto p-6">
       <div className="max-w-3xl mx-auto space-y-4">
@@ -49,7 +55,12 @@ export default function ApprovalsPage() {
                     {a.agent} · waiting {a.waiting}
                   </div>
                   <h2 className="text-[14px] font-medium tracking-tight">
-                    {a.title}
+                    <Link
+                      href={`/${org}/approvals/${a.id}`}
+                      className="hover:underline decoration-stone-300 underline-offset-2"
+                    >
+                      {a.title}
+                    </Link>
                   </h2>
                 </div>
                 <span
@@ -68,9 +79,12 @@ export default function ApprovalsPage() {
                 {a.body}
               </p>
               <div className="flex items-center justify-end gap-2">
-                <button className="inline-flex items-center gap-1 text-[11px] rounded-md border border-stone-200 bg-white px-2 py-1 hover:border-stone-400">
+                <Link
+                  href={`/${org}/approvals/${a.id}`}
+                  className="inline-flex items-center gap-1 text-[11px] rounded-md border border-stone-200 bg-white px-2 py-1 hover:border-stone-400"
+                >
                   <AlertCircle className="size-3" /> Discuss
-                </button>
+                </Link>
                 <button className="inline-flex items-center gap-1 text-[11px] rounded-md border border-red-300 bg-white text-red-700 px-2 py-1 hover:bg-red-50">
                   <XCircle className="size-3" /> Decline
                 </button>
