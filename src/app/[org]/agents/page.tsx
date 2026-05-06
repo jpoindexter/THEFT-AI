@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { db } from "@/lib/db/store";
 import { Plus } from "lucide-react";
+import StatusDot from "@/components/status-dot";
 
 const STATUS_TONE: Record<string, string> = {
   idle: "bg-cream text-ink-muted",
@@ -54,16 +55,32 @@ export default async function AgentsIndexPage({
                   href={`/${orgSlug}/agents/${a.slug ?? a.id}`}
                   className="px-4 py-3 flex items-center justify-between hover:bg-canvas"
                 >
-                  <div className="min-w-0">
-                    <div className="text-[13px] font-medium tracking-tight">
-                      {a.name}
-                    </div>
-                    <div className="text-[11px] text-ink-muted">
-                      {a.title ?? a.role}
-                      {a.department_id &&
-                        ` · ${deptName.get(a.department_id) ?? ""}`}
-                      {a.attached_skills.length > 0 &&
-                        ` · ${a.attached_skills.length} skill${a.attached_skills.length === 1 ? "" : "s"}`}
+                  <div className="min-w-0 flex items-start gap-3">
+                    <span className="mt-1.5 shrink-0">
+                      <StatusDot
+                        tone={
+                          a.status === "running"
+                            ? "sage"
+                            : a.status === "paused"
+                              ? "mustard"
+                              : a.status === "error"
+                                ? "brick"
+                                : "neutral"
+                        }
+                        pulsing={a.status === "running"}
+                      />
+                    </span>
+                    <div className="min-w-0">
+                      <div className="text-[13px] font-medium tracking-tight">
+                        {a.name}
+                      </div>
+                      <div className="text-[11px] text-ink-muted">
+                        {a.title ?? a.role}
+                        {a.department_id &&
+                          ` · ${deptName.get(a.department_id) ?? ""}`}
+                        {a.attached_skills.length > 0 &&
+                          ` · ${a.attached_skills.length} skill${a.attached_skills.length === 1 ? "" : "s"}`}
+                      </div>
                     </div>
                   </div>
                   <span

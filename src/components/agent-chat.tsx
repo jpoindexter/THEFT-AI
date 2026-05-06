@@ -6,6 +6,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { ChevronDown, ChevronRight, ArrowUp, Wrench } from "lucide-react";
+import SlashMenu from "@/components/slash-menu";
 
 type Answer = { key?: string; label?: string; custom?: string };
 
@@ -159,7 +160,7 @@ export default function AgentChat({
         )}
       </div>
       <div className="border-t border-line/80 p-2.5">
-        <div className="rounded-lg border border-line/80 bg-paper focus-within:border-line-strong transition-colors flex items-end gap-1">
+        <div className="rounded-lg border border-line/80 bg-paper focus-within:border-line-strong transition-colors flex items-end gap-1 relative">
           <textarea
             value={input}
             onChange={(e) => setInput(e.target.value)}
@@ -171,12 +172,19 @@ export default function AgentChat({
             }}
             placeholder={
               paused
-                ? "Or type a freeform answer…"
-                : "Ask Cofounder anything about your company…"
+                ? 'Or type a freeform answer… ("/" for commands)'
+                : 'Ask Cofounder anything… ("/" for commands)'
             }
             rows={2}
             className="flex-1 resize-none bg-transparent px-3 py-2 text-[13px] focus:outline-none placeholder:text-ink-soft"
           />
+          {input.startsWith("/") && !input.includes(" ") && (
+            <SlashMenu
+              q={input.slice(1)}
+              onPick={(cmd) => setInput(cmd.label + " ")}
+              onClose={() => setInput(input.replace(/^\//, ""))}
+            />
+          )}
           <button
             type="button"
             onClick={() => void send(input)}
