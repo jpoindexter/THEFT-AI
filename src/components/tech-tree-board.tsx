@@ -1,7 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { X, Folder } from "lucide-react";
+import { X, Folder, ArrowUpRight } from "lucide-react";
+import Link from "next/link";
+import { useParams } from "next/navigation";
 
 type Node = {
   id: string;
@@ -35,6 +37,7 @@ export default function TechTreeBoard({
   nodes: Node[];
 }) {
   const [selected, setSelected] = useState<Node | null>(null);
+  const params = useParams<{ org: string }>();
 
   return (
     <div className="absolute inset-0 bg-[#f5f4f0] flex flex-col">
@@ -147,6 +150,12 @@ export default function TechTreeBoard({
           >
             {selected.agent_can_do_this ? "Launch Agent" : "Mark complete"}
           </button>
+          <Link
+            href={`/${params.org}/roadmap/${selected.slug}`}
+            className="mt-2 w-full inline-flex items-center justify-center gap-1 rounded-md border border-stone-200 text-[12px] py-2 hover:border-stone-400"
+          >
+            Open detail <ArrowUpRight className="size-3" />
+          </Link>
         </aside>
       )}
     </div>

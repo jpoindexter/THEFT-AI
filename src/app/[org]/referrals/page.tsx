@@ -1,4 +1,4 @@
-import { Copy, Gift } from "lucide-react";
+import { Copy, Gift, Mail, Share2, Send } from "lucide-react";
 
 export default function ReferralsPage() {
   return (
@@ -39,8 +39,58 @@ export default function ReferralsPage() {
           <Stat label="Activated" value="0" />
           <Stat label="Credits earned" value="$0" />
         </div>
+
+        <section className="rounded-lg border border-stone-200/70 bg-white p-4 space-y-2">
+          <div className="text-[10px] uppercase tracking-[0.14em] text-stone-400">
+            Share
+          </div>
+          <div className="flex gap-2">
+            <ShareButton icon={<Mail className="size-3.5" />} label="Email" />
+            <ShareButton icon={<Send className="size-3.5" />} label="X" />
+            <ShareButton icon={<Share2 className="size-3.5" />} label="LinkedIn" />
+          </div>
+        </section>
+
+        <section className="rounded-lg border border-stone-200/70 bg-white p-4 space-y-2">
+          <div className="text-[10px] uppercase tracking-[0.14em] text-stone-400">
+            Recent referrals
+          </div>
+          <p className="text-[12px] text-stone-500">
+            No referrals yet. Once a referred founder activates a workspace,
+            you'll see them here.
+          </p>
+        </section>
+
+        <section className="rounded-lg border border-stone-200/70 bg-white p-4 space-y-2">
+          <div className="text-[10px] uppercase tracking-[0.14em] text-stone-400">
+            How it works
+          </div>
+          <ul className="text-[12px] text-stone-700 space-y-1 list-disc pl-4">
+            <li>Friend signs up via your link.</li>
+            <li>They activate by completing onboarding.</li>
+            <li>You both get $20 in workspace credits when they upgrade.</li>
+          </ul>
+        </section>
       </div>
     </div>
+  );
+}
+
+function ShareButton({
+  icon,
+  label,
+}: {
+  icon: React.ReactNode;
+  label: string;
+}) {
+  return (
+    <button
+      type="button"
+      className="inline-flex items-center gap-1 rounded-md border border-stone-200 bg-white px-2 py-1 text-[12px] hover:border-stone-400"
+    >
+      {icon}
+      {label}
+    </button>
   );
 }
 
