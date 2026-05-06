@@ -107,6 +107,7 @@ export default function LayoutHeader({
     memory: "Company memory",
     notifications: "Notifications",
     billing: "Billing",
+    sandbox: "Sandbox",
   };
   const subLabel =
     subSegment && SUB_LABELS[subSegment]

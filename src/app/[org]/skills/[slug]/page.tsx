@@ -78,16 +78,26 @@ export default async function SkillDetail({
         >
           <ArrowLeft className="size-3" /> Back to skills
         </Link>
-        <header>
-          <h1 className="text-xl tracking-tight">{skill.name}</h1>
-          <code className="text-[11px] font-mono text-ink-soft">
-            {skill.slug}
-          </code>
-          {skill.description && (
-            <p className="text-[13px] text-ink-muted mt-2">
-              {skill.description}
-            </p>
-          )}
+        <header className="flex items-start justify-between gap-3">
+          <div className="min-w-0">
+            <h1 className="text-xl tracking-tight">{skill.name}</h1>
+            <code className="text-[11px] font-mono text-ink-soft">
+              {skill.slug}
+            </code>
+            {skill.description && (
+              <p className="text-[13px] text-ink-muted mt-2">
+                {skill.description}
+              </p>
+            )}
+          </div>
+          <div className="flex items-center gap-1 shrink-0">
+            <button className="text-xs rounded-md border border-line bg-paper px-2 py-1 hover:border-line-strong">
+              Attach to agent
+            </button>
+            <button className="text-xs rounded-md bg-ink text-paper px-3 py-1 hover:opacity-90">
+              Clone & customize
+            </button>
+          </div>
         </header>
 
         <section className="rounded-lg border border-line/70 bg-paper p-4">
