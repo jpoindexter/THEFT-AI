@@ -71,6 +71,59 @@ export default async function ArtifactDetailPage({
 
         <section className="rounded-lg border border-line/70 bg-paper p-4 space-y-2">
           <div className="text-[10px] uppercase tracking-wider text-ink-soft">
+            Versions
+          </div>
+          <ul className="divide-y divide-line/60">
+            {[
+              {
+                v: "v3",
+                by: "Marketing",
+                when: "12m ago",
+                note: "Tightened opening paragraph",
+                current: true,
+              },
+              {
+                v: "v2",
+                by: "Marketing",
+                when: "1h ago",
+                note: "Added pricing block",
+                current: false,
+              },
+              {
+                v: "v1",
+                by: "Cofounder",
+                when: "1d ago",
+                note: "Initial draft",
+                current: false,
+              },
+            ].map((row) => (
+              <li
+                key={row.v}
+                className="py-1.5 flex items-center justify-between text-[12px]"
+              >
+                <span className="font-mono text-ink">{row.v}</span>
+                <span className="text-ink-muted truncate flex-1 mx-2">
+                  {row.note}
+                </span>
+                <span className="text-2xs text-ink-soft shrink-0">
+                  {row.by} · {row.when}
+                </span>
+                {row.current ? (
+                  <span className="ml-2 text-2xs uppercase tracking-wider rounded px-1.5 py-0.5 bg-sage/30 text-sage-ink">
+                    current
+                  </span>
+                ) : (
+                  <button className="ml-2 text-2xs rounded-md border border-line px-1.5 py-0.5 hover:border-line-strong">
+                    Diff
+                  </button>
+                )}
+              </li>
+            ))}
+          </ul>
+        </section>
+
+        <section className="rounded-lg border border-line/70 bg-paper p-4 space-y-2">
+          <div className="text-[10px] uppercase tracking-wider text-ink-soft">
             Comments
           </div>
           <p className="text-[12px] text-ink-muted">
