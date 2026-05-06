@@ -60,31 +60,37 @@ export default async function InboxPage({
 
         <ul className="rounded-lg border border-stone-200/70 bg-white divide-y divide-stone-100">
           {AGENTS.map((a) => (
-            <li
-              key={a.slug}
-              className="px-4 py-3 flex items-center justify-between"
-            >
-              <div className="min-w-0">
-                <div className="text-[13px] font-medium">{a.name}</div>
-                <div className="text-[11px] font-mono text-stone-500">
-                  {a.address}
+            <li key={a.slug}>
+              <Link
+                href={
+                  a.enabled
+                    ? `/${org}/inbox/${a.slug}`
+                    : `/${org}/settings/inbox`
+                }
+                className="px-4 py-3 flex items-center justify-between hover:bg-stone-50"
+              >
+                <div className="min-w-0">
+                  <div className="text-[13px] font-medium">{a.name}</div>
+                  <div className="text-[11px] font-mono text-stone-500">
+                    {a.address}
+                  </div>
+                  <div className="text-[12px] text-stone-700 mt-1 truncate">
+                    {a.last_message}
+                  </div>
                 </div>
-                <div className="text-[12px] text-stone-700 mt-1 truncate">
-                  {a.last_message}
+                <div className="flex items-center gap-2">
+                  <span className="text-[10px] text-stone-400">{a.when}</span>
+                  <span
+                    className={`text-[10px] uppercase rounded px-1.5 py-0.5 ${
+                      a.enabled
+                        ? "bg-emerald-100 text-emerald-700"
+                        : "bg-stone-100 text-stone-500"
+                    }`}
+                  >
+                    {a.enabled ? "Active" : "Off"}
+                  </span>
                 </div>
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="text-[10px] text-stone-400">{a.when}</span>
-                <span
-                  className={`text-[10px] uppercase rounded px-1.5 py-0.5 ${
-                    a.enabled
-                      ? "bg-emerald-100 text-emerald-700"
-                      : "bg-stone-100 text-stone-500"
-                  }`}
-                >
-                  {a.enabled ? "Active" : "Off"}
-                </span>
-              </div>
+              </Link>
             </li>
           ))}
         </ul>
