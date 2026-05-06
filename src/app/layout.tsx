@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import ThemeBoot from "@/components/theme-boot";
+import ToastHost from "@/components/toast-host";
 
 const sans = Inter({
   variable: "--font-sans",
@@ -32,6 +33,7 @@ export default function RootLayout({
       <body className="min-h-full flex flex-col bg-cream text-ink font-sans">
         <ThemeBoot />
         {children}
+        <ToastHost />
       </body>
     </html>
   );

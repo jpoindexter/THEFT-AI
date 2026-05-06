@@ -112,6 +112,7 @@ export default function LayoutHeader({
     diagnostics: "Diagnostics",
     "whats-new": "What's new",
     help: "Help",
+    feed: "Feed",
   };
   const subLabel =
     subSegment && SUB_LABELS[subSegment]

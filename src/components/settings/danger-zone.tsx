@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { AlertTriangle } from "lucide-react";
 import { SettingsCard } from "@/components/settings/section";
+import { toast } from "@/components/toast-host";
 
 export default function DangerZone({
   orgSlug,
@@ -27,9 +28,11 @@ export default function DangerZone({
     const res = await fetch(`/api/${orgSlug}`, { method: "DELETE" });
     if (!res.ok) {
       setError("Could not delete workspace.");
+      toast("Workspace delete failed", "warn");
       setBusy(false);
       return;
     }
+    toast(`${orgName} deleted`, "ok");
     router.replace("/onboarding");
   }
 
