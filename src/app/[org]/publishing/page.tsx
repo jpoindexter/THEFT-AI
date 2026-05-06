@@ -81,13 +81,17 @@ export default async function PublishingPage({
                 >
                   Open department
                 </Link>
-                <button
-                  type="button"
-                  disabled={t.status === "up_to_date"}
-                  className="text-[11px] rounded-md bg-stone-900 text-white px-2 py-1 disabled:opacity-40"
+                <Link
+                  href={`/${org}/publishing/${t.slug}`}
+                  aria-disabled={t.status === "up_to_date"}
+                  className={`text-[11px] rounded-md bg-stone-900 text-white px-2 py-1 ${
+                    t.status === "up_to_date"
+                      ? "opacity-40 pointer-events-none"
+                      : ""
+                  }`}
                 >
                   Publish to prod
-                </button>
+                </Link>
               </div>
             </article>
           ))}

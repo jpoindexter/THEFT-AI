@@ -53,38 +53,45 @@ export default async function RoutinesPage({
         </header>
         <ul className="rounded-lg border border-stone-200/70 bg-white divide-y divide-stone-100">
           {ROUTINES.map((r) => (
-            <li
-              key={r.id}
-              className="px-4 py-3 flex items-center justify-between"
-            >
-              <div>
-                <div className="text-[13px] font-medium tracking-tight">
-                  {r.name}
+            <li key={r.id} className="relative hover:bg-stone-50">
+              <Link
+                href={`/${org}/routines/${r.id}`}
+                className="absolute inset-0 z-0"
+                aria-label={r.name}
+              />
+              <div className="relative z-10 px-4 py-3 flex items-center justify-between pointer-events-none">
+                <div>
+                  <div className="text-[13px] font-medium tracking-tight">
+                    {r.name}
+                  </div>
+                  <div className="text-[11px] text-stone-500 inline-flex items-center gap-2 mt-0.5">
+                    <span>{r.agent}</span>
+                    <span>·</span>
+                    <span className="inline-flex items-center gap-1">
+                      <Calendar className="size-3" />
+                      {r.cron}
+                    </span>
+                    <span>·</span>
+                    <span>last run {r.last_run}</span>
+                  </div>
                 </div>
-                <div className="text-[11px] text-stone-500 inline-flex items-center gap-2 mt-0.5">
-                  <span>{r.agent}</span>
-                  <span>·</span>
-                  <span className="inline-flex items-center gap-1">
-                    <Calendar className="size-3" />
-                    {r.cron}
+                <div className="flex items-center gap-2 pointer-events-auto">
+                  <span
+                    className={`text-[10px] uppercase rounded px-1.5 py-0.5 ${
+                      r.enabled
+                        ? "bg-emerald-100 text-emerald-700"
+                        : "bg-stone-100 text-stone-500"
+                    }`}
+                  >
+                    {r.enabled ? "Active" : "Paused"}
                   </span>
-                  <span>·</span>
-                  <span>last run {r.last_run}</span>
+                  <Link
+                    href={`/${org}/routines/${r.id}`}
+                    className="text-[11px] rounded-md border border-stone-200 bg-white px-2 py-1 hover:border-stone-400"
+                  >
+                    Edit
+                  </Link>
                 </div>
-              </div>
-              <div className="flex items-center gap-2">
-                <span
-                  className={`text-[10px] uppercase rounded px-1.5 py-0.5 ${
-                    r.enabled
-                      ? "bg-emerald-100 text-emerald-700"
-                      : "bg-stone-100 text-stone-500"
-                  }`}
-                >
-                  {r.enabled ? "Active" : "Paused"}
-                </span>
-                <button className="text-[11px] rounded-md border border-stone-200 bg-white px-2 py-1 hover:border-stone-400">
-                  Edit
-                </button>
               </div>
             </li>
           ))}

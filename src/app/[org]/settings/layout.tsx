@@ -25,6 +25,7 @@ const SECTIONS = [
   { slug: "company-context", label: "Company Context", Icon: Brain },
   { slug: "inbox", label: "Inbox", Icon: Inbox },
   { slug: "support", label: "Support", Icon: LifeBuoy },
+  { slug: "payments", label: "Payments", Icon: CreditCard },
   { slug: "stripe", label: "Stripe", Icon: CreditCard },
   { slug: "billing", label: "Billing", Icon: Receipt },
   { slug: "advanced", label: "Advanced", Icon: Wrench },
