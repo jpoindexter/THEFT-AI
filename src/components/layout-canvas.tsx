@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 import { usePathname } from "next/navigation";
-import { Bell, Plus, BookOpen } from "lucide-react";
+import { Bell, Plus, BookOpen, Eye } from "lucide-react";
+import Link from "next/link";
 
 export default function LayoutCanvas({
   children,
@@ -14,6 +15,8 @@ export default function LayoutCanvas({
   const pathname = usePathname();
   const segments = pathname.replace(/^\/+|\/+$/g, "").split("/");
   const isOrgRoot = segments.length === 1;
+  const orgSlug = segments[0];
+  const attentionCount = 4;
   const [menuOpen, setMenuOpen] = useState(false);
   const [inboxOpen, setInboxOpen] = useState(false);
 
@@ -75,6 +78,22 @@ export default function LayoutCanvas({
             )}
           </div>
         </div>
+      )}
+
+      {hasPlan && (
+        <Link
+          href={`/${orgSlug}/review`}
+          aria-label="Attention queue"
+          className="absolute bottom-3 right-3 inline-flex items-center gap-1.5 rounded-full bg-stone-900 text-white pl-2 pr-3 py-1.5 text-[11px] hover:bg-stone-800 z-20 shadow-[0_2px_8px_-4px_rgba(0,0,0,0.35)]"
+        >
+          <Eye className="size-3.5" />
+          <span>Review</span>
+          {attentionCount > 0 && (
+            <span className="size-4 rounded-full bg-amber-300 text-stone-900 text-[10px] font-semibold inline-flex items-center justify-center">
+              {attentionCount}
+            </span>
+          )}
+        </Link>
       )}
     </main>
   );

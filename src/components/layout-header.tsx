@@ -34,6 +34,8 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { useEffect, useState } from "react";
+import KeyboardShortcutsDialog from "@/components/keyboard-shortcuts-dialog";
 
 export default function LayoutHeader({
   orgName,
@@ -48,6 +50,18 @@ export default function LayoutHeader({
 }) {
   const router = useRouter();
   const pathname = usePathname();
+  const [shortcutsOpen, setShortcutsOpen] = useState(false);
+
+  useEffect(() => {
+    function onKey(e: KeyboardEvent) {
+      if ((e.metaKey || e.ctrlKey) && e.key === "/") {
+        e.preventDefault();
+        setShortcutsOpen(true);
+      }
+    }
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, []);
   const segments = pathname.replace(/^\/+|\/+$/g, "").split("/");
   const after = segments.slice(1);
   const isSubpage = after.length > 0;
@@ -182,6 +196,7 @@ export default function LayoutHeader({
             />
             <DropdownMenuSeparator />
             <MenuRow
+              onSelect={() => setShortcutsOpen(true)}
               icon={<Keyboard className="size-3.5" />}
               label="Keyboard Shortcuts"
             />
@@ -235,6 +250,10 @@ export default function LayoutHeader({
           <Search className="size-3.5" />
         </IconBtn>
       </div>
+      <KeyboardShortcutsDialog
+        open={shortcutsOpen}
+        onOpenChange={setShortcutsOpen}
+      />
     </header>
   );
 }
