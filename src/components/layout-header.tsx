@@ -26,6 +26,7 @@ import {
   DollarSign,
   Rocket,
   Eye,
+  Users,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -133,6 +134,11 @@ export default function LayoutHeader({
               onSelect={goto(`/${orgSlug}/settings/domains`)}
               icon={<Globe className="size-3.5" />}
               label="Domains"
+            />
+            <MenuRow
+              onSelect={goto(`/${orgSlug}/agents`)}
+              icon={<Users className="size-3.5" />}
+              label="Agents"
             />
             <MenuRow
               onSelect={goto(`/${orgSlug}/skills`)}

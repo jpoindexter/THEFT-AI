@@ -1,0 +1,84 @@
+import { notFound } from "next/navigation";
+import Link from "next/link";
+import { db } from "@/lib/db/store";
+import { Plus } from "lucide-react";
+
+const STATUS_TONE: Record<string, string> = {
+  idle: "bg-stone-100 text-stone-600",
+  running: "bg-emerald-100 text-emerald-700",
+  paused: "bg-amber-100 text-amber-700",
+  error: "bg-red-100 text-red-700",
+  terminated: "bg-stone-200 text-stone-500",
+};
+
+export default async function AgentsIndexPage({
+  params,
+}: {
+  params: Promise<{ org: string }>;
+}) {
+  const { org: orgSlug } = await params;
+  const organization = await db.getOrgBySlug(orgSlug);
+  if (!organization) notFound();
+  const agents = await db.listAgents(organization.id);
+  const departments = await db.listDepartments(organization.id);
+  const deptName = new Map(departments.map((d) => [d.id, d.name]));
+
+  return (
+    <div className="absolute inset-0 overflow-y-auto p-6">
+      <div className="max-w-3xl mx-auto space-y-4">
+        <header className="flex items-center justify-between">
+          <div>
+            <h1 className="text-xl tracking-tight">Agents</h1>
+            <p className="text-[12px] text-stone-500">
+              Every employee in this workspace. Click one to inspect its skills,
+              tasks, and configuration.
+            </p>
+          </div>
+          <Link
+            href={`/${orgSlug}/agents/new`}
+            className="inline-flex items-center gap-1 rounded-md bg-stone-900 text-white px-3 py-1.5 text-[12px]"
+          >
+            <Plus className="size-3.5" /> New agent
+          </Link>
+        </header>
+
+        {agents.length === 0 ? (
+          <div className="rounded-lg border border-stone-200/70 bg-white p-8 text-center text-[12px] text-stone-500">
+            No agents yet. Onboarding usually creates one per department.
+          </div>
+        ) : (
+          <ul className="rounded-lg border border-stone-200/70 bg-white divide-y divide-stone-100">
+            {agents.map((a) => (
+              <li key={a.id}>
+                <Link
+                  href={`/${orgSlug}/agents/${a.slug ?? a.id}`}
+                  className="px-4 py-3 flex items-center justify-between hover:bg-stone-50"
+                >
+                  <div className="min-w-0">
+                    <div className="text-[13px] font-medium tracking-tight">
+                      {a.name}
+                    </div>
+                    <div className="text-[11px] text-stone-500">
+                      {a.title ?? a.role}
+                      {a.department_id &&
+                        ` · ${deptName.get(a.department_id) ?? ""}`}
+                      {a.attached_skills.length > 0 &&
+                        ` · ${a.attached_skills.length} skill${a.attached_skills.length === 1 ? "" : "s"}`}
+                    </div>
+                  </div>
+                  <span
+                    className={`text-[10px] uppercase rounded px-1.5 py-0.5 shrink-0 ${
+                      STATUS_TONE[a.status] ?? "bg-stone-100 text-stone-500"
+                    }`}
+                  >
+                    {a.status}
+                  </span>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+    </div>
+  );
+}
