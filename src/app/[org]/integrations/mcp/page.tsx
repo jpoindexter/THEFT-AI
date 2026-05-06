@@ -3,7 +3,13 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { ArrowLeft, Server } from "lucide-react";
+import { ArrowLeft, Server, ArrowRight } from "lucide-react";
+
+const INSTALLED = [
+  { slug: "linear", name: "Linear", status: "running" },
+  { slug: "notion", name: "Notion", status: "running" },
+  { slug: "postgres", name: "Postgres", status: "stopped" },
+];
 
 const SUGGESTED = [
   {
@@ -53,6 +59,39 @@ export default function McpSetupPage() {
             exposed by the server become callable by every agent.
           </p>
         </header>
+
+        {INSTALLED.length > 0 && (
+          <section>
+            <div className="text-[10px] uppercase tracking-[0.14em] text-stone-400 mb-2">
+              Installed
+            </div>
+            <ul className="rounded-lg border border-stone-200/70 bg-white divide-y divide-stone-100">
+              {INSTALLED.map((s) => (
+                <li key={s.slug}>
+                  <Link
+                    href={`/${params.org}/integrations/mcp/${s.slug}`}
+                    className="px-4 py-3 flex items-center justify-between hover:bg-stone-50"
+                  >
+                    <div className="flex items-center gap-2">
+                      <span
+                        className={`size-2 rounded-full ${
+                          s.status === "running"
+                            ? "bg-emerald-500"
+                            : "bg-stone-300"
+                        }`}
+                      />
+                      <span className="text-[13px] font-medium">{s.name}</span>
+                      <span className="text-[10px] uppercase tracking-wider text-stone-500">
+                        {s.status}
+                      </span>
+                    </div>
+                    <ArrowRight className="size-3 text-stone-400" />
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </section>
+        )}
 
         <section>
           <div className="text-[10px] uppercase tracking-[0.14em] text-stone-400 mb-2">
