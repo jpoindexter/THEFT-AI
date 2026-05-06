@@ -246,9 +246,26 @@ export default function DepartmentHero({
           </div>
         </div>
 
-        {hasActiveTasks && (
+        {hasActiveTasks ? (
           <div className="text-[12px] text-ink-muted text-center">
             Active tasks shown in the right panel.
+          </div>
+        ) : (
+          <div className="rounded-lg border border-mustard/40 bg-mustard/15 p-3 text-center max-w-md mx-auto">
+            <div className="text-[12px] text-mustard-ink font-medium">
+              First task here?
+            </div>
+            <p className="text-[11px] text-mustard-ink/80 leading-snug mt-1">
+              Kick off the {department.name} agent with the recommended
+              onboarding task — it gathers context first, then proposes work.
+            </p>
+            <button
+              type="button"
+              onClick={() => setTaskOpen(true)}
+              className="mt-2 inline-flex items-center gap-1 rounded-md bg-ink text-paper px-3 py-1 text-[11px] hover:opacity-90"
+            >
+              Start onboarding task
+            </button>
           </div>
         )}
 

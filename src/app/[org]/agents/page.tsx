@@ -3,6 +3,7 @@ import Link from "next/link";
 import { db } from "@/lib/db/store";
 import { Plus } from "lucide-react";
 import StatusDot from "@/components/status-dot";
+import EmptyState from "@/components/empty-state";
 
 const STATUS_TONE: Record<string, string> = {
   idle: "bg-cream text-ink-muted",
@@ -44,9 +45,15 @@ export default async function AgentsIndexPage({
         </header>
 
         {agents.length === 0 ? (
-          <div className="rounded-lg border border-line/70 bg-paper p-8 text-center text-[12px] text-ink-muted">
-            No agents yet. Onboarding usually creates one per department.
-          </div>
+          <EmptyState
+            Icon={Plus}
+            title="No agents yet"
+            body="Onboarding usually seeds one per department. You can also hire a custom one for narrow work."
+            actions={[
+              { label: "New agent", href: `/${orgSlug}/agents/new`, primary: true },
+              { label: "Restart onboarding", href: "/onboarding" },
+            ]}
+          />
         ) : (
           <ul className="rounded-lg border border-line/70 bg-paper divide-y divide-line/60">
             {agents.map((a) => (
