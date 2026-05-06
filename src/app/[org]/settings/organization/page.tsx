@@ -11,6 +11,7 @@ import { Copy, Upload, Download } from "lucide-react";
 import { db } from "@/lib/db/store";
 import { notFound } from "next/navigation";
 import DangerZone from "@/components/settings/danger-zone";
+import Link from "next/link";
 
 const SOURCES = ["ChatGPT", "Claude", "Paperclip", "OpenClaw", "Other"];
 
@@ -101,15 +102,23 @@ export default async function Organization({
       </SettingsCard>
 
       <SettingsCard
-        title="Export workspace"
-        description="Download a JSON snapshot of your business plan, agents, tasks, artifacts, and tech-tree status."
+        title="Export & import"
+        description="Snapshot the workspace state or restore from another export."
       >
-        <a
-          href={`/api/${org}/export`}
-          className="inline-flex items-center gap-1 text-[12px] rounded-md border border-line px-3 py-1.5 hover:border-line-strong"
-        >
-          <Download className="size-3" /> Download workspace.json
-        </a>
+        <div className="flex flex-wrap items-center gap-2">
+          <a
+            href={`/api/${org}/export`}
+            className="inline-flex items-center gap-1 text-[12px] rounded-md border border-line px-3 py-1.5 hover:border-line-strong"
+          >
+            <Download className="size-3" /> Download workspace.json
+          </a>
+          <Link
+            href={`/${org}/settings/import`}
+            className="inline-flex items-center gap-1 text-[12px] rounded-md border border-line px-3 py-1.5 hover:border-line-strong"
+          >
+            Import workspace.json
+          </Link>
+        </div>
       </SettingsCard>
 
       <DangerZone orgSlug={organization.slug} orgName={organization.name} />

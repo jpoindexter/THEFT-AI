@@ -118,6 +118,8 @@ export default function LayoutHeader({
     timeline: "Timeline",
     dashboard: "Dashboard",
     share: "Share",
+    team: "Team",
+    import: "Import",
   };
   const subLabel =
     subSegment && SUB_LABELS[subSegment]
@@ -200,6 +202,11 @@ export default function LayoutHeader({
               onSelect={goto(`/${orgSlug}/agents`)}
               icon={<Users className="size-3.5" />}
               label="Agents"
+            />
+            <MenuRow
+              onSelect={goto(`/${orgSlug}/team`)}
+              icon={<Users className="size-3.5" />}
+              label="Team"
             />
             <MenuRow
               onSelect={goto(`/${orgSlug}/skills`)}
