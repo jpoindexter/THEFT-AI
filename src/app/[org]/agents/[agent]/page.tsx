@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { db } from "@/lib/db/store";
-import { ArrowLeft, MoreHorizontal } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 
 export default async function AgentDetailPage({
   params,
@@ -27,9 +27,12 @@ export default async function AgentDetailPage({
           >
             <ArrowLeft className="size-3" /> Back
           </Link>
-          <button className="size-7 rounded-md hover:bg-stone-200/60 inline-flex items-center justify-center">
-            <MoreHorizontal className="size-4" />
-          </button>
+          <Link
+            href={`/${orgSlug}/agents/${agentSlug}/edit`}
+            className="text-[11px] rounded-md border border-stone-200 bg-white px-2 py-1 hover:border-stone-400"
+          >
+            Edit
+          </Link>
         </div>
 
         <header className="space-y-1">

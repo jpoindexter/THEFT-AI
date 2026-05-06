@@ -25,6 +25,7 @@ import {
   Activity,
   DollarSign,
   Rocket,
+  Eye,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -70,6 +71,7 @@ export default function LayoutHeader({
     agents: "Agents",
     tasks: "Tasks",
     library: "Library",
+    review: "Review",
   };
   const subLabel =
     subSegment && SUB_LABELS[subSegment]
@@ -126,6 +128,11 @@ export default function LayoutHeader({
               onSelect={goto(`/${orgSlug}/integrations`)}
               icon={<Cable className="size-3.5" />}
               label="Integrations"
+            />
+            <MenuRow
+              onSelect={goto(`/${orgSlug}/review`)}
+              icon={<Eye className="size-3.5" />}
+              label="Review"
             />
             <MenuRow
               onSelect={goto(`/${orgSlug}/approvals`)}
