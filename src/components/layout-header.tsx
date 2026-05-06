@@ -287,13 +287,14 @@ export default function LayoutHeader({
         )}
       </div>
       <div className="flex items-center gap-1 text-ink-muted">
-        <button
-          type="button"
-          className="rounded-md bg-ink text-paper px-2.5 py-1 text-[11px] font-medium tracking-wide hover:bg-ink/80 inline-flex items-center gap-1"
+        <Link
+          href={`/${orgSlug}/billing/upgrade`}
+          className="rounded-md bg-ink text-paper px-2.5 py-1 text-[11px] font-medium tracking-wide hover:opacity-90 inline-flex items-center gap-1"
+          title="Upgrade plan"
         >
-          <SunMedium className="size-3 text-amber-300" />
+          <SunMedium className="size-3 text-mustard" />
           Upgrade
-        </button>
+        </Link>
         <ThemeToggle />
         <IconBtn title="Share workspace">
           <Share2 className="size-3.5" />

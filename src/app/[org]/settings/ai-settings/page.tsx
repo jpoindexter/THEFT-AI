@@ -72,6 +72,37 @@ export default function AISettings() {
             </SelectContent>
           </Select>
         </Row>
+        <Row label="Engineer">
+          <Select defaultValue="opus-4-7">
+            <SelectTrigger className="w-56">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="opus-4-7">Claude Opus 4.7</SelectItem>
+              <SelectItem value="sonnet-4-6">Claude Sonnet 4.6</SelectItem>
+            </SelectContent>
+          </Select>
+        </Row>
+      </SettingsCard>
+
+      <SettingsCard
+        title="Browser test credentials"
+        description="Used by the Engineer when it needs to log into the running app. Stored encrypted; never shown back."
+      >
+        <Row label="Email">
+          <input
+            type="email"
+            placeholder="test@theft.ai"
+            className="w-72 h-9 rounded-md border border-line bg-paper px-3 text-[13px] focus:outline-none focus:border-line-strong"
+          />
+        </Row>
+        <Row label="Password">
+          <input
+            type="password"
+            placeholder="••••••••"
+            className="w-72 h-9 rounded-md border border-line bg-paper px-3 text-[13px] font-mono focus:outline-none focus:border-line-strong"
+          />
+        </Row>
       </SettingsCard>
     </>
   );

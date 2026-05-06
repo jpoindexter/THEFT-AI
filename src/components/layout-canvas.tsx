@@ -36,20 +36,33 @@ export default function LayoutCanvas({
       </button>
 
       {inboxOpen && (
-        <div className="absolute bottom-14 left-3 w-64 rounded-lg bg-paper border border-line/70 shadow-md z-30">
+        <div className="absolute bottom-14 left-3 w-72 rounded-lg bg-paper border border-line/70 shadow-md z-30">
           <div className="flex items-center justify-between px-3 py-2 border-b border-line/70">
-            <div className="text-[13px] font-medium">Inbox</div>
-            <button
-              type="button"
+            <div className="text-[13px] font-medium">Notifications</div>
+            <Link
+              href={`/${orgSlug}/notifications`}
               className="text-[11px] text-ink-muted hover:text-ink"
               onClick={() => setInboxOpen(false)}
             >
-              Desktop alerts
-            </button>
+              Open all
+            </Link>
           </div>
-          <div className="p-6 text-center text-[12px] text-ink-muted">
-            All caught up!
-          </div>
+          <ul className="p-1.5 max-h-72 overflow-y-auto">
+            <NotifPeek
+              actor="Engineer"
+              body="opened PR #42"
+              time="12m"
+              href={`/${orgSlug}/publishing`}
+              onClose={() => setInboxOpen(false)}
+            />
+            <NotifPeek
+              actor="Marketing"
+              body="@you on Launch broadcast — May"
+              time="23m"
+              href={`/${orgSlug}/library`}
+              onClose={() => setInboxOpen(false)}
+            />
+          </ul>
         </div>
       )}
 
@@ -99,6 +112,36 @@ export default function LayoutCanvas({
         </Link>
       )}
     </main>
+  );
+}
+
+function NotifPeek({
+  actor,
+  body,
+  time,
+  href,
+  onClose,
+}: {
+  actor: string;
+  body: string;
+  time: string;
+  href: string;
+  onClose: () => void;
+}) {
+  return (
+    <li>
+      <Link
+        href={href}
+        onClick={onClose}
+        className="block rounded-md px-2 py-1.5 hover:bg-canvas"
+      >
+        <div className="text-[12px]">
+          <span className="font-medium text-ink">{actor}</span>{" "}
+          <span className="text-ink-muted">{body}</span>
+        </div>
+        <div className="text-[10px] text-ink-soft">{time} ago</div>
+      </Link>
+    </li>
   );
 }
 
