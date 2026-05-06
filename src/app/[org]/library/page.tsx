@@ -58,14 +58,16 @@ export default async function LibraryPage({
             </div>
             <ul className="rounded-lg border border-stone-200/70 bg-white divide-y divide-stone-100">
               {pinned.map((a) => (
-                <li
-                  key={a.id}
-                  className="px-3 py-2 text-[13px] flex items-center justify-between"
-                >
-                  <span className="truncate">{a.name}</span>
-                  <span className="text-[10px] text-stone-500 uppercase">
-                    {a.kind}
-                  </span>
+                <li key={a.id}>
+                  <Link
+                    href={`/${orgSlug}/library/${a.id}`}
+                    className="px-3 py-2 text-[13px] flex items-center justify-between hover:bg-stone-50"
+                  >
+                    <span className="truncate">{a.name}</span>
+                    <span className="text-[10px] text-stone-500 uppercase">
+                      {a.kind}
+                    </span>
+                  </Link>
                 </li>
               ))}
             </ul>
@@ -108,14 +110,16 @@ export default async function LibraryPage({
             </div>
             <ul className="rounded-lg border border-stone-200/70 bg-white divide-y divide-stone-100">
               {artifacts.map((a) => (
-                <li
-                  key={a.id}
-                  className="px-3 py-2 text-[13px] flex items-center justify-between"
-                >
-                  <span className="truncate">{a.name}</span>
-                  <span className="text-[10px] text-stone-500 uppercase">
-                    {a.kind}
-                  </span>
+                <li key={a.id}>
+                  <Link
+                    href={`/${orgSlug}/library/${a.id}`}
+                    className="px-3 py-2 text-[13px] flex items-center justify-between hover:bg-stone-50"
+                  >
+                    <span className="truncate">{a.name}</span>
+                    <span className="text-[10px] text-stone-500 uppercase">
+                      {a.kind}
+                    </span>
+                  </Link>
                 </li>
               ))}
             </ul>

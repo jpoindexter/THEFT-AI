@@ -1,4 +1,5 @@
 import { Plus, Calendar } from "lucide-react";
+import Link from "next/link";
 
 const ROUTINES = [
   {
@@ -27,7 +28,12 @@ const ROUTINES = [
   },
 ];
 
-export default function RoutinesPage() {
+export default async function RoutinesPage({
+  params,
+}: {
+  params: Promise<{ org: string }>;
+}) {
+  const { org } = await params;
   return (
     <div className="absolute inset-0 overflow-y-auto p-6">
       <div className="max-w-3xl mx-auto space-y-4">
@@ -38,9 +44,12 @@ export default function RoutinesPage() {
               Scheduled, recurring tasks an agent runs without you asking.
             </p>
           </div>
-          <button className="inline-flex items-center gap-1 rounded-md bg-stone-900 text-white px-3 py-1.5 text-[12px]">
+          <Link
+            href={`/${org}/routines/new`}
+            className="inline-flex items-center gap-1 rounded-md bg-stone-900 text-white px-3 py-1.5 text-[12px]"
+          >
             <Plus className="size-3.5" /> New routine
-          </button>
+          </Link>
         </header>
         <ul className="rounded-lg border border-stone-200/70 bg-white divide-y divide-stone-100">
           {ROUTINES.map((r) => (
