@@ -7,7 +7,7 @@ import {
   TabsContent,
 } from "@/components/ui/tabs";
 import { SectionHeader, SettingsCard, Row } from "@/components/settings/section";
-import { Copy, Upload } from "lucide-react";
+import { Copy, Upload, Download } from "lucide-react";
 import { db } from "@/lib/db/store";
 import { notFound } from "next/navigation";
 import DangerZone from "@/components/settings/danger-zone";
@@ -98,6 +98,18 @@ export default async function Organization({
         <button className="text-[12px] rounded-md border border-line px-2 py-1 hover:border-line-strong">
           Join or Create Organization
         </button>
+      </SettingsCard>
+
+      <SettingsCard
+        title="Export workspace"
+        description="Download a JSON snapshot of your business plan, agents, tasks, artifacts, and tech-tree status."
+      >
+        <a
+          href={`/api/${org}/export`}
+          className="inline-flex items-center gap-1 text-[12px] rounded-md border border-line px-3 py-1.5 hover:border-line-strong"
+        >
+          <Download className="size-3" /> Download workspace.json
+        </a>
       </SettingsCard>
 
       <DangerZone orgSlug={organization.slug} orgName={organization.name} />

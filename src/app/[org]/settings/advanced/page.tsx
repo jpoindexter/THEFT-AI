@@ -29,10 +29,13 @@ export default async function Advanced({
               </p>
             </div>
           </div>
-          <button className="text-[12px] rounded-md border border-line px-2 py-1 hover:border-line-strong inline-flex items-center gap-1 whitespace-nowrap">
+          <Link
+            href={`/${org}/settings/advanced/import-supabase`}
+            className="text-[12px] rounded-md border border-line px-2 py-1 hover:border-line-strong inline-flex items-center gap-1 whitespace-nowrap"
+          >
             <Database className="size-3" />
             Import your own Supabase
-          </button>
+          </Link>
         </div>
       </SettingsCard>
 

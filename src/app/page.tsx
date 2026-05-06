@@ -26,7 +26,7 @@ export default async function Home() {
             <nav className="flex items-center gap-4 text-ink">
               <Link href="#how">How it works</Link>
               <Link href="#agents">Agents</Link>
-              <Link href={continueHref}>Sign in</Link>
+              <Link href="/signin">Sign in</Link>
             </nav>
           </header>
           <div className="mt-32 max-w-2xl space-y-6">
