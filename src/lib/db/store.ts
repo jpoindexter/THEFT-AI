@@ -167,6 +167,28 @@ export const db = {
       all.map((o) => (o.id === id ? { ...o, ...patch } : o)),
     );
   },
+  async deleteOrg(id: string): Promise<void> {
+    const orgs = await readTable<Org>("organizations");
+    await writeTable(
+      "organizations",
+      orgs.filter((o) => o.id !== id),
+    );
+    const tables: string[] = [
+      "departments",
+      "agents",
+      "tasks",
+      "cofounder_messages",
+      "artifacts",
+      "tech_tree_status",
+    ];
+    for (const t of tables) {
+      const rows = await readTable<{ organization_id?: string }>(t);
+      await writeTable(
+        t,
+        rows.filter((r) => r.organization_id !== id),
+      );
+    }
+  },
 
   // --- departments ---
   async listDepartments(orgId: string): Promise<Department[]> {

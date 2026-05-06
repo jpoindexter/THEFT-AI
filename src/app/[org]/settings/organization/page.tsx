@@ -8,10 +8,20 @@ import {
 } from "@/components/ui/tabs";
 import { SectionHeader, SettingsCard, Row } from "@/components/settings/section";
 import { Copy, Upload } from "lucide-react";
+import { db } from "@/lib/db/store";
+import { notFound } from "next/navigation";
+import DangerZone from "@/components/settings/danger-zone";
 
 const SOURCES = ["ChatGPT", "Claude", "Paperclip", "OpenClaw", "Other"];
 
-export default function Organization() {
+export default async function Organization({
+  params,
+}: {
+  params: Promise<{ org: string }>;
+}) {
+  const { org } = await params;
+  const organization = await db.getOrgBySlug(org);
+  if (!organization) notFound();
   return (
     <>
       <SectionHeader
@@ -89,6 +99,8 @@ export default function Organization() {
           Join or Create Organization
         </button>
       </SettingsCard>
+
+      <DangerZone orgSlug={organization.slug} orgName={organization.name} />
     </>
   );
 }
