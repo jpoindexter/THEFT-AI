@@ -115,6 +115,7 @@ export default function LayoutHeader({
     help: "Help",
     feed: "Feed",
     studio: "Studio",
+    timeline: "Timeline",
   };
   const subLabel =
     subSegment && SUB_LABELS[subSegment]

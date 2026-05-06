@@ -44,12 +44,20 @@ export default async function RoutinesPage({
               Scheduled, recurring tasks an agent runs without you asking.
             </p>
           </div>
-          <Link
-            href={`/${org}/routines/new`}
-            className="inline-flex items-center gap-1 rounded-md bg-ink text-paper px-3 py-1.5 text-[12px]"
-          >
-            <Plus className="size-3.5" /> New routine
-          </Link>
+          <div className="flex items-center gap-1">
+            <Link
+              href={`/${org}/timeline`}
+              className="inline-flex items-center gap-1 rounded-md border border-line bg-paper px-2 py-1 text-[11px] hover:border-line-strong"
+            >
+              Timeline
+            </Link>
+            <Link
+              href={`/${org}/routines/new`}
+              className="inline-flex items-center gap-1 rounded-md bg-ink text-paper px-3 py-1.5 text-[12px]"
+            >
+              <Plus className="size-3.5" /> New routine
+            </Link>
+          </div>
         </header>
         <ul className="rounded-lg border border-line/70 bg-paper divide-y divide-line/60">
           {ROUTINES.map((r) => (
