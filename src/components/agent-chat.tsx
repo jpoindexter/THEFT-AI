@@ -182,7 +182,7 @@ export default function AgentChat({
             onClick={() => void send(input)}
             disabled={busy || !input.trim()}
             aria-label="Send"
-            className="size-6 mb-1.5 mr-1.5 rounded-md bg-stone-200 text-ink-muted inline-flex items-center justify-center disabled:opacity-50 hover:bg-stone-300"
+            className="size-6 mb-1.5 mr-1.5 rounded-md bg-line text-ink-muted inline-flex items-center justify-center disabled:opacity-50 hover:bg-stone-300"
           >
             <ArrowUp className="size-3.5" />
           </button>
@@ -219,7 +219,7 @@ function Turn({
           <span className="size-3 rounded-full bg-gradient-to-br from-amber-200 to-amber-400 inline-block" />
           Cofounder
         </div>
-        <div className="text-[13px] leading-relaxed text-stone-800 bg-amber-100/40 px-1 py-0.5 rounded-sm whitespace-pre-wrap">
+        <div className="text-[13px] leading-relaxed text-ink bg-amber-100/40 px-1 py-0.5 rounded-sm whitespace-pre-wrap">
           {t.text}
         </div>
       </div>
@@ -364,7 +364,7 @@ function AskUserQuestion({
               onAnswer({ key: picked, label: o?.label });
             }
           }}
-          className="text-[11px] rounded-md bg-stone-900 text-white px-2.5 py-1 hover:bg-stone-800 disabled:opacity-40"
+          className="text-[11px] rounded-md bg-ink text-paper px-2.5 py-1 hover:bg-ink/80 disabled:opacity-40"
         >
           Submit
         </button>

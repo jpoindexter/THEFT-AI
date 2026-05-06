@@ -6,14 +6,14 @@ export default function OrgNotFound() {
       <div className="max-w-sm w-full text-center space-y-3">
         <CrossStitch />
         <h1 className="text-xl tracking-tight">Not here</h1>
-        <p className="text-[13px] text-stone-500">
+        <p className="text-[13px] text-ink-muted">
           Whatever you were looking for either moved, was removed, or never
           existed in this workspace.
         </p>
         <div className="pt-1">
           <Link
             href="/"
-            className="inline-block rounded-md bg-stone-900 text-white px-3 py-1.5 text-[12px]"
+            className="inline-block rounded-md bg-ink text-paper px-3 py-1.5 text-[12px]"
           >
             Back to landing
           </Link>

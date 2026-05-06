@@ -61,29 +61,29 @@ export default async function InboxThreadPage({
       <div className="max-w-3xl mx-auto space-y-4">
         <Link
           href={`/${org}/inbox`}
-          className="inline-flex items-center gap-1 text-[12px] text-stone-500 hover:text-stone-900"
+          className="inline-flex items-center gap-1 text-[12px] text-ink-muted hover:text-ink"
         >
           <ArrowLeft className="size-3" /> Back to inbox
         </Link>
 
         <header>
-          <div className="text-[10px] uppercase tracking-wider text-stone-400">
+          <div className="text-[10px] uppercase tracking-wider text-ink-soft">
             {t.agent} · <code className="font-mono">{t.address}</code>
           </div>
           <h1 className="text-xl tracking-tight mt-0.5">{t.subject}</h1>
         </header>
 
-        <section className="rounded-lg border border-stone-200/70 bg-white p-4 space-y-4">
+        <section className="rounded-lg border border-line/70 bg-paper p-4 space-y-4">
           {t.messages.map((m, i) => (
             <article
               key={i}
-              className="border-b last:border-0 border-stone-100 pb-3 last:pb-0"
+              className="border-b last:border-0 border-line/50 pb-3 last:pb-0"
             >
               <div className="flex items-center justify-between text-[11px]">
-                <span className="font-mono text-stone-700">{m.from}</span>
-                <span className="text-stone-400">{m.when}</span>
+                <span className="font-mono text-ink">{m.from}</span>
+                <span className="text-ink-soft">{m.when}</span>
               </div>
-              <p className="text-[13px] text-stone-700 leading-relaxed mt-1 whitespace-pre-wrap">
+              <p className="text-[13px] text-ink leading-relaxed mt-1 whitespace-pre-wrap">
                 {m.body}
               </p>
             </article>
@@ -94,27 +94,27 @@ export default async function InboxThreadPage({
           <div className="text-[10px] uppercase tracking-wider text-amber-800 mb-1">
             Agent draft (not sent)
           </div>
-          <p className="text-[13px] text-stone-800 leading-relaxed">
+          <p className="text-[13px] text-ink leading-relaxed">
             {t.suggested}
           </p>
           <div className="flex justify-end gap-2 pt-3">
-            <button className="text-[11px] rounded-md border border-stone-200 bg-white px-2 py-1 hover:border-stone-400">
+            <button className="text-[11px] rounded-md border border-line bg-paper px-2 py-1 hover:border-line-strong">
               Edit
             </button>
-            <button className="text-[11px] rounded-md bg-stone-900 text-white px-3 py-1.5">
+            <button className="text-[11px] rounded-md bg-ink text-paper px-3 py-1.5">
               Send reply
             </button>
           </div>
         </section>
 
         <div className="flex justify-end gap-1">
-          <button className="inline-flex items-center gap-1 text-[11px] rounded-md border border-stone-200 bg-white px-2 py-1 hover:border-stone-400">
+          <button className="inline-flex items-center gap-1 text-[11px] rounded-md border border-line bg-paper px-2 py-1 hover:border-line-strong">
             <Reply className="size-3" /> Reply
           </button>
-          <button className="inline-flex items-center gap-1 text-[11px] rounded-md border border-stone-200 bg-white px-2 py-1 hover:border-stone-400">
+          <button className="inline-flex items-center gap-1 text-[11px] rounded-md border border-line bg-paper px-2 py-1 hover:border-line-strong">
             <Forward className="size-3" /> Forward
           </button>
-          <button className="inline-flex items-center gap-1 text-[11px] rounded-md border border-red-300 bg-white text-red-700 px-2 py-1 hover:bg-red-50">
+          <button className="inline-flex items-center gap-1 text-[11px] rounded-md border border-red-300 bg-paper text-red-700 px-2 py-1 hover:bg-red-50">
             <Trash2 className="size-3" /> Archive
           </button>
         </div>

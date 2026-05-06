@@ -118,19 +118,19 @@ export default function LayoutHeader({
               <button
                 type="button"
                 aria-label="Workspace menu"
-                className="inline-flex items-center gap-1 rounded hover:bg-stone-200/60 px-1 py-1"
+                className="inline-flex items-center gap-1 rounded hover:bg-line/60 px-1 py-1"
               >
-                <span className="size-6 rounded-full bg-stone-200 inline-flex items-center justify-center text-[11px] font-medium text-stone-600">
+                <span className="size-6 rounded-full bg-line inline-flex items-center justify-center text-[11px] font-medium text-ink-muted">
                   {founderInitial}
                 </span>
-                <ChevronDown className="size-3 text-stone-400" />
+                <ChevronDown className="size-3 text-ink-soft" />
               </button>
             }
           />
           <DropdownMenuContent align="start" className="w-56">
             {orgs.length > 1 && (
               <>
-                <div className="px-2 py-1.5 text-[10px] uppercase tracking-wider text-stone-500">
+                <div className="px-2 py-1.5 text-[10px] uppercase tracking-wider text-ink-muted">
                   Workspaces
                 </div>
                 {orgs.map((o) => (
@@ -141,8 +141,8 @@ export default function LayoutHeader({
                       <span
                         className={`size-3.5 rounded-sm ${
                           o.slug === orgSlug
-                            ? "bg-stone-900"
-                            : "bg-stone-200"
+                            ? "bg-ink"
+                            : "bg-line"
                         }`}
                       />
                     }
@@ -151,14 +151,14 @@ export default function LayoutHeader({
                 ))}
                 <MenuRow
                   onSelect={goto("/onboarding")}
-                  icon={<span className="size-3.5 inline-flex items-center justify-center text-stone-500">+</span>}
+                  icon={<span className="size-3.5 inline-flex items-center justify-center text-ink-muted">+</span>}
                   label="New workspace"
                 />
                 <DropdownMenuSeparator />
               </>
             )}
             {orgs.length <= 1 && (
-              <div className="px-2 py-1.5 text-[10px] uppercase tracking-wider text-stone-500">
+              <div className="px-2 py-1.5 text-[10px] uppercase tracking-wider text-ink-muted">
                 {orgName}
               </div>
             )}
@@ -274,22 +274,22 @@ export default function LayoutHeader({
         {hasPlan && (
           <Link
             href={`/${orgSlug}`}
-            className="ml-1 tracking-tight text-[12px] uppercase text-stone-700 hover:text-stone-900"
+            className="ml-1 tracking-tight text-[12px] uppercase text-ink hover:text-ink"
           >
             {orgName}
           </Link>
         )}
         {isSubpage && hasPlan && subLabel && (
           <>
-            <span className="mx-1 text-stone-300">›</span>
-            <span className="tracking-tight text-stone-900">{subLabel}</span>
+            <span className="mx-1 text-line-strong">›</span>
+            <span className="tracking-tight text-ink">{subLabel}</span>
           </>
         )}
       </div>
-      <div className="flex items-center gap-1 text-stone-500">
+      <div className="flex items-center gap-1 text-ink-muted">
         <button
           type="button"
-          className="rounded-md bg-stone-900 text-white px-2.5 py-1 text-[11px] font-medium tracking-wide hover:bg-stone-800 inline-flex items-center gap-1"
+          className="rounded-md bg-ink text-paper px-2.5 py-1 text-[11px] font-medium tracking-wide hover:bg-ink/80 inline-flex items-center gap-1"
         >
           <SunMedium className="size-3 text-amber-300" />
           Upgrade

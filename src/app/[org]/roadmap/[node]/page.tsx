@@ -4,17 +4,17 @@ import { db } from "@/lib/db/store";
 import { ArrowLeft, Lock, CheckCircle2, Sparkles } from "lucide-react";
 
 const STAGE_TONE: Record<string, string> = {
-  idea: "bg-stone-100 text-stone-700",
+  idea: "bg-cream text-ink",
   initial: "bg-amber-100 text-amber-800",
   identity: "bg-rose-100 text-rose-800",
   build: "bg-sky-100 text-sky-800",
   live: "bg-emerald-100 text-emerald-800",
   launch: "bg-violet-100 text-violet-800",
-  scale: "bg-stone-200 text-stone-700",
+  scale: "bg-line text-ink",
 };
 
 const STATUS_TONE: Record<string, string> = {
-  locked: "bg-stone-100 text-stone-500",
+  locked: "bg-cream text-ink-muted",
   available: "bg-amber-100 text-amber-800",
   in_progress: "bg-sky-100 text-sky-800",
   done: "bg-emerald-100 text-emerald-700",
@@ -44,7 +44,7 @@ export default async function TechTreeNodePage({
       <div className="max-w-2xl mx-auto space-y-4">
         <Link
           href={`/${orgSlug}/roadmap`}
-          className="inline-flex items-center gap-1 text-[12px] text-stone-500 hover:text-stone-900"
+          className="inline-flex items-center gap-1 text-[12px] text-ink-muted hover:text-ink"
         >
           <ArrowLeft className="size-3" /> Back to roadmap
         </Link>
@@ -53,57 +53,57 @@ export default async function TechTreeNodePage({
           <div className="flex items-center gap-2">
             <span
               className={`text-[10px] uppercase tracking-wider rounded px-1.5 py-0.5 ${
-                STAGE_TONE[node.stage] ?? "bg-stone-100 text-stone-700"
+                STAGE_TONE[node.stage] ?? "bg-cream text-ink"
               }`}
             >
               {node.stage}
             </span>
             <span
               className={`text-[10px] uppercase tracking-wider rounded px-1.5 py-0.5 ${
-                STATUS_TONE[myStatus] ?? "bg-stone-100 text-stone-500"
+                STATUS_TONE[myStatus] ?? "bg-cream text-ink-muted"
               }`}
             >
               {myStatus.replace("_", " ")}
             </span>
             {node.agent_can_do_this && (
-              <span className="text-[10px] inline-flex items-center gap-1 text-stone-500">
+              <span className="text-[10px] inline-flex items-center gap-1 text-ink-muted">
                 <Sparkles className="size-3" /> agent can do this
               </span>
             )}
           </div>
           <h1 className="text-xl tracking-tight">{node.title}</h1>
           {node.description && (
-            <p className="text-[13px] text-stone-600 leading-relaxed pt-1 max-w-prose">
+            <p className="text-[13px] text-ink-muted leading-relaxed pt-1 max-w-prose">
               {node.description}
             </p>
           )}
         </header>
 
         {node.what_becomes_true && (
-          <section className="rounded-lg border border-stone-200/70 bg-white p-4 space-y-1">
-            <div className="text-[10px] uppercase tracking-wider text-stone-400">
+          <section className="rounded-lg border border-line/70 bg-paper p-4 space-y-1">
+            <div className="text-[10px] uppercase tracking-wider text-ink-soft">
               What becomes true
             </div>
-            <p className="text-[13px] text-stone-700 leading-relaxed">
+            <p className="text-[13px] text-ink leading-relaxed">
               {node.what_becomes_true}
             </p>
           </section>
         )}
 
         {node.how_to_move_forward && (
-          <section className="rounded-lg border border-stone-200/70 bg-white p-4 space-y-1">
-            <div className="text-[10px] uppercase tracking-wider text-stone-400">
+          <section className="rounded-lg border border-line/70 bg-paper p-4 space-y-1">
+            <div className="text-[10px] uppercase tracking-wider text-ink-soft">
               How to move forward
             </div>
-            <p className="text-[13px] text-stone-700 leading-relaxed">
+            <p className="text-[13px] text-ink leading-relaxed">
               {node.how_to_move_forward}
             </p>
           </section>
         )}
 
         {dependsOn.length > 0 && (
-          <section className="rounded-lg border border-stone-200/70 bg-white p-4 space-y-1">
-            <div className="text-[10px] uppercase tracking-wider text-stone-400">
+          <section className="rounded-lg border border-line/70 bg-paper p-4 space-y-1">
+            <div className="text-[10px] uppercase tracking-wider text-ink-soft">
               Depends on
             </div>
             <ul className="space-y-1">
@@ -113,12 +113,12 @@ export default async function TechTreeNodePage({
                   <li key={d.id}>
                     <Link
                       href={`/${orgSlug}/roadmap/${d.slug}`}
-                      className="flex items-center gap-2 text-[12px] hover:text-stone-900"
+                      className="flex items-center gap-2 text-[12px] hover:text-ink"
                     >
                       {s === "complete" ? (
                         <CheckCircle2 className="size-3 text-emerald-600" />
                       ) : (
-                        <Lock className="size-3 text-stone-400" />
+                        <Lock className="size-3 text-ink-soft" />
                       )}
                       {d.title}
                     </Link>
@@ -130,8 +130,8 @@ export default async function TechTreeNodePage({
         )}
 
         {unlocks.length > 0 && (
-          <section className="rounded-lg border border-stone-200/70 bg-white p-4 space-y-1">
-            <div className="text-[10px] uppercase tracking-wider text-stone-400">
+          <section className="rounded-lg border border-line/70 bg-paper p-4 space-y-1">
+            <div className="text-[10px] uppercase tracking-wider text-ink-soft">
               Unlocks
             </div>
             <ul className="space-y-1">
@@ -139,7 +139,7 @@ export default async function TechTreeNodePage({
                 <li key={u.id}>
                   <Link
                     href={`/${orgSlug}/roadmap/${u.slug}`}
-                    className="text-[12px] text-stone-700 hover:text-stone-900"
+                    className="text-[12px] text-ink hover:text-ink"
                   >
                     {u.title}
                   </Link>
@@ -150,13 +150,13 @@ export default async function TechTreeNodePage({
         )}
 
         <div className="flex justify-end gap-2 pt-1">
-          <button className="text-[12px] rounded-md border border-stone-200 bg-white px-3 py-1.5 hover:border-stone-400">
+          <button className="text-[12px] rounded-md border border-line bg-paper px-3 py-1.5 hover:border-line-strong">
             Mark locked
           </button>
-          <button className="text-[12px] rounded-md border border-stone-200 bg-white px-3 py-1.5 hover:border-stone-400">
+          <button className="text-[12px] rounded-md border border-line bg-paper px-3 py-1.5 hover:border-line-strong">
             Mark in progress
           </button>
-          <button className="text-[12px] rounded-md bg-stone-900 text-white px-3 py-1.5">
+          <button className="text-[12px] rounded-md bg-ink text-paper px-3 py-1.5">
             Mark done
           </button>
         </div>

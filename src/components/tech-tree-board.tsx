@@ -117,7 +117,7 @@ function DetailDrawer({
         <button
           onClick={onClose}
           className="text-ink-soft hover:text-ink"
-          aria-label="Close"
+          aria-label="Close" title="Close"
         >
           <X className="size-4" />
         </button>

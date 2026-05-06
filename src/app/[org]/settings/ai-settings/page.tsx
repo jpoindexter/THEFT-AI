@@ -44,7 +44,7 @@ export default function AISettings() {
         </Row>
         <div className="space-y-1">
           <div className="text-[13px]">Global Prompt Personalization</div>
-          <p className="text-[11px] text-stone-500">
+          <p className="text-[11px] text-ink-muted">
             Add context that should be included globally across chats and agents.
           </p>
           <Textarea
@@ -52,7 +52,7 @@ export default function AISettings() {
             className="min-h-24"
           />
           <div className="flex justify-end">
-            <button className="text-[11px] rounded-md bg-stone-900 text-white px-3 py-1">
+            <button className="text-[11px] rounded-md bg-ink text-paper px-3 py-1">
               Save
             </button>
           </div>

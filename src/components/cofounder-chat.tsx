@@ -274,7 +274,7 @@ export default function CofounderChat({
             onClick={send}
             disabled={busy || !input.trim()}
             aria-label="Send"
-            className="size-6 mb-1.5 mr-1.5 rounded-md bg-stone-200 text-ink-muted inline-flex items-center justify-center disabled:opacity-50 hover:bg-stone-300 transition-colors"
+            className="size-6 mb-1.5 mr-1.5 rounded-md bg-line text-ink-muted inline-flex items-center justify-center disabled:opacity-50 hover:bg-stone-300 transition-colors"
           >
             ↑
           </button>
@@ -300,7 +300,7 @@ function Message({ m, isFirst }: { m: Msg; isFirst: boolean }) {
         <span className="size-3 rounded-full bg-gradient-to-br from-amber-200 to-amber-400 inline-block" />
         Cofounder
       </div>
-      <div className="text-[13px] leading-relaxed text-stone-800 whitespace-pre-wrap bg-amber-100/40 px-1 rounded-sm inline">
+      <div className="text-[13px] leading-relaxed text-ink whitespace-pre-wrap bg-amber-100/40 px-1 rounded-sm inline">
         {m.text}
       </div>
       {isFirst && !m.text.trim() && (
@@ -350,7 +350,7 @@ function AnsweredQuestionsCard({
                 }
                 className="w-full flex items-start justify-between gap-2 text-left"
               >
-                <span className="text-[12px] text-stone-800 leading-snug">
+                <span className="text-[12px] text-ink leading-snug">
                   {q.prompt}
                 </span>
                 <span className="inline-flex items-center gap-1 text-[10px] text-ink-muted shrink-0">
@@ -478,7 +478,7 @@ function BriefWidget({
             onClick={() => setStep(Math.max(0, step - 1))}
             disabled={step === 0}
             className="disabled:opacity-30 hover:text-ink"
-            aria-label="Close"
+            aria-label="Close" title="Close"
           >
             <X className="size-3" />
           </button>
@@ -544,7 +544,7 @@ function BriefWidget({
               else onSubmit();
             }}
             disabled={!currentAnswer || submitting}
-            className="text-[11px] rounded-md bg-stone-900 text-white px-2.5 py-1 hover:bg-stone-800 disabled:opacity-40"
+            className="text-[11px] rounded-md bg-ink text-paper px-2.5 py-1 hover:bg-ink/80 disabled:opacity-40"
           >
             {submitting
               ? "Submitting…"
@@ -589,11 +589,11 @@ function BusinessPlanCard({
 
   return (
     <div className="space-y-3">
-      <p className="bg-amber-100/40 px-1 rounded-sm text-[13px] text-stone-800 leading-relaxed">
+      <p className="bg-amber-100/40 px-1 rounded-sm text-[13px] text-ink leading-relaxed">
         The business brief is ready to review. Here&apos;s a summary of
         what&apos;s in it:
       </p>
-      <div className="space-y-3 text-[13px] leading-relaxed text-stone-800">
+      <div className="space-y-3 text-[13px] leading-relaxed text-ink">
         {sections.map((s) => (
           <p key={s.label} className="bg-amber-100/40 px-1 rounded-sm">
             <strong>{s.label}:</strong>{" "}
@@ -615,7 +615,7 @@ function BusinessPlanCard({
         type="button"
         onClick={onActivate}
         disabled={activating}
-        className="w-full rounded-md bg-stone-900 text-white text-[12px] py-2 hover:bg-stone-800 disabled:opacity-60"
+        className="w-full rounded-md bg-ink text-paper text-[12px] py-2 hover:bg-ink/80 disabled:opacity-60"
       >
         {activating
           ? "Activating departments…"

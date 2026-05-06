@@ -196,8 +196,8 @@ export default function DepartmentHero({
           <span className="font-medium">{department.name} Department</span>
           <button
             type="button"
-            className="ml-auto size-7 rounded-md hover:bg-stone-200/60 inline-flex items-center justify-center"
-            aria-label="More"
+            className="ml-auto size-7 rounded-md hover:bg-line/60 inline-flex items-center justify-center"
+            aria-label="More" title="More actions"
           >
             <MoreHorizontal className="size-4 text-ink-soft" />
           </button>
@@ -234,7 +234,7 @@ export default function DepartmentHero({
                 type="button"
                 className="text-left rounded-md border border-line/70 bg-canvas px-3 py-2 hover:border-line-strong transition-colors"
               >
-                <div className="size-5 rounded-sm bg-stone-200 mb-1.5" />
+                <div className="size-5 rounded-sm bg-line mb-1.5" />
                 <div className="text-[12px] font-medium text-ink leading-tight">
                   {node.title}
                 </div>
@@ -256,7 +256,7 @@ export default function DepartmentHero({
           <button
             type="button"
             onClick={() => setTaskOpen(true)}
-            className="inline-flex items-center gap-1 rounded-md bg-stone-900 text-white px-3 py-1.5 text-[12px]"
+            className="inline-flex items-center gap-1 rounded-md bg-ink text-paper px-3 py-1.5 text-[12px]"
           >
             <Plus className="size-3.5" />
             New task
@@ -288,7 +288,7 @@ function DeviceMock({ url, label }: { url: string; label: string }) {
           </div>
         </div>
         <div className="aspect-[4/3] p-3 space-y-1.5">
-          <div className="h-1.5 w-12 rounded bg-stone-200" />
+          <div className="h-1.5 w-12 rounded bg-line" />
           <div className="h-1.5 w-20 rounded bg-cream" />
           <div className="h-1.5 w-16 rounded bg-cream" />
           <div className="h-12 mt-2 rounded bg-cream" />

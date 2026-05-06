@@ -18,28 +18,28 @@ export default async function CostsPage({
         <header className="flex items-center justify-between">
           <div>
             <h1 className="text-xl tracking-tight">Costs</h1>
-            <p className="text-[12px] text-stone-500">
+            <p className="text-[12px] text-ink-muted">
               Token usage, model spend, and per-agent costs across the workspace.
             </p>
           </div>
           <Link
             href={`/${org}/costs/budget`}
-            className="text-[11px] rounded-md border border-stone-200 bg-white px-2 py-1 hover:border-stone-400"
+            className="text-[11px] rounded-md border border-line bg-paper px-2 py-1 hover:border-line-strong"
           >
             Budget & limits
           </Link>
         </header>
 
-        <section className="rounded-lg border border-stone-200/70 bg-white p-4 space-y-2">
+        <section className="rounded-lg border border-line/70 bg-paper p-4 space-y-2">
           <div className="flex items-center justify-between text-[11px]">
-            <span className="text-stone-500">
+            <span className="text-ink-muted">
               ${total.toFixed(2)} of ${MONTHLY_BUDGET} monthly budget
             </span>
-            <span className="font-mono text-stone-400">
+            <span className="font-mono text-ink-soft">
               {pctOfBudget.toFixed(0)}%
             </span>
           </div>
-          <div className="h-2 rounded-full bg-stone-100 overflow-hidden">
+          <div className="h-2 rounded-full bg-cream overflow-hidden">
             <div
               className={`h-full ${
                 pctOfBudget > 80 ? "bg-red-500" : "bg-emerald-500"
@@ -55,12 +55,12 @@ export default async function CostsPage({
           <Stat label="Daily average" value="$3.71" />
         </div>
 
-        <section className="rounded-lg border border-stone-200/70 bg-white p-4">
+        <section className="rounded-lg border border-line/70 bg-paper p-4">
           <div className="flex items-center justify-between mb-3">
-            <div className="text-[10px] uppercase tracking-wider text-stone-400">
+            <div className="text-[10px] uppercase tracking-wider text-ink-soft">
               Last 14 days
             </div>
-            <select className="text-[11px] rounded-md border border-stone-200 bg-white px-2 py-0.5">
+            <select className="text-[11px] rounded-md border border-line bg-paper px-2 py-0.5">
               <option>By day</option>
               <option>By agent</option>
               <option>By model</option>
@@ -78,11 +78,11 @@ export default async function CostsPage({
           </div>
         </section>
 
-        <section className="rounded-lg border border-stone-200/70 bg-white">
-          <header className="px-4 py-2 border-b border-stone-200/70 text-[10px] uppercase tracking-wider text-stone-400">
+        <section className="rounded-lg border border-line/70 bg-paper">
+          <header className="px-4 py-2 border-b border-line/70 text-[10px] uppercase tracking-wider text-ink-soft">
             Per agent
           </header>
-          <div className="divide-y divide-stone-100">
+          <div className="divide-y divide-line/60">
             {[
               { agent: "Engineer", model: "claude-sonnet-4-6", spent: 142.5 },
               { agent: "Marketing", model: "claude-sonnet-4-6", spent: 38.2 },
@@ -95,7 +95,7 @@ export default async function CostsPage({
               >
                 <div>
                   <div className="font-medium">{r.agent}</div>
-                  <div className="text-[10px] text-stone-500 font-mono">
+                  <div className="text-[10px] text-ink-muted font-mono">
                     {r.model}
                   </div>
                 </div>
@@ -113,8 +113,8 @@ export default async function CostsPage({
 
 function Stat({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-lg border border-stone-200/70 bg-white p-3">
-      <div className="text-[10px] uppercase tracking-wider text-stone-400">
+    <div className="rounded-lg border border-line/70 bg-paper p-3">
+      <div className="text-[10px] uppercase tracking-wider text-ink-soft">
         {label}
       </div>
       <div className="text-2xl tracking-tight font-medium mt-1">{value}</div>

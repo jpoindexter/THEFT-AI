@@ -10,7 +10,7 @@ const LOGS = [
 ];
 
 const LEVEL_TONE: Record<string, string> = {
-  info: "bg-stone-100 text-stone-700",
+  info: "bg-cream text-ink",
   warn: "bg-amber-100 text-amber-800",
   error: "bg-red-100 text-red-700",
 };
@@ -20,22 +20,22 @@ export default function LogsPage() {
     <div className="space-y-4">
       <header>
         <h1 className="text-lg font-medium tracking-tight inline-flex items-center gap-2">
-          <ScrollText className="size-4 text-stone-500" /> Logs
+          <ScrollText className="size-4 text-ink-muted" /> Logs
         </h1>
-        <p className="text-[12px] text-stone-500">
+        <p className="text-[12px] text-ink-muted">
           Live tail across edge functions, API routes, database, and auth.
         </p>
       </header>
 
       <div className="flex items-center gap-2 text-[11px]">
-        <select className="rounded-md border border-stone-200 bg-white px-2 py-1">
+        <select className="rounded-md border border-line bg-paper px-2 py-1">
           <option>All sources</option>
           <option>api</option>
           <option>db</option>
           <option>edge</option>
           <option>auth</option>
         </select>
-        <select className="rounded-md border border-stone-200 bg-white px-2 py-1">
+        <select className="rounded-md border border-line bg-paper px-2 py-1">
           <option>All levels</option>
           <option>info</option>
           <option>warn</option>
@@ -43,23 +43,23 @@ export default function LogsPage() {
         </select>
         <input
           placeholder="Filter…"
-          className="rounded-md border border-stone-200 bg-white px-2 py-1 flex-1 focus:outline-none focus:border-stone-400"
+          className="rounded-md border border-line bg-paper px-2 py-1 flex-1 focus:outline-none focus:border-line-strong"
         />
       </div>
 
-      <div className="rounded-lg border border-stone-200/70 bg-stone-950 p-3 max-h-[420px] overflow-y-auto">
+      <div className="rounded-lg border border-line/70 bg-ink p-3 max-h-[420px] overflow-y-auto">
         <ul className="space-y-1 font-mono text-[11px]">
           {LOGS.map((l, i) => (
-            <li key={i} className="flex items-start gap-2 text-stone-300">
-              <span className="text-stone-500 shrink-0">{l.ts}</span>
+            <li key={i} className="flex items-start gap-2 text-line-strong">
+              <span className="text-ink-muted shrink-0">{l.ts}</span>
               <span
                 className={`uppercase rounded px-1 text-[9px] shrink-0 ${
-                  LEVEL_TONE[l.level] ?? "bg-stone-100 text-stone-700"
+                  LEVEL_TONE[l.level] ?? "bg-cream text-ink"
                 }`}
               >
                 {l.level}
               </span>
-              <span className="text-stone-400 shrink-0">[{l.source}]</span>
+              <span className="text-ink-soft shrink-0">[{l.source}]</span>
               <span className="break-all">{l.msg}</span>
             </li>
           ))}

@@ -4,11 +4,11 @@ import { db } from "@/lib/db/store";
 import { Plus } from "lucide-react";
 
 const STATUS_TONE: Record<string, string> = {
-  idle: "bg-stone-100 text-stone-600",
+  idle: "bg-cream text-ink-muted",
   running: "bg-emerald-100 text-emerald-700",
   paused: "bg-amber-100 text-amber-700",
   error: "bg-red-100 text-red-700",
-  terminated: "bg-stone-200 text-stone-500",
+  terminated: "bg-line text-ink-muted",
 };
 
 export default async function AgentsIndexPage({
@@ -29,36 +29,36 @@ export default async function AgentsIndexPage({
         <header className="flex items-center justify-between">
           <div>
             <h1 className="text-xl tracking-tight">Agents</h1>
-            <p className="text-[12px] text-stone-500">
+            <p className="text-[12px] text-ink-muted">
               Every employee in this workspace. Click one to inspect its skills,
               tasks, and configuration.
             </p>
           </div>
           <Link
             href={`/${orgSlug}/agents/new`}
-            className="inline-flex items-center gap-1 rounded-md bg-stone-900 text-white px-3 py-1.5 text-[12px]"
+            className="inline-flex items-center gap-1 rounded-md bg-ink text-paper px-3 py-1.5 text-[12px]"
           >
             <Plus className="size-3.5" /> New agent
           </Link>
         </header>
 
         {agents.length === 0 ? (
-          <div className="rounded-lg border border-stone-200/70 bg-white p-8 text-center text-[12px] text-stone-500">
+          <div className="rounded-lg border border-line/70 bg-paper p-8 text-center text-[12px] text-ink-muted">
             No agents yet. Onboarding usually creates one per department.
           </div>
         ) : (
-          <ul className="rounded-lg border border-stone-200/70 bg-white divide-y divide-stone-100">
+          <ul className="rounded-lg border border-line/70 bg-paper divide-y divide-line/60">
             {agents.map((a) => (
               <li key={a.id}>
                 <Link
                   href={`/${orgSlug}/agents/${a.slug ?? a.id}`}
-                  className="px-4 py-3 flex items-center justify-between hover:bg-stone-50"
+                  className="px-4 py-3 flex items-center justify-between hover:bg-canvas"
                 >
                   <div className="min-w-0">
                     <div className="text-[13px] font-medium tracking-tight">
                       {a.name}
                     </div>
-                    <div className="text-[11px] text-stone-500">
+                    <div className="text-[11px] text-ink-muted">
                       {a.title ?? a.role}
                       {a.department_id &&
                         ` · ${deptName.get(a.department_id) ?? ""}`}
@@ -68,7 +68,7 @@ export default async function AgentsIndexPage({
                   </div>
                   <span
                     className={`text-[10px] uppercase rounded px-1.5 py-0.5 shrink-0 ${
-                      STATUS_TONE[a.status] ?? "bg-stone-100 text-stone-500"
+                      STATUS_TONE[a.status] ?? "bg-cream text-ink-muted"
                     }`}
                   >
                     {a.status}

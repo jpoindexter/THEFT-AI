@@ -69,49 +69,49 @@ export default async function RoutineDetailPage({
       <div className="max-w-3xl mx-auto space-y-4">
         <Link
           href={`/${org}/routines`}
-          className="inline-flex items-center gap-1 text-[12px] text-stone-500 hover:text-stone-900"
+          className="inline-flex items-center gap-1 text-[12px] text-ink-muted hover:text-ink"
         >
           <ArrowLeft className="size-3" /> Back to routines
         </Link>
 
         <header>
-          <div className="text-[10px] uppercase tracking-wider text-stone-400">
+          <div className="text-[10px] uppercase tracking-wider text-ink-soft">
             Routine · {r.agent}
           </div>
           <h1 className="text-xl tracking-tight">{r.name}</h1>
-          <div className="text-[12px] text-stone-500 inline-flex items-center gap-3 mt-1">
+          <div className="text-[12px] text-ink-muted inline-flex items-center gap-3 mt-1">
             <span className="inline-flex items-center gap-1">
               <Calendar className="size-3" /> <code className="font-mono">{r.cron}</code>
             </span>
           </div>
         </header>
 
-        <section className="rounded-lg border border-stone-200/70 bg-white p-4 space-y-2">
-          <div className="text-[10px] uppercase tracking-wider text-stone-400">
+        <section className="rounded-lg border border-line/70 bg-paper p-4 space-y-2">
+          <div className="text-[10px] uppercase tracking-wider text-ink-soft">
             Prompt
           </div>
-          <p className="text-[13px] text-stone-700 leading-snug">{r.prompt}</p>
+          <p className="text-[13px] text-ink leading-snug">{r.prompt}</p>
         </section>
 
-        <section className="rounded-lg border border-stone-200/70 bg-white p-4 space-y-2">
-          <div className="text-[10px] uppercase tracking-wider text-stone-400">
+        <section className="rounded-lg border border-line/70 bg-paper p-4 space-y-2">
+          <div className="text-[10px] uppercase tracking-wider text-ink-soft">
             Recent runs
           </div>
           {r.runs.length === 0 ? (
-            <p className="text-[12px] text-stone-500">
+            <p className="text-[12px] text-ink-muted">
               No runs yet. First run scheduled at{" "}
               <code className="font-mono">{r.cron}</code>.
             </p>
           ) : (
-            <ul className="divide-y divide-stone-100">
+            <ul className="divide-y divide-line/60">
               {r.runs.map((run, i) => (
                 <li key={i} className="py-2 flex items-start gap-3">
-                  <Clock className="size-3.5 text-stone-400 mt-0.5 shrink-0" />
+                  <Clock className="size-3.5 text-ink-soft mt-0.5 shrink-0" />
                   <div className="flex-1 min-w-0">
-                    <div className="text-[12px] font-mono text-stone-700">
+                    <div className="text-[12px] font-mono text-ink">
                       {run.when}
                     </div>
-                    <div className="text-[12px] text-stone-600">
+                    <div className="text-[12px] text-ink-muted">
                       {run.summary}
                     </div>
                   </div>
@@ -131,13 +131,13 @@ export default async function RoutineDetailPage({
         </section>
 
         <div className="flex justify-end gap-2">
-          <button className="text-[12px] rounded-md border border-stone-200 bg-white px-3 py-1.5 hover:border-stone-400">
+          <button className="text-[12px] rounded-md border border-line bg-paper px-3 py-1.5 hover:border-line-strong">
             Pause
           </button>
-          <button className="text-[12px] rounded-md border border-stone-200 bg-white px-3 py-1.5 hover:border-stone-400">
+          <button className="text-[12px] rounded-md border border-line bg-paper px-3 py-1.5 hover:border-line-strong">
             Run now
           </button>
-          <button className="text-[12px] rounded-md bg-stone-900 text-white px-3 py-1.5">
+          <button className="text-[12px] rounded-md bg-ink text-paper px-3 py-1.5">
             Edit
           </button>
         </div>

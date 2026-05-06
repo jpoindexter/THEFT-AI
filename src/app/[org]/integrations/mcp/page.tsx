@@ -45,16 +45,16 @@ export default function McpSetupPage() {
       <div className="max-w-3xl mx-auto space-y-5">
         <Link
           href={`/${params.org}/integrations`}
-          className="inline-flex items-center gap-1 text-[12px] text-stone-500 hover:text-stone-900"
+          className="inline-flex items-center gap-1 text-[12px] text-ink-muted hover:text-ink"
         >
           <ArrowLeft className="size-3" /> Back to integrations
         </Link>
 
         <header>
           <h1 className="text-xl tracking-tight inline-flex items-center gap-2">
-            <Server className="size-5 text-stone-500" /> MCP servers
+            <Server className="size-5 text-ink-muted" /> MCP servers
           </h1>
-          <p className="text-[12px] text-stone-500">
+          <p className="text-[12px] text-ink-muted">
             Plug any Model Context Protocol server into the workspace. Tools
             exposed by the server become callable by every agent.
           </p>
@@ -62,15 +62,15 @@ export default function McpSetupPage() {
 
         {INSTALLED.length > 0 && (
           <section>
-            <div className="text-[10px] uppercase tracking-[0.14em] text-stone-400 mb-2">
+            <div className="text-[10px] uppercase tracking-[0.14em] text-ink-soft mb-2">
               Installed
             </div>
-            <ul className="rounded-lg border border-stone-200/70 bg-white divide-y divide-stone-100">
+            <ul className="rounded-lg border border-line/70 bg-paper divide-y divide-line/60">
               {INSTALLED.map((s) => (
                 <li key={s.slug}>
                   <Link
                     href={`/${params.org}/integrations/mcp/${s.slug}`}
-                    className="px-4 py-3 flex items-center justify-between hover:bg-stone-50"
+                    className="px-4 py-3 flex items-center justify-between hover:bg-canvas"
                   >
                     <div className="flex items-center gap-2">
                       <span
@@ -81,11 +81,11 @@ export default function McpSetupPage() {
                         }`}
                       />
                       <span className="text-[13px] font-medium">{s.name}</span>
-                      <span className="text-[10px] uppercase tracking-wider text-stone-500">
+                      <span className="text-[10px] uppercase tracking-wider text-ink-muted">
                         {s.status}
                       </span>
                     </div>
-                    <ArrowRight className="size-3 text-stone-400" />
+                    <ArrowRight className="size-3 text-ink-soft" />
                   </Link>
                 </li>
               ))}
@@ -94,10 +94,10 @@ export default function McpSetupPage() {
         )}
 
         <section>
-          <div className="text-[10px] uppercase tracking-[0.14em] text-stone-400 mb-2">
+          <div className="text-[10px] uppercase tracking-[0.14em] text-ink-soft mb-2">
             Suggested
           </div>
-          <ul className="rounded-lg border border-stone-200/70 bg-white divide-y divide-stone-100">
+          <ul className="rounded-lg border border-line/70 bg-paper divide-y divide-line/60">
             {SUGGESTED.map((s) => (
               <li
                 key={s.name}
@@ -105,8 +105,8 @@ export default function McpSetupPage() {
               >
                 <div className="min-w-0">
                   <div className="text-[13px] font-medium">{s.name}</div>
-                  <div className="text-[11px] text-stone-500">{s.desc}</div>
-                  <code className="text-[10px] font-mono text-stone-400 block mt-1 truncate">
+                  <div className="text-[11px] text-ink-muted">{s.desc}</div>
+                  <code className="text-[10px] font-mono text-ink-soft block mt-1 truncate">
                     {s.cmd}
                   </code>
                 </div>
@@ -116,7 +116,7 @@ export default function McpSetupPage() {
                     setName(s.name);
                     setCmd(s.cmd);
                   }}
-                  className="text-[11px] rounded-md border border-stone-200 bg-white px-2 py-1 hover:border-stone-400 shrink-0"
+                  className="text-[11px] rounded-md border border-line bg-paper px-2 py-1 hover:border-line-strong shrink-0"
                 >
                   Use
                 </button>
@@ -125,7 +125,7 @@ export default function McpSetupPage() {
           </ul>
         </section>
 
-        <section className="rounded-lg border border-stone-200/70 bg-white p-4 space-y-3">
+        <section className="rounded-lg border border-line/70 bg-paper p-4 space-y-3">
           <div className="text-[14px] font-medium tracking-tight">
             Add server
           </div>
@@ -134,7 +134,7 @@ export default function McpSetupPage() {
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="e.g. Linear"
-              className="w-full h-9 rounded-md border border-stone-200 bg-white px-3 text-[13px] focus:outline-none focus:border-stone-400"
+              className="w-full h-9 rounded-md border border-line bg-paper px-3 text-[13px] focus:outline-none focus:border-line-strong"
             />
           </Field>
           <Field label="Command" hint="The CLI command that starts the MCP server.">
@@ -142,7 +142,7 @@ export default function McpSetupPage() {
               value={cmd}
               onChange={(e) => setCmd(e.target.value)}
               placeholder="npx -y @vendor/mcp-server"
-              className="w-full h-9 rounded-md border border-stone-200 bg-white px-3 text-[13px] font-mono focus:outline-none focus:border-stone-400"
+              className="w-full h-9 rounded-md border border-line bg-paper px-3 text-[13px] font-mono focus:outline-none focus:border-line-strong"
             />
           </Field>
           <Field
@@ -154,14 +154,14 @@ export default function McpSetupPage() {
               onChange={(e) => setEnv(e.target.value)}
               rows={4}
               placeholder="LINEAR_API_KEY=lin_..."
-              className="w-full rounded-md border border-stone-200 bg-white px-3 py-2 text-[12px] font-mono focus:outline-none focus:border-stone-400"
+              className="w-full rounded-md border border-line bg-paper px-3 py-2 text-[12px] font-mono focus:outline-none focus:border-line-strong"
             />
           </Field>
           <div className="flex justify-end pt-1">
             <button
               type="button"
               disabled={!name || !cmd}
-              className="text-[12px] rounded-md bg-stone-900 text-white px-3 py-1.5 disabled:opacity-40"
+              className="text-[12px] rounded-md bg-ink text-paper px-3 py-1.5 disabled:opacity-40"
             >
               Add server
             </button>
@@ -183,9 +183,9 @@ function Field({
 }) {
   return (
     <div className="space-y-1">
-      <div className="text-[12px] text-stone-700">{label}</div>
+      <div className="text-[12px] text-ink">{label}</div>
       {children}
-      {hint && <p className="text-[11px] text-stone-500">{hint}</p>}
+      {hint && <p className="text-[11px] text-ink-muted">{hint}</p>}
     </div>
   );
 }

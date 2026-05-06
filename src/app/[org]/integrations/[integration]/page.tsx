@@ -120,7 +120,7 @@ export default async function IntegrationDetailPage({
       <div className="max-w-3xl mx-auto space-y-4">
         <Link
           href={`/${org}/integrations`}
-          className="inline-flex items-center gap-1 text-[12px] text-stone-500 hover:text-stone-900"
+          className="inline-flex items-center gap-1 text-[12px] text-ink-muted hover:text-ink"
         >
           <ArrowLeft className="size-3" /> Back to integrations
         </Link>
@@ -128,14 +128,14 @@ export default async function IntegrationDetailPage({
         <header className="flex items-start justify-between">
           <div>
             <h1 className="text-xl tracking-tight">{i.name}</h1>
-            <p className="text-[12px] text-stone-500 max-w-prose mt-1">
+            <p className="text-[12px] text-ink-muted max-w-prose mt-1">
               {i.desc}
             </p>
             <a
               href={i.docs}
               target="_blank"
               rel="noreferrer"
-              className="inline-flex items-center gap-1 text-[11px] text-stone-500 hover:text-stone-900 mt-1"
+              className="inline-flex items-center gap-1 text-[11px] text-ink-muted hover:text-ink mt-1"
             >
               {i.docs} <ExternalLink className="size-3" />
             </a>
@@ -144,25 +144,25 @@ export default async function IntegrationDetailPage({
             className={`text-[10px] uppercase rounded px-1.5 py-0.5 shrink-0 ${
               i.status === "connected"
                 ? "bg-emerald-100 text-emerald-700"
-                : "bg-stone-100 text-stone-500"
+                : "bg-cream text-ink-muted"
             }`}
           >
             {i.status}
           </span>
         </header>
 
-        <section className="rounded-lg border border-stone-200/70 bg-white p-4 space-y-2">
-          <div className="text-[10px] uppercase tracking-wider text-stone-400">
+        <section className="rounded-lg border border-line/70 bg-paper p-4 space-y-2">
+          <div className="text-[10px] uppercase tracking-wider text-ink-soft">
             Scopes
           </div>
           {i.scopes.length === 0 ? (
-            <p className="text-[12px] text-stone-500">No scopes granted.</p>
+            <p className="text-[12px] text-ink-muted">No scopes granted.</p>
           ) : (
             <div className="flex flex-wrap gap-1">
               {i.scopes.map((s) => (
                 <code
                   key={s}
-                  className="text-[11px] font-mono px-1.5 py-0.5 rounded bg-stone-100 text-stone-700"
+                  className="text-[11px] font-mono px-1.5 py-0.5 rounded bg-cream text-ink"
                 >
                   {s}
                 </code>
@@ -171,22 +171,22 @@ export default async function IntegrationDetailPage({
           )}
         </section>
 
-        <section className="rounded-lg border border-stone-200/70 bg-white p-4 space-y-2">
-          <div className="text-[10px] uppercase tracking-wider text-stone-400">
+        <section className="rounded-lg border border-line/70 bg-paper p-4 space-y-2">
+          <div className="text-[10px] uppercase tracking-wider text-ink-soft">
             Tools exposed to agents ({i.tools.length})
           </div>
           {i.tools.length === 0 ? (
-            <p className="text-[12px] text-stone-500">
+            <p className="text-[12px] text-ink-muted">
               No tools yet. Connect to populate.
             </p>
           ) : (
-            <ul className="divide-y divide-stone-100">
+            <ul className="divide-y divide-line/60">
               {i.tools.map((t) => (
                 <li key={t.name} className="py-2">
-                  <code className="text-[12px] font-mono text-stone-900">
+                  <code className="text-[12px] font-mono text-ink">
                     {t.name}
                   </code>
-                  <div className="text-[11px] text-stone-500">
+                  <div className="text-[11px] text-ink-muted">
                     {t.description}
                   </div>
                 </li>
@@ -195,14 +195,14 @@ export default async function IntegrationDetailPage({
           )}
         </section>
 
-        <section className="rounded-lg border border-stone-200/70 bg-white p-4 space-y-2">
-          <div className="text-[10px] uppercase tracking-wider text-stone-400 inline-flex items-center gap-1">
+        <section className="rounded-lg border border-line/70 bg-paper p-4 space-y-2">
+          <div className="text-[10px] uppercase tracking-wider text-ink-soft inline-flex items-center gap-1">
             <Activity className="size-3" /> Recent calls
           </div>
           {i.recent.length === 0 ? (
-            <p className="text-[12px] text-stone-500">No recent activity.</p>
+            <p className="text-[12px] text-ink-muted">No recent activity.</p>
           ) : (
-            <ul className="divide-y divide-stone-100">
+            <ul className="divide-y divide-line/60">
               {i.recent.map((r, idx) => (
                 <li
                   key={idx}
@@ -210,9 +210,9 @@ export default async function IntegrationDetailPage({
                 >
                   <span>
                     <code className="font-mono">{r.tool}</code>{" "}
-                    <span className="text-stone-500">— {r.result}</span>
+                    <span className="text-ink-muted">— {r.result}</span>
                   </span>
-                  <span className="text-[10px] text-stone-400">{r.when} ago</span>
+                  <span className="text-[10px] text-ink-soft">{r.when} ago</span>
                 </li>
               ))}
             </ul>
@@ -221,11 +221,11 @@ export default async function IntegrationDetailPage({
 
         <div className="flex justify-end gap-2">
           {i.status === "connected" ? (
-            <button className="inline-flex items-center gap-1 text-[11px] rounded-md border border-red-300 bg-white text-red-700 px-2 py-1 hover:bg-red-50">
+            <button className="inline-flex items-center gap-1 text-[11px] rounded-md border border-red-300 bg-paper text-red-700 px-2 py-1 hover:bg-red-50">
               <Trash2 className="size-3" /> Disconnect
             </button>
           ) : (
-            <button className="text-[11px] rounded-md bg-stone-900 text-white px-3 py-1.5">
+            <button className="text-[11px] rounded-md bg-ink text-paper px-3 py-1.5">
               Connect
             </button>
           )}

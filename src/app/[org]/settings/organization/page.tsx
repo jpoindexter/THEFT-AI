@@ -37,7 +37,7 @@ export default async function Organization({
 
       <SettingsCard title="Company Context" description="Bring durable company context from other AI tools into this workspace.">
         <Tabs defaultValue="claude">
-          <TabsList className="bg-stone-100">
+          <TabsList className="bg-cream">
             {SOURCES.map((s) => (
               <TabsTrigger key={s} value={s.toLowerCase()} className="text-[12px]">
                 {s}
@@ -48,7 +48,7 @@ export default async function Organization({
             <TabsContent key={s} value={s.toLowerCase()} className="mt-3 space-y-3">
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1.5">
-                  <div className="text-[11px] uppercase tracking-wider text-stone-500 inline-flex items-center gap-1">
+                  <div className="text-[11px] uppercase tracking-wider text-ink-muted inline-flex items-center gap-1">
                     Prompt to paste
                     <Copy className="size-3" />
                   </div>
@@ -59,7 +59,7 @@ export default async function Organization({
                   />
                 </div>
                 <div className="space-y-1.5">
-                  <div className="text-[11px] uppercase tracking-wider text-stone-500">
+                  <div className="text-[11px] uppercase tracking-wider text-ink-muted">
                     Generated report
                   </div>
                   <Textarea
@@ -67,7 +67,7 @@ export default async function Organization({
                     className="min-h-32 text-[11px]"
                   />
                   <div className="flex justify-end">
-                    <button className="inline-flex items-center gap-1 text-[12px] rounded-md border border-stone-200 px-2 py-1 hover:border-stone-400">
+                    <button className="inline-flex items-center gap-1 text-[12px] rounded-md border border-line px-2 py-1 hover:border-line-strong">
                       <Upload className="size-3" />
                       Preview report
                     </button>
@@ -80,22 +80,22 @@ export default async function Organization({
       </SettingsCard>
 
       <SettingsCard title="Organization Members">
-        <div className="rounded-md border border-stone-200/80 px-3 py-2 flex items-center justify-between text-[13px]">
+        <div className="rounded-md border border-line/70 px-3 py-2 flex items-center justify-between text-[13px]">
           <div>
             <div className="font-medium">jpoindexter</div>
-            <div className="text-[10px] text-stone-500">jason@example.com</div>
+            <div className="text-[10px] text-ink-muted">jason@example.com</div>
           </div>
           <span className="text-[10px] uppercase rounded bg-amber-100 text-amber-800 px-1.5 py-0.5">
             Admin
           </span>
         </div>
-        <button className="mt-3 text-[12px] rounded-md border border-stone-200 px-2 py-1 hover:border-stone-400">
+        <button className="mt-3 text-[12px] rounded-md border border-line px-2 py-1 hover:border-line-strong">
           + Invite
         </button>
       </SettingsCard>
 
       <SettingsCard title="Organizations" description="Accept organization invitations or create another workspace.">
-        <button className="text-[12px] rounded-md border border-stone-200 px-2 py-1 hover:border-stone-400">
+        <button className="text-[12px] rounded-md border border-line px-2 py-1 hover:border-line-strong">
           Join or Create Organization
         </button>
       </SettingsCard>

@@ -36,37 +36,37 @@ export default function OnboardingDonePage() {
   }, []);
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-stone-50">
+    <div className="min-h-screen flex items-center justify-center bg-canvas">
       <div className="max-w-md w-full px-6 space-y-6">
         <CrossStitchBadge />
         <header className="text-center">
           <h1 className="text-2xl tracking-tight">
             {done ? "Workspace ready" : "Setting up your workspace…"}
           </h1>
-          <p className="text-[13px] text-stone-500 mt-1">
+          <p className="text-[13px] text-ink-muted mt-1">
             {done
               ? "Your cofounder and department agents are standing by."
               : "This usually takes about 30 seconds."}
           </p>
         </header>
 
-        <ul className="rounded-lg border border-stone-200/70 bg-white divide-y divide-stone-100">
+        <ul className="rounded-lg border border-line/70 bg-paper divide-y divide-line/60">
           {STAGES.map((s, i) => (
             <li key={s} className="px-4 py-3 flex items-center gap-3">
               <span
                 className={`size-4 rounded-full inline-flex items-center justify-center text-[9px] ${
                   i < step
-                    ? "bg-emerald-500 text-white"
+                    ? "bg-emerald-500 text-paper"
                     : i === step
-                      ? "bg-stone-900 text-white animate-pulse"
-                      : "bg-stone-200 text-stone-400"
+                      ? "bg-ink text-paper animate-pulse"
+                      : "bg-line text-ink-soft"
                 }`}
               >
                 {i < step ? "✓" : i + 1}
               </span>
               <span
                 className={`text-[13px] ${
-                  i <= step ? "text-stone-900" : "text-stone-400"
+                  i <= step ? "text-ink" : "text-ink-soft"
                 }`}
               >
                 {s}
@@ -79,7 +79,7 @@ export default function OnboardingDonePage() {
           <div className="text-center">
             <Link
               href={`/${org}`}
-              className="inline-block rounded-md bg-stone-900 text-white px-4 py-2 text-[13px]"
+              className="inline-block rounded-md bg-ink text-paper px-4 py-2 text-[13px]"
             >
               Enter workspace →
             </Link>

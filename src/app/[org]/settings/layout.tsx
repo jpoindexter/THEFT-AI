@@ -41,10 +41,10 @@ export default async function SettingsLayout({
   const { org } = await params;
   return (
     <div className="absolute inset-0 grid grid-cols-[220px_1fr] bg-[#f5f4f0]">
-      <aside className="border-r border-stone-200/80 p-3 text-[13px] flex flex-col gap-1">
+      <aside className="border-r border-line/70 p-3 text-[13px] flex flex-col gap-1">
         <Link
           href={`/${org}`}
-          className="inline-flex items-center gap-1.5 text-stone-500 hover:text-stone-900 px-2 py-1 mb-2"
+          className="inline-flex items-center gap-1.5 text-ink-muted hover:text-ink px-2 py-1 mb-2"
         >
           <ArrowLeft className="size-3.5" /> Settings
         </Link>
@@ -52,9 +52,9 @@ export default async function SettingsLayout({
           <Link
             key={slug}
             href={`/${org}/settings/${slug}`}
-            className="rounded-md px-2 py-1.5 hover:bg-stone-200/50 inline-flex items-center gap-2"
+            className="rounded-md px-2 py-1.5 hover:bg-line/50 inline-flex items-center gap-2"
           >
-            <Icon className="size-3.5 text-stone-400" />
+            <Icon className="size-3.5 text-ink-soft" />
             {label}
           </Link>
         ))}

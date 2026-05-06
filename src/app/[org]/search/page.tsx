@@ -51,8 +51,8 @@ export default function SearchPage() {
       <div className="max-w-2xl mx-auto space-y-4">
         <header>
           <h1 className="text-xl tracking-tight mb-3">Search</h1>
-          <div className="rounded-lg border border-stone-200 bg-white px-3 py-2 inline-flex items-center gap-2 w-full">
-            <Search className="size-4 text-stone-400" />
+          <div className="rounded-lg border border-line bg-paper px-3 py-2 inline-flex items-center gap-2 w-full">
+            <Search className="size-4 text-ink-soft" />
             <input
               autoFocus
               value={q}
@@ -71,8 +71,8 @@ export default function SearchPage() {
                   onClick={() => setKind(k)}
                   className={`text-[11px] uppercase tracking-wider rounded px-2 py-0.5 transition-colors ${
                     on
-                      ? "bg-stone-900 text-white"
-                      : "bg-stone-100 text-stone-600 hover:bg-stone-200"
+                      ? "bg-ink text-paper"
+                      : "bg-cream text-ink-muted hover:bg-line"
                   }`}
                 >
                   {k}
@@ -86,19 +86,19 @@ export default function SearchPage() {
           {filtered.map((r, i) => (
             <li
               key={i}
-              className="rounded-md border border-stone-200/70 bg-white px-3 py-2 flex items-center justify-between hover:border-stone-400 cursor-pointer"
+              className="rounded-md border border-line/70 bg-paper px-3 py-2 flex items-center justify-between hover:border-line-strong cursor-pointer"
             >
               <div>
                 <div className="text-[13px]">{r.title}</div>
-                <div className="text-[11px] text-stone-500">{r.sub}</div>
+                <div className="text-[11px] text-ink-muted">{r.sub}</div>
               </div>
-              <span className="text-[10px] uppercase tracking-wider text-stone-400">
+              <span className="text-[10px] uppercase tracking-wider text-ink-soft">
                 {r.kind}
               </span>
             </li>
           ))}
           {filtered.length === 0 && (
-            <li className="rounded-md border border-stone-200/70 bg-white px-3 py-3 text-center text-[12px] text-stone-500">
+            <li className="rounded-md border border-line/70 bg-paper px-3 py-3 text-center text-[12px] text-ink-muted">
               No matches.
             </li>
           )}

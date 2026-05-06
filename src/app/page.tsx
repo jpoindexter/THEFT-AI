@@ -6,7 +6,7 @@ export default async function Home() {
   const continueHref = orgs.length > 0 ? `/${orgs[0].slug}` : "/onboarding";
 
   return (
-    <div className="min-h-screen bg-[#f3f1ec] text-stone-900 flex flex-col">
+    <div className="min-h-screen bg-[#f3f1ec] text-ink flex flex-col">
       {/* Hero */}
       <section className="relative overflow-hidden">
         <div className="absolute inset-0">
@@ -23,7 +23,7 @@ export default async function Home() {
         <div className="relative z-10 max-w-5xl mx-auto px-6 pt-20 pb-32">
           <header className="flex items-center justify-between text-[13px]">
             <div className="font-medium tracking-tight">THEFT</div>
-            <nav className="flex items-center gap-4 text-stone-700">
+            <nav className="flex items-center gap-4 text-ink">
               <Link href="#how">How it works</Link>
               <Link href="#agents">Agents</Link>
               <Link href={continueHref}>Sign in</Link>
@@ -33,7 +33,7 @@ export default async function Home() {
             <h1 className="text-5xl tracking-tight font-medium leading-tight">
               Run an entire company with AI agents.
             </h1>
-            <p className="text-[15px] text-stone-700 leading-relaxed">
+            <p className="text-[15px] text-ink leading-relaxed">
               THEFT is an agent-orchestration platform — designed to help you
               run an entire business. Departments, agents, tasks, library, all
               in one place.
@@ -41,13 +41,13 @@ export default async function Home() {
             <div className="flex items-center gap-2 pt-2">
               <Link
                 href={continueHref}
-                className="rounded-md bg-stone-900 text-white px-4 py-2 text-[13px] hover:bg-stone-800"
+                className="rounded-md bg-ink text-paper px-4 py-2 text-[13px] hover:bg-ink/80"
               >
                 Get started
               </Link>
               <Link
                 href="#how"
-                className="rounded-md bg-white border border-stone-200 px-4 py-2 text-[13px] hover:border-stone-400"
+                className="rounded-md bg-paper border border-line px-4 py-2 text-[13px] hover:border-line-strong"
               >
                 Watch demo
               </Link>
@@ -62,7 +62,7 @@ export default async function Home() {
           <h2 className="text-3xl tracking-tight font-medium">
             Cofounder lets you run an entire company with agents.
           </h2>
-          <p className="text-[14px] text-stone-600 max-w-xl mx-auto">
+          <p className="text-[14px] text-ink-muted max-w-xl mx-auto">
             Designed to help you run an entire business — Engineering, Design,
             Marketing, Sales, Operations, Finance, Legal, Support — without
             hiring a team.
@@ -75,7 +75,7 @@ export default async function Home() {
       </section>
 
       {/* Learn how to start a company */}
-      <section className="px-6 py-16 bg-white border-y border-stone-200/70">
+      <section className="px-6 py-16 bg-paper border-y border-line/70">
         <div className="max-w-5xl mx-auto">
           <h2 className="text-2xl tracking-tight font-medium mb-8 text-center">
             Learn how to start a company.
@@ -89,14 +89,14 @@ export default async function Home() {
             ].map((c, i) => (
               <article
                 key={i}
-                className="rounded-lg border border-stone-200/70 overflow-hidden bg-white"
+                className="rounded-lg border border-line/70 overflow-hidden bg-paper"
               >
                 <div
                   className={`aspect-[16/10] bg-gradient-to-br ${c.tone}`}
                 />
                 <div className="p-3">
                   <div className="text-[13px] font-medium">{c.title}</div>
-                  <p className="text-[11px] text-stone-500 mt-0.5 leading-snug">
+                  <p className="text-[11px] text-ink-muted mt-0.5 leading-snug">
                     Walkthrough · 8 min read
                   </p>
                 </div>
@@ -136,13 +136,13 @@ export default async function Home() {
               },
             ].map((f) => (
               <div key={f.tag} className="space-y-2">
-                <div className="text-[10px] uppercase tracking-wider text-stone-400">
+                <div className="text-[10px] uppercase tracking-wider text-ink-soft">
                   {f.tag}
                 </div>
                 <h3 className="text-xl tracking-tight font-medium">
                   {f.title}
                 </h3>
-                <p className="text-[13px] text-stone-600 leading-relaxed">
+                <p className="text-[13px] text-ink-muted leading-relaxed">
                   {f.body}
                 </p>
                 <ScreenshotMock kind="agent" />
@@ -169,7 +169,7 @@ export default async function Home() {
           <h2 className="text-3xl tracking-tight font-medium">
             All the tools and systems your company needs.
           </h2>
-          <p className="text-[14px] text-stone-700">
+          <p className="text-[14px] text-ink">
             GitHub, Vercel, Supabase, Postmark, Stripe — auto-provisioned
             during onboarding so your agents have everything they need on day
             one.
@@ -179,20 +179,20 @@ export default async function Home() {
       </section>
 
       {/* CTA */}
-      <section className="px-6 py-20 bg-stone-900 text-white text-center">
+      <section className="px-6 py-20 bg-ink text-paper text-center">
         <div className="max-w-2xl mx-auto space-y-6">
           <h2 className="text-3xl tracking-tight">
             Run an entire company with AI agents.
           </h2>
           <Link
             href={continueHref}
-            className="inline-block rounded-md bg-white text-stone-900 px-5 py-2 text-[13px]"
+            className="inline-block rounded-md bg-paper text-ink px-5 py-2 text-[13px]"
           >
             Get started
           </Link>
         </div>
       </section>
-      <footer className="px-6 py-6 text-[11px] text-stone-500 flex items-center justify-between">
+      <footer className="px-6 py-6 text-[11px] text-ink-muted flex items-center justify-between">
         <span>© THEFT AI</span>
         <span>Built with agents</span>
       </footer>
@@ -249,8 +249,8 @@ function ScreenshotMock({
   kind: "canvas" | "brief" | "agent" | "dashboard";
 }) {
   return (
-    <div className="rounded-xl border border-stone-200/80 bg-white shadow-[0_10px_30px_-15px_rgba(0,0,0,0.18)] overflow-hidden">
-      <div className="bg-stone-100 border-b border-stone-200/70 px-2 py-1 flex items-center gap-1.5">
+    <div className="rounded-xl border border-line/70 bg-paper shadow-[0_10px_30px_-15px_rgba(0,0,0,0.18)] overflow-hidden">
+      <div className="bg-cream border-b border-line/70 px-2 py-1 flex items-center gap-1.5">
         <div className="flex gap-1">
           <span className="size-1.5 rounded-full bg-rose-300" />
           <span className="size-1.5 rounded-full bg-amber-300" />
@@ -291,7 +291,7 @@ function CanvasMock() {
         return (
           <span
             key={d}
-            className="absolute text-[7px] bg-white border border-stone-200 rounded-full px-1.5 py-0.5"
+            className="absolute text-[7px] bg-paper border border-line rounded-full px-1.5 py-0.5"
             style={{
               left: `${x}%`,
               top: `${y}%`,
@@ -309,13 +309,13 @@ function CanvasMock() {
 function BriefMock() {
   return (
     <div className="space-y-1.5">
-      <div className="h-1.5 w-24 rounded bg-stone-200" />
-      <div className="h-1.5 w-40 rounded bg-stone-100" />
-      <div className="h-6 mt-2 rounded-md bg-stone-100" />
-      <div className="h-6 rounded-md bg-stone-100" />
-      <div className="h-6 rounded-md bg-stone-50 ring-1 ring-stone-200" />
+      <div className="h-1.5 w-24 rounded bg-line" />
+      <div className="h-1.5 w-40 rounded bg-cream" />
+      <div className="h-6 mt-2 rounded-md bg-cream" />
+      <div className="h-6 rounded-md bg-cream" />
+      <div className="h-6 rounded-md bg-canvas ring-1 ring-line" />
       <div className="flex justify-end pt-2">
-        <div className="h-3 w-16 rounded bg-stone-900" />
+        <div className="h-3 w-16 rounded bg-ink" />
       </div>
     </div>
   );
@@ -328,7 +328,7 @@ function AgentMock() {
       <div className="h-1.5 w-full rounded bg-amber-50" />
       <div className="h-1.5 w-3/4 rounded bg-amber-50" />
       <div className="h-1.5 w-2/3 rounded bg-amber-50" />
-      <div className="h-3 mt-2 rounded bg-stone-100" />
+      <div className="h-3 mt-2 rounded bg-cream" />
     </div>
   );
 }
@@ -346,9 +346,9 @@ function DashboardMock() {
       ].map((s) => (
         <div
           key={s}
-          className="rounded-md border border-stone-200/70 bg-white p-2 text-[7px]"
+          className="rounded-md border border-line/70 bg-paper p-2 text-[7px]"
         >
-          <div className="size-2 rounded-sm bg-stone-200 mb-0.5" />
+          <div className="size-2 rounded-sm bg-line mb-0.5" />
           {s}
         </div>
       ))}

@@ -54,7 +54,7 @@ const STATUS_TONE: Record<string, string> = {
   running: "bg-emerald-100 text-emerald-700",
   starting: "bg-amber-100 text-amber-700",
   failed: "bg-red-100 text-red-700",
-  stopped: "bg-stone-100 text-stone-500",
+  stopped: "bg-cream text-ink-muted",
 };
 
 export default async function McpServerDetailPage({
@@ -71,7 +71,7 @@ export default async function McpServerDetailPage({
       <div className="max-w-3xl mx-auto space-y-4">
         <Link
           href={`/${org}/integrations/mcp`}
-          className="inline-flex items-center gap-1 text-[12px] text-stone-500 hover:text-stone-900"
+          className="inline-flex items-center gap-1 text-[12px] text-ink-muted hover:text-ink"
         >
           <ArrowLeft className="size-3" /> Back to MCP servers
         </Link>
@@ -79,9 +79,9 @@ export default async function McpServerDetailPage({
         <header className="flex items-start justify-between">
           <div>
             <h1 className="text-xl tracking-tight inline-flex items-center gap-2">
-              <Server className="size-5 text-stone-500" /> {s.name}
+              <Server className="size-5 text-ink-muted" /> {s.name}
             </h1>
-            <code className="text-[11px] font-mono text-stone-500 block mt-1">
+            <code className="text-[11px] font-mono text-ink-muted block mt-1">
               {s.cmd}
             </code>
           </div>
@@ -94,8 +94,8 @@ export default async function McpServerDetailPage({
           </span>
         </header>
 
-        <section className="rounded-lg border border-stone-200/70 bg-white p-4 space-y-2">
-          <div className="text-[10px] uppercase tracking-wider text-stone-400">
+        <section className="rounded-lg border border-line/70 bg-paper p-4 space-y-2">
+          <div className="text-[10px] uppercase tracking-wider text-ink-soft">
             Environment
           </div>
           <ul className="space-y-1">
@@ -105,7 +105,7 @@ export default async function McpServerDetailPage({
                 className="text-[12px] font-mono flex items-center justify-between"
               >
                 <span>{e}</span>
-                <span className="text-[10px] text-stone-400">
+                <span className="text-[10px] text-ink-soft">
                   set · encrypted
                 </span>
               </li>
@@ -113,15 +113,15 @@ export default async function McpServerDetailPage({
           </ul>
         </section>
 
-        <section className="rounded-lg border border-stone-200/70 bg-white p-4 space-y-2">
-          <div className="text-[10px] uppercase tracking-wider text-stone-400">
+        <section className="rounded-lg border border-line/70 bg-paper p-4 space-y-2">
+          <div className="text-[10px] uppercase tracking-wider text-ink-soft">
             Tools ({s.tools.length})
           </div>
-          <ul className="divide-y divide-stone-100">
+          <ul className="divide-y divide-line/60">
             {s.tools.map((t) => (
               <li key={t.name} className="py-2">
                 <code className="text-[12px] font-mono">{t.name}</code>
-                <div className="text-[11px] text-stone-500">
+                <div className="text-[11px] text-ink-muted">
                   {t.description}
                 </div>
               </li>
@@ -129,16 +129,16 @@ export default async function McpServerDetailPage({
           </ul>
         </section>
 
-        <section className="rounded-lg border border-stone-200/70 bg-white p-4 space-y-2">
-          <div className="text-[10px] uppercase tracking-wider text-stone-400 inline-flex items-center gap-1">
+        <section className="rounded-lg border border-line/70 bg-paper p-4 space-y-2">
+          <div className="text-[10px] uppercase tracking-wider text-ink-soft inline-flex items-center gap-1">
             <Activity className="size-3" /> Logs
           </div>
           {s.logs.length === 0 ? (
-            <p className="text-[12px] text-stone-500">
+            <p className="text-[12px] text-ink-muted">
               No logs yet. Start the server to see output.
             </p>
           ) : (
-            <pre className="text-[11px] font-mono whitespace-pre-wrap leading-relaxed bg-stone-50 rounded-md p-2 max-h-64 overflow-y-auto">
+            <pre className="text-[11px] font-mono whitespace-pre-wrap leading-relaxed bg-canvas rounded-md p-2 max-h-64 overflow-y-auto">
               {s.logs
                 .map((l) => `${l.ts} [${l.level}] ${l.msg}`)
                 .join("\n")}
@@ -148,15 +148,15 @@ export default async function McpServerDetailPage({
 
         <div className="flex justify-end gap-2">
           {s.status === "running" ? (
-            <button className="text-[11px] rounded-md border border-stone-200 bg-white px-2 py-1 hover:border-stone-400">
+            <button className="text-[11px] rounded-md border border-line bg-paper px-2 py-1 hover:border-line-strong">
               Restart
             </button>
           ) : (
-            <button className="text-[11px] rounded-md bg-stone-900 text-white px-3 py-1.5">
+            <button className="text-[11px] rounded-md bg-ink text-paper px-3 py-1.5">
               Start
             </button>
           )}
-          <button className="inline-flex items-center gap-1 text-[11px] rounded-md border border-red-300 bg-white text-red-700 px-2 py-1 hover:bg-red-50">
+          <button className="inline-flex items-center gap-1 text-[11px] rounded-md border border-red-300 bg-paper text-red-700 px-2 py-1 hover:bg-red-50">
             <Trash2 className="size-3" /> Remove
           </button>
         </div>

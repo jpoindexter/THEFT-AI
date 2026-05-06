@@ -61,7 +61,7 @@ export default async function SkillsPage({
       <div className="max-w-4xl mx-auto space-y-6">
         <header>
           <h1 className="text-xl tracking-tight">Skills</h1>
-          <p className="text-[13px] text-stone-500">
+          <p className="text-[13px] text-ink-muted">
             Reusable guidance packages that any agent can have attached. Drop a
             skill into <code>/skills/&lt;name&gt;/SKILL.md</code> and it will
             appear here.
@@ -72,23 +72,23 @@ export default async function SkillsPage({
             <Link
               href={`/${org}/skills/${s.slug}`}
               key={s.slug}
-              className="rounded-lg border border-stone-200/70 bg-white p-3 hover:border-stone-400 transition-colors"
+              className="rounded-lg border border-line/70 bg-paper p-3 hover:border-line-strong transition-colors"
             >
               <div className="flex items-center justify-between gap-2 mb-1">
                 <div className="text-[13px] font-medium tracking-tight">
                   {s.name}
                 </div>
-                <code className="text-[10px] font-mono text-stone-400">
+                <code className="text-[10px] font-mono text-ink-soft">
                   {s.slug}
                 </code>
               </div>
-              <p className="text-[12px] text-stone-500 leading-snug line-clamp-3">
+              <p className="text-[12px] text-ink-muted leading-snug line-clamp-3">
                 {s.description}
               </p>
             </Link>
           ))}
           {skills.length === 0 && (
-            <div className="col-span-2 rounded-md border border-stone-200/70 bg-white p-6 text-center text-[12px] text-stone-500">
+            <div className="col-span-2 rounded-md border border-line/70 bg-paper p-6 text-center text-[12px] text-ink-muted">
               No skills found. Add a skill at{" "}
               <code>/skills/&lt;name&gt;/SKILL.md</code>.
             </div>

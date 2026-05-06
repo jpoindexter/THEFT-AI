@@ -24,33 +24,33 @@ export default async function ArtifactDetailPage({
       <div className="max-w-3xl mx-auto space-y-4">
         <Link
           href={`/${orgSlug}/library`}
-          className="inline-flex items-center gap-1 text-[12px] text-stone-500 hover:text-stone-900"
+          className="inline-flex items-center gap-1 text-[12px] text-ink-muted hover:text-ink"
         >
           <ArrowLeft className="size-3" /> Back to library
         </Link>
 
         <header className="flex items-start justify-between gap-4">
           <div className="min-w-0">
-            <div className="text-[10px] uppercase tracking-wider text-stone-400">
+            <div className="text-[10px] uppercase tracking-wider text-ink-soft">
               {artifact.kind}
               {dept && ` · ${dept.name}`}
             </div>
             <h1 className="text-xl tracking-tight truncate">{artifact.name}</h1>
-            <p className="text-[11px] text-stone-500 mt-1">
+            <p className="text-[11px] text-ink-muted mt-1">
               Created {new Date(artifact.created_at).toLocaleString()}
             </p>
           </div>
           <div className="flex items-center gap-1 shrink-0">
             <button
               type="button"
-              className="inline-flex items-center gap-1 text-[11px] rounded-md border border-stone-200 bg-white px-2 py-1 hover:border-stone-400"
+              className="inline-flex items-center gap-1 text-[11px] rounded-md border border-line bg-paper px-2 py-1 hover:border-line-strong"
             >
               <Pin className="size-3" />
               {artifact.pinned ? "Unpin" : "Pin"}
             </button>
             <button
               type="button"
-              className="inline-flex items-center gap-1 text-[11px] rounded-md border border-stone-200 bg-white px-2 py-1 hover:border-stone-400"
+              className="inline-flex items-center gap-1 text-[11px] rounded-md border border-line bg-paper px-2 py-1 hover:border-line-strong"
             >
               <MessageSquare className="size-3" /> Comment
             </button>
@@ -58,22 +58,22 @@ export default async function ArtifactDetailPage({
         </header>
 
         {artifact.kind === "markdown" || artifact.kind === "code" ? (
-          <section className="rounded-lg border border-stone-200/70 bg-white p-4">
-            <pre className="text-[12px] font-mono whitespace-pre-wrap leading-relaxed text-stone-700">
+          <section className="rounded-lg border border-line/70 bg-paper p-4">
+            <pre className="text-[12px] font-mono whitespace-pre-wrap leading-relaxed text-ink">
               {artifact.content ?? "(empty)"}
             </pre>
           </section>
         ) : (
-          <section className="rounded-lg border border-stone-200/70 bg-white p-4 text-[12px] text-stone-500">
+          <section className="rounded-lg border border-line/70 bg-paper p-4 text-[12px] text-ink-muted">
             Binary preview not implemented for <code>{artifact.kind}</code> yet.
           </section>
         )}
 
-        <section className="rounded-lg border border-stone-200/70 bg-white p-4 space-y-2">
-          <div className="text-[10px] uppercase tracking-wider text-stone-400">
+        <section className="rounded-lg border border-line/70 bg-paper p-4 space-y-2">
+          <div className="text-[10px] uppercase tracking-wider text-ink-soft">
             Comments
           </div>
-          <p className="text-[12px] text-stone-500">
+          <p className="text-[12px] text-ink-muted">
             No comments yet. Select text inside the artifact to start a thread.
           </p>
         </section>

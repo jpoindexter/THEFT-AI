@@ -27,7 +27,7 @@ const SUGGESTIONS = [
 const TONE: Record<string, string> = {
   high: "border-red-200 bg-red-50",
   medium: "border-amber-200 bg-amber-50",
-  low: "border-stone-200 bg-white",
+  low: "border-line bg-paper",
 };
 
 export default function SuggestionsPage() {
@@ -35,9 +35,9 @@ export default function SuggestionsPage() {
     <div className="space-y-4">
       <header>
         <h1 className="text-lg font-medium tracking-tight inline-flex items-center gap-2">
-          <Lightbulb className="size-4 text-stone-500" /> Suggestions
+          <Lightbulb className="size-4 text-ink-muted" /> Suggestions
         </h1>
-        <p className="text-[12px] text-stone-500">
+        <p className="text-[12px] text-ink-muted">
           Observations from the schema linter and query profiler. The Engineer
           agent can implement any of these.
         </p>
@@ -51,7 +51,7 @@ export default function SuggestionsPage() {
           >
             <div className="flex items-start justify-between gap-3">
               <div>
-                <div className="text-[10px] uppercase tracking-wider text-stone-500 inline-flex items-center gap-1">
+                <div className="text-[10px] uppercase tracking-wider text-ink-muted inline-flex items-center gap-1">
                   <AlertTriangle className="size-3" /> {s.severity} ·{" "}
                   {s.impact}
                 </div>
@@ -59,12 +59,12 @@ export default function SuggestionsPage() {
                   {s.title}
                 </h2>
               </div>
-              <button className="text-[11px] rounded-md bg-stone-900 text-white px-2 py-1 shrink-0">
+              <button className="text-[11px] rounded-md bg-ink text-paper px-2 py-1 shrink-0">
                 Hand to Engineer
               </button>
             </div>
-            <p className="text-[12px] text-stone-700">{s.body}</p>
-            <pre className="text-[11px] font-mono text-stone-700 bg-white/70 rounded-md px-3 py-2">
+            <p className="text-[12px] text-ink">{s.body}</p>
+            <pre className="text-[11px] font-mono text-ink bg-paper/70 rounded-md px-3 py-2">
               {s.fix}
             </pre>
           </li>

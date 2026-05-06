@@ -28,6 +28,7 @@ export default function LayoutCanvas({
       <button
         type="button"
         aria-label="Notifications"
+        title="Notifications"
         onClick={() => setInboxOpen((v) => !v)}
         className="absolute bottom-3 left-3 size-8 rounded-full bg-paper border border-line/70 inline-flex items-center justify-center hover:border-line-strong z-20"
       >
@@ -65,13 +66,14 @@ export default function LayoutCanvas({
             <button
               type="button"
               aria-label="New"
+              title="Create agent or task"
               onClick={() => setMenuOpen((v) => !v)}
-              className="size-9 rounded-md bg-ink text-white inline-flex items-center justify-center shadow-[0_2px_8px_-4px_rgba(0,0,0,0.25)]"
+              className="size-9 rounded-md bg-ink text-paper inline-flex items-center justify-center shadow-[0_2px_8px_-4px_rgba(0,0,0,0.25)]"
             >
               <Plus className="size-4" />
             </button>
             {menuOpen && (
-              <div className="absolute bottom-12 left-1/2 -translate-x-1/2 w-44 rounded-lg bg-paper text-white border border-line shadow-lg overflow-hidden">
+              <div className="absolute bottom-12 left-1/2 -translate-x-1/2 w-44 rounded-lg bg-paper text-paper border border-line shadow-lg overflow-hidden">
                 <MenuItem icon={<BookOpen className="size-3.5" />} label="New Agent" sub="Employee you can give tasks to" />
                 <MenuItem icon={<BookOpen className="size-3.5" />} label="New Task" sub="Work to assign your agents" />
               </div>
@@ -84,7 +86,8 @@ export default function LayoutCanvas({
         <Link
           href={`/${orgSlug}/review`}
           aria-label="Attention queue"
-          className="absolute bottom-3 right-3 inline-flex items-center gap-1.5 rounded-full bg-ink text-white pl-2 pr-3 py-1.5 text-[11px] hover:opacity-90 z-20 shadow-[0_2px_8px_-4px_rgba(0,0,0,0.35)]"
+          title="Items waiting for your review (⌘.)"
+          className="absolute bottom-3 right-3 inline-flex items-center gap-1.5 rounded-full bg-ink text-paper pl-2 pr-3 py-1.5 text-[11px] hover:opacity-90 z-20 shadow-[0_2px_8px_-4px_rgba(0,0,0,0.35)]"
         >
           <Eye className="size-3.5" />
           <span>Review</span>

@@ -93,30 +93,30 @@ export default async function ActivityDetailPage({
       <div className="max-w-2xl mx-auto space-y-4">
         <Link
           href={`/${org}/activity`}
-          className="inline-flex items-center gap-1 text-[12px] text-stone-500 hover:text-stone-900"
+          className="inline-flex items-center gap-1 text-[12px] text-ink-muted hover:text-ink"
         >
           <ArrowLeft className="size-3" /> Back to activity
         </Link>
 
         <header className="space-y-1">
-          <div className="text-[10px] uppercase tracking-wider text-stone-400">
+          <div className="text-[10px] uppercase tracking-wider text-ink-soft">
             {e.actor} · {e.when}
           </div>
           <h1 className="text-xl tracking-tight">
             {e.action}{" "}
-            <span className="font-mono text-[15px] text-stone-700">
+            <span className="font-mono text-[15px] text-ink">
               {e.target}
             </span>
           </h1>
-          <p className="text-[12px] text-stone-500">{e.detail}</p>
+          <p className="text-[12px] text-ink-muted">{e.detail}</p>
         </header>
 
-        <section className="rounded-lg border border-stone-200/70 bg-white p-4">
-          <p className="text-[13px] text-stone-700 leading-relaxed">{e.body}</p>
+        <section className="rounded-lg border border-line/70 bg-paper p-4">
+          <p className="text-[13px] text-ink leading-relaxed">{e.body}</p>
         </section>
 
-        <section className="rounded-lg border border-stone-200/70 bg-white p-4">
-          <div className="text-[10px] uppercase tracking-wider text-stone-400 mb-2">
+        <section className="rounded-lg border border-line/70 bg-paper p-4">
+          <div className="text-[10px] uppercase tracking-wider text-ink-soft mb-2">
             Metadata
           </div>
           <ul className="space-y-1">
@@ -125,8 +125,8 @@ export default async function ActivityDetailPage({
                 key={k}
                 className="flex justify-between text-[12px] font-mono"
               >
-                <span className="text-stone-500">{k}</span>
-                <span className="text-stone-900">{v}</span>
+                <span className="text-ink-muted">{k}</span>
+                <span className="text-ink">{v}</span>
               </li>
             ))}
           </ul>

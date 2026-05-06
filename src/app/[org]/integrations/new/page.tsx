@@ -28,26 +28,26 @@ export default function NewIntegrationPage() {
       <div className="max-w-3xl mx-auto space-y-6">
         <Link
           href={`/${params.org}/integrations`}
-          className="inline-flex items-center gap-1 text-[12px] text-stone-500 hover:text-stone-900"
+          className="inline-flex items-center gap-1 text-[12px] text-ink-muted hover:text-ink"
         >
           <ArrowLeft className="size-3" /> Back to integrations
         </Link>
 
         <header>
           <h1 className="text-xl tracking-tight">New custom integration</h1>
-          <p className="text-[12px] text-stone-500">
+          <p className="text-[12px] text-ink-muted">
             Wire any HTTP API into the agent runtime. Tools defined in the schema
             become callable by attached agents.
           </p>
         </header>
 
-        <section className="rounded-lg border border-stone-200/70 bg-white p-4 space-y-3">
+        <section className="rounded-lg border border-line/70 bg-paper p-4 space-y-3">
           <Field label="Name">
             <input
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="e.g. Encompass"
-              className="w-full h-9 rounded-md border border-stone-200 bg-white px-3 text-[13px] focus:outline-none focus:border-stone-400"
+              className="w-full h-9 rounded-md border border-line bg-paper px-3 text-[13px] focus:outline-none focus:border-line-strong"
             />
           </Field>
           <Field label="Base URL">
@@ -55,14 +55,14 @@ export default function NewIntegrationPage() {
               value={baseUrl}
               onChange={(e) => setBaseUrl(e.target.value)}
               placeholder="https://api.example.com"
-              className="w-full h-9 rounded-md border border-stone-200 bg-white px-3 text-[13px] font-mono focus:outline-none focus:border-stone-400"
+              className="w-full h-9 rounded-md border border-line bg-paper px-3 text-[13px] font-mono focus:outline-none focus:border-line-strong"
             />
           </Field>
           <Field label="Auth">
             <select
               value={auth}
               onChange={(e) => setAuth(e.target.value)}
-              className="w-full h-9 rounded-md border border-stone-200 bg-white px-2 text-[13px]"
+              className="w-full h-9 rounded-md border border-line bg-paper px-2 text-[13px]"
             >
               {AUTH_KINDS.map((a) => (
                 <option key={a.id} value={a.id}>
@@ -77,14 +77,14 @@ export default function NewIntegrationPage() {
               value={secret}
               onChange={(e) => setSecret(e.target.value)}
               placeholder="••••••••"
-              className="w-full h-9 rounded-md border border-stone-200 bg-white px-3 text-[13px] font-mono focus:outline-none focus:border-stone-400"
+              className="w-full h-9 rounded-md border border-line bg-paper px-3 text-[13px] font-mono focus:outline-none focus:border-line-strong"
             />
           </Field>
         </section>
 
-        <section className="rounded-lg border border-stone-200/70 bg-white p-4 space-y-2">
+        <section className="rounded-lg border border-line/70 bg-paper p-4 space-y-2">
           <div className="text-[14px] font-medium tracking-tight">Schema</div>
-          <p className="text-[11px] text-stone-500">
+          <p className="text-[11px] text-ink-muted">
             JSON Schema describing the tools agents can call. Each tool requires{" "}
             <code>name</code>, <code>description</code>, and{" "}
             <code>input_schema</code>.
@@ -93,7 +93,7 @@ export default function NewIntegrationPage() {
             value={schema}
             onChange={(e) => setSchema(e.target.value)}
             rows={14}
-            className="w-full rounded-md border border-stone-200 bg-stone-50 px-3 py-2 text-[12px] font-mono focus:outline-none focus:border-stone-400"
+            className="w-full rounded-md border border-line bg-canvas px-3 py-2 text-[12px] font-mono focus:outline-none focus:border-line-strong"
           />
         </section>
 
@@ -101,14 +101,14 @@ export default function NewIntegrationPage() {
           <button
             type="button"
             onClick={() => router.back()}
-            className="text-[12px] rounded-md border border-stone-200 bg-white px-3 py-1.5 hover:border-stone-400"
+            className="text-[12px] rounded-md border border-line bg-paper px-3 py-1.5 hover:border-line-strong"
           >
             Cancel
           </button>
           <button
             type="button"
             disabled={!name || !baseUrl}
-            className="text-[12px] rounded-md bg-stone-900 text-white px-3 py-1.5 disabled:opacity-40"
+            className="text-[12px] rounded-md bg-ink text-paper px-3 py-1.5 disabled:opacity-40"
           >
             Save integration
           </button>
@@ -129,9 +129,9 @@ function Field({
 }) {
   return (
     <div className="space-y-1">
-      <div className="text-[12px] text-stone-700">{label}</div>
+      <div className="text-[12px] text-ink">{label}</div>
       {children}
-      {hint && <p className="text-[11px] text-stone-500">{hint}</p>}
+      {hint && <p className="text-[11px] text-ink-muted">{hint}</p>}
     </div>
   );
 }

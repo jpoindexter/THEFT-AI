@@ -39,7 +39,7 @@ export default async function ApprovalsPage({
       <div className="max-w-3xl mx-auto space-y-4">
         <header>
           <h1 className="text-xl tracking-tight">Approvals</h1>
-          <p className="text-[12px] text-stone-500">
+          <p className="text-[12px] text-ink-muted">
             Decisions agents need from you before continuing.
           </p>
         </header>
@@ -47,11 +47,11 @@ export default async function ApprovalsPage({
           {APPROVALS.map((a) => (
             <li
               key={a.id}
-              className="rounded-lg border border-stone-200/70 bg-white p-4 space-y-2"
+              className="rounded-lg border border-line/70 bg-paper p-4 space-y-2"
             >
               <div className="flex items-start justify-between gap-3">
                 <div>
-                  <div className="text-[11px] uppercase tracking-wider text-stone-400">
+                  <div className="text-[11px] uppercase tracking-wider text-ink-soft">
                     {a.agent} · waiting {a.waiting}
                   </div>
                   <h2 className="text-[14px] font-medium tracking-tight">
@@ -75,20 +75,20 @@ export default async function ApprovalsPage({
                   {a.impact} impact
                 </span>
               </div>
-              <p className="text-[12px] text-stone-600 leading-snug">
+              <p className="text-[12px] text-ink-muted leading-snug">
                 {a.body}
               </p>
               <div className="flex items-center justify-end gap-2">
                 <Link
                   href={`/${org}/approvals/${a.id}`}
-                  className="inline-flex items-center gap-1 text-[11px] rounded-md border border-stone-200 bg-white px-2 py-1 hover:border-stone-400"
+                  className="inline-flex items-center gap-1 text-[11px] rounded-md border border-line bg-paper px-2 py-1 hover:border-line-strong"
                 >
                   <AlertCircle className="size-3" /> Discuss
                 </Link>
-                <button className="inline-flex items-center gap-1 text-[11px] rounded-md border border-red-300 bg-white text-red-700 px-2 py-1 hover:bg-red-50">
+                <button className="inline-flex items-center gap-1 text-[11px] rounded-md border border-red-300 bg-paper text-red-700 px-2 py-1 hover:bg-red-50">
                   <XCircle className="size-3" /> Decline
                 </button>
-                <button className="inline-flex items-center gap-1 text-[11px] rounded-md bg-stone-900 text-white px-2 py-1">
+                <button className="inline-flex items-center gap-1 text-[11px] rounded-md bg-ink text-paper px-2 py-1">
                   <CheckCircle2 className="size-3" /> Approve
                 </button>
               </div>

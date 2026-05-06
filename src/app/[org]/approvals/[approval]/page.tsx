@@ -89,15 +89,15 @@ export default async function ApprovalDetailPage({
       <div className="max-w-2xl mx-auto space-y-4">
         <Link
           href={`/${org}/approvals`}
-          className="inline-flex items-center gap-1 text-[12px] text-stone-500 hover:text-stone-900"
+          className="inline-flex items-center gap-1 text-[12px] text-ink-muted hover:text-ink"
         >
           <ArrowLeft className="size-3" /> Back to approvals
         </Link>
 
         <header className="space-y-1">
-          <div className="text-[10px] uppercase tracking-wider text-stone-400 inline-flex items-center gap-2">
+          <div className="text-[10px] uppercase tracking-wider text-ink-soft inline-flex items-center gap-2">
             {a.agent}
-            <span className="inline-flex items-center gap-1 text-stone-500">
+            <span className="inline-flex items-center gap-1 text-ink-muted">
               <Clock className="size-3" />
               waiting {a.waiting}
             </span>
@@ -114,30 +114,30 @@ export default async function ApprovalDetailPage({
           >
             {a.impact} impact
           </span>
-          <p className="text-[13px] text-stone-700 leading-relaxed pt-2 max-w-prose">
+          <p className="text-[13px] text-ink leading-relaxed pt-2 max-w-prose">
             {a.body}
           </p>
         </header>
 
-        <section className="rounded-lg border border-stone-200/70 bg-white p-4 space-y-2">
-          <div className="text-[10px] uppercase tracking-wider text-stone-400 inline-flex items-center gap-1">
+        <section className="rounded-lg border border-line/70 bg-paper p-4 space-y-2">
+          <div className="text-[10px] uppercase tracking-wider text-ink-soft inline-flex items-center gap-1">
             <ShieldAlert className="size-3" /> Risks
           </div>
-          <ul className="list-disc pl-5 space-y-1 text-[12px] text-stone-700">
+          <ul className="list-disc pl-5 space-y-1 text-[12px] text-ink">
             {a.risks.map((r, i) => (
               <li key={i}>{r}</li>
             ))}
           </ul>
         </section>
 
-        <section className="rounded-lg border border-stone-200/70 bg-white p-4 space-y-2">
-          <div className="text-[10px] uppercase tracking-wider text-stone-400">
+        <section className="rounded-lg border border-line/70 bg-paper p-4 space-y-2">
+          <div className="text-[10px] uppercase tracking-wider text-ink-soft">
             Execution plan
           </div>
-          <ol className="space-y-1.5 text-[13px] text-stone-700">
+          <ol className="space-y-1.5 text-[13px] text-ink">
             {a.plan.map((step, i) => (
               <li key={i} className="flex items-start gap-2">
-                <span className="size-4 rounded-full border border-stone-300 inline-flex items-center justify-center text-[10px] text-stone-500 shrink-0 mt-0.5">
+                <span className="size-4 rounded-full border border-line-strong inline-flex items-center justify-center text-[10px] text-ink-muted shrink-0 mt-0.5">
                   {i + 1}
                 </span>
                 {step}
@@ -146,23 +146,23 @@ export default async function ApprovalDetailPage({
           </ol>
         </section>
 
-        <section className="rounded-lg border border-stone-200/70 bg-white p-4 space-y-1">
-          <div className="text-[10px] uppercase tracking-wider text-stone-400">
+        <section className="rounded-lg border border-line/70 bg-paper p-4 space-y-1">
+          <div className="text-[10px] uppercase tracking-wider text-ink-soft">
             Rollback
           </div>
-          <pre className="text-[11px] font-mono text-stone-700 whitespace-pre-wrap">
+          <pre className="text-[11px] font-mono text-ink whitespace-pre-wrap">
             {a.rollback}
           </pre>
         </section>
 
         <div className="flex justify-end gap-2 pt-1">
-          <button className="inline-flex items-center gap-1 text-[12px] rounded-md border border-stone-200 bg-white px-3 py-1.5 hover:border-stone-400">
+          <button className="inline-flex items-center gap-1 text-[12px] rounded-md border border-line bg-paper px-3 py-1.5 hover:border-line-strong">
             <AlertCircle className="size-3" /> Discuss
           </button>
-          <button className="inline-flex items-center gap-1 text-[12px] rounded-md border border-red-300 bg-white text-red-700 px-3 py-1.5 hover:bg-red-50">
+          <button className="inline-flex items-center gap-1 text-[12px] rounded-md border border-red-300 bg-paper text-red-700 px-3 py-1.5 hover:bg-red-50">
             <XCircle className="size-3" /> Decline
           </button>
-          <button className="inline-flex items-center gap-1 text-[12px] rounded-md bg-stone-900 text-white px-3 py-1.5">
+          <button className="inline-flex items-center gap-1 text-[12px] rounded-md bg-ink text-paper px-3 py-1.5">
             <CheckCircle2 className="size-3" /> Approve
           </button>
         </div>

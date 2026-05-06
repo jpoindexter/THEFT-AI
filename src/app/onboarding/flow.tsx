@@ -91,10 +91,10 @@ export default function OnboardingFlow() {
   const showAscii = step <= 2;
 
   return (
-    <div className="min-h-screen bg-[#f3f1ec] text-stone-900 relative">
+    <div className="min-h-screen bg-[#f3f1ec] text-ink relative">
       <button
         type="button"
-        className="absolute top-4 left-4 text-[12px] text-stone-500 inline-flex items-center gap-1.5 hover:text-stone-900"
+        className="absolute top-4 left-4 text-[12px] text-ink-muted inline-flex items-center gap-1.5 hover:text-ink"
       >
         <LogOut className="size-3" /> Log out
       </button>
@@ -155,7 +155,7 @@ export default function OnboardingFlow() {
                 </h2>
                 <div className="space-y-1.5 text-left">
                   <label
-                    className="text-[11px] text-stone-500"
+                    className="text-[11px] text-ink-muted"
                     htmlFor="company-name"
                   >
                     Company name
@@ -165,7 +165,7 @@ export default function OnboardingFlow() {
                     autoFocus
                     value={companyName}
                     onChange={(e) => setCompanyName(e.target.value)}
-                    className="w-full rounded-md border border-blue-400 ring-2 ring-blue-100 bg-white px-3 py-2 text-[13px] focus:outline-none focus:ring-blue-200"
+                    className="w-full rounded-md border border-blue-400 ring-2 ring-blue-100 bg-paper px-3 py-2 text-[13px] focus:outline-none focus:ring-blue-200"
                   />
                 </div>
                 {err && <p className="text-[12px] text-red-600">{err}</p>}
@@ -179,7 +179,7 @@ export default function OnboardingFlow() {
                   <button
                     type="button"
                     onClick={() => setStep(3)}
-                    className="text-[12px] text-stone-500 hover:text-stone-900 underline underline-offset-2"
+                    className="text-[12px] text-ink-muted hover:text-ink underline underline-offset-2"
                   >
                     Back
                   </button>
@@ -216,13 +216,13 @@ function Question({
           <button
             key={o.key}
             onClick={o.onSelect}
-            className={`w-full text-left flex items-center gap-3 rounded-md border bg-white px-4 py-2.5 text-[13px] transition-colors ${
+            className={`w-full text-left flex items-center gap-3 rounded-md border bg-paper px-4 py-2.5 text-[13px] transition-colors ${
               o.selected
-                ? "border-stone-900 ring-1 ring-stone-900"
-                : "border-stone-200 hover:border-stone-400"
+                ? "border-ink ring-1 ring-stone-900"
+                : "border-line hover:border-line-strong"
             }`}
           >
-            <span className="text-stone-400 tabular-nums w-6 text-[11px] font-mono">
+            <span className="text-ink-soft tabular-nums w-6 text-[11px] font-mono">
               {String(o.index).padStart(2, "0")}
             </span>
             <span>{o.label}</span>
@@ -233,7 +233,7 @@ function Question({
         <button
           onClick={onContinue}
           disabled={!onContinue}
-          className="text-[13px] text-stone-500 hover:text-stone-900 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+          className="text-[13px] text-ink-muted hover:text-ink disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
         >
           Continue →
         </button>
@@ -266,7 +266,7 @@ function StageSlider({
               className={`px-2.5 py-1 rounded transition-colors ${
                 active
                   ? "bg-blue-50 text-blue-700"
-                  : "text-stone-400 hover:text-stone-700"
+                  : "text-ink-soft hover:text-ink"
               }`}
             >
               {s.label}
@@ -321,7 +321,7 @@ function PillButton({
       type="button"
       onClick={onClick}
       disabled={disabled}
-      className="rounded-md bg-white border border-stone-200 px-5 py-1.5 text-[13px] disabled:opacity-40 disabled:cursor-not-allowed hover:border-stone-400 transition-colors shadow-[0_1px_0_rgba(0,0,0,0.02)]"
+      className="rounded-md bg-paper border border-line px-5 py-1.5 text-[13px] disabled:opacity-40 disabled:cursor-not-allowed hover:border-line-strong transition-colors shadow-[0_1px_0_rgba(0,0,0,0.02)]"
     >
       {children}
     </button>

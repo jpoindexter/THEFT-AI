@@ -22,29 +22,29 @@ export default async function TaskDetailPage({
   return (
     <div className="absolute inset-0 overflow-y-auto p-6">
       <div className="max-w-3xl mx-auto space-y-4">
-        <div className="flex items-center justify-between text-[12px] text-stone-500">
+        <div className="flex items-center justify-between text-[12px] text-ink-muted">
           <Link
             href={`/${orgSlug}`}
-            className="inline-flex items-center gap-1 hover:text-stone-900"
+            className="inline-flex items-center gap-1 hover:text-ink"
           >
             <ArrowLeft className="size-3" /> Back to canvas
           </Link>
           <button
             type="button"
-            className="size-7 rounded-md hover:bg-stone-200/60 inline-flex items-center justify-center"
-            aria-label="More"
+            className="size-7 rounded-md hover:bg-line/60 inline-flex items-center justify-center"
+            aria-label="More" title="More actions"
           >
             <MoreHorizontal className="size-4" />
           </button>
         </div>
 
         <header className="space-y-1">
-          <div className="text-[10px] uppercase tracking-wider text-stone-400">
+          <div className="text-[10px] uppercase tracking-wider text-ink-soft">
             Task · {task.status}
           </div>
           <h1 className="text-xl tracking-tight">{task.title}</h1>
           {task.description && (
-            <p className="text-[13px] text-stone-600 leading-relaxed pt-1 max-w-2xl">
+            <p className="text-[13px] text-ink-muted leading-relaxed pt-1 max-w-2xl">
               {task.description}
             </p>
           )}
@@ -57,8 +57,8 @@ export default async function TaskDetailPage({
         </div>
 
         {task.mode === "plan" && (
-          <section className="rounded-lg border border-stone-200/70 bg-white p-4 space-y-3">
-            <div className="text-[10px] uppercase tracking-wider text-stone-400">
+          <section className="rounded-lg border border-line/70 bg-paper p-4 space-y-3">
+            <div className="text-[10px] uppercase tracking-wider text-ink-soft">
               Plan
             </div>
             <ol className="space-y-2">
@@ -68,55 +68,55 @@ export default async function TaskDetailPage({
                     key={i}
                     className="flex items-start gap-3 text-[13px]"
                   >
-                    <span className="size-5 rounded-full border border-stone-300 inline-flex items-center justify-center text-[10px] text-stone-500 mt-0.5 shrink-0">
+                    <span className="size-5 rounded-full border border-line-strong inline-flex items-center justify-center text-[10px] text-ink-muted mt-0.5 shrink-0">
                       {i + 1}
                     </span>
-                    <span className="text-stone-700">{step}</span>
+                    <span className="text-ink">{step}</span>
                   </li>
                 ),
               )}
             </ol>
             <div className="flex justify-end gap-2 pt-1">
-              <button className="text-[11px] rounded-md border border-stone-200 px-2 py-1 hover:border-stone-400">
+              <button className="text-[11px] rounded-md border border-line px-2 py-1 hover:border-line-strong">
                 Reject
               </button>
-              <button className="text-[11px] rounded-md bg-stone-900 text-white px-2 py-1">
+              <button className="text-[11px] rounded-md bg-ink text-paper px-2 py-1">
                 Approve & execute
               </button>
             </div>
           </section>
         )}
 
-        <section className="rounded-lg border border-stone-200/70 bg-white p-4 space-y-3">
-          <div className="text-[10px] uppercase tracking-wider text-stone-400">
+        <section className="rounded-lg border border-line/70 bg-paper p-4 space-y-3">
+          <div className="text-[10px] uppercase tracking-wider text-ink-soft">
             Conversation
           </div>
-          <div className="text-[12px] text-stone-500">
+          <div className="text-[12px] text-ink-muted">
             Conversation appears here once the agent runs the task.
           </div>
         </section>
 
-        <section className="rounded-lg border border-stone-200/70 bg-white p-4 space-y-3">
-          <div className="text-[10px] uppercase tracking-wider text-stone-400">
+        <section className="rounded-lg border border-line/70 bg-paper p-4 space-y-3">
+          <div className="text-[10px] uppercase tracking-wider text-ink-soft">
             Workflow
           </div>
-          <div className="text-[12px] text-stone-500">
+          <div className="text-[12px] text-ink-muted">
             Generated artifacts, approvals, and review items appear here.
           </div>
         </section>
 
-        <section className="rounded-lg border border-stone-200/70 bg-white p-4 flex items-center justify-between">
+        <section className="rounded-lg border border-line/70 bg-paper p-4 flex items-center justify-between">
           <div className="text-[12px]">
             <div className="font-medium">Created</div>
-            <div className="text-stone-500">
+            <div className="text-ink-muted">
               {new Date(task.created_at).toLocaleString()}
             </div>
           </div>
           <div className="flex gap-1">
-            <button className="text-[11px] rounded-md border border-stone-200 px-2 py-1 hover:border-stone-400">
+            <button className="text-[11px] rounded-md border border-line px-2 py-1 hover:border-line-strong">
               Report issue
             </button>
-            <button className="text-[11px] rounded-md bg-stone-900 text-white px-2 py-1">
+            <button className="text-[11px] rounded-md bg-ink text-paper px-2 py-1">
               Mark complete
             </button>
           </div>
@@ -128,8 +128,8 @@ export default async function TaskDetailPage({
 
 function Stat({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-lg border border-stone-200/70 bg-white p-3">
-      <div className="text-[10px] uppercase tracking-wider text-stone-400">
+    <div className="rounded-lg border border-line/70 bg-paper p-3">
+      <div className="text-[10px] uppercase tracking-wider text-ink-soft">
         {label}
       </div>
       <div className="text-[13px] mt-0.5">{value}</div>

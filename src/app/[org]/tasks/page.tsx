@@ -59,11 +59,11 @@ export default async function TasksPage({
         <header className="flex items-center justify-between">
           <div>
             <h1 className="text-xl tracking-tight">Tasks</h1>
-            <p className="text-[12px] text-stone-500">
+            <p className="text-[12px] text-ink-muted">
               Track running work, review completed work, and open task details.
             </p>
           </div>
-          <button className="inline-flex items-center gap-1 rounded-md bg-stone-900 text-white px-3 py-1.5 text-[12px]">
+          <button className="inline-flex items-center gap-1 rounded-md bg-ink text-paper px-3 py-1.5 text-[12px]">
             <Plus className="size-3.5" /> New task
           </button>
         </header>
@@ -75,31 +75,31 @@ export default async function TasksPage({
               <div>
                 <h2 className="text-[13px] font-medium tracking-tight">
                   {s.label}
-                  <span className="ml-2 text-[10px] text-stone-400">
+                  <span className="ml-2 text-[10px] text-ink-soft">
                     {bucket.length}
                   </span>
                 </h2>
-                <p className="text-[11px] text-stone-500">{s.description}</p>
+                <p className="text-[11px] text-ink-muted">{s.description}</p>
               </div>
               {bucket.length > 0 ? (
-                <ul className="rounded-lg border border-stone-200/70 bg-white divide-y divide-stone-100">
+                <ul className="rounded-lg border border-line/70 bg-paper divide-y divide-line/60">
                   {bucket.map((t) => (
                     <li key={t.id}>
                       <Link
                         href={`/${orgSlug}/tasks/${t.id}`}
-                        className="flex items-center justify-between gap-3 px-3 py-2 text-[13px] hover:bg-stone-50 transition-colors"
+                        className="flex items-center justify-between gap-3 px-3 py-2 text-[13px] hover:bg-canvas transition-colors"
                       >
                         <span className="truncate">{t.title}</span>
-                        <span className="inline-flex items-center gap-2 text-[10px] text-stone-500 shrink-0">
+                        <span className="inline-flex items-center gap-2 text-[10px] text-ink-muted shrink-0">
                           <span className="uppercase">{t.status}</span>
-                          <ChevronRight className="size-3 text-stone-400" />
+                          <ChevronRight className="size-3 text-ink-soft" />
                         </span>
                       </Link>
                     </li>
                   ))}
                 </ul>
               ) : (
-                <div className="rounded-lg border border-stone-200/70 bg-white px-3 py-4 text-[12px] text-stone-500">
+                <div className="rounded-lg border border-line/70 bg-paper px-3 py-4 text-[12px] text-ink-muted">
                   Nothing here yet.
                 </div>
               )}

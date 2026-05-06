@@ -59,39 +59,39 @@ export default async function ReviewPage({
       <div className="max-w-3xl mx-auto space-y-4">
         <header>
           <h1 className="text-xl tracking-tight inline-flex items-center gap-2">
-            <Eye className="size-5 text-stone-500" /> Review
+            <Eye className="size-5 text-ink-muted" /> Review
           </h1>
-          <p className="text-[12px] text-stone-500">
+          <p className="text-[12px] text-ink-muted">
             Things agents prepared that need a human decision before they ship,
             send, or merge.
           </p>
         </header>
 
-        <ul className="rounded-lg border border-stone-200/70 bg-white divide-y divide-stone-100">
+        <ul className="rounded-lg border border-line/70 bg-paper divide-y divide-line/60">
           {QUEUE.map((q) => {
             const Icon = q.icon;
             return (
               <li key={q.id}>
                 <Link
                   href={`/${org}${q.href}`}
-                  className="px-4 py-3 flex items-start gap-3 hover:bg-stone-50"
+                  className="px-4 py-3 flex items-start gap-3 hover:bg-canvas"
                 >
-                  <span className="size-7 rounded-md bg-stone-100 inline-flex items-center justify-center text-stone-600 shrink-0">
+                  <span className="size-7 rounded-md bg-cream inline-flex items-center justify-center text-ink-muted shrink-0">
                     <Icon className="size-3.5" />
                   </span>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
-                      <span className="text-[10px] uppercase tracking-wider text-stone-500">
+                      <span className="text-[10px] uppercase tracking-wider text-ink-muted">
                         {q.kind}
                       </span>
-                      <span className="text-[10px] text-stone-400">
+                      <span className="text-[10px] text-ink-soft">
                         · by {q.by} · {q.age} ago
                       </span>
                     </div>
                     <div className="text-[13px] font-medium tracking-tight mt-0.5">
                       {q.title}
                     </div>
-                    <div className="text-[12px] text-stone-600 mt-0.5">
+                    <div className="text-[12px] text-ink-muted mt-0.5">
                       {q.detail}
                     </div>
                   </div>
@@ -104,7 +104,7 @@ export default async function ReviewPage({
           })}
         </ul>
 
-        <p className="text-[11px] text-stone-500 text-center">
+        <p className="text-[11px] text-ink-muted text-center">
           {QUEUE.length} items waiting. Action one to reduce the queue.
         </p>
       </div>

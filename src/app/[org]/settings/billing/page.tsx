@@ -16,11 +16,11 @@ export default function Billing() {
           </div>
           <div className="flex items-baseline justify-between">
             <span>Subscription</span>
-            <span className="text-stone-500">Trial</span>
+            <span className="text-ink-muted">Trial</span>
           </div>
           <Link
             href="/billing"
-            className="inline-flex w-fit text-[12px] rounded-md bg-stone-900 text-white px-3 py-1.5 mt-3"
+            className="inline-flex w-fit text-[12px] rounded-md bg-ink text-paper px-3 py-1.5 mt-3"
           >
             View Billing & Usage
           </Link>

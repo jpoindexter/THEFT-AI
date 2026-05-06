@@ -50,7 +50,7 @@ export default function BrandKitFlow({
             <div className="flex justify-center gap-2 pt-4">
               <button
                 onClick={() => setPhase("vibes")}
-                className="rounded-md bg-stone-900 text-white px-4 py-2 text-[13px]"
+                className="rounded-md bg-ink text-paper px-4 py-2 text-[13px]"
               >
                 Choose vibe →
               </button>
@@ -149,7 +149,7 @@ export default function BrandKitFlow({
           <div className="rounded-2xl bg-paper border border-line/80 overflow-hidden">
             <div className="grid grid-cols-3 gap-px bg-cream">
               <div className="bg-paper p-6">
-                <div className="size-8 rounded-md bg-stone-900" />
+                <div className="size-8 rounded-md bg-ink" />
                 <h2 className="text-2xl tracking-tight mt-4 leading-tight">
                   {orgSlug}
                 </h2>
@@ -191,7 +191,7 @@ export default function BrandKitFlow({
               >
                 ← Pick a different vibe
               </button>
-              <button className="text-[12px] rounded-md bg-stone-900 text-white px-3 py-1.5">
+              <button className="text-[12px] rounded-md bg-ink text-paper px-3 py-1.5">
                 Lock brand kit
               </button>
             </div>

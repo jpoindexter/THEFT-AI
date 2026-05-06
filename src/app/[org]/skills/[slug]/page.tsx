@@ -74,41 +74,41 @@ export default async function SkillDetail({
       <div className="max-w-3xl mx-auto space-y-4">
         <Link
           href={`/${org}/skills`}
-          className="inline-flex items-center gap-1 text-[12px] text-stone-500 hover:text-stone-900"
+          className="inline-flex items-center gap-1 text-[12px] text-ink-muted hover:text-ink"
         >
           <ArrowLeft className="size-3" /> Back to skills
         </Link>
         <header>
           <h1 className="text-xl tracking-tight">{skill.name}</h1>
-          <code className="text-[11px] font-mono text-stone-400">
+          <code className="text-[11px] font-mono text-ink-soft">
             {skill.slug}
           </code>
           {skill.description && (
-            <p className="text-[13px] text-stone-600 mt-2">
+            <p className="text-[13px] text-ink-muted mt-2">
               {skill.description}
             </p>
           )}
         </header>
 
-        <section className="rounded-lg border border-stone-200/70 bg-white p-4">
-          <div className="text-[11px] uppercase tracking-wider text-stone-500 mb-2">
+        <section className="rounded-lg border border-line/70 bg-paper p-4">
+          <div className="text-[11px] uppercase tracking-wider text-ink-muted mb-2">
             SKILL.md
           </div>
-          <pre className="text-[11px] font-mono whitespace-pre-wrap leading-relaxed text-stone-700">
+          <pre className="text-[11px] font-mono whitespace-pre-wrap leading-relaxed text-ink">
             {skill.body}
           </pre>
         </section>
 
-        <section className="rounded-lg border border-stone-200/70 bg-white p-4 space-y-1">
-          <div className="text-[11px] uppercase tracking-wider text-stone-500 mb-1">
+        <section className="rounded-lg border border-line/70 bg-paper p-4 space-y-1">
+          <div className="text-[11px] uppercase tracking-wider text-ink-muted mb-1">
             Files
           </div>
           {skill.files.map((f) => (
             <div
               key={f}
-              className="flex items-center gap-2 text-[12px] font-mono text-stone-700"
+              className="flex items-center gap-2 text-[12px] font-mono text-ink"
             >
-              <FileText className="size-3 text-stone-400" />
+              <FileText className="size-3 text-ink-soft" />
               {f}
             </div>
           ))}

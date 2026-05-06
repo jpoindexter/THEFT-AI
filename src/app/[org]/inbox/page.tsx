@@ -43,22 +43,22 @@ export default async function InboxPage({
         <header className="flex items-center justify-between">
           <div>
             <h1 className="text-xl tracking-tight inline-flex items-center gap-2">
-              <Inbox className="size-5 text-stone-500" /> Inbox
+              <Inbox className="size-5 text-ink-muted" /> Inbox
             </h1>
-            <p className="text-[12px] text-stone-500">
+            <p className="text-[12px] text-ink-muted">
               Per-agent email addresses. Inbound messages route to the agent
               and become tasks.
             </p>
           </div>
           <Link
             href={`/${org}/settings/inbox`}
-            className="inline-flex items-center gap-1 rounded-md border border-stone-200 bg-white px-2 py-1 text-[12px] hover:border-stone-400"
+            className="inline-flex items-center gap-1 rounded-md border border-line bg-paper px-2 py-1 text-[12px] hover:border-line-strong"
           >
             <Settings className="size-3" /> Settings
           </Link>
         </header>
 
-        <ul className="rounded-lg border border-stone-200/70 bg-white divide-y divide-stone-100">
+        <ul className="rounded-lg border border-line/70 bg-paper divide-y divide-line/60">
           {AGENTS.map((a) => (
             <li key={a.slug}>
               <Link
@@ -67,24 +67,24 @@ export default async function InboxPage({
                     ? `/${org}/inbox/${a.slug}`
                     : `/${org}/settings/inbox`
                 }
-                className="px-4 py-3 flex items-center justify-between hover:bg-stone-50"
+                className="px-4 py-3 flex items-center justify-between hover:bg-canvas"
               >
                 <div className="min-w-0">
                   <div className="text-[13px] font-medium">{a.name}</div>
-                  <div className="text-[11px] font-mono text-stone-500">
+                  <div className="text-[11px] font-mono text-ink-muted">
                     {a.address}
                   </div>
-                  <div className="text-[12px] text-stone-700 mt-1 truncate">
+                  <div className="text-[12px] text-ink mt-1 truncate">
                     {a.last_message}
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
-                  <span className="text-[10px] text-stone-400">{a.when}</span>
+                  <span className="text-[10px] text-ink-soft">{a.when}</span>
                   <span
                     className={`text-[10px] uppercase rounded px-1.5 py-0.5 ${
                       a.enabled
                         ? "bg-emerald-100 text-emerald-700"
-                        : "bg-stone-100 text-stone-500"
+                        : "bg-cream text-ink-muted"
                     }`}
                   >
                     {a.enabled ? "Active" : "Off"}

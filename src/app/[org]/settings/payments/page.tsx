@@ -34,19 +34,19 @@ export default async function PaymentsSettings({
       />
 
       <SettingsCard>
-        <div className="rounded-md border border-stone-200/80 px-3 py-2 flex items-center justify-between text-[13px]">
+        <div className="rounded-md border border-line/70 px-3 py-2 flex items-center justify-between text-[13px]">
           <div>
             <div className="font-medium inline-flex items-center gap-2">
-              <CreditCard className="size-3.5 text-stone-500" />
+              <CreditCard className="size-3.5 text-ink-muted" />
               Stripe
             </div>
-            <div className="text-[11px] text-stone-500">
+            <div className="text-[11px] text-ink-muted">
               Add Stripe test or live keys to connect.
             </div>
           </div>
           <Link
             href={`/${org}/settings/stripe`}
-            className="text-[11px] rounded-md border border-stone-200 px-2 py-1 hover:border-stone-400 inline-flex items-center gap-1"
+            className="text-[11px] rounded-md border border-line px-2 py-1 hover:border-line-strong inline-flex items-center gap-1"
           >
             Configure <ArrowRight className="size-3" />
           </Link>
@@ -61,17 +61,17 @@ export default async function PaymentsSettings({
           {KICKOFFS.map((k) => (
             <li
               key={k.id}
-              className="rounded-md border border-stone-200/70 p-3 flex items-start justify-between gap-3"
+              className="rounded-md border border-line/70 p-3 flex items-start justify-between gap-3"
             >
               <div>
                 <div className="text-[13px] font-medium tracking-tight">
                   {k.label}
                 </div>
-                <div className="text-[12px] text-stone-500">{k.body}</div>
+                <div className="text-[12px] text-ink-muted">{k.body}</div>
               </div>
               <button
                 type="button"
-                className="text-[11px] rounded-md bg-stone-900 text-white px-2 py-1 inline-flex items-center gap-1 shrink-0"
+                className="text-[11px] rounded-md bg-ink text-paper px-2 py-1 inline-flex items-center gap-1 shrink-0"
               >
                 <Sparkles className="size-3" /> Kick off
               </button>

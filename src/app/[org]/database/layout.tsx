@@ -31,12 +31,12 @@ export default async function DatabaseLayout({
   const { org } = await params;
   return (
     <div className="absolute inset-0 grid grid-cols-[200px_1fr]">
-      <aside className="border-r border-stone-200/70 p-3 text-[13px] flex flex-col gap-0.5 bg-stone-50/50">
-        <div className="px-2 py-1 text-[11px] text-stone-500">
+      <aside className="border-r border-line/70 p-3 text-[13px] flex flex-col gap-0.5 bg-canvas/50">
+        <div className="px-2 py-1 text-[11px] text-ink-muted">
           theft-ai
-          <div className="text-[9px] text-stone-400 mt-0.5">Managed Supabase</div>
+          <div className="text-[9px] text-ink-soft mt-0.5">Managed Supabase</div>
         </div>
-        <div className="my-2 border-t border-stone-200/70" />
+        <div className="my-2 border-t border-line/70" />
         {NAV.map(({ slug, label, Icon }) => {
           const href = slug
             ? `/${org}/database/${slug}`
@@ -45,9 +45,9 @@ export default async function DatabaseLayout({
             <Link
               key={slug || "root"}
               href={href}
-              className="rounded-md px-2 py-1.5 inline-flex items-center gap-2 text-left text-stone-600 hover:bg-stone-200/40"
+              className="rounded-md px-2 py-1.5 inline-flex items-center gap-2 text-left text-ink-muted hover:bg-line/40"
             >
-              <Icon className="size-3.5 text-stone-400" />
+              <Icon className="size-3.5 text-ink-soft" />
               {label}
             </Link>
           );
@@ -56,8 +56,8 @@ export default async function DatabaseLayout({
       <div className="overflow-y-auto p-6">{children}</div>
       <Link
         href={`/${org}`}
-        className="absolute top-3 right-3 size-7 rounded-md hover:bg-stone-200/60 inline-flex items-center justify-center text-stone-400"
-        aria-label="Close"
+        className="absolute top-3 right-3 size-7 rounded-md hover:bg-line/60 inline-flex items-center justify-center text-ink-soft"
+        aria-label="Close" title="Close"
       >
         ×
       </Link>

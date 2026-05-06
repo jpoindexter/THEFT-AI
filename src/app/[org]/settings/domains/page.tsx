@@ -31,21 +31,21 @@ export default async function Domains({
       />
       <SettingsCard title="Domains">
         {DOMAINS.length === 0 ? (
-          <div className="rounded-md border border-dashed border-stone-300 p-8 text-center text-[12px] text-stone-500 flex flex-col items-center gap-2">
+          <div className="rounded-md border border-dashed border-line-strong p-8 text-center text-[12px] text-ink-muted flex flex-col items-center gap-2">
             <Globe className="size-5" />
             No domains added yet.
-            <button className="inline-flex items-center gap-1 rounded-md bg-stone-900 text-white px-3 py-1.5 text-[12px]">
+            <button className="inline-flex items-center gap-1 rounded-md bg-ink text-paper px-3 py-1.5 text-[12px]">
               <Plus className="size-3" />
               Add or buy a domain
             </button>
           </div>
         ) : (
-          <ul className="divide-y divide-stone-100 -mx-1">
+          <ul className="divide-y divide-line/60 -mx-1">
             {DOMAINS.map((d) => (
               <li key={d.slug}>
                 <Link
                   href={`/${org}/settings/domains/${d.slug}`}
-                  className="flex items-center justify-between px-1 py-2.5 hover:bg-stone-50 rounded-md"
+                  className="flex items-center justify-between px-1 py-2.5 hover:bg-canvas rounded-md"
                 >
                   <div className="flex items-center gap-3">
                     <span
@@ -56,23 +56,23 @@ export default async function Domains({
                       }`}
                     />
                     <span className="text-[13px] font-mono">{d.domain}</span>
-                    <span className="text-[11px] text-stone-500">
+                    <span className="text-[11px] text-ink-muted">
                       {d.target}
                     </span>
                   </div>
-                  <ArrowRight className="size-3 text-stone-400" />
+                  <ArrowRight className="size-3 text-ink-soft" />
                 </Link>
               </li>
             ))}
           </ul>
         )}
         <div className="flex justify-end pt-1">
-          <button className="inline-flex items-center gap-1 rounded-md border border-stone-200 px-2 py-1 text-[11px] hover:border-stone-400">
+          <button className="inline-flex items-center gap-1 rounded-md border border-line px-2 py-1 text-[11px] hover:border-line-strong">
             <Plus className="size-3" />
             Add or buy a domain
           </button>
         </div>
-        <p className="text-[11px] text-stone-500">
+        <p className="text-[11px] text-ink-muted">
           Propagation can take up to 24 hours. Buying through Cofounder runs
           DNS, nameserver, and Postmark setup automatically.
         </p>
@@ -81,7 +81,7 @@ export default async function Domains({
         title="Inbox domains"
         description="Once a domain is verified for inbound email, you can route it to specific agents in Settings → Inbox."
       >
-        <p className="text-[12px] text-stone-500">
+        <p className="text-[12px] text-ink-muted">
           {DOMAINS.filter((d) => d.status === "verified").length} verified
           domain(s) available for inbound routing.
         </p>

@@ -54,33 +54,33 @@ export default async function ActivityPage({
       <div className="max-w-3xl mx-auto space-y-4">
         <header>
           <h1 className="text-xl tracking-tight">Activity</h1>
-          <p className="text-[12px] text-stone-500">
+          <p className="text-[12px] text-ink-muted">
             Audit trail of every meaningful action agents take in this workspace.
           </p>
         </header>
-        <ul className="rounded-lg border border-stone-200/70 bg-white divide-y divide-stone-100">
+        <ul className="rounded-lg border border-line/70 bg-paper divide-y divide-line/60">
           {EVENTS.map((e) => (
             <li key={e.id}>
               <Link
                 href={`/${org}/activity/${e.id}`}
-                className="px-4 py-3 flex items-center gap-3 hover:bg-stone-50"
+                className="px-4 py-3 flex items-center gap-3 hover:bg-canvas"
               >
-                <span className="size-7 rounded-full bg-stone-100 inline-flex items-center justify-center text-[10px] font-medium text-stone-600 flex-shrink-0">
+                <span className="size-7 rounded-full bg-cream inline-flex items-center justify-center text-[10px] font-medium text-ink-muted flex-shrink-0">
                   {e.actor[0]}
                 </span>
                 <div className="flex-1 min-w-0">
                   <div className="text-[13px]">
                     <span className="font-medium">{e.actor}</span>{" "}
-                    <span className="text-stone-500">{e.action}</span>{" "}
-                    <span className="font-mono text-[11px] text-stone-700">
+                    <span className="text-ink-muted">{e.action}</span>{" "}
+                    <span className="font-mono text-[11px] text-ink">
                       {e.target}
                     </span>
                   </div>
-                  <div className="text-[11px] text-stone-500 mt-0.5">
+                  <div className="text-[11px] text-ink-muted mt-0.5">
                     {e.detail}
                   </div>
                 </div>
-                <span className="text-[10px] text-stone-400 shrink-0">
+                <span className="text-[10px] text-ink-soft shrink-0">
                   {e.when}
                 </span>
               </Link>

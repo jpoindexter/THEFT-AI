@@ -17,7 +17,7 @@ export default function Preferences() {
       />
       <SettingsCard title="Profile">
         <Row label="Profile picture" hint="200×200 px, JPG/PNG/WebP, 5MB max">
-          <button className="text-[12px] rounded-md border border-stone-200 px-2 py-1 hover:border-stone-400">
+          <button className="text-[12px] rounded-md border border-line px-2 py-1 hover:border-line-strong">
             Upload Photo
           </button>
         </Row>
@@ -38,10 +38,10 @@ export default function Preferences() {
 
       <SettingsCard title="Appearance">
         <Row label="Theme">
-          <div className="inline-flex rounded-md border border-stone-200 overflow-hidden text-[12px]">
-            <button className="px-3 py-1.5 hover:bg-stone-100">Light</button>
-            <button className="px-3 py-1.5 bg-stone-100">System</button>
-            <button className="px-3 py-1.5 hover:bg-stone-100">Dark</button>
+          <div className="inline-flex rounded-md border border-line overflow-hidden text-[12px]">
+            <button className="px-3 py-1.5 hover:bg-cream">Light</button>
+            <button className="px-3 py-1.5 bg-cream">System</button>
+            <button className="px-3 py-1.5 hover:bg-cream">Dark</button>
           </div>
         </Row>
         <Row label="Shadows" hint="Soft drop shadow on cards">
@@ -52,7 +52,7 @@ export default function Preferences() {
       <SettingsCard>
         <div>
           <h2 className="text-[14px] font-medium text-red-700">Danger Zone</h2>
-          <p className="text-[12px] text-stone-500">
+          <p className="text-[12px] text-ink-muted">
             Once you delete your account, there is no going back.
           </p>
           <button

@@ -32,20 +32,20 @@ export default async function LibraryPage({
         <header className="flex items-center justify-between">
           <div>
             <h1 className="text-xl tracking-tight">Library</h1>
-            <p className="text-[12px] text-stone-500">
+            <p className="text-[12px] text-ink-muted">
               Shared file system. Every agent in the workspace can read and
               write here.
             </p>
           </div>
           <div className="flex items-center gap-2">
-            <div className="flex items-center gap-1 rounded-md border border-stone-200 bg-white px-2 py-1 text-[12px]">
-              <Search className="size-3 text-stone-400" />
+            <div className="flex items-center gap-1 rounded-md border border-line bg-paper px-2 py-1 text-[12px]">
+              <Search className="size-3 text-ink-soft" />
               <input
                 placeholder="Search files"
                 className="bg-transparent focus:outline-none w-40"
               />
             </div>
-            <button className="inline-flex items-center gap-1 rounded-md border border-stone-200 bg-white px-2 py-1 text-[12px] hover:border-stone-400">
+            <button className="inline-flex items-center gap-1 rounded-md border border-line bg-paper px-2 py-1 text-[12px] hover:border-line-strong">
               <Upload className="size-3" /> Upload
             </button>
           </div>
@@ -53,18 +53,18 @@ export default async function LibraryPage({
 
         {pinned.length > 0 && (
           <section className="space-y-2">
-            <div className="text-[10px] uppercase tracking-[0.14em] text-stone-400 inline-flex items-center gap-1">
+            <div className="text-[10px] uppercase tracking-[0.14em] text-ink-soft inline-flex items-center gap-1">
               <Pin className="size-3" /> Pinned
             </div>
-            <ul className="rounded-lg border border-stone-200/70 bg-white divide-y divide-stone-100">
+            <ul className="rounded-lg border border-line/70 bg-paper divide-y divide-line/60">
               {pinned.map((a) => (
                 <li key={a.id}>
                   <Link
                     href={`/${orgSlug}/library/${a.id}`}
-                    className="px-3 py-2 text-[13px] flex items-center justify-between hover:bg-stone-50"
+                    className="px-3 py-2 text-[13px] flex items-center justify-between hover:bg-canvas"
                   >
                     <span className="truncate">{a.name}</span>
-                    <span className="text-[10px] text-stone-500 uppercase">
+                    <span className="text-[10px] text-ink-muted uppercase">
                       {a.kind}
                     </span>
                   </Link>
@@ -75,7 +75,7 @@ export default async function LibraryPage({
         )}
 
         <section>
-          <div className="text-[10px] uppercase tracking-[0.14em] text-stone-400 mb-2">
+          <div className="text-[10px] uppercase tracking-[0.14em] text-ink-soft mb-2">
             By department
           </div>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
@@ -87,7 +87,7 @@ export default async function LibraryPage({
                 <Link
                   key={d.id}
                   href={`/${orgSlug}/${d.slug}`}
-                  className="rounded-lg border border-stone-200/70 overflow-hidden bg-white hover:border-stone-400 transition-colors"
+                  className="rounded-lg border border-line/70 overflow-hidden bg-paper hover:border-line-strong transition-colors"
                 >
                   <div
                     className="aspect-[16/10]"
@@ -95,7 +95,7 @@ export default async function LibraryPage({
                   />
                   <div className="p-2 text-[12px] flex items-center justify-between">
                     <span>{d.name}</span>
-                    <span className="text-stone-400">{count}</span>
+                    <span className="text-ink-soft">{count}</span>
                   </div>
                 </Link>
               );
@@ -105,18 +105,18 @@ export default async function LibraryPage({
 
         {artifacts.length > 0 && (
           <section className="space-y-2">
-            <div className="text-[10px] uppercase tracking-[0.14em] text-stone-400">
+            <div className="text-[10px] uppercase tracking-[0.14em] text-ink-soft">
               All files
             </div>
-            <ul className="rounded-lg border border-stone-200/70 bg-white divide-y divide-stone-100">
+            <ul className="rounded-lg border border-line/70 bg-paper divide-y divide-line/60">
               {artifacts.map((a) => (
                 <li key={a.id}>
                   <Link
                     href={`/${orgSlug}/library/${a.id}`}
-                    className="px-3 py-2 text-[13px] flex items-center justify-between hover:bg-stone-50"
+                    className="px-3 py-2 text-[13px] flex items-center justify-between hover:bg-canvas"
                   >
                     <span className="truncate">{a.name}</span>
-                    <span className="text-[10px] text-stone-500 uppercase">
+                    <span className="text-[10px] text-ink-muted uppercase">
                       {a.kind}
                     </span>
                   </Link>

@@ -48,8 +48,8 @@ export default function KeyboardShortcutsDialog({
 }) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-lg p-0 bg-white">
-        <DialogHeader className="px-4 py-3 border-b border-stone-200/70">
+      <DialogContent className="sm:max-w-lg p-0 bg-paper">
+        <DialogHeader className="px-4 py-3 border-b border-line/70">
           <DialogTitle className="text-[14px] font-medium tracking-tight">
             Keyboard shortcuts
           </DialogTitle>
@@ -57,7 +57,7 @@ export default function KeyboardShortcutsDialog({
         <div className="p-4 space-y-4 max-h-[60vh] overflow-y-auto">
           {GROUPS.map((g) => (
             <section key={g.name}>
-              <div className="text-[10px] uppercase tracking-[0.14em] text-stone-400 mb-2">
+              <div className="text-[10px] uppercase tracking-[0.14em] text-ink-soft mb-2">
                 {g.name}
               </div>
               <ul className="space-y-1">
@@ -66,12 +66,12 @@ export default function KeyboardShortcutsDialog({
                     key={r.label}
                     className="flex items-center justify-between text-[12px]"
                   >
-                    <span className="text-stone-700">{r.label}</span>
+                    <span className="text-ink">{r.label}</span>
                     <span className="flex items-center gap-1">
                       {r.keys.map((k) => (
                         <kbd
                           key={k}
-                          className="rounded border border-stone-200 bg-stone-50 px-1.5 py-0.5 text-[10px] font-mono text-stone-700 min-w-[20px] text-center"
+                          className="rounded border border-line bg-canvas px-1.5 py-0.5 text-[10px] font-mono text-ink min-w-[20px] text-center"
                         >
                           {k}
                         </kbd>

@@ -103,7 +103,7 @@ export default function NewTaskDialog({
             type="button"
             onClick={submit}
             disabled={!description.trim() || submitting}
-            className="rounded-md bg-stone-900 text-white px-3 py-1 text-[11px] disabled:opacity-30"
+            className="rounded-md bg-ink text-paper px-3 py-1 text-[11px] disabled:opacity-30"
           >
             {submitting ? "Creating…" : "Create Task"}
           </button>
