@@ -56,6 +56,37 @@ export default async function TaskDetailPage({
           <Stat label="Priority" value={task.priority} />
         </div>
 
+        {task.mode === "plan" && (
+          <section className="rounded-lg border border-stone-200/70 bg-white p-4 space-y-3">
+            <div className="text-[10px] uppercase tracking-wider text-stone-400">
+              Plan
+            </div>
+            <ol className="space-y-2">
+              {(["Read related artifacts", "Draft outline", "Confirm with you", "Execute outline"] as const).map(
+                (step, i) => (
+                  <li
+                    key={i}
+                    className="flex items-start gap-3 text-[13px]"
+                  >
+                    <span className="size-5 rounded-full border border-stone-300 inline-flex items-center justify-center text-[10px] text-stone-500 mt-0.5 shrink-0">
+                      {i + 1}
+                    </span>
+                    <span className="text-stone-700">{step}</span>
+                  </li>
+                ),
+              )}
+            </ol>
+            <div className="flex justify-end gap-2 pt-1">
+              <button className="text-[11px] rounded-md border border-stone-200 px-2 py-1 hover:border-stone-400">
+                Reject
+              </button>
+              <button className="text-[11px] rounded-md bg-stone-900 text-white px-2 py-1">
+                Approve & execute
+              </button>
+            </div>
+          </section>
+        )}
+
         <section className="rounded-lg border border-stone-200/70 bg-white p-4 space-y-3">
           <div className="text-[10px] uppercase tracking-wider text-stone-400">
             Conversation

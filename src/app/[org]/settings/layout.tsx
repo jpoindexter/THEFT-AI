@@ -12,6 +12,7 @@ import {
   Wrench,
   ArrowLeft,
   Globe,
+  Brain,
 } from "lucide-react";
 
 const SECTIONS = [
@@ -21,6 +22,7 @@ const SECTIONS = [
   { slug: "domains", label: "Domains", Icon: Globe },
   { slug: "notifications", label: "Notifications", Icon: Bell },
   { slug: "organization", label: "Organization", Icon: Building2 },
+  { slug: "company-context", label: "Company Context", Icon: Brain },
   { slug: "inbox", label: "Inbox", Icon: Inbox },
   { slug: "support", label: "Support", Icon: LifeBuoy },
   { slug: "stripe", label: "Stripe", Icon: CreditCard },
