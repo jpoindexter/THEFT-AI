@@ -137,9 +137,12 @@ export default async function RoutineDetailPage({
           <button className="text-[12px] rounded-md border border-line bg-paper px-3 py-1.5 hover:border-line-strong">
             Run now
           </button>
-          <button className="text-[12px] rounded-md bg-ink text-paper px-3 py-1.5">
+          <Link
+            href={`/${org}/routines/${routine}/edit`}
+            className="text-[12px] rounded-md bg-ink text-paper px-3 py-1.5 hover:opacity-90"
+          >
             Edit
-          </button>
+          </Link>
         </div>
       </div>
     </div>

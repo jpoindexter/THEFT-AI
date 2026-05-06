@@ -59,13 +59,21 @@ export default async function SkillsPage({
   return (
     <div className="absolute inset-0 overflow-y-auto p-8">
       <div className="max-w-4xl mx-auto space-y-6">
-        <header>
-          <h1 className="text-xl tracking-tight">Skills</h1>
-          <p className="text-[13px] text-ink-muted">
-            Reusable guidance packages that any agent can have attached. Drop a
-            skill into <code>/skills/&lt;name&gt;/SKILL.md</code> and it will
-            appear here.
-          </p>
+        <header className="flex items-start justify-between gap-3">
+          <div>
+            <h1 className="text-xl tracking-tight">Skills</h1>
+            <p className="text-[13px] text-ink-muted">
+              Reusable guidance packages that any agent can have attached. Drop
+              a skill into <code>/skills/&lt;name&gt;/SKILL.md</code> and it
+              will appear here.
+            </p>
+          </div>
+          <Link
+            href={`/${org}/skills/new`}
+            className="inline-flex items-center gap-1 rounded-md bg-ink text-paper px-3 py-1.5 text-[12px] shrink-0"
+          >
+            + New skill
+          </Link>
         </header>
         <div className="grid grid-cols-2 gap-3">
           {skills.map((s) => (
