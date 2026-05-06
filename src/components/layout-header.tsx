@@ -29,6 +29,7 @@ import {
   Users,
   ShieldCheck,
   Brain,
+  Stethoscope,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -108,6 +109,7 @@ export default function LayoutHeader({
     notifications: "Notifications",
     billing: "Billing",
     sandbox: "Sandbox",
+    diagnostics: "Diagnostics",
   };
   const subLabel =
     subSegment && SUB_LABELS[subSegment]
@@ -256,6 +258,11 @@ export default function LayoutHeader({
               onSelect={goto(`/${orgSlug}/memory`)}
               icon={<Brain className="size-3.5" />}
               label="Company memory"
+            />
+            <MenuRow
+              onSelect={goto(`/${orgSlug}/diagnostics`)}
+              icon={<Stethoscope className="size-3.5" />}
+              label="Diagnostics"
             />
             <MenuRow
               onSelect={goto(`/${orgSlug}/settings/billing`)}

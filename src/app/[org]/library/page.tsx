@@ -45,9 +45,12 @@ export default async function LibraryPage({
                 className="bg-transparent focus:outline-none w-40"
               />
             </div>
-            <button className="inline-flex items-center gap-1 rounded-md border border-line bg-paper px-2 py-1 text-[12px] hover:border-line-strong">
+            <Link
+              href={`/${orgSlug}/library/upload`}
+              className="inline-flex items-center gap-1 rounded-md border border-line bg-paper px-2 py-1 text-[12px] hover:border-line-strong"
+            >
               <Upload className="size-3" /> Upload
-            </button>
+            </Link>
           </div>
         </header>
 
