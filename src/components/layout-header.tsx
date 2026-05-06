@@ -41,6 +41,7 @@ import { useEffect, useState } from "react";
 import KeyboardShortcutsDialog from "@/components/keyboard-shortcuts-dialog";
 import ThemeToggle from "@/components/theme-toggle";
 import CommandPalette from "@/components/command-palette";
+import ShareDialog from "@/components/share-dialog";
 
 export default function LayoutHeader({
   orgName,
@@ -59,6 +60,7 @@ export default function LayoutHeader({
   const pathname = usePathname();
   const [shortcutsOpen, setShortcutsOpen] = useState(false);
   const [paletteOpen, setPaletteOpen] = useState(false);
+  const [shareOpen, setShareOpen] = useState(false);
 
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
@@ -307,7 +309,10 @@ export default function LayoutHeader({
           Upgrade
         </Link>
         <ThemeToggle />
-        <IconBtn title="Share workspace">
+        <IconBtn
+          onClick={() => setShareOpen(true)}
+          title="Share workspace"
+        >
           <Share2 className="size-3.5" />
         </IconBtn>
         <IconBtn
@@ -322,6 +327,11 @@ export default function LayoutHeader({
         onOpenChange={setShortcutsOpen}
       />
       <CommandPalette open={paletteOpen} onOpenChange={setPaletteOpen} />
+      <ShareDialog
+        orgSlug={orgSlug}
+        open={shareOpen}
+        onOpenChange={setShareOpen}
+      />
     </header>
   );
 }

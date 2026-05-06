@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import { db } from "@/lib/db/store";
 import Link from "next/link";
 import { ArrowLeft, MoreHorizontal } from "lucide-react";
+import AgentRunConsole from "@/components/agent-run-console";
 
 export default async function TaskDetailPage({
   params,
@@ -87,14 +88,9 @@ export default async function TaskDetailPage({
           </section>
         )}
 
-        <section className="rounded-lg border border-line/70 bg-paper p-4 space-y-3">
-          <div className="text-[10px] uppercase tracking-wider text-ink-soft">
-            Conversation
-          </div>
-          <div className="text-[12px] text-ink-muted">
-            Conversation appears here once the agent runs the task.
-          </div>
-        </section>
+        <AgentRunConsole />
+
+
 
         <section className="rounded-lg border border-line/70 bg-paper p-4 space-y-3">
           <div className="text-[10px] uppercase tracking-wider text-ink-soft">
