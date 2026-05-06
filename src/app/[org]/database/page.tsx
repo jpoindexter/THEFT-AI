@@ -1,19 +1,25 @@
 import { Table2 } from "lucide-react";
+import Link from "next/link";
 
 const TABLES = [
-  { name: "audit_log_entries", schema: "auth" },
-  { name: "custom_oauth_providers", schema: "auth" },
-  { name: "flow_state", schema: "auth" },
+  { name: "users", schema: "public" },
+  { name: "subscriptions", schema: "public" },
+  { name: "tasks", schema: "public" },
+  { name: "agents", schema: "public" },
+  { name: "artifacts", schema: "public" },
   { name: "identities", schema: "auth" },
-  { name: "instances", schema: "auth" },
-  { name: "mfa_amr_claims", schema: "auth" },
-  { name: "mfa_challenges", schema: "auth" },
+  { name: "audit_log_entries", schema: "auth" },
   { name: "mfa_factors", schema: "auth" },
   { name: "oauth_authorizations", schema: "auth" },
-  { name: "oauth_client_states", schema: "auth" },
+  { name: "flow_state", schema: "auth" },
 ];
 
-export default function DatabasePage() {
+export default async function DatabasePage({
+  params,
+}: {
+  params: Promise<{ org: string }>;
+}) {
+  const { org } = await params;
   return (
     <div className="space-y-4">
       <header>
@@ -46,15 +52,16 @@ export default function DatabasePage() {
             36 tables across 5 schemas
           </p>
           {TABLES.map((t) => (
-            <button
+            <Link
               key={t.name}
+              href={`/${org}/database/tables/${t.name}`}
               className="w-full rounded-md px-2 py-1 text-left hover:bg-cream inline-flex items-center justify-between"
             >
               <span className="font-mono">{t.name}</span>
               <span className="text-[9px] uppercase text-ink-soft">
                 {t.schema}
               </span>
-            </button>
+            </Link>
           ))}
         </aside>
         <main className="rounded-lg border border-line/70 bg-paper p-6 flex flex-col items-center justify-center text-center min-h-[400px]">

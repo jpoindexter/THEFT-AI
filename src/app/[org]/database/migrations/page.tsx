@@ -4,9 +4,9 @@ import {
   Eyebrow,
   PageTitle,
   Pill,
-  ButtonGhost,
   Hint,
 } from "@/components/ui/primitives";
+import Link from "next/link";
 
 const MIGRATIONS = [
   {
@@ -35,7 +35,12 @@ const MIGRATIONS = [
   },
 ];
 
-export default function MigrationsPage() {
+export default async function MigrationsPage({
+  params,
+}: {
+  params: Promise<{ org: string }>;
+}) {
+  const { org } = await params;
   return (
     <div className="space-y-4">
       <header>
@@ -50,7 +55,7 @@ export default function MigrationsPage() {
       <Card>
         <ul className="divide-y divide-line/60">
           {MIGRATIONS.map((m) => (
-            <MigrationRow key={m.id} m={m} />
+            <MigrationRow key={m.id} org={org} m={m} />
           ))}
         </ul>
       </Card>
@@ -59,8 +64,10 @@ export default function MigrationsPage() {
 }
 
 function MigrationRow({
+  org,
   m,
 }: {
+  org: string;
   m: {
     id: string;
     name: string;
@@ -71,27 +78,32 @@ function MigrationRow({
   };
 }) {
   return (
-    <li className="px-4 py-3 flex items-start justify-between gap-3">
-      <div className="min-w-0">
-        <div className="flex items-center gap-2">
-          <code className="text-sm font-mono text-ink">{m.name}</code>
-          {m.status === "applied" && (
-            <CheckCircle2 className="size-3 text-sage-ink" />
-          )}
+    <li>
+      <Link
+        href={`/${org}/database/migrations/${m.name}`}
+        className="px-4 py-3 flex items-start justify-between gap-3 hover:bg-canvas"
+      >
+        <div className="min-w-0">
+          <div className="flex items-center gap-2">
+            <code className="text-sm font-mono text-ink">{m.name}</code>
+            {m.status === "applied" && (
+              <CheckCircle2 className="size-3 text-sage-ink" />
+            )}
+          </div>
+          <Eyebrow className="lowercase tracking-normal mt-0.5 normal-case">
+            {m.when} · {m.by}
+          </Eyebrow>
+          <p className="text-sm text-ink mt-1">{m.summary}</p>
         </div>
-        <Eyebrow className="lowercase tracking-normal mt-0.5 normal-case">
-          {m.when} · {m.by}
-        </Eyebrow>
-        <p className="text-sm text-ink mt-1">{m.summary}</p>
-      </div>
-      <div className="flex items-center gap-2 shrink-0">
-        <Pill tone={m.status === "applied" ? "sage" : "mustard"}>
-          {m.status}
-        </Pill>
-        <ButtonGhost className="text-xs px-2 py-1 inline-flex items-center gap-1">
-          Open <ArrowRight className="size-3" />
-        </ButtonGhost>
-      </div>
+        <div className="flex items-center gap-2 shrink-0">
+          <Pill tone={m.status === "applied" ? "sage" : "mustard"}>
+            {m.status}
+          </Pill>
+          <span className="text-xs inline-flex items-center gap-1 text-ink-muted">
+            Open <ArrowRight className="size-3" />
+          </span>
+        </div>
+      </Link>
     </li>
   );
 }

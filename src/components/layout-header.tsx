@@ -28,6 +28,7 @@ import {
   Eye,
   Users,
   ShieldCheck,
+  Brain,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -39,6 +40,7 @@ import {
 import { useEffect, useState } from "react";
 import KeyboardShortcutsDialog from "@/components/keyboard-shortcuts-dialog";
 import ThemeToggle from "@/components/theme-toggle";
+import CommandPalette from "@/components/command-palette";
 
 export default function LayoutHeader({
   orgName,
@@ -56,6 +58,7 @@ export default function LayoutHeader({
   const router = useRouter();
   const pathname = usePathname();
   const [shortcutsOpen, setShortcutsOpen] = useState(false);
+  const [paletteOpen, setPaletteOpen] = useState(false);
 
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
@@ -64,7 +67,7 @@ export default function LayoutHeader({
         setShortcutsOpen(true);
       } else if ((e.metaKey || e.ctrlKey) && e.key === "k") {
         e.preventDefault();
-        router.push(`/${orgSlug}/search`);
+        setPaletteOpen(true);
       } else if ((e.metaKey || e.ctrlKey) && e.key === ".") {
         e.preventDefault();
         router.push(`/${orgSlug}/review`);
@@ -99,6 +102,9 @@ export default function LayoutHeader({
     review: "Review",
     "managed-services": "Managed services",
     preview: "Preview",
+    memory: "Company memory",
+    notifications: "Notifications",
+    billing: "Billing",
   };
   const subLabel =
     subSegment && SUB_LABELS[subSegment]
@@ -244,6 +250,11 @@ export default function LayoutHeader({
               label="Managed services"
             />
             <MenuRow
+              onSelect={goto(`/${orgSlug}/memory`)}
+              icon={<Brain className="size-3.5" />}
+              label="Company memory"
+            />
+            <MenuRow
               onSelect={goto(`/${orgSlug}/settings/billing`)}
               icon={<Receipt className="size-3.5" />}
               label="Billing & Usage"
@@ -300,7 +311,7 @@ export default function LayoutHeader({
           <Share2 className="size-3.5" />
         </IconBtn>
         <IconBtn
-          onClick={goto(`/${orgSlug}/search`)}
+          onClick={() => setPaletteOpen(true)}
           title="Search (⌘K)"
         >
           <Search className="size-3.5" />
@@ -310,6 +321,7 @@ export default function LayoutHeader({
         open={shortcutsOpen}
         onOpenChange={setShortcutsOpen}
       />
+      <CommandPalette open={paletteOpen} onOpenChange={setPaletteOpen} />
     </header>
   );
 }
