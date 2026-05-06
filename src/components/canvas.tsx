@@ -129,7 +129,7 @@ export default function Canvas({
       <button
         type="button"
         onClick={reset}
-        className="absolute top-3 right-3 rounded-md bg-white border border-stone-200/70 px-2 py-1 text-[11px] text-stone-500 hover:border-stone-400 inline-flex items-center gap-1"
+        className="absolute top-3 right-3 rounded-md bg-paper border border-line/70 px-2 py-1 text-[11px] text-ink-muted hover:border-line-strong inline-flex items-center gap-1"
         data-canvas-pan-block
       >
         {Math.round(t.scale * 100)}%

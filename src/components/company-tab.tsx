@@ -29,22 +29,22 @@ export default function CompanyTab({
   return (
     <div className="flex-1 overflow-y-auto p-4 space-y-5 text-[13px]">
       <div>
-        <div className="text-[10px] uppercase tracking-[0.12em] text-stone-400 mb-2">
+        <div className="text-[10px] uppercase tracking-[0.12em] text-ink-soft mb-2">
           Company memory
         </div>
         {memory ? (
-          <div className="rounded-md border border-stone-200/80 bg-white p-3 text-[12px] text-stone-700 leading-snug whitespace-pre-wrap">
+          <div className="rounded-md border border-line/80 bg-paper p-3 text-[12px] text-ink leading-snug whitespace-pre-wrap">
             {memory}
           </div>
         ) : (
-          <div className="rounded-md border border-stone-200/80 bg-white p-3 text-[12px] text-stone-500">
+          <div className="rounded-md border border-line/80 bg-paper p-3 text-[12px] text-ink-muted">
             No memory imported. Bring durable context from another AI tool via Settings → Organization.
           </div>
         )}
       </div>
 
       <div>
-        <div className="text-[10px] uppercase tracking-[0.12em] text-stone-400 mb-2">
+        <div className="text-[10px] uppercase tracking-[0.12em] text-ink-soft mb-2">
           Stack status
         </div>
         <div className="space-y-1">
@@ -59,12 +59,12 @@ export default function CompanyTab({
             ).map(([label, value, status]) => (
               <div
                 key={label}
-                className="rounded-md border border-stone-200/80 bg-white px-3 py-1.5 flex items-center justify-between text-[12px]"
+                className="rounded-md border border-line/80 bg-paper px-3 py-1.5 flex items-center justify-between text-[12px]"
               >
                 <span>{label}</span>
                 <span
                   className={`text-[10px] uppercase ${
-                    status === "ready" ? "text-emerald-700" : "text-stone-500"
+                    status === "ready" ? "text-emerald-700" : "text-ink-muted"
                   }`}
                 >
                   {value ?? status}

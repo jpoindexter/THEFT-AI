@@ -62,7 +62,7 @@ export default function NewTaskDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md p-0 bg-white">
+      <DialogContent className="sm:max-w-md p-0 bg-paper">
         <DialogHeader className="sr-only">
           <DialogTitle>Create a task</DialogTitle>
         </DialogHeader>
@@ -73,10 +73,10 @@ export default function NewTaskDialog({
             onChange={(e) => setDescription(e.target.value)}
             placeholder="Describe a task for your agent…"
             rows={5}
-            className="w-full resize-none text-[13px] focus:outline-none placeholder:text-stone-400"
+            className="w-full resize-none text-[13px] focus:outline-none placeholder:text-ink-soft"
           />
         </div>
-        <div className="flex items-center gap-2 border-t border-stone-200/80 p-2 text-[11px]">
+        <div className="flex items-center gap-2 border-t border-line/80 p-2 text-[11px]">
           <PillButton icon={<Paperclip className="size-3.5" />} label="Add files" />
           <PillButton
             icon={<Play className="size-3.5" />}
@@ -88,7 +88,7 @@ export default function NewTaskDialog({
           <select
             value={agentId}
             onChange={(e) => setAgentId(e.target.value)}
-            className="rounded-md border border-stone-200/80 bg-white px-2 py-1 focus:outline-none"
+            className="rounded-md border border-line/80 bg-paper px-2 py-1 focus:outline-none"
           >
             <option value="auto">Auto-assign</option>
             {agents.map((a) => (
@@ -126,7 +126,7 @@ function PillButton({
     <button
       type="button"
       onClick={onClick}
-      className="inline-flex items-center gap-1 rounded-md border border-stone-200/80 bg-white px-2 py-1 hover:border-stone-400 transition-colors"
+      className="inline-flex items-center gap-1 rounded-md border border-line/80 bg-paper px-2 py-1 hover:border-line-strong transition-colors"
     >
       {icon}
       {label}

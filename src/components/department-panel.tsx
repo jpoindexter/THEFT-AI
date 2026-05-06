@@ -113,7 +113,7 @@ export default function DepartmentPanel({
           className="rounded-lg aspect-[16/9] mb-2"
           style={{ background: cover }}
         />
-        <p className="text-[12px] text-stone-600 leading-snug">{description}</p>
+        <p className="text-[12px] text-ink-muted leading-snug">{description}</p>
       </div>
 
       <Card
@@ -125,16 +125,16 @@ export default function DepartmentPanel({
         {agents.map((a) => (
           <div
             key={a.id}
-            className="rounded-md border border-stone-200/70 bg-white px-3 py-1.5 flex items-center justify-between text-[12px]"
+            className="rounded-md border border-line/70 bg-paper px-3 py-1.5 flex items-center justify-between text-[12px]"
           >
             <div>
               <span className="font-medium mr-1">{a.name}</span>
-              <span className="text-stone-500">Default</span>
+              <span className="text-ink-muted">Default</span>
             </div>
-            <span className="text-[10px] text-stone-500">2 schedules</span>
+            <span className="text-[10px] text-ink-muted">2 schedules</span>
           </div>
         ))}
-        <button className="mt-2 w-full inline-flex items-center justify-center gap-1 rounded-md bg-stone-50 border border-dashed border-stone-300 px-3 py-1.5 text-[12px] text-stone-600 hover:border-stone-400">
+        <button className="mt-2 w-full inline-flex items-center justify-center gap-1 rounded-md bg-canvas border border-dashed border-line-strong px-3 py-1.5 text-[12px] text-ink-muted hover:border-line-strong">
           <Plus className="size-3" /> New Agent
         </button>
       </Card>
@@ -152,10 +152,10 @@ export default function DepartmentPanel({
             {tasks.map((t) => (
               <li
                 key={t.id}
-                className="rounded-md border border-stone-200/70 bg-white px-2 py-1 text-[12px] flex items-center justify-between"
+                className="rounded-md border border-line/70 bg-paper px-2 py-1 text-[12px] flex items-center justify-between"
               >
                 <span className="truncate">{t.title}</span>
-                <span className="text-[10px] uppercase text-stone-500">
+                <span className="text-[10px] uppercase text-ink-muted">
                   {t.status}
                 </span>
               </li>
@@ -177,10 +177,10 @@ export default function DepartmentPanel({
             {artifacts.map((a) => (
               <li
                 key={a.id}
-                className="rounded-md border border-stone-200/70 bg-white px-2 py-1 text-[12px] flex items-center justify-between"
+                className="rounded-md border border-line/70 bg-paper px-2 py-1 text-[12px] flex items-center justify-between"
               >
                 <span className="truncate">{a.name}</span>
-                <span className="text-[10px] uppercase text-stone-500">
+                <span className="text-[10px] uppercase text-ink-muted">
                   {a.kind}
                 </span>
               </li>
@@ -194,7 +194,7 @@ export default function DepartmentPanel({
         open={open.context}
         toggle={() => setOpen((o) => ({ ...o, context: !o.context }))}
       >
-        <pre className="text-[10px] font-mono text-stone-700 bg-stone-50 rounded-md p-2 leading-snug whitespace-pre-wrap">
+        <pre className="text-[10px] font-mono text-ink bg-canvas rounded-md p-2 leading-snug whitespace-pre-wrap">
           {JSON.stringify(
             {
               summary:
@@ -224,7 +224,7 @@ function Card({
   children: React.ReactNode;
 }) {
   return (
-    <section className="rounded-lg border border-stone-200/70 bg-white">
+    <section className="rounded-lg border border-line/70 bg-paper">
       <button
         type="button"
         onClick={toggle}
@@ -232,9 +232,9 @@ function Card({
       >
         <span className="inline-flex items-center gap-1.5">
           <span className="font-medium">{title}</span>
-          <Info className="size-3 text-stone-400" />
+          <Info className="size-3 text-ink-soft" />
         </span>
-        <span className="inline-flex items-center gap-2 text-stone-400 text-[11px]">
+        <span className="inline-flex items-center gap-2 text-ink-soft text-[11px]">
           {count !== undefined && <span>{count}</span>}
           {open ? (
             <ChevronDown className="size-3" />
@@ -250,9 +250,9 @@ function Card({
 
 function Empty({ title, body }: { title: string; body: string }) {
   return (
-    <div className="rounded-md border border-stone-200/70 bg-stone-50 px-3 py-3 text-[12px]">
-      <div className="font-medium text-stone-700">{title}</div>
-      <div className="text-stone-500">{body}</div>
+    <div className="rounded-md border border-line/70 bg-canvas px-3 py-3 text-[12px]">
+      <div className="font-medium text-ink">{title}</div>
+      <div className="text-ink-muted">{body}</div>
     </div>
   );
 }

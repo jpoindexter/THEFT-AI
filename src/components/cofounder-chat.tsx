@@ -159,10 +159,10 @@ export default function CofounderChat({
         {isEmpty && onboarding && (
           <div className="flex flex-col items-center text-center gap-3 pt-4 pb-2">
             <Sunflower />
-            <p className="text-[14px] text-stone-900 tracking-tight">
+            <p className="text-[14px] text-ink tracking-tight">
               Tell me more about your company
             </p>
-            <p className="text-[12px] text-stone-500 max-w-[260px] leading-snug">
+            <p className="text-[12px] text-ink-muted max-w-[260px] leading-snug">
               Answer the brief below or share what you&apos;re building in the chat.
             </p>
           </div>
@@ -170,9 +170,9 @@ export default function CofounderChat({
         {isEmpty && !onboarding && (
           <div className="flex flex-col items-center justify-center h-full text-center gap-3 px-6">
             <div className="size-10 rounded-full bg-gradient-to-br from-amber-200 to-amber-500" />
-            <p className="text-[13px] text-stone-500 leading-snug">
+            <p className="text-[13px] text-ink-muted leading-snug">
               Ask Cofounder anything about{" "}
-              <span className="text-stone-900">{organization.slug}</span>.
+              <span className="text-ink">{organization.slug}</span>.
             </p>
           </div>
         )}
@@ -183,7 +183,7 @@ export default function CofounderChat({
 
         {/* Inline brief widget — appears after user sends first message in onboarding */}
         {showBrief && briefStarted && !briefDone && briefLoading && (
-          <div className="rounded-lg border border-stone-200/80 bg-white p-4 text-[12px] text-stone-500 inline-flex items-center gap-2">
+          <div className="rounded-lg border border-line/80 bg-paper p-4 text-[12px] text-ink-muted inline-flex items-center gap-2">
             <span className="size-2 rounded-full bg-amber-300 animate-pulse" />
             Cofounder is building a brief from your idea…
           </div>
@@ -213,7 +213,7 @@ export default function CofounderChat({
               <button
                 type="button"
                 onClick={() => setActionsOpen((o) => !o)}
-                className="text-[11px] text-stone-500 inline-flex items-center gap-1 hover:text-stone-700"
+                className="text-[11px] text-ink-muted inline-flex items-center gap-1 hover:text-ink"
               >
                 <ChevronDown
                   className={`size-3 transition-transform ${actionsOpen ? "" : "-rotate-90"}`}
@@ -221,7 +221,7 @@ export default function CofounderChat({
                 Ran 2 actions
               </button>
               {actionsOpen && (
-                <div className="text-[11px] text-stone-500 space-y-1 pl-4">
+                <div className="text-[11px] text-ink-muted space-y-1 pl-4">
                   <div className="flex items-center gap-1.5">
                     <span aria-hidden>⏱</span>
                     Waited for the user&apos;s answer
@@ -243,13 +243,13 @@ export default function CofounderChat({
         )}
 
         {busy && !briefStarted && (
-          <div className="text-[10px] uppercase tracking-[0.12em] text-stone-400">
+          <div className="text-[10px] uppercase tracking-[0.12em] text-ink-soft">
             Cofounder is thinking…
           </div>
         )}
       </div>
-      <div className="border-t border-stone-200/80 p-2.5">
-        <div className="rounded-lg border border-stone-200/80 bg-white focus-within:border-stone-400 transition-colors flex items-end gap-1">
+      <div className="border-t border-line/80 p-2.5">
+        <div className="rounded-lg border border-line/80 bg-paper focus-within:border-line-strong transition-colors flex items-end gap-1">
           <textarea
             value={input}
             onChange={(e) => setInput(e.target.value)}
@@ -267,14 +267,14 @@ export default function CofounderChat({
                   : "Ask Cofounder anything…"
             }
             rows={2}
-            className="flex-1 resize-none bg-transparent px-3 py-2 text-[13px] focus:outline-none placeholder:text-stone-400"
+            className="flex-1 resize-none bg-transparent px-3 py-2 text-[13px] focus:outline-none placeholder:text-ink-soft"
           />
           <button
             type="button"
             onClick={send}
             disabled={busy || !input.trim()}
             aria-label="Send"
-            className="size-6 mb-1.5 mr-1.5 rounded-md bg-stone-200 text-stone-500 inline-flex items-center justify-center disabled:opacity-50 hover:bg-stone-300 transition-colors"
+            className="size-6 mb-1.5 mr-1.5 rounded-md bg-stone-200 text-ink-muted inline-flex items-center justify-center disabled:opacity-50 hover:bg-stone-300 transition-colors"
           >
             ↑
           </button>
@@ -288,7 +288,7 @@ function Message({ m, isFirst }: { m: Msg; isFirst: boolean }) {
   if (m.role === "user") {
     return (
       <div className="flex justify-end">
-        <div className="max-w-[85%] rounded-lg bg-stone-100 px-3 py-1.5 text-[13px] text-stone-900">
+        <div className="max-w-[85%] rounded-lg bg-cream px-3 py-1.5 text-[13px] text-ink">
           {m.text}
         </div>
       </div>
@@ -296,7 +296,7 @@ function Message({ m, isFirst }: { m: Msg; isFirst: boolean }) {
   }
   return (
     <div className="space-y-1.5">
-      <div className="inline-flex items-center gap-1.5 text-[11px] text-stone-600 bg-amber-100/40 px-1.5 py-0.5 rounded-sm">
+      <div className="inline-flex items-center gap-1.5 text-[11px] text-ink-muted bg-amber-100/40 px-1.5 py-0.5 rounded-sm">
         <span className="size-3 rounded-full bg-gradient-to-br from-amber-200 to-amber-400 inline-block" />
         Cofounder
       </div>
@@ -304,7 +304,7 @@ function Message({ m, isFirst }: { m: Msg; isFirst: boolean }) {
         {m.text}
       </div>
       {isFirst && !m.text.trim() && (
-        <div className="text-stone-400 font-mono text-[11px]">
+        <div className="text-ink-soft font-mono text-[11px]">
           {`‘‘‘‘‘‘`}
         </div>
       )}
@@ -322,15 +322,15 @@ function AnsweredQuestionsCard({
   const [open, setOpen] = useState<Record<string, boolean>>({});
   return (
     <div className="space-y-2">
-      <div className="text-[11px] text-stone-500 inline-flex items-center gap-1">
+      <div className="text-[11px] text-ink-muted inline-flex items-center gap-1">
         <span aria-hidden>↳</span> Running Tool: Ask User Question
       </div>
-      <div className="rounded-lg border border-stone-200/80 bg-white p-3 space-y-2.5">
+      <div className="rounded-lg border border-line/80 bg-paper p-3 space-y-2.5">
         <div>
-          <div className="text-[12px] font-medium text-stone-900">
+          <div className="text-[12px] font-medium text-ink">
             Answered questions
           </div>
-          <div className="text-[11px] text-stone-500">You chose</div>
+          <div className="text-[11px] text-ink-muted">You chose</div>
         </div>
         {questions.map((q) => {
           const a = answers.find((x) => x.questionId === q.id);
@@ -341,7 +341,7 @@ function AnsweredQuestionsCard({
           return (
             <div
               key={q.id}
-              className="border-t border-stone-200/60 pt-2 first:border-0 first:pt-0"
+              className="border-t border-line/60 pt-2 first:border-0 first:pt-0"
             >
               <button
                 type="button"
@@ -353,8 +353,8 @@ function AnsweredQuestionsCard({
                 <span className="text-[12px] text-stone-800 leading-snug">
                   {q.prompt}
                 </span>
-                <span className="inline-flex items-center gap-1 text-[10px] text-stone-500 shrink-0">
-                  <span className="rounded bg-stone-100 px-1.5 py-0.5">
+                <span className="inline-flex items-center gap-1 text-[10px] text-ink-muted shrink-0">
+                  <span className="rounded bg-cream px-1.5 py-0.5">
                     Answered
                   </span>
                   <ChevronDown
@@ -363,7 +363,7 @@ function AnsweredQuestionsCard({
                 </span>
               </button>
               {isOpen && (
-                <div className="mt-1.5 inline-block bg-stone-100 rounded-sm px-1.5 py-0.5 text-[11px] text-stone-700">
+                <div className="mt-1.5 inline-block bg-cream rounded-sm px-1.5 py-0.5 text-[11px] text-ink">
                   {label}
                 </div>
               )}
@@ -444,7 +444,7 @@ function BriefWidget({
   return (
     <div className="space-y-2">
       {isLast && (
-        <div className="text-[11px] text-stone-500 inline-flex items-center gap-1">
+        <div className="text-[11px] text-ink-muted inline-flex items-center gap-1">
           <ChevronDown
             className={`size-3 transition-transform ${actionsOpen ? "" : "-rotate-90"}`}
             onClick={() => setActionsOpen(!actionsOpen)}
@@ -454,7 +454,7 @@ function BriefWidget({
         </div>
       )}
       {actionsOpen && (
-        <div className="text-[11px] text-stone-500 space-y-1 pl-4">
+        <div className="text-[11px] text-ink-muted space-y-1 pl-4">
           <div className="flex items-center gap-1.5">
             <span aria-hidden>✎</span> Wrote to workspace
           </div>
@@ -467,24 +467,24 @@ function BriefWidget({
         </div>
       )}
 
-      <div className="rounded-lg border border-stone-200/80 bg-white overflow-hidden">
-        <div className="flex items-center justify-between px-3 py-1.5 text-[11px] text-stone-500 border-b border-stone-200/70">
+      <div className="rounded-lg border border-line/80 bg-paper overflow-hidden">
+        <div className="flex items-center justify-between px-3 py-1.5 text-[11px] text-ink-muted border-b border-line/70">
           <span className="inline-flex items-center gap-1">
             {step + 1}/{total}
-            <ChevronRight className="size-3 text-stone-400" />
+            <ChevronRight className="size-3 text-ink-soft" />
           </span>
           <button
             type="button"
             onClick={() => setStep(Math.max(0, step - 1))}
             disabled={step === 0}
-            className="disabled:opacity-30 hover:text-stone-900"
+            className="disabled:opacity-30 hover:text-ink"
             aria-label="Close"
           >
             <X className="size-3" />
           </button>
         </div>
         <div className="p-3 space-y-3">
-          <p className="text-[13px] leading-snug text-stone-900">{q.prompt}</p>
+          <p className="text-[13px] leading-snug text-ink">{q.prompt}</p>
           <div className="space-y-1">
             {q.options.map((o) => {
               const selected = currentAnswer?.optionKey === o.key;
@@ -494,12 +494,12 @@ function BriefWidget({
                   onClick={() => pick(o.key)}
                   className={`w-full text-left rounded-md px-2.5 py-2 transition-colors ${
                     selected
-                      ? "bg-stone-100"
-                      : "hover:bg-stone-50"
+                      ? "bg-cream"
+                      : "hover:bg-canvas"
                   }`}
                 >
                   <div className="flex items-start justify-between gap-2">
-                    <div className="text-[12px] font-medium text-stone-900">
+                    <div className="text-[12px] font-medium text-ink">
                       {o.label}
                     </div>
                     {o.recommended && (
@@ -509,7 +509,7 @@ function BriefWidget({
                     )}
                   </div>
                   {o.description && (
-                    <p className="text-[11px] text-stone-500 mt-1 leading-snug">
+                    <p className="text-[11px] text-ink-muted mt-1 leading-snug">
                       {o.description}
                     </p>
                   )}
@@ -523,16 +523,16 @@ function BriefWidget({
               value={custom}
               onChange={(e) => setCustomAnswer(e.target.value)}
               placeholder="Something else…"
-              className="w-full text-[12px] border-b border-stone-200 bg-transparent px-1 py-1 focus:outline-none focus:border-stone-400"
+              className="w-full text-[12px] border-b border-line bg-transparent px-1 py-1 focus:outline-none focus:border-line-strong"
             />
           )}
         </div>
-        <div className="flex items-center justify-end gap-1.5 border-t border-stone-200/70 p-2">
+        <div className="flex items-center justify-end gap-1.5 border-t border-line/70 p-2">
           <button
             type="button"
             onClick={decideAll}
             disabled={submitting}
-            className="text-[11px] rounded-md border border-stone-200/80 bg-white px-2.5 py-1 hover:border-stone-400 disabled:opacity-40"
+            className="text-[11px] rounded-md border border-line/80 bg-paper px-2.5 py-1 hover:border-line-strong disabled:opacity-40"
           >
             Decide all
           </button>
@@ -601,11 +601,11 @@ function BusinessPlanCard({
           </p>
         ))}
       </div>
-      <div className="text-[10px] text-stone-400 inline-flex items-center gap-1.5">
+      <div className="text-[10px] text-ink-soft inline-flex items-center gap-1.5">
         {new Date().toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}
         <button
           type="button"
-          className="hover:text-stone-700"
+          className="hover:text-ink"
           aria-label="Copy"
         >
           ⎘
@@ -654,7 +654,7 @@ function PlanSection({
       >
         {label}
       </span>
-      <div className="text-[12px] text-stone-700 mt-1.5 leading-snug">
+      <div className="text-[12px] text-ink mt-1.5 leading-snug">
         {children}
       </div>
     </div>
@@ -687,7 +687,7 @@ function DocIcon() {
   return (
     <svg
       viewBox="0 0 16 16"
-      className="size-4 text-stone-500"
+      className="size-4 text-ink-muted"
       fill="none"
       stroke="currentColor"
       strokeWidth="1.4"

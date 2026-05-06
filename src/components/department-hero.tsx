@@ -199,12 +199,12 @@ export default function DepartmentHero({
             className="ml-auto size-7 rounded-md hover:bg-stone-200/60 inline-flex items-center justify-center"
             aria-label="More"
           >
-            <MoreHorizontal className="size-4 text-stone-400" />
+            <MoreHorizontal className="size-4 text-ink-soft" />
           </button>
         </div>
 
-        <div className="rounded-2xl bg-stone-50/80 border border-stone-200/70 px-8 py-12 flex flex-col items-center text-center gap-6">
-          <div className="inline-flex items-center gap-1.5 rounded-full border border-stone-200/70 bg-white px-3 py-1 text-[11px] text-stone-700">
+        <div className="rounded-2xl bg-canvas/80 border border-line/70 px-8 py-12 flex flex-col items-center text-center gap-6">
+          <div className="inline-flex items-center gap-1.5 rounded-full border border-line/70 bg-paper px-3 py-1 text-[11px] text-ink">
             <Sparkles className="size-3 text-amber-500" />
             {cfg.cta}
           </div>
@@ -218,12 +218,12 @@ export default function DepartmentHero({
           </div>
         </div>
 
-        <div className="rounded-2xl border border-stone-200/70 bg-white p-4">
+        <div className="rounded-2xl border border-line/70 bg-paper p-4">
           <div className="flex items-center justify-between mb-3">
-            <span className="text-[11px] text-stone-500">
+            <span className="text-[11px] text-ink-muted">
               {department.name} Roadmap
             </span>
-            <span className="text-[10px] uppercase tracking-wider text-stone-400">
+            <span className="text-[10px] uppercase tracking-wider text-ink-soft">
               {cfg.progress}
             </span>
           </div>
@@ -232,13 +232,13 @@ export default function DepartmentHero({
               <button
                 key={i}
                 type="button"
-                className="text-left rounded-md border border-stone-200/70 bg-stone-50 px-3 py-2 hover:border-stone-400 transition-colors"
+                className="text-left rounded-md border border-line/70 bg-canvas px-3 py-2 hover:border-line-strong transition-colors"
               >
                 <div className="size-5 rounded-sm bg-stone-200 mb-1.5" />
-                <div className="text-[12px] font-medium text-stone-900 leading-tight">
+                <div className="text-[12px] font-medium text-ink leading-tight">
                   {node.title}
                 </div>
-                <div className="text-[10px] text-stone-500 mt-0.5">
+                <div className="text-[10px] text-ink-muted mt-0.5">
                   {node.subtitle}
                 </div>
               </button>
@@ -247,7 +247,7 @@ export default function DepartmentHero({
         </div>
 
         {hasActiveTasks && (
-          <div className="text-[12px] text-stone-500 text-center">
+          <div className="text-[12px] text-ink-muted text-center">
             Active tasks shown in the right panel.
           </div>
         )}
@@ -276,26 +276,26 @@ export default function DepartmentHero({
 function DeviceMock({ url, label }: { url: string; label: string }) {
   return (
     <div className="flex flex-col items-center gap-2">
-      <div className="rounded-xl border border-stone-200/80 bg-white shadow-[0_4px_24px_-12px_rgba(0,0,0,0.15)] overflow-hidden w-56">
-        <div className="bg-stone-100 border-b border-stone-200/70 px-2 py-1 flex items-center gap-1.5">
+      <div className="rounded-xl border border-line/80 bg-paper shadow-[0_4px_24px_-12px_rgba(0,0,0,0.15)] overflow-hidden w-56">
+        <div className="bg-cream border-b border-line/70 px-2 py-1 flex items-center gap-1.5">
           <div className="flex gap-1">
             <span className="size-1.5 rounded-full bg-rose-300" />
             <span className="size-1.5 rounded-full bg-amber-300" />
             <span className="size-1.5 rounded-full bg-emerald-300" />
           </div>
-          <div className="flex-1 text-[8px] text-stone-500 text-center font-mono">
+          <div className="flex-1 text-[8px] text-ink-muted text-center font-mono">
             {url}
           </div>
         </div>
         <div className="aspect-[4/3] p-3 space-y-1.5">
           <div className="h-1.5 w-12 rounded bg-stone-200" />
-          <div className="h-1.5 w-20 rounded bg-stone-100" />
-          <div className="h-1.5 w-16 rounded bg-stone-100" />
-          <div className="h-12 mt-2 rounded bg-stone-100" />
+          <div className="h-1.5 w-20 rounded bg-cream" />
+          <div className="h-1.5 w-16 rounded bg-cream" />
+          <div className="h-12 mt-2 rounded bg-cream" />
           <div className="h-3 mt-1 rounded bg-blue-100 w-16" />
         </div>
       </div>
-      <span className="text-[10px] text-stone-500">{label}</span>
+      <span className="text-[10px] text-ink-muted">{label}</span>
     </div>
   );
 }

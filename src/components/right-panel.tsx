@@ -79,16 +79,16 @@ export default function RightPanel({
   // task-style header with the cofounder chat + inline brief beneath.
   if (!hasPlan) {
     return (
-      <aside className="rounded-lg bg-white border border-stone-200/70 flex flex-col overflow-hidden">
-        <header className="px-4 py-3 border-b border-stone-200/70 flex items-start gap-3">
-          <div className="size-7 rounded-md bg-stone-100 inline-flex items-center justify-center mt-0.5">
+      <aside className="rounded-lg bg-paper border border-line/70 flex flex-col overflow-hidden">
+        <header className="px-4 py-3 border-b border-line/70 flex items-start gap-3">
+          <div className="size-7 rounded-md bg-cream inline-flex items-center justify-center mt-0.5">
             <DocIcon />
           </div>
           <div className="leading-tight">
             <div className="text-[15px] tracking-tight font-medium">
               Onboarding
             </div>
-            <div className="text-[11px] text-stone-500 mt-0.5">
+            <div className="text-[11px] text-ink-muted mt-0.5">
               {organization.name} · {founderName}
             </div>
           </div>
@@ -98,10 +98,10 @@ export default function RightPanel({
           onboarding
           emptyHeader={
             <div className="flex flex-col items-center text-center gap-3 pt-4 pb-2">
-              <p className="text-[14px] text-stone-900 tracking-tight">
+              <p className="text-[14px] text-ink tracking-tight">
                 Tell me more about your company
               </p>
-              <p className="text-[12px] text-stone-500 max-w-[260px] leading-snug">
+              <p className="text-[12px] text-ink-muted max-w-[260px] leading-snug">
                 Share what you&apos;re building and Cofounder will start a brief.
               </p>
             </div>
@@ -112,8 +112,8 @@ export default function RightPanel({
   }
 
   return (
-    <aside className="rounded-lg bg-white border border-stone-200/70 flex flex-col overflow-hidden">
-      <nav className="h-10 flex items-center gap-3 px-4 border-b border-stone-200/70 text-[13px]">
+    <aside className="rounded-lg bg-paper border border-line/70 flex flex-col overflow-hidden">
+      <nav className="h-10 flex items-center gap-3 px-4 border-b border-line/70 text-[13px]">
         {TABS.map((t) => {
           const active = tab === t.key;
           return (
@@ -122,8 +122,8 @@ export default function RightPanel({
               onClick={() => setTab(t.key)}
               className={`tracking-tight transition-colors ${
                 active
-                  ? "text-stone-900 font-medium"
-                  : "text-stone-400 hover:text-stone-900"
+                  ? "text-ink font-medium"
+                  : "text-ink-soft hover:text-ink"
               }`}
             >
               {t.label}
@@ -176,12 +176,12 @@ function HomeTab({
   return (
     <div className="flex-1 overflow-y-auto p-4 space-y-5">
       <h2 className="text-[18px] tracking-tight">
-        {greeting}, <span className="text-stone-400">{founderName}</span>
+        {greeting}, <span className="text-ink-soft">{founderName}</span>
       </h2>
 
       <Link
         href={`/${organization.slug}/roadmap`}
-        className="block rounded-lg overflow-hidden border border-stone-200/70 relative aspect-[16/8]"
+        className="block rounded-lg overflow-hidden border border-line/70 relative aspect-[16/8]"
       >
         <div
           className="absolute inset-0 bg-gradient-to-b from-sky-300 via-sky-100 to-sky-50"
@@ -196,10 +196,10 @@ function HomeTab({
           aria-hidden
         />
         <div className="absolute inset-0 flex items-end justify-between p-3">
-          <div className="text-[12px] tracking-tight text-stone-700 backdrop-blur-sm bg-white/40 px-2 py-0.5 rounded">
+          <div className="text-[12px] tracking-tight text-ink backdrop-blur-sm bg-paper/60 px-2 py-0.5 rounded">
             {organization.name} Roadmap
           </div>
-          <div className="absolute top-3 right-3 text-[10px] text-stone-700 bg-white/60 backdrop-blur-sm rounded px-1.5 py-0.5">
+          <div className="absolute top-3 right-3 text-[10px] text-ink bg-paper/80 backdrop-blur-sm rounded px-1.5 py-0.5">
             9%
           </div>
         </div>
@@ -210,11 +210,11 @@ function HomeTab({
           {ACTIVE_TASKS.map((t, i) => (
             <li
               key={i}
-              className="flex items-center gap-2 rounded-md hover:bg-stone-50 px-1 py-1.5 text-[13px] text-stone-700 cursor-pointer"
+              className="flex items-center gap-2 rounded-md hover:bg-canvas px-1 py-1.5 text-[13px] text-ink cursor-pointer"
             >
               {t.icon}
               <span className="truncate flex-1">{t.title}</span>
-              <ChevronRight className="size-3.5 text-stone-400" />
+              <ChevronRight className="size-3.5 text-ink-soft" />
             </li>
           ))}
         </ul>
@@ -225,7 +225,7 @@ function HomeTab({
         right={
           <button
             type="button"
-            className="text-stone-400 hover:text-stone-700"
+            className="text-ink-soft hover:text-ink"
             aria-label="Refresh"
           >
             <RefreshCw className="size-3" />
@@ -236,9 +236,9 @@ function HomeTab({
           {SUGGESTED.map((s) => (
             <li
               key={s}
-              className="flex items-center gap-2 text-[13px] text-stone-700"
+              className="flex items-center gap-2 text-[13px] text-ink"
             >
-              <Circle className="size-3 text-stone-300" />
+              <Circle className="size-3 text-line-strong" />
               <span>{s}</span>
             </li>
           ))}
@@ -262,7 +262,7 @@ function Section({
   return (
     <div>
       <div className="flex items-center justify-between mb-2">
-        <div className="text-[10px] uppercase tracking-[0.14em] text-stone-400">
+        <div className="text-[10px] uppercase tracking-[0.14em] text-ink-soft">
           {label}
         </div>
         {right}
@@ -280,23 +280,23 @@ function CofounderInlineComposer({
   const [text, setText] = useState("");
   return (
     <div className="mt-auto pt-4">
-      <div className="rounded-lg border border-stone-200/70 bg-white">
-        <div className="px-3 py-2 border-b border-stone-200/70 inline-flex items-center gap-1.5 text-[11px]">
+      <div className="rounded-lg border border-line/70 bg-paper">
+        <div className="px-3 py-2 border-b border-line/70 inline-flex items-center gap-1.5 text-[11px]">
           <span className="size-3 rounded-full bg-gradient-to-br from-amber-200 to-amber-400 inline-block" />
-          <span className="text-stone-600">Cofounder</span>
+          <span className="text-ink-muted">Cofounder</span>
         </div>
         <textarea
           value={text}
           onChange={(e) => setText(e.target.value)}
           placeholder={`Ask Cofounder anything about your company…`}
           rows={2}
-          className="w-full resize-none bg-transparent px-3 py-2 text-[12px] focus:outline-none placeholder:text-stone-400"
+          className="w-full resize-none bg-transparent px-3 py-2 text-[12px] focus:outline-none placeholder:text-ink-soft"
         />
         <div className="flex items-center justify-between px-2 pb-2">
           <button
             type="button"
             aria-label="Add"
-            className="size-6 rounded-md hover:bg-stone-100 inline-flex items-center justify-center text-stone-400"
+            className="size-6 rounded-md hover:bg-cream inline-flex items-center justify-center text-ink-soft"
           >
             +
           </button>
@@ -312,7 +312,7 @@ function CofounderInlineComposer({
               });
               setText("");
             }}
-            className="size-6 rounded-md bg-stone-200 text-stone-500 inline-flex items-center justify-center disabled:opacity-50"
+            className="size-6 rounded-md bg-line text-ink-muted inline-flex items-center justify-center disabled:opacity-50"
             aria-label="Send"
           >
             ↑
@@ -327,7 +327,7 @@ function DocIcon() {
   return (
     <svg
       viewBox="0 0 16 16"
-      className="size-4 text-stone-500"
+      className="size-4 text-ink-muted"
       fill="none"
       stroke="currentColor"
       strokeWidth="1.4"

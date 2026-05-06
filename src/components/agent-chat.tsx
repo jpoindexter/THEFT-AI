@@ -152,14 +152,14 @@ export default function AgentChat({
           />
         ))}
         {busy && (
-          <div className="text-[11px] text-stone-400 inline-flex items-center gap-1.5">
+          <div className="text-[11px] text-ink-soft inline-flex items-center gap-1.5">
             <span className="size-2 rounded-full bg-amber-300 animate-pulse" />
             Cofounder is thinking…
           </div>
         )}
       </div>
-      <div className="border-t border-stone-200/80 p-2.5">
-        <div className="rounded-lg border border-stone-200/80 bg-white focus-within:border-stone-400 transition-colors flex items-end gap-1">
+      <div className="border-t border-line/80 p-2.5">
+        <div className="rounded-lg border border-line/80 bg-paper focus-within:border-line-strong transition-colors flex items-end gap-1">
           <textarea
             value={input}
             onChange={(e) => setInput(e.target.value)}
@@ -175,14 +175,14 @@ export default function AgentChat({
                 : "Ask Cofounder anything about your company…"
             }
             rows={2}
-            className="flex-1 resize-none bg-transparent px-3 py-2 text-[13px] focus:outline-none placeholder:text-stone-400"
+            className="flex-1 resize-none bg-transparent px-3 py-2 text-[13px] focus:outline-none placeholder:text-ink-soft"
           />
           <button
             type="button"
             onClick={() => void send(input)}
             disabled={busy || !input.trim()}
             aria-label="Send"
-            className="size-6 mb-1.5 mr-1.5 rounded-md bg-stone-200 text-stone-500 inline-flex items-center justify-center disabled:opacity-50 hover:bg-stone-300"
+            className="size-6 mb-1.5 mr-1.5 rounded-md bg-stone-200 text-ink-muted inline-flex items-center justify-center disabled:opacity-50 hover:bg-stone-300"
           >
             <ArrowUp className="size-3.5" />
           </button>
@@ -206,7 +206,7 @@ function Turn({
   if (t.kind === "user_message") {
     return (
       <div className="flex justify-end">
-        <div className="max-w-[85%] rounded-lg bg-stone-100 px-3 py-1.5 text-[13px] text-stone-900">
+        <div className="max-w-[85%] rounded-lg bg-cream px-3 py-1.5 text-[13px] text-ink">
           {t.text}
         </div>
       </div>
@@ -215,7 +215,7 @@ function Turn({
   if (t.kind === "text") {
     return (
       <div className="space-y-1">
-        <div className="inline-flex items-center gap-1.5 text-[11px] text-stone-600 bg-amber-100/40 px-1.5 py-0.5 rounded-sm">
+        <div className="inline-flex items-center gap-1.5 text-[11px] text-ink-muted bg-amber-100/40 px-1.5 py-0.5 rounded-sm">
           <span className="size-3 rounded-full bg-gradient-to-br from-amber-200 to-amber-400 inline-block" />
           Cofounder
         </div>
@@ -237,7 +237,7 @@ function Turn({
   }
   if (t.kind === "tool_answer") {
     return (
-      <div className="text-[11px] text-stone-500 inline-block bg-stone-100 rounded-sm px-1.5 py-0.5">
+      <div className="text-[11px] text-ink-muted inline-block bg-cream rounded-sm px-1.5 py-0.5">
         {t.answer.label ?? t.answer.custom ?? t.answer.key}
       </div>
     );
@@ -259,24 +259,24 @@ function Turn({
 function ToolCallCard({ name, input }: { name: string; input: unknown }) {
   const [open, setOpen] = useState(false);
   return (
-    <div className="rounded-md border border-stone-200/80 bg-white text-[12px]">
+    <div className="rounded-md border border-line/80 bg-paper text-[12px]">
       <button
         type="button"
         onClick={() => setOpen((o) => !o)}
-        className="w-full flex items-center justify-between px-2.5 py-1.5 hover:bg-stone-50"
+        className="w-full flex items-center justify-between px-2.5 py-1.5 hover:bg-canvas"
       >
-        <span className="inline-flex items-center gap-1.5 text-stone-700">
-          <Wrench className="size-3 text-stone-400" />
+        <span className="inline-flex items-center gap-1.5 text-ink">
+          <Wrench className="size-3 text-ink-soft" />
           <span className="font-mono text-[11px]">{name}</span>
         </span>
         {open ? (
-          <ChevronDown className="size-3 text-stone-400" />
+          <ChevronDown className="size-3 text-ink-soft" />
         ) : (
-          <ChevronRight className="size-3 text-stone-400" />
+          <ChevronRight className="size-3 text-ink-soft" />
         )}
       </button>
       {open && (
-        <pre className="border-t border-stone-200/70 p-2 text-[10px] font-mono text-stone-600 bg-stone-50 rounded-b-md whitespace-pre-wrap">
+        <pre className="border-t border-line/70 p-2 text-[10px] font-mono text-ink-muted bg-canvas rounded-b-md whitespace-pre-wrap">
           {JSON.stringify(input, null, 2)}
         </pre>
       )}
@@ -297,12 +297,12 @@ function AskUserQuestion({
   const [custom, setCustom] = useState("");
 
   return (
-    <div className="rounded-lg border border-stone-200/80 bg-white">
-      <div className="px-3 py-1.5 text-[11px] text-stone-500 border-b border-stone-200/70 inline-flex items-center gap-1">
+    <div className="rounded-lg border border-line/80 bg-paper">
+      <div className="px-3 py-1.5 text-[11px] text-ink-muted border-b border-line/70 inline-flex items-center gap-1">
         Cofounder is asking
       </div>
       <div className="p-3 space-y-3">
-        <p className="text-[13px] text-stone-900 leading-snug">
+        <p className="text-[13px] text-ink leading-snug">
           {input.question}
         </p>
         <div className="space-y-1">
@@ -317,11 +317,11 @@ function AskUserQuestion({
                 }}
                 disabled={disabled}
                 className={`w-full text-left rounded-md px-2.5 py-2 transition-colors disabled:opacity-50 ${
-                  selected ? "bg-stone-100" : "hover:bg-stone-50"
+                  selected ? "bg-cream" : "hover:bg-canvas"
                 }`}
               >
                 <div className="flex items-start justify-between gap-2">
-                  <div className="text-[12px] font-medium text-stone-900">
+                  <div className="text-[12px] font-medium text-ink">
                     {o.label}
                   </div>
                   {o.recommended && (
@@ -331,7 +331,7 @@ function AskUserQuestion({
                   )}
                 </div>
                 {o.description && (
-                  <p className="text-[11px] text-stone-500 mt-1 leading-snug">
+                  <p className="text-[11px] text-ink-muted mt-1 leading-snug">
                     {o.description}
                   </p>
                 )}
@@ -348,11 +348,11 @@ function AskUserQuestion({
             }}
             disabled={disabled}
             placeholder="Something else…"
-            className="w-full text-[12px] border-b border-stone-200 bg-transparent px-1 py-1 focus:outline-none focus:border-stone-400"
+            className="w-full text-[12px] border-b border-line bg-transparent px-1 py-1 focus:outline-none focus:border-line-strong"
           />
         )}
       </div>
-      <div className="flex items-center justify-end gap-1.5 border-t border-stone-200/70 p-2">
+      <div className="flex items-center justify-end gap-1.5 border-t border-line/70 p-2">
         <button
           type="button"
           disabled={disabled || (!picked && !custom.trim())}
