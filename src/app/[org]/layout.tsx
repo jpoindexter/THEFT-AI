@@ -22,7 +22,7 @@ export default async function OrgLayout({
       0;
 
   return (
-    <div className="min-h-screen flex flex-col bg-cream text-ink">
+    <div className="min-h-screen flex flex-col bg-canvas text-ink">
       <LayoutHeader
         orgName={organization.name}
         orgSlug={organization.slug}

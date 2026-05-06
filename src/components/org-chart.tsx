@@ -1,28 +1,17 @@
 "use client";
 
 import Link from "next/link";
+import { Pill } from "@/components/ui/primitives";
+import {
+  DEPT_PREVIEWS,
+  PreviewScene,
+} from "@/components/org-chart-preview";
 
-type Department = {
-  id: string;
-  slug: string;
-  name: string;
-};
+type Department = { id: string; slug: string; name: string };
 
-const TINT: Record<string, string> = {
-  engineering: "from-amber-100 to-amber-200",
-  design: "from-stone-200 to-stone-300",
-  marketing: "from-orange-100 to-orange-200",
-  sales: "from-lime-100 to-lime-200",
-  operations: "from-emerald-100 to-emerald-200",
-  finance: "from-sky-100 to-sky-200",
-  legal: "from-slate-200 to-slate-300",
-  support: "from-violet-100 to-violet-200",
-};
-
-// proportions tuned to match cofounder.co reference
-const RING_R = 30; // dotted ring radius (% of viewBox half)
-const LABEL_R = 30; // labels sit ON the ring
-const MOCKUP_R = 42; // mockups sit OUTSIDE the ring with breathing room
+const RING_R = 30;
+const LABEL_R = 30;
+const MOCKUP_R = 42;
 
 export default function OrgChart({
   orgSlug,
@@ -37,70 +26,22 @@ export default function OrgChart({
   return (
     <div className="absolute inset-0 flex items-center justify-center p-6">
       <div className="relative aspect-square w-full max-w-[860px] max-h-full">
-        <svg
-          className="absolute inset-0 size-full pointer-events-none"
-          viewBox="0 0 100 100"
-          preserveAspectRatio="xMidYMid meet"
-        >
-          <circle
-            cx="50"
-            cy="50"
-            r={RING_R}
-            fill="none"
-            stroke="#d6d3d1"
-            strokeWidth="0.18"
-            strokeDasharray="0.4 1.2"
-          />
-        </svg>
-
-        {/* center */}
-        <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-10 flex flex-col items-center gap-1.5">
-          <div className="size-4 rounded-full bg-gradient-to-br from-amber-200 via-amber-300 to-amber-400" />
-          <div className="text-[12px] tracking-tight text-stone-700">
-            {orgName}
-          </div>
-        </div>
-
+        <Ring />
+        <Center orgName={orgName} />
         {ordered.map((d, i) => {
           const angle = (i / ordered.length) * 2 * Math.PI - Math.PI / 2;
           const lx = 50 + Math.cos(angle) * LABEL_R;
           const ly = 50 + Math.sin(angle) * LABEL_R;
           const mx = 50 + Math.cos(angle) * MOCKUP_R;
           const my = 50 + Math.sin(angle) * MOCKUP_R;
-
           return (
-            <div key={d.id} className="absolute inset-0 pointer-events-none">
-              <div
-                className="absolute pointer-events-auto flex gap-1"
-                style={{
-                  left: `${mx}%`,
-                  top: `${my}%`,
-                  transform: "translate(-50%, -50%)",
-                }}
-              >
-                {[0, 1].map((k) => (
-                  <Mockup
-                    key={k}
-                    tint={TINT[d.slug] ?? "from-stone-100 to-stone-200"}
-                  />
-                ))}
-              </div>
-
-              <Link
-                href={`/${orgSlug}/${d.slug}`}
-                className="absolute pointer-events-auto group"
-                style={{
-                  left: `${lx}%`,
-                  top: `${ly}%`,
-                  transform: "translate(-50%, -50%)",
-                }}
-              >
-                <div className="rounded-full bg-white border border-stone-200/70 px-2.5 py-0.5 text-[11px] tracking-tight inline-flex items-center gap-1 hover:border-stone-400">
-                  <span className="size-1.5 rounded-full bg-stone-300 group-hover:bg-stone-500" />
-                  {d.name}
-                </div>
-              </Link>
-            </div>
+            <DeptNode
+              key={d.id}
+              dept={d}
+              orgSlug={orgSlug}
+              labelPos={{ x: lx, y: ly }}
+              mockPos={{ x: mx, y: my }}
+            />
           );
         })}
       </div>
@@ -108,15 +49,142 @@ export default function OrgChart({
   );
 }
 
-function Mockup({ tint }: { tint: string }) {
+function Ring() {
   return (
-    <div className="w-[64px] h-[40px] rounded-md bg-white border border-stone-200/70 overflow-hidden shadow-[0_1px_2px_rgba(0,0,0,0.04)]">
-      <div className={`h-2 bg-gradient-to-r ${tint}`} />
-      <div className="p-1 space-y-0.5">
-        <div className="h-1 rounded bg-stone-100" />
-        <div className="h-1 w-2/3 rounded bg-stone-100" />
-        <div className="h-2.5 mt-0.5 rounded bg-stone-50" />
+    <svg
+      className="absolute inset-0 size-full pointer-events-none"
+      viewBox="0 0 100 100"
+      preserveAspectRatio="xMidYMid meet"
+    >
+      <circle
+        cx="50"
+        cy="50"
+        r={RING_R}
+        fill="none"
+        stroke="currentColor"
+        className="text-line-strong"
+        strokeWidth="0.18"
+        strokeDasharray="0.4 1.2"
+      />
+    </svg>
+  );
+}
+
+function Center({ orgName }: { orgName: string }) {
+  return (
+    <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-10 flex flex-col items-center gap-1.5">
+      <div className="size-4 rounded-full bg-mustard" />
+      <div className="text-sm tracking-tight text-ink">{orgName}</div>
+    </div>
+  );
+}
+
+function DeptNode({
+  dept,
+  orgSlug,
+  labelPos,
+  mockPos,
+}: {
+  dept: Department;
+  orgSlug: string;
+  labelPos: { x: number; y: number };
+  mockPos: { x: number; y: number };
+}) {
+  const preview = DEPT_PREVIEWS[dept.slug as keyof typeof DEPT_PREVIEWS];
+  return (
+    <div className="absolute inset-0 pointer-events-none">
+      <div
+        className="absolute pointer-events-auto flex gap-1"
+        style={{
+          left: `${mockPos.x}%`,
+          top: `${mockPos.y}%`,
+          transform: "translate(-50%, -50%)",
+        }}
+      >
+        <Mockup scene={dept.slug as keyof typeof DEPT_PREVIEWS} />
+        <Mockup scene={dept.slug as keyof typeof DEPT_PREVIEWS} />
       </div>
+
+      <div
+        className="absolute pointer-events-auto group"
+        style={{
+          left: `${labelPos.x}%`,
+          top: `${labelPos.y}%`,
+          transform: "translate(-50%, -50%)",
+        }}
+      >
+        <Link
+          href={`/${orgSlug}/${dept.slug}`}
+          className="rounded-full bg-paper border border-line/70 px-2.5 py-0.5 text-xs tracking-tight inline-flex items-center gap-1 hover:border-line-strong"
+        >
+          <span className="size-1.5 rounded-full bg-line-strong group-hover:bg-ink" />
+          {dept.name}
+        </Link>
+
+        {preview && (
+          <HoverCard
+            name={dept.name}
+            preview={preview}
+            href={`/${orgSlug}/${dept.slug}`}
+          />
+        )}
+      </div>
+    </div>
+  );
+}
+
+function HoverCard({
+  name,
+  preview,
+  href,
+}: {
+  name: string;
+  preview: (typeof DEPT_PREVIEWS)[keyof typeof DEPT_PREVIEWS];
+  href: string;
+}) {
+  const tone =
+    preview.status === "live"
+      ? "sage"
+      : preview.status === "beta"
+        ? "mustard"
+        : "neutral";
+  const label =
+    preview.status === "coming_soon"
+      ? "Coming soon"
+      : preview.status === "beta"
+        ? "Beta"
+        : "Live";
+  return (
+    <Link
+      href={href}
+      className="absolute left-1/2 -translate-x-1/2 top-full mt-2 w-[260px] rounded-md bg-paper border border-line/70 shadow-md overflow-hidden opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none group-hover:pointer-events-auto z-30"
+    >
+      <div className="relative aspect-[5/3] bg-canvas">
+        <PreviewScene scene={preview.scene} />
+        <span className="absolute top-2 right-2">
+          <Pill tone={tone}>{label}</Pill>
+        </span>
+      </div>
+      <div className="p-3">
+        <div className="text-base font-medium tracking-tight text-ink">
+          {name}
+        </div>
+        <p className="text-xs text-ink-muted leading-snug mt-1">
+          {preview.description}
+        </p>
+      </div>
+    </Link>
+  );
+}
+
+function Mockup({
+  scene,
+}: {
+  scene: keyof typeof DEPT_PREVIEWS;
+}) {
+  return (
+    <div className="w-[64px] h-[40px] rounded-md bg-paper border border-line/70 overflow-hidden shadow-[0_1px_2px_rgba(0,0,0,0.04)]">
+      <PreviewScene scene={scene} />
     </div>
   );
 }

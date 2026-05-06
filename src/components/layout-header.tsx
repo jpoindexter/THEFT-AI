@@ -38,6 +38,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useEffect, useState } from "react";
 import KeyboardShortcutsDialog from "@/components/keyboard-shortcuts-dialog";
+import ThemeToggle from "@/components/theme-toggle";
 
 export default function LayoutHeader({
   orgName,
@@ -293,13 +294,14 @@ export default function LayoutHeader({
           <SunMedium className="size-3 text-amber-300" />
           Upgrade
         </button>
-        <IconBtn>
-          <SunMedium className="size-3.5" />
-        </IconBtn>
-        <IconBtn>
+        <ThemeToggle />
+        <IconBtn title="Share workspace">
           <Share2 className="size-3.5" />
         </IconBtn>
-        <IconBtn onClick={goto(`/${orgSlug}/search`)}>
+        <IconBtn
+          onClick={goto(`/${orgSlug}/search`)}
+          title="Search (⌘K)"
+        >
           <Search className="size-3.5" />
         </IconBtn>
       </div>
@@ -334,15 +336,19 @@ function MenuRow({
 function IconBtn({
   children,
   onClick,
+  title,
 }: {
   children: React.ReactNode;
   onClick?: () => void;
+  title?: string;
 }) {
   return (
     <button
       type="button"
       onClick={onClick}
-      className="size-7 rounded-md hover:bg-stone-200/60 inline-flex items-center justify-center"
+      title={title}
+      aria-label={title}
+      className="size-7 rounded-md hover:bg-line/40 inline-flex items-center justify-center text-ink-muted hover:text-ink"
     >
       {children}
     </button>

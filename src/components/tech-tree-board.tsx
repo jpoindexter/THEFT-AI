@@ -4,20 +4,8 @@ import { useState } from "react";
 import { X, Folder, ArrowUpRight } from "lucide-react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
-
-type Node = {
-  id: string;
-  slug: string;
-  stage: string;
-  title: string;
-  description: string | null;
-  what_becomes_true: string | null;
-  how_to_move_forward: string | null;
-  position: number | null;
-  agent_can_do_this: boolean;
-  status: string;
-  dependencies: string[];
-};
+import { Eyebrow, ButtonPrimary } from "@/components/ui/primitives";
+import { TreeCard, type TechNode } from "@/components/tech-tree-card";
 
 const STAGES = [
   { key: "idea", label: "IDEA STAGE" },
@@ -34,141 +22,133 @@ export default function TechTreeBoard({
   nodes,
 }: {
   orgName: string;
-  nodes: Node[];
+  nodes: TechNode[];
 }) {
-  const [selected, setSelected] = useState<Node | null>(null);
-  const params = useParams<{ org: string }>();
+  const [selected, setSelected] = useState<TechNode | null>(null);
 
   return (
-    <div className="absolute inset-0 bg-[#f5f4f0] flex flex-col">
-      <div className="px-6 py-4 flex items-center gap-3 border-b border-stone-200/80">
-        <div className="size-8 rounded-md bg-stone-200 inline-flex items-center justify-center">
-          <Folder className="size-4 text-stone-500" />
-        </div>
-        <div>
-          <h1 className="text-[15px] tracking-tight">How to Build a Company</h1>
-          <p className="text-[11px] text-stone-500">{orgName}</p>
-        </div>
-      </div>
+    <div className="absolute inset-0 bg-cream flex flex-col">
+      <BoardHeader orgName={orgName} />
       <div className="flex-1 overflow-auto p-6">
         <div className="flex gap-8 min-w-max">
-          {STAGES.map((stage) => {
-            const stageNodes = nodes
-              .filter((n) => n.stage === stage.key)
-              .sort((a, b) => (a.position ?? 0) - (b.position ?? 0));
-            if (stageNodes.length === 0) return null;
-            return (
-              <div key={stage.key} className="w-56 flex flex-col gap-2">
-                <div className="text-[10px] uppercase tracking-[0.14em] text-stone-400 px-1 mb-1">
-                  {stage.label}
-                </div>
-                {stageNodes.map((n) => {
-                  const isLocked = n.status === "locked";
-                  const isComplete = n.status === "complete";
-                  const isInProgress = n.status === "in_progress";
-                  return (
-                    <button
-                      key={n.id}
-                      onClick={() => setSelected(n)}
-                      className={`text-left rounded-md border bg-white px-3 py-2 transition-all ${
-                        isLocked ? "opacity-40" : "hover:border-stone-400"
-                      } ${
-                        selected?.id === n.id
-                          ? "border-stone-900 ring-1 ring-stone-900"
-                          : "border-stone-200/80"
-                      } ${
-                        isComplete
-                          ? "bg-emerald-50/60 border-emerald-200"
-                          : isInProgress
-                            ? "bg-amber-50/60 border-amber-200"
-                            : ""
-                      }`}
-                    >
-                      <div className="flex items-start justify-between gap-2">
-                        <div className="text-[13px] font-medium leading-tight tracking-tight">
-                          {n.title}
-                        </div>
-                        {isComplete && (
-                          <span className="text-[9px] uppercase tracking-wider text-emerald-700 bg-emerald-100 px-1 py-0.5 rounded">
-                            Done
-                          </span>
-                        )}
-                        {!isLocked && !isComplete && (
-                          <span className="text-[9px] uppercase tracking-wider text-amber-700 bg-amber-100 px-1 py-0.5 rounded">
-                            Avail
-                          </span>
-                        )}
-                      </div>
-                      <div className="text-[10px] text-stone-500 mt-1">
-                        {n.agent_can_do_this
-                          ? "Agent can do this"
-                          : "Needs your input"}
-                      </div>
-                    </button>
-                  );
-                })}
-              </div>
-            );
-          })}
+          {STAGES.map((stage) => (
+            <StageColumn
+              key={stage.key}
+              label={stage.label}
+              nodes={nodes
+                .filter((n) => n.stage === stage.key)
+                .sort((a, b) => (a.position ?? 0) - (b.position ?? 0))}
+              selectedId={selected?.id ?? null}
+              onSelect={setSelected}
+            />
+          ))}
         </div>
       </div>
       {selected && (
-        <aside className="absolute right-0 top-[57px] bottom-0 w-80 bg-white border-l border-stone-200/80 p-5 overflow-y-auto">
-          <div className="flex items-start justify-between mb-5">
-            <div>
-              <div className="text-[9px] uppercase tracking-[0.14em] text-stone-400">
-                {selected.stage}
-              </div>
-              <h2 className="text-base font-medium tracking-tight mt-1">
-                {selected.title}
-              </h2>
-            </div>
-            <button
-              onClick={() => setSelected(null)}
-              className="text-stone-400 hover:text-stone-900"
-              aria-label="Close"
-            >
-              <X className="size-4" />
-            </button>
-          </div>
-          {selected.what_becomes_true && (
-            <Section
-              label="What becomes true"
-              body={selected.what_becomes_true}
-            />
-          )}
-          {selected.how_to_move_forward && (
-            <Section
-              label="How to move this forward"
-              body={selected.how_to_move_forward}
-            />
-          )}
-          <button
-            type="button"
-            className="mt-4 w-full rounded-md bg-stone-900 text-white text-[12px] py-2 hover:bg-stone-800 transition-colors"
-            disabled={selected.status === "locked"}
-          >
-            {selected.agent_can_do_this ? "Launch Agent" : "Mark complete"}
-          </button>
-          <Link
-            href={`/${params.org}/roadmap/${selected.slug}`}
-            className="mt-2 w-full inline-flex items-center justify-center gap-1 rounded-md border border-stone-200 text-[12px] py-2 hover:border-stone-400"
-          >
-            Open detail <ArrowUpRight className="size-3" />
-          </Link>
-        </aside>
+        <DetailDrawer
+          n={selected}
+          onClose={() => setSelected(null)}
+        />
       )}
     </div>
+  );
+}
+
+function BoardHeader({ orgName }: { orgName: string }) {
+  return (
+    <div className="px-6 py-4 flex items-center gap-3 border-b border-line/70">
+      <div className="size-8 rounded-md bg-cream inline-flex items-center justify-center">
+        <Folder className="size-4 text-ink-muted" />
+      </div>
+      <div>
+        <h1 className="text-md tracking-tight text-ink">
+          How to Build a Company
+        </h1>
+        <p className="text-xs text-ink-muted">{orgName}</p>
+      </div>
+    </div>
+  );
+}
+
+function StageColumn({
+  label,
+  nodes,
+  selectedId,
+  onSelect,
+}: {
+  label: string;
+  nodes: TechNode[];
+  selectedId: string | null;
+  onSelect: (n: TechNode) => void;
+}) {
+  if (nodes.length === 0) return null;
+  return (
+    <div className="w-56 flex flex-col gap-2">
+      <Eyebrow className="px-1 mb-1">{label}</Eyebrow>
+      {nodes.map((n) => (
+        <TreeCard
+          key={n.id}
+          n={n}
+          selected={selectedId === n.id}
+          onSelect={() => onSelect(n)}
+        />
+      ))}
+    </div>
+  );
+}
+
+function DetailDrawer({
+  n,
+  onClose,
+}: {
+  n: TechNode;
+  onClose: () => void;
+}) {
+  const params = useParams<{ org: string }>();
+  return (
+    <aside className="absolute right-0 top-[57px] bottom-0 w-80 bg-paper border-l border-line/70 p-5 overflow-y-auto">
+      <header className="flex items-start justify-between mb-5">
+        <div>
+          <Eyebrow>{n.stage}</Eyebrow>
+          <h2 className="text-md font-medium tracking-tight mt-1 text-ink">
+            {n.title}
+          </h2>
+        </div>
+        <button
+          onClick={onClose}
+          className="text-ink-soft hover:text-ink"
+          aria-label="Close"
+        >
+          <X className="size-4" />
+        </button>
+      </header>
+      {n.what_becomes_true && (
+        <Section label="What becomes true" body={n.what_becomes_true} />
+      )}
+      {n.how_to_move_forward && (
+        <Section label="How to move this forward" body={n.how_to_move_forward} />
+      )}
+      <ButtonPrimary
+        className="mt-4 w-full"
+        disabled={n.status === "locked"}
+      >
+        {n.agent_can_do_this ? "Launch Agent" : "Mark complete"}
+      </ButtonPrimary>
+      <Link
+        href={`/${params.org}/roadmap/${n.slug}`}
+        className="mt-2 w-full inline-flex items-center justify-center gap-1 rounded-md border border-line bg-paper text-sm py-2 hover:border-line-strong"
+      >
+        Open detail <ArrowUpRight className="size-3" />
+      </Link>
+    </aside>
   );
 }
 
 function Section({ label, body }: { label: string; body: string }) {
   return (
     <div className="mb-5">
-      <div className="text-[9px] uppercase tracking-[0.14em] text-stone-400 mb-1.5">
-        {label}
-      </div>
-      <p className="text-[13px] text-stone-700 leading-snug">{body}</p>
+      <Eyebrow className="mb-1.5">{label}</Eyebrow>
+      <p className="text-base text-ink leading-snug">{body}</p>
     </div>
   );
 }

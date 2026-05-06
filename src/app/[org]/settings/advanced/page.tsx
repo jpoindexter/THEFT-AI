@@ -1,7 +1,13 @@
 import { SectionHeader, SettingsCard } from "@/components/settings/section";
 import { GitBranch, AlertTriangle, Database } from "lucide-react";
+import Link from "next/link";
 
-export default function Advanced() {
+export default async function Advanced({
+  params,
+}: {
+  params: Promise<{ org: string }>;
+}) {
+  const { org } = await params;
   return (
     <>
       <SectionHeader
@@ -48,10 +54,13 @@ export default function Advanced() {
               </p>
             </div>
           </div>
-          <button className="text-[12px] rounded-md border border-stone-200 px-2 py-1 hover:border-stone-400 inline-flex items-center gap-1 whitespace-nowrap">
+          <Link
+            href={`/${org}/settings/advanced/import-repo`}
+            className="text-[12px] rounded-md border border-stone-200 px-2 py-1 hover:border-stone-400 inline-flex items-center gap-1 whitespace-nowrap"
+          >
             <GitBranch className="size-3" />
             Open guided import
-          </button>
+          </Link>
         </div>
       </SettingsCard>
     </>
