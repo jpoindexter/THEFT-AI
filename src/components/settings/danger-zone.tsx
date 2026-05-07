@@ -45,12 +45,12 @@ export default function DangerZone({
         <button
           type="button"
           onClick={() => setOpen(true)}
-          className="inline-flex items-center gap-1 text-[12px] rounded-md border border-red-300 bg-paper text-red-700 px-3 py-1.5 hover:bg-red-50"
+          className="inline-flex items-center gap-1 text-xs rounded-md border border-brick/40 bg-paper text-brick-ink px-3 py-1.5 hover:bg-brick/10"
         >
           <AlertTriangle className="size-3" /> Delete workspace
         </button>
       ) : (
-        <div className="rounded-md border border-red-200 bg-red-50 p-3 space-y-2 text-[12px]">
+        <div className="rounded-md border border-brick/40 bg-brick/10 p-3 space-y-2 text-xs">
           <p className="text-ink">
             This will permanently delete <strong>{orgName}</strong> and every
             artifact, task, and agent inside it. This cannot be undone.
@@ -62,10 +62,10 @@ export default function DangerZone({
             value={confirm}
             onChange={(e) => setConfirm(e.target.value)}
             placeholder={orgName}
-            className="w-full h-9 rounded-md border border-red-200 bg-paper px-3 text-[12px] font-mono focus:outline-none focus:border-red-400"
+            className="w-full h-9 rounded-md border border-brick/40 bg-paper px-3 text-xs font-mono focus:outline-none focus:border-brick"
           />
           {error && (
-            <p className="text-[11px] text-red-700 font-mono">{error}</p>
+            <p className="text-2xs text-brick-ink font-mono">{error}</p>
           )}
           <div className="flex justify-end gap-2 pt-1">
             <button
@@ -75,7 +75,7 @@ export default function DangerZone({
                 setConfirm("");
                 setError(null);
               }}
-              className="text-[11px] rounded-md border border-line bg-paper px-2 py-1 hover:border-line-strong"
+              className="text-2xs rounded-md border border-line bg-paper px-2 py-1 hover:border-line-strong"
             >
               Cancel
             </button>
@@ -83,7 +83,7 @@ export default function DangerZone({
               type="button"
               disabled={!matches || busy}
               onClick={destroy}
-              className="text-[11px] rounded-md bg-red-600 text-paper px-3 py-1 hover:bg-red-700 disabled:opacity-40"
+              className="text-2xs rounded-md bg-brick text-paper px-3 py-1 hover:opacity-90 disabled:opacity-40"
             >
               {busy ? "Deleting…" : "Delete forever"}
             </button>

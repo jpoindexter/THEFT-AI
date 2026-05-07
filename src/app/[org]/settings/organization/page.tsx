@@ -11,6 +11,7 @@ import { Copy, Upload, Download } from "lucide-react";
 import { db } from "@/lib/db/store";
 import { notFound } from "next/navigation";
 import DangerZone from "@/components/settings/danger-zone";
+import TransferOwnership from "@/components/settings/transfer-ownership";
 import Link from "next/link";
 
 const SOURCES = ["ChatGPT", "Claude", "Paperclip", "OpenClaw", "Other"];
@@ -86,7 +87,7 @@ export default async function Organization({
             <div className="font-medium">jpoindexter</div>
             <div className="text-[10px] text-ink-muted">jason@example.com</div>
           </div>
-          <span className="text-[10px] uppercase rounded bg-amber-100 text-amber-800 px-1.5 py-0.5">
+          <span className="text-2xs uppercase tracking-wider rounded bg-mustard/30 text-mustard-ink px-1.5 py-0.5">
             Admin
           </span>
         </div>
@@ -121,6 +122,7 @@ export default async function Organization({
         </div>
       </SettingsCard>
 
+      <TransferOwnership orgName={organization.name} />
       <DangerZone orgSlug={organization.slug} orgName={organization.name} />
     </>
   );

@@ -5,6 +5,7 @@ import { ArrowLeft, MoreHorizontal } from "lucide-react";
 import AgentRunConsole from "@/components/agent-run-console";
 import TaskCloseControls from "@/components/task-close-controls";
 import TaskHandoff from "@/components/task-handoff";
+import SubtaskTree from "@/components/task/subtask-tree";
 
 export default async function TaskDetailPage({
   params,
@@ -21,6 +22,14 @@ export default async function TaskDetailPage({
   const agent = task.agent_id
     ? agents.find((a) => a.id === task.agent_id)
     : null;
+  const children = tasks
+    .filter((t) => t.parent_task_id === taskId)
+    .map((c) => ({
+      id: c.id,
+      title: c.title,
+      status: c.status === "done" ? ("done" as const) : c.status === "in_progress" ? ("in_progress" as const) : c.status === "blocked" ? ("blocked" as const) : ("todo" as const),
+      agent: agents.find((a) => a.id === c.agent_id)?.name ?? null,
+    }));
 
   return (
     <div className="absolute inset-0 overflow-y-auto p-6">
@@ -101,7 +110,7 @@ export default async function TaskDetailPage({
 
         <AgentRunConsole />
 
-
+        <SubtaskTree org={orgSlug} parentId={task.id} subtasks={children} />
 
         <section className="rounded-lg border border-line/70 bg-paper p-4 space-y-3">
           <div className="text-[10px] uppercase tracking-wider text-ink-soft">
