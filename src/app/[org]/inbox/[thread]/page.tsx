@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowLeft, Reply, Forward, Trash2 } from "lucide-react";
+import AgentDraft from "@/components/inbox/agent-draft";
 
 const THREADS: Record<
   string,
@@ -90,31 +91,16 @@ export default async function InboxThreadPage({
           ))}
         </section>
 
-        <section className="rounded-lg border border-amber-200/70 bg-amber-50 p-4">
-          <div className="text-[10px] uppercase tracking-wider text-amber-800 mb-1">
-            Agent draft (not sent)
-          </div>
-          <p className="text-[13px] text-ink leading-relaxed">
-            {t.suggested}
-          </p>
-          <div className="flex justify-end gap-2 pt-3">
-            <button className="text-[11px] rounded-md border border-line bg-paper px-2 py-1 hover:border-line-strong">
-              Edit
-            </button>
-            <button className="text-[11px] rounded-md bg-ink text-paper px-3 py-1.5">
-              Send reply
-            </button>
-          </div>
-        </section>
+        <AgentDraft initial={t.suggested} />
 
         <div className="flex justify-end gap-1">
-          <button className="inline-flex items-center gap-1 text-[11px] rounded-md border border-line bg-paper px-2 py-1 hover:border-line-strong">
+          <button className="inline-flex items-center gap-1 text-xs rounded-md border border-line bg-paper px-2 py-1 hover:border-line-strong">
             <Reply className="size-3" /> Reply
           </button>
-          <button className="inline-flex items-center gap-1 text-[11px] rounded-md border border-line bg-paper px-2 py-1 hover:border-line-strong">
+          <button className="inline-flex items-center gap-1 text-xs rounded-md border border-line bg-paper px-2 py-1 hover:border-line-strong">
             <Forward className="size-3" /> Forward
           </button>
-          <button className="inline-flex items-center gap-1 text-[11px] rounded-md border border-red-300 bg-paper text-red-700 px-2 py-1 hover:bg-red-50">
+          <button className="inline-flex items-center gap-1 text-xs rounded-md border border-brick/40 bg-paper text-brick-ink px-2 py-1 hover:bg-brick/10">
             <Trash2 className="size-3" /> Archive
           </button>
         </div>

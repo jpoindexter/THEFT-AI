@@ -8,21 +8,16 @@ import {
   Eyebrow,
   Hint,
   PageTitle,
-  Pill,
   ButtonPrimary,
 } from "@/components/ui/primitives";
-import { Brain, Search, Plus, Trash2 } from "lucide-react";
+import { Brain, Plus } from "lucide-react";
+import { MemoryRow, type MemoryItem } from "@/components/memory/memory-row";
+import {
+  MemoryFilters,
+  type SourceFilter,
+} from "@/components/memory/memory-filters";
 
-type Memory = {
-  id: string;
-  topic: string;
-  body: string;
-  source: "task" | "import" | "manual" | "integration";
-  pinned: boolean;
-  updated_at: string;
-};
-
-const SEED: Memory[] = [
+const SEED: MemoryItem[] = [
   {
     id: "m1",
     topic: "Pricing thesis",
@@ -47,24 +42,38 @@ const SEED: Memory[] = [
     pinned: false,
     updated_at: "2026-04-30",
   },
+  {
+    id: "m4",
+    topic: "Postmark inbound parsing",
+    body: "Inbound mail is parsed into a Task at the matching agent's inbox. Subject becomes title; first paragraph becomes description.",
+    source: "integration",
+    pinned: false,
+    updated_at: "2026-04-22",
+  },
 ];
 
 export default function MemoryPage() {
   const params = useParams<{ org: string }>();
-  const [items, setItems] = useState<Memory[]>(SEED);
+  const [items, setItems] = useState<MemoryItem[]>(SEED);
   const [q, setQ] = useState("");
-  const [editing, setEditing] = useState<Memory | null>(null);
+  const [source, setSource] = useState<SourceFilter>("all");
+  const [pinnedOnly, setPinnedOnly] = useState(false);
+  const [editing, setEditing] = useState<MemoryItem | null>(null);
 
   useEffect(() => {
     void params.org;
   }, [params.org]);
 
-  const filtered = items.filter((m) =>
-    !q
-      ? true
-      : m.topic.toLowerCase().includes(q.toLowerCase()) ||
-        m.body.toLowerCase().includes(q.toLowerCase()),
-  );
+  const filtered = items.filter((m) => {
+    if (pinnedOnly && !m.pinned) return false;
+    if (source !== "all" && m.source !== source) return false;
+    if (!q) return true;
+    const needle = q.toLowerCase();
+    return (
+      m.topic.toLowerCase().includes(needle) ||
+      m.body.toLowerCase().includes(needle)
+    );
+  });
 
   function save() {
     if (!editing) return;
@@ -107,21 +116,24 @@ export default function MemoryPage() {
           </ButtonPrimary>
         </header>
 
-        <div className="flex items-center gap-2 rounded-md border border-line bg-paper px-2 py-1.5">
-          <Search className="size-3.5 text-ink-soft" />
-          <input
-            value={q}
-            onChange={(e) => setQ(e.target.value)}
-            placeholder="Search memory…"
-            className="flex-1 bg-transparent text-sm focus:outline-none placeholder:text-ink-soft"
-          />
+        <MemoryFilters
+          q={q}
+          setQ={setQ}
+          source={source}
+          setSource={setSource}
+          pinnedOnly={pinnedOnly}
+          setPinnedOnly={setPinnedOnly}
+        />
+
+        <div className="text-2xs text-ink-soft px-1">
+          {filtered.length} of {items.length} memory items
         </div>
 
         <Card>
           <ul className="divide-y divide-line/60">
             {filtered.length === 0 && (
               <li className="px-4 py-6 text-center text-sm text-ink-muted">
-                No memory yet. Pin something the agents shouldn't forget.
+                No matches. Try a broader search or clear filters.
               </li>
             )}
             {filtered.map((m) => (
@@ -147,16 +159,22 @@ export default function MemoryPage() {
         {editing && (
           <Card>
             <CardBody>
-              <Eyebrow>{items.some((i) => i.id === editing.id) ? "Edit" : "New"} memory</Eyebrow>
+              <Eyebrow>
+                {items.some((i) => i.id === editing.id) ? "Edit" : "New"} memory
+              </Eyebrow>
               <input
                 value={editing.topic}
-                onChange={(e) => setEditing({ ...editing, topic: e.target.value })}
+                onChange={(e) =>
+                  setEditing({ ...editing, topic: e.target.value })
+                }
                 placeholder="Topic"
                 className="w-full h-9 rounded-md border border-line bg-paper px-3 text-sm focus:outline-none focus:border-line-strong mt-1"
               />
               <textarea
                 value={editing.body}
-                onChange={(e) => setEditing({ ...editing, body: e.target.value })}
+                onChange={(e) =>
+                  setEditing({ ...editing, body: e.target.value })
+                }
                 placeholder="Durable fact, decision, or workflow worth keeping…"
                 rows={5}
                 className="w-full rounded-md border border-line bg-paper px-3 py-2 text-sm focus:outline-none focus:border-line-strong mt-2"
@@ -192,59 +210,5 @@ export default function MemoryPage() {
         )}
       </div>
     </div>
-  );
-}
-
-function MemoryRow({
-  m,
-  onEdit,
-  onPin,
-  onDelete,
-}: {
-  m: Memory;
-  onEdit: () => void;
-  onPin: () => void;
-  onDelete: () => void;
-}) {
-  return (
-    <li className="px-4 py-3 flex items-start justify-between gap-3">
-      <button
-        type="button"
-        onClick={onEdit}
-        className="flex-1 text-left min-w-0"
-      >
-        <div className="flex items-center gap-2">
-          <span className="text-base font-medium tracking-tight text-ink">
-            {m.topic}
-          </span>
-          {m.pinned && <Pill tone="mustard">Pinned</Pill>}
-          <Pill>{m.source}</Pill>
-        </div>
-        <p className="text-sm text-ink-muted leading-snug mt-0.5 line-clamp-3">
-          {m.body}
-        </p>
-        <div className="text-2xs text-ink-soft mt-1">
-          updated {m.updated_at}
-        </div>
-      </button>
-      <div className="flex items-center gap-1 shrink-0">
-        <button
-          type="button"
-          onClick={onPin}
-          title={m.pinned ? "Unpin" : "Pin"}
-          className="text-xs rounded-md border border-line px-2 py-1 hover:border-line-strong"
-        >
-          {m.pinned ? "Unpin" : "Pin"}
-        </button>
-        <button
-          type="button"
-          onClick={onDelete}
-          title="Delete"
-          className="size-7 rounded-md inline-flex items-center justify-center text-brick-ink hover:bg-brick/10"
-        >
-          <Trash2 className="size-3.5" />
-        </button>
-      </div>
-    </li>
   );
 }
