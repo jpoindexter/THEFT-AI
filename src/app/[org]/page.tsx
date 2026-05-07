@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import { db } from "@/lib/db/store";
 import OrgChart from "@/components/org-chart";
 import Canvas from "@/components/canvas";
+import OnboardingTour from "@/components/onboarding-tour";
 
 export default async function OrgHome({
   params,
@@ -19,6 +20,7 @@ export default async function OrgHome({
         orgName={organization.name}
         departments={departments}
       />
+      <OnboardingTour org={orgSlug} />
     </Canvas>
   );
 }
