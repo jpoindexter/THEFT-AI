@@ -187,6 +187,19 @@ export type ApprovalRule = {
   created_at: string;
 };
 
+export type Routine = {
+  id: string;
+  organization_id: string;
+  name: string;
+  description: string | null;
+  agent: string;
+  cron: string;
+  enabled: boolean;
+  last_run_at: string | null;
+  last_run_status: "ok" | "failed" | null;
+  created_at: string;
+};
+
 export type UsageRecord = {
   id: string;
   organization_id: string;
@@ -493,6 +506,34 @@ export const db = {
   async deleteWebhook(id: string): Promise<void> {
     const all = await readTable<Webhook>("webhooks");
     await writeTable("webhooks", all.filter((w) => w.id !== id));
+  },
+
+  // --- routines ---
+  async listRoutines(orgId: string): Promise<Routine[]> {
+    const all = await readTable<Routine>("routines");
+    return all
+      .filter((r) => r.organization_id === orgId)
+      .sort((a, b) => a.name.localeCompare(b.name));
+  },
+  async createRoutine(input: Omit<Routine, "id" | "created_at" | "last_run_at" | "last_run_status">): Promise<Routine> {
+    const all = await readTable<Routine>("routines");
+    const r: Routine = {
+      ...input,
+      id: randomUUID(),
+      last_run_at: null,
+      last_run_status: null,
+      created_at: new Date().toISOString(),
+    };
+    await writeTable("routines", [...all, r]);
+    return r;
+  },
+  async updateRoutine(id: string, patch: Partial<Routine>): Promise<void> {
+    const all = await readTable<Routine>("routines");
+    await writeTable("routines", all.map((r) => (r.id === id ? { ...r, ...patch } : r)));
+  },
+  async deleteRoutine(id: string): Promise<void> {
+    const all = await readTable<Routine>("routines");
+    await writeTable("routines", all.filter((r) => r.id !== id));
   },
 
   // --- usage records ---

@@ -1,39 +1,54 @@
+"use client";
+
+import { useState, useEffect } from "react";
 import { Plus, Calendar } from "lucide-react";
 import Link from "next/link";
+import { useParams } from "next/navigation";
+import EmptyState from "@/components/empty-state";
 
-const ROUTINES = [
-  {
-    id: "weekly_status",
-    name: "Weekly status brief",
-    agent: "Operations",
-    cron: "Mondays at 9am",
-    last_run: "Mon 2026-05-04 9:00am",
-    enabled: true,
-  },
-  {
-    id: "month_close",
-    name: "Month-end finance close",
-    agent: "Finance",
-    cron: "Last day of month at 5pm",
-    last_run: "—",
-    enabled: true,
-  },
-  {
-    id: "social_pack",
-    name: "Daily social pack",
-    agent: "Marketing",
-    cron: "Every weekday at 7am",
-    last_run: "Tue 2026-05-05 7:00am",
-    enabled: false,
-  },
-];
+type Routine = {
+  id: string;
+  name: string;
+  agent: string;
+  cron: string;
+  enabled: boolean;
+  last_run_at: string | null;
+  last_run_status: "ok" | "failed" | null;
+};
 
-export default async function RoutinesPage({
-  params,
-}: {
-  params: Promise<{ org: string }>;
-}) {
-  const { org } = await params;
+export default function RoutinesPage() {
+  const params = useParams<{ org: string }>();
+  const org = params.org;
+  const [routines, setRoutines] = useState<Routine[]>([]);
+  const [busy, setBusy] = useState<string | null>(null);
+
+  useEffect(() => {
+    void fetch(`/api/${org}/routines`)
+      .then((r) => (r.ok ? r.json() : { routines: [] }))
+      .then((j: { routines: Routine[] }) => setRoutines(j.routines ?? []));
+  }, [org]);
+
+  async function toggle(id: string, enabled: boolean) {
+    setBusy(id);
+    setRoutines((prev) => prev.map((r) => (r.id === id ? { ...r, enabled } : r)));
+    await fetch(`/api/${org}/routines/${id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ enabled }),
+    });
+    setBusy(null);
+  }
+
+  async function remove(id: string) {
+    setRoutines((prev) => prev.filter((r) => r.id !== id));
+    await fetch(`/api/${org}/routines/${id}`, { method: "DELETE" });
+  }
+
+  const fmtDate = (iso: string | null) => {
+    if (!iso) return "—";
+    return new Date(iso).toLocaleString("en-US", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" });
+  };
+
   return (
     <div className="absolute inset-0 overflow-y-auto p-6">
       <div className="max-w-3xl mx-auto space-y-4">
@@ -59,19 +74,20 @@ export default async function RoutinesPage({
             </Link>
           </div>
         </header>
-        <ul className="rounded-lg border border-line/70 bg-paper divide-y divide-line/60">
-          {ROUTINES.map((r) => (
-            <li key={r.id} className="relative hover:bg-canvas">
-              <Link
-                href={`/${org}/routines/${r.id}`}
-                className="absolute inset-0 z-0"
-                aria-label={r.name}
-              />
-              <div className="relative z-10 px-4 py-3 flex items-center justify-between pointer-events-none">
+
+        {routines.length === 0 ? (
+          <EmptyState
+            Icon={Calendar}
+            title="No routines yet"
+            body="Routines run on a schedule — daily digests, weekly closes, social packs."
+            actions={[{ label: "New routine", href: `/${org}/routines/new`, primary: true }]}
+          />
+        ) : (
+          <ul className="rounded-lg border border-line/70 bg-paper divide-y divide-line/60">
+            {routines.map((r) => (
+              <li key={r.id} className="px-4 py-3 flex items-center justify-between hover:bg-canvas">
                 <div>
-                  <div className="text-base font-medium tracking-tight">
-                    {r.name}
-                  </div>
+                  <div className="text-base font-medium tracking-tight">{r.name}</div>
                   <div className="text-xs text-ink-muted inline-flex items-center gap-2 mt-0.5">
                     <span>{r.agent}</span>
                     <span>·</span>
@@ -80,30 +96,37 @@ export default async function RoutinesPage({
                       {r.cron}
                     </span>
                     <span>·</span>
-                    <span>last run {r.last_run}</span>
+                    <span>last run {fmtDate(r.last_run_at)}</span>
+                    {r.last_run_status === "failed" && (
+                      <span className="text-brick-ink">· failed</span>
+                    )}
                   </div>
                 </div>
-                <div className="flex items-center gap-2 pointer-events-auto">
-                  <span
-                    className={`text-2xs uppercase rounded px-1.5 py-0.5 ${
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    disabled={busy === r.id}
+                    onClick={() => toggle(r.id, !r.enabled)}
+                    className={`text-2xs uppercase rounded px-1.5 py-0.5 border transition-colors ${
                       r.enabled
-                        ? "bg-sage/30 text-sage-ink"
-                        : "bg-cream text-ink-muted"
+                        ? "border-sage/40 bg-sage/20 text-sage-ink hover:bg-sage/30"
+                        : "border-line/70 bg-cream text-ink-muted hover:border-line-strong"
                     }`}
                   >
                     {r.enabled ? "Active" : "Paused"}
-                  </span>
-                  <Link
-                    href={`/${org}/routines/${r.id}`}
-                    className="text-xs rounded-md border border-line bg-paper px-2 py-1 hover:border-line-strong"
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => remove(r.id)}
+                    className="text-xs rounded-md border border-line bg-paper px-2 py-1 hover:border-line-strong text-brick-ink"
                   >
-                    Edit
-                  </Link>
+                    Delete
+                  </button>
                 </div>
-              </div>
-            </li>
-          ))}
-        </ul>
+              </li>
+            ))}
+          </ul>
+        )}
       </div>
     </div>
   );

@@ -80,6 +80,8 @@ export async function runAgent(opts: {
   }
 
   const turns: AgentTurn[] = [];
+  let totalInputTokens = 0;
+  let totalOutputTokens = 0;
 
   for (let loop = 0; loop < MAX_LOOPS; loop++) {
     const reply = await client.messages.create({
@@ -90,6 +92,8 @@ export async function runAgent(opts: {
       messages,
     });
 
+    totalInputTokens += reply.usage.input_tokens;
+    totalOutputTokens += reply.usage.output_tokens;
     messages.push({ role: "assistant", content: reply.content });
 
     let pauseFor: AgentTurn | null = null;
@@ -154,6 +158,7 @@ export async function runAgent(opts: {
       const done: AgentTurn = { kind: "done" };
       turns.push(done);
       opts.onTurn?.(done);
+      void recordUsage(opts.org.id, MODEL, totalInputTokens, totalOutputTokens);
       return { history: messages, turns };
     }
 
@@ -163,7 +168,33 @@ export async function runAgent(opts: {
     }
   }
 
+  void recordUsage(opts.org.id, MODEL, totalInputTokens, totalOutputTokens);
   return { history: messages, turns };
+}
+
+const MODEL_COST: Record<string, { input: number; output: number }> = {
+  "claude-opus-4-7": { input: 15, output: 75 },
+  "claude-sonnet-4-6": { input: 3, output: 15 },
+  "claude-haiku-4-5": { input: 0.25, output: 1.25 },
+};
+
+async function recordUsage(orgId: string, model: string, inputTokens: number, outputTokens: number) {
+  const rates = MODEL_COST[model] ?? MODEL_COST["claude-sonnet-4-6"];
+  const cost = (inputTokens * rates.input + outputTokens * rates.output) / 1_000_000;
+  try {
+    await db.recordUsage({
+      organization_id: orgId,
+      agent_id: null,
+      agent_name: "Cofounder",
+      task_id: null,
+      model,
+      input_tokens: inputTokens,
+      output_tokens: outputTokens,
+      cost_usd: cost,
+    });
+  } catch {
+    // non-critical — don't fail the agent turn on a logging error
+  }
 }
 
 async function executeTool(opts: {
