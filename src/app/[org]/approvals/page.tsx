@@ -66,10 +66,10 @@ export default async function ApprovalsPage({
                 <span
                   className={`text-[10px] uppercase rounded px-1.5 py-0.5 ${
                     a.impact === "low"
-                      ? "bg-emerald-100 text-emerald-700"
+                      ? "bg-sage/30 text-sage-ink"
                       : a.impact === "medium"
-                        ? "bg-amber-100 text-amber-800"
-                        : "bg-red-100 text-red-700"
+                        ? "bg-mustard/30 text-mustard-ink"
+                        : "bg-brick/15 text-brick-ink"
                   }`}
                 >
                   {a.impact} impact
@@ -85,7 +85,7 @@ export default async function ApprovalsPage({
                 >
                   <AlertCircle className="size-3" /> Discuss
                 </Link>
-                <button className="inline-flex items-center gap-1 text-[11px] rounded-md border border-red-300 bg-paper text-red-700 px-2 py-1 hover:bg-red-50">
+                <button className="inline-flex items-center gap-1 text-[11px] rounded-md border border-brick/40 bg-paper text-brick-ink px-2 py-1 hover:bg-brick/10">
                   <XCircle className="size-3" /> Decline
                 </button>
                 <button className="inline-flex items-center gap-1 text-[11px] rounded-md bg-ink text-paper px-2 py-1">

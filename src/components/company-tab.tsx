@@ -64,7 +64,7 @@ export default function CompanyTab({
                 <span>{label}</span>
                 <span
                   className={`text-[10px] uppercase ${
-                    status === "ready" ? "text-emerald-700" : "text-ink-muted"
+                    status === "ready" ? "text-sage-ink" : "text-ink-muted"
                   }`}
                 >
                   {value ?? status}

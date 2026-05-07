@@ -154,7 +154,7 @@ export default function AgentChat({
         ))}
         {busy && (
           <div className="text-[11px] text-ink-soft inline-flex items-center gap-1.5">
-            <span className="size-2 rounded-full bg-amber-300 animate-pulse" />
+            <span className="size-2 rounded-full bg-mustard animate-pulse" />
             Cofounder is thinking…
           </div>
         )}
@@ -190,7 +190,7 @@ export default function AgentChat({
             onClick={() => void send(input)}
             disabled={busy || !input.trim()}
             aria-label="Send"
-            className="size-6 mb-1.5 mr-1.5 rounded-md bg-line text-ink-muted inline-flex items-center justify-center disabled:opacity-50 hover:bg-stone-300"
+            className="size-6 mb-1.5 mr-1.5 rounded-md bg-line text-ink-muted inline-flex items-center justify-center disabled:opacity-50 hover:bg-line"
           >
             <ArrowUp className="size-3.5" />
           </button>
@@ -223,11 +223,11 @@ function Turn({
   if (t.kind === "text") {
     return (
       <div className="space-y-1">
-        <div className="inline-flex items-center gap-1.5 text-[11px] text-ink-muted bg-amber-100/40 px-1.5 py-0.5 rounded-sm">
+        <div className="inline-flex items-center gap-1.5 text-[11px] text-ink-muted bg-mustard/30/40 px-1.5 py-0.5 rounded-sm">
           <span className="size-3 rounded-full bg-gradient-to-br from-amber-200 to-amber-400 inline-block" />
           Cofounder
         </div>
-        <div className="text-[13px] leading-relaxed text-ink bg-amber-100/40 px-1 py-0.5 rounded-sm whitespace-pre-wrap">
+        <div className="text-[13px] leading-relaxed text-ink bg-mustard/30/40 px-1 py-0.5 rounded-sm whitespace-pre-wrap">
           {t.text}
         </div>
       </div>

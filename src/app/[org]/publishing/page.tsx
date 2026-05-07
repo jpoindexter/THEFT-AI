@@ -62,8 +62,8 @@ export default async function PublishingPage({
                 <span
                   className={`text-[10px] uppercase tracking-wider rounded px-1.5 py-0.5 ${
                     t.status === "up_to_date"
-                      ? "bg-emerald-100 text-emerald-700"
-                      : "bg-amber-100 text-amber-800"
+                      ? "bg-sage/30 text-sage-ink"
+                      : "bg-mustard/30 text-mustard-ink"
                   }`}
                 >
                   {t.status === "up_to_date" ? "Up to date" : "Behind prod"}

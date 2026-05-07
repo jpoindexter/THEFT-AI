@@ -253,8 +253,8 @@ function ScreenshotMock({
       <div className="bg-cream border-b border-line/70 px-2 py-1 flex items-center gap-1.5">
         <div className="flex gap-1">
           <span className="size-1.5 rounded-full bg-rose-300" />
-          <span className="size-1.5 rounded-full bg-amber-300" />
-          <span className="size-1.5 rounded-full bg-emerald-300" />
+          <span className="size-1.5 rounded-full bg-mustard" />
+          <span className="size-1.5 rounded-full bg-sage" />
         </div>
       </div>
       <div className="aspect-[16/10] p-4">
@@ -324,10 +324,10 @@ function BriefMock() {
 function AgentMock() {
   return (
     <div className="space-y-1">
-      <div className="h-2 w-16 rounded bg-amber-200" />
-      <div className="h-1.5 w-full rounded bg-amber-50" />
-      <div className="h-1.5 w-3/4 rounded bg-amber-50" />
-      <div className="h-1.5 w-2/3 rounded bg-amber-50" />
+      <div className="h-2 w-16 rounded bg-mustard/30" />
+      <div className="h-1.5 w-full rounded bg-mustard/15" />
+      <div className="h-1.5 w-3/4 rounded bg-mustard/15" />
+      <div className="h-1.5 w-2/3 rounded bg-mustard/15" />
       <div className="h-3 mt-2 rounded bg-cream" />
     </div>
   );

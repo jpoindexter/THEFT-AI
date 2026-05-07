@@ -5,19 +5,19 @@ import { ArrowLeft, Lock, CheckCircle2, Sparkles } from "lucide-react";
 
 const STAGE_TONE: Record<string, string> = {
   idea: "bg-cream text-ink",
-  initial: "bg-amber-100 text-amber-800",
+  initial: "bg-mustard/30 text-mustard-ink",
   identity: "bg-rose-100 text-rose-800",
   build: "bg-sky-100 text-sky-800",
-  live: "bg-emerald-100 text-emerald-800",
+  live: "bg-sage/30 text-sage-ink",
   launch: "bg-violet-100 text-violet-800",
   scale: "bg-line text-ink",
 };
 
 const STATUS_TONE: Record<string, string> = {
   locked: "bg-cream text-ink-muted",
-  available: "bg-amber-100 text-amber-800",
+  available: "bg-mustard/30 text-mustard-ink",
   in_progress: "bg-sky-100 text-sky-800",
-  done: "bg-emerald-100 text-emerald-700",
+  done: "bg-sage/30 text-sage-ink",
 };
 
 export default async function TechTreeNodePage({
@@ -116,7 +116,7 @@ export default async function TechTreeNodePage({
                       className="flex items-center gap-2 text-[12px] hover:text-ink"
                     >
                       {s === "complete" ? (
-                        <CheckCircle2 className="size-3 text-emerald-600" />
+                        <CheckCircle2 className="size-3 text-sage-ink" />
                       ) : (
                         <Lock className="size-3 text-ink-soft" />
                       )}

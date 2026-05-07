@@ -51,9 +51,9 @@ const SERVERS: Record<
 };
 
 const STATUS_TONE: Record<string, string> = {
-  running: "bg-emerald-100 text-emerald-700",
-  starting: "bg-amber-100 text-amber-700",
-  failed: "bg-red-100 text-red-700",
+  running: "bg-sage/30 text-sage-ink",
+  starting: "bg-mustard/30 text-mustard-ink",
+  failed: "bg-brick/15 text-brick-ink",
   stopped: "bg-cream text-ink-muted",
 };
 
@@ -156,7 +156,7 @@ export default async function McpServerDetailPage({
               Start
             </button>
           )}
-          <button className="inline-flex items-center gap-1 text-[11px] rounded-md border border-red-300 bg-paper text-red-700 px-2 py-1 hover:bg-red-50">
+          <button className="inline-flex items-center gap-1 text-[11px] rounded-md border border-brick/40 bg-paper text-brick-ink px-2 py-1 hover:bg-brick/10">
             <Trash2 className="size-3" /> Remove
           </button>
         </div>

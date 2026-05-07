@@ -108,7 +108,7 @@ export default function LayoutCanvas({
           <Eye className="size-3.5" />
           <span>Review</span>
           {attentionCount > 0 && (
-            <span className="size-4 rounded-full bg-amber-300 text-ink text-[10px] font-semibold inline-flex items-center justify-center">
+            <span className="size-4 rounded-full bg-mustard text-ink text-[10px] font-semibold inline-flex items-center justify-center">
               {attentionCount}
             </span>
           )}

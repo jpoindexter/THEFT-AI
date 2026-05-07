@@ -40,8 +40,8 @@ function KeyBlock({
 }) {
   const toneClass =
     tone === "amber"
-      ? "border-amber-200 bg-amber-50"
-      : "border-emerald-200 bg-emerald-50";
+      ? "border-mustard/40 bg-mustard/15"
+      : "border-sage/40 bg-sage/15";
   return (
     <div className={`rounded-md border ${toneClass} p-3 space-y-2 text-[12px]`}>
       <div className="flex items-center justify-between">

@@ -48,7 +48,7 @@ export default async function Advanced({
               <p className="text-[11px] text-ink-muted">
                 Switch the workspace from the managed repository to a GitHub repository you own.
               </p>
-              <div className="inline-flex items-center gap-1 mt-2 text-[11px] text-red-600">
+              <div className="inline-flex items-center gap-1 mt-2 text-[11px] text-brick-ink">
                 <AlertTriangle className="size-3" />
                 Destructive action
               </div>

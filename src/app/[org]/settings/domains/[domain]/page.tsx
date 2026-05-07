@@ -77,10 +77,10 @@ export default async function DomainDetailPage({
           <span
             className={`size-2 rounded-full ${
               d.status === "verified"
-                ? "bg-emerald-500"
+                ? "bg-sage"
                 : d.status === "pending"
-                  ? "bg-amber-500"
-                  : "bg-red-500"
+                  ? "bg-mustard/150"
+                  : "bg-brick/100"
             }`}
           />
           <span className="capitalize">{d.status}</span>
@@ -105,7 +105,7 @@ export default async function DomainDetailPage({
               <span className="font-mono text-ink truncate">{r.host}</span>
               <span className="font-mono text-ink truncate">{r.value}</span>
               <span className="flex items-center gap-2">
-                {r.ok && <CheckCircle2 className="size-3.5 text-emerald-600" />}
+                {r.ok && <CheckCircle2 className="size-3.5 text-sage-ink" />}
                 <button
                   type="button"
                   className="text-[10px] inline-flex items-center gap-1 rounded-md border border-line px-1.5 py-0.5 hover:border-line-strong"

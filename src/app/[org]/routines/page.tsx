@@ -87,7 +87,7 @@ export default async function RoutinesPage({
                   <span
                     className={`text-[10px] uppercase rounded px-1.5 py-0.5 ${
                       r.enabled
-                        ? "bg-emerald-100 text-emerald-700"
+                        ? "bg-sage/30 text-sage-ink"
                         : "bg-cream text-ink-muted"
                     }`}
                   >

@@ -169,7 +169,7 @@ function HomeTab({
   ];
   const ACTIVE_TASKS = [
     {
-      icon: <span className="size-3 rounded-full bg-orange-300 inline-block" />,
+      icon: <span className="size-3 rounded-full bg-mustard inline-block" />,
       title: "Marketing: Score generated-artifact-…",
     },
   ];

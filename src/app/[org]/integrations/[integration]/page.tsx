@@ -143,7 +143,7 @@ export default async function IntegrationDetailPage({
           <span
             className={`text-[10px] uppercase rounded px-1.5 py-0.5 shrink-0 ${
               i.status === "connected"
-                ? "bg-emerald-100 text-emerald-700"
+                ? "bg-sage/30 text-sage-ink"
                 : "bg-cream text-ink-muted"
             }`}
           >
@@ -221,7 +221,7 @@ export default async function IntegrationDetailPage({
 
         <div className="flex justify-end gap-2">
           {i.status === "connected" ? (
-            <button className="inline-flex items-center gap-1 text-[11px] rounded-md border border-red-300 bg-paper text-red-700 px-2 py-1 hover:bg-red-50">
+            <button className="inline-flex items-center gap-1 text-[11px] rounded-md border border-brick/40 bg-paper text-brick-ink px-2 py-1 hover:bg-brick/10">
               <Trash2 className="size-3" /> Disconnect
             </button>
           ) : (

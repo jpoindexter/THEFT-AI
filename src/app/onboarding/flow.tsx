@@ -168,7 +168,7 @@ export default function OnboardingFlow() {
                     className="w-full rounded-md border border-blue-400 ring-2 ring-blue-100 bg-paper px-3 py-2 text-[13px] focus:outline-none focus:ring-blue-200"
                   />
                 </div>
-                {err && <p className="text-[12px] text-red-600">{err}</p>}
+                {err && <p className="text-[12px] text-brick-ink">{err}</p>}
                 <div className="flex flex-col items-center gap-2 pt-1">
                   <PillButton
                     onClick={complete}

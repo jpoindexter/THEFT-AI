@@ -205,7 +205,7 @@ export default function DepartmentHero({
 
         <div className="rounded-2xl bg-canvas/80 border border-line/70 px-8 py-12 flex flex-col items-center text-center gap-6">
           <div className="inline-flex items-center gap-1.5 rounded-full border border-line/70 bg-paper px-3 py-1 text-[11px] text-ink">
-            <Sparkles className="size-3 text-amber-500" />
+            <Sparkles className="size-3 text-mustard-ink" />
             {cfg.cta}
           </div>
           <h1 className="text-3xl tracking-tight max-w-2xl font-medium leading-tight">
@@ -297,8 +297,8 @@ function DeviceMock({ url, label }: { url: string; label: string }) {
         <div className="bg-cream border-b border-line/70 px-2 py-1 flex items-center gap-1.5">
           <div className="flex gap-1">
             <span className="size-1.5 rounded-full bg-rose-300" />
-            <span className="size-1.5 rounded-full bg-amber-300" />
-            <span className="size-1.5 rounded-full bg-emerald-300" />
+            <span className="size-1.5 rounded-full bg-mustard" />
+            <span className="size-1.5 rounded-full bg-sage" />
           </div>
           <div className="flex-1 text-[8px] text-ink-muted text-center font-mono">
             {url}

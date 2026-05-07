@@ -52,7 +52,7 @@ export default function DeleteAccountDialog({
             type="button"
             disabled={!valid}
             onClick={onConfirm}
-            className="text-[12px] rounded-md bg-red-600 text-paper px-3 py-1.5 disabled:opacity-40"
+            className="text-[12px] rounded-md bg-brick text-paper px-3 py-1.5 disabled:opacity-40"
           >
             Delete Account
           </button>

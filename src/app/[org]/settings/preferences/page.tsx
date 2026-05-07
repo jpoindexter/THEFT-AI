@@ -51,14 +51,14 @@ export default function Preferences() {
 
       <SettingsCard>
         <div>
-          <h2 className="text-[14px] font-medium text-red-700">Danger Zone</h2>
+          <h2 className="text-[14px] font-medium text-brick-ink">Danger Zone</h2>
           <p className="text-[12px] text-ink-muted">
             Once you delete your account, there is no going back.
           </p>
           <button
             type="button"
             onClick={() => setDeleteOpen(true)}
-            className="mt-3 text-[12px] rounded-md border border-red-300 text-red-700 px-3 py-1 hover:bg-red-50"
+            className="mt-3 text-[12px] rounded-md border border-brick/40 text-brick-ink px-3 py-1 hover:bg-brick/10"
           >
             Delete My Account
           </button>

@@ -56,7 +56,7 @@ export default function OnboardingDonePage() {
               <span
                 className={`size-4 rounded-full inline-flex items-center justify-center text-[9px] ${
                   i < step
-                    ? "bg-emerald-500 text-paper"
+                    ? "bg-sage text-paper"
                     : i === step
                       ? "bg-ink text-paper animate-pulse"
                       : "bg-line text-ink-soft"

@@ -118,8 +118,8 @@ export default async function RoutineDetailPage({
                   <span
                     className={`text-[10px] uppercase rounded px-1.5 py-0.5 ${
                       run.status === "ok"
-                        ? "bg-emerald-100 text-emerald-700"
-                        : "bg-red-100 text-red-700"
+                        ? "bg-sage/30 text-sage-ink"
+                        : "bg-brick/15 text-brick-ink"
                     }`}
                   >
                     {run.status}

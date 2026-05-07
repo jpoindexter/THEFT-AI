@@ -76,8 +76,8 @@ export default function McpSetupPage() {
                       <span
                         className={`size-2 rounded-full ${
                           s.status === "running"
-                            ? "bg-emerald-500"
-                            : "bg-stone-300"
+                            ? "bg-sage"
+                            : "bg-line"
                         }`}
                       />
                       <span className="text-[13px] font-medium">{s.name}</span>

@@ -11,8 +11,8 @@ const LOGS = [
 
 const LEVEL_TONE: Record<string, string> = {
   info: "bg-cream text-ink",
-  warn: "bg-amber-100 text-amber-800",
-  error: "bg-red-100 text-red-700",
+  warn: "bg-mustard/30 text-mustard-ink",
+  error: "bg-brick/15 text-brick-ink",
 };
 
 export default function LogsPage() {

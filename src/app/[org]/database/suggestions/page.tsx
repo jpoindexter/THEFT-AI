@@ -25,8 +25,8 @@ const SUGGESTIONS = [
 ];
 
 const TONE: Record<string, string> = {
-  high: "border-red-200 bg-red-50",
-  medium: "border-amber-200 bg-amber-50",
+  high: "border-brick/40 bg-brick/10",
+  medium: "border-mustard/40 bg-mustard/15",
   low: "border-line bg-paper",
 };
 

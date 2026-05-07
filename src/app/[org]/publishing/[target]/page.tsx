@@ -107,7 +107,7 @@ export default function PublishTargetPage() {
               <ExternalLink className="size-3" />
             </a>
           </div>
-          <span className="text-[10px] uppercase tracking-wider rounded bg-amber-100 text-amber-800 px-1.5 py-0.5">
+          <span className="text-[10px] uppercase tracking-wider rounded bg-mustard/30 text-mustard-ink px-1.5 py-0.5">
             {target.commits.length} commits ahead
           </span>
         </header>

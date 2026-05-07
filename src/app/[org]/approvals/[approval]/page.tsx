@@ -104,10 +104,10 @@ export default async function ApprovalDetailPage({
           <span
             className={`inline-block text-[10px] uppercase rounded px-1.5 py-0.5 mt-1 ${
               a.impact === "low"
-                ? "bg-emerald-100 text-emerald-700"
+                ? "bg-sage/30 text-sage-ink"
                 : a.impact === "medium"
-                  ? "bg-amber-100 text-amber-800"
-                  : "bg-red-100 text-red-700"
+                  ? "bg-mustard/30 text-mustard-ink"
+                  : "bg-brick/15 text-brick-ink"
             }`}
           >
             {a.impact} impact

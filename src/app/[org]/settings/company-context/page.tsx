@@ -94,7 +94,7 @@ export default function CompanyContextPage() {
             >
               {copied ? (
                 <>
-                  <Check className="size-3 text-emerald-600" /> Copied
+                  <Check className="size-3 text-sage-ink" /> Copied
                 </>
               ) : (
                 <>

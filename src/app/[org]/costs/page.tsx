@@ -50,7 +50,7 @@ export default async function CostsPage({
           <div className="h-2 rounded-full bg-cream overflow-hidden">
             <div
               className={`h-full ${
-                pctOfBudget > 80 ? "bg-red-500" : "bg-emerald-500"
+                pctOfBudget > 80 ? "bg-brick/100" : "bg-sage"
               }`}
               style={{ width: `${pctOfBudget}%` }}
             />
@@ -78,7 +78,7 @@ export default async function CostsPage({
             {SERIES.map((v, i) => (
               <div
                 key={i}
-                className="flex-1 rounded-sm bg-amber-200/80"
+                className="flex-1 rounded-sm bg-mustard/40"
                 style={{ height: `${(v / max) * 100}%` }}
                 title={`Day ${i + 1}: $${v}`}
               />

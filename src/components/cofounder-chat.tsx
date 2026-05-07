@@ -184,7 +184,7 @@ export default function CofounderChat({
         {/* Inline brief widget — appears after user sends first message in onboarding */}
         {showBrief && briefStarted && !briefDone && briefLoading && (
           <div className="rounded-lg border border-line/80 bg-paper p-4 text-[12px] text-ink-muted inline-flex items-center gap-2">
-            <span className="size-2 rounded-full bg-amber-300 animate-pulse" />
+            <span className="size-2 rounded-full bg-mustard animate-pulse" />
             Cofounder is building a brief from your idea…
           </div>
         )}
@@ -274,7 +274,7 @@ export default function CofounderChat({
             onClick={send}
             disabled={busy || !input.trim()}
             aria-label="Send"
-            className="size-6 mb-1.5 mr-1.5 rounded-md bg-line text-ink-muted inline-flex items-center justify-center disabled:opacity-50 hover:bg-stone-300 transition-colors"
+            className="size-6 mb-1.5 mr-1.5 rounded-md bg-line text-ink-muted inline-flex items-center justify-center disabled:opacity-50 hover:bg-line transition-colors"
           >
             ↑
           </button>
@@ -296,11 +296,11 @@ function Message({ m, isFirst }: { m: Msg; isFirst: boolean }) {
   }
   return (
     <div className="space-y-1.5">
-      <div className="inline-flex items-center gap-1.5 text-[11px] text-ink-muted bg-amber-100/40 px-1.5 py-0.5 rounded-sm">
+      <div className="inline-flex items-center gap-1.5 text-[11px] text-ink-muted bg-mustard/30/40 px-1.5 py-0.5 rounded-sm">
         <span className="size-3 rounded-full bg-gradient-to-br from-amber-200 to-amber-400 inline-block" />
         Cofounder
       </div>
-      <div className="text-[13px] leading-relaxed text-ink whitespace-pre-wrap bg-amber-100/40 px-1 rounded-sm inline">
+      <div className="text-[13px] leading-relaxed text-ink whitespace-pre-wrap bg-mustard/30/40 px-1 rounded-sm inline">
         {m.text}
       </div>
       {isFirst && !m.text.trim() && (
@@ -589,13 +589,13 @@ function BusinessPlanCard({
 
   return (
     <div className="space-y-3">
-      <p className="bg-amber-100/40 px-1 rounded-sm text-[13px] text-ink leading-relaxed">
+      <p className="bg-mustard/30/40 px-1 rounded-sm text-[13px] text-ink leading-relaxed">
         The business brief is ready to review. Here&apos;s a summary of
         what&apos;s in it:
       </p>
       <div className="space-y-3 text-[13px] leading-relaxed text-ink">
         {sections.map((s) => (
-          <p key={s.label} className="bg-amber-100/40 px-1 rounded-sm">
+          <p key={s.label} className="bg-mustard/30/40 px-1 rounded-sm">
             <strong>{s.label}:</strong>{" "}
             {Array.isArray(s.body) ? s.body.join(", ") : s.body}
           </p>
@@ -641,7 +641,7 @@ function PlanSection({
   children: React.ReactNode;
 }) {
   const palette: Record<string, string> = {
-    amber: "text-amber-700 bg-amber-50",
+    amber: "text-mustard-ink bg-mustard/15",
     violet: "text-violet-700 bg-violet-50",
     sky: "text-sky-700 bg-sky-50",
     rose: "text-rose-700 bg-rose-50",
@@ -665,7 +665,7 @@ function Sunflower() {
   return (
     <pre
       aria-hidden
-      className="text-amber-700/40 text-[10px] leading-tight font-mono whitespace-pre"
+      className="text-mustard-ink/40 text-[10px] leading-tight font-mono whitespace-pre"
     >
 {`        .-^-.
       .'     '.

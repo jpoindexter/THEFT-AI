@@ -95,7 +95,7 @@ export default async function ReviewPage({
                       {q.detail}
                     </div>
                   </div>
-                  <span className="text-[10px] uppercase rounded bg-amber-100 text-amber-700 px-1.5 py-0.5 shrink-0 self-center">
+                  <span className="text-[10px] uppercase rounded bg-mustard/30 text-mustard-ink px-1.5 py-0.5 shrink-0 self-center">
                     {q.waitingOn}
                   </span>
                 </Link>

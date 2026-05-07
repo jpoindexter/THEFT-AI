@@ -7,9 +7,9 @@ import EmptyState from "@/components/empty-state";
 
 const STATUS_TONE: Record<string, string> = {
   idle: "bg-cream text-ink-muted",
-  running: "bg-emerald-100 text-emerald-700",
-  paused: "bg-amber-100 text-amber-700",
-  error: "bg-red-100 text-red-700",
+  running: "bg-sage/30 text-sage-ink",
+  paused: "bg-mustard/30 text-mustard-ink",
+  error: "bg-brick/15 text-brick-ink",
   terminated: "bg-line text-ink-muted",
 };
 
