@@ -34,6 +34,14 @@ export type Org = {
   goal: string | null;
   business_plan: unknown;
   created_at: string;
+  ai_model: string | null;
+  engineer_model: string | null;
+  global_prompt: string | null;
+  review_bot_mode: string | null;
+  budget_monthly_usd: number | null;
+  budget_hard_limit: boolean | null;
+  budget_warn_pct: number | null;
+  budget_per_agent: Record<string, number> | null;
 };
 
 export type Department = {
@@ -187,6 +195,32 @@ export type ApprovalRule = {
   created_at: string;
 };
 
+export type EvalSuite = {
+  id: string;
+  organization_id: string;
+  name: string;
+  agent: string;
+  ran_against: string;
+  cases: number;
+  pass: number;
+  fail: number;
+  pending: number;
+  last_run_at: string | null;
+  created_at: string;
+};
+
+export type Approval = {
+  id: string;
+  organization_id: string;
+  agent: string;
+  title: string;
+  body: string;
+  impact: "low" | "medium" | "high";
+  status: "pending" | "approved" | "declined" | "discussed";
+  created_at: string;
+  decided_at: string | null;
+};
+
 export type TeamMember = {
   id: string;
   organization_id: string;
@@ -246,6 +280,14 @@ export const db = {
       goal: null,
       business_plan: null,
       created_at: new Date().toISOString(),
+      ai_model: null,
+      engineer_model: null,
+      global_prompt: null,
+      review_bot_mode: null,
+      budget_monthly_usd: null,
+      budget_hard_limit: null,
+      budget_warn_pct: null,
+      budget_per_agent: null,
     };
     await writeTable("organizations", [...all, org]);
     return org;
@@ -310,6 +352,10 @@ export const db = {
     const created = rows.map((r) => ({ ...r, id: randomUUID() }));
     await writeTable("agents", [...all, ...created]);
     return created;
+  },
+  async updateAgent(id: string, patch: Partial<Agent>): Promise<void> {
+    const all = await readTable<Agent>("agents");
+    await writeTable("agents", all.map((a) => a.id === id ? { ...a, ...patch } : a));
   },
 
   // --- tasks ---
@@ -614,6 +660,55 @@ export const db = {
             Array.isArray(rows[0][k]) ? "array" : "text",
     }));
     return { columns, rows };
+  },
+
+  // --- evals ---
+  async listEvalSuites(orgId: string): Promise<EvalSuite[]> {
+    const all = await readTable<EvalSuite>("eval_suites");
+    return all
+      .filter((s) => s.organization_id === orgId)
+      .sort((a, b) => b.created_at.localeCompare(a.created_at));
+  },
+  async createEvalSuite(input: Omit<EvalSuite, "id" | "created_at">): Promise<EvalSuite> {
+    const all = await readTable<EvalSuite>("eval_suites");
+    const suite: EvalSuite = { ...input, id: randomUUID(), created_at: new Date().toISOString() };
+    await writeTable("eval_suites", [...all, suite]);
+    return suite;
+  },
+  async updateEvalSuite(id: string, patch: Partial<EvalSuite>): Promise<void> {
+    const all = await readTable<EvalSuite>("eval_suites");
+    await writeTable("eval_suites", all.map((s) => s.id === id ? { ...s, ...patch } : s));
+  },
+  async deleteEvalSuite(id: string): Promise<void> {
+    const all = await readTable<EvalSuite>("eval_suites");
+    await writeTable("eval_suites", all.filter((s) => s.id !== id));
+  },
+
+  // --- approvals ---
+  async listApprovals(orgId: string): Promise<Approval[]> {
+    const all = await readTable<Approval>("approvals");
+    return all
+      .filter((a) => a.organization_id === orgId)
+      .sort((a, b) => b.created_at.localeCompare(a.created_at));
+  },
+  async createApproval(input: Omit<Approval, "id" | "created_at" | "decided_at">): Promise<Approval> {
+    const all = await readTable<Approval>("approvals");
+    const approval: Approval = {
+      ...input,
+      id: randomUUID(),
+      created_at: new Date().toISOString(),
+      decided_at: null,
+    };
+    await writeTable("approvals", [...all, approval]);
+    return approval;
+  },
+  async updateApproval(id: string, patch: Partial<Approval>): Promise<void> {
+    const all = await readTable<Approval>("approvals");
+    await writeTable("approvals", all.map((a) => a.id === id ? { ...a, ...patch } : a));
+  },
+  async deleteApproval(id: string): Promise<void> {
+    const all = await readTable<Approval>("approvals");
+    await writeTable("approvals", all.filter((a) => a.id !== id));
   },
 
   // --- approval rules ---

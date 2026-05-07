@@ -87,7 +87,7 @@ export default function RoutinesPage() {
             {routines.map((r) => (
               <li key={r.id} className="px-4 py-3 flex items-center justify-between hover:bg-canvas">
                 <div>
-                  <div className="text-base font-medium tracking-tight">{r.name}</div>
+                  <Link href={`/${org}/routines/${r.id}`} className="text-base font-medium tracking-tight hover:underline decoration-line">{r.name}</Link>
                   <div className="text-xs text-ink-muted inline-flex items-center gap-2 mt-0.5">
                     <span>{r.agent}</span>
                     <span>·</span>

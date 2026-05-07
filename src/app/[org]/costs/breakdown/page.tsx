@@ -1,38 +1,17 @@
 import Link from "next/link";
+import { notFound } from "next/navigation";
 import {
   Card,
   CardBody,
   Eyebrow,
   Hint,
   PageTitle,
-  Pill,
   StatCard,
 } from "@/components/ui/primitives";
 import { ArrowLeft, BarChart3, TrendingUp, TrendingDown } from "lucide-react";
-
-const AGENTS = [
-  "Cofounder",
-  "Engineer",
-  "Marketing",
-  "Sales",
-  "Operations",
-  "Finance",
-  "Support",
-];
+import { db } from "@/lib/db/store";
 
 const MODELS = ["claude-opus-4-7", "claude-sonnet-4-6", "claude-haiku-4-5"];
-
-const ROWS: Record<string, Record<string, number>> = {
-  Cofounder: { "claude-opus-4-7": 18.4, "claude-sonnet-4-6": 0, "claude-haiku-4-5": 0 },
-  Engineer: { "claude-opus-4-7": 22.6, "claude-sonnet-4-6": 5.5, "claude-haiku-4-5": 0 },
-  Marketing: { "claude-opus-4-7": 0, "claude-sonnet-4-6": 6.3, "claude-haiku-4-5": 0 },
-  Sales: { "claude-opus-4-7": 0, "claude-sonnet-4-6": 2.4, "claude-haiku-4-5": 1.1 },
-  Operations: { "claude-opus-4-7": 0, "claude-sonnet-4-6": 1.2, "claude-haiku-4-5": 2.4 },
-  Finance: { "claude-opus-4-7": 0, "claude-sonnet-4-6": 0.6, "claude-haiku-4-5": 0.4 },
-  Support: { "claude-opus-4-7": 0, "claude-sonnet-4-6": 0, "claude-haiku-4-5": 1.8 },
-};
-
-const PRIOR_TOTAL = 51.4;
 
 export default async function CostBreakdownPage({
   params,
@@ -40,17 +19,42 @@ export default async function CostBreakdownPage({
   params: Promise<{ org: string }>;
 }) {
   const { org } = await params;
+  const o = await db.getOrgBySlug(org);
+  if (!o) notFound();
 
-  const total = AGENTS.reduce(
-    (s, a) => s + MODELS.reduce((sm, m) => sm + (ROWS[a]?.[m] ?? 0), 0),
-    0,
-  );
-  const delta = total - PRIOR_TOTAL;
-  const deltaPct = Math.round((delta / PRIOR_TOTAL) * 100);
+  const now = new Date();
+  const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000).toISOString();
+  const fourteenDaysAgo = new Date(now.getTime() - 14 * 24 * 60 * 60 * 1000).toISOString();
 
-  const max = Math.max(
-    ...AGENTS.flatMap((a) => MODELS.map((m) => ROWS[a]?.[m] ?? 0)),
-  );
+  const usage = await db.listUsage(o.id, { since: fourteenDaysAgo });
+  const thisWeek = usage.filter((u) => u.created_at >= sevenDaysAgo);
+  const prevWeek = usage.filter((u) => u.created_at >= fourteenDaysAgo && u.created_at < sevenDaysAgo);
+
+  const total = thisWeek.reduce((s, u) => s + u.cost_usd, 0);
+  const prevTotal = prevWeek.reduce((s, u) => s + u.cost_usd, 0);
+  const delta = total - prevTotal;
+  const deltaPct = prevTotal > 0 ? Math.round((delta / prevTotal) * 100) : 0;
+
+  // Build agent × model matrix
+  const agentSet = new Set(thisWeek.map((u) => u.agent_name ?? "Unknown"));
+  const agents = [...agentSet].sort();
+  const matrix: Record<string, Record<string, number>> = {};
+  for (const a of agents) {
+    matrix[a] = {};
+    for (const m of MODELS) matrix[a][m] = 0;
+  }
+  for (const u of thisWeek) {
+    const a = u.agent_name ?? "Unknown";
+    const m = u.model;
+    if (!matrix[a]) matrix[a] = {};
+    matrix[a][m] = (matrix[a][m] ?? 0) + u.cost_usd;
+  }
+
+  const allCells = agents.flatMap((a) => MODELS.map((m) => matrix[a]?.[m] ?? 0));
+  const max = Math.max(0.001, ...allCells);
+
+  const topDriver = [...thisWeek]
+    .sort((a, b) => b.cost_usd - a.cost_usd)[0];
 
   return (
     <div className="absolute inset-0 overflow-y-auto p-6">
@@ -85,73 +89,62 @@ export default async function CostBreakdownPage({
                 ) : (
                   <TrendingDown className="size-3.5" />
                 )}
-                {delta >= 0 ? "+" : ""}${delta.toFixed(2)} ({deltaPct}%)
+                {delta >= 0 ? "+" : ""}${Math.abs(delta).toFixed(2)} ({deltaPct >= 0 ? "+" : ""}{deltaPct}%)
               </span>
             }
           />
-          <StatCard label="Top driver" value="Engineer · Opus" />
+          <StatCard
+            label="Top driver"
+            value={topDriver ? `${topDriver.agent_name ?? "?"} · ${topDriver.model.replace("claude-", "").split("-")[0]}` : "—"}
+          />
         </div>
 
-        <Card>
-          <CardBody className="p-0">
-            <div className="grid grid-cols-[140px_repeat(3,1fr)_80px] border-b border-line/60 text-2xs uppercase tracking-wider text-ink-soft">
-              <div className="px-3 py-2">Agent</div>
-              {MODELS.map((m) => (
-                <div key={m} className="px-3 py-2 font-mono normal-case tracking-normal">
-                  {m}
-                </div>
-              ))}
-              <div className="px-3 py-2 text-right">Total</div>
-            </div>
-            <div className="divide-y divide-line/60">
-              {AGENTS.map((a) => {
-                const row = ROWS[a] ?? {};
-                const rowTotal = MODELS.reduce(
-                  (s, m) => s + (row[m] ?? 0),
-                  0,
-                );
-                return (
-                  <div
-                    key={a}
-                    className="grid grid-cols-[140px_repeat(3,1fr)_80px] items-center text-sm"
-                  >
-                    <div className="px-3 py-2 font-medium tracking-tight">
-                      {a}
-                    </div>
-                    {MODELS.map((m) => {
-                      const v = row[m] ?? 0;
-                      return <Cell key={m} v={v} max={max} />;
-                    })}
-                    <div className="px-3 py-2 text-right text-ink-muted">
-                      ${rowTotal.toFixed(2)}
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </CardBody>
-        </Card>
-
-        <Card>
-          <CardBody>
-            <Eyebrow>What this tells you</Eyebrow>
-            <Hint>
-              Engineer is doing 50% of total spend on Opus alone. If the same
-              tasks pass eval on Sonnet, switching saves ~$15/wk. Try the eval
-              suite{" "}
-              <Link
-                href={`/${org}/evals/engineer-bug-fix`}
-                className="underline hover:text-ink"
+        {agents.length === 0 ? (
+          <Card>
+            <CardBody>
+              <p className="text-sm text-ink-muted text-center py-4">
+                No spend recorded this week.
+              </p>
+            </CardBody>
+          </Card>
+        ) : (
+          <Card>
+            <CardBody className="p-0">
+              <div
+                className="grid border-b border-line/60 text-2xs uppercase tracking-wider text-ink-soft"
+                style={{ gridTemplateColumns: `140px repeat(${MODELS.length}, 1fr) 80px` }}
               >
-                engineer-bug-fix
-              </Link>{" "}
-              against Sonnet to test.
-            </Hint>
-            <div className="mt-2">
-              <Pill tone="mustard">cost optimization · low effort</Pill>
-            </div>
-          </CardBody>
-        </Card>
+                <div className="px-3 py-2">Agent</div>
+                {MODELS.map((m) => (
+                  <div key={m} className="px-3 py-2 font-mono normal-case tracking-normal">
+                    {m.replace("claude-", "")}
+                  </div>
+                ))}
+                <div className="px-3 py-2 text-right">Total</div>
+              </div>
+              <div className="divide-y divide-line/60">
+                {agents.map((a) => {
+                  const rowTotal = MODELS.reduce((s, m) => s + (matrix[a]?.[m] ?? 0), 0);
+                  return (
+                    <div
+                      key={a}
+                      className="grid items-center text-sm"
+                      style={{ gridTemplateColumns: `140px repeat(${MODELS.length}, 1fr) 80px` }}
+                    >
+                      <div className="px-3 py-2 font-medium tracking-tight truncate">{a}</div>
+                      {MODELS.map((m) => (
+                        <Cell key={m} v={matrix[a]?.[m] ?? 0} max={max} />
+                      ))}
+                      <div className="px-3 py-2 text-right text-ink-muted">
+                        ${rowTotal.toFixed(2)}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </CardBody>
+          </Card>
+        )}
       </div>
     </div>
   );
@@ -161,7 +154,7 @@ function Cell({ v, max }: { v: number; max: number }) {
   if (v === 0) {
     return <div className="px-3 py-2 text-2xs text-ink-soft">—</div>;
   }
-  const intensity = max ? Math.min(1, v / max) : 0;
+  const intensity = Math.min(1, v / max);
   const tone =
     intensity > 0.7 ? "brick" : intensity > 0.4 ? "mustard" : "sage";
   const bg =
@@ -172,10 +165,7 @@ function Cell({ v, max }: { v: number; max: number }) {
         : "bg-sage/15 text-sage-ink";
   return (
     <div className="px-3 py-2">
-      <span
-        className={`inline-block rounded px-2 py-0.5 text-xs font-medium ${bg}`}
-        title={`${(intensity * 100).toFixed(0)}% of max cell`}
-      >
+      <span className={`inline-block rounded px-2 py-0.5 text-xs font-medium ${bg}`}>
         ${v.toFixed(2)}
       </span>
     </div>

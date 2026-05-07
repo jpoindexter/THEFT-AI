@@ -3,6 +3,7 @@ import { db } from "@/lib/db/store";
 import RightPanel from "@/components/right-panel";
 import LayoutHeader from "@/components/layout-header";
 import LayoutCanvas from "@/components/layout-canvas";
+import FreshUpdates from "@/components/fresh-updates";
 
 export default async function OrgLayout({
   children,
@@ -42,6 +43,7 @@ export default async function OrgLayout({
           founderName={"jpoindexter"}
         />
       </div>
+      <FreshUpdates />
     </div>
   );
 }

@@ -241,7 +241,7 @@ const HERO_BY_DEPT: Record<
 export default function DepartmentHero({
   orgName,
   department,
-  hasActiveTasks,
+  hasActiveTasks: _hasActiveTasks,
 }: {
   orgName: string;
   department: Department;
@@ -249,119 +249,117 @@ export default function DepartmentHero({
 }) {
   const cfg = HERO_BY_DEPT[department.slug] ?? HERO_BY_DEPT.engineering;
   const [taskOpen, setTaskOpen] = useState(false);
+  const [fabOpen, setFabOpen] = useState(false);
 
   return (
-    <div className="absolute inset-0 overflow-y-auto p-6">
-      <div className="max-w-5xl mx-auto space-y-4">
-        <div className="flex items-center gap-2 text-base">
-          <DeptIcon slug={department.slug} />
-          <span className="font-medium">{department.name} Department</span>
-          <button
-            type="button"
-            className="ml-auto size-7 rounded-md hover:bg-line/60 inline-flex items-center justify-center"
-            aria-label="More" title="More actions"
-          >
-            <MoreHorizontal className="size-4 text-ink-soft" />
-          </button>
-        </div>
-
-        <div className="rounded-2xl bg-canvas/80 border border-line/70 px-8 py-12 flex flex-col items-center text-center gap-6">
-          <div className="inline-flex items-center gap-1.5 rounded-full border border-line/70 bg-paper px-3 py-1 text-xs text-ink">
-            <Sparkles className="size-3 text-mustard-ink" />
-            {cfg.cta}
-          </div>
-          <h1 className="text-3xl tracking-tight max-w-2xl font-medium leading-tight">
-            {cfg.headline(orgName)}
-          </h1>
-          <div className="flex items-end gap-4 pt-4">
-            {cfg.mockups.map((m, i) => (
-              <DeviceMock key={i} url={m.url} label={m.label} />
-            ))}
-          </div>
-        </div>
-
-        <div className="rounded-2xl border border-line/70 bg-paper p-4">
-          <div className="flex items-center justify-between mb-3">
-            <span className="text-xs text-ink-muted">
-              {department.name} Roadmap
-            </span>
-            <span className="text-2xs uppercase tracking-wider text-ink-soft">
-              {cfg.progress}
-            </span>
-          </div>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-            {cfg.roadmap.map((node, i) => {
-              const Icon = ROADMAP_ICON[node.title] ?? Layout;
-              const Status = node.status === "done" ? CheckCircle2 : Circle;
-              return (
-                <button
-                  key={i}
-                  type="button"
-                  className="text-left rounded-md border border-line/70 bg-canvas px-3 py-2 hover:border-line-strong transition-colors flex items-start gap-2"
-                >
-                  <span className="size-7 rounded-md bg-paper border border-line/70 inline-flex items-center justify-center shrink-0">
-                    <Icon className="size-3.5 text-ink-muted" />
-                  </span>
-                  <span className="min-w-0 flex-1">
-                    <div className="text-sm font-medium text-ink leading-tight inline-flex items-center gap-1">
-                      <span className="truncate">{node.title}</span>
-                      <Status
-                        className={`size-3 shrink-0 ${
-                          node.status === "done"
-                            ? "text-sage-ink"
-                            : "text-ink-soft"
-                        }`}
-                      />
-                    </div>
-                    <div className="text-2xs text-ink-muted mt-0.5">
-                      {node.subtitle}
-                    </div>
-                  </span>
-                </button>
-              );
-            })}
-          </div>
-        </div>
-
-        {hasActiveTasks ? (
-          <div className="text-sm text-ink-muted text-center">
-            Active tasks shown in the right panel.
-          </div>
-        ) : (
-          <div className="rounded-lg border border-mustard/40 bg-mustard/15 p-3 text-center max-w-md mx-auto">
-            <div className="text-sm text-mustard-ink font-medium">
-              First task here?
-            </div>
-            <p className="text-xs text-mustard-ink/80 leading-snug mt-1">
-              Kick off the {department.name} agent with the recommended
-              onboarding task — it gathers context first, then proposes work.
-            </p>
+    <div className="absolute inset-0">
+      <div className="absolute inset-0 overflow-y-auto p-6 pb-20">
+        <div className="max-w-5xl mx-auto space-y-4">
+          <div className="flex items-center gap-2 text-base">
+            <DeptIcon slug={department.slug} />
+            <span className="font-medium">{department.name} Department</span>
             <button
               type="button"
-              onClick={() => setTaskOpen(true)}
-              className="mt-2 inline-flex items-center gap-1 rounded-md bg-ink text-paper px-3 py-1 text-xs hover:opacity-90"
+              className="ml-auto size-7 rounded-md hover:bg-line/60 inline-flex items-center justify-center"
+              aria-label="More"
             >
-              Start onboarding task
+              <MoreHorizontal className="size-4 text-ink-soft" />
+            </button>
+          </div>
+
+          <div className="rounded-2xl bg-canvas/80 border border-line/70 px-8 py-12 flex flex-col items-center text-center gap-6">
+            <div className="inline-flex items-center gap-1.5 rounded-full border border-line/70 bg-paper px-3 py-1 text-xs text-ink">
+              <Sparkles className="size-3 text-mustard-ink" />
+              {cfg.cta}
+            </div>
+            <h1 className="text-3xl tracking-tight max-w-2xl font-medium leading-tight">
+              {cfg.headline(orgName)}
+            </h1>
+            <div className="flex items-end gap-4 pt-4">
+              {cfg.mockups.map((m, i) => (
+                <DeviceMock key={i} url={m.url} label={m.label} />
+              ))}
+            </div>
+          </div>
+
+          <div className="rounded-2xl border border-line/70 bg-paper p-4">
+            <div className="flex items-center justify-between mb-3">
+              <span className="text-xs text-ink-muted">
+                {department.name} Roadmap
+              </span>
+              <span className="text-2xs uppercase tracking-wider text-ink-soft">
+                {cfg.progress}
+              </span>
+            </div>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+              {cfg.roadmap.map((node, i) => {
+                const Icon = ROADMAP_ICON[node.title] ?? Layout;
+                const Status = node.status === "done" ? CheckCircle2 : Circle;
+                return (
+                  <button
+                    key={i}
+                    type="button"
+                    className="text-left rounded-md border border-line/70 bg-canvas px-3 py-2 hover:border-line-strong transition-colors flex items-start gap-2"
+                  >
+                    <span className="size-7 rounded-md bg-paper border border-line/70 inline-flex items-center justify-center shrink-0">
+                      <Icon className="size-3.5 text-ink-muted" />
+                    </span>
+                    <span className="min-w-0 flex-1">
+                      <div className="text-sm font-medium text-ink leading-tight inline-flex items-center gap-1">
+                        <span className="truncate">{node.title}</span>
+                        <Status
+                          className={`size-3 shrink-0 ${
+                            node.status === "done" ? "text-sage-ink" : "text-ink-soft"
+                          }`}
+                        />
+                      </div>
+                      <div className="text-2xs text-ink-muted mt-0.5">{node.subtitle}</div>
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Floating action button */}
+      <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-20">
+        {fabOpen && (
+          <div className="mb-2 rounded-xl bg-ink shadow-lg overflow-hidden w-52">
+            <button
+              type="button"
+              onClick={() => { setFabOpen(false); /* new agent */ }}
+              className="w-full text-left px-4 py-3 hover:bg-ink/80 transition-colors"
+            >
+              <div className="text-sm font-medium text-paper">New Agent</div>
+              <div className="text-xs text-paper/60 mt-0.5">Employee you can give tasks to</div>
+            </button>
+            <div className="h-px bg-paper/10" />
+            <button
+              type="button"
+              onClick={() => { setFabOpen(false); setTaskOpen(true); }}
+              className="w-full text-left px-4 py-3 hover:bg-ink/80 transition-colors"
+            >
+              <div className="text-sm font-medium text-paper">New Task</div>
+              <div className="text-xs text-paper/60 mt-0.5">Work to assign your agents</div>
             </button>
           </div>
         )}
-
-        <div className="flex justify-center pt-4">
-          <button
-            type="button"
-            onClick={() => setTaskOpen(true)}
-            className="inline-flex items-center gap-1 rounded-md bg-ink text-paper px-3 py-1.5 text-sm"
-          >
-            <Plus className="size-3.5" />
-            New task
-          </button>
-        </div>
+        <button
+          type="button"
+          onClick={() => setFabOpen((o) => !o)}
+          className="size-10 rounded-full bg-ink text-paper inline-flex items-center justify-center shadow-md hover:opacity-90 transition-opacity"
+          aria-label="New"
+        >
+          <Plus className="size-5" />
+        </button>
       </div>
 
       <NewTaskDialog
         organization={{ id: "", slug: orgName.toLowerCase().replace(/\s+/g, "-") }}
         open={taskOpen}
-        onOpenChange={setTaskOpen}
+        onOpenChange={(o) => { setTaskOpen(o); if (!o) setFabOpen(false); }}
       />
     </div>
   );

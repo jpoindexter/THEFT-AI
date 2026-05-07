@@ -7,80 +7,10 @@ import {
   Hint,
   PageTitle,
   Pill,
+  StatCard,
 } from "@/components/ui/primitives";
-import {
-  ArrowLeft,
-  CheckCircle2,
-  XCircle,
-  Clock,
-  Play,
-  Plus,
-  FlaskConical,
-} from "lucide-react";
-
-type CaseStatus = "pass" | "fail" | "pending";
-
-type Case = {
-  id: string;
-  prompt: string;
-  expected: string;
-  actual: string;
-  status: CaseStatus;
-  judge: string;
-};
-
-const FIXTURES: Record<string, { name: string; agent: string; cases: Case[] }> = {
-  "engineer-bug-fix": {
-    name: "Engineer · bug fix flow",
-    agent: "Engineer",
-    cases: [
-      {
-        id: "case-1",
-        prompt: "Bug: clicking 'Save' on the Memory page does nothing.",
-        expected:
-          "Diagnoses event handler binding, references memory/page.tsx, proposes one focused fix with tests.",
-        actual:
-          "Diagnoses event handler binding in memory/page.tsx, proposes a fix and adds a Vitest case.",
-        status: "pass",
-        judge: "structure + scope-discipline",
-      },
-      {
-        id: "case-2",
-        prompt: "Bug: invoices export returns a 500 only on Sundays.",
-        expected:
-          "Forms a hypothesis tied to the cron schedule, asks one disambiguating question.",
-        actual:
-          "Forms a cron-schedule hypothesis, runs a sample query, then asks about timezone of the cron.",
-        status: "pass",
-        judge: "hypothesis-first",
-      },
-      {
-        id: "case-3",
-        prompt: "Bug: signup form silently drops errors when email is taken.",
-        expected: "Surfaces error to UI, adds a regression test.",
-        actual: "Adds a try/catch wrapper but does not surface to UI.",
-        status: "fail",
-        judge: "user-visible-error",
-      },
-    ],
-  },
-  "marketing-launch-tone": {
-    name: "Marketing · launch tone",
-    agent: "Marketing",
-    cases: [
-      {
-        id: "case-1",
-        prompt: "Draft a launch tweet for Stripe checkout shipping.",
-        expected:
-          "Active voice, no exclamation marks, one concrete fact, max 240 chars.",
-        actual:
-          "Stripe checkout is live. One-click for Team and Studio. No reroutes, no pricing surprise.",
-        status: "pass",
-        judge: "voice-rules + length",
-      },
-    ],
-  },
-};
+import { ArrowLeft, CheckCircle2, XCircle, Clock, Play, Plus, FlaskConical } from "lucide-react";
+import { db } from "@/lib/db/store";
 
 export default async function EvalSuitePage({
   params,
@@ -88,13 +18,14 @@ export default async function EvalSuitePage({
   params: Promise<{ org: string; suite: string }>;
 }) {
   const { org, suite } = await params;
-  const data = FIXTURES[suite];
-  if (!data) notFound();
+  const o = await db.getOrgBySlug(org);
+  if (!o) notFound();
 
-  const tally = data.cases.reduce(
-    (a, c) => ({ ...a, [c.status]: a[c.status] + 1 }),
-    { pass: 0, fail: 0, pending: 0 },
-  );
+  const suites = await db.listEvalSuites(o.id);
+  const s = suites.find((x) => x.id === suite);
+  if (!s) notFound();
+
+  const passRate = s.cases ? Math.round((s.pass / s.cases) * 100) : 0;
 
   return (
     <div className="absolute inset-0 overflow-y-auto p-6">
@@ -108,12 +39,16 @@ export default async function EvalSuitePage({
 
         <header className="flex items-start justify-between gap-3">
           <div>
-            <Eyebrow>{data.agent}</Eyebrow>
+            <Eyebrow>{s.agent}</Eyebrow>
             <PageTitle className="inline-flex items-center gap-2">
-              <FlaskConical className="size-5 text-ink-muted" /> {data.name}
+              <FlaskConical className="size-5 text-ink-muted" /> {s.name}
             </PageTitle>
             <Hint>
-              {data.cases.length} cases · {tally.pass} pass · {tally.fail} fail · {tally.pending} pending
+              {s.cases} cases · last run{" "}
+              {s.last_run_at
+                ? s.last_run_at.slice(0, 16).replace("T", " ")
+                : "never"}{" "}
+              · model {s.ran_against}
             </Hint>
           </div>
           <div className="flex items-center gap-1">
@@ -126,13 +61,51 @@ export default async function EvalSuitePage({
           </div>
         </header>
 
-        <ul className="space-y-3">
-          {data.cases.map((c) => (
-            <li key={c.id}>
-              <CaseCard c={c} />
-            </li>
-          ))}
-        </ul>
+        <div className="grid grid-cols-4 gap-3">
+          <StatCard label="Cases" value={String(s.cases)} />
+          <StatCard
+            label="Pass rate"
+            value={s.cases ? `${passRate}%` : "—"}
+            tone={s.cases === 0 ? "neutral" : passRate >= 95 ? "sage" : passRate >= 85 ? "mustard" : "brick"}
+          />
+          <StatCard
+            label="Failing"
+            value={String(s.fail)}
+            tone={s.fail > 0 ? "brick" : "neutral"}
+          />
+          <StatCard
+            label="Pending"
+            value={String(s.pending)}
+            tone={s.pending > 0 ? "mustard" : "neutral"}
+          />
+        </div>
+
+        <Card>
+          <CardBody className="p-0">
+            {s.cases === 0 ? (
+              <div className="px-4 py-6 text-sm text-ink-muted text-center">
+                No cases yet. Add the first one to start tracking quality.
+              </div>
+            ) : (
+              <div className="px-4 py-4 space-y-2">
+                <div className="flex items-center gap-3 text-sm">
+                  <span className="inline-flex items-center gap-1 text-sage-ink">
+                    <CheckCircle2 className="size-4" /> {s.pass} passed
+                  </span>
+                  <span className="inline-flex items-center gap-1 text-brick-ink">
+                    <XCircle className="size-4" /> {s.fail} failed
+                  </span>
+                  <span className="inline-flex items-center gap-1 text-ink-muted">
+                    <Clock className="size-4" /> {s.pending} pending
+                  </span>
+                </div>
+                <Hint>
+                  Individual case results aren&apos;t stored yet. Run the suite to populate them.
+                </Hint>
+              </div>
+            )}
+          </CardBody>
+        </Card>
 
         <Card>
           <CardBody>
@@ -144,50 +117,6 @@ export default async function EvalSuitePage({
           </CardBody>
         </Card>
       </div>
-    </div>
-  );
-}
-
-function CaseCard({ c }: { c: Case }) {
-  const Icon =
-    c.status === "pass" ? CheckCircle2 : c.status === "fail" ? XCircle : Clock;
-  const tone =
-    c.status === "pass" ? "sage" : c.status === "fail" ? "brick" : "mustard";
-  return (
-    <Card>
-      <CardBody>
-        <div className="flex items-center justify-between gap-2 mb-2">
-          <span className="inline-flex items-center gap-2 text-xs">
-            <Icon
-              className={`size-4 ${
-                c.status === "pass"
-                  ? "text-sage-ink"
-                  : c.status === "fail"
-                    ? "text-brick-ink"
-                    : "text-mustard-ink"
-              }`}
-            />
-            <span className="font-mono text-ink-muted">{c.id}</span>
-          </span>
-          <Pill tone={tone}>{c.judge}</Pill>
-        </div>
-        <div className="space-y-2 text-sm">
-          <Field label="Prompt">{c.prompt}</Field>
-          <Field label="Expected">{c.expected}</Field>
-          <Field label="Actual">{c.actual}</Field>
-        </div>
-      </CardBody>
-    </Card>
-  );
-}
-
-function Field({ label, children }: { label: string; children: React.ReactNode }) {
-  return (
-    <div>
-      <div className="text-2xs uppercase tracking-wider text-ink-soft">
-        {label}
-      </div>
-      <div className="text-ink leading-relaxed">{children}</div>
     </div>
   );
 }

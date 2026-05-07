@@ -1,15 +1,18 @@
 import { Switch } from "@/components/ui/switch";
-import { Textarea } from "@/components/ui/textarea";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { SectionHeader, SettingsCard, Row } from "@/components/settings/section";
+import { db } from "@/lib/db/store";
+import { notFound } from "next/navigation";
+import AISettingsForm from "@/components/settings/ai-settings-form";
 
-export default function AISettings() {
+export default async function AISettings({
+  params,
+}: {
+  params: Promise<{ org: string }>;
+}) {
+  const { org } = await params;
+  const o = await db.getOrgBySlug(org);
+  if (!o) notFound();
+
   return (
     <>
       <SectionHeader
@@ -30,59 +33,13 @@ export default function AISettings() {
         >
           <Switch defaultChecked />
         </Row>
-        <Row label="Cofounder Review Bot mode" hint="Controls how selective Cofounder Review Bot is when reviewing GitHub repositories.">
-          <Select defaultValue="blockers">
-            <SelectTrigger className="w-44">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="off">Off</SelectItem>
-              <SelectItem value="blockers">Blockers only</SelectItem>
-              <SelectItem value="all">All comments</SelectItem>
-            </SelectContent>
-          </Select>
-        </Row>
-        <div className="space-y-1">
-          <div className="text-base">Global Prompt Personalization</div>
-          <p className="text-xs text-ink-muted">
-            Add context that should be included globally across chats and agents.
-          </p>
-          <Textarea
-            placeholder="Example: be direct. Prefer bullets over paragraphs. Flag assumptions explicitly."
-            className="min-h-24"
-          />
-          <div className="flex justify-end">
-            <button className="text-xs rounded-md bg-ink text-paper px-3 py-1">
-              Save
-            </button>
-          </div>
-        </div>
-      </SettingsCard>
-
-      <SettingsCard title="AI Model" description="Choose which AI model powers your Cofounder conversations.">
-        <Row label="Cofounder">
-          <Select defaultValue="sonnet-4-6">
-            <SelectTrigger className="w-56">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="sonnet-4-6">Claude Sonnet 4.6</SelectItem>
-              <SelectItem value="opus-4-7">Claude Opus 4.7</SelectItem>
-              <SelectItem value="haiku-4-5">Claude Haiku 4.5</SelectItem>
-            </SelectContent>
-          </Select>
-        </Row>
-        <Row label="Engineer">
-          <Select defaultValue="opus-4-7">
-            <SelectTrigger className="w-56">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="opus-4-7">Claude Opus 4.7</SelectItem>
-              <SelectItem value="sonnet-4-6">Claude Sonnet 4.6</SelectItem>
-            </SelectContent>
-          </Select>
-        </Row>
+        <AISettingsForm
+          org={org}
+          initialAiModel={o.ai_model ?? "sonnet-4-6"}
+          initialEngineerModel={o.engineer_model ?? "opus-4-7"}
+          initialGlobalPrompt={o.global_prompt ?? ""}
+          initialReviewBotMode={o.review_bot_mode ?? "blockers"}
+        />
       </SettingsCard>
 
       <SettingsCard

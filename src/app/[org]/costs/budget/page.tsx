@@ -3,27 +3,59 @@
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { toast } from "@/components/toast-host";
 
-const AGENTS = [
-  { id: "engineer", name: "Engineer", default: 200 },
-  { id: "marketing", name: "Marketing", default: 60 },
-  { id: "design", name: "Design", default: 100 },
-  { id: "sales", name: "Sales", default: 40 },
-  { id: "operations", name: "Operations", default: 40 },
-  { id: "finance", name: "Finance", default: 40 },
-  { id: "legal", name: "Legal", default: 20 },
-  { id: "support", name: "Support", default: 20 },
-];
+type Agent = { id: string; name: string };
 
 export default function BudgetPage() {
   const params = useParams<{ org: string }>();
   const [monthly, setMonthly] = useState(800);
   const [hardLimit, setHardLimit] = useState(true);
   const [warnPct, setWarnPct] = useState(80);
-  const [perAgent, setPerAgent] = useState<Record<string, number>>(
-    Object.fromEntries(AGENTS.map((a) => [a.id, a.default])),
-  );
+  const [agents, setAgents] = useState<Agent[]>([]);
+  const [perAgent, setPerAgent] = useState<Record<string, number>>({});
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    void fetch(`/api/${params.org}`)
+      .then((r) => r.json())
+      .catch(() => null);
+
+    void fetch(`/api/${params.org}/agents`)
+      .then((r) => r.json())
+      .then((j: { agents: Agent[] }) => {
+        const agentList = j.agents ?? [];
+        setAgents(agentList);
+        setPerAgent(Object.fromEntries(agentList.map((a) => [a.id, 0])));
+      });
+
+    void fetch(`/api/${params.org}`)
+      .then((r) => r.json())
+      .then((j: { org?: { budget_monthly_usd?: number | null; budget_hard_limit?: boolean | null; budget_warn_pct?: number | null; budget_per_agent?: Record<string, number> | null } }) => {
+        if (!j.org) return;
+        if (j.org.budget_monthly_usd != null) setMonthly(j.org.budget_monthly_usd);
+        if (j.org.budget_hard_limit != null) setHardLimit(j.org.budget_hard_limit);
+        if (j.org.budget_warn_pct != null) setWarnPct(j.org.budget_warn_pct);
+        if (j.org.budget_per_agent) setPerAgent(j.org.budget_per_agent);
+      });
+  }, [params.org]);
+
+  async function save() {
+    setSaving(true);
+    await fetch(`/api/${params.org}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        budget_monthly_usd: monthly,
+        budget_hard_limit: hardLimit,
+        budget_warn_pct: warnPct,
+        budget_per_agent: perAgent,
+      }),
+    });
+    setSaving(false);
+    toast("Budget saved", "ok");
+  }
 
   return (
     <div className="absolute inset-0 overflow-y-auto p-6">
@@ -44,9 +76,7 @@ export default function BudgetPage() {
         </header>
 
         <section className="rounded-lg border border-line/70 bg-paper p-4 space-y-3">
-          <div className="text-md font-medium tracking-tight">
-            Workspace
-          </div>
+          <div className="text-md font-medium tracking-tight">Workspace</div>
           <Field label="Monthly budget (USD)">
             <input
               type="number"
@@ -73,39 +103,36 @@ export default function BudgetPage() {
           </Field>
         </section>
 
-        <section className="rounded-lg border border-line/70 bg-paper p-4 space-y-2">
-          <div className="text-md font-medium tracking-tight">
-            Per-agent caps
-          </div>
-          <p className="text-xs text-ink-muted">
-            Per-agent caps sum to{" "}
-            <span className="font-mono">
-              ${Object.values(perAgent).reduce((a, b) => a + b, 0)}
-            </span>{" "}
-            of ${monthly}.
-          </p>
-          <ul className="divide-y divide-line/60">
-            {AGENTS.map((a) => (
-              <li
-                key={a.id}
-                className="py-2 flex items-center justify-between text-sm"
-              >
-                <span>{a.name}</span>
-                <input
-                  type="number"
-                  value={perAgent[a.id]}
-                  onChange={(e) =>
-                    setPerAgent({
-                      ...perAgent,
-                      [a.id]: Number(e.target.value),
-                    })
-                  }
-                  className="w-24 h-8 rounded-md border border-line bg-paper px-2 text-sm font-mono focus:outline-none focus:border-line-strong"
-                />
-              </li>
-            ))}
-          </ul>
-        </section>
+        {agents.length > 0 && (
+          <section className="rounded-lg border border-line/70 bg-paper p-4 space-y-2">
+            <div className="text-md font-medium tracking-tight">Per-agent caps</div>
+            <p className="text-xs text-ink-muted">
+              Per-agent caps sum to{" "}
+              <span className="font-mono">
+                ${Object.values(perAgent).reduce((a, b) => a + b, 0)}
+              </span>{" "}
+              of ${monthly}.
+            </p>
+            <ul className="divide-y divide-line/60">
+              {agents.map((a) => (
+                <li
+                  key={a.id}
+                  className="py-2 flex items-center justify-between text-sm"
+                >
+                  <span>{a.name}</span>
+                  <input
+                    type="number"
+                    value={perAgent[a.id] ?? 0}
+                    onChange={(e) =>
+                      setPerAgent({ ...perAgent, [a.id]: Number(e.target.value) })
+                    }
+                    className="w-24 h-8 rounded-md border border-line bg-paper px-2 text-sm font-mono focus:outline-none focus:border-line-strong"
+                  />
+                </li>
+              ))}
+            </ul>
+          </section>
+        )}
 
         <div className="flex justify-end gap-2">
           <Link
@@ -114,8 +141,12 @@ export default function BudgetPage() {
           >
             Cancel
           </Link>
-          <button className="text-sm rounded-md bg-ink text-paper px-3 py-1.5">
-            Save budget
+          <button
+            onClick={save}
+            disabled={saving}
+            className="text-sm rounded-md bg-ink text-paper px-3 py-1.5 disabled:opacity-50"
+          >
+            {saving ? "Saving…" : "Save budget"}
           </button>
         </div>
       </div>

@@ -1,77 +1,17 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import {
-  ArrowLeft,
-  Clock,
-  ShieldAlert,
-} from "lucide-react";
+import { ArrowLeft, Clock, ShieldAlert } from "lucide-react";
 import ApprovalActions from "@/components/approval-actions";
+import { db } from "@/lib/db/store";
 
-const APPROVALS: Record<
-  string,
-  {
-    agent: string;
-    title: string;
-    body: string;
-    impact: "low" | "medium" | "high";
-    waiting: string;
-    risks: string[];
-    plan: string[];
-    rollback: string;
-  }
-> = {
-  approval_001: {
-    agent: "Engineer",
-    title: "Apply migration: add `subscriptions` table",
-    body: "Migration 0014 adds a new `subscriptions` table with a foreign key to `auth.users`. The table starts empty.",
-    impact: "low",
-    waiting: "2m",
-    risks: [
-      "FK to auth.users — verify no orphan deletes are expected.",
-      "Adds 4 columns; no existing data is touched.",
-    ],
-    plan: [
-      "Run migration on staging branch.",
-      "Verify table exists and FK constraint resolves.",
-      "Promote to production.",
-    ],
-    rollback: "DROP TABLE public.subscriptions;",
-  },
-  approval_002: {
-    agent: "Marketing",
-    title: "Send launch email to 1,240 subscribers",
-    body: "Reviewed by Cofounder. Subject: \"PDF Champ is live.\" Send time: today 5pm.",
-    impact: "medium",
-    waiting: "8m",
-    risks: [
-      "Once sent, cannot be unsent.",
-      "Subject line is committed across providers (Postmark + downstream).",
-    ],
-    plan: [
-      "Render email in three clients (Gmail, Outlook, iOS Mail).",
-      "Confirm subject line and preview text.",
-      "Schedule via Postmark for 5pm.",
-    ],
-    rollback: "Cannot rollback once sent. Pre-send checks only.",
-  },
-  approval_003: {
-    agent: "Sales",
-    title: "Spend $200 on outbound prospect data",
-    body: "Sales wants to pull 500 mortgage broker contacts via Clay (~$200). Cost would draw down monthly budget.",
-    impact: "medium",
-    waiting: "21m",
-    risks: [
-      "Burns 18% of remaining sales budget.",
-      "Data quality varies across Clay providers.",
-    ],
-    plan: [
-      "Pull 50-row sample first.",
-      "Spot-check deliverability.",
-      "Pull remaining 450 if sample passes.",
-    ],
-    rollback: "Refund window with Clay is 24h.",
-  },
-};
+function waitingLabel(iso: string): string {
+  const ms = Date.now() - new Date(iso).getTime();
+  const m = Math.floor(ms / 60_000);
+  if (m < 60) return `${m}m`;
+  const h = Math.floor(m / 60);
+  if (h < 24) return `${h}h`;
+  return `${Math.floor(h / 24)}d`;
+}
 
 export default async function ApprovalDetailPage({
   params,
@@ -79,7 +19,11 @@ export default async function ApprovalDetailPage({
   params: Promise<{ org: string; approval: string }>;
 }) {
   const { org, approval } = await params;
-  const a = APPROVALS[approval];
+  const o = await db.getOrgBySlug(org);
+  if (!o) notFound();
+
+  const approvals = await db.listApprovals(o.id);
+  const a = approvals.find((x) => x.id === approval);
   if (!a) notFound();
 
   return (
@@ -97,7 +41,7 @@ export default async function ApprovalDetailPage({
             {a.agent}
             <span className="inline-flex items-center gap-1 text-ink-muted">
               <Clock className="size-3" />
-              waiting {a.waiting}
+              waiting {waitingLabel(a.created_at)}
             </span>
           </div>
           <h1 className="text-xl tracking-tight">{a.title}</h1>
@@ -117,43 +61,23 @@ export default async function ApprovalDetailPage({
           </p>
         </header>
 
-        <section className="rounded-lg border border-line/70 bg-paper p-4 space-y-2">
-          <div className="text-2xs uppercase tracking-wider text-ink-soft inline-flex items-center gap-1">
-            <ShieldAlert className="size-3" /> Risks
-          </div>
-          <ul className="list-disc pl-5 space-y-1 text-sm text-ink">
-            {a.risks.map((r, i) => (
-              <li key={i}>{r}</li>
-            ))}
-          </ul>
-        </section>
-
-        <section className="rounded-lg border border-line/70 bg-paper p-4 space-y-2">
-          <div className="text-2xs uppercase tracking-wider text-ink-soft">
-            Execution plan
-          </div>
-          <ol className="space-y-1.5 text-base text-ink">
-            {a.plan.map((step, i) => (
-              <li key={i} className="flex items-start gap-2">
-                <span className="size-4 rounded-full border border-line-strong inline-flex items-center justify-center text-2xs text-ink-muted shrink-0 mt-0.5">
-                  {i + 1}
+        {a.status !== "pending" && (
+          <section className="rounded-lg border border-line/70 bg-paper p-4">
+            <div className="text-2xs uppercase tracking-wider text-ink-soft inline-flex items-center gap-1 mb-1">
+              <ShieldAlert className="size-3" /> Decision
+            </div>
+            <p className="text-sm text-ink">
+              {a.status.charAt(0).toUpperCase() + a.status.slice(1)}
+              {a.decided_at && (
+                <span className="text-ink-muted ml-2">
+                  · {new Date(a.decided_at).toLocaleString()}
                 </span>
-                {step}
-              </li>
-            ))}
-          </ol>
-        </section>
+              )}
+            </p>
+          </section>
+        )}
 
-        <section className="rounded-lg border border-line/70 bg-paper p-4 space-y-1">
-          <div className="text-2xs uppercase tracking-wider text-ink-soft">
-            Rollback
-          </div>
-          <pre className="text-xs font-mono text-ink whitespace-pre-wrap">
-            {a.rollback}
-          </pre>
-        </section>
-
-        <ApprovalActions org={org} id={approval} />
+        {a.status === "pending" && <ApprovalActions org={org} id={approval} />}
       </div>
     </div>
   );

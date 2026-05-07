@@ -1,3 +1,7 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import { useParams } from "next/navigation";
 import Link from "next/link";
 import {
   Card,
@@ -20,69 +24,32 @@ type Suite = {
   pass: number;
   fail: number;
   pending: number;
-  last: string;
+  last_run_at: string | null;
   ran_against: string;
-  tone: Tone;
 };
 
-const SUITES: Suite[] = [
-  {
-    id: "engineer-bug-fix",
-    name: "Engineer · bug fix flow",
-    agent: "Engineer",
-    cases: 14,
-    pass: 13,
-    fail: 1,
-    pending: 0,
-    last: "2026-05-06 18:42",
-    ran_against: "claude-opus-4-7",
-    tone: "mustard",
-  },
-  {
-    id: "marketing-launch-tone",
-    name: "Marketing · launch tone",
-    agent: "Marketing",
-    cases: 9,
-    pass: 9,
-    fail: 0,
-    pending: 0,
-    last: "2026-05-06 17:11",
-    ran_against: "claude-opus-4-7",
-    tone: "sage",
-  },
-  {
-    id: "support-triage",
-    name: "Support · case triage classifier",
-    agent: "Support",
-    cases: 22,
-    pass: 19,
-    fail: 1,
-    pending: 2,
-    last: "2026-05-06 09:00",
-    ran_against: "claude-haiku-4-5",
-    tone: "mustard",
-  },
-  {
-    id: "finance-invoice-extract",
-    name: "Finance · invoice line extraction",
-    agent: "Finance",
-    cases: 30,
-    pass: 24,
-    fail: 6,
-    pending: 0,
-    last: "2026-05-05 22:30",
-    ran_against: "claude-opus-4-7",
-    tone: "brick",
-  },
-];
+function suiteTone(s: Suite): Tone {
+  if (s.cases === 0) return "neutral";
+  if (s.fail > 0) return "brick";
+  if (s.pending > 0) return "mustard";
+  return "sage";
+}
 
-export default async function EvalsPage({
-  params,
-}: {
-  params: Promise<{ org: string }>;
-}) {
-  const { org } = await params;
-  const totals = SUITES.reduce(
+export default function EvalsPage() {
+  const params = useParams<{ org: string }>();
+  const [suites, setSuites] = useState<Suite[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    void fetch(`/api/${params.org}/evals`)
+      .then((r) => r.json())
+      .then((j: { suites: Suite[] }) => {
+        setSuites(j.suites ?? []);
+        setLoading(false);
+      });
+  }, [params.org]);
+
+  const totals = suites.reduce(
     (a, s) => ({
       cases: a.cases + s.cases,
       pass: a.pass + s.pass,
@@ -108,7 +75,7 @@ export default async function EvalsPage({
             </Hint>
           </div>
           <Link
-            href={`/${org}/evals/new`}
+            href={`/${params.org}/evals/new`}
             className="inline-flex items-center gap-1 text-sm rounded-md bg-ink text-paper px-3 py-1.5 hover:opacity-90"
           >
             <Plus className="size-3.5" /> New suite
@@ -116,61 +83,75 @@ export default async function EvalsPage({
         </header>
 
         <div className="grid grid-cols-4 gap-3">
-          <StatCard label="Suites" value={String(SUITES.length)} />
+          <StatCard label="Suites" value={String(suites.length)} />
           <StatCard label="Cases" value={String(totals.cases)} />
           <StatCard
             label="Pass rate"
-            value={`${passRate}%`}
-            tone={passRate >= 95 ? "sage" : passRate >= 85 ? "mustard" : "brick"}
+            value={totals.cases ? `${passRate}%` : "—"}
+            tone={totals.cases === 0 ? "neutral" : passRate >= 95 ? "sage" : passRate >= 85 ? "mustard" : "brick"}
           />
-          <StatCard label="Failing" value={String(totals.fail)} tone="brick" />
+          <StatCard label="Failing" value={String(totals.fail)} tone={totals.fail > 0 ? "brick" : "neutral"} />
         </div>
 
         <Card>
           <CardBody className="p-0">
-            <ul className="divide-y divide-line/60">
-              {SUITES.map((s) => (
-                <li key={s.id}>
-                  <Link
-                    href={`/${org}/evals/${s.id}`}
-                    className="grid grid-cols-12 items-center px-4 py-3 hover:bg-cream/40"
-                  >
-                    <div className="col-span-5 min-w-0">
-                      <div className="text-sm font-medium tracking-tight truncate">
-                        {s.name}
+            {loading ? (
+              <div className="px-4 py-6 text-sm text-ink-muted text-center">Loading…</div>
+            ) : suites.length === 0 ? (
+              <div className="px-4 py-6 text-sm text-ink-muted text-center">
+                No eval suites yet.{" "}
+                <Link href={`/${params.org}/evals/new`} className="underline hover:text-ink">
+                  Create one
+                </Link>{" "}
+                to track agent quality over time.
+              </div>
+            ) : (
+              <ul className="divide-y divide-line/60">
+                {suites.map((s) => (
+                  <li key={s.id}>
+                    <Link
+                      href={`/${params.org}/evals/${s.id}`}
+                      className="grid grid-cols-12 items-center px-4 py-3 hover:bg-cream/40"
+                    >
+                      <div className="col-span-5 min-w-0">
+                        <div className="text-sm font-medium tracking-tight truncate">
+                          {s.name}
+                        </div>
+                        <div className="text-2xs text-ink-soft mt-0.5">
+                          {s.agent} · {s.ran_against}
+                        </div>
                       </div>
-                      <div className="text-2xs text-ink-soft mt-0.5">
-                        {s.agent} · {s.ran_against}
+                      <div className="col-span-4 inline-flex items-center gap-2 text-xs">
+                        <span className="inline-flex items-center gap-0.5 text-sage-ink">
+                          <CheckCircle2 className="size-3" /> {s.pass}
+                        </span>
+                        <span className="inline-flex items-center gap-0.5 text-brick-ink">
+                          <XCircle className="size-3" /> {s.fail}
+                        </span>
+                        <span className="inline-flex items-center gap-0.5 text-ink-muted">
+                          <Clock className="size-3" /> {s.pending}
+                        </span>
+                        <span className="text-ink-soft">/ {s.cases} cases</span>
                       </div>
-                    </div>
-                    <div className="col-span-4 inline-flex items-center gap-2 text-xs">
-                      <span className="inline-flex items-center gap-0.5 text-sage-ink">
-                        <CheckCircle2 className="size-3" /> {s.pass}
-                      </span>
-                      <span className="inline-flex items-center gap-0.5 text-brick-ink">
-                        <XCircle className="size-3" /> {s.fail}
-                      </span>
-                      <span className="inline-flex items-center gap-0.5 text-ink-muted">
-                        <Clock className="size-3" /> {s.pending}
-                      </span>
-                      <span className="text-ink-soft">/ {s.cases} cases</span>
-                    </div>
-                    <div className="col-span-2 text-2xs text-ink-soft">
-                      {s.last}
-                    </div>
-                    <div className="col-span-1 text-right">
-                      <Pill tone={s.tone}>
-                        {s.fail === 0 && s.pending === 0
-                          ? "green"
-                          : s.fail > 0
-                            ? "regressed"
-                            : "running"}
-                      </Pill>
-                    </div>
-                  </Link>
-                </li>
-              ))}
-            </ul>
+                      <div className="col-span-2 text-2xs text-ink-soft">
+                        {s.last_run_at ? s.last_run_at.slice(0, 16).replace("T", " ") : "—"}
+                      </div>
+                      <div className="col-span-1 text-right">
+                        <Pill tone={suiteTone(s)}>
+                          {s.fail === 0 && s.pending === 0 && s.cases > 0
+                            ? "green"
+                            : s.fail > 0
+                              ? "regressed"
+                              : s.cases === 0
+                                ? "empty"
+                                : "running"}
+                        </Pill>
+                      </div>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            )}
           </CardBody>
         </Card>
 
@@ -188,4 +169,3 @@ export default async function EvalsPage({
     </div>
   );
 }
-

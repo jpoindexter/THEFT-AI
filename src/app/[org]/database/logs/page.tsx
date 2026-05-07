@@ -1,69 +1,26 @@
-import { ScrollText } from "lucide-react";
-
-const LOGS = [
-  { ts: "12:42:01", level: "info", source: "api", msg: "POST /api/auth/signin 200 (123ms)" },
-  { ts: "12:41:58", level: "info", source: "db", msg: "select 12 rows from public.users (4ms)" },
-  { ts: "12:41:50", level: "warn", source: "edge", msg: "rate-limit warning ip=184.x.y.z (8 req/2s)" },
-  { ts: "12:41:31", level: "info", source: "api", msg: "GET /api/health 200 (3ms)" },
-  { ts: "12:41:22", level: "error", source: "api", msg: "POST /api/stripe/webhook 400 — bad signature" },
-  { ts: "12:41:01", level: "info", source: "auth", msg: "user_signed_in user_id=usr_abc123" },
-];
-
-const LEVEL_TONE: Record<string, string> = {
-  info: "bg-cream text-ink",
-  warn: "bg-mustard/30 text-mustard-ink",
-  error: "bg-brick/15 text-brick-ink",
-};
+import { Inbox } from "lucide-react";
 
 export default function LogsPage() {
   return (
     <div className="space-y-4">
-      <header>
-        <h1 className="text-lg font-medium tracking-tight inline-flex items-center gap-2">
-          <ScrollText className="size-4 text-ink-muted" /> Logs
-        </h1>
-        <p className="text-sm text-ink-muted">
-          Live tail across edge functions, API routes, database, and auth.
-        </p>
+      <header className="flex items-center justify-between">
+        <div>
+          <h1 className="text-lg font-medium tracking-tight">Logs</h1>
+          <p className="text-sm text-ink-muted">
+            Debug errors and track activity in your app.
+          </p>
+        </div>
+        <div className="rounded-md border border-line/70 bg-paper px-2 py-1.5 text-xs text-ink-muted inline-flex items-center gap-1">
+          Function Edge Logs ▾
+        </div>
       </header>
 
-      <div className="flex items-center gap-2 text-xs">
-        <select className="rounded-md border border-line bg-paper px-2 py-1">
-          <option>All sources</option>
-          <option>api</option>
-          <option>db</option>
-          <option>edge</option>
-          <option>auth</option>
-        </select>
-        <select className="rounded-md border border-line bg-paper px-2 py-1">
-          <option>All levels</option>
-          <option>info</option>
-          <option>warn</option>
-          <option>error</option>
-        </select>
-        <input
-          placeholder="Filter…"
-          className="rounded-md border border-line bg-paper px-2 py-1 flex-1 focus:outline-none focus:border-line-strong"
-        />
-      </div>
-
-      <div className="rounded-lg border border-line/70 bg-ink p-3 max-h-[420px] overflow-y-auto">
-        <ul className="space-y-1 font-mono text-xs">
-          {LOGS.map((l, i) => (
-            <li key={i} className="flex items-start gap-2 text-line-strong">
-              <span className="text-ink-muted shrink-0">{l.ts}</span>
-              <span
-                className={`uppercase rounded px-1 text-2xs shrink-0 ${
-                  LEVEL_TONE[l.level] ?? "bg-cream text-ink"
-                }`}
-              >
-                {l.level}
-              </span>
-              <span className="text-ink-soft shrink-0">[{l.source}]</span>
-              <span className="break-all">{l.msg}</span>
-            </li>
-          ))}
-        </ul>
+      <div className="rounded-lg border border-line/70 bg-paper p-12 flex flex-col items-center justify-center text-center min-h-[200px] gap-2">
+        <Inbox className="size-6 text-line-strong" />
+        <div className="text-base text-ink font-medium">No logs found</div>
+        <p className="text-xs text-ink-muted max-w-xs">
+          Logs will appear here when your application generates activity.
+        </p>
       </div>
     </div>
   );

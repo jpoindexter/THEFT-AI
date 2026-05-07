@@ -125,13 +125,14 @@ export default function DepartmentPanel({
         {agents.map((a) => (
           <div
             key={a.id}
-            className="rounded-md border border-line/70 bg-paper px-3 py-1.5 flex items-center justify-between text-sm"
+            className="rounded-md border border-line/70 bg-paper px-2.5 py-1.5 flex items-center gap-2 text-sm"
           >
-            <div>
-              <span className="font-medium mr-1">{a.name}</span>
-              <span className="text-ink-muted">Default</span>
-            </div>
-            <span className="text-2xs text-ink-muted">2 schedules</span>
+            <span className="size-5 rounded border border-line/70 bg-canvas inline-flex items-center justify-center text-2xs font-medium text-ink-soft shrink-0">
+              {a.name.charAt(0).toUpperCase()}
+            </span>
+            <span className="font-medium">{a.name}</span>
+            <span className="text-ink-muted">Default</span>
+            <span className="ml-auto text-2xs text-ink-muted">2 schedules</span>
           </div>
         ))}
         <button className="mt-2 w-full inline-flex items-center justify-center gap-1 rounded-md bg-canvas border border-dashed border-line-strong px-3 py-1.5 text-sm text-ink-muted hover:border-line-strong">

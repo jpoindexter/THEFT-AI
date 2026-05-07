@@ -10,6 +10,7 @@ import LibraryTab from "./library-tab";
 import CompanyTab from "./company-tab";
 import DepartmentPanel from "./department-panel";
 import { ChevronRight, RefreshCw, Circle } from "lucide-react";
+import Sunflower from "@/components/sunflower";
 
 type Org = { id: string; slug: string; name: string };
 type Tab = "home" | "cofounder" | "company" | "tasks" | "library";
@@ -45,6 +46,7 @@ export default function RightPanel({
   const [department, setDepartment] = useState<DepartmentInfo | undefined>(
     serverDepartment,
   );
+  const [onboardingStarted, setOnboardingStarted] = useState(false);
 
   // detect dept slug from URL: /[org]/[deptSlug] (excluding well-known sections)
   const RESERVED = new Set([
@@ -80,29 +82,30 @@ export default function RightPanel({
   if (!hasPlan) {
     return (
       <aside className="rounded-lg bg-paper border border-line/70 flex flex-col overflow-hidden">
-        <header className="px-4 py-3 border-b border-line/70 flex items-start gap-3">
-          <div className="size-7 rounded-md bg-cream inline-flex items-center justify-center mt-0.5">
-            <DocIcon />
-          </div>
-          <div className="leading-tight">
-            <div className="text-md tracking-tight font-medium">
-              Onboarding
+        {onboardingStarted && (
+          <header className="px-4 py-3 border-b border-line/70 flex items-start gap-3">
+            <div className="size-7 rounded-md bg-cream inline-flex items-center justify-center mt-0.5">
+              <DocIcon />
             </div>
-            <div className="text-xs text-ink-muted mt-0.5">
-              {organization.name} · {founderName}
+            <div className="leading-tight">
+              <div className="text-md tracking-tight font-medium">
+                Onboarding
+              </div>
+              <div className="text-xs text-ink-muted mt-0.5">
+                {organization.name} · {founderName}
+              </div>
             </div>
-          </div>
-        </header>
+          </header>
+        )}
         <AgentChat
           organization={organization}
           onboarding
+          onFirstTurn={() => setOnboardingStarted(true)}
           emptyHeader={
-            <div className="flex flex-col items-center text-center gap-3 pt-4 pb-2">
-              <p className="text-md text-ink tracking-tight">
+            <div className="flex flex-col items-center text-center gap-2 pt-6 pb-2">
+              <Sunflower size={168} />
+              <p className="text-md text-ink tracking-tight mt-1">
                 Tell me more about your company
-              </p>
-              <p className="text-sm text-ink-muted max-w-[260px] leading-snug">
-                Share what you&apos;re building and Cofounder will start a brief.
               </p>
             </div>
           }
@@ -150,6 +153,9 @@ export default function RightPanel({
   );
 }
 
+type ActiveTask = { id: string; title: string };
+type SuggestedNode = { id: string; title: string };
+
 function HomeTab({
   organization,
   founderName,
@@ -160,19 +166,30 @@ function HomeTab({
   const hour = new Date().getHours();
   const greeting =
     hour < 12 ? "Good morning" : hour < 18 ? "Good afternoon" : "Good evening";
-  const SUGGESTED = [
-    "App is built",
-    "Build marketing website",
-    "Sales positioning is ready",
-    "Brand identity",
-    "Setup social presence",
-  ];
-  const ACTIVE_TASKS = [
-    {
-      icon: <span className="size-3 rounded-full bg-mustard inline-block" />,
-      title: "Marketing: Score generated-artifact-…",
-    },
-  ];
+
+  const [activeTasks, setActiveTasks] = useState<ActiveTask[]>([]);
+  const [suggested, setSuggested] = useState<SuggestedNode[]>([]);
+  const [completePct, setCompletePct] = useState<number>(0);
+
+  useEffect(() => {
+    void fetch(`/api/${organization.slug}/tasks`)
+      .then((r) => r.json())
+      .then((j: { tasks?: ActiveTask[] }) => {
+        setActiveTasks(j.tasks ?? []);
+      });
+    void fetch(`/api/${organization.slug}/roadmap`)
+      .then((r) => r.json())
+      .then((j: { nodes?: { id: string; title: string; status: string }[] }) => {
+        const nodes = j.nodes ?? [];
+        const available = nodes.filter((n) => n.status === "available");
+        const complete = nodes.filter((n) => n.status === "complete");
+        setSuggested(available.slice(0, 5));
+        if (nodes.length > 0) {
+          setCompletePct(Math.round((complete.length / nodes.length) * 100));
+        }
+      });
+  }, [organization.slug]);
+
   return (
     <div className="flex-1 overflow-y-auto p-4 space-y-5">
       <h2 className="text-lg tracking-tight">
@@ -197,50 +214,54 @@ function HomeTab({
             {organization.name} Roadmap
           </div>
           <div className="absolute top-3 right-3 text-2xs text-ink bg-paper/80 backdrop-blur-sm rounded px-1.5 py-0.5">
-            9%
+            {completePct}%
           </div>
         </div>
       </Link>
 
-      <Section label="Active tasks">
-        <ul className="space-y-1">
-          {ACTIVE_TASKS.map((t, i) => (
-            <li
-              key={i}
-              className="flex items-center gap-2 rounded-md hover:bg-canvas px-1 py-1.5 text-base text-ink cursor-pointer"
-            >
-              {t.icon}
-              <span className="truncate flex-1">{t.title}</span>
-              <ChevronRight className="size-3.5 text-ink-soft" />
-            </li>
-          ))}
-        </ul>
-      </Section>
+      {activeTasks.length > 0 && (
+        <Section label="Active tasks">
+          <ul className="space-y-1">
+            {activeTasks.map((t) => (
+              <li
+                key={t.id}
+                className="flex items-center gap-2 rounded-md hover:bg-canvas px-1 py-1.5 text-base text-ink cursor-pointer"
+              >
+                <span className="size-3 rounded-full bg-mustard inline-block shrink-0" />
+                <span className="truncate flex-1">{t.title}</span>
+                <ChevronRight className="size-3.5 text-ink-soft shrink-0" />
+              </li>
+            ))}
+          </ul>
+        </Section>
+      )}
 
-      <Section
-        label="Suggested next"
-        right={
-          <button
-            type="button"
-            className="text-ink-soft hover:text-ink"
-            aria-label="Refresh"
-          >
-            <RefreshCw className="size-3" />
-          </button>
-        }
-      >
-        <ul className="space-y-1.5">
-          {SUGGESTED.map((s) => (
-            <li
-              key={s}
-              className="flex items-center gap-2 text-base text-ink"
+      {suggested.length > 0 && (
+        <Section
+          label="Suggested next"
+          right={
+            <button
+              type="button"
+              className="text-ink-soft hover:text-ink"
+              aria-label="Refresh"
             >
-              <Circle className="size-3 text-line-strong" />
-              <span>{s}</span>
-            </li>
-          ))}
-        </ul>
-      </Section>
+              <RefreshCw className="size-3" />
+            </button>
+          }
+        >
+          <ul className="space-y-1.5">
+            {suggested.map((n) => (
+              <li
+                key={n.id}
+                className="flex items-center gap-2 text-base text-ink"
+              >
+                <Circle className="size-3 text-line-strong" />
+                <span>{n.title}</span>
+              </li>
+            ))}
+          </ul>
+        </Section>
+      )}
 
       <CofounderInlineComposer organization={organization} />
     </div>

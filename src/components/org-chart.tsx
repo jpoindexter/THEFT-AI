@@ -18,6 +18,17 @@ import {
   Sparkles,
 } from "lucide-react";
 
+const DEPT_COLOR: Record<string, string> = {
+  engineering: "bg-[#c8a87a] text-white",
+  design:      "bg-[#7ab4c8] text-white",
+  marketing:   "bg-[#e0907a] text-white",
+  sales:       "bg-[#7ac87a] text-white",
+  operations:  "bg-[#7ac8b4] text-white",
+  finance:     "bg-[#9a7ac8] text-white",
+  legal:       "bg-[#4a5a6a] text-white",
+  support:     "bg-[#e0a050] text-white",
+};
+
 type Department = { id: string; slug: string; name: string };
 
 const DEPT_ICON: Record<string, React.ComponentType<{ className?: string }>> = {
@@ -92,14 +103,31 @@ function Ring() {
   );
 }
 
-function Center({ orgName }: { orgName: string }) {
+function Center({ orgName: _ }: { orgName: string }) {
   return (
     <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-10">
       <div className="rounded-full bg-paper border border-line/70 px-3 py-1 inline-flex items-center gap-1.5 shadow-sm">
-        <Sparkles className="size-3 text-mustard-ink" />
-        <span className="text-sm tracking-tight text-ink">{orgName}</span>
+        <SeedlingIcon />
+        <span className="text-sm tracking-tight text-ink">Cofounder</span>
       </div>
     </div>
+  );
+}
+
+function SeedlingIcon() {
+  return (
+    <svg width="14" height="16" viewBox="0 0 14 16" fill="none" aria-hidden className="shrink-0">
+      {/* stem */}
+      <line x1="7" y1="15" x2="7" y2="6" stroke="#6b7d44" strokeWidth="1.2" strokeLinecap="round" />
+      {/* left leaf */}
+      <path d="M7 10 Q3 8 4 5 Q6 7 7 8" fill="none" stroke="#9aaa5d" strokeWidth="1" strokeLinecap="round" />
+      {/* right leaf */}
+      <path d="M7 9 Q11 7 10 4 Q8 6 7 7" fill="none" stroke="#9aaa5d" strokeWidth="1" strokeLinecap="round" />
+      {/* bud */}
+      <circle cx="7" cy="4.5" r="1.8" fill="none" stroke="#c89a4d" strokeWidth="1" />
+      <line x1="5.8" y1="3.3" x2="8.2" y2="5.7" stroke="#c89a4d" strokeWidth="0.7" strokeLinecap="round" />
+      <line x1="8.2" y1="3.3" x2="5.8" y2="5.7" stroke="#c89a4d" strokeWidth="0.7" strokeLinecap="round" />
+    </svg>
   );
 }
 
@@ -139,12 +167,15 @@ function DeptNode({
       >
         <Link
           href={`/${orgSlug}/${dept.slug}`}
-          className="rounded-full bg-paper border border-line/70 px-2.5 py-0.5 text-xs tracking-tight inline-flex items-center gap-1.5 hover:border-line-strong"
+          className="rounded-full bg-paper border border-line/70 pl-1 pr-2.5 py-0.5 text-xs tracking-tight inline-flex items-center gap-1.5 hover:border-line-strong"
         >
           {(() => {
             const Icon = DEPT_ICON[dept.slug] ?? Sparkles;
+            const color = DEPT_COLOR[dept.slug] ?? "bg-ink text-paper";
             return (
-              <Icon className="size-3 text-ink-muted group-hover:text-ink" />
+              <span className={`size-4 rounded-full inline-flex items-center justify-center shrink-0 ${color}`}>
+                <Icon className="size-2.5" />
+              </span>
             );
           })()}
           {dept.name}

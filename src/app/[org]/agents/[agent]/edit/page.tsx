@@ -26,6 +26,7 @@ export default function AgentEditPage() {
   const [agent, setAgent] = useState<Agent | null>(null);
   const [skills, setSkills] = useState<Skill[]>([]);
   const [draft, setDraft] = useState<Partial<Agent>>({});
+  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     void fetch(`/api/${params.org}/agents`)
@@ -54,6 +55,18 @@ export default function AgentEditPage() {
           : [...cur, slug],
       };
     });
+  }
+
+  async function save() {
+    if (!agent || saving) return;
+    setSaving(true);
+    await fetch(`/api/${params.org}/agents/${agent.id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(draft),
+    });
+    setSaving(false);
+    window.location.href = `/${params.org}/agents/${params.agent}`;
   }
 
   if (!agent) {
@@ -167,9 +180,11 @@ export default function AgentEditPage() {
           </Link>
           <button
             type="button"
-            className="text-sm rounded-md bg-ink text-paper px-3 py-1.5"
+            onClick={save}
+            disabled={saving}
+            className="text-sm rounded-md bg-ink text-paper px-3 py-1.5 disabled:opacity-50"
           >
-            Save changes
+            {saving ? "Saving…" : "Save changes"}
           </button>
         </div>
       </div>

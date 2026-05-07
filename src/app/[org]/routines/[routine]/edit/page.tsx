@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ArrowLeft, Trash2 } from "lucide-react";
 import {
   Card,
@@ -15,83 +15,64 @@ import {
 } from "@/components/ui/primitives";
 import { toast } from "@/components/toast-host";
 
-const SEED: Record<
-  string,
-  {
-    name: string;
-    agent: string;
-    cron: string;
-    prompt: string;
-    enabled: boolean;
-  }
-> = {
-  weekly_status: {
-    name: "Weekly status brief",
-    agent: "operations",
-    cron: "0 9 * * 1",
-    prompt:
-      "Write a 5-bullet status brief covering shipped work, in-progress, blockers, decisions needed, and next focus.",
-    enabled: true,
-  },
-  social_pack: {
-    name: "Daily social pack",
-    agent: "marketing",
-    cron: "0 7 * * 1-5",
-    prompt:
-      "Draft 3 LinkedIn posts and 3 X posts riffing on yesterday's engineering changes and product launches.",
-    enabled: false,
-  },
-  month_close: {
-    name: "Month-end finance close",
-    agent: "finance",
-    cron: "0 17 L * *",
-    prompt:
-      "Reconcile Stripe payouts, AWS bill, and outstanding invoices. Post a close note to #finance with variance vs forecast.",
-    enabled: true,
-  },
+type Routine = {
+  id: string;
+  name: string;
+  description: string | null;
+  agent: string;
+  cron: string;
+  enabled: boolean;
 };
-
-const AGENTS = [
-  "operations",
-  "engineering",
-  "design",
-  "marketing",
-  "sales",
-  "finance",
-  "legal",
-  "support",
-];
 
 export default function EditRoutinePage() {
   const params = useParams<{ org: string; routine: string }>();
   const router = useRouter();
-  const seed = SEED[params.routine] ?? {
-    name: "",
-    agent: "operations",
-    cron: "",
-    prompt: "",
-    enabled: false,
-  };
-  const [draft, setDraft] = useState(seed);
+  const [draft, setDraft] = useState<Routine | null>(null);
   const [busy, setBusy] = useState(false);
 
-  function save() {
-    if (!draft.name || !draft.cron) return;
+  useEffect(() => {
+    void fetch(`/api/${params.org}/routines`)
+      .then((r) => r.json())
+      .then((j: { routines: Routine[] }) => {
+        const r = j.routines.find((x) => x.id === params.routine);
+        if (r) setDraft(r);
+      });
+  }, [params.org, params.routine]);
+
+  async function save() {
+    if (!draft || !draft.name || !draft.cron || busy) return;
     setBusy(true);
-    setTimeout(() => {
-      setBusy(false);
-      toast(`${draft.name} saved`, "ok");
-      router.replace(`/${params.org}/routines/${params.routine}`);
-    }, 400);
+    await fetch(`/api/${params.org}/routines/${params.routine}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        name: draft.name,
+        description: draft.description,
+        agent: draft.agent,
+        cron: draft.cron,
+        enabled: draft.enabled,
+      }),
+    });
+    setBusy(false);
+    toast(`${draft.name} saved`, "ok");
+    router.replace(`/${params.org}/routines/${params.routine}`);
   }
 
-  function destroy() {
+  async function destroy() {
+    if (!draft || busy) return;
     setBusy(true);
-    setTimeout(() => {
-      setBusy(false);
-      toast(`${draft.name} deleted`, "warn");
-      router.replace(`/${params.org}/routines`);
-    }, 300);
+    await fetch(`/api/${params.org}/routines/${params.routine}`, { method: "DELETE" });
+    setBusy(false);
+    toast(`${draft.name} deleted`, "warn");
+    router.replace(`/${params.org}/routines`);
+  }
+
+  if (!draft) {
+    return (
+      <div className="absolute inset-0 grid place-items-center text-sm text-ink-muted">
+        Loading…
+      </div>
+    );
   }
 
   return (
@@ -108,8 +89,8 @@ export default function EditRoutinePage() {
           <Eyebrow>Routine</Eyebrow>
           <PageTitle>Edit routine</PageTitle>
           <Hint>
-            Schedule, prompt, and which agent runs it. Pause if you don't want
-            it to fire while you change things.
+            Schedule, description, and which agent runs it. Pause if you
+            don&apos;t want it to fire while you change things.
           </Hint>
         </header>
 
@@ -123,17 +104,12 @@ export default function EditRoutinePage() {
               />
             </Field>
             <Field label="Run as agent">
-              <select
+              <input
                 value={draft.agent}
                 onChange={(e) => setDraft({ ...draft, agent: e.target.value })}
-                className="w-full h-9 rounded-md border border-line bg-paper px-2 text-sm"
-              >
-                {AGENTS.map((a) => (
-                  <option key={a} value={a}>
-                    {a[0].toUpperCase() + a.slice(1)}
-                  </option>
-                ))}
-              </select>
+                placeholder="e.g. Marketing"
+                className="w-full h-9 rounded-md border border-line bg-paper px-3 text-sm focus:outline-none focus:border-line-strong"
+              />
             </Field>
             <Field label="Schedule (cron)" hint="UTC. Use crontab.guru if unsure.">
               <input
@@ -142,11 +118,13 @@ export default function EditRoutinePage() {
                 className="w-full h-9 rounded-md border border-line bg-paper px-3 text-sm font-mono focus:outline-none focus:border-line-strong"
               />
             </Field>
-            <Field label="Prompt">
+            <Field label="Description">
               <textarea
-                value={draft.prompt}
-                onChange={(e) => setDraft({ ...draft, prompt: e.target.value })}
-                rows={5}
+                value={draft.description ?? ""}
+                onChange={(e) =>
+                  setDraft({ ...draft, description: e.target.value || null })
+                }
+                rows={4}
                 className="w-full rounded-md border border-line bg-paper px-3 py-2 text-sm focus:outline-none focus:border-line-strong"
               />
             </Field>

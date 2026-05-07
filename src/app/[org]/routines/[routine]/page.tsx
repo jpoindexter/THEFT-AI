@@ -1,59 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { db } from "@/lib/db/store";
 import { ArrowLeft, Calendar, Clock } from "lucide-react";
-
-const ROUTINES: Record<
-  string,
-  {
-    name: string;
-    agent: string;
-    cron: string;
-    prompt: string;
-    runs: { when: string; status: "ok" | "failed"; summary: string }[];
-  }
-> = {
-  weekly_status: {
-    name: "Weekly status brief",
-    agent: "Operations",
-    cron: "0 9 * * 1",
-    prompt:
-      "Write a 5-bullet status brief covering shipped work, in-progress, blockers, decisions needed, and next focus.",
-    runs: [
-      {
-        when: "Mon 2026-05-04 9:00am",
-        status: "ok",
-        summary: "Posted to #standup. 5 items.",
-      },
-      {
-        when: "Mon 2026-04-27 9:00am",
-        status: "ok",
-        summary: "Posted to #standup. 4 items.",
-      },
-    ],
-  },
-  month_close: {
-    name: "Month-end finance close",
-    agent: "Finance",
-    cron: "0 17 L * *",
-    prompt:
-      "Reconcile Stripe payouts, AWS bill, and outstanding invoices. Post a close note to #finance with variance vs forecast.",
-    runs: [],
-  },
-  social_pack: {
-    name: "Daily social pack",
-    agent: "Marketing",
-    cron: "0 7 * * 1-5",
-    prompt:
-      "Draft 3 LinkedIn posts and 3 X posts riffing on yesterday's engineering changes and product launches.",
-    runs: [
-      {
-        when: "Tue 2026-05-05 7:00am",
-        status: "failed",
-        summary: "No new shipped work to riff on. Skipped.",
-      },
-    ],
-  },
-};
 
 export default async function RoutineDetailPage({
   params,
@@ -61,7 +9,10 @@ export default async function RoutineDetailPage({
   params: Promise<{ org: string; routine: string }>;
 }) {
   const { org, routine } = await params;
-  const r = ROUTINES[routine];
+  const o = await db.getOrgBySlug(org);
+  if (!o) notFound();
+  const routines = await db.listRoutines(o.id);
+  const r = routines.find((x) => x.id === routine);
   if (!r) notFound();
 
   return (
@@ -81,62 +32,61 @@ export default async function RoutineDetailPage({
           <h1 className="text-xl tracking-tight">{r.name}</h1>
           <div className="text-sm text-ink-muted inline-flex items-center gap-3 mt-1">
             <span className="inline-flex items-center gap-1">
-              <Calendar className="size-3" /> <code className="font-mono">{r.cron}</code>
+              <Calendar className="size-3" />
+              <code className="font-mono">{r.cron}</code>
+            </span>
+            <span
+              className={`text-2xs uppercase rounded px-1.5 py-0.5 ${
+                r.enabled
+                  ? "bg-sage/30 text-sage-ink"
+                  : "bg-cream text-ink-muted border border-line/70"
+              }`}
+            >
+              {r.enabled ? "Active" : "Paused"}
             </span>
           </div>
         </header>
 
-        <section className="rounded-lg border border-line/70 bg-paper p-4 space-y-2">
-          <div className="text-2xs uppercase tracking-wider text-ink-soft">
-            Prompt
-          </div>
-          <p className="text-base text-ink leading-snug">{r.prompt}</p>
-        </section>
+        {r.description && (
+          <section className="rounded-lg border border-line/70 bg-paper p-4 space-y-2">
+            <div className="text-2xs uppercase tracking-wider text-ink-soft">
+              Description
+            </div>
+            <p className="text-base text-ink leading-snug">{r.description}</p>
+          </section>
+        )}
 
         <section className="rounded-lg border border-line/70 bg-paper p-4 space-y-2">
           <div className="text-2xs uppercase tracking-wider text-ink-soft">
-            Recent runs
+            Last run
           </div>
-          {r.runs.length === 0 ? (
+          {r.last_run_at ? (
+            <div className="flex items-center gap-3">
+              <Clock className="size-3.5 text-ink-soft shrink-0" />
+              <span className="text-sm font-mono">
+                {new Date(r.last_run_at).toLocaleString()}
+              </span>
+              {r.last_run_status && (
+                <span
+                  className={`text-2xs uppercase rounded px-1.5 py-0.5 ${
+                    r.last_run_status === "ok"
+                      ? "bg-sage/30 text-sage-ink"
+                      : "bg-brick/15 text-brick-ink"
+                  }`}
+                >
+                  {r.last_run_status}
+                </span>
+              )}
+            </div>
+          ) : (
             <p className="text-sm text-ink-muted">
               No runs yet. First run scheduled at{" "}
               <code className="font-mono">{r.cron}</code>.
             </p>
-          ) : (
-            <ul className="divide-y divide-line/60">
-              {r.runs.map((run, i) => (
-                <li key={i} className="py-2 flex items-start gap-3">
-                  <Clock className="size-3.5 text-ink-soft mt-0.5 shrink-0" />
-                  <div className="flex-1 min-w-0">
-                    <div className="text-sm font-mono text-ink">
-                      {run.when}
-                    </div>
-                    <div className="text-sm text-ink-muted">
-                      {run.summary}
-                    </div>
-                  </div>
-                  <span
-                    className={`text-2xs uppercase rounded px-1.5 py-0.5 ${
-                      run.status === "ok"
-                        ? "bg-sage/30 text-sage-ink"
-                        : "bg-brick/15 text-brick-ink"
-                    }`}
-                  >
-                    {run.status}
-                  </span>
-                </li>
-              ))}
-            </ul>
           )}
         </section>
 
         <div className="flex justify-end gap-2">
-          <button className="text-sm rounded-md border border-line bg-paper px-3 py-1.5 hover:border-line-strong">
-            Pause
-          </button>
-          <button className="text-sm rounded-md border border-line bg-paper px-3 py-1.5 hover:border-line-strong">
-            Run now
-          </button>
           <Link
             href={`/${org}/routines/${routine}/edit`}
             className="text-sm rounded-md bg-ink text-paper px-3 py-1.5 hover:opacity-90"

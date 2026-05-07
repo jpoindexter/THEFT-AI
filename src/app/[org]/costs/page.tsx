@@ -2,8 +2,6 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { db } from "@/lib/db/store";
 
-const MONTHLY_BUDGET = 800;
-
 export default async function CostsPage({
   params,
 }: {
@@ -18,7 +16,8 @@ export default async function CostsPage({
   const usage = await db.listUsage(o.id, { since: monthStart });
 
   const total = usage.reduce((s, u) => s + u.cost_usd, 0);
-  const pctOfBudget = Math.min(100, (total / MONTHLY_BUDGET) * 100);
+  const budget = o.budget_monthly_usd ?? 800;
+  const pctOfBudget = Math.min(100, (total / budget) * 100);
 
   const byAgent = new Map<string, { model: string; spent: number }>();
   for (const u of usage) {
@@ -74,7 +73,7 @@ export default async function CostsPage({
         <section className="rounded-lg border border-line/70 bg-paper p-4 space-y-2">
           <div className="flex items-center justify-between text-xs">
             <span className="text-ink-muted">
-              ${total.toFixed(2)} of ${MONTHLY_BUDGET} monthly budget
+              ${total.toFixed(2)} of ${budget} monthly budget
             </span>
             <span className="font-mono text-ink-soft">
               {pctOfBudget.toFixed(0)}%
