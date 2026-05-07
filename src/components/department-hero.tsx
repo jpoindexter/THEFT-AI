@@ -19,7 +19,7 @@ const HERO_BY_DEPT: Record<
   engineering: {
     headline: (org) => (
       <>
-        Let&apos;s build <span className="text-ink">your app</span> from
+        Let&apos;s build <span className="text-mustard-ink">your app</span> from
         the ground up.
       </>
     ),
@@ -43,7 +43,7 @@ const HERO_BY_DEPT: Record<
   design: {
     headline: () => (
       <>
-        Let&apos;s build <span className="text-ink">your visual identity</span>{" "}
+        Let&apos;s build <span className="text-mustard-ink">your visual identity</span>{" "}
         from the ground up.
       </>
     ),
@@ -63,7 +63,7 @@ const HERO_BY_DEPT: Record<
   marketing: {
     headline: () => (
       <>
-        Let&apos;s build <span className="text-ink">your go-to-market</span>{" "}
+        Let&apos;s build <span className="text-mustard-ink">your go-to-market</span>{" "}
         from the ground up.
       </>
     ),
@@ -83,7 +83,7 @@ const HERO_BY_DEPT: Record<
   sales: {
     headline: () => (
       <>
-        Let&apos;s build <span className="text-ink">your pipeline</span>{" "}
+        Let&apos;s build <span className="text-mustard-ink">your pipeline</span>{" "}
         from the ground up.
       </>
     ),
@@ -103,7 +103,7 @@ const HERO_BY_DEPT: Record<
   operations: {
     headline: () => (
       <>
-        Let&apos;s set up <span className="text-ink">your operations</span>{" "}
+        Let&apos;s set up <span className="text-mustard-ink">your operations</span>{" "}
         from the ground up.
       </>
     ),
@@ -122,7 +122,7 @@ const HERO_BY_DEPT: Record<
   finance: {
     headline: () => (
       <>
-        Let&apos;s set up <span className="text-ink">your finance stack</span>{" "}
+        Let&apos;s set up <span className="text-mustard-ink">your finance stack</span>{" "}
         from the ground up.
       </>
     ),
@@ -141,7 +141,7 @@ const HERO_BY_DEPT: Record<
   legal: {
     headline: () => (
       <>
-        Let&apos;s set up <span className="text-ink">your legal foundation</span>.
+        Let&apos;s set up <span className="text-mustard-ink">your legal foundation</span>.
       </>
     ),
     cta: "Legal agent ready",
@@ -159,7 +159,7 @@ const HERO_BY_DEPT: Record<
   support: {
     headline: () => (
       <>
-        Let&apos;s set up <span className="text-ink">your customer support</span>.
+        Let&apos;s set up <span className="text-mustard-ink">your customer support</span>.
       </>
     ),
     cta: "Support agent ready",
