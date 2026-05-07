@@ -245,6 +245,17 @@ export const db = {
     await writeTable("tasks", [...all, task]);
     return task;
   },
+  async updateTask(
+    id: string,
+    patch: Partial<Omit<Task, "id" | "organization_id" | "created_at">>,
+  ): Promise<void> {
+    const all = await readTable<Task>("tasks");
+    const now = new Date().toISOString();
+    await writeTable(
+      "tasks",
+      all.map((t) => (t.id === id ? { ...t, ...patch, updated_at: now } : t)),
+    );
+  },
 
   // --- cofounder messages ---
   async listMessages(orgId: string, limit = 100): Promise<Message[]> {

@@ -4,6 +4,7 @@ import Link from "next/link";
 import { ArrowLeft, MoreHorizontal } from "lucide-react";
 import AgentRunConsole from "@/components/agent-run-console";
 import TaskCloseControls from "@/components/task-close-controls";
+import TaskHandoff from "@/components/task-handoff";
 
 export default async function TaskDetailPage({
   params,
@@ -56,6 +57,15 @@ export default async function TaskDetailPage({
           <Stat label="Agent" value={agent?.name ?? "Auto-assign"} />
           <Stat label="Mode" value={task.mode} />
           <Stat label="Priority" value={task.priority} />
+        </div>
+
+        <div className="flex justify-end">
+          <TaskHandoff
+            org={orgSlug}
+            taskId={task.id}
+            currentAgentId={task.agent_id}
+            agents={agents.map((a) => ({ id: a.id, name: a.name }))}
+          />
         </div>
 
         {task.mode === "plan" && (

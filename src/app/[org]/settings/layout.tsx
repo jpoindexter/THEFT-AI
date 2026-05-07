@@ -14,6 +14,8 @@ import {
   Globe,
   Brain,
   ShieldCheck,
+  KeyRound,
+  ScrollText,
 } from "lucide-react";
 
 const SECTIONS = [
@@ -25,6 +27,8 @@ const SECTIONS = [
   { slug: "organization", label: "Organization", Icon: Building2 },
   { slug: "company-context", label: "Company Context", Icon: Brain },
   { slug: "security", label: "Security", Icon: ShieldCheck },
+  { slug: "sso", label: "SSO", Icon: KeyRound },
+  { slug: "audit", label: "Audit Log", Icon: ScrollText },
   { slug: "inbox", label: "Inbox", Icon: Inbox },
   { slug: "support", label: "Support", Icon: LifeBuoy },
   { slug: "payments", label: "Payments", Icon: CreditCard },
