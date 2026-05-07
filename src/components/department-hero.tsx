@@ -1,10 +1,72 @@
 "use client";
 
 import { useState } from "react";
-import { Sparkles, Plus, MoreHorizontal } from "lucide-react";
+import {
+  Sparkles,
+  Plus,
+  MoreHorizontal,
+  CheckCircle2,
+  Circle,
+  Globe,
+  Hammer,
+  PenLine,
+  Megaphone,
+  Target,
+  Mail,
+  CreditCard,
+  Receipt,
+  Scale,
+  FileSignature,
+  Inbox as InboxIcon,
+  Building2,
+  Layout,
+  Palette,
+  Box,
+  Server,
+  ClipboardList,
+} from "lucide-react";
 import NewTaskDialog from "./new-task-dialog";
 
 type Department = { slug: string; name: string };
+
+const ROADMAP_ICON: Record<string, React.ComponentType<{ className?: string }>> = {
+  // engineering
+  "App is built": Layout,
+  "Build marketing website": Globe,
+  "Production product deployment exists": Server,
+  "Buy domain": Globe,
+  // design
+  "Brand kit": Palette,
+  "Design logo": PenLine,
+  "Create pitch deck": Layout,
+  "Build components": Box,
+  // marketing
+  "Positioning": Target,
+  "Launch plan": Megaphone,
+  "Marketing site": Globe,
+  "Outbound": Mail,
+  // sales
+  "Define ICP": Target,
+  "Gather prospects": ClipboardList,
+  "Outbound emails": Mail,
+  "Close deals": Hammer,
+  // operations
+  "Setup bookkeeping": Receipt,
+  "Recurring brief": ClipboardList,
+  "Cleanup tasks": Hammer,
+  // finance
+  "Stripe connected": CreditCard,
+  "Bookkeeping live": Receipt,
+  "Recurring close": Receipt,
+  // legal
+  "Incorporate LLC": Building2,
+  "Terms & Privacy": Scale,
+  "Customer agreements": FileSignature,
+  // support
+  "Inbox connected": InboxIcon,
+  "Macros set": ClipboardList,
+  "Escalation tree": Hammer,
+};
 
 const HERO_BY_DEPT: Record<
   string,
@@ -228,21 +290,36 @@ export default function DepartmentHero({
             </span>
           </div>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-            {cfg.roadmap.map((node, i) => (
-              <button
-                key={i}
-                type="button"
-                className="text-left rounded-md border border-line/70 bg-canvas px-3 py-2 hover:border-line-strong transition-colors"
-              >
-                <div className="size-5 rounded-sm bg-line mb-1.5" />
-                <div className="text-sm font-medium text-ink leading-tight">
-                  {node.title}
-                </div>
-                <div className="text-2xs text-ink-muted mt-0.5">
-                  {node.subtitle}
-                </div>
-              </button>
-            ))}
+            {cfg.roadmap.map((node, i) => {
+              const Icon = ROADMAP_ICON[node.title] ?? Layout;
+              const Status = node.status === "done" ? CheckCircle2 : Circle;
+              return (
+                <button
+                  key={i}
+                  type="button"
+                  className="text-left rounded-md border border-line/70 bg-canvas px-3 py-2 hover:border-line-strong transition-colors flex items-start gap-2"
+                >
+                  <span className="size-7 rounded-md bg-paper border border-line/70 inline-flex items-center justify-center shrink-0">
+                    <Icon className="size-3.5 text-ink-muted" />
+                  </span>
+                  <span className="min-w-0 flex-1">
+                    <div className="text-sm font-medium text-ink leading-tight inline-flex items-center gap-1">
+                      <span className="truncate">{node.title}</span>
+                      <Status
+                        className={`size-3 shrink-0 ${
+                          node.status === "done"
+                            ? "text-sage-ink"
+                            : "text-ink-soft"
+                        }`}
+                      />
+                    </div>
+                    <div className="text-2xs text-ink-muted mt-0.5">
+                      {node.subtitle}
+                    </div>
+                  </span>
+                </button>
+              );
+            })}
           </div>
         </div>
 
