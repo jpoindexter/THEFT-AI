@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { ChevronRight, ChevronDown, X } from "lucide-react";
 import { QUESTIONS, type BriefAnswer } from "@/lib/business-brief/questions";
+import Sunflower from "@/components/sunflower";
 
 type Msg = {
   id: string;
@@ -18,6 +19,11 @@ type BriefPlan = {
   key_features?: string[];
   pricing_thesis?: string;
   go_to_market_thesis?: string;
+  differentiator?: string;
+  company_type?: string;
+  industry?: string;
+  user_type?: string;
+  company_values?: string[];
 } & Record<string, unknown>;
 
 export default function CofounderChat({
@@ -158,7 +164,7 @@ export default function CofounderChat({
       <div ref={scrollRef} className="flex-1 overflow-y-auto p-4 space-y-4">
         {isEmpty && onboarding && (
           <div className="flex flex-col items-center text-center gap-3 pt-4 pb-2">
-            <div className="size-8 rounded-full bg-mustard/30" />
+            <Sunflower size={140} />
             <p className="text-sm text-ink tracking-tight">
               Tell me more about your company
             </p>
@@ -169,7 +175,7 @@ export default function CofounderChat({
         )}
         {isEmpty && !onboarding && (
           <div className="flex flex-col items-center justify-center h-full text-center gap-3 px-6">
-            <div className="size-10 rounded-full  bg-mustard/30" />
+            <Sunflower size={80} />
             <p className="text-base text-ink-muted leading-snug">
               Ask Cofounder anything about{" "}
               <span className="text-ink">{organization.slug}</span>.
@@ -555,6 +561,7 @@ function BriefWidget({
 
 function BusinessPlanCard({
   plan,
+  orgSlug,
   onActivate,
   activating,
 }: {
@@ -563,59 +570,78 @@ function BusinessPlanCard({
   onActivate: () => void;
   activating: boolean;
 }) {
-  // render summary as prose with **bold** labels, on a soft highlighter bg —
-  // matches the cofounder.co Cofounder reply look
-  const sections: { label: string; body?: string | string[] }[] = [
-    { label: "Product", body: pickStr(plan.product_or_service) },
-    { label: "ICP", body: pickStr(plan.icp) },
-    { label: "Business Model", body: pickStr(plan.pricing_thesis) },
-    { label: "Mission", body: pickStr(plan.mission) },
-    {
-      label: "Differentiator",
-      body: pickStr(
-        (plan as Record<string, unknown>).differentiator as string | undefined,
-      ),
-    },
-    {
-      label: "Go-to-market",
-      body: pickStr(plan.go_to_market_thesis),
-    },
-  ].filter((s) => Boolean(s.body));
+  const classificationItems = [
+    plan.company_type && `Company Type: ${plan.company_type}`,
+    plan.industry && `Industry: ${plan.industry}`,
+    plan.user_type && `User Type: ${plan.user_type}`,
+  ].filter(Boolean) as string[];
 
   return (
-    <div className="space-y-3">
-      <p className="bg-mustard/30 px-1 rounded-sm text-base text-ink leading-relaxed">
-        The business brief is ready to review. Here&apos;s a summary of
-        what&apos;s in it:
-      </p>
-      <div className="space-y-3 text-base leading-relaxed text-ink">
-        {sections.map((s) => (
-          <p key={s.label} className="bg-mustard/30 px-1 rounded-sm">
-            <strong>{s.label}:</strong>{" "}
-            {Array.isArray(s.body) ? s.body.join(", ") : s.body}
-          </p>
-        ))}
-      </div>
-      <div className="text-2xs text-ink-soft inline-flex items-center gap-1.5">
-        {new Date().toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}
-        <button
-          type="button"
-          className="hover:text-ink"
-          aria-label="Copy"
-        >
-          ⎘
+    <div className="rounded-lg border border-line/80 bg-paper overflow-hidden">
+      <div className="flex items-center justify-between px-3 py-2 border-b border-line/70">
+        <div className="flex items-center gap-2">
+          <DocIcon />
+          <div>
+            <div className="text-sm font-medium text-ink">Business Plan</div>
+            <div className="text-2xs text-ink-muted">{orgSlug}</div>
+          </div>
+        </div>
+        <button type="button" className="text-xs text-ink-muted hover:text-ink border border-line/70 rounded px-2 py-0.5">
+          Edit
         </button>
       </div>
-      <button
-        type="button"
-        onClick={onActivate}
-        disabled={activating}
-        className="w-full rounded-md bg-ink text-paper text-sm py-2 hover:bg-ink/80 disabled:opacity-60"
-      >
-        {activating
-          ? "Activating departments…"
-          : "Accept & activate departments"}
-      </button>
+
+      <div className="p-3 space-y-4 max-h-72 overflow-y-auto">
+        {plan.product_or_service && (
+          <PlanSection label="Product or Service" tone="amber">
+            <p>{plan.product_or_service}</p>
+          </PlanSection>
+        )}
+        {plan.icp && (
+          <PlanSection label="ICP" tone="amber">
+            <p>{plan.icp}</p>
+          </PlanSection>
+        )}
+        {plan.mission && (
+          <PlanSection label="Mission" tone="amber">
+            <p>{plan.mission}</p>
+          </PlanSection>
+        )}
+        {classificationItems.length > 0 && (
+          <PlanSection label="Business Classification" tone="sky">
+            <ul className="space-y-0.5">
+              {classificationItems.map((item) => (
+                <li key={item}>• {item}</li>
+              ))}
+            </ul>
+          </PlanSection>
+        )}
+        {plan.company_values && plan.company_values.length > 0 && (
+          <PlanSection label="Company Values" tone="sky">
+            <ul className="space-y-0.5">
+              {plan.company_values.map((v) => (
+                <li key={v}>• {v}</li>
+              ))}
+            </ul>
+          </PlanSection>
+        )}
+        {plan.go_to_market_thesis && (
+          <PlanSection label="Go-To-Market Strategy" tone="violet">
+            <p>{plan.go_to_market_thesis}</p>
+          </PlanSection>
+        )}
+      </div>
+
+      <div className="px-3 pb-3 pt-2">
+        <button
+          type="button"
+          onClick={onActivate}
+          disabled={activating}
+          className="w-full rounded-md bg-ink text-paper text-sm py-2 hover:bg-ink/80 disabled:opacity-60"
+        >
+          {activating ? "Activating departments…" : "Accept & activate departments"}
+        </button>
+      </div>
     </div>
   );
 }
@@ -637,9 +663,9 @@ function PlanSection({
 }) {
   const palette: Record<string, string> = {
     amber: "text-mustard-ink bg-mustard/15",
-    violet: "text-ink bg-cream",
-    sky: "text-ink bg-cream",
-    rose: "text-ink bg-cream",
+    violet: "text-brick-ink bg-brick/15",
+    sky: "text-ink bg-canvas",
+    rose: "text-brick-ink bg-brick/10",
     lime: "text-sage-ink bg-sage/15",
   };
   return (

@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { usePathname } from "next/navigation";
-import { Bell, Plus, BookOpen, Eye } from "lucide-react";
+import { Bell, Plus, UserRound, ClipboardList, Eye } from "lucide-react";
 import Link from "next/link";
 
 export default function LayoutCanvas({
@@ -89,9 +89,9 @@ export default function LayoutCanvas({
               <Plus className="size-4" />
             </button>
             {menuOpen && (
-              <div className="absolute bottom-12 left-1/2 -translate-x-1/2 w-44 rounded-lg bg-paper text-paper border border-line shadow-lg overflow-hidden">
-                <MenuItem icon={<BookOpen className="size-3.5" />} label="New Agent" sub="Employee you can give tasks to" />
-                <MenuItem icon={<BookOpen className="size-3.5" />} label="New Task" sub="Work to assign your agents" />
+              <div className="absolute bottom-12 left-1/2 -translate-x-1/2 w-44 rounded-lg bg-ink text-paper border border-ink shadow-lg overflow-hidden">
+                <MenuItem icon={<UserRound className="size-3.5" />} label="New Agent" sub="Employee you can give tasks to" />
+                <MenuItem icon={<ClipboardList className="size-3.5" />} label="New Task" sub="Work to assign your agents" />
               </div>
             )}
           </div>
@@ -172,12 +172,12 @@ function MenuItem({
   return (
     <button
       type="button"
-      className="w-full text-left flex items-start gap-2 px-3 py-2 hover:bg-cream transition-colors"
+      className="w-full text-left flex items-start gap-2 px-3 py-2 hover:bg-ink/80 transition-colors"
     >
-      <span className="mt-0.5 text-line-strong">{icon}</span>
+      <span className="mt-0.5 text-paper/60">{icon}</span>
       <span className="leading-tight">
-        <span className="block text-sm">{label}</span>
-        <span className="block text-2xs text-ink-soft">{sub}</span>
+        <span className="block text-sm text-paper">{label}</span>
+        <span className="block text-2xs text-paper/60">{sub}</span>
       </span>
     </button>
   );
