@@ -23,6 +23,19 @@ export default function NewRoutinePage() {
     "Write a 5-bullet status brief covering shipped work, in-progress, blockers, decisions needed, and next focus.",
   );
   const [enabled, setEnabled] = useState(true);
+  const [busy, setBusy] = useState(false);
+
+  async function save() {
+    if (!name || !cron) return;
+    setBusy(true);
+    const res = await fetch(`/api/${params.org}/routines`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name, agent, cron, description: prompt, enabled }),
+    });
+    setBusy(false);
+    if (res.ok) router.replace(`/${params.org}/routines`);
+  }
 
   function pickPreset(id: string) {
     setPreset(id);
@@ -145,10 +158,11 @@ export default function NewRoutinePage() {
           </button>
           <button
             type="button"
-            disabled={!name || !cron}
+            onClick={save}
+            disabled={!name || !cron || busy}
             className="text-sm rounded-md bg-ink text-paper px-3 py-1.5 disabled:opacity-40"
           >
-            Save routine
+            {busy ? "Saving…" : "Save routine"}
           </button>
         </div>
       </div>

@@ -2,70 +2,86 @@
 
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Card, Eyebrow, Hint, PageTitle } from "@/components/ui/primitives";
 
-const EVENTS = [
-  {
-    id: "evt_001",
-    when: "2m ago",
-    actor: "Engineer",
-    action: "opened PR",
-    target: "feat/subscriptions-table",
-    detail: "12 files changed · +320/-12",
-  },
-  {
-    id: "evt_002",
-    when: "6m ago",
-    actor: "Cofounder",
-    action: "set business plan",
-    target: "Business Plan",
-    detail: "Product, ICP, pricing thesis saved",
-  },
-  {
-    id: "evt_003",
-    when: "21m ago",
-    actor: "Marketing",
-    action: "drafted launch email",
-    target: "Launch broadcast — May",
-    detail: "Awaiting approval",
-  },
-  {
-    id: "evt_004",
-    when: "1h ago",
-    actor: "Sales",
-    action: "exported prospect list",
-    target: "lenders-mortgage-2026.csv",
-    detail: "240 rows",
-  },
-  {
-    id: "evt_005",
-    when: "2h ago",
-    actor: "Operations",
-    action: "kicked routine",
-    target: "Weekly status brief",
-    detail: "Scheduled · Mondays 9am",
-  },
-];
+type Event = {
+  id: string;
+  when: string;
+  actor: string;
+  action: string;
+  target: string;
+  detail: string;
+  href: string;
+};
 
-const ACTORS = [
-  "all",
-  "Cofounder",
-  "Engineer",
-  "Marketing",
-  "Sales",
-  "Operations",
-  "Finance",
-  "Legal",
-  "Support",
-] as const;
+type Task = {
+  id: string;
+  title: string;
+  status: string;
+  priority: string;
+  mode: string;
+  agent_id: string | null;
+  updated_at: string;
+  created_at: string;
+};
+
+type Agent = { id: string; name: string };
 
 export default function ActivityPage() {
   const params = useParams<{ org: string }>();
-  const [actor, setActor] = useState<(typeof ACTORS)[number]>("all");
+  const [events, setEvents] = useState<Event[]>([]);
+  const [actors, setActors] = useState<string[]>([]);
+  const [actor, setActor] = useState("all");
   const [q, setQ] = useState("");
 
-  const filtered = EVENTS.filter((e) => {
+  useEffect(() => {
+    const org = params.org;
+    Promise.all([
+      fetch(`/api/${org}/tasks`).then((r) => r.ok ? r.json() : { tasks: [] }),
+      fetch(`/api/${org}/agents`).then((r) => r.ok ? r.json() : { agents: [] }),
+    ]).then(([tj, aj]: [{ tasks: Task[] }, { agents: Agent[] }]) => {
+      const agentName = new Map(aj.agents.map((a) => [a.id, a.name]));
+      const relTime = (iso: string) => {
+        const ms = Date.now() - new Date(iso).getTime();
+        if (ms < 60_000) return "just now";
+        if (ms < 3_600_000) return `${Math.floor(ms / 60_000)}m ago`;
+        if (ms < 86_400_000) return `${Math.floor(ms / 3_600_000)}h ago`;
+        return `${Math.floor(ms / 86_400_000)}d ago`;
+      };
+
+      const derived: Event[] = [];
+      for (const t of tj.tasks) {
+        const agent = t.agent_id ? (agentName.get(t.agent_id) ?? "Agent") : "You";
+        const statusLabel: Record<string, string> = {
+          done: "completed",
+          in_progress: "started",
+          in_review: "submitted for review",
+          blocked: "blocked on",
+          cancelled: "cancelled",
+          todo: "queued",
+          backlog: "added to backlog",
+        };
+        const action = statusLabel[t.status] ?? "updated";
+        derived.push({
+          id: t.id,
+          when: relTime(t.updated_at),
+          actor: agent,
+          action,
+          target: t.title,
+          detail: `${t.mode} mode · ${t.priority} priority`,
+          href: `tasks/${t.id}`,
+        });
+      }
+      derived.sort((a, b) => b.id.localeCompare(a.id));
+
+      setEvents(derived);
+      const uniqueActors = [...new Set(derived.map((e) => e.actor))];
+      setActors(uniqueActors);
+    }).catch(() => undefined);
+  }, [params.org]);
+
+  const filtered = events.filter((e) => {
     if (actor !== "all" && e.actor !== actor) return false;
     if (!q) return true;
     const needle = q.toLowerCase();
@@ -86,25 +102,37 @@ export default function ActivityPage() {
           </Hint>
         </header>
 
-        <Filters
-          actor={actor}
-          onActor={setActor}
-          q={q}
-          onQ={setQ}
-          total={filtered.length}
-        />
+        <div className="flex flex-wrap items-center gap-2 text-xs">
+          <select
+            value={actor}
+            onChange={(e) => setActor(e.target.value)}
+            className="rounded-md border border-line bg-paper px-2 py-1"
+          >
+            <option value="all">All actors</option>
+            {actors.map((a) => (
+              <option key={a} value={a}>{a}</option>
+            ))}
+          </select>
+          <input
+            value={q}
+            onChange={(e) => setQ(e.target.value)}
+            placeholder="Filter by target or detail…"
+            className="flex-1 rounded-md border border-line bg-paper px-2 py-1 focus:outline-none focus:border-line-strong"
+          />
+          <Eyebrow className="ml-auto">{filtered.length} events</Eyebrow>
+        </div>
 
         <Card>
           <ul className="divide-y divide-line/60">
             {filtered.length === 0 && (
               <li className="px-4 py-6 text-center text-sm text-ink-muted">
-                No events match.
+                {events.length === 0 ? "No activity yet." : "No events match."}
               </li>
             )}
             {filtered.map((e) => (
               <li key={e.id}>
                 <Link
-                  href={`/${params.org}/activity/${e.id}`}
+                  href={`/${params.org}/${e.href}`}
                   className="px-4 py-3 flex items-center gap-3 hover:bg-canvas"
                 >
                   <span className="size-7 rounded-full bg-cream inline-flex items-center justify-center text-2xs font-medium text-ink-muted flex-shrink-0">
@@ -114,60 +142,17 @@ export default function ActivityPage() {
                     <div className="text-sm">
                       <span className="font-medium">{e.actor}</span>{" "}
                       <span className="text-ink-muted">{e.action}</span>{" "}
-                      <span className="font-mono text-xs text-ink">
-                        {e.target}
-                      </span>
+                      <span className="font-mono text-xs text-ink truncate">{e.target}</span>
                     </div>
-                    <div className="text-xs text-ink-muted mt-0.5">
-                      {e.detail}
-                    </div>
+                    <div className="text-xs text-ink-muted mt-0.5">{e.detail}</div>
                   </div>
-                  <span className="text-2xs text-ink-soft shrink-0">
-                    {e.when}
-                  </span>
+                  <span className="text-2xs text-ink-soft shrink-0">{e.when}</span>
                 </Link>
               </li>
             ))}
           </ul>
         </Card>
       </div>
-    </div>
-  );
-}
-
-function Filters({
-  actor,
-  onActor,
-  q,
-  onQ,
-  total,
-}: {
-  actor: (typeof ACTORS)[number];
-  onActor: (a: (typeof ACTORS)[number]) => void;
-  q: string;
-  onQ: (s: string) => void;
-  total: number;
-}) {
-  return (
-    <div className="flex flex-wrap items-center gap-2 text-xs">
-      <select
-        value={actor}
-        onChange={(e) => onActor(e.target.value as (typeof ACTORS)[number])}
-        className="rounded-md border border-line bg-paper px-2 py-1"
-      >
-        {ACTORS.map((a) => (
-          <option key={a} value={a}>
-            {a === "all" ? "All actors" : a}
-          </option>
-        ))}
-      </select>
-      <input
-        value={q}
-        onChange={(e) => onQ(e.target.value)}
-        placeholder="Filter by target or detail…"
-        className="flex-1 rounded-md border border-line bg-paper px-2 py-1 focus:outline-none focus:border-line-strong"
-      />
-      <Eyebrow className="ml-auto">{total} events</Eyebrow>
     </div>
   );
 }

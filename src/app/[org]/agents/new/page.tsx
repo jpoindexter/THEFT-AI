@@ -33,6 +33,7 @@ export default function NewAgentPage() {
   const [budget, setBudget] = useState(50);
   const [skills, setSkills] = useState<Skill[]>([]);
   const [attached, setAttached] = useState<string[]>([]);
+  const [busy, setBusy] = useState(false);
 
   useEffect(() => {
     void fetch(`/api/${params.org}/skills`)
@@ -40,6 +41,18 @@ export default function NewAgentPage() {
       .then((j: { skills: Skill[] }) => setSkills(j.skills ?? []))
       .catch(() => undefined);
   }, [params.org]);
+
+  async function create() {
+    if (!name || !role) return;
+    setBusy(true);
+    const res = await fetch(`/api/${params.org}/agents`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name, role, department, model, instructions, attached_skills: attached }),
+    });
+    setBusy(false);
+    if (res.ok) router.replace(`/${params.org}/agents`);
+  }
 
   function toggle(slug: string) {
     setAttached((cur) =>
@@ -164,10 +177,11 @@ export default function NewAgentPage() {
           </button>
           <button
             type="button"
-            disabled={!name || !role}
+            onClick={create}
+            disabled={!name || !role || busy}
             className="text-sm rounded-md bg-ink text-paper px-3 py-1.5 disabled:opacity-40"
           >
-            Create agent
+            {busy ? "Creating…" : "Create agent"}
           </button>
         </div>
       </div>
