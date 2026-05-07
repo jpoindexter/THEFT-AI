@@ -1,4 +1,4 @@
-import { Input } from "@/components/ui/input";
+import OrgNameForm from "@/components/settings/org-name-form";
 import { Textarea } from "@/components/ui/textarea";
 import {
   Tabs,
@@ -33,7 +33,7 @@ export default async function Organization({
 
       <SettingsCard title="Company Name" description="Update the name shown across your organization workspace.">
         <Row label="Company Name">
-          <Input defaultValue="THEFT" className="w-56 h-9" />
+          <OrgNameForm org={org} initialName={organization.name} />
         </Row>
       </SettingsCard>
 

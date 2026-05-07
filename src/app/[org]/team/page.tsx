@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import {
   Card,
@@ -18,29 +18,56 @@ const ROLES = ["viewer", "editor", "admin"] as const;
 type Role = (typeof ROLES)[number];
 
 type Member = {
+  id: string;
   email: string;
   role: Role;
-  pending?: boolean;
-  founder?: boolean;
+  pending: boolean;
+  founder: boolean;
 };
-
-const SEED: Member[] = [
-  { email: "jason@theft.studio", role: "admin", founder: true },
-  { email: "ana@partner.io", role: "editor" },
-  { email: "kim@encompass.com", role: "viewer", pending: true },
-];
 
 export default function TeamPage() {
   const params = useParams<{ org: string }>();
-  const [members, setMembers] = useState<Member[]>(SEED);
+  const org = params.org;
+  const [members, setMembers] = useState<Member[]>([]);
   const [email, setEmail] = useState("");
   const [role, setRole] = useState<Role>("viewer");
 
-  function invite() {
+  useEffect(() => {
+    void fetch(`/api/${org}/team`)
+      .then((r) => r.ok ? r.json() : { members: [] })
+      .then((j: { members: Member[] }) => setMembers(j.members ?? []));
+  }, [org]);
+
+  async function invite() {
     if (!email.includes("@")) return;
-    setMembers((cur) => [...cur, { email, role, pending: true }]);
-    toast(`Invite sent to ${email}`, "ok");
-    setEmail("");
+    const res = await fetch(`/api/${org}/team`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, role }),
+    });
+    if (res.ok) {
+      const j = await res.json();
+      setMembers((cur) => {
+        if (cur.some((m) => m.email === email)) return cur;
+        return [...cur, j.member];
+      });
+      toast(`Invite sent to ${email}`, "ok");
+      setEmail("");
+    }
+  }
+
+  async function changeRole(id: string, newRole: Role) {
+    setMembers((cur) => cur.map((m) => (m.id === id ? { ...m, role: newRole } : m)));
+    await fetch(`/api/${org}/team/${id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ role: newRole }),
+    });
+  }
+
+  async function remove(id: string) {
+    setMembers((cur) => cur.filter((m) => m.id !== id));
+    await fetch(`/api/${org}/team/${id}`, { method: "DELETE" });
   }
 
   return (
@@ -52,8 +79,7 @@ export default function TeamPage() {
             <Users className="size-5 text-ink-muted" /> Team
           </PageTitle>
           <Hint>
-            People who can see and act on this workspace. Founder is always
-            admin.
+            People who can see and act on this workspace. Founder is always admin.
           </Hint>
         </header>
 
@@ -94,24 +120,52 @@ export default function TeamPage() {
         <Card>
           <CardBody>
             <Eyebrow>Members ({members.length})</Eyebrow>
-            <ul className="divide-y divide-line/60 mt-2">
-              {members.map((m) => (
-                <MemberRow
-                  key={m.email}
-                  m={m}
-                  onChange={(role) =>
-                    setMembers((cur) =>
-                      cur.map((c) =>
-                        c.email === m.email ? { ...c, role } : c,
-                      ),
-                    )
-                  }
-                  onRemove={() =>
-                    setMembers((cur) => cur.filter((c) => c.email !== m.email))
-                  }
-                />
-              ))}
-            </ul>
+            {members.length === 0 ? (
+              <p className="text-sm text-ink-muted mt-2">No members yet.</p>
+            ) : (
+              <ul className="divide-y divide-line/60 mt-2">
+                {members.map((m) => (
+                  <li key={m.id} className="py-2.5 flex items-center justify-between gap-3 text-sm">
+                    <span className="inline-flex items-center gap-2 min-w-0">
+                      <span className="size-7 rounded-full bg-cream inline-flex items-center justify-center text-2xs font-medium text-ink-muted shrink-0">
+                        {m.email[0].toUpperCase()}
+                      </span>
+                      <span className="font-mono truncate">{m.email}</span>
+                      {m.founder && (
+                        <span title="Workspace founder" className="text-mustard-ink">
+                          <Crown className="size-3" />
+                        </span>
+                      )}
+                      {m.pending && <Pill tone="mustard">Pending</Pill>}
+                    </span>
+                    <span className="flex items-center gap-1 shrink-0">
+                      <select
+                        value={m.role}
+                        onChange={(e) => changeRole(m.id, e.target.value as Role)}
+                        disabled={m.founder}
+                        className="h-7 rounded-md border border-line bg-paper px-2 text-xs disabled:opacity-50"
+                      >
+                        {ROLES.map((r) => (
+                          <option key={r} value={r}>
+                            {r[0].toUpperCase() + r.slice(1)}
+                          </option>
+                        ))}
+                      </select>
+                      {!m.founder && (
+                        <button
+                          type="button"
+                          onClick={() => remove(m.id)}
+                          title="Remove member"
+                          className="size-7 rounded-md inline-flex items-center justify-center text-brick-ink hover:bg-brick/10"
+                        >
+                          <X className="size-3" />
+                        </button>
+                      )}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            )}
           </CardBody>
         </Card>
 
@@ -126,74 +180,18 @@ export default function TeamPage() {
                   ["Admin", "Editor + billing, integrations, member management."],
                 ] as const
               ).map(([title, body]) => (
-                <li
-                  key={title}
-                  className="rounded-md border border-line/70 bg-paper p-3"
-                >
-                  <div className="text-sm font-medium tracking-tight">
-                    {title}
-                  </div>
+                <li key={title} className="rounded-md border border-line/70 bg-paper p-3">
+                  <div className="text-sm font-medium tracking-tight">{title}</div>
                   <Hint>{body}</Hint>
                 </li>
               ))}
             </ul>
             <div className="text-2xs text-ink-soft mt-2">
-              Workspace: <code className="font-mono">{params.org}</code>
+              Workspace: <code className="font-mono">{org}</code>
             </div>
           </CardBody>
         </Card>
       </div>
     </div>
-  );
-}
-
-function MemberRow({
-  m,
-  onChange,
-  onRemove,
-}: {
-  m: Member;
-  onChange: (r: Role) => void;
-  onRemove: () => void;
-}) {
-  return (
-    <li className="py-2.5 flex items-center justify-between gap-3 text-sm">
-      <span className="inline-flex items-center gap-2 min-w-0">
-        <span className="size-7 rounded-full bg-cream inline-flex items-center justify-center text-2xs font-medium text-ink-muted shrink-0">
-          {m.email[0].toUpperCase()}
-        </span>
-        <span className="font-mono truncate">{m.email}</span>
-        {m.founder && (
-          <span title="Workspace founder" className="text-mustard-ink">
-            <Crown className="size-3" />
-          </span>
-        )}
-        {m.pending && <Pill tone="mustard">Pending</Pill>}
-      </span>
-      <span className="flex items-center gap-1 shrink-0">
-        <select
-          value={m.role}
-          onChange={(e) => onChange(e.target.value as Role)}
-          disabled={m.founder}
-          className="h-7 rounded-md border border-line bg-paper px-2 text-xs disabled:opacity-50"
-        >
-          {ROLES.map((r) => (
-            <option key={r} value={r}>
-              {r[0].toUpperCase() + r.slice(1)}
-            </option>
-          ))}
-        </select>
-        {!m.founder && (
-          <button
-            type="button"
-            onClick={onRemove}
-            title="Remove member"
-            className="size-7 rounded-md inline-flex items-center justify-center text-brick-ink hover:bg-brick/10"
-          >
-            <X className="size-3" />
-          </button>
-        )}
-      </span>
-    </li>
   );
 }

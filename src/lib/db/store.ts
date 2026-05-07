@@ -187,6 +187,17 @@ export type ApprovalRule = {
   created_at: string;
 };
 
+export type TeamMember = {
+  id: string;
+  organization_id: string;
+  email: string;
+  role: "viewer" | "editor" | "admin";
+  founder: boolean;
+  pending: boolean;
+  invited_at: string;
+  accepted_at: string | null;
+};
+
 export type Routine = {
   id: string;
   organization_id: string;
@@ -506,6 +517,39 @@ export const db = {
   async deleteWebhook(id: string): Promise<void> {
     const all = await readTable<Webhook>("webhooks");
     await writeTable("webhooks", all.filter((w) => w.id !== id));
+  },
+
+  // --- team members ---
+  async listTeam(orgId: string): Promise<TeamMember[]> {
+    const all = await readTable<TeamMember>("team_members");
+    return all
+      .filter((m) => m.organization_id === orgId)
+      .sort((a, b) => a.invited_at.localeCompare(b.invited_at));
+  },
+  async inviteMember(input: { organization_id: string; email: string; role: TeamMember["role"]; founder?: boolean }): Promise<TeamMember> {
+    const all = await readTable<TeamMember>("team_members");
+    const existing = all.find((m) => m.organization_id === input.organization_id && m.email === input.email);
+    if (existing) return existing;
+    const member: TeamMember = {
+      id: randomUUID(),
+      organization_id: input.organization_id,
+      email: input.email,
+      role: input.role,
+      founder: input.founder ?? false,
+      pending: !(input.founder ?? false),
+      invited_at: new Date().toISOString(),
+      accepted_at: input.founder ? new Date().toISOString() : null,
+    };
+    await writeTable("team_members", [...all, member]);
+    return member;
+  },
+  async updateMember(id: string, patch: { role?: TeamMember["role"]; pending?: boolean; accepted_at?: string | null }): Promise<void> {
+    const all = await readTable<TeamMember>("team_members");
+    await writeTable("team_members", all.map((m) => (m.id === id ? { ...m, ...patch } : m)));
+  },
+  async removeMember(id: string): Promise<void> {
+    const all = await readTable<TeamMember>("team_members");
+    await writeTable("team_members", all.filter((m) => m.id !== id));
   },
 
   // --- routines ---
