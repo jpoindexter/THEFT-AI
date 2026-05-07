@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { LogOut } from "lucide-react";
+import Sunflower from "@/components/sunflower";
 
 type Step = 0 | 1 | 2 | 3 | 4;
 type Experience = "writes_code" | "manages_engineers" | "non_technical";
@@ -42,7 +43,7 @@ const ROLES: { key: Role; label: string }[] = [
 ];
 
 const STAGES: { key: Stage; label: string }[] = [
-  { key: "pre_idea", label: "Pre-idea" },
+  { key: "pre_idea", label: "Pre-Idea" },
   { key: "idea", label: "Idea" },
   { key: "pre_mvp", label: "Pre-MVP" },
   { key: "mvp", label: "MVP" },
@@ -294,7 +295,7 @@ function StageSlider({
           aria-label="Idea stage"
         />
         <div
-          className="absolute top-1/2 -translate-y-1/2 size-2 rounded-full bg-cream0 pointer-events-none"
+          className="absolute top-1/2 -translate-y-1/2 size-2 rounded-full bg-ink pointer-events-none"
           style={{
             left: `calc(${(idx / (STAGES.length - 1)) * 100}% - 4px)`,
           }}
@@ -328,20 +329,21 @@ function PillButton({
   );
 }
 
-// Cross-stitch tagline rendered as SVG: three stacked words filled with
-// a dot/cross pattern that mimics the textile aesthetic on cofounder.co.
 function AsciiTagline() {
-  const lines = ["WE ARE", "THINKING", "MACHINES"];
+  const lines: { text: string; size: number; y: number }[] = [
+    { text: "We are a",         size: 100, y: 130 },
+    { text: "late intelligence", size: 58,  y: 250 },
+    { text: "company",          size: 118, y: 390 },
+  ];
   return (
     <div className="select-none w-full" aria-hidden>
       <svg
-        viewBox="0 0 600 540"
+        viewBox="0 0 600 460"
         width="100%"
         className="max-w-[480px]"
         style={{ overflow: "visible" }}
       >
         <defs>
-          {/* Cross-stitch pattern: a 6x6 cell with a × glyph */}
           <pattern
             id="stitch"
             x="0"
@@ -359,21 +361,21 @@ function AsciiTagline() {
             />
           </pattern>
         </defs>
-        {lines.map((line, i) => (
+        {lines.map(({ text, size, y }) => (
           <text
-            key={line}
+            key={text}
             x="50%"
-            y={120 + i * 170}
+            y={y}
             textAnchor="middle"
             fontFamily="var(--font-sans), Inter, sans-serif"
-            fontSize="120"
+            fontSize={size}
             fontWeight={800}
-            letterSpacing="2"
+            letterSpacing="-1"
             fill="url(#stitch)"
             stroke="#d6d3d1"
             strokeWidth="0.4"
           >
-            {line}
+            {text}
           </text>
         ))}
       </svg>
@@ -381,107 +383,3 @@ function AsciiTagline() {
   );
 }
 
-// Pixel-art sunflower in cross-stitch style. Each cell is rendered as a small
-// × glyph (not a filled square) to match the textile aesthetic on the
-// cofounder.co reference. Colors: mustard petals, dark center, sage stem/leaves.
-function Sunflower() {
-  // 28 columns × 40 rows. Characters: . = empty, p = petal, c = center,
-  // s = stem, l = leaf, L = leaf-light, P = petal-light
-  // prettier-ignore
-  const grid = [
-    "............................",
-    "............................",
-    ".........pppPp..............",
-    "........PpppppPp............",
-    ".......PpppppppPp...........",
-    "......pppPcccccPpp..........",
-    ".....ppPccccccccPpp.........",
-    "....pPpcccccccccccPp........",
-    "....ppccccccccccccpp........",
-    "....pPcccccccccccccp........",
-    "....ppcccccccccccccpp.......",
-    "....pPccccccccccccPpp.......",
-    "....ppccccccccccccPpp.......",
-    ".....pPcccccccccPppP........",
-    ".....ppPcccccccPpp..........",
-    "......pppPpPPpppP...........",
-    ".......pPpppppP.............",
-    "..........s.................",
-    "..........s.................",
-    ".........lss................",
-    "........llsLL...............",
-    ".......lLLs..LL.............",
-    "......lLLLs..LLLl...........",
-    ".....lLLLls..LLLLll.........",
-    "......lLLs....LLLLll........",
-    ".......lLs.....LLLLl........",
-    "........s.......LLLl........",
-    "........s........LLl........",
-    "........s.........Ll........",
-    "........s..................",
-    "........s..................",
-    "........s..................",
-    "........ss.................",
-    ".......lLLLs...............",
-    "......lLLLLLs..............",
-    ".....lLLLLLLLLs............",
-    ".....lLLLLLLLLLLs..........",
-    ".......lLLLLLLLLLs.........",
-    "..........llLLLLLLs........",
-    "..............lllLLs.......",
-  ];
-  const palette: Record<string, string> = {
-    p: "#c89a4d", // mustard petal
-    P: "#e0b96a", // light petal
-    c: "#5a3618", // dark center
-    s: "#6b7d44", // stem
-    l: "#7c8d4d", // leaf shadow
-    L: "#9aaa5d", // leaf highlight
-  };
-  const cell = 8; // px per cell — slightly larger so the × glyph reads
-  const cols = grid[0].length;
-  const rows = grid.length;
-  const w = cols * cell;
-  const h = rows * cell;
-  return (
-    <svg
-      width={w}
-      height={h}
-      viewBox={`0 0 ${w} ${h}`}
-      className="select-none"
-      aria-hidden
-    >
-      {grid.flatMap((line, y) =>
-        line.split("").map((ch, x) => {
-          const fill = palette[ch];
-          if (!fill) return null;
-          const cx = x * cell + cell / 2;
-          const cy = y * cell + cell / 2;
-          const half = cell * 0.42;
-          return (
-            <g key={`${x}-${y}`}>
-              <line
-                x1={cx - half}
-                y1={cy - half}
-                x2={cx + half}
-                y2={cy + half}
-                stroke={fill}
-                strokeWidth="1.1"
-                strokeLinecap="round"
-              />
-              <line
-                x1={cx + half}
-                y1={cy - half}
-                x2={cx - half}
-                y2={cy + half}
-                stroke={fill}
-                strokeWidth="1.1"
-                strokeLinecap="round"
-              />
-            </g>
-          );
-        }),
-      )}
-    </svg>
-  );
-}

@@ -1,5 +1,5 @@
 import { Pill } from "@/components/ui/primitives";
-import { ArrowLeft } from "lucide-react";
+import { Box } from "lucide-react";
 
 export type TechNode = {
   id: string;
@@ -19,49 +19,45 @@ export function TreeCard({
   n,
   selected,
   onSelect,
-  depTitles = [],
 }: {
   n: TechNode;
   selected: boolean;
   onSelect: () => void;
-  depTitles?: string[];
 }) {
   const isLocked = n.status === "locked";
   const isComplete = n.status === "complete";
-  const isInProgress = n.status === "in_progress";
 
-  let toneClass = "border-line/70";
-  if (isComplete) toneClass = "border-sage/60 bg-sage/15";
-  else if (isInProgress) toneClass = "border-mustard/60 bg-mustard/15";
-  if (selected) toneClass += " ring-1 ring-ink border-ink";
+  let borderClass = "border-line/70";
+  if (isComplete) borderClass = "border-sage/60 bg-sage/10";
+  if (selected) borderClass += " ring-1 ring-ink border-ink";
 
   return (
     <button
       type="button"
       onClick={onSelect}
       data-tt-node={n.id}
-      className={`text-left rounded-md border bg-paper px-3 py-2 transition-all ${toneClass} ${
-        isLocked ? "opacity-40" : "hover:border-line-strong"
+      className={`text-left rounded-md border bg-paper px-2.5 py-2 transition-all w-full ${borderClass} ${
+        isLocked ? "opacity-35" : "hover:border-line-strong"
       }`}
     >
-      <div className="flex items-start justify-between gap-2">
-        <div className="text-base font-medium leading-tight tracking-tight text-ink">
-          {n.title}
+      <div className="flex items-start gap-2">
+        <div className="size-5 rounded shrink-0 bg-canvas border border-line/60 flex items-center justify-center mt-0.5">
+          <Box className="size-2.5 text-ink-soft" />
         </div>
-        {isComplete && <Pill tone="sage">Done</Pill>}
-        {!isLocked && !isComplete && <Pill tone="mustard">Avail</Pill>}
-      </div>
-      <div className="text-2xs text-ink-muted mt-1">
-        {n.agent_can_do_this ? "Agent can do this" : "Needs your input"}
-      </div>
-      {depTitles.length > 0 && (
-        <div className="mt-2 pt-1.5 border-t border-line/40 flex items-start gap-1 text-2xs text-ink-soft">
-          <ArrowLeft className="size-3 shrink-0 mt-0.5" />
-          <span className="leading-snug">
-            after <span className="text-ink-muted">{depTitles.join(", ")}</span>
-          </span>
+        <div className="flex-1 min-w-0">
+          <div className="flex items-start justify-between gap-1.5">
+            <div className="text-xs font-medium leading-snug text-ink">{n.title}</div>
+            {isComplete ? (
+              <Pill tone="sage">Complete</Pill>
+            ) : !isLocked ? (
+              <Pill tone="sage">Available</Pill>
+            ) : null}
+          </div>
+          <div className="text-2xs text-ink-muted mt-0.5">
+            {n.agent_can_do_this ? "Agent can do this" : "Needs your input"}
+          </div>
         </div>
-      )}
+      </div>
     </button>
   );
 }

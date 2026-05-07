@@ -79,7 +79,7 @@ export default async function DomainDetailPage({
               d.status === "verified"
                 ? "bg-sage"
                 : d.status === "pending"
-                  ? "bg-mustard/150"
+                  ? "bg-mustard"
                   : "bg-brick/100"
             }`}
           />

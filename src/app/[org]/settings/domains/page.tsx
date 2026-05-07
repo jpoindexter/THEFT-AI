@@ -52,7 +52,7 @@ export default async function Domains({
                       className={`size-2 rounded-full ${
                         d.status === "verified"
                           ? "bg-sage"
-                          : "bg-mustard/150"
+                          : "bg-mustard"
                       }`}
                     />
                     <span className="text-base font-mono">{d.domain}</span>

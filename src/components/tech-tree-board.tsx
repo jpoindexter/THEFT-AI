@@ -1,8 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { X, Folder, ArrowUpRight } from "lucide-react";
-import Link from "next/link";
+import { X, Folder, Box } from "lucide-react";
 import { useParams } from "next/navigation";
 import { Eyebrow, ButtonPrimary } from "@/components/ui/primitives";
 import { TreeCard, type TechNode } from "@/components/tech-tree-card";
@@ -49,7 +48,6 @@ export default function TechTreeBoard({
                 .filter((n) => n.stage === stage.key)
                 .sort((a, b) => (a.position ?? 0) - (b.position ?? 0))}
               selectedId={selected?.id ?? null}
-              titlesById={titlesById}
               onSelect={setSelected}
             />
           ))}
@@ -73,9 +71,7 @@ function BoardHeader({ orgName }: { orgName: string }) {
         <Folder className="size-4 text-ink-muted" />
       </div>
       <div>
-        <h1 className="text-md tracking-tight text-ink">
-          How to Build a Company
-        </h1>
+        <h1 className="text-md tracking-tight text-ink">How to Build a Company</h1>
         <p className="text-xs text-ink-muted">{orgName}</p>
       </div>
     </div>
@@ -86,18 +82,16 @@ function StageColumn({
   label,
   nodes,
   selectedId,
-  titlesById,
   onSelect,
 }: {
   label: string;
   nodes: TechNode[];
   selectedId: string | null;
-  titlesById: Map<string, string>;
   onSelect: (n: TechNode) => void;
 }) {
   if (nodes.length === 0) return null;
   return (
-    <div className="w-56 flex flex-col gap-2">
+    <div className="w-52 flex flex-col gap-2">
       <Eyebrow className="px-1 mb-1">{label}</Eyebrow>
       {nodes.map((n) => (
         <TreeCard
@@ -105,11 +99,23 @@ function StageColumn({
           n={n}
           selected={selectedId === n.id}
           onSelect={() => onSelect(n)}
-          depTitles={n.dependencies
-            .map((id) => titlesById.get(id))
-            .filter((t): t is string => Boolean(t))}
         />
       ))}
+    </div>
+  );
+}
+
+function DrawerSection({
+  label,
+  children,
+}: {
+  label: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="space-y-2">
+      <div className="text-2xs uppercase tracking-wider text-ink-soft font-medium">{label}</div>
+      {children}
     </div>
   );
 }
@@ -123,92 +129,140 @@ function DetailDrawer({
   allNodes: TechNode[];
   onClose: () => void;
 }) {
-  const params = useParams<{ org: string }>();
+  useParams<{ org: string }>();
   const deps = n.dependencies
     .map((id) => allNodes.find((x) => x.id === id))
     .filter((x): x is TechNode => Boolean(x));
   const unblocks = allNodes.filter((x) => x.dependencies.includes(n.id));
+  const incompleteDeps = deps.filter((d) => d.status !== "complete");
 
   return (
-    <aside className="absolute right-0 top-[57px] bottom-0 w-80 bg-paper border-l border-line/70 p-5 overflow-y-auto">
-      <header className="flex items-start justify-between mb-5">
-        <div>
-          <Eyebrow>{n.stage}</Eyebrow>
-          <h2 className="text-md font-medium tracking-tight mt-1 text-ink">
-            {n.title}
-          </h2>
-        </div>
+    <aside className="absolute right-0 top-[57px] bottom-0 w-80 bg-paper border-l border-line/70 overflow-y-auto">
+      <div className="px-4 py-3 border-b border-line/70 flex items-center justify-between">
+        <span className="text-2xs uppercase tracking-wider text-ink-soft font-medium">
+          {n.stage.toUpperCase()}
+        </span>
         <button
           onClick={onClose}
           className="text-ink-soft hover:text-ink"
           aria-label="Close"
-          title="Close"
         >
           <X className="size-4" />
         </button>
-      </header>
-      {n.what_becomes_true && (
-        <Section label="What becomes true" body={n.what_becomes_true} />
-      )}
-      {n.how_to_move_forward && (
-        <Section label="How to move this forward" body={n.how_to_move_forward} />
-      )}
-      {deps.length > 0 && <DepList label="After" items={deps} org={params.org} />}
-      {unblocks.length > 0 && (
-        <DepList label="Unblocks" items={unblocks} org={params.org} />
-      )}
-      <ButtonPrimary
-        className="mt-4 w-full"
-        disabled={n.status === "locked"}
-      >
-        {n.agent_can_do_this ? "Launch Agent" : "Mark complete"}
-      </ButtonPrimary>
-      <Link
-        href={`/${params.org}/roadmap/${n.slug}`}
-        className="mt-2 w-full inline-flex items-center justify-center gap-1 rounded-md border border-line bg-paper text-sm py-2 hover:border-line-strong"
-      >
-        Open detail <ArrowUpRight className="size-3" />
-      </Link>
-    </aside>
-  );
-}
+      </div>
 
-function DepList({
-  label,
-  items,
-  org,
-}: {
-  label: string;
-  items: TechNode[];
-  org: string;
-}) {
-  return (
-    <div className="mb-5">
-      <Eyebrow className="mb-1.5">{label}</Eyebrow>
-      <ul className="space-y-1">
-        {items.map((d) => (
-          <li key={d.id}>
-            <Link
-              href={`/${org}/roadmap/${d.slug}`}
-              className="block rounded-md border border-line/60 bg-cream px-2 py-1 text-xs hover:border-line-strong"
+      <div className="p-5 space-y-5">
+        {(() => {
+          const headline = n.what_becomes_true ?? n.title;
+          const headlineIsWBT = Boolean(n.what_becomes_true);
+          return (
+            <div className="space-y-2">
+              <div className="size-8 rounded-md border border-line/70 bg-canvas flex items-center justify-center">
+                <Box className="size-4 text-ink-soft" />
+              </div>
+              <h2 className="text-xl font-medium tracking-tight text-ink leading-snug">{headline}</h2>
+              {headlineIsWBT ? (
+                <div className="flex items-center gap-1.5 flex-wrap">
+                  <span className="text-2xs text-ink-muted border border-line/70 rounded-full px-2 py-0.5">
+                    {n.title}
+                  </span>
+                  <span className="text-2xs text-ink-muted border border-line/70 rounded-full px-2 py-0.5">
+                    {n.agent_can_do_this ? "Agent can do this" : "Needs your input"}
+                  </span>
+                </div>
+              ) : (
+                <p className="text-xs text-ink-muted">
+                  {n.agent_can_do_this ? "Agent can do this" : "Needs your input"}
+                </p>
+              )}
+            </div>
+          );
+        })()}
+
+        {n.status === "locked" && incompleteDeps.length > 0 && (
+          <DrawerSection label="LOCKED CONTEXT">
+            <p className="text-xs text-ink-muted">Needs earlier steps first</p>
+            <p className="text-2xs text-ink-soft">
+              Complete {incompleteDeps.length} prerequisite
+              {incompleteDeps.length > 1 ? "s" : ""} before this is ready.
+            </p>
+          </DrawerSection>
+        )}
+
+        {n.how_to_move_forward && (
+          <DrawerSection label="HOW TO MOVE THIS FORWARD">
+            <p className="text-xs text-ink leading-snug">{n.how_to_move_forward}</p>
+          </DrawerSection>
+        )}
+
+        <DrawerSection label="TO COMPLETE">
+          <div className="flex items-center gap-2 rounded-md border border-line/70 px-2.5 py-1.5">
+            <div
+              className={`size-4 rounded-full border flex items-center justify-center shrink-0 ${
+                n.status === "complete"
+                  ? "bg-sage/60 border-sage/60"
+                  : "border-line"
+              }`}
             >
-              <span className="text-ink">{d.title}</span>
-              <span className="ml-1 text-2xs text-ink-soft uppercase tracking-wider">
-                · {d.status}
-              </span>
-            </Link>
-          </li>
-        ))}
-      </ul>
-    </div>
-  );
-}
+              {n.status === "complete" && (
+                <span className="text-[8px] leading-none text-paper">✓</span>
+              )}
+            </div>
+            <span className="text-xs text-ink flex-1 leading-snug">{n.title}</span>
+            {n.status !== "complete" && n.status !== "locked" && (
+              n.agent_can_do_this ? (
+                <span className="text-2xs text-ink-muted border border-line/70 rounded-full px-1.5 py-0.5">
+                  Launch
+                </span>
+              ) : (
+                <span className="text-2xs text-ink-muted border border-line/70 rounded-full px-1.5 py-0.5">
+                  SETUP
+                </span>
+              )
+            )}
+          </div>
+        </DrawerSection>
 
-function Section({ label, body }: { label: string; body: string }) {
-  return (
-    <div className="mb-5">
-      <Eyebrow className="mb-1.5">{label}</Eyebrow>
-      <p className="text-base text-ink leading-snug">{body}</p>
-    </div>
+        {deps.length > 0 && (
+          <DrawerSection label="REQUIRED FIRST">
+            <ul className="space-y-1">
+              {deps.map((d) => (
+                <li
+                  key={d.id}
+                  className="flex items-center gap-2 rounded-md border border-line/70 px-2.5 py-1.5 text-xs"
+                >
+                  <span className="flex-1 text-ink leading-snug">{d.title}</span>
+                  <span className="text-2xs uppercase text-ink-soft shrink-0">
+                    {d.stage.toUpperCase()}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </DrawerSection>
+        )}
+
+        {unblocks.length > 0 && (
+          <DrawerSection label="COMPLETING THIS UNLOCKS">
+            <ul className="space-y-1">
+              {unblocks.map((u) => (
+                <li
+                  key={u.id}
+                  className="flex items-center gap-2 rounded-md border border-line/70 px-2.5 py-1.5 text-xs"
+                >
+                  <span className="flex-1 text-ink leading-snug">{u.title}</span>
+                  <span className="text-2xs uppercase text-ink-soft shrink-0">
+                    {u.stage.toUpperCase()}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </DrawerSection>
+        )}
+
+        {n.agent_can_do_this && n.status !== "locked" && (
+          <ButtonPrimary className="w-full">Launch Agent</ButtonPrimary>
+        )}
+      </div>
+    </aside>
   );
 }

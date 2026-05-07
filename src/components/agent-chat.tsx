@@ -4,8 +4,8 @@
 // Replaces the hand-coded brief widget. The agent decides what to ask, what
 // tools to call, what artifacts to produce.
 
-import { useEffect, useRef, useState } from "react";
-import { ChevronDown, ChevronRight, ArrowUp, Wrench } from "lucide-react";
+import { Fragment, useEffect, useRef, useState } from "react";
+import { ChevronDown, ChevronRight, ArrowUp, Wrench, Maximize2 } from "lucide-react";
 import SlashMenu from "@/components/slash-menu";
 
 type Answer = { key?: string; label?: string; custom?: string };
@@ -45,16 +45,19 @@ export default function AgentChat({
   organization,
   onboarding,
   emptyHeader,
+  onFirstTurn,
 }: {
-  organization: { id: string; slug: string };
+  organization: { id: string; slug: string; name: string };
   onboarding?: boolean;
   emptyHeader?: React.ReactNode;
+  onFirstTurn?: () => void;
 }) {
   const [turns, setTurns] = useState<Turn[]>([]);
   const [paused, setPaused] = useState<Paused>(null);
   const [busy, setBusy] = useState(false);
   const [input, setInput] = useState("");
   const scrollRef = useRef<HTMLDivElement>(null);
+  const firstTurnFired = useRef(false);
 
   // load existing state on mount
   useEffect(() => {
@@ -63,9 +66,9 @@ export default function AgentChat({
       .then((j: { turns?: Turn[]; paused?: Paused }) => {
         setTurns(j.turns ?? []);
         setPaused(j.paused ?? null);
-        // if onboarding and no turns yet, kick the agent off
-        if (onboarding && (!j.turns || j.turns.length === 0)) {
-          void kick();
+        if ((j.turns ?? []).length > 0 && !firstTurnFired.current) {
+          firstTurnFired.current = true;
+          onFirstTurn?.();
         }
       });
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -98,6 +101,10 @@ export default function AgentChat({
     if (!text.trim() || busy) return;
     setBusy(true);
     setInput("");
+    if (!firstTurnFired.current) {
+      firstTurnFired.current = true;
+      onFirstTurn?.();
+    }
     setTurns((p) => [...p, { kind: "user_message", text }]);
     try {
       const r = await fetch(`/api/${organization.slug}/agent/run`, {
@@ -143,15 +150,54 @@ export default function AgentChat({
     <>
       <div ref={scrollRef} className="flex-1 overflow-y-auto p-4 space-y-4">
         {turns.length === 0 && !busy && emptyHeader}
-        {turns.map((t, i) => (
-          <Turn
-            key={i}
-            t={t}
-            paused={paused}
-            answering={busy}
-            onAnswer={answer}
-          />
-        ))}
+        {(() => {
+          const pauseTurns = turns.filter((t) => t.kind === "pause");
+          const total = pauseTurns.length || undefined;
+          return turns.map((t, i) => {
+            // Business plan tool call: render answered-questions summary + plan card
+            if (t.kind === "tool_call" && t.name === "set_business_plan") {
+              const prevPauses = turns.slice(0, i).filter((x): x is Extract<Turn, { kind: "pause" }> => x.kind === "pause");
+              const prevAnswers = turns.slice(0, i).filter((x): x is Extract<Turn, { kind: "tool_answer" }> => x.kind === "tool_answer");
+              return (
+                <Fragment key={i}>
+                  {prevPauses.length > 0 && (
+                    <AgentAnsweredCard pauses={prevPauses} answers={prevAnswers} />
+                  )}
+                  <AgentBusinessPlanCard
+                    plan={t.input as Record<string, unknown>}
+                    orgName={organization.name}
+                    orgSlug={organization.slug}
+                  />
+                </Fragment>
+              );
+            }
+            // Skip tool_result for set_business_plan (shown above) and complete_onboarding
+            if (t.kind === "tool_result" && (t.name === "set_business_plan" || t.name === "complete_onboarding")) {
+              return null;
+            }
+            // Skip tool_call for complete_onboarding
+            if (t.kind === "tool_call" && t.name === "complete_onboarding") {
+              return null;
+            }
+            const pauseIdx = t.kind === "pause"
+              ? pauseTurns.findIndex((p) => (p as typeof t).kind === "pause" && turns.indexOf(p as Turn) === i)
+              : -1;
+            const step = pauseIdx >= 0 ? pauseIdx + 1 : undefined;
+            return (
+              <Turn
+                key={i}
+                t={t}
+                paused={paused}
+                answering={busy}
+                step={step}
+                total={total}
+                onAnswer={answer}
+                onDecideThis={() => void send("Decide this one for me")}
+                onDecideAll={() => void send("Decide all remaining questions for me")}
+              />
+            );
+          });
+        })()}
         {busy && (
           <div className="text-xs text-ink-soft inline-flex items-center gap-1.5">
             <span className="size-2 rounded-full bg-mustard animate-pulse" />
@@ -173,7 +219,11 @@ export default function AgentChat({
             placeholder={
               paused
                 ? 'Or type a freeform answer… ("/" for commands)'
-                : 'Ask Cofounder anything… ("/" for commands)'
+                : onboarding && !turns.some((t) => t.kind === "user_message")
+                  ? "Share what you're building…"
+                  : onboarding
+                    ? "Ask for follow up changes…"
+                    : 'Ask Cofounder anything… ("/" for commands)'
             }
             rows={2}
             className="flex-1 resize-none bg-transparent px-3 py-2 text-base focus:outline-none placeholder:text-ink-soft"
@@ -204,12 +254,20 @@ function Turn({
   t,
   paused,
   answering,
+  step,
+  total,
   onAnswer,
+  onDecideThis,
+  onDecideAll,
 }: {
   t: Turn;
   paused: Paused;
   answering: boolean;
+  step?: number;
+  total?: number;
   onAnswer: (a: Answer) => void;
+  onDecideThis?: () => void;
+  onDecideAll?: () => void;
 }) {
   if (t.kind === "user_message") {
     return (
@@ -223,11 +281,11 @@ function Turn({
   if (t.kind === "text") {
     return (
       <div className="space-y-1">
-        <div className="inline-flex items-center gap-1.5 text-xs text-ink-muted bg-mustard/30/40 px-1.5 py-0.5 rounded-sm">
+        <div className="inline-flex items-center gap-1.5 text-xs text-ink-muted bg-mustard/30 px-1.5 py-0.5 rounded-sm">
           <span className="size-3 rounded-full  bg-mustard/30 inline-block" />
           Cofounder
         </div>
-        <div className="text-base leading-relaxed text-ink bg-mustard/30/40 px-1 py-0.5 rounded-sm whitespace-pre-wrap">
+        <div className="text-base leading-relaxed text-ink bg-mustard/30 px-1 py-0.5 rounded-sm whitespace-pre-wrap">
           {t.text}
         </div>
       </div>
@@ -257,7 +315,11 @@ function Turn({
       <AskUserQuestion
         input={t.input}
         disabled={answering}
+        step={step}
+        total={total}
         onAnswer={onAnswer}
+        onDecideThis={onDecideThis}
+        onDecideAll={onDecideAll}
       />
     );
   }
@@ -295,22 +357,36 @@ function ToolCallCard({ name, input }: { name: string; input: unknown }) {
 function AskUserQuestion({
   input,
   disabled,
+  step,
+  total,
   onAnswer,
+  onDecideThis,
+  onDecideAll,
 }: {
   input: AskUserQuestionInput;
   disabled: boolean;
+  step?: number;
+  total?: number;
   onAnswer: (a: Answer) => void;
+  onDecideThis?: () => void;
+  onDecideAll?: () => void;
 }) {
   const [picked, setPicked] = useState<string | null>(null);
   const [custom, setCustom] = useState("");
+  const isLast = step !== undefined && total !== undefined && step >= total;
 
   return (
     <div className="rounded-lg border border-line/80 bg-paper">
-      <div className="px-3 py-1.5 text-xs text-ink-muted border-b border-line/70 inline-flex items-center gap-1">
-        Cofounder is asking
+      <div className="px-3 py-1.5 border-b border-line/70 flex items-center justify-between">
+        <div className="inline-flex items-center gap-1 text-xs text-ink-muted">
+          {step !== undefined && total !== undefined && (
+            <span className="font-mono">{step}/{total}</span>
+          )}
+          <ChevronRight className="size-3 text-ink-soft" />
+        </div>
       </div>
       <div className="p-3 space-y-3">
-        <p className="text-base text-ink leading-snug">
+        <p className="text-base text-ink leading-snug font-medium">
           {input.question}
         </p>
         <div className="space-y-1">
@@ -319,62 +395,228 @@ function AskUserQuestion({
             return (
               <button
                 key={o.key}
-                onClick={() => {
-                  setPicked(o.key);
-                  setCustom("");
-                }}
+                onClick={() => { setPicked(o.key); setCustom(""); }}
                 disabled={disabled}
                 className={`w-full text-left rounded-md px-2.5 py-2 transition-colors disabled:opacity-50 ${
-                  selected ? "bg-cream" : "hover:bg-canvas"
+                  selected ? "bg-cream border border-line" : "hover:bg-canvas border border-transparent"
                 }`}
               >
                 <div className="flex items-start justify-between gap-2">
-                  <div className="text-sm font-medium text-ink">
-                    {o.label}
-                  </div>
+                  <div className="text-sm font-medium text-ink">{o.label}</div>
                   {o.recommended && (
-                    <span className="text-2xs text-mustard-ink bg-mustard/30 px-1.5 py-0.5 rounded-sm">
+                    <span className="text-2xs text-mustard-ink bg-mustard/30 px-1.5 py-0.5 rounded-sm shrink-0">
                       Recommended
                     </span>
                   )}
                 </div>
                 {o.description && (
-                  <p className="text-xs text-ink-muted mt-1 leading-snug">
-                    {o.description}
-                  </p>
+                  <p className="text-xs text-ink-muted mt-0.5 leading-snug">{o.description}</p>
                 )}
               </button>
             );
           })}
         </div>
-        {input.allow_custom && (
+        {input.allow_custom !== false && (
           <input
             value={custom}
-            onChange={(e) => {
-              setCustom(e.target.value);
-              setPicked(null);
-            }}
+            onChange={(e) => { setCustom(e.target.value); setPicked(null); }}
             disabled={disabled}
-            placeholder="Something else…"
-            className="w-full text-sm border-b border-line bg-transparent px-1 py-1 focus:outline-none focus:border-line-strong"
+            placeholder="Something else"
+            className="w-full text-sm border-b border-line bg-transparent px-1 py-1 focus:outline-none focus:border-line-strong placeholder:text-ink-soft"
           />
         )}
       </div>
-      <div className="flex items-center justify-end gap-1.5 border-t border-line/70 p-2">
+      <div className="flex items-center justify-between gap-1.5 border-t border-line/70 px-3 py-2">
+        <div className="flex items-center gap-1.5">
+          {onDecideAll && (
+            <button
+              type="button"
+              disabled={disabled}
+              onClick={onDecideAll}
+              className="text-xs text-ink-muted hover:text-ink border border-line rounded-md px-2.5 py-1 disabled:opacity-40"
+            >
+              Decide all
+            </button>
+          )}
+          {onDecideThis && (
+            <button
+              type="button"
+              disabled={disabled}
+              onClick={onDecideThis}
+              className="text-xs text-ink-muted hover:text-ink border border-line rounded-md px-2.5 py-1 disabled:opacity-40"
+            >
+              Decide this one
+            </button>
+          )}
+        </div>
+        {isLast && (
+          <button
+            type="button"
+            disabled={disabled || (!picked && !custom.trim())}
+            onClick={() => {
+              if (custom.trim()) onAnswer({ custom: custom.trim() });
+              else if (picked) onAnswer({ key: picked, label: input.options.find((x) => x.key === picked)?.label });
+            }}
+            className="text-xs rounded-md bg-ink text-paper px-3 py-1 hover:opacity-90 disabled:opacity-40"
+          >
+            Submit
+          </button>
+        )}
+        {!isLast && (
+          <button
+            type="button"
+            disabled={disabled || (!picked && !custom.trim())}
+            onClick={() => {
+              if (custom.trim()) onAnswer({ custom: custom.trim() });
+              else if (picked) onAnswer({ key: picked, label: input.options.find((x) => x.key === picked)?.label });
+            }}
+            className="text-xs rounded-md border border-line bg-paper px-2.5 py-1 hover:border-line-strong disabled:opacity-40"
+          >
+            Next →
+          </button>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function AgentAnsweredCard({
+  pauses,
+  answers,
+}: {
+  pauses: Extract<Turn, { kind: "pause" }>[];
+  answers: Extract<Turn, { kind: "tool_answer" }>[];
+}) {
+  const [open, setOpen] = useState<Record<string, boolean>>({});
+  return (
+    <div className="space-y-2">
+      <div className="text-xs text-ink-muted inline-flex items-center gap-1">
+        <span aria-hidden>↳</span> Running Tool: Ask User Question
+      </div>
+      <div className="rounded-lg border border-line/80 bg-paper p-3 space-y-2.5">
+        <div>
+          <div className="text-sm font-medium text-ink">Answered questions</div>
+          <div className="text-xs text-ink-muted">You chose</div>
+        </div>
+        {pauses.map((pause) => {
+          const ans = answers.find((a) => a.tool_use_id === pause.tool_use_id);
+          if (!ans) return null;
+          const label = ans.answer.label ?? ans.answer.custom ?? ans.answer.key;
+          const isOpen = open[pause.tool_use_id] !== false;
+          return (
+            <div key={pause.tool_use_id} className="border-t border-line/60 pt-2 first:border-0 first:pt-0">
+              <button
+                type="button"
+                onClick={() => setOpen((s) => ({ ...s, [pause.tool_use_id]: !isOpen }))}
+                className="w-full flex items-start justify-between gap-2 text-left"
+              >
+                <span className="text-sm text-ink leading-snug">{pause.input.question}</span>
+                <span className="inline-flex items-center gap-1 text-2xs text-ink-muted shrink-0">
+                  <span className="rounded bg-cream px-1.5 py-0.5">Answered</span>
+                  <ChevronDown className={`size-3 transition-transform ${isOpen ? "" : "-rotate-90"}`} />
+                </span>
+              </button>
+              {isOpen && (
+                <div className="mt-1.5 inline-block bg-cream rounded-sm px-1.5 py-0.5 text-xs text-ink">
+                  {label}
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+function AgentBusinessPlanCard({
+  plan,
+  orgName,
+  orgSlug,
+}: {
+  plan: Record<string, unknown>;
+  orgName: string;
+  orgSlug: string;
+}) {
+  const [activating, setActivating] = useState(false);
+
+  const KNOWN: { key: string; label: string }[] = [
+    { key: "product", label: "Product or Service" },
+    { key: "icp", label: "ICP" },
+    { key: "mission", label: "Mission" },
+    { key: "business_model", label: "Business Model" },
+    { key: "differentiator", label: "Key Differentiator" },
+    { key: "go_to_market", label: "Go-To-Market Strategy" },
+  ];
+
+  const sections: { label: string; body: string | string[] }[] = [];
+  const knownKeys = new Set(KNOWN.map((k) => k.key));
+
+  for (const { key, label } of KNOWN) {
+    const v = plan[key];
+    if (!v) continue;
+    if (typeof v === "string" && v.trim()) sections.push({ label, body: v.trim() });
+    else if (Array.isArray(v) && v.length > 0) sections.push({ label, body: v.map(String) });
+  }
+  // Render any extra array/string fields the agent may have added
+  for (const [key, v] of Object.entries(plan)) {
+    if (knownKeys.has(key)) continue;
+    const label = key.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+    if (typeof v === "string" && v.trim()) sections.push({ label, body: v.trim() });
+    else if (Array.isArray(v) && v.length > 0) sections.push({ label, body: v.map(String) });
+  }
+
+  return (
+    <div className="rounded-lg border border-line/70 bg-paper overflow-hidden">
+      <div className="px-3 py-2.5 border-b border-line/70 flex items-center gap-2">
+        <div className="size-5 rounded-sm bg-canvas border border-line/70 flex items-center justify-center shrink-0">
+          <svg viewBox="0 0 16 16" className="size-3 text-ink-muted" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M3 2h7l3 3v9H3z" /><path d="M10 2v3h3" />
+          </svg>
+        </div>
+        <div className="flex-1 min-w-0">
+          <div className="text-sm font-medium text-ink">Business Plan</div>
+          <div className="text-2xs text-ink-muted truncate">{orgName} · {orgSlug}</div>
+        </div>
+        <button type="button" className="text-2xs text-ink-muted border border-line/70 rounded px-2 py-0.5 hover:border-line-strong shrink-0">
+          Edit
+        </button>
+        <button type="button" className="size-5 flex items-center justify-center text-ink-soft hover:text-ink shrink-0">
+          <Maximize2 className="size-3" />
+        </button>
+      </div>
+      <div className="p-3 space-y-3 max-h-72 overflow-y-auto">
+        {sections.map((s) => (
+          <div key={s.label}>
+            <span className="inline-block text-2xs uppercase tracking-wider px-1.5 py-0.5 rounded bg-sage/15 text-ink mb-1.5">
+              {s.label}
+            </span>
+            {Array.isArray(s.body) ? (
+              <ul className="space-y-0.5">
+                {s.body.map((item, idx) => (
+                  <li key={idx} className="text-xs text-ink flex items-start gap-1.5">
+                    <span className="mt-1 text-ink-soft shrink-0">•</span>
+                    <span className="leading-snug">{item}</span>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="text-xs text-ink leading-snug">{s.body}</p>
+            )}
+          </div>
+        ))}
+      </div>
+      <div className="border-t border-line/70 p-3">
         <button
           type="button"
-          disabled={disabled || (!picked && !custom.trim())}
+          disabled={activating}
           onClick={() => {
-            if (custom.trim()) {
-              onAnswer({ custom: custom.trim() });
-            } else if (picked) {
-              const o = input.options.find((x) => x.key === picked);
-              onAnswer({ key: picked, label: o?.label });
-            }
+            setActivating(true);
+            window.location.reload();
           }}
-          className="text-xs rounded-md bg-ink text-paper px-2.5 py-1 hover:bg-ink/80 disabled:opacity-40"
+          className="w-full rounded-md bg-ink text-paper text-sm py-2 hover:bg-ink/80 disabled:opacity-60"
         >
-          Submit
+          {activating ? "Activating departments…" : "Accept & activate departments"}
         </button>
       </div>
     </div>

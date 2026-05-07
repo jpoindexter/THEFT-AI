@@ -1,6 +1,13 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { ExternalLink } from "lucide-react";
+
+type OrgData = {
+  name: string;
+  goal: string | null;
+  business_plan: unknown;
+};
 
 type Stack = {
   github: { repo: string | null; status: "ready" | "missing" };
@@ -14,65 +21,152 @@ export default function CompanyTab({
 }: {
   organization: { id: string; slug: string };
 }) {
+  const [org, setOrg] = useState<OrgData | null>(null);
   const [stack, setStack] = useState<Stack | null>(null);
-  const [memory, setMemory] = useState<string | null>(null);
 
   useEffect(() => {
-    void fetch(`/api/${organization.slug}/company`)
-      .then((r) => r.json())
-      .then((j) => {
-        setStack(j.stack);
-        setMemory(j.memory ?? null);
-      });
+    void Promise.all([
+      fetch(`/api/${organization.slug}`).then((r) => r.json()),
+      fetch(`/api/${organization.slug}/company`).then((r) => r.json()),
+    ]).then(([od, cd]) => {
+      setOrg(od.org ?? null);
+      setStack(cd.stack ?? null);
+    });
   }, [organization.slug]);
 
-  return (
-    <div className="flex-1 overflow-y-auto p-4 space-y-5 text-base">
-      <div>
-        <div className="text-2xs uppercase tracking-[0.12em] text-ink-soft mb-2">
-          Company memory
-        </div>
-        {memory ? (
-          <div className="rounded-md border border-line/80 bg-paper p-3 text-sm text-ink leading-snug whitespace-pre-wrap">
-            {memory}
-          </div>
-        ) : (
-          <div className="rounded-md border border-line/80 bg-paper p-3 text-sm text-ink-muted">
-            No memory imported. Bring durable context from another AI tool via Settings → Organization.
-          </div>
-        )}
-      </div>
+  const description =
+    org?.goal ??
+    ((org?.business_plan as Record<string, unknown> | null)?.description as string | null) ??
+    null;
 
-      <div>
-        <div className="text-2xs uppercase tracking-[0.12em] text-ink-soft mb-2">
-          Stack status
-        </div>
-        <div className="space-y-1">
-          {stack &&
-            (
-              [
-                ["GitHub", stack.github.repo, stack.github.status],
-                ["Vercel", stack.vercel.project, stack.vercel.status],
-                ["Supabase", stack.supabase.project, stack.supabase.status],
-                ["Postmark", stack.postmark.server, stack.postmark.status],
-              ] as const
-            ).map(([label, value, status]) => (
-              <div
-                key={label}
-                className="rounded-md border border-line/80 bg-paper px-3 py-1.5 flex items-center justify-between text-sm"
-              >
-                <span>{label}</span>
-                <span
-                  className={`text-2xs uppercase ${
-                    status === "ready" ? "text-sage-ink" : "text-ink-muted"
-                  }`}
+  const stackRows = [
+    { label: "Domain", value: null, status: "missing" as const },
+    { label: "Email", value: null, status: "missing" as const },
+    { label: "Payment", value: null, status: "missing" as const },
+    {
+      label: "Hosting",
+      value: stack?.vercel.status === "ready" ? "Vercel" : null,
+      status: stack?.vercel.status ?? "missing",
+    },
+  ];
+
+  const linkRows: { label: string; href: string | null }[] = [
+    { label: "App", href: null },
+    { label: "Production", href: null },
+    { label: "Staging", href: null },
+    {
+      label: "Repository",
+      href: stack?.github.repo ?? null,
+    },
+    {
+      label: "Vercel",
+      href: stack?.vercel.project ?? null,
+    },
+  ];
+
+  const marketingLinkRows: { label: string; href: string | null }[] = [
+    { label: "App", href: null },
+  ];
+
+  return (
+    <div className="flex-1 overflow-y-auto p-4 space-y-4 text-base">
+      {org && (
+        <>
+          <div>
+            <h2 className="text-base font-medium tracking-tight text-ink">
+              {org.name}
+            </h2>
+            {description && (
+              <p className="text-xs text-ink-muted mt-1 leading-snug">
+                {description}
+              </p>
+            )}
+          </div>
+
+          <div>
+            <div className="text-2xs uppercase tracking-[0.12em] text-ink-soft mb-1.5">
+              Stack
+            </div>
+            <div className="space-y-0.5">
+              {stackRows.map((row) => (
+                <div
+                  key={row.label}
+                  className="flex items-center justify-between rounded-md border border-line/70 bg-paper px-3 py-1.5 text-sm"
                 >
-                  {value ?? status}
-                </span>
-              </div>
-            ))}
-        </div>
-      </div>
+                  <span className="text-ink">{row.label}</span>
+                  <span
+                    className={`text-xs ${
+                      row.status === "ready"
+                        ? "text-ink"
+                        : "text-ink-muted"
+                    }`}
+                  >
+                    {row.value ?? "Requires setup"}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div>
+            <div className="text-2xs uppercase tracking-[0.12em] text-ink-soft mb-1.5">
+              Links
+            </div>
+            <div className="space-y-0.5">
+              {linkRows.map((row) => (
+                <div
+                  key={row.label}
+                  className="flex items-center justify-between rounded-md border border-line/70 bg-paper px-3 py-1.5 text-sm"
+                >
+                  <span className="text-ink">{row.label}</span>
+                  {row.href ? (
+                    <a
+                      href={row.href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-xs text-ink-muted hover:text-ink inline-flex items-center gap-1 max-w-[160px] truncate"
+                    >
+                      <span className="truncate">{row.href}</span>
+                      <ExternalLink className="size-2.5 shrink-0" />
+                    </a>
+                  ) : (
+                    <span className="text-xs text-ink-soft">—</span>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div>
+            <div className="text-2xs uppercase tracking-[0.12em] text-ink-soft mb-1.5">
+              Marketing Website
+            </div>
+            <div className="space-y-0.5">
+              {marketingLinkRows.map((row) => (
+                <div
+                  key={row.label}
+                  className="flex items-center justify-between rounded-md border border-line/70 bg-paper px-3 py-1.5 text-sm"
+                >
+                  <span className="text-ink">{row.label}</span>
+                  {row.href ? (
+                    <a
+                      href={row.href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-xs text-ink-muted hover:text-ink inline-flex items-center gap-1 max-w-[160px] truncate"
+                    >
+                      <span className="truncate">{row.href}</span>
+                      <ExternalLink className="size-2.5 shrink-0" />
+                    </a>
+                  ) : (
+                    <span className="text-xs text-ink-soft">—</span>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        </>
+      )}
     </div>
   );
 }
