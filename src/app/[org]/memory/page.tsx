@@ -16,52 +16,34 @@ import {
   MemoryFilters,
   type SourceFilter,
 } from "@/components/memory/memory-filters";
-
-const SEED: MemoryItem[] = [
-  {
-    id: "m1",
-    topic: "Pricing thesis",
-    body: "Anchor at $60/seat for Team. $200 monthly credit per workspace covers ~80% of agent runs at current volume. Flat $1.2k for Studio buys multi-workspace + SSO.",
-    source: "task",
-    pinned: true,
-    updated_at: "2026-05-04",
-  },
-  {
-    id: "m2",
-    topic: "ICP",
-    body: "Solo founders + 2-5 person teams who would otherwise hire fractional ops/marketing. Mortgage tech and dev tools have shown highest activation in trials.",
-    source: "manual",
-    pinned: true,
-    updated_at: "2026-05-02",
-  },
-  {
-    id: "m3",
-    topic: "Engineer agent prefers reversible migrations",
-    body: "Always reversible. Backfills run in their own migration. Default rollout is staging → prod via PR.",
-    source: "task",
-    pinned: false,
-    updated_at: "2026-04-30",
-  },
-  {
-    id: "m4",
-    topic: "Postmark inbound parsing",
-    body: "Inbound mail is parsed into a Task at the matching agent's inbox. Subject becomes title; first paragraph becomes description.",
-    source: "integration",
-    pinned: false,
-    updated_at: "2026-04-22",
-  },
-];
+import { toast } from "@/components/toast-host";
 
 export default function MemoryPage() {
   const params = useParams<{ org: string }>();
-  const [items, setItems] = useState<MemoryItem[]>(SEED);
+  const [items, setItems] = useState<MemoryItem[]>([]);
+  const [loading, setLoading] = useState(true);
   const [q, setQ] = useState("");
   const [source, setSource] = useState<SourceFilter>("all");
   const [pinnedOnly, setPinnedOnly] = useState(false);
   const [editing, setEditing] = useState<MemoryItem | null>(null);
 
   useEffect(() => {
-    void params.org;
+    type ApiItem = MemoryItem & { organization_id: string; created_at: string };
+    void fetch(`/api/${params.org}/memory`)
+      .then((r) => r.json())
+      .then((j: { items: ApiItem[] }) => {
+        setItems(
+          j.items.map((m) => ({
+            id: m.id,
+            topic: m.topic,
+            body: m.body,
+            source: m.source,
+            pinned: m.pinned,
+            updated_at: m.updated_at.slice(0, 10),
+          })),
+        );
+        setLoading(false);
+      });
   }, [params.org]);
 
   const filtered = items.filter((m) => {
@@ -75,14 +57,62 @@ export default function MemoryPage() {
     );
   });
 
-  function save() {
+  async function save() {
     if (!editing) return;
+    const isUpdate = items.some((c) => c.id === editing.id);
+    const url = isUpdate
+      ? `/api/${params.org}/memory/${editing.id}`
+      : `/api/${params.org}/memory`;
+    const method = isUpdate ? "PATCH" : "POST";
+    const res = await fetch(url, {
+      method,
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        topic: editing.topic,
+        body: editing.body,
+        pinned: editing.pinned,
+        source: editing.source,
+      }),
+    });
+    if (!res.ok) {
+      toast("Save failed", "warn");
+      return;
+    }
+    type ApiItem = MemoryItem & { organization_id: string; created_at: string };
+    const j = (await res.json()) as { item: ApiItem };
+    const saved: MemoryItem = {
+      id: j.item.id,
+      topic: j.item.topic,
+      body: j.item.body,
+      source: j.item.source,
+      pinned: j.item.pinned,
+      updated_at: j.item.updated_at.slice(0, 10),
+    };
     setItems((cur) =>
-      cur.some((c) => c.id === editing.id)
-        ? cur.map((c) => (c.id === editing.id ? editing : c))
-        : [...cur, editing],
+      isUpdate
+        ? cur.map((c) => (c.id === saved.id ? saved : c))
+        : [saved, ...cur],
     );
+    toast(isUpdate ? "Memory updated" : "Memory saved", "ok");
     setEditing(null);
+  }
+
+  async function togglePin(m: MemoryItem) {
+    const next = !m.pinned;
+    setItems((cur) =>
+      cur.map((c) => (c.id === m.id ? { ...c, pinned: next } : c)),
+    );
+    await fetch(`/api/${params.org}/memory/${m.id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ pinned: next }),
+    });
+  }
+
+  async function remove(m: MemoryItem) {
+    setItems((cur) => cur.filter((c) => c.id !== m.id));
+    await fetch(`/api/${params.org}/memory/${m.id}`, { method: "DELETE" });
+    toast(`Removed "${m.topic}"`, "warn");
   }
 
   return (
@@ -126,14 +156,18 @@ export default function MemoryPage() {
         />
 
         <div className="text-2xs text-ink-soft px-1">
-          {filtered.length} of {items.length} memory items
+          {loading
+            ? "Loading…"
+            : `${filtered.length} of ${items.length} memory items`}
         </div>
 
         <Card>
           <ul className="divide-y divide-line/60">
-            {filtered.length === 0 && (
+            {!loading && filtered.length === 0 && (
               <li className="px-4 py-6 text-center text-sm text-ink-muted">
-                No matches. Try a broader search or clear filters.
+                {items.length === 0
+                  ? "No memory yet. Pin something the agents shouldn't forget."
+                  : "No matches. Try a broader search or clear filters."}
               </li>
             )}
             {filtered.map((m) => (
@@ -141,16 +175,8 @@ export default function MemoryPage() {
                 key={m.id}
                 m={m}
                 onEdit={() => setEditing(m)}
-                onPin={() =>
-                  setItems((cur) =>
-                    cur.map((c) =>
-                      c.id === m.id ? { ...c, pinned: !c.pinned } : c,
-                    ),
-                  )
-                }
-                onDelete={() =>
-                  setItems((cur) => cur.filter((c) => c.id !== m.id))
-                }
+                onPin={() => togglePin(m)}
+                onDelete={() => remove(m)}
               />
             ))}
           </ul>
@@ -199,8 +225,8 @@ export default function MemoryPage() {
                 </button>
                 <ButtonPrimary
                   onClick={save}
+                  size="sm"
                   disabled={!editing.topic.trim() || !editing.body.trim()}
-                  className="text-xs px-3 py-1.5"
                 >
                   Save
                 </ButtonPrimary>

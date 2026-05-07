@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import {
   Card,
@@ -10,8 +10,16 @@ import {
   PageTitle,
   Pill,
   ButtonPrimary,
+  ButtonGhost,
 } from "@/components/ui/primitives";
-import { Webhook, Plus, Trash2, Play, CheckCircle2, XCircle } from "lucide-react";
+import {
+  Webhook,
+  Plus,
+  Trash2,
+  Play,
+  CheckCircle2,
+  XCircle,
+} from "lucide-react";
 import { toast } from "@/components/toast-host";
 
 const ALL_EVENTS = [
@@ -32,64 +40,72 @@ type Endpoint = {
   url: string;
   events: string[];
   status: EndpointStatus;
-  lastDelivery: string | null;
-  successRate: number;
+  last_delivery_at: string | null;
+  last_status_code: number | null;
+  success_count: number;
+  failure_count: number;
 };
-
-const SEED: Endpoint[] = [
-  {
-    id: "wh-slack",
-    name: "Slack #ops",
-    url: "https://hooks.slack.com/services/T0/B0/abc",
-    events: ["task.completed", "approval.decided", "agent.paused"],
-    status: "ok",
-    lastDelivery: "12m ago",
-    successRate: 100,
-  },
-  {
-    id: "wh-zapier",
-    name: "Zapier · sheets backup",
-    url: "https://hooks.zapier.com/hooks/catch/123/abc",
-    events: ["artifact.created"],
-    status: "failing",
-    lastDelivery: "3h ago",
-    successRate: 64,
-  },
-];
 
 export default function WebhooksPage() {
   const params = useParams<{ org: string }>();
-  const [items, setItems] = useState<Endpoint[]>(SEED);
+  const [items, setItems] = useState<Endpoint[]>([]);
+  const [loading, setLoading] = useState(true);
   const [adding, setAdding] = useState(false);
   const [draft, setDraft] = useState<{
     name: string;
     url: string;
     events: string[];
   }>({ name: "", url: "", events: ["task.completed"] });
+  const [busy, setBusy] = useState(false);
 
-  function save() {
-    if (!draft.name || !draft.url.startsWith("https://")) return;
-    setItems((c) => [
-      ...c,
-      {
-        id: `wh-${Date.now()}`,
-        name: draft.name,
-        url: draft.url,
-        events: draft.events,
-        status: "ok",
-        lastDelivery: null,
-        successRate: 100,
-      },
-    ]);
+  useEffect(() => {
+    void fetch(`/api/${params.org}/webhooks`)
+      .then((r) => r.json())
+      .then((j: { items: Endpoint[] }) => {
+        setItems(j.items);
+        setLoading(false);
+      });
+  }, [params.org]);
+
+  async function save() {
+    if (!draft.name || !draft.url.startsWith("https://") || busy) return;
+    setBusy(true);
+    const res = await fetch(`/api/${params.org}/webhooks`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(draft),
+    });
+    setBusy(false);
+    if (!res.ok) {
+      toast("Failed to create webhook", "warn");
+      return;
+    }
+    const j = (await res.json()) as { item: Endpoint };
+    setItems((c) => [j.item, ...c]);
     setDraft({ name: "", url: "", events: ["task.completed"] });
     setAdding(false);
     toast("Webhook saved", "ok");
   }
 
-  function ping(id: string) {
-    void params.org;
-    toast("Test event delivered · 200 OK", "ok");
-    void id;
+  async function ping(id: string) {
+    const res = await fetch(`/api/${params.org}/webhooks/${id}/ping`, {
+      method: "POST",
+    });
+    const j = (await res.json()) as { ok: boolean; status: number };
+    toast(
+      j.ok
+        ? `Test event delivered · ${j.status}`
+        : `Test event failed · ${j.status || "no response"}`,
+      j.ok ? "ok" : "warn",
+    );
+    void fetch(`/api/${params.org}/webhooks`)
+      .then((r) => r.json())
+      .then((data: { items: Endpoint[] }) => setItems(data.items));
+  }
+
+  async function destroy(id: string) {
+    setItems((c) => c.filter((x) => x.id !== id));
+    await fetch(`/api/${params.org}/webhooks/${id}`, { method: "DELETE" });
   }
 
   return (
@@ -103,7 +119,8 @@ export default function WebhooksPage() {
             </PageTitle>
             <Hint>
               Outgoing HTTPS endpoints that receive workspace events. Each
-              delivery is signed with HMAC-SHA256 over the body.
+              delivery is signed with HMAC-SHA256 in the{" "}
+              <code className="font-mono">X-THEFT-Signature</code> header.
             </Hint>
           </div>
           <ButtonPrimary
@@ -121,9 +138,7 @@ export default function WebhooksPage() {
               <div className="space-y-2 mt-2">
                 <input
                   value={draft.name}
-                  onChange={(e) =>
-                    setDraft({ ...draft, name: e.target.value })
-                  }
+                  onChange={(e) => setDraft({ ...draft, name: e.target.value })}
                   placeholder="Name (e.g. Slack · #ops)"
                   className="w-full h-9 rounded-md border border-line bg-paper px-3 text-sm focus:outline-none focus:border-line-strong"
                 />
@@ -149,7 +164,9 @@ export default function WebhooksPage() {
                           })
                         }
                         className={`text-2xs uppercase tracking-wider rounded px-2 py-0.5 ${
-                          on ? "bg-ink text-paper" : "bg-cream text-ink-muted hover:bg-line"
+                          on
+                            ? "bg-ink text-paper"
+                            : "bg-cream text-ink-muted hover:bg-line"
                         }`}
                       >
                         {e.label}
@@ -158,18 +175,17 @@ export default function WebhooksPage() {
                   })}
                 </div>
                 <div className="flex justify-end gap-2 pt-2">
-                  <button
-                    onClick={() => setAdding(false)}
-                    className="text-xs rounded-md border border-line bg-paper px-3 py-1.5 hover:border-line-strong"
-                  >
+                  <ButtonGhost size="sm" onClick={() => setAdding(false)}>
                     Cancel
-                  </button>
+                  </ButtonGhost>
                   <ButtonPrimary
                     onClick={save}
-                    disabled={!draft.name || !draft.url.startsWith("https://")}
-                    className="text-xs px-3 py-1.5"
+                    disabled={
+                      !draft.name || !draft.url.startsWith("https://") || busy
+                    }
+                    size="sm"
                   >
-                    Save endpoint
+                    {busy ? "Saving…" : "Save endpoint"}
                   </ButtonPrimary>
                 </div>
               </div>
@@ -180,7 +196,12 @@ export default function WebhooksPage() {
         <Card>
           <CardBody className="p-0">
             <ul className="divide-y divide-line/60">
-              {items.length === 0 && (
+              {loading && (
+                <li className="px-4 py-6 text-sm text-ink-muted text-center">
+                  Loading…
+                </li>
+              )}
+              {!loading && items.length === 0 && (
                 <li className="px-4 py-6 text-sm text-ink-muted text-center">
                   No webhooks yet. Pipe workspace events to Slack, Zapier, or
                   your own listener.
@@ -191,9 +212,7 @@ export default function WebhooksPage() {
                   key={e.id}
                   e={e}
                   onPing={() => ping(e.id)}
-                  onDelete={() =>
-                    setItems((c) => c.filter((x) => x.id !== e.id))
-                  }
+                  onDelete={() => destroy(e.id)}
                 />
               ))}
             </ul>
@@ -215,6 +234,8 @@ function EndpointRow({
 }) {
   const tone =
     e.status === "ok" ? "sage" : e.status === "failing" ? "brick" : "neutral";
+  const total = e.success_count + e.failure_count;
+  const successRate = total ? Math.round((e.success_count / total) * 100) : 100;
   return (
     <li className="px-4 py-3 grid grid-cols-12 items-start gap-2">
       <div className="col-span-7 min-w-0">
@@ -232,18 +253,20 @@ function EndpointRow({
         </div>
         <div className="flex flex-wrap gap-1 mt-1">
           {e.events.map((ev) => (
-            <span
-              key={ev}
-              className="text-2xs rounded bg-cream text-ink-muted px-1.5 py-0.5 font-mono"
-            >
+            <Pill key={ev} className="font-mono normal-case tracking-normal">
               {ev}
-            </span>
+            </Pill>
           ))}
         </div>
       </div>
       <div className="col-span-3 text-2xs text-ink-soft">
-        <div>{e.successRate}% success</div>
-        <div>last {e.lastDelivery ?? "never"}</div>
+        <div>{successRate}% success</div>
+        <div>
+          last{" "}
+          {e.last_delivery_at
+            ? new Date(e.last_delivery_at).toLocaleString()
+            : "never"}
+        </div>
       </div>
       <div className="col-span-2 flex items-center justify-end gap-1">
         <button

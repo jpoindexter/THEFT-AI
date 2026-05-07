@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import {
@@ -28,47 +28,17 @@ type Scope = "engineer" | "marketing" | "finance" | "any";
 
 type Rule = {
   id: string;
+  organization_id: string;
   name: string;
   scope: Scope;
   pattern: string;
-  cap: number;
+  cap_per_day: number;
   action: Action;
   enabled: boolean;
   hits: number;
+  position: number;
+  created_at: string;
 };
-
-const SEED: Rule[] = [
-  {
-    id: "r1",
-    name: "Reversible doc edits",
-    scope: "marketing",
-    pattern: "kind:artifact AND name~='draft' AND mode=execute",
-    cap: 5,
-    action: "auto-approve",
-    enabled: true,
-    hits: 18,
-  },
-  {
-    id: "r2",
-    name: "Block destructive SQL",
-    scope: "engineer",
-    pattern: "tool:run_sql AND query~='drop table|truncate'",
-    cap: 0,
-    action: "auto-decline",
-    enabled: true,
-    hits: 2,
-  },
-  {
-    id: "r3",
-    name: "Always-human · finance > $500",
-    scope: "finance",
-    pattern: "amount>500",
-    cap: 0,
-    action: "require-human",
-    enabled: true,
-    hits: 7,
-  },
-];
 
 const ACTION_TONE: Record<Action, "sage" | "brick" | "mustard"> = {
   "auto-approve": "sage",
@@ -78,7 +48,71 @@ const ACTION_TONE: Record<Action, "sage" | "brick" | "mustard"> = {
 
 export default function ApprovalRulesPage() {
   const params = useParams<{ org: string }>();
-  const [rules, setRules] = useState<Rule[]>(SEED);
+  const [rules, setRules] = useState<Rule[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    void fetch(`/api/${params.org}/approvals/rules`)
+      .then((r) => r.json())
+      .then((j: { rules: Rule[] }) => {
+        setRules(j.rules);
+        setLoading(false);
+      });
+  }, [params.org]);
+
+  async function persist(r: Rule) {
+    const res = await fetch(`/api/${params.org}/approvals/rules`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        id: r.id,
+        name: r.name,
+        scope: r.scope,
+        pattern: r.pattern,
+        cap_per_day: r.cap_per_day,
+        action: r.action,
+        enabled: r.enabled,
+        position: r.position,
+      }),
+    });
+    if (!res.ok) toast("Save failed", "warn");
+  }
+
+  function patch(id: string, p: Partial<Rule>) {
+    setRules((c) => {
+      const next = c.map((x) => (x.id === id ? { ...x, ...p } : x));
+      const updated = next.find((x) => x.id === id);
+      if (updated) void persist(updated);
+      return next;
+    });
+  }
+
+  async function remove(r: Rule) {
+    setRules((c) => c.filter((x) => x.id !== r.id));
+    await fetch(`/api/${params.org}/approvals/rules/${r.id}`, {
+      method: "DELETE",
+    });
+    toast(`Rule "${r.name}" removed`, "warn");
+  }
+
+  async function add() {
+    const position = rules.length;
+    const res = await fetch(`/api/${params.org}/approvals/rules`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        name: "New rule",
+        scope: "any",
+        pattern: "",
+        cap_per_day: 1,
+        action: "auto-approve",
+        enabled: false,
+        position,
+      }),
+    });
+    const j = (await res.json()) as { rule: Rule };
+    setRules((c) => [...c, j.rule]);
+  }
 
   return (
     <div className="absolute inset-0 overflow-y-auto p-6">
@@ -102,24 +136,7 @@ export default function ApprovalRulesPage() {
               ever sees the request.
             </Hint>
           </div>
-          <ButtonPrimary
-            onClick={() =>
-              setRules((c) => [
-                ...c,
-                {
-                  id: `r${Date.now()}`,
-                  name: "New rule",
-                  scope: "any",
-                  pattern: "",
-                  cap: 1,
-                  action: "auto-approve",
-                  enabled: false,
-                  hits: 0,
-                },
-              ])
-            }
-            className="inline-flex items-center gap-1"
-          >
+          <ButtonPrimary onClick={add} className="inline-flex items-center gap-1">
             <Plus className="size-3.5" /> New rule
           </ButtonPrimary>
         </header>
@@ -165,20 +182,23 @@ export default function ApprovalRulesPage() {
         <Card>
           <CardBody className="p-0">
             <ul className="divide-y divide-line/60">
+              {loading && (
+                <li className="px-4 py-6 text-sm text-ink-muted text-center">
+                  Loading…
+                </li>
+              )}
+              {!loading && rules.length === 0 && (
+                <li className="px-4 py-6 text-sm text-ink-muted text-center">
+                  No rules yet. Add one to start auto-resolving approvals.
+                </li>
+              )}
               {rules.map((r, i) => (
                 <RuleRow
                   key={r.id}
                   r={r}
                   position={i + 1}
-                  onChange={(patch) =>
-                    setRules((c) =>
-                      c.map((x) => (x.id === r.id ? { ...x, ...patch } : x)),
-                    )
-                  }
-                  onDelete={() => {
-                    setRules((c) => c.filter((x) => x.id !== r.id));
-                    toast(`Rule "${r.name}" removed`, "warn");
-                  }}
+                  onChange={(p) => patch(r.id, p)}
+                  onDelete={() => remove(r)}
                 />
               ))}
             </ul>
@@ -235,7 +255,7 @@ function RuleRow({
         <div className="flex items-center gap-1">
           <select
             value={r.scope}
-            onChange={(e) => onChange({ scope: e.target.value as Scope })}
+            onChange={(e) => onChange({ scope: e.target.value as Rule["scope"] })}
             className="h-6 rounded-md border border-line bg-paper px-1 text-2xs"
           >
             <option value="any">Any agent</option>
@@ -245,7 +265,9 @@ function RuleRow({
           </select>
           <select
             value={r.action}
-            onChange={(e) => onChange({ action: e.target.value as Action })}
+            onChange={(e) =>
+              onChange({ action: e.target.value as Rule["action"] })
+            }
             className="h-6 rounded-md border border-line bg-paper px-1 text-2xs"
           >
             <option value="auto-approve">Auto-approve</option>
@@ -255,8 +277,17 @@ function RuleRow({
           <Pill tone={ACTION_TONE[r.action]}>{r.hits} hits</Pill>
         </div>
       </div>
-      <div className="col-span-3 text-2xs text-ink-soft mt-1">
-        cap {r.cap}/day
+      <div className="col-span-3 inline-flex items-center gap-1 text-2xs text-ink-soft mt-1">
+        <span>cap</span>
+        <input
+          type="number"
+          value={r.cap_per_day}
+          onChange={(e) =>
+            onChange({ cap_per_day: Number(e.target.value) || 0 })
+          }
+          className="w-14 h-6 rounded-md border border-line bg-paper px-1 text-2xs"
+        />
+        <span>/day</span>
       </div>
       <div className="col-span-1 flex items-center justify-end gap-1">
         <input

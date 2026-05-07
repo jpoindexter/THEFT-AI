@@ -134,6 +134,58 @@ export type TechTreeNode = {
   dependencies: string[]; // depends_on node ids
 };
 
+export type MemoryItem = {
+  id: string;
+  organization_id: string;
+  topic: string;
+  body: string;
+  source: "task" | "import" | "manual" | "integration";
+  pinned: boolean;
+  created_at: string;
+  updated_at: string;
+};
+
+export type ApiKey = {
+  id: string;
+  organization_id: string;
+  name: string;
+  scope: "read" | "write" | "admin";
+  prefix: string; // first 8 chars for display
+  hash: string; // sha256 of full secret
+  last_used_at: string | null;
+  created_at: string;
+  revoked_at: string | null;
+};
+
+export type Webhook = {
+  id: string;
+  organization_id: string;
+  name: string;
+  url: string;
+  events: string[];
+  status: "ok" | "failing" | "paused";
+  last_delivery_at: string | null;
+  last_status_code: number | null;
+  success_count: number;
+  failure_count: number;
+  secret: string; // HMAC secret
+  created_at: string;
+};
+
+export type ApprovalRule = {
+  id: string;
+  organization_id: string;
+  name: string;
+  scope: "engineer" | "marketing" | "finance" | "any";
+  pattern: string;
+  cap_per_day: number;
+  action: "auto-approve" | "auto-decline" | "require-human";
+  enabled: boolean;
+  hits: number;
+  position: number; // sort order; first match wins
+  created_at: string;
+};
+
 export const db = {
   // --- organizations ---
   async listOrgs(): Promise<Org[]> {
@@ -315,6 +367,156 @@ export const db = {
       completed_at: null,
     }));
     await writeTable("tech_tree_status", [...all, ...seeded]);
+  },
+
+  // --- memory ---
+  async listMemory(orgId: string): Promise<MemoryItem[]> {
+    const all = await readTable<MemoryItem>("memory_items");
+    return all
+      .filter((m) => m.organization_id === orgId)
+      .sort((a, b) => b.updated_at.localeCompare(a.updated_at));
+  },
+  async upsertMemory(
+    input:
+      | (Omit<MemoryItem, "created_at" | "updated_at"> & { id: string })
+      | (Omit<MemoryItem, "id" | "created_at" | "updated_at">),
+  ): Promise<MemoryItem> {
+    const all = await readTable<MemoryItem>("memory_items");
+    const now = new Date().toISOString();
+    if ("id" in input && all.some((m) => m.id === input.id)) {
+      const updated = all.map((m) =>
+        m.id === input.id ? { ...m, ...input, updated_at: now } : m,
+      );
+      await writeTable("memory_items", updated);
+      return updated.find((m) => m.id === input.id)!;
+    }
+    const created: MemoryItem = {
+      ...(input as Omit<MemoryItem, "id" | "created_at" | "updated_at">),
+      id: "id" in input ? input.id : randomUUID(),
+      created_at: now,
+      updated_at: now,
+    };
+    await writeTable("memory_items", [...all, created]);
+    return created;
+  },
+  async deleteMemory(id: string): Promise<void> {
+    const all = await readTable<MemoryItem>("memory_items");
+    await writeTable(
+      "memory_items",
+      all.filter((m) => m.id !== id),
+    );
+  },
+
+  // --- api keys ---
+  async listApiKeys(orgId: string): Promise<ApiKey[]> {
+    const all = await readTable<ApiKey>("api_keys");
+    return all
+      .filter((k) => k.organization_id === orgId)
+      .sort((a, b) => b.created_at.localeCompare(a.created_at));
+  },
+  async createApiKey(
+    input: Omit<ApiKey, "id" | "created_at" | "last_used_at" | "revoked_at">,
+  ): Promise<ApiKey> {
+    const all = await readTable<ApiKey>("api_keys");
+    const key: ApiKey = {
+      ...input,
+      id: randomUUID(),
+      created_at: new Date().toISOString(),
+      last_used_at: null,
+      revoked_at: null,
+    };
+    await writeTable("api_keys", [...all, key]);
+    return key;
+  },
+  async revokeApiKey(id: string): Promise<void> {
+    const all = await readTable<ApiKey>("api_keys");
+    const now = new Date().toISOString();
+    await writeTable(
+      "api_keys",
+      all.map((k) => (k.id === id ? { ...k, revoked_at: now } : k)),
+    );
+  },
+
+  // --- webhooks ---
+  async listWebhooks(orgId: string): Promise<Webhook[]> {
+    const all = await readTable<Webhook>("webhooks");
+    return all
+      .filter((w) => w.organization_id === orgId)
+      .sort((a, b) => b.created_at.localeCompare(a.created_at));
+  },
+  async createWebhook(
+    input: Omit<
+      Webhook,
+      | "id"
+      | "created_at"
+      | "last_delivery_at"
+      | "last_status_code"
+      | "success_count"
+      | "failure_count"
+    >,
+  ): Promise<Webhook> {
+    const all = await readTable<Webhook>("webhooks");
+    const wh: Webhook = {
+      ...input,
+      id: randomUUID(),
+      created_at: new Date().toISOString(),
+      last_delivery_at: null,
+      last_status_code: null,
+      success_count: 0,
+      failure_count: 0,
+    };
+    await writeTable("webhooks", [...all, wh]);
+    return wh;
+  },
+  async updateWebhook(id: string, patch: Partial<Webhook>): Promise<void> {
+    const all = await readTable<Webhook>("webhooks");
+    await writeTable(
+      "webhooks",
+      all.map((w) => (w.id === id ? { ...w, ...patch } : w)),
+    );
+  },
+  async deleteWebhook(id: string): Promise<void> {
+    const all = await readTable<Webhook>("webhooks");
+    await writeTable("webhooks", all.filter((w) => w.id !== id));
+  },
+
+  // --- approval rules ---
+  async listApprovalRules(orgId: string): Promise<ApprovalRule[]> {
+    const all = await readTable<ApprovalRule>("approval_rules");
+    return all
+      .filter((r) => r.organization_id === orgId)
+      .sort((a, b) => a.position - b.position);
+  },
+  async upsertApprovalRule(
+    input: Omit<ApprovalRule, "id" | "created_at" | "hits"> & {
+      id?: string;
+      hits?: number;
+    },
+  ): Promise<ApprovalRule> {
+    const all = await readTable<ApprovalRule>("approval_rules");
+    const now = new Date().toISOString();
+    if (input.id && all.some((r) => r.id === input.id)) {
+      const updated = all.map((r) =>
+        r.id === input.id ? { ...r, ...input } : r,
+      );
+      await writeTable("approval_rules", updated);
+      return updated.find((r) => r.id === input.id)!;
+    }
+    const rule: ApprovalRule = {
+      ...input,
+      id: input.id ?? randomUUID(),
+      hits: input.hits ?? 0,
+      created_at: now,
+    };
+    await writeTable("approval_rules", [...all, rule]);
+    return rule;
+  },
+  async deleteApprovalRule(id: string): Promise<void> {
+    const all = await readTable<ApprovalRule>("approval_rules");
+    await writeTable(
+      "approval_rules",
+      all.filter((r) => r.id !== id),
+    );
   },
 };
 

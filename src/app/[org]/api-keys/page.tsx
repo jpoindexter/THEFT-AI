@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import {
   Card,
@@ -10,72 +10,60 @@ import {
   PageTitle,
   Pill,
   ButtonPrimary,
+  ButtonGhost,
 } from "@/components/ui/primitives";
 import { KeyRound, Plus, Copy, Check, Trash2 } from "lucide-react";
 import { toast } from "@/components/toast-host";
 
 type Scope = "read" | "write" | "admin";
+const SCOPES: Scope[] = ["read", "write", "admin"];
 
-type Key = {
+type KeyView = {
   id: string;
   name: string;
   prefix: string;
   scope: Scope;
-  created: string;
-  lastUsed: string | null;
+  created_at: string;
+  last_used_at: string | null;
+  revoked_at?: string | null;
 };
-
-const SCOPES: Scope[] = ["read", "write", "admin"];
-
-const SEED: Key[] = [
-  {
-    id: "k_a01",
-    name: "Vercel CI",
-    prefix: "tk_live_a01b",
-    scope: "write",
-    created: "2026-04-12",
-    lastUsed: "2m ago",
-  },
-  {
-    id: "k_b29",
-    name: "Local dev",
-    prefix: "tk_live_b29f",
-    scope: "admin",
-    created: "2026-03-22",
-    lastUsed: "1h ago",
-  },
-  {
-    id: "k_c40",
-    name: "Read-only audit export",
-    prefix: "tk_live_c40e",
-    scope: "read",
-    created: "2026-02-08",
-    lastUsed: null,
-  },
-];
 
 export default function ApiKeysPage() {
   const params = useParams<{ org: string }>();
-  const [keys, setKeys] = useState<Key[]>(SEED);
+  const [keys, setKeys] = useState<KeyView[]>([]);
+  const [loading, setLoading] = useState(true);
   const [drafting, setDrafting] = useState(false);
   const [name, setName] = useState("");
   const [scope, setScope] = useState<Scope>("read");
   const [reveal, setReveal] = useState<{ id: string; full: string } | null>(null);
   const [copied, setCopied] = useState(false);
+  const [busy, setBusy] = useState(false);
 
-  function create() {
-    if (!name.trim()) return;
-    const full = `tk_live_${Math.random().toString(36).slice(2, 18)}`;
-    const k: Key = {
-      id: full.slice(0, 8),
-      name,
-      prefix: full.slice(0, 12),
-      scope,
-      created: new Date().toISOString().slice(0, 10),
-      lastUsed: null,
-    };
-    setKeys((cur) => [k, ...cur]);
-    setReveal({ id: k.id, full });
+  useEffect(() => {
+    void fetch(`/api/${params.org}/api-keys`)
+      .then((r) => r.json())
+      .then((j: { keys: KeyView[] }) => {
+        setKeys(j.keys.filter((k) => !k.revoked_at));
+        setLoading(false);
+      });
+  }, [params.org]);
+
+  async function create() {
+    if (!name.trim() || busy) return;
+    setBusy(true);
+    const res = await fetch(`/api/${params.org}/api-keys`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name, scope }),
+    });
+    setBusy(false);
+    if (!res.ok) {
+      toast("Failed to create key", "warn");
+      return;
+    }
+    const j = (await res.json()) as { key: KeyView; secret: string };
+    setKeys((cur) => [j.key, ...cur]);
+    setReveal({ id: j.key.id, full: j.secret });
     setName("");
     setDrafting(false);
     toast(`API key created — copy it now, we won't show it again`, "warn");
@@ -88,8 +76,9 @@ export default function ApiKeysPage() {
     setTimeout(() => setCopied(false), 1200);
   }
 
-  function destroy(id: string) {
+  async function destroy(id: string) {
     setKeys((cur) => cur.filter((k) => k.id !== id));
+    await fetch(`/api/${params.org}/api-keys/${id}`, { method: "DELETE" });
     toast("API key revoked", "warn");
   }
 
@@ -149,22 +138,21 @@ export default function ApiKeysPage() {
                 all of write plus billing + members.
               </Hint>
               <div className="flex justify-end gap-2 mt-3">
-                <button
-                  type="button"
+                <ButtonGhost
+                  size="sm"
                   onClick={() => {
                     setDrafting(false);
                     setName("");
                   }}
-                  className="text-xs rounded-md border border-line bg-paper px-3 py-1.5 hover:border-line-strong"
                 >
                   Cancel
-                </button>
+                </ButtonGhost>
                 <ButtonPrimary
                   onClick={create}
-                  disabled={!name.trim()}
-                  className="text-xs px-3 py-1.5"
+                  disabled={!name.trim() || busy}
+                  size="sm"
                 >
-                  Create
+                  {busy ? "Creating…" : "Create"}
                 </ButtonPrimary>
               </div>
             </CardBody>
@@ -181,31 +169,23 @@ export default function ApiKeysPage() {
                 <code className="flex-1 font-mono text-xs truncate">
                   {reveal.full}
                 </code>
-                <button
-                  type="button"
-                  onClick={copy}
-                  className="text-xs inline-flex items-center gap-1 rounded-md border border-line px-2 py-0.5 hover:border-line-strong"
-                >
+                <ButtonGhost size="sm" onClick={copy}>
                   {copied ? (
                     <Check className="size-3 text-sage-ink" />
                   ) : (
                     <Copy className="size-3" />
                   )}
                   {copied ? "Copied" : "Copy"}
-                </button>
+                </ButtonGhost>
               </div>
               <Hint className="text-mustard-ink/80">
-                We don't store the full token. After you close this card you'll
-                only see the prefix.
+                We hash the secret on the server. After you close this card
+                you&apos;ll only see the prefix.
               </Hint>
               <div className="flex justify-end mt-2">
-                <button
-                  type="button"
-                  onClick={() => setReveal(null)}
-                  className="text-xs rounded-md bg-ink text-paper px-3 py-1"
-                >
+                <ButtonPrimary size="sm" onClick={() => setReveal(null)}>
                   Done
-                </button>
+                </ButtonPrimary>
               </div>
             </CardBody>
           </Card>
@@ -214,8 +194,10 @@ export default function ApiKeysPage() {
         <Card>
           <CardBody>
             <Eyebrow>Keys ({keys.length})</Eyebrow>
-            {keys.length === 0 ? (
-              <Hint>No keys yet.</Hint>
+            {loading ? (
+              <Hint>Loading…</Hint>
+            ) : keys.length === 0 ? (
+              <Hint>No keys yet. Mint one above.</Hint>
             ) : (
               <ul className="divide-y divide-line/60 mt-2">
                 {keys.map((k) => (
@@ -230,14 +212,15 @@ export default function ApiKeysPage() {
   );
 }
 
-function KeyRow({ k, onRevoke }: { k: Key; onRevoke: () => void }) {
+function KeyRow({ k, onRevoke }: { k: KeyView; onRevoke: () => void }) {
   return (
     <li className="py-2 flex items-center justify-between gap-3">
       <div className="min-w-0">
         <div className="text-sm font-medium tracking-tight">{k.name}</div>
         <div className="text-xs text-ink-muted font-mono">{k.prefix}…</div>
         <div className="text-2xs text-ink-soft mt-0.5">
-          created {k.created} · last used {k.lastUsed ?? "never"}
+          created {k.created_at.slice(0, 10)} · last used{" "}
+          {k.last_used_at ? k.last_used_at.slice(0, 16) : "never"}
         </div>
       </div>
       <div className="flex items-center gap-2 shrink-0">
