@@ -1,4 +1,5 @@
 import { Pill } from "@/components/ui/primitives";
+import { ArrowLeft } from "lucide-react";
 
 export type TechNode = {
   id: string;
@@ -18,10 +19,12 @@ export function TreeCard({
   n,
   selected,
   onSelect,
+  depTitles = [],
 }: {
   n: TechNode;
   selected: boolean;
   onSelect: () => void;
+  depTitles?: string[];
 }) {
   const isLocked = n.status === "locked";
   const isComplete = n.status === "complete";
@@ -50,6 +53,14 @@ export function TreeCard({
       <div className="text-2xs text-ink-muted mt-1">
         {n.agent_can_do_this ? "Agent can do this" : "Needs your input"}
       </div>
+      {depTitles.length > 0 && (
+        <div className="mt-2 pt-1.5 border-t border-line/40 flex items-start gap-1 text-2xs text-ink-soft">
+          <ArrowLeft className="size-3 shrink-0 mt-0.5" />
+          <span className="leading-snug">
+            after <span className="text-ink-muted">{depTitles.join(", ")}</span>
+          </span>
+        </div>
+      )}
     </button>
   );
 }

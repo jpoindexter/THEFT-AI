@@ -25,6 +25,7 @@ export default function TechTreeBoard({
   nodes: TechNode[];
 }) {
   const [selected, setSelected] = useState<TechNode | null>(null);
+  const titlesById = new Map(nodes.map((n) => [n.id, n.title]));
 
   return (
     <div className="absolute inset-0 bg-cream flex flex-col">
@@ -39,6 +40,7 @@ export default function TechTreeBoard({
                 .filter((n) => n.stage === stage.key)
                 .sort((a, b) => (a.position ?? 0) - (b.position ?? 0))}
               selectedId={selected?.id ?? null}
+              titlesById={titlesById}
               onSelect={setSelected}
             />
           ))}
@@ -47,6 +49,7 @@ export default function TechTreeBoard({
       {selected && (
         <DetailDrawer
           n={selected}
+          allNodes={nodes}
           onClose={() => setSelected(null)}
         />
       )}
@@ -74,11 +77,13 @@ function StageColumn({
   label,
   nodes,
   selectedId,
+  titlesById,
   onSelect,
 }: {
   label: string;
   nodes: TechNode[];
   selectedId: string | null;
+  titlesById: Map<string, string>;
   onSelect: (n: TechNode) => void;
 }) {
   if (nodes.length === 0) return null;
@@ -91,6 +96,9 @@ function StageColumn({
           n={n}
           selected={selectedId === n.id}
           onSelect={() => onSelect(n)}
+          depTitles={n.dependencies
+            .map((id) => titlesById.get(id))
+            .filter((t): t is string => Boolean(t))}
         />
       ))}
     </div>
@@ -99,12 +107,19 @@ function StageColumn({
 
 function DetailDrawer({
   n,
+  allNodes,
   onClose,
 }: {
   n: TechNode;
+  allNodes: TechNode[];
   onClose: () => void;
 }) {
   const params = useParams<{ org: string }>();
+  const deps = n.dependencies
+    .map((id) => allNodes.find((x) => x.id === id))
+    .filter((x): x is TechNode => Boolean(x));
+  const unblocks = allNodes.filter((x) => x.dependencies.includes(n.id));
+
   return (
     <aside className="absolute right-0 top-[57px] bottom-0 w-80 bg-paper border-l border-line/70 p-5 overflow-y-auto">
       <header className="flex items-start justify-between mb-5">
@@ -117,7 +132,8 @@ function DetailDrawer({
         <button
           onClick={onClose}
           className="text-ink-soft hover:text-ink"
-          aria-label="Close" title="Close"
+          aria-label="Close"
+          title="Close"
         >
           <X className="size-4" />
         </button>
@@ -127,6 +143,10 @@ function DetailDrawer({
       )}
       {n.how_to_move_forward && (
         <Section label="How to move this forward" body={n.how_to_move_forward} />
+      )}
+      {deps.length > 0 && <DepList label="After" items={deps} org={params.org} />}
+      {unblocks.length > 0 && (
+        <DepList label="Unblocks" items={unblocks} org={params.org} />
       )}
       <ButtonPrimary
         className="mt-4 w-full"
@@ -141,6 +161,37 @@ function DetailDrawer({
         Open detail <ArrowUpRight className="size-3" />
       </Link>
     </aside>
+  );
+}
+
+function DepList({
+  label,
+  items,
+  org,
+}: {
+  label: string;
+  items: TechNode[];
+  org: string;
+}) {
+  return (
+    <div className="mb-5">
+      <Eyebrow className="mb-1.5">{label}</Eyebrow>
+      <ul className="space-y-1">
+        {items.map((d) => (
+          <li key={d.id}>
+            <Link
+              href={`/${org}/roadmap/${d.slug}`}
+              className="block rounded-md border border-line/60 bg-cream px-2 py-1 text-xs hover:border-line-strong"
+            >
+              <span className="text-ink">{d.title}</span>
+              <span className="ml-1 text-2xs text-ink-soft uppercase tracking-wider">
+                · {d.status}
+              </span>
+            </Link>
+          </li>
+        ))}
+      </ul>
+    </div>
   );
 }
 
