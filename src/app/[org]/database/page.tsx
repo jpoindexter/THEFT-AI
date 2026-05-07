@@ -1,17 +1,18 @@
 import { Table2 } from "lucide-react";
 import Link from "next/link";
 
-const TABLES = [
-  { name: "users", schema: "public" },
-  { name: "subscriptions", schema: "public" },
-  { name: "tasks", schema: "public" },
+const STORE_TABLES = [
+  { name: "organizations", schema: "public" },
+  { name: "departments", schema: "public" },
   { name: "agents", schema: "public" },
+  { name: "tasks", schema: "public" },
   { name: "artifacts", schema: "public" },
-  { name: "identities", schema: "auth" },
-  { name: "audit_log_entries", schema: "auth" },
-  { name: "mfa_factors", schema: "auth" },
-  { name: "oauth_authorizations", schema: "auth" },
-  { name: "flow_state", schema: "auth" },
+  { name: "cofounder_messages", schema: "public" },
+  { name: "memory_items", schema: "public" },
+  { name: "api_keys", schema: "public" },
+  { name: "webhooks", schema: "public" },
+  { name: "approval_rules", schema: "public" },
+  { name: "tech_tree_status", schema: "public" },
 ];
 
 export default async function DatabasePage({
@@ -28,36 +29,21 @@ export default async function DatabasePage({
           Table Editor
         </h1>
         <p className="text-sm text-ink-muted">
-          View and manage the data stored in your app.
+          View and manage the data stored in your workspace.
         </p>
       </header>
       <div className="grid grid-cols-[260px_1fr] gap-3">
         <aside className="rounded-lg border border-line/70 bg-paper p-3 space-y-1.5 text-sm">
-          <div className="space-y-1.5">
-            <select className="w-full rounded-md border border-line bg-paper px-2 py-1 text-sm">
-              <option>prod</option>
-              <option>staging</option>
-            </select>
-            <select className="w-full rounded-md border border-line bg-paper px-2 py-1 text-sm">
-              <option>All schemas</option>
-              <option>public</option>
-              <option>auth</option>
-            </select>
-          </div>
-          <div className="border-t border-line/70 my-2" />
           <div className="text-2xs uppercase tracking-wider text-ink-soft mb-1">
-            Tables
+            Tables ({STORE_TABLES.length})
           </div>
-          <p className="text-xs text-ink-muted">
-            36 tables across 5 schemas
-          </p>
-          {TABLES.map((t) => (
+          {STORE_TABLES.map((t) => (
             <Link
               key={t.name}
               href={`/${org}/database/tables/${t.name}`}
               className="w-full rounded-md px-2 py-1 text-left hover:bg-cream inline-flex items-center justify-between"
             >
-              <span className="font-mono">{t.name}</span>
+              <span className="font-mono text-xs">{t.name}</span>
               <span className="text-2xs uppercase text-ink-soft">
                 {t.schema}
               </span>
@@ -70,8 +56,7 @@ export default async function DatabasePage({
             Select a table
           </div>
           <p className="text-xs text-ink-muted mt-1 max-w-sm">
-            Choose a table from the sidebar to browse rows, filter records, edit
-            cells, or upload CSV data.
+            Choose a table from the sidebar to browse rows.
           </p>
         </main>
       </div>

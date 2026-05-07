@@ -203,6 +203,7 @@ async function executeTool(opts: {
         status: "todo",
         priority: "normal",
         mode: "execute",
+        due_at: null,
         result: null,
       });
       return { ok: true, task_id: task.id };

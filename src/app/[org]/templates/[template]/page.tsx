@@ -194,7 +194,7 @@ export default async function TemplateDetailPage({
 
         <div className="flex justify-end">
           <Link
-            href={`/${org}/tasks/new`}
+            href={`/${org}/tasks/new?template=${template}`}
             className="inline-flex items-center gap-1 rounded-md bg-ink text-paper px-3 py-1.5 text-sm hover:opacity-90"
           >
             <Plus className="size-3.5" /> Use template

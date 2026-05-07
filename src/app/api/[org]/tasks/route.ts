@@ -52,6 +52,7 @@ export async function POST(
     status: "todo",
     priority: "normal",
     mode: body.mode,
+    due_at: null,
     result: null,
   });
   return NextResponse.json({ task });

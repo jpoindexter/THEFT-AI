@@ -79,6 +79,7 @@ export type Task = {
     | "cancelled";
   priority: "low" | "normal" | "high" | "urgent";
   mode: "plan" | "execute";
+  due_at: string | null;
   result: unknown;
   created_at: string;
   updated_at: string;
@@ -186,6 +187,19 @@ export type ApprovalRule = {
   created_at: string;
 };
 
+export type UsageRecord = {
+  id: string;
+  organization_id: string;
+  agent_id: string | null;
+  agent_name: string | null;
+  task_id: string | null;
+  model: string;
+  input_tokens: number;
+  output_tokens: number;
+  cost_usd: number;
+  created_at: string;
+};
+
 export const db = {
   // --- organizations ---
   async listOrgs(): Promise<Org[]> {
@@ -290,6 +304,7 @@ export const db = {
     const now = new Date().toISOString();
     const task: Task = {
       ...input,
+      due_at: input.due_at ?? null,
       id: randomUUID(),
       created_at: now,
       updated_at: now,
@@ -478,6 +493,42 @@ export const db = {
   async deleteWebhook(id: string): Promise<void> {
     const all = await readTable<Webhook>("webhooks");
     await writeTable("webhooks", all.filter((w) => w.id !== id));
+  },
+
+  // --- usage records ---
+  async listUsage(orgId: string, opts?: { since?: string }): Promise<UsageRecord[]> {
+    const all = await readTable<UsageRecord>("usage_records");
+    return all.filter(
+      (u) =>
+        u.organization_id === orgId &&
+        (!opts?.since || u.created_at >= opts.since),
+    );
+  },
+  async recordUsage(input: Omit<UsageRecord, "id" | "created_at">): Promise<UsageRecord> {
+    const all = await readTable<UsageRecord>("usage_records");
+    const record: UsageRecord = {
+      ...input,
+      id: randomUUID(),
+      created_at: new Date().toISOString(),
+    };
+    await writeTable("usage_records", [...all, record]);
+    return record;
+  },
+
+  // --- raw table access (for database viewer) ---
+  async readRaw(tableName: string): Promise<{
+    columns: { name: string; type: string }[];
+    rows: Record<string, unknown>[];
+  }> {
+    const rows = await readTable<Record<string, unknown>>(tableName);
+    if (rows.length === 0) return { columns: [], rows: [] };
+    const columns = Object.keys(rows[0]).map((k) => ({
+      name: k,
+      type: typeof rows[0][k] === "number" ? "number" :
+            typeof rows[0][k] === "boolean" ? "boolean" :
+            Array.isArray(rows[0][k]) ? "array" : "text",
+    }));
+    return { columns, rows };
   },
 
   // --- approval rules ---

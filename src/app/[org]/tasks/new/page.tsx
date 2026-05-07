@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { ArrowLeft, Paperclip, Play } from "lucide-react";
 import {
   Card,
@@ -17,13 +17,26 @@ import SlashMenu from "@/components/slash-menu";
 
 type Agent = { id: string; slug: string; name: string };
 
+const TEMPLATE_PROMPTS: Record<string, { description: string; mode: "plan" | "execute" }> = {
+  "fix-bug": { description: "Reproduce the reported bug locally, root-cause, fix the smallest code path, write a regression test that fails before / passes after, then open a PR.", mode: "plan" },
+  "add-stripe-checkout": { description: "Implement Stripe Checkout for the new pricing page. Cover one-off + subscription with webhooks. Verify the happy path locally before opening a PR.", mode: "plan" },
+  "schema-migration": { description: "Add a Postgres column. Migration must be reversible. If a backfill is needed, ship it as a separate migration and queue it after the schema change.", mode: "plan" },
+  "launch-broadcast": { description: "Draft a launch broadcast for the segment in Library. Three subject variants. Tight body. Decide send-time.", mode: "execute" },
+  "weekly-digest": { description: "Pull shipped work, open PRs, and customer notes from the past week. Compress to a 5-bullet digest. Tone: dry + factual.", mode: "execute" },
+  "monthly-close": { description: "Reconcile Stripe payouts, AWS bill, and outstanding invoices. Post a close note to #finance with variance vs forecast.", mode: "execute" },
+  "user-research": { description: "Schedule a 30-min interview with a target user. Use the JTBD interview template. Transcribe, then synthesise into a JTBD brief in Library.", mode: "plan" },
+};
+
 export default function NewTaskPage() {
   const params = useParams<{ org: string }>();
   const router = useRouter();
-  const [description, setDescription] = useState("");
+  const searchParams = useSearchParams();
+  const templateSlug = searchParams.get("template") ?? "";
+  const templateDefaults = TEMPLATE_PROMPTS[templateSlug];
+  const [description, setDescription] = useState(templateDefaults?.description ?? "");
   const [agents, setAgents] = useState<Agent[]>([]);
   const [agentId, setAgentId] = useState<string>("auto");
-  const [mode, setMode] = useState<"plan" | "execute">("execute");
+  const [mode, setMode] = useState<"plan" | "execute">(templateDefaults?.mode ?? "execute");
   const [busy, setBusy] = useState(false);
   const slashOpen = description.startsWith("/") && !description.includes(" ");
   const slashQ = slashOpen ? description.slice(1) : "";

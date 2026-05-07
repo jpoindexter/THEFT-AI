@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { notFound } from "next/navigation";
 import {
   Card,
   CardBody,
@@ -8,6 +9,7 @@ import {
   Pill,
 } from "@/components/ui/primitives";
 import { CalendarDays, Repeat, Flag, Sparkles } from "lucide-react";
+import { db } from "@/lib/db/store";
 
 type EventKind = "routine" | "task" | "meeting" | "publish";
 type Tone = "sage" | "mustard" | "brick" | "neutral";
@@ -45,12 +47,33 @@ const ICON: Record<EventKind, React.ComponentType<{ className?: string }>> = {
   publish: Sparkles,
 };
 
+const STATUS_TONE: Record<string, "sage" | "mustard" | "brick" | "neutral"> = {
+  done: "sage",
+  in_progress: "mustard",
+  in_review: "mustard",
+  blocked: "brick",
+  todo: "neutral",
+  backlog: "neutral",
+  cancelled: "neutral",
+};
+
 export default async function CalendarPage({
   params,
 }: {
   params: Promise<{ org: string }>;
 }) {
   const { org } = await params;
+  const o = await db.getOrgBySlug(org);
+  if (!o) notFound();
+  const allTasks = await db.listTasks(o.id);
+  const upNext = allTasks
+    .filter((t) => t.status !== "done" && t.status !== "cancelled")
+    .sort((a, b) => {
+      const da = a.due_at ?? a.updated_at;
+      const db2 = b.due_at ?? b.updated_at;
+      return da.localeCompare(db2);
+    })
+    .slice(0, 8);
 
   return (
     <div className="absolute inset-0 overflow-y-auto p-6">
@@ -117,34 +140,30 @@ export default async function CalendarPage({
 
         <Card>
           <CardBody>
-            <Eyebrow>Up next this week</Eyebrow>
-            <ul className="divide-y divide-line/60 mt-2">
-              {EVENTS.filter((e) => e.day >= TODAY_INDEX)
-                .sort(
-                  (a, b) => a.day * 24 + a.hour - (b.day * 24 + b.hour),
-                )
-                .slice(0, 5)
-                .map((e) => {
-                  const Icon = ICON[e.kind];
+            <Eyebrow>Up next</Eyebrow>
+            {upNext.length === 0 ? (
+              <p className="text-sm text-ink-muted mt-2">No active tasks.</p>
+            ) : (
+              <ul className="divide-y divide-line/60 mt-2">
+                {upNext.map((t) => {
+                  const tone = STATUS_TONE[t.status] ?? "neutral";
                   return (
-                    <li
-                      key={e.id}
-                      className="py-2 flex items-center justify-between text-sm"
-                    >
+                    <li key={t.id} className="py-2 flex items-center justify-between text-sm">
                       <span className="inline-flex items-center gap-2 min-w-0">
-                        <Icon className="size-3.5 text-ink-muted shrink-0" />
-                        <span className="truncate">{e.title}</span>
-                        <Pill tone={e.tone}>{e.kind}</Pill>
+                        <Flag className="size-3.5 text-ink-muted shrink-0" />
+                        <span className="truncate">{t.title}</span>
+                        <Pill tone={tone}>{t.status.replace("_", " ")}</Pill>
                       </span>
                       <span className="text-2xs text-ink-soft shrink-0">
-                        {DAYS[e.day]} · {e.hour.toString().padStart(2, "0")}:00 ·
-                        {" "}
-                        {e.who}
+                        {t.due_at
+                          ? new Date(t.due_at).toLocaleDateString("en-US", { month: "short", day: "numeric" })
+                          : t.priority !== "normal" ? t.priority : ""}
                       </span>
                     </li>
                   );
                 })}
-            </ul>
+              </ul>
+            )}
           </CardBody>
         </Card>
       </div>
