@@ -30,6 +30,12 @@ export default async function CostsPage({
               Export CSV
             </a>
             <Link
+              href={`/${org}/costs/breakdown`}
+              className="text-[11px] rounded-md border border-line bg-paper px-2 py-1 hover:border-line-strong"
+            >
+              Breakdown
+            </Link>
+            <Link
               href={`/${org}/costs/budget`}
               className="text-[11px] rounded-md border border-line bg-paper px-2 py-1 hover:border-line-strong"
             >
