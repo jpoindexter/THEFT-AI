@@ -3,12 +3,13 @@
 import Link from "next/link";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Mail, ArrowRight, Code2, Globe } from "lucide-react";
+import { Mail, ArrowRight, Code2, Globe, Wrench } from "lucide-react";
 
 export default function SignInPage() {
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [busy, setBusy] = useState(false);
+  const [devBusy, setDevBusy] = useState(false);
 
   async function send() {
     if (!email.includes("@")) return;
@@ -17,6 +18,13 @@ export default function SignInPage() {
       setBusy(false);
       router.push("/signin/sent");
     }, 600);
+  }
+
+  async function devLogin() {
+    setDevBusy(true);
+    const res = await fetch("/api/dev-login", { method: "POST" });
+    const j = (await res.json()) as { redirect: string };
+    router.replace(j.redirect);
   }
 
   return (
@@ -68,6 +76,26 @@ export default function SignInPage() {
             <a className="underline" href="#">terms</a> and{" "}
             <a className="underline" href="#">privacy policy</a>.
           </p>
+
+          <div className="rounded-md border border-mustard/40 bg-mustard/15 p-3 text-xs">
+            <div className="flex items-center justify-between gap-2">
+              <span className="inline-flex items-center gap-1.5 text-mustard-ink">
+                <Wrench className="size-3.5" /> Dev mode
+              </span>
+              <button
+                type="button"
+                onClick={devLogin}
+                disabled={devBusy}
+                className="text-xs rounded-md bg-ink text-paper px-2 py-1 hover:opacity-90 disabled:opacity-40"
+              >
+                {devBusy ? "Signing in…" : "Continue as dev"}
+              </button>
+            </div>
+            <p className="text-2xs text-ink-muted mt-1">
+              Skips the magic link, drops a dev cookie, and lands on the first
+              workspace. Or bookmark <code className="font-mono">/dev</code>.
+            </p>
+          </div>
         </div>
       </main>
     </div>
