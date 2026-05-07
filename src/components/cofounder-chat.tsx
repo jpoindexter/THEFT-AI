@@ -158,32 +158,32 @@ export default function CofounderChat({
       <div ref={scrollRef} className="flex-1 overflow-y-auto p-4 space-y-4">
         {isEmpty && onboarding && (
           <div className="flex flex-col items-center text-center gap-3 pt-4 pb-2">
-            <Sunflower />
-            <p className="text-[14px] text-ink tracking-tight">
+            <div className="size-8 rounded-full bg-mustard/30" />
+            <p className="text-sm text-ink tracking-tight">
               Tell me more about your company
             </p>
-            <p className="text-[12px] text-ink-muted max-w-[260px] leading-snug">
+            <p className="text-xs text-ink-muted max-w-[260px] leading-snug">
               Answer the brief below or share what you&apos;re building in the chat.
             </p>
           </div>
         )}
         {isEmpty && !onboarding && (
           <div className="flex flex-col items-center justify-center h-full text-center gap-3 px-6">
-            <div className="size-10 rounded-full bg-gradient-to-br from-amber-200 to-amber-500" />
-            <p className="text-[13px] text-ink-muted leading-snug">
+            <div className="size-10 rounded-full  bg-mustard/30" />
+            <p className="text-base text-ink-muted leading-snug">
               Ask Cofounder anything about{" "}
               <span className="text-ink">{organization.slug}</span>.
             </p>
           </div>
         )}
 
-        {messages.map((m, idx) => (
-          <Message key={m.id} m={m} isFirst={idx === 0} />
+        {messages.map((m) => (
+          <Message key={m.id} m={m} />
         ))}
 
         {/* Inline brief widget — appears after user sends first message in onboarding */}
         {showBrief && briefStarted && !briefDone && briefLoading && (
-          <div className="rounded-lg border border-line/80 bg-paper p-4 text-[12px] text-ink-muted inline-flex items-center gap-2">
+          <div className="rounded-lg border border-line/80 bg-paper p-4 text-sm text-ink-muted inline-flex items-center gap-2">
             <span className="size-2 rounded-full bg-mustard animate-pulse" />
             Cofounder is building a brief from your idea…
           </div>
@@ -213,7 +213,7 @@ export default function CofounderChat({
               <button
                 type="button"
                 onClick={() => setActionsOpen((o) => !o)}
-                className="text-[11px] text-ink-muted inline-flex items-center gap-1 hover:text-ink"
+                className="text-xs text-ink-muted inline-flex items-center gap-1 hover:text-ink"
               >
                 <ChevronDown
                   className={`size-3 transition-transform ${actionsOpen ? "" : "-rotate-90"}`}
@@ -221,7 +221,7 @@ export default function CofounderChat({
                 Ran 2 actions
               </button>
               {actionsOpen && (
-                <div className="text-[11px] text-ink-muted space-y-1 pl-4">
+                <div className="text-xs text-ink-muted space-y-1 pl-4">
                   <div className="flex items-center gap-1.5">
                     <span aria-hidden>⏱</span>
                     Waited for the user&apos;s answer
@@ -243,7 +243,7 @@ export default function CofounderChat({
         )}
 
         {busy && !briefStarted && (
-          <div className="text-[10px] uppercase tracking-[0.12em] text-ink-soft">
+          <div className="text-2xs uppercase tracking-[0.12em] text-ink-soft">
             Cofounder is thinking…
           </div>
         )}
@@ -267,7 +267,7 @@ export default function CofounderChat({
                   : "Ask Cofounder anything…"
             }
             rows={2}
-            className="flex-1 resize-none bg-transparent px-3 py-2 text-[13px] focus:outline-none placeholder:text-ink-soft"
+            className="flex-1 resize-none bg-transparent px-3 py-2 text-base focus:outline-none placeholder:text-ink-soft"
           />
           <button
             type="button"
@@ -284,11 +284,11 @@ export default function CofounderChat({
   );
 }
 
-function Message({ m, isFirst }: { m: Msg; isFirst: boolean }) {
+function Message({ m }: { m: Msg }) {
   if (m.role === "user") {
     return (
       <div className="flex justify-end">
-        <div className="max-w-[85%] rounded-lg bg-cream px-3 py-1.5 text-[13px] text-ink">
+        <div className="max-w-[85%] rounded-lg bg-cream px-3 py-1.5 text-base text-ink">
           {m.text}
         </div>
       </div>
@@ -296,18 +296,13 @@ function Message({ m, isFirst }: { m: Msg; isFirst: boolean }) {
   }
   return (
     <div className="space-y-1.5">
-      <div className="inline-flex items-center gap-1.5 text-[11px] text-ink-muted bg-mustard/30/40 px-1.5 py-0.5 rounded-sm">
-        <span className="size-3 rounded-full bg-gradient-to-br from-amber-200 to-amber-400 inline-block" />
+      <div className="inline-flex items-center gap-1.5 text-xs text-ink-muted bg-mustard/30 px-1.5 py-0.5 rounded-sm">
+        <span className="size-3 rounded-full  bg-mustard/30 inline-block" />
         Cofounder
       </div>
-      <div className="text-[13px] leading-relaxed text-ink whitespace-pre-wrap bg-mustard/30/40 px-1 rounded-sm inline">
+      <div className="text-sm leading-relaxed text-ink whitespace-pre-wrap bg-mustard/30 px-1 rounded-sm inline">
         {m.text}
       </div>
-      {isFirst && !m.text.trim() && (
-        <div className="text-ink-soft font-mono text-[11px]">
-          {`‘‘‘‘‘‘`}
-        </div>
-      )}
     </div>
   );
 }
@@ -322,15 +317,15 @@ function AnsweredQuestionsCard({
   const [open, setOpen] = useState<Record<string, boolean>>({});
   return (
     <div className="space-y-2">
-      <div className="text-[11px] text-ink-muted inline-flex items-center gap-1">
+      <div className="text-xs text-ink-muted inline-flex items-center gap-1">
         <span aria-hidden>↳</span> Running Tool: Ask User Question
       </div>
       <div className="rounded-lg border border-line/80 bg-paper p-3 space-y-2.5">
         <div>
-          <div className="text-[12px] font-medium text-ink">
+          <div className="text-sm font-medium text-ink">
             Answered questions
           </div>
-          <div className="text-[11px] text-ink-muted">You chose</div>
+          <div className="text-xs text-ink-muted">You chose</div>
         </div>
         {questions.map((q) => {
           const a = answers.find((x) => x.questionId === q.id);
@@ -350,10 +345,10 @@ function AnsweredQuestionsCard({
                 }
                 className="w-full flex items-start justify-between gap-2 text-left"
               >
-                <span className="text-[12px] text-ink leading-snug">
+                <span className="text-sm text-ink leading-snug">
                   {q.prompt}
                 </span>
-                <span className="inline-flex items-center gap-1 text-[10px] text-ink-muted shrink-0">
+                <span className="inline-flex items-center gap-1 text-2xs text-ink-muted shrink-0">
                   <span className="rounded bg-cream px-1.5 py-0.5">
                     Answered
                   </span>
@@ -363,7 +358,7 @@ function AnsweredQuestionsCard({
                 </span>
               </button>
               {isOpen && (
-                <div className="mt-1.5 inline-block bg-cream rounded-sm px-1.5 py-0.5 text-[11px] text-ink">
+                <div className="mt-1.5 inline-block bg-cream rounded-sm px-1.5 py-0.5 text-xs text-ink">
                   {label}
                 </div>
               )}
@@ -444,7 +439,7 @@ function BriefWidget({
   return (
     <div className="space-y-2">
       {isLast && (
-        <div className="text-[11px] text-ink-muted inline-flex items-center gap-1">
+        <div className="text-xs text-ink-muted inline-flex items-center gap-1">
           <ChevronDown
             className={`size-3 transition-transform ${actionsOpen ? "" : "-rotate-90"}`}
             onClick={() => setActionsOpen(!actionsOpen)}
@@ -454,7 +449,7 @@ function BriefWidget({
         </div>
       )}
       {actionsOpen && (
-        <div className="text-[11px] text-ink-muted space-y-1 pl-4">
+        <div className="text-xs text-ink-muted space-y-1 pl-4">
           <div className="flex items-center gap-1.5">
             <span aria-hidden>✎</span> Wrote to workspace
           </div>
@@ -468,7 +463,7 @@ function BriefWidget({
       )}
 
       <div className="rounded-lg border border-line/80 bg-paper overflow-hidden">
-        <div className="flex items-center justify-between px-3 py-1.5 text-[11px] text-ink-muted border-b border-line/70">
+        <div className="flex items-center justify-between px-3 py-1.5 text-xs text-ink-muted border-b border-line/70">
           <span className="inline-flex items-center gap-1">
             {step + 1}/{total}
             <ChevronRight className="size-3 text-ink-soft" />
@@ -484,7 +479,7 @@ function BriefWidget({
           </button>
         </div>
         <div className="p-3 space-y-3">
-          <p className="text-[13px] leading-snug text-ink">{q.prompt}</p>
+          <p className="text-base leading-snug text-ink">{q.prompt}</p>
           <div className="space-y-1">
             {q.options.map((o) => {
               const selected = currentAnswer?.optionKey === o.key;
@@ -499,17 +494,17 @@ function BriefWidget({
                   }`}
                 >
                   <div className="flex items-start justify-between gap-2">
-                    <div className="text-[12px] font-medium text-ink">
+                    <div className="text-sm font-medium text-ink">
                       {o.label}
                     </div>
                     {o.recommended && (
-                      <span className="text-[9px] text-sky-700 bg-sky-100 px-1.5 py-0.5 rounded-sm">
+                      <span className="text-2xs text-ink bg-cream px-1.5 py-0.5 rounded-sm">
                         Recommended
                       </span>
                     )}
                   </div>
                   {o.description && (
-                    <p className="text-[11px] text-ink-muted mt-1 leading-snug">
+                    <p className="text-xs text-ink-muted mt-1 leading-snug">
                       {o.description}
                     </p>
                   )}
@@ -523,7 +518,7 @@ function BriefWidget({
               value={custom}
               onChange={(e) => setCustomAnswer(e.target.value)}
               placeholder="Something else…"
-              className="w-full text-[12px] border-b border-line bg-transparent px-1 py-1 focus:outline-none focus:border-line-strong"
+              className="w-full text-sm border-b border-line bg-transparent px-1 py-1 focus:outline-none focus:border-line-strong"
             />
           )}
         </div>
@@ -532,7 +527,7 @@ function BriefWidget({
             type="button"
             onClick={decideAll}
             disabled={submitting}
-            className="text-[11px] rounded-md border border-line/80 bg-paper px-2.5 py-1 hover:border-line-strong disabled:opacity-40"
+            className="text-xs rounded-md border border-line/80 bg-paper px-2.5 py-1 hover:border-line-strong disabled:opacity-40"
           >
             Decide all
           </button>
@@ -544,7 +539,7 @@ function BriefWidget({
               else onSubmit();
             }}
             disabled={!currentAnswer || submitting}
-            className="text-[11px] rounded-md bg-ink text-paper px-2.5 py-1 hover:bg-ink/80 disabled:opacity-40"
+            className="text-xs rounded-md bg-ink text-paper px-2.5 py-1 hover:bg-ink/80 disabled:opacity-40"
           >
             {submitting
               ? "Submitting…"
@@ -589,19 +584,19 @@ function BusinessPlanCard({
 
   return (
     <div className="space-y-3">
-      <p className="bg-mustard/30/40 px-1 rounded-sm text-[13px] text-ink leading-relaxed">
+      <p className="bg-mustard/30 px-1 rounded-sm text-base text-ink leading-relaxed">
         The business brief is ready to review. Here&apos;s a summary of
         what&apos;s in it:
       </p>
-      <div className="space-y-3 text-[13px] leading-relaxed text-ink">
+      <div className="space-y-3 text-base leading-relaxed text-ink">
         {sections.map((s) => (
-          <p key={s.label} className="bg-mustard/30/40 px-1 rounded-sm">
+          <p key={s.label} className="bg-mustard/30 px-1 rounded-sm">
             <strong>{s.label}:</strong>{" "}
             {Array.isArray(s.body) ? s.body.join(", ") : s.body}
           </p>
         ))}
       </div>
-      <div className="text-[10px] text-ink-soft inline-flex items-center gap-1.5">
+      <div className="text-2xs text-ink-soft inline-flex items-center gap-1.5">
         {new Date().toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}
         <button
           type="button"
@@ -615,7 +610,7 @@ function BusinessPlanCard({
         type="button"
         onClick={onActivate}
         disabled={activating}
-        className="w-full rounded-md bg-ink text-paper text-[12px] py-2 hover:bg-ink/80 disabled:opacity-60"
+        className="w-full rounded-md bg-ink text-paper text-sm py-2 hover:bg-ink/80 disabled:opacity-60"
       >
         {activating
           ? "Activating departments…"
@@ -642,44 +637,22 @@ function PlanSection({
 }) {
   const palette: Record<string, string> = {
     amber: "text-mustard-ink bg-mustard/15",
-    violet: "text-violet-700 bg-violet-50",
-    sky: "text-sky-700 bg-sky-50",
-    rose: "text-rose-700 bg-rose-50",
-    lime: "text-lime-700 bg-lime-50",
+    violet: "text-ink bg-cream",
+    sky: "text-ink bg-cream",
+    rose: "text-ink bg-cream",
+    lime: "text-sage-ink bg-sage/15",
   };
   return (
     <div>
       <span
-        className={`inline-block text-[10px] uppercase tracking-wider px-1.5 py-0.5 rounded ${palette[tone]}`}
+        className={`inline-block text-2xs uppercase tracking-wider px-1.5 py-0.5 rounded ${palette[tone]}`}
       >
         {label}
       </span>
-      <div className="text-[12px] text-ink mt-1.5 leading-snug">
+      <div className="text-sm text-ink mt-1.5 leading-snug">
         {children}
       </div>
     </div>
-  );
-}
-
-function Sunflower() {
-  return (
-    <pre
-      aria-hidden
-      className="text-mustard-ink/40 text-[10px] leading-tight font-mono whitespace-pre"
-    >
-{`        .-^-.
-      .'     '.
-     /  o   o  \\
-    ;    ()    ;
-     \\  '___'  /
-      '.     .'
-       /vvvvv\\
-      / |   | \\
-     /  |   |  \\
-        | | |
-        | | |
-       _|/V\\|_`}
-    </pre>
   );
 }
 

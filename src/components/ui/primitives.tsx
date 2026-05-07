@@ -105,15 +105,24 @@ export function Pill({
   );
 }
 
+type ButtonSize = "sm" | "md";
+
+const SIZE_CLS: Record<ButtonSize, string> = {
+  sm: "text-xs px-2 py-1",
+  md: "text-sm px-3 py-1.5",
+};
+
 export function ButtonPrimary({
   className,
+  size = "md",
   ...rest
-}: React.ButtonHTMLAttributes<HTMLButtonElement>) {
+}: React.ButtonHTMLAttributes<HTMLButtonElement> & { size?: ButtonSize }) {
   return (
     <button
       type="button"
       className={cn(
-        "text-sm rounded-md bg-ink text-paper px-3 py-1.5 hover:opacity-90 transition-opacity disabled:opacity-40",
+        "rounded-md bg-ink text-paper hover:opacity-90 transition-opacity disabled:opacity-40 inline-flex items-center justify-center gap-1",
+        SIZE_CLS[size],
         className,
       )}
       {...rest}
@@ -123,16 +132,63 @@ export function ButtonPrimary({
 
 export function ButtonGhost({
   className,
+  size = "md",
   ...rest
-}: React.ButtonHTMLAttributes<HTMLButtonElement>) {
+}: React.ButtonHTMLAttributes<HTMLButtonElement> & { size?: ButtonSize }) {
   return (
     <button
       type="button"
       className={cn(
-        "text-sm rounded-md border border-line bg-paper px-3 py-1.5 hover:border-line-strong transition-colors",
+        "rounded-md border border-line bg-paper hover:border-line-strong transition-colors disabled:opacity-40 inline-flex items-center justify-center gap-1",
+        SIZE_CLS[size],
         className,
       )}
       {...rest}
     />
+  );
+}
+
+type StatTone = "sage" | "mustard" | "brick" | "neutral";
+
+const STAT_TONE_TEXT: Record<StatTone, string> = {
+  sage: "text-sage-ink",
+  mustard: "text-mustard-ink",
+  brick: "text-brick-ink",
+  neutral: "text-ink",
+};
+
+export function StatCard({
+  label,
+  value,
+  tone = "neutral",
+  className,
+  Icon,
+}: {
+  label: string;
+  value: React.ReactNode;
+  tone?: StatTone;
+  className?: string;
+  Icon?: React.ComponentType<{ className?: string }>;
+}) {
+  return (
+    <div
+      className={cn(
+        "rounded-md border border-line/70 bg-paper p-3",
+        className,
+      )}
+    >
+      <div className="text-2xs uppercase tracking-wider text-ink-soft inline-flex items-center gap-1">
+        {Icon && <Icon className="size-3" />}
+        {label}
+      </div>
+      <div
+        className={cn(
+          "text-base font-medium tracking-tight mt-0.5",
+          STAT_TONE_TEXT[tone],
+        )}
+      >
+        {value}
+      </div>
+    </div>
   );
 }

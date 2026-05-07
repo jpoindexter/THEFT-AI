@@ -31,10 +31,10 @@ export default async function PublishingPage({
       <div className="max-w-3xl mx-auto space-y-6">
         <header>
           <h1 className="text-xl tracking-tight">Publishing</h1>
-          <p className="text-[12px] text-ink-muted">
+          <p className="text-sm text-ink-muted">
             Move changes from staging to production. Each publish opens a PR
-            from <code className="font-mono text-[11px]">main</code> →{" "}
-            <code className="font-mono text-[11px]">prod</code>.
+            from <code className="font-mono text-xs">main</code> →{" "}
+            <code className="font-mono text-xs">prod</code>.
           </p>
         </header>
 
@@ -46,21 +46,21 @@ export default async function PublishingPage({
             >
               <header className="flex items-start justify-between">
                 <div>
-                  <h2 className="text-[14px] font-medium tracking-tight">
+                  <h2 className="text-md font-medium tracking-tight">
                     {t.label}
                   </h2>
                   <a
                     href={`https://${t.domain}`}
                     target="_blank"
                     rel="noreferrer"
-                    className="text-[11px] text-ink-muted inline-flex items-center gap-1 hover:text-ink"
+                    className="text-xs text-ink-muted inline-flex items-center gap-1 hover:text-ink"
                   >
                     {t.domain}
                     <ExternalLink className="size-3" />
                   </a>
                 </div>
                 <span
-                  className={`text-[10px] uppercase tracking-wider rounded px-1.5 py-0.5 ${
+                  className={`text-2xs uppercase tracking-wider rounded px-1.5 py-0.5 ${
                     t.status === "up_to_date"
                       ? "bg-sage/30 text-sage-ink"
                       : "bg-mustard/30 text-mustard-ink"
@@ -69,7 +69,7 @@ export default async function PublishingPage({
                   {t.status === "up_to_date" ? "Up to date" : "Behind prod"}
                 </span>
               </header>
-              <div className="grid grid-cols-3 gap-3 text-[11px]">
+              <div className="grid grid-cols-3 gap-3 text-xs">
                 <Stat icon={<GitBranch className="size-3" />} label="Repo" value={t.repo} />
                 <Stat icon={<GitPullRequest className="size-3" />} label="Branch flow" value={t.branch} />
                 <Stat icon={<ExternalLink className="size-3" />} label="Domain" value={t.domain} />
@@ -77,20 +77,20 @@ export default async function PublishingPage({
               <div className="flex justify-end gap-2">
                 <Link
                   href={`/${org}/preview/${t.slug === "app" ? "feat-subscriptions-table" : "fix-canvas-pan"}`}
-                  className="text-[11px] rounded-md border border-line bg-paper px-2 py-1 hover:border-line-strong"
+                  className="text-xs rounded-md border border-line bg-paper px-2 py-1 hover:border-line-strong"
                 >
                   Open preview
                 </Link>
                 <Link
                   href={`/${org}/${t.slug === "app" ? "engineering" : "marketing"}`}
-                  className="text-[11px] rounded-md border border-line bg-paper px-2 py-1 hover:border-line-strong"
+                  className="text-xs rounded-md border border-line bg-paper px-2 py-1 hover:border-line-strong"
                 >
                   Open department
                 </Link>
                 <Link
                   href={`/${org}/publishing/${t.slug}`}
                   aria-disabled={t.status === "up_to_date"}
-                  className={`text-[11px] rounded-md bg-ink text-paper px-2 py-1 ${
+                  className={`text-xs rounded-md bg-ink text-paper px-2 py-1 ${
                     t.status === "up_to_date"
                       ? "opacity-40 pointer-events-none"
                       : ""
@@ -118,11 +118,11 @@ function Stat({
 }) {
   return (
     <div className="rounded-md border border-line/70 px-2 py-1.5">
-      <div className="text-[10px] text-ink-muted inline-flex items-center gap-1">
+      <div className="text-2xs text-ink-muted inline-flex items-center gap-1">
         {icon}
         {label}
       </div>
-      <div className="font-mono text-[11px] mt-0.5">{value}</div>
+      <div className="font-mono text-xs mt-0.5">{value}</div>
     </div>
   );
 }

@@ -39,20 +39,20 @@ export default function NewRoutinePage() {
       <div className="max-w-2xl mx-auto space-y-5">
         <Link
           href={`/${params.org}/routines`}
-          className="inline-flex items-center gap-1 text-[12px] text-ink-muted hover:text-ink"
+          className="inline-flex items-center gap-1 text-sm text-ink-muted hover:text-ink"
         >
           <ArrowLeft className="size-3" /> Back to routines
         </Link>
 
         <header>
           <h1 className="text-xl tracking-tight">New routine</h1>
-          <p className="text-[12px] text-ink-muted">
+          <p className="text-sm text-ink-muted">
             A scheduled task an agent runs without you asking.
           </p>
         </header>
 
         <section className="rounded-lg border border-line/70 bg-paper p-4 space-y-3">
-          <div className="text-[14px] font-medium tracking-tight">Preset</div>
+          <div className="text-md font-medium tracking-tight">Preset</div>
           <div className="grid grid-cols-2 gap-1.5">
             {PRESETS.map((p) => {
               const on = preset === p.id;
@@ -61,7 +61,7 @@ export default function NewRoutinePage() {
                   key={p.id}
                   type="button"
                   onClick={() => pickPreset(p.id)}
-                  className={`text-left rounded-md border px-2 py-1.5 text-[12px] transition-colors ${
+                  className={`text-left rounded-md border px-2 py-1.5 text-sm transition-colors ${
                     on
                       ? "border-ink bg-cream"
                       : "border-line hover:border-line-strong"
@@ -69,7 +69,7 @@ export default function NewRoutinePage() {
                 >
                   <div className="font-medium">{p.label}</div>
                   {p.cron && (
-                    <code className="text-[10px] font-mono text-ink-muted">
+                    <code className="text-2xs font-mono text-ink-muted">
                       {p.cron}
                     </code>
                   )}
@@ -84,14 +84,14 @@ export default function NewRoutinePage() {
             <input
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="w-full h-9 rounded-md border border-line bg-paper px-3 text-[13px] focus:outline-none focus:border-line-strong"
+              className="w-full h-9 rounded-md border border-line bg-paper px-3 text-base focus:outline-none focus:border-line-strong"
             />
           </Field>
           <Field label="Run as agent">
             <select
               value={agent}
               onChange={(e) => setAgent(e.target.value)}
-              className="w-full h-9 rounded-md border border-line bg-paper px-2 text-[13px]"
+              className="w-full h-9 rounded-md border border-line bg-paper px-2 text-base"
             >
               {[
                 "operations",
@@ -114,7 +114,7 @@ export default function NewRoutinePage() {
               value={cron}
               onChange={(e) => setCron(e.target.value)}
               placeholder="0 9 * * 1"
-              className="w-full h-9 rounded-md border border-line bg-paper px-3 text-[13px] font-mono focus:outline-none focus:border-line-strong"
+              className="w-full h-9 rounded-md border border-line bg-paper px-3 text-base font-mono focus:outline-none focus:border-line-strong"
             />
           </Field>
           <Field label="Prompt">
@@ -122,10 +122,10 @@ export default function NewRoutinePage() {
               value={prompt}
               onChange={(e) => setPrompt(e.target.value)}
               rows={5}
-              className="w-full rounded-md border border-line bg-paper px-3 py-2 text-[13px] focus:outline-none focus:border-line-strong"
+              className="w-full rounded-md border border-line bg-paper px-3 py-2 text-base focus:outline-none focus:border-line-strong"
             />
           </Field>
-          <label className="inline-flex items-center gap-2 text-[12px]">
+          <label className="inline-flex items-center gap-2 text-sm">
             <input
               type="checkbox"
               checked={enabled}
@@ -139,14 +139,14 @@ export default function NewRoutinePage() {
           <button
             type="button"
             onClick={() => router.back()}
-            className="text-[12px] rounded-md border border-line bg-paper px-3 py-1.5 hover:border-line-strong"
+            className="text-sm rounded-md border border-line bg-paper px-3 py-1.5 hover:border-line-strong"
           >
             Cancel
           </button>
           <button
             type="button"
             disabled={!name || !cron}
-            className="text-[12px] rounded-md bg-ink text-paper px-3 py-1.5 disabled:opacity-40"
+            className="text-sm rounded-md bg-ink text-paper px-3 py-1.5 disabled:opacity-40"
           >
             Save routine
           </button>
@@ -167,9 +167,9 @@ function Field({
 }) {
   return (
     <div className="space-y-1">
-      <div className="text-[12px] text-ink">{label}</div>
+      <div className="text-sm text-ink">{label}</div>
       {children}
-      {hint && <p className="text-[11px] text-ink-muted">{hint}</p>}
+      {hint && <p className="text-xs text-ink-muted">{hint}</p>}
     </div>
   );
 }

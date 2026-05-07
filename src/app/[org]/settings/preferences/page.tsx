@@ -17,7 +17,7 @@ export default function Preferences() {
       />
       <SettingsCard title="Profile">
         <Row label="Profile picture" hint="200×200 px, JPG/PNG/WebP, 5MB max">
-          <button className="text-[12px] rounded-md border border-line px-2 py-1 hover:border-line-strong">
+          <button className="text-sm rounded-md border border-line px-2 py-1 hover:border-line-strong">
             Upload Photo
           </button>
         </Row>
@@ -38,7 +38,7 @@ export default function Preferences() {
 
       <SettingsCard title="Appearance">
         <Row label="Theme">
-          <div className="inline-flex rounded-md border border-line overflow-hidden text-[12px]">
+          <div className="inline-flex rounded-md border border-line overflow-hidden text-sm">
             <button className="px-3 py-1.5 hover:bg-cream">Light</button>
             <button className="px-3 py-1.5 bg-cream">System</button>
             <button className="px-3 py-1.5 hover:bg-cream">Dark</button>
@@ -51,14 +51,14 @@ export default function Preferences() {
 
       <SettingsCard>
         <div>
-          <h2 className="text-[14px] font-medium text-brick-ink">Danger Zone</h2>
-          <p className="text-[12px] text-ink-muted">
+          <h2 className="text-md font-medium text-brick-ink">Danger Zone</h2>
+          <p className="text-sm text-ink-muted">
             Once you delete your account, there is no going back.
           </p>
           <button
             type="button"
             onClick={() => setDeleteOpen(true)}
-            className="mt-3 text-[12px] rounded-md border border-brick/40 text-brick-ink px-3 py-1 hover:bg-brick/10"
+            className="mt-3 text-sm rounded-md border border-brick/40 text-brick-ink px-3 py-1 hover:bg-brick/10"
           >
             Delete My Account
           </button>

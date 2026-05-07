@@ -73,10 +73,10 @@ export default function NewTaskDialog({
             onChange={(e) => setDescription(e.target.value)}
             placeholder="Describe a task for your agent…"
             rows={5}
-            className="w-full resize-none text-[13px] focus:outline-none placeholder:text-ink-soft"
+            className="w-full resize-none text-base focus:outline-none placeholder:text-ink-soft"
           />
         </div>
-        <div className="flex items-center gap-2 border-t border-line/80 p-2 text-[11px]">
+        <div className="flex items-center gap-2 border-t border-line/80 p-2 text-xs">
           <PillButton icon={<Paperclip className="size-3.5" />} label="Add files" />
           <PillButton
             icon={<Play className="size-3.5" />}
@@ -103,7 +103,7 @@ export default function NewTaskDialog({
             type="button"
             onClick={submit}
             disabled={!description.trim() || submitting}
-            className="rounded-md bg-ink text-paper px-3 py-1 text-[11px] disabled:opacity-30"
+            className="rounded-md bg-ink text-paper px-3 py-1 text-xs disabled:opacity-30"
           >
             {submitting ? "Creating…" : "Create Task"}
           </button>

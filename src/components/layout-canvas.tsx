@@ -33,7 +33,7 @@ export default function LayoutCanvas({
         className="absolute bottom-3 left-3 size-8 rounded-full bg-paper border border-line/70 inline-flex items-center justify-center hover:border-line-strong z-20"
       >
         <Bell className="size-3.5 text-ink-muted" />
-        <span className="absolute -top-1 -right-1 size-3.5 rounded-full bg-mustard text-mustard-ink text-[9px] font-medium inline-flex items-center justify-center border border-paper">
+        <span className="absolute -top-1 -right-1 size-3.5 rounded-full bg-mustard text-mustard-ink text-2xs font-medium inline-flex items-center justify-center border border-paper">
           2
         </span>
       </button>
@@ -41,10 +41,10 @@ export default function LayoutCanvas({
       {inboxOpen && (
         <div className="absolute bottom-14 left-3 w-72 rounded-lg bg-paper border border-line/70 shadow-md z-30">
           <div className="flex items-center justify-between px-3 py-2 border-b border-line/70">
-            <div className="text-[13px] font-medium">Notifications</div>
+            <div className="text-base font-medium">Notifications</div>
             <Link
               href={`/${orgSlug}/notifications`}
-              className="text-[11px] text-ink-muted hover:text-ink"
+              className="text-xs text-ink-muted hover:text-ink"
               onClick={() => setInboxOpen(false)}
             >
               Open all
@@ -74,8 +74,8 @@ export default function LayoutCanvas({
         <div className="absolute left-1/2 -translate-x-1/2 bottom-3 flex items-center gap-2 z-10">
           {isOrgRoot && (
             <>
-              <RecentCard tint="from-rose-100 to-rose-200" />
-              <RecentCard tint="from-amber-100 to-amber-200" />
+              <RecentCard tint="bg-cream" />
+              <RecentCard tint="bg-mustard/30" />
             </>
           )}
           <div className="relative">
@@ -103,12 +103,12 @@ export default function LayoutCanvas({
           href={`/${orgSlug}/review`}
           aria-label="Attention queue"
           title="Items waiting for your review (⌘.)"
-          className="absolute bottom-3 right-3 inline-flex items-center gap-1.5 rounded-full bg-ink text-paper pl-2 pr-3 py-1.5 text-[11px] hover:opacity-90 z-20 shadow-[0_2px_8px_-4px_rgba(0,0,0,0.35)]"
+          className="absolute bottom-3 right-3 inline-flex items-center gap-1.5 rounded-full bg-ink text-paper pl-2 pr-3 py-1.5 text-xs hover:opacity-90 z-20 shadow-[0_2px_8px_-4px_rgba(0,0,0,0.35)]"
         >
           <Eye className="size-3.5" />
           <span>Review</span>
           {attentionCount > 0 && (
-            <span className="size-4 rounded-full bg-mustard text-ink text-[10px] font-semibold inline-flex items-center justify-center">
+            <span className="size-4 rounded-full bg-mustard text-ink text-2xs font-semibold inline-flex items-center justify-center">
               {attentionCount}
             </span>
           )}
@@ -138,11 +138,11 @@ function NotifPeek({
         onClick={onClose}
         className="block rounded-md px-2 py-1.5 hover:bg-canvas"
       >
-        <div className="text-[12px]">
+        <div className="text-sm">
           <span className="font-medium text-ink">{actor}</span>{" "}
           <span className="text-ink-muted">{body}</span>
         </div>
-        <div className="text-[10px] text-ink-soft">{time} ago</div>
+        <div className="text-2xs text-ink-soft">{time} ago</div>
       </Link>
     </li>
   );
@@ -151,7 +151,7 @@ function NotifPeek({
 function RecentCard({ tint }: { tint: string }) {
   return (
     <div className="w-12 h-9 rounded-md bg-paper border border-line/70 overflow-hidden shadow-[0_1px_2px_rgba(0,0,0,0.04)]">
-      <div className={`h-1.5 bg-gradient-to-r ${tint}`} />
+      <div className={`h-1.5  ${tint}`} />
       <div className="p-1 space-y-0.5">
         <div className="h-0.5 rounded bg-line" />
         <div className="h-0.5 w-2/3 rounded bg-line" />
@@ -176,8 +176,8 @@ function MenuItem({
     >
       <span className="mt-0.5 text-line-strong">{icon}</span>
       <span className="leading-tight">
-        <span className="block text-[12px]">{label}</span>
-        <span className="block text-[10px] text-ink-soft">{sub}</span>
+        <span className="block text-sm">{label}</span>
+        <span className="block text-2xs text-ink-soft">{sub}</span>
       </span>
     </button>
   );

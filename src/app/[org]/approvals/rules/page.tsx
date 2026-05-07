@@ -11,6 +11,7 @@ import {
   PageTitle,
   Pill,
   ButtonPrimary,
+  StatCard,
 } from "@/components/ui/primitives";
 import {
   ShieldCheck,
@@ -127,7 +128,7 @@ export default function ApprovalRulesPage() {
           <CardBody>
             <Eyebrow>Activity (24h)</Eyebrow>
             <div className="grid grid-cols-3 gap-3 mt-2">
-              <Stat
+              <StatCard
                 label="Auto-approved"
                 value={String(
                   rules
@@ -137,7 +138,7 @@ export default function ApprovalRulesPage() {
                 tone="sage"
                 Icon={CheckCircle2}
               />
-              <Stat
+              <StatCard
                 label="Auto-declined"
                 value={String(
                   rules
@@ -147,7 +148,7 @@ export default function ApprovalRulesPage() {
                 tone="brick"
                 Icon={XCircle}
               />
-              <Stat
+              <StatCard
                 label="Routed to human"
                 value={String(
                   rules
@@ -198,35 +199,6 @@ export default function ApprovalRulesPage() {
             </Hint>
           </CardBody>
         </Card>
-      </div>
-    </div>
-  );
-}
-
-function Stat({
-  label,
-  value,
-  tone,
-  Icon,
-}: {
-  label: string;
-  value: string;
-  tone: "sage" | "brick" | "mustard";
-  Icon: React.ComponentType<{ className?: string }>;
-}) {
-  const toneCls =
-    tone === "sage"
-      ? "text-sage-ink"
-      : tone === "brick"
-        ? "text-brick-ink"
-        : "text-mustard-ink";
-  return (
-    <div className="rounded-md border border-line/70 bg-paper p-3">
-      <div className="text-2xs uppercase tracking-wider text-ink-soft inline-flex items-center gap-1">
-        <Icon className={`size-3 ${toneCls}`} /> {label}
-      </div>
-      <div className="text-base font-medium tracking-tight mt-1 text-ink">
-        {value}
       </div>
     </div>
   );

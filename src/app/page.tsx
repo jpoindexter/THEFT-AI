@@ -21,7 +21,7 @@ export default async function Home() {
           <PixelLandscape />
         </div>
         <div className="relative z-10 max-w-5xl mx-auto px-6 pt-20 pb-32">
-          <header className="flex items-center justify-between text-[13px]">
+          <header className="flex items-center justify-between text-base">
             <div className="font-medium tracking-tight">THEFT</div>
             <nav className="flex items-center gap-4 text-ink">
               <Link href="#how">How it works</Link>
@@ -33,7 +33,7 @@ export default async function Home() {
             <h1 className="text-5xl tracking-tight font-medium leading-tight">
               Run an entire company with AI agents.
             </h1>
-            <p className="text-[15px] text-ink leading-relaxed">
+            <p className="text-md text-ink leading-relaxed">
               THEFT is an agent-orchestration platform — designed to help you
               run an entire business. Departments, agents, tasks, library, all
               in one place.
@@ -41,13 +41,13 @@ export default async function Home() {
             <div className="flex items-center gap-2 pt-2">
               <Link
                 href={continueHref}
-                className="rounded-md bg-ink text-paper px-4 py-2 text-[13px] hover:bg-ink/80"
+                className="rounded-md bg-ink text-paper px-4 py-2 text-base hover:bg-ink/80"
               >
                 Get started
               </Link>
               <Link
                 href="#how"
-                className="rounded-md bg-paper border border-line px-4 py-2 text-[13px] hover:border-line-strong"
+                className="rounded-md bg-paper border border-line px-4 py-2 text-base hover:border-line-strong"
               >
                 Watch demo
               </Link>
@@ -62,7 +62,7 @@ export default async function Home() {
           <h2 className="text-3xl tracking-tight font-medium">
             Cofounder lets you run an entire company with agents.
           </h2>
-          <p className="text-[14px] text-ink-muted max-w-xl mx-auto">
+          <p className="text-md text-ink-muted max-w-xl mx-auto">
             Designed to help you run an entire business — Engineering, Design,
             Marketing, Sales, Operations, Finance, Legal, Support — without
             hiring a team.
@@ -82,21 +82,21 @@ export default async function Home() {
           </h2>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {[
-              { tone: "from-rose-300 to-orange-200", title: "Pick a name" },
-              { tone: "from-amber-200 to-yellow-200", title: "Build the app" },
-              { tone: "from-sky-200 to-emerald-200", title: "Brand identity" },
-              { tone: "from-emerald-200 to-lime-200", title: "Public launch" },
+              { tone: "bg-mustard/40", title: "Pick a name" },
+              { tone: "bg-mustard/40", title: "Build the app" },
+              { tone: "bg-sage/40", title: "Brand identity" },
+              { tone: "bg-sage/40", title: "Public launch" },
             ].map((c, i) => (
               <article
                 key={i}
                 className="rounded-lg border border-line/70 overflow-hidden bg-paper"
               >
                 <div
-                  className={`aspect-[16/10] bg-gradient-to-br ${c.tone}`}
+                  className={`aspect-[16/10]  ${c.tone}`}
                 />
                 <div className="p-3">
-                  <div className="text-[13px] font-medium">{c.title}</div>
-                  <p className="text-[11px] text-ink-muted mt-0.5 leading-snug">
+                  <div className="text-base font-medium">{c.title}</div>
+                  <p className="text-xs text-ink-muted mt-0.5 leading-snug">
                     Walkthrough · 8 min read
                   </p>
                 </div>
@@ -136,13 +136,13 @@ export default async function Home() {
               },
             ].map((f) => (
               <div key={f.tag} className="space-y-2">
-                <div className="text-[10px] uppercase tracking-wider text-ink-soft">
+                <div className="text-2xs uppercase tracking-wider text-ink-soft">
                   {f.tag}
                 </div>
                 <h3 className="text-xl tracking-tight font-medium">
                   {f.title}
                 </h3>
-                <p className="text-[13px] text-ink-muted leading-relaxed">
+                <p className="text-base text-ink-muted leading-relaxed">
                   {f.body}
                 </p>
                 <ScreenshotMock kind="agent" />
@@ -169,7 +169,7 @@ export default async function Home() {
           <h2 className="text-3xl tracking-tight font-medium">
             All the tools and systems your company needs.
           </h2>
-          <p className="text-[14px] text-ink">
+          <p className="text-md text-ink">
             GitHub, Vercel, Supabase, Postmark, Stripe — auto-provisioned
             during onboarding so your agents have everything they need on day
             one.
@@ -186,13 +186,13 @@ export default async function Home() {
           </h2>
           <Link
             href={continueHref}
-            className="inline-block rounded-md bg-paper text-ink px-5 py-2 text-[13px]"
+            className="inline-block rounded-md bg-paper text-ink px-5 py-2 text-base"
           >
             Get started
           </Link>
         </div>
       </section>
-      <footer className="px-6 py-6 text-[11px] text-ink-muted flex items-center justify-between">
+      <footer className="px-6 py-6 text-xs text-ink-muted flex items-center justify-between">
         <span>© THEFT AI</span>
         <span>Built with agents</span>
       </footer>
@@ -252,7 +252,7 @@ function ScreenshotMock({
     <div className="rounded-xl border border-line/70 bg-paper shadow-[0_10px_30px_-15px_rgba(0,0,0,0.18)] overflow-hidden">
       <div className="bg-cream border-b border-line/70 px-2 py-1 flex items-center gap-1.5">
         <div className="flex gap-1">
-          <span className="size-1.5 rounded-full bg-rose-300" />
+          <span className="size-1.5 rounded-full bg-mustard" />
           <span className="size-1.5 rounded-full bg-mustard" />
           <span className="size-1.5 rounded-full bg-sage" />
         </div>

@@ -93,37 +93,37 @@ export default async function ActivityDetailPage({
       <div className="max-w-2xl mx-auto space-y-4">
         <Link
           href={`/${org}/activity`}
-          className="inline-flex items-center gap-1 text-[12px] text-ink-muted hover:text-ink"
+          className="inline-flex items-center gap-1 text-sm text-ink-muted hover:text-ink"
         >
           <ArrowLeft className="size-3" /> Back to activity
         </Link>
 
         <header className="space-y-1">
-          <div className="text-[10px] uppercase tracking-wider text-ink-soft">
+          <div className="text-2xs uppercase tracking-wider text-ink-soft">
             {e.actor} · {e.when}
           </div>
           <h1 className="text-xl tracking-tight">
             {e.action}{" "}
-            <span className="font-mono text-[15px] text-ink">
+            <span className="font-mono text-md text-ink">
               {e.target}
             </span>
           </h1>
-          <p className="text-[12px] text-ink-muted">{e.detail}</p>
+          <p className="text-sm text-ink-muted">{e.detail}</p>
         </header>
 
         <section className="rounded-lg border border-line/70 bg-paper p-4">
-          <p className="text-[13px] text-ink leading-relaxed">{e.body}</p>
+          <p className="text-base text-ink leading-relaxed">{e.body}</p>
         </section>
 
         <section className="rounded-lg border border-line/70 bg-paper p-4">
-          <div className="text-[10px] uppercase tracking-wider text-ink-soft mb-2">
+          <div className="text-2xs uppercase tracking-wider text-ink-soft mb-2">
             Metadata
           </div>
           <ul className="space-y-1">
             {Object.entries(e.metadata).map(([k, v]) => (
               <li
                 key={k}
-                className="flex justify-between text-[12px] font-mono"
+                className="flex justify-between text-sm font-mono"
               >
                 <span className="text-ink-muted">{k}</span>
                 <span className="text-ink">{v}</span>

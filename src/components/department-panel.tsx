@@ -105,7 +105,7 @@ export default function DepartmentPanel({
   return (
     <div className="flex-1 overflow-y-auto p-4 space-y-4">
       <div>
-        <div className="inline-flex items-center gap-1.5 text-[13px] mb-3">
+        <div className="inline-flex items-center gap-1.5 text-base mb-3">
           <DeptIcon slug={department.slug} />
           <span className="font-medium">{department.name}</span>
         </div>
@@ -113,7 +113,7 @@ export default function DepartmentPanel({
           className="rounded-lg aspect-[16/9] mb-2"
           style={{ background: cover }}
         />
-        <p className="text-[12px] text-ink-muted leading-snug">{description}</p>
+        <p className="text-sm text-ink-muted leading-snug">{description}</p>
       </div>
 
       <Card
@@ -125,16 +125,16 @@ export default function DepartmentPanel({
         {agents.map((a) => (
           <div
             key={a.id}
-            className="rounded-md border border-line/70 bg-paper px-3 py-1.5 flex items-center justify-between text-[12px]"
+            className="rounded-md border border-line/70 bg-paper px-3 py-1.5 flex items-center justify-between text-sm"
           >
             <div>
               <span className="font-medium mr-1">{a.name}</span>
               <span className="text-ink-muted">Default</span>
             </div>
-            <span className="text-[10px] text-ink-muted">2 schedules</span>
+            <span className="text-2xs text-ink-muted">2 schedules</span>
           </div>
         ))}
-        <button className="mt-2 w-full inline-flex items-center justify-center gap-1 rounded-md bg-canvas border border-dashed border-line-strong px-3 py-1.5 text-[12px] text-ink-muted hover:border-line-strong">
+        <button className="mt-2 w-full inline-flex items-center justify-center gap-1 rounded-md bg-canvas border border-dashed border-line-strong px-3 py-1.5 text-sm text-ink-muted hover:border-line-strong">
           <Plus className="size-3" /> New Agent
         </button>
       </Card>
@@ -152,10 +152,10 @@ export default function DepartmentPanel({
             {tasks.map((t) => (
               <li
                 key={t.id}
-                className="rounded-md border border-line/70 bg-paper px-2 py-1 text-[12px] flex items-center justify-between"
+                className="rounded-md border border-line/70 bg-paper px-2 py-1 text-sm flex items-center justify-between"
               >
                 <span className="truncate">{t.title}</span>
-                <span className="text-[10px] uppercase text-ink-muted">
+                <span className="text-2xs uppercase text-ink-muted">
                   {t.status}
                 </span>
               </li>
@@ -177,10 +177,10 @@ export default function DepartmentPanel({
             {artifacts.map((a) => (
               <li
                 key={a.id}
-                className="rounded-md border border-line/70 bg-paper px-2 py-1 text-[12px] flex items-center justify-between"
+                className="rounded-md border border-line/70 bg-paper px-2 py-1 text-sm flex items-center justify-between"
               >
                 <span className="truncate">{a.name}</span>
-                <span className="text-[10px] uppercase text-ink-muted">
+                <span className="text-2xs uppercase text-ink-muted">
                   {a.kind}
                 </span>
               </li>
@@ -194,7 +194,7 @@ export default function DepartmentPanel({
         open={open.context}
         toggle={() => setOpen((o) => ({ ...o, context: !o.context }))}
       >
-        <pre className="text-[10px] font-mono text-ink bg-canvas rounded-md p-2 leading-snug whitespace-pre-wrap">
+        <pre className="text-2xs font-mono text-ink bg-canvas rounded-md p-2 leading-snug whitespace-pre-wrap">
           {JSON.stringify(
             {
               summary:
@@ -228,13 +228,13 @@ function Card({
       <button
         type="button"
         onClick={toggle}
-        className="w-full px-3 py-2 flex items-center justify-between text-[13px]"
+        className="w-full px-3 py-2 flex items-center justify-between text-base"
       >
         <span className="inline-flex items-center gap-1.5">
           <span className="font-medium">{title}</span>
           <Info className="size-3 text-ink-soft" />
         </span>
-        <span className="inline-flex items-center gap-2 text-ink-soft text-[11px]">
+        <span className="inline-flex items-center gap-2 text-ink-soft text-xs">
           {count !== undefined && <span>{count}</span>}
           {open ? (
             <ChevronDown className="size-3" />
@@ -250,7 +250,7 @@ function Card({
 
 function Empty({ title, body }: { title: string; body: string }) {
   return (
-    <div className="rounded-md border border-line/70 bg-canvas px-3 py-3 text-[12px]">
+    <div className="rounded-md border border-line/70 bg-canvas px-3 py-3 text-sm">
       <div className="font-medium text-ink">{title}</div>
       <div className="text-ink-muted">{body}</div>
     </div>
@@ -259,18 +259,18 @@ function Empty({ title, body }: { title: string; body: string }) {
 
 function DeptIcon({ slug }: { slug: string }) {
   const colors: Record<string, string> = {
-    engineering: "from-orange-300 to-amber-400",
-    design: "from-stone-300 to-stone-400",
-    marketing: "from-pink-300 to-rose-400",
-    sales: "from-lime-300 to-emerald-400",
-    operations: "from-emerald-300 to-teal-400",
-    finance: "from-sky-300 to-indigo-400",
-    legal: "from-slate-300 to-slate-500",
-    support: "from-violet-300 to-purple-400",
+    engineering: "bg-mustard/40",
+    design: "bg-cream",
+    marketing: "bg-mustard/30",
+    sales: "bg-sage/30",
+    operations: "bg-sage/30",
+    finance: "bg-cream",
+    legal: "bg-cream",
+    support: "bg-cream",
   };
   return (
     <span
-      className={`size-3.5 rounded-sm bg-gradient-to-br ${colors[slug] ?? "from-stone-200 to-stone-400"}`}
+      className={`size-3.5 rounded-sm  ${colors[slug] ?? "bg-cream"}`}
     />
   );
 }

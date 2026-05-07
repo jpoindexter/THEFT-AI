@@ -85,10 +85,10 @@ export default function RightPanel({
             <DocIcon />
           </div>
           <div className="leading-tight">
-            <div className="text-[15px] tracking-tight font-medium">
+            <div className="text-md tracking-tight font-medium">
               Onboarding
             </div>
-            <div className="text-[11px] text-ink-muted mt-0.5">
+            <div className="text-xs text-ink-muted mt-0.5">
               {organization.name} · {founderName}
             </div>
           </div>
@@ -98,10 +98,10 @@ export default function RightPanel({
           onboarding
           emptyHeader={
             <div className="flex flex-col items-center text-center gap-3 pt-4 pb-2">
-              <p className="text-[14px] text-ink tracking-tight">
+              <p className="text-md text-ink tracking-tight">
                 Tell me more about your company
               </p>
-              <p className="text-[12px] text-ink-muted max-w-[260px] leading-snug">
+              <p className="text-sm text-ink-muted max-w-[260px] leading-snug">
                 Share what you&apos;re building and Cofounder will start a brief.
               </p>
             </div>
@@ -113,7 +113,7 @@ export default function RightPanel({
 
   return (
     <aside className="rounded-lg bg-paper border border-line/70 flex flex-col overflow-hidden">
-      <nav className="h-10 flex items-center gap-3 px-4 border-b border-line/70 text-[13px]">
+      <nav className="h-10 flex items-center gap-3 px-4 border-b border-line/70 text-base">
         {TABS.map((t) => {
           const active = tab === t.key;
           return (
@@ -175,7 +175,7 @@ function HomeTab({
   ];
   return (
     <div className="flex-1 overflow-y-auto p-4 space-y-5">
-      <h2 className="text-[18px] tracking-tight">
+      <h2 className="text-lg tracking-tight">
         {greeting}, <span className="text-ink-soft">{founderName}</span>
       </h2>
 
@@ -183,10 +183,7 @@ function HomeTab({
         href={`/${organization.slug}/roadmap`}
         className="block rounded-lg overflow-hidden border border-line/70 relative aspect-[16/8]"
       >
-        <div
-          className="absolute inset-0 bg-gradient-to-b from-sky-300 via-sky-100 to-sky-50"
-          aria-hidden
-        />
+        <div className="absolute inset-0 bg-cream" aria-hidden />
         <div
           className="absolute inset-0"
           style={{
@@ -196,10 +193,10 @@ function HomeTab({
           aria-hidden
         />
         <div className="absolute inset-0 flex items-end justify-between p-3">
-          <div className="text-[12px] tracking-tight text-ink backdrop-blur-sm bg-paper/60 px-2 py-0.5 rounded">
+          <div className="text-sm tracking-tight text-ink backdrop-blur-sm bg-paper/60 px-2 py-0.5 rounded">
             {organization.name} Roadmap
           </div>
-          <div className="absolute top-3 right-3 text-[10px] text-ink bg-paper/80 backdrop-blur-sm rounded px-1.5 py-0.5">
+          <div className="absolute top-3 right-3 text-2xs text-ink bg-paper/80 backdrop-blur-sm rounded px-1.5 py-0.5">
             9%
           </div>
         </div>
@@ -210,7 +207,7 @@ function HomeTab({
           {ACTIVE_TASKS.map((t, i) => (
             <li
               key={i}
-              className="flex items-center gap-2 rounded-md hover:bg-canvas px-1 py-1.5 text-[13px] text-ink cursor-pointer"
+              className="flex items-center gap-2 rounded-md hover:bg-canvas px-1 py-1.5 text-base text-ink cursor-pointer"
             >
               {t.icon}
               <span className="truncate flex-1">{t.title}</span>
@@ -236,7 +233,7 @@ function HomeTab({
           {SUGGESTED.map((s) => (
             <li
               key={s}
-              className="flex items-center gap-2 text-[13px] text-ink"
+              className="flex items-center gap-2 text-base text-ink"
             >
               <Circle className="size-3 text-line-strong" />
               <span>{s}</span>
@@ -262,7 +259,7 @@ function Section({
   return (
     <div>
       <div className="flex items-center justify-between mb-2">
-        <div className="text-[10px] uppercase tracking-[0.14em] text-ink-soft">
+        <div className="text-2xs uppercase tracking-[0.14em] text-ink-soft">
           {label}
         </div>
         {right}
@@ -281,8 +278,8 @@ function CofounderInlineComposer({
   return (
     <div className="mt-auto pt-4">
       <div className="rounded-lg border border-line/70 bg-paper">
-        <div className="px-3 py-2 border-b border-line/70 inline-flex items-center gap-1.5 text-[11px]">
-          <span className="size-3 rounded-full bg-gradient-to-br from-amber-200 to-amber-400 inline-block" />
+        <div className="px-3 py-2 border-b border-line/70 inline-flex items-center gap-1.5 text-xs">
+          <span className="size-3 rounded-full  bg-mustard/30 inline-block" />
           <span className="text-ink-muted">Cofounder</span>
         </div>
         <textarea
@@ -290,7 +287,7 @@ function CofounderInlineComposer({
           onChange={(e) => setText(e.target.value)}
           placeholder={`Ask Cofounder anything about your company…`}
           rows={2}
-          className="w-full resize-none bg-transparent px-3 py-2 text-[12px] focus:outline-none placeholder:text-ink-soft"
+          className="w-full resize-none bg-transparent px-3 py-2 text-sm focus:outline-none placeholder:text-ink-soft"
         />
         <div className="flex items-center justify-between px-2 pb-2">
           <button

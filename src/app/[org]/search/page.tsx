@@ -58,7 +58,7 @@ export default function SearchPage() {
               value={q}
               onChange={(e) => setQ(e.target.value)}
               placeholder="Search tasks, agents, artifacts, tech tree, skills…"
-              className="flex-1 text-[13px] focus:outline-none bg-transparent"
+              className="flex-1 text-base focus:outline-none bg-transparent"
             />
           </div>
           <div className="flex flex-wrap gap-1 mt-2">
@@ -69,7 +69,7 @@ export default function SearchPage() {
                   key={k}
                   type="button"
                   onClick={() => setKind(k)}
-                  className={`text-[11px] uppercase tracking-wider rounded px-2 py-0.5 transition-colors ${
+                  className={`text-xs uppercase tracking-wider rounded px-2 py-0.5 transition-colors ${
                     on
                       ? "bg-ink text-paper"
                       : "bg-cream text-ink-muted hover:bg-line"
@@ -89,16 +89,16 @@ export default function SearchPage() {
               className="rounded-md border border-line/70 bg-paper px-3 py-2 flex items-center justify-between hover:border-line-strong cursor-pointer"
             >
               <div>
-                <div className="text-[13px]">{r.title}</div>
-                <div className="text-[11px] text-ink-muted">{r.sub}</div>
+                <div className="text-base">{r.title}</div>
+                <div className="text-xs text-ink-muted">{r.sub}</div>
               </div>
-              <span className="text-[10px] uppercase tracking-wider text-ink-soft">
+              <span className="text-2xs uppercase tracking-wider text-ink-soft">
                 {r.kind}
               </span>
             </li>
           ))}
           {filtered.length === 0 && (
-            <li className="rounded-md border border-line/70 bg-paper px-3 py-3 text-center text-[12px] text-ink-muted">
+            <li className="rounded-md border border-line/70 bg-paper px-3 py-3 text-center text-sm text-ink-muted">
               No matches.
             </li>
           )}

@@ -6,6 +6,7 @@ import {
   Hint,
   PageTitle,
   Pill,
+  StatCard,
 } from "@/components/ui/primitives";
 import { ArrowLeft, BarChart3, TrendingUp, TrendingDown } from "lucide-react";
 
@@ -73,40 +74,22 @@ export default async function CostBreakdownPage({
         </header>
 
         <div className="grid grid-cols-3 gap-3">
-          <div className="rounded-md border border-line/70 bg-paper p-3">
-            <div className="text-2xs uppercase tracking-wider text-ink-soft">
-              Total
-            </div>
-            <div className="text-base font-medium tracking-tight mt-0.5 text-ink">
-              ${total.toFixed(2)}
-            </div>
-          </div>
-          <div className="rounded-md border border-line/70 bg-paper p-3">
-            <div className="text-2xs uppercase tracking-wider text-ink-soft">
-              vs last week
-            </div>
-            <div
-              className={`text-base font-medium tracking-tight mt-0.5 inline-flex items-center gap-1 ${
-                delta >= 0 ? "text-mustard-ink" : "text-sage-ink"
-              }`}
-            >
-              {delta >= 0 ? (
-                <TrendingUp className="size-3.5" />
-              ) : (
-                <TrendingDown className="size-3.5" />
-              )}
-              {delta >= 0 ? "+" : ""}
-              ${delta.toFixed(2)} ({deltaPct}%)
-            </div>
-          </div>
-          <div className="rounded-md border border-line/70 bg-paper p-3">
-            <div className="text-2xs uppercase tracking-wider text-ink-soft">
-              Top driver
-            </div>
-            <div className="text-base font-medium tracking-tight mt-0.5">
-              Engineer · Opus
-            </div>
-          </div>
+          <StatCard label="Total" value={`$${total.toFixed(2)}`} />
+          <StatCard
+            label="vs last week"
+            tone={delta >= 0 ? "mustard" : "sage"}
+            value={
+              <span className="inline-flex items-center gap-1">
+                {delta >= 0 ? (
+                  <TrendingUp className="size-3.5" />
+                ) : (
+                  <TrendingDown className="size-3.5" />
+                )}
+                {delta >= 0 ? "+" : ""}${delta.toFixed(2)} ({deltaPct}%)
+              </span>
+            }
+          />
+          <StatCard label="Top driver" value="Engineer · Opus" />
         </div>
 
         <Card>

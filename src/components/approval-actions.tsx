@@ -50,7 +50,7 @@ export default function ApprovalActions({
         type="button"
         onClick={() => decide("discuss")}
         disabled={!!busy}
-        className="inline-flex items-center gap-1 text-[12px] rounded-md border border-line bg-paper px-3 py-1.5 hover:border-line-strong disabled:opacity-40"
+        className="inline-flex items-center gap-1 text-sm rounded-md border border-line bg-paper px-3 py-1.5 hover:border-line-strong disabled:opacity-40"
       >
         <AlertCircle className="size-3" />
         {busy === "discuss" ? "…" : "Discuss"}
@@ -59,7 +59,7 @@ export default function ApprovalActions({
         type="button"
         onClick={() => decide("decline")}
         disabled={!!busy}
-        className="inline-flex items-center gap-1 text-[12px] rounded-md border border-brick/40 bg-brick/10 text-brick-ink px-3 py-1.5 hover:bg-brick/20 disabled:opacity-40"
+        className="inline-flex items-center gap-1 text-sm rounded-md border border-brick/40 bg-brick/10 text-brick-ink px-3 py-1.5 hover:bg-brick/20 disabled:opacity-40"
       >
         <XCircle className="size-3" />
         {busy === "decline" ? "…" : "Decline"}
@@ -68,7 +68,7 @@ export default function ApprovalActions({
         type="button"
         onClick={() => decide("approve")}
         disabled={!!busy}
-        className="inline-flex items-center gap-1 text-[12px] rounded-md bg-ink text-paper px-3 py-1.5 hover:opacity-90 disabled:opacity-40"
+        className="inline-flex items-center gap-1 text-sm rounded-md bg-ink text-paper px-3 py-1.5 hover:opacity-90 disabled:opacity-40"
       >
         <CheckCircle2 className="size-3" />
         {busy === "approve" ? "…" : "Approve"}

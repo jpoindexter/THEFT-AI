@@ -43,7 +43,7 @@ export default function TaskCloseControls({
           <CheckCircle2 className="size-4 text-sage-ink" />
           Task closed
         </span>
-        <button className="text-[11px] rounded-md border border-line px-2 py-1 hover:border-line-strong">
+        <button className="text-xs rounded-md border border-line px-2 py-1 hover:border-line-strong">
           Reopen
         </button>
       </div>
@@ -58,13 +58,13 @@ export default function TaskCloseControls({
           Close this task once the work is shipped or rejected.
         </div>
         <div className="flex gap-1">
-          <button className="text-[11px] rounded-md border border-line px-2 py-1 hover:border-line-strong">
+          <button className="text-xs rounded-md border border-line px-2 py-1 hover:border-line-strong">
             Report issue
           </button>
           <button
             type="button"
             onClick={() => setOpen(true)}
-            className="text-[11px] rounded-md bg-ink text-paper px-3 py-1"
+            className="text-xs rounded-md bg-ink text-paper px-3 py-1"
           >
             Close task
           </button>
@@ -76,7 +76,7 @@ export default function TaskCloseControls({
   return (
     <div className="rounded-lg border border-line/70 bg-paper p-4 space-y-3">
       <div className="flex items-center justify-between">
-        <div className="text-[14px] font-medium tracking-tight">
+        <div className="text-md font-medium tracking-tight">
           Close task
         </div>
         <button

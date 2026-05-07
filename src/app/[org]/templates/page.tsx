@@ -84,7 +84,7 @@ export default async function TemplatesPage({
           </div>
           <Link
             href={`/${org}/tasks/new`}
-            className="inline-flex items-center gap-1 rounded-md border border-line bg-paper px-3 py-1.5 text-[12px] hover:border-line-strong"
+            className="inline-flex items-center gap-1 rounded-md border border-line bg-paper px-3 py-1.5 text-sm hover:border-line-strong"
           >
             <Plus className="size-3.5" /> Blank task
           </Link>

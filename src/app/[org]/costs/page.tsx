@@ -18,26 +18,26 @@ export default async function CostsPage({
         <header className="flex items-center justify-between">
           <div>
             <h1 className="text-xl tracking-tight">Costs</h1>
-            <p className="text-[12px] text-ink-muted">
+            <p className="text-sm text-ink-muted">
               Token usage, model spend, and per-agent costs across the workspace.
             </p>
           </div>
           <div className="flex items-center gap-1">
             <a
               href={`/api/${org}/costs/export`}
-              className="text-[11px] rounded-md border border-line bg-paper px-2 py-1 hover:border-line-strong"
+              className="text-xs rounded-md border border-line bg-paper px-2 py-1 hover:border-line-strong"
             >
               Export CSV
             </a>
             <Link
               href={`/${org}/costs/breakdown`}
-              className="text-[11px] rounded-md border border-line bg-paper px-2 py-1 hover:border-line-strong"
+              className="text-xs rounded-md border border-line bg-paper px-2 py-1 hover:border-line-strong"
             >
               Breakdown
             </Link>
             <Link
               href={`/${org}/costs/budget`}
-              className="text-[11px] rounded-md border border-line bg-paper px-2 py-1 hover:border-line-strong"
+              className="text-xs rounded-md border border-line bg-paper px-2 py-1 hover:border-line-strong"
             >
               Budget & limits
             </Link>
@@ -45,7 +45,7 @@ export default async function CostsPage({
         </header>
 
         <section className="rounded-lg border border-line/70 bg-paper p-4 space-y-2">
-          <div className="flex items-center justify-between text-[11px]">
+          <div className="flex items-center justify-between text-xs">
             <span className="text-ink-muted">
               ${total.toFixed(2)} of ${MONTHLY_BUDGET} monthly budget
             </span>
@@ -71,10 +71,10 @@ export default async function CostsPage({
 
         <section className="rounded-lg border border-line/70 bg-paper p-4">
           <div className="flex items-center justify-between mb-3">
-            <div className="text-[10px] uppercase tracking-wider text-ink-soft">
+            <div className="text-2xs uppercase tracking-wider text-ink-soft">
               Last 14 days
             </div>
-            <select className="text-[11px] rounded-md border border-line bg-paper px-2 py-0.5">
+            <select className="text-xs rounded-md border border-line bg-paper px-2 py-0.5">
               <option>By day</option>
               <option>By agent</option>
               <option>By model</option>
@@ -93,7 +93,7 @@ export default async function CostsPage({
         </section>
 
         <section className="rounded-lg border border-line/70 bg-paper">
-          <header className="px-4 py-2 border-b border-line/70 text-[10px] uppercase tracking-wider text-ink-soft">
+          <header className="px-4 py-2 border-b border-line/70 text-2xs uppercase tracking-wider text-ink-soft">
             Per agent
           </header>
           <div className="divide-y divide-line/60">
@@ -105,15 +105,15 @@ export default async function CostsPage({
             ].map((r) => (
               <div
                 key={r.agent}
-                className="px-4 py-2 flex items-center justify-between text-[13px]"
+                className="px-4 py-2 flex items-center justify-between text-base"
               >
                 <div>
                   <div className="font-medium">{r.agent}</div>
-                  <div className="text-[10px] text-ink-muted font-mono">
+                  <div className="text-2xs text-ink-muted font-mono">
                     {r.model}
                   </div>
                 </div>
-                <div className="font-mono text-[12px]">
+                <div className="font-mono text-sm">
                   ${r.spent.toFixed(2)}
                 </div>
               </div>
@@ -128,7 +128,7 @@ export default async function CostsPage({
 function Stat({ label, value }: { label: string; value: string }) {
   return (
     <div className="rounded-lg border border-line/70 bg-paper p-3">
-      <div className="text-[10px] uppercase tracking-wider text-ink-soft">
+      <div className="text-2xs uppercase tracking-wider text-ink-soft">
         {label}
       </div>
       <div className="text-2xl tracking-tight font-medium mt-1">{value}</div>

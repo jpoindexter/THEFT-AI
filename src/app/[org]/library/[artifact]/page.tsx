@@ -24,33 +24,33 @@ export default async function ArtifactDetailPage({
       <div className="max-w-3xl mx-auto space-y-4">
         <Link
           href={`/${orgSlug}/library`}
-          className="inline-flex items-center gap-1 text-[12px] text-ink-muted hover:text-ink"
+          className="inline-flex items-center gap-1 text-sm text-ink-muted hover:text-ink"
         >
           <ArrowLeft className="size-3" /> Back to library
         </Link>
 
         <header className="flex items-start justify-between gap-4">
           <div className="min-w-0">
-            <div className="text-[10px] uppercase tracking-wider text-ink-soft">
+            <div className="text-2xs uppercase tracking-wider text-ink-soft">
               {artifact.kind}
               {dept && ` · ${dept.name}`}
             </div>
             <h1 className="text-xl tracking-tight truncate">{artifact.name}</h1>
-            <p className="text-[11px] text-ink-muted mt-1">
+            <p className="text-xs text-ink-muted mt-1">
               Created {new Date(artifact.created_at).toLocaleString()}
             </p>
           </div>
           <div className="flex items-center gap-1 shrink-0">
             <button
               type="button"
-              className="inline-flex items-center gap-1 text-[11px] rounded-md border border-line bg-paper px-2 py-1 hover:border-line-strong"
+              className="inline-flex items-center gap-1 text-xs rounded-md border border-line bg-paper px-2 py-1 hover:border-line-strong"
             >
               <Pin className="size-3" />
               {artifact.pinned ? "Unpin" : "Pin"}
             </button>
             <button
               type="button"
-              className="inline-flex items-center gap-1 text-[11px] rounded-md border border-line bg-paper px-2 py-1 hover:border-line-strong"
+              className="inline-flex items-center gap-1 text-xs rounded-md border border-line bg-paper px-2 py-1 hover:border-line-strong"
             >
               <MessageSquare className="size-3" /> Comment
             </button>
@@ -59,18 +59,18 @@ export default async function ArtifactDetailPage({
 
         {artifact.kind === "markdown" || artifact.kind === "code" ? (
           <section className="rounded-lg border border-line/70 bg-paper p-4">
-            <pre className="text-[12px] font-mono whitespace-pre-wrap leading-relaxed text-ink">
+            <pre className="text-sm font-mono whitespace-pre-wrap leading-relaxed text-ink">
               {artifact.content ?? "(empty)"}
             </pre>
           </section>
         ) : (
-          <section className="rounded-lg border border-line/70 bg-paper p-4 text-[12px] text-ink-muted">
+          <section className="rounded-lg border border-line/70 bg-paper p-4 text-sm text-ink-muted">
             Binary preview not implemented for <code>{artifact.kind}</code> yet.
           </section>
         )}
 
         <section className="rounded-lg border border-line/70 bg-paper p-4 space-y-2">
-          <div className="text-[10px] uppercase tracking-wider text-ink-soft">
+          <div className="text-2xs uppercase tracking-wider text-ink-soft">
             Versions
           </div>
           <ul className="divide-y divide-line/60">
@@ -99,7 +99,7 @@ export default async function ArtifactDetailPage({
             ].map((row) => (
               <li
                 key={row.v}
-                className="py-1.5 flex items-center justify-between text-[12px]"
+                className="py-1.5 flex items-center justify-between text-sm"
               >
                 <span className="font-mono text-ink">{row.v}</span>
                 <span className="text-ink-muted truncate flex-1 mx-2">
@@ -123,10 +123,10 @@ export default async function ArtifactDetailPage({
         </section>
 
         <section className="rounded-lg border border-line/70 bg-paper p-4 space-y-2">
-          <div className="text-[10px] uppercase tracking-wider text-ink-soft">
+          <div className="text-2xs uppercase tracking-wider text-ink-soft">
             Comments
           </div>
-          <p className="text-[12px] text-ink-muted">
+          <p className="text-sm text-ink-muted">
             No comments yet. Select text inside the artifact to start a thread.
           </p>
         </section>

@@ -52,7 +52,7 @@ export default function NewAgentPage() {
       <div className="max-w-3xl mx-auto space-y-6">
         <header>
           <h1 className="text-xl tracking-tight">New agent</h1>
-          <p className="text-[12px] text-ink-muted">
+          <p className="text-sm text-ink-muted">
             A custom agent with its own instructions, model, integrations, and
             attached skills.
           </p>
@@ -64,7 +64,7 @@ export default function NewAgentPage() {
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="e.g. Outbound Researcher"
-              className="w-full h-9 rounded-md border border-line bg-paper px-3 text-[13px] focus:outline-none focus:border-line-strong"
+              className="w-full h-9 rounded-md border border-line bg-paper px-3 text-base focus:outline-none focus:border-line-strong"
             />
           </Field>
           <Field label="Role">
@@ -72,14 +72,14 @@ export default function NewAgentPage() {
               value={role}
               onChange={(e) => setRole(e.target.value)}
               placeholder="e.g. researcher"
-              className="w-full h-9 rounded-md border border-line bg-paper px-3 text-[13px] focus:outline-none focus:border-line-strong"
+              className="w-full h-9 rounded-md border border-line bg-paper px-3 text-base focus:outline-none focus:border-line-strong"
             />
           </Field>
           <Field label="Department">
             <select
               value={department}
               onChange={(e) => setDepartment(e.target.value)}
-              className="w-full h-9 rounded-md border border-line bg-paper px-2 text-[13px]"
+              className="w-full h-9 rounded-md border border-line bg-paper px-2 text-base"
             >
               {DEPARTMENTS.map((d) => (
                 <option key={d} value={d}>
@@ -95,7 +95,7 @@ export default function NewAgentPage() {
             <select
               value={model}
               onChange={(e) => setModel(e.target.value)}
-              className="w-full h-9 rounded-md border border-line bg-paper px-2 text-[13px]"
+              className="w-full h-9 rounded-md border border-line bg-paper px-2 text-base"
             >
               {MODELS.map((m) => (
                 <option key={m} value={m}>
@@ -110,7 +110,7 @@ export default function NewAgentPage() {
               onChange={(e) => setInstructions(e.target.value)}
               rows={5}
               placeholder="You are a research agent. You ..."
-              className="w-full rounded-md border border-line bg-paper px-3 py-2 text-[13px] focus:outline-none focus:border-line-strong"
+              className="w-full rounded-md border border-line bg-paper px-3 py-2 text-base focus:outline-none focus:border-line-strong"
             />
           </Field>
           <Field label="Monthly budget" hint="USD. Hard cap on token spend.">
@@ -118,14 +118,14 @@ export default function NewAgentPage() {
               type="number"
               value={budget}
               onChange={(e) => setBudget(Number(e.target.value))}
-              className="w-32 h-9 rounded-md border border-line bg-paper px-3 text-[13px] focus:outline-none focus:border-line-strong"
+              className="w-32 h-9 rounded-md border border-line bg-paper px-3 text-base focus:outline-none focus:border-line-strong"
             />
           </Field>
         </Section>
 
         <Section title="Skills" hint="Reusable guidance attached to this agent.">
           {skills.length === 0 ? (
-            <p className="text-[12px] text-ink-muted">
+            <p className="text-sm text-ink-muted">
               No skills found in <code>/skills/</code>.
             </p>
           ) : (
@@ -137,14 +137,14 @@ export default function NewAgentPage() {
                     key={s.slug}
                     type="button"
                     onClick={() => toggle(s.slug)}
-                    className={`text-left rounded-md border px-2 py-1.5 text-[12px] transition-colors ${
+                    className={`text-left rounded-md border px-2 py-1.5 text-sm transition-colors ${
                       on
                         ? "border-ink bg-cream"
                         : "border-line hover:border-line-strong"
                     }`}
                   >
                     <div className="font-medium">{s.name}</div>
-                    <div className="font-mono text-[10px] text-ink-muted">
+                    <div className="font-mono text-2xs text-ink-muted">
                       {s.slug}
                     </div>
                   </button>
@@ -158,14 +158,14 @@ export default function NewAgentPage() {
           <button
             type="button"
             onClick={() => router.back()}
-            className="text-[12px] rounded-md border border-line bg-paper px-3 py-1.5 hover:border-line-strong"
+            className="text-sm rounded-md border border-line bg-paper px-3 py-1.5 hover:border-line-strong"
           >
             Cancel
           </button>
           <button
             type="button"
             disabled={!name || !role}
-            className="text-[12px] rounded-md bg-ink text-paper px-3 py-1.5 disabled:opacity-40"
+            className="text-sm rounded-md bg-ink text-paper px-3 py-1.5 disabled:opacity-40"
           >
             Create agent
           </button>
@@ -187,8 +187,8 @@ function Section({
   return (
     <section className="rounded-lg border border-line/70 bg-paper p-4 space-y-3">
       <div>
-        <h2 className="text-[14px] font-medium tracking-tight">{title}</h2>
-        {hint && <p className="text-[11px] text-ink-muted">{hint}</p>}
+        <h2 className="text-md font-medium tracking-tight">{title}</h2>
+        {hint && <p className="text-xs text-ink-muted">{hint}</p>}
       </div>
       {children}
     </section>
@@ -206,9 +206,9 @@ function Field({
 }) {
   return (
     <div className="space-y-1">
-      <div className="text-[12px] text-ink">{label}</div>
+      <div className="text-sm text-ink">{label}</div>
       {children}
-      {hint && <p className="text-[11px] text-ink-muted">{hint}</p>}
+      {hint && <p className="text-xs text-ink-muted">{hint}</p>}
     </div>
   );
 }

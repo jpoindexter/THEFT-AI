@@ -144,7 +144,7 @@ function Field({
 }) {
   return (
     <div className="space-y-1">
-      <label className="text-[12px] text-ink-muted">{label}</label>
+      <label className="text-sm text-ink-muted">{label}</label>
       <input
         placeholder={placeholder}
         className="w-full h-9 rounded-md border border-line bg-paper px-3 text-xs font-mono focus:outline-none focus:border-line-strong"

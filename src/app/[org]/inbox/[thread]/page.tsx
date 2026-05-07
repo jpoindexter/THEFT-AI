@@ -62,13 +62,13 @@ export default async function InboxThreadPage({
       <div className="max-w-3xl mx-auto space-y-4">
         <Link
           href={`/${org}/inbox`}
-          className="inline-flex items-center gap-1 text-[12px] text-ink-muted hover:text-ink"
+          className="inline-flex items-center gap-1 text-sm text-ink-muted hover:text-ink"
         >
           <ArrowLeft className="size-3" /> Back to inbox
         </Link>
 
         <header>
-          <div className="text-[10px] uppercase tracking-wider text-ink-soft">
+          <div className="text-2xs uppercase tracking-wider text-ink-soft">
             {t.agent} · <code className="font-mono">{t.address}</code>
           </div>
           <h1 className="text-xl tracking-tight mt-0.5">{t.subject}</h1>
@@ -80,11 +80,11 @@ export default async function InboxThreadPage({
               key={i}
               className="border-b last:border-0 border-line/50 pb-3 last:pb-0"
             >
-              <div className="flex items-center justify-between text-[11px]">
+              <div className="flex items-center justify-between text-xs">
                 <span className="font-mono text-ink">{m.from}</span>
                 <span className="text-ink-soft">{m.when}</span>
               </div>
-              <p className="text-[13px] text-ink leading-relaxed mt-1 whitespace-pre-wrap">
+              <p className="text-base text-ink leading-relaxed mt-1 whitespace-pre-wrap">
                 {m.body}
               </p>
             </article>

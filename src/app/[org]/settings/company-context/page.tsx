@@ -49,7 +49,7 @@ export default function CompanyContextPage() {
       <div className="max-w-3xl mx-auto space-y-5">
         <header>
           <h1 className="text-xl tracking-tight">Company Context</h1>
-          <p className="text-[12px] text-ink-muted">
+          <p className="text-sm text-ink-muted">
             Import durable company knowledge from another AI tool. Run the
             prompt there, paste the report here, preview, then import to Company
             Memory.
@@ -57,7 +57,7 @@ export default function CompanyContextPage() {
         </header>
 
         <section className="rounded-lg border border-line/70 bg-paper p-4 space-y-3">
-          <div className="text-[14px] font-medium tracking-tight">
+          <div className="text-md font-medium tracking-tight">
             1. Pick the source
           </div>
           <div className="grid grid-cols-5 gap-1.5">
@@ -68,14 +68,14 @@ export default function CompanyContextPage() {
                   key={s.id}
                   type="button"
                   onClick={() => setSource(s.id)}
-                  className={`text-left rounded-md border px-2 py-1.5 text-[11px] transition-colors ${
+                  className={`text-left rounded-md border px-2 py-1.5 text-xs transition-colors ${
                     on
                       ? "border-ink bg-cream"
                       : "border-line hover:border-line-strong"
                   }`}
                 >
                   <div className="font-medium">{s.label}</div>
-                  <div className="text-[10px] text-ink-muted">{s.note}</div>
+                  <div className="text-2xs text-ink-muted">{s.note}</div>
                 </button>
               );
             })}
@@ -84,13 +84,13 @@ export default function CompanyContextPage() {
 
         <section className="rounded-lg border border-line/70 bg-paper p-4 space-y-2">
           <div className="flex items-center justify-between">
-            <div className="text-[14px] font-medium tracking-tight">
+            <div className="text-md font-medium tracking-tight">
               2. Copy this prompt into {SOURCES.find((s) => s.id === source)?.label}
             </div>
             <button
               type="button"
               onClick={copy}
-              className="inline-flex items-center gap-1 text-[11px] rounded-md border border-line bg-paper px-2 py-1 hover:border-line-strong"
+              className="inline-flex items-center gap-1 text-xs rounded-md border border-line bg-paper px-2 py-1 hover:border-line-strong"
             >
               {copied ? (
                 <>
@@ -103,13 +103,13 @@ export default function CompanyContextPage() {
               )}
             </button>
           </div>
-          <pre className="text-[11px] font-mono whitespace-pre-wrap leading-relaxed bg-canvas rounded-md p-3 max-h-64 overflow-y-auto text-ink">
+          <pre className="text-xs font-mono whitespace-pre-wrap leading-relaxed bg-canvas rounded-md p-3 max-h-64 overflow-y-auto text-ink">
             {PROMPT}
           </pre>
         </section>
 
         <section className="rounded-lg border border-line/70 bg-paper p-4 space-y-2">
-          <div className="text-[14px] font-medium tracking-tight">
+          <div className="text-md font-medium tracking-tight">
             3. Paste the report
           </div>
           <textarea
@@ -117,21 +117,21 @@ export default function CompanyContextPage() {
             onChange={(e) => setReport(e.target.value)}
             rows={10}
             placeholder="Paste the Company Context Export here…"
-            className="w-full rounded-md border border-line bg-paper px-3 py-2 text-[12px] font-mono focus:outline-none focus:border-line-strong"
+            className="w-full rounded-md border border-line bg-paper px-3 py-2 text-sm font-mono focus:outline-none focus:border-line-strong"
           />
           <div className="flex justify-end gap-2">
             <button
               type="button"
               disabled={!report.trim()}
               onClick={() => setPreviewing(true)}
-              className="text-[12px] rounded-md border border-line bg-paper px-3 py-1.5 hover:border-line-strong disabled:opacity-40"
+              className="text-sm rounded-md border border-line bg-paper px-3 py-1.5 hover:border-line-strong disabled:opacity-40"
             >
               Preview
             </button>
             <button
               type="button"
               disabled={!previewing}
-              className="inline-flex items-center gap-1 text-[12px] rounded-md bg-ink text-paper px-3 py-1.5 disabled:opacity-40"
+              className="inline-flex items-center gap-1 text-sm rounded-md bg-ink text-paper px-3 py-1.5 disabled:opacity-40"
             >
               <Upload className="size-3" /> Import to Company Memory
             </button>
@@ -140,13 +140,13 @@ export default function CompanyContextPage() {
 
         {previewing && (
           <section className="rounded-lg border border-line/70 bg-paper p-4 space-y-2">
-            <div className="text-[14px] font-medium tracking-tight">
+            <div className="text-md font-medium tracking-tight">
               Preview
             </div>
-            <p className="text-[11px] text-ink-muted">
+            <p className="text-xs text-ink-muted">
               Items extracted. Uncheck anything you don&apos;t want imported.
             </p>
-            <ul className="space-y-1 text-[12px]">
+            <ul className="space-y-1 text-sm">
               {parseItems(report).map((line, i) => (
                 <li
                   key={i}
@@ -157,7 +157,7 @@ export default function CompanyContextPage() {
                     defaultChecked
                     className="mt-1"
                   />
-                  <span className="font-mono text-[11px] text-ink">
+                  <span className="font-mono text-xs text-ink">
                     {line}
                   </span>
                 </li>

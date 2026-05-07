@@ -19,7 +19,7 @@ const HERO_BY_DEPT: Record<
   engineering: {
     headline: (org) => (
       <>
-        Let&apos;s build <span className="text-blue-600">your app</span> from
+        Let&apos;s build <span className="text-ink">your app</span> from
         the ground up.
       </>
     ),
@@ -43,7 +43,7 @@ const HERO_BY_DEPT: Record<
   design: {
     headline: () => (
       <>
-        Let&apos;s build <span className="text-blue-600">your visual identity</span>{" "}
+        Let&apos;s build <span className="text-ink">your visual identity</span>{" "}
         from the ground up.
       </>
     ),
@@ -63,7 +63,7 @@ const HERO_BY_DEPT: Record<
   marketing: {
     headline: () => (
       <>
-        Let&apos;s build <span className="text-blue-600">your go-to-market</span>{" "}
+        Let&apos;s build <span className="text-ink">your go-to-market</span>{" "}
         from the ground up.
       </>
     ),
@@ -83,7 +83,7 @@ const HERO_BY_DEPT: Record<
   sales: {
     headline: () => (
       <>
-        Let&apos;s build <span className="text-blue-600">your pipeline</span>{" "}
+        Let&apos;s build <span className="text-ink">your pipeline</span>{" "}
         from the ground up.
       </>
     ),
@@ -103,7 +103,7 @@ const HERO_BY_DEPT: Record<
   operations: {
     headline: () => (
       <>
-        Let&apos;s set up <span className="text-blue-600">your operations</span>{" "}
+        Let&apos;s set up <span className="text-ink">your operations</span>{" "}
         from the ground up.
       </>
     ),
@@ -122,7 +122,7 @@ const HERO_BY_DEPT: Record<
   finance: {
     headline: () => (
       <>
-        Let&apos;s set up <span className="text-blue-600">your finance stack</span>{" "}
+        Let&apos;s set up <span className="text-ink">your finance stack</span>{" "}
         from the ground up.
       </>
     ),
@@ -141,7 +141,7 @@ const HERO_BY_DEPT: Record<
   legal: {
     headline: () => (
       <>
-        Let&apos;s set up <span className="text-blue-600">your legal foundation</span>.
+        Let&apos;s set up <span className="text-ink">your legal foundation</span>.
       </>
     ),
     cta: "Legal agent ready",
@@ -159,7 +159,7 @@ const HERO_BY_DEPT: Record<
   support: {
     headline: () => (
       <>
-        Let&apos;s set up <span className="text-blue-600">your customer support</span>.
+        Let&apos;s set up <span className="text-ink">your customer support</span>.
       </>
     ),
     cta: "Support agent ready",
@@ -191,7 +191,7 @@ export default function DepartmentHero({
   return (
     <div className="absolute inset-0 overflow-y-auto p-6">
       <div className="max-w-5xl mx-auto space-y-4">
-        <div className="flex items-center gap-2 text-[13px]">
+        <div className="flex items-center gap-2 text-base">
           <DeptIcon slug={department.slug} />
           <span className="font-medium">{department.name} Department</span>
           <button
@@ -204,7 +204,7 @@ export default function DepartmentHero({
         </div>
 
         <div className="rounded-2xl bg-canvas/80 border border-line/70 px-8 py-12 flex flex-col items-center text-center gap-6">
-          <div className="inline-flex items-center gap-1.5 rounded-full border border-line/70 bg-paper px-3 py-1 text-[11px] text-ink">
+          <div className="inline-flex items-center gap-1.5 rounded-full border border-line/70 bg-paper px-3 py-1 text-xs text-ink">
             <Sparkles className="size-3 text-mustard-ink" />
             {cfg.cta}
           </div>
@@ -220,10 +220,10 @@ export default function DepartmentHero({
 
         <div className="rounded-2xl border border-line/70 bg-paper p-4">
           <div className="flex items-center justify-between mb-3">
-            <span className="text-[11px] text-ink-muted">
+            <span className="text-xs text-ink-muted">
               {department.name} Roadmap
             </span>
-            <span className="text-[10px] uppercase tracking-wider text-ink-soft">
+            <span className="text-2xs uppercase tracking-wider text-ink-soft">
               {cfg.progress}
             </span>
           </div>
@@ -235,10 +235,10 @@ export default function DepartmentHero({
                 className="text-left rounded-md border border-line/70 bg-canvas px-3 py-2 hover:border-line-strong transition-colors"
               >
                 <div className="size-5 rounded-sm bg-line mb-1.5" />
-                <div className="text-[12px] font-medium text-ink leading-tight">
+                <div className="text-sm font-medium text-ink leading-tight">
                   {node.title}
                 </div>
-                <div className="text-[10px] text-ink-muted mt-0.5">
+                <div className="text-2xs text-ink-muted mt-0.5">
                   {node.subtitle}
                 </div>
               </button>
@@ -247,22 +247,22 @@ export default function DepartmentHero({
         </div>
 
         {hasActiveTasks ? (
-          <div className="text-[12px] text-ink-muted text-center">
+          <div className="text-sm text-ink-muted text-center">
             Active tasks shown in the right panel.
           </div>
         ) : (
           <div className="rounded-lg border border-mustard/40 bg-mustard/15 p-3 text-center max-w-md mx-auto">
-            <div className="text-[12px] text-mustard-ink font-medium">
+            <div className="text-sm text-mustard-ink font-medium">
               First task here?
             </div>
-            <p className="text-[11px] text-mustard-ink/80 leading-snug mt-1">
+            <p className="text-xs text-mustard-ink/80 leading-snug mt-1">
               Kick off the {department.name} agent with the recommended
               onboarding task — it gathers context first, then proposes work.
             </p>
             <button
               type="button"
               onClick={() => setTaskOpen(true)}
-              className="mt-2 inline-flex items-center gap-1 rounded-md bg-ink text-paper px-3 py-1 text-[11px] hover:opacity-90"
+              className="mt-2 inline-flex items-center gap-1 rounded-md bg-ink text-paper px-3 py-1 text-xs hover:opacity-90"
             >
               Start onboarding task
             </button>
@@ -273,7 +273,7 @@ export default function DepartmentHero({
           <button
             type="button"
             onClick={() => setTaskOpen(true)}
-            className="inline-flex items-center gap-1 rounded-md bg-ink text-paper px-3 py-1.5 text-[12px]"
+            className="inline-flex items-center gap-1 rounded-md bg-ink text-paper px-3 py-1.5 text-sm"
           >
             <Plus className="size-3.5" />
             New task
@@ -296,7 +296,7 @@ function DeviceMock({ url, label }: { url: string; label: string }) {
       <div className="rounded-xl border border-line/80 bg-paper shadow-[0_4px_24px_-12px_rgba(0,0,0,0.15)] overflow-hidden w-56">
         <div className="bg-cream border-b border-line/70 px-2 py-1 flex items-center gap-1.5">
           <div className="flex gap-1">
-            <span className="size-1.5 rounded-full bg-rose-300" />
+            <span className="size-1.5 rounded-full bg-mustard" />
             <span className="size-1.5 rounded-full bg-mustard" />
             <span className="size-1.5 rounded-full bg-sage" />
           </div>
@@ -309,28 +309,28 @@ function DeviceMock({ url, label }: { url: string; label: string }) {
           <div className="h-1.5 w-20 rounded bg-cream" />
           <div className="h-1.5 w-16 rounded bg-cream" />
           <div className="h-12 mt-2 rounded bg-cream" />
-          <div className="h-3 mt-1 rounded bg-blue-100 w-16" />
+          <div className="h-3 mt-1 rounded bg-cream w-16" />
         </div>
       </div>
-      <span className="text-[10px] text-ink-muted">{label}</span>
+      <span className="text-2xs text-ink-muted">{label}</span>
     </div>
   );
 }
 
 function DeptIcon({ slug }: { slug: string }) {
   const colors: Record<string, string> = {
-    engineering: "from-orange-300 to-amber-400",
-    design: "from-stone-300 to-stone-400",
-    marketing: "from-pink-300 to-rose-400",
-    sales: "from-lime-300 to-emerald-400",
-    operations: "from-emerald-300 to-teal-400",
-    finance: "from-sky-300 to-indigo-400",
-    legal: "from-slate-300 to-slate-500",
-    support: "from-violet-300 to-purple-400",
+    engineering: "bg-mustard/40",
+    design: "bg-cream",
+    marketing: "bg-mustard/30",
+    sales: "bg-sage/30",
+    operations: "bg-sage/30",
+    finance: "bg-cream",
+    legal: "bg-cream",
+    support: "bg-cream",
   };
   return (
     <span
-      className={`size-4 rounded-sm bg-gradient-to-br ${colors[slug] ?? "from-stone-200 to-stone-400"}`}
+      className={`size-4 rounded-sm  ${colors[slug] ?? "bg-cream"}`}
     />
   );
 }

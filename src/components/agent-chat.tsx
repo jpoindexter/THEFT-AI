@@ -153,7 +153,7 @@ export default function AgentChat({
           />
         ))}
         {busy && (
-          <div className="text-[11px] text-ink-soft inline-flex items-center gap-1.5">
+          <div className="text-xs text-ink-soft inline-flex items-center gap-1.5">
             <span className="size-2 rounded-full bg-mustard animate-pulse" />
             Cofounder is thinking…
           </div>
@@ -176,7 +176,7 @@ export default function AgentChat({
                 : 'Ask Cofounder anything… ("/" for commands)'
             }
             rows={2}
-            className="flex-1 resize-none bg-transparent px-3 py-2 text-[13px] focus:outline-none placeholder:text-ink-soft"
+            className="flex-1 resize-none bg-transparent px-3 py-2 text-base focus:outline-none placeholder:text-ink-soft"
           />
           {input.startsWith("/") && !input.includes(" ") && (
             <SlashMenu
@@ -214,7 +214,7 @@ function Turn({
   if (t.kind === "user_message") {
     return (
       <div className="flex justify-end">
-        <div className="max-w-[85%] rounded-lg bg-cream px-3 py-1.5 text-[13px] text-ink">
+        <div className="max-w-[85%] rounded-lg bg-cream px-3 py-1.5 text-base text-ink">
           {t.text}
         </div>
       </div>
@@ -223,11 +223,11 @@ function Turn({
   if (t.kind === "text") {
     return (
       <div className="space-y-1">
-        <div className="inline-flex items-center gap-1.5 text-[11px] text-ink-muted bg-mustard/30/40 px-1.5 py-0.5 rounded-sm">
-          <span className="size-3 rounded-full bg-gradient-to-br from-amber-200 to-amber-400 inline-block" />
+        <div className="inline-flex items-center gap-1.5 text-xs text-ink-muted bg-mustard/30/40 px-1.5 py-0.5 rounded-sm">
+          <span className="size-3 rounded-full  bg-mustard/30 inline-block" />
           Cofounder
         </div>
-        <div className="text-[13px] leading-relaxed text-ink bg-mustard/30/40 px-1 py-0.5 rounded-sm whitespace-pre-wrap">
+        <div className="text-base leading-relaxed text-ink bg-mustard/30/40 px-1 py-0.5 rounded-sm whitespace-pre-wrap">
           {t.text}
         </div>
       </div>
@@ -245,7 +245,7 @@ function Turn({
   }
   if (t.kind === "tool_answer") {
     return (
-      <div className="text-[11px] text-ink-muted inline-block bg-cream rounded-sm px-1.5 py-0.5">
+      <div className="text-xs text-ink-muted inline-block bg-cream rounded-sm px-1.5 py-0.5">
         {t.answer.label ?? t.answer.custom ?? t.answer.key}
       </div>
     );
@@ -267,7 +267,7 @@ function Turn({
 function ToolCallCard({ name, input }: { name: string; input: unknown }) {
   const [open, setOpen] = useState(false);
   return (
-    <div className="rounded-md border border-line/80 bg-paper text-[12px]">
+    <div className="rounded-md border border-line/80 bg-paper text-sm">
       <button
         type="button"
         onClick={() => setOpen((o) => !o)}
@@ -275,7 +275,7 @@ function ToolCallCard({ name, input }: { name: string; input: unknown }) {
       >
         <span className="inline-flex items-center gap-1.5 text-ink">
           <Wrench className="size-3 text-ink-soft" />
-          <span className="font-mono text-[11px]">{name}</span>
+          <span className="font-mono text-xs">{name}</span>
         </span>
         {open ? (
           <ChevronDown className="size-3 text-ink-soft" />
@@ -284,7 +284,7 @@ function ToolCallCard({ name, input }: { name: string; input: unknown }) {
         )}
       </button>
       {open && (
-        <pre className="border-t border-line/70 p-2 text-[10px] font-mono text-ink-muted bg-canvas rounded-b-md whitespace-pre-wrap">
+        <pre className="border-t border-line/70 p-2 text-2xs font-mono text-ink-muted bg-canvas rounded-b-md whitespace-pre-wrap">
           {JSON.stringify(input, null, 2)}
         </pre>
       )}
@@ -306,11 +306,11 @@ function AskUserQuestion({
 
   return (
     <div className="rounded-lg border border-line/80 bg-paper">
-      <div className="px-3 py-1.5 text-[11px] text-ink-muted border-b border-line/70 inline-flex items-center gap-1">
+      <div className="px-3 py-1.5 text-xs text-ink-muted border-b border-line/70 inline-flex items-center gap-1">
         Cofounder is asking
       </div>
       <div className="p-3 space-y-3">
-        <p className="text-[13px] text-ink leading-snug">
+        <p className="text-base text-ink leading-snug">
           {input.question}
         </p>
         <div className="space-y-1">
@@ -329,17 +329,17 @@ function AskUserQuestion({
                 }`}
               >
                 <div className="flex items-start justify-between gap-2">
-                  <div className="text-[12px] font-medium text-ink">
+                  <div className="text-sm font-medium text-ink">
                     {o.label}
                   </div>
                   {o.recommended && (
-                    <span className="text-[9px] text-sky-700 bg-sky-100 px-1.5 py-0.5 rounded-sm">
+                    <span className="text-2xs text-mustard-ink bg-mustard/30 px-1.5 py-0.5 rounded-sm">
                       Recommended
                     </span>
                   )}
                 </div>
                 {o.description && (
-                  <p className="text-[11px] text-ink-muted mt-1 leading-snug">
+                  <p className="text-xs text-ink-muted mt-1 leading-snug">
                     {o.description}
                   </p>
                 )}
@@ -356,7 +356,7 @@ function AskUserQuestion({
             }}
             disabled={disabled}
             placeholder="Something else…"
-            className="w-full text-[12px] border-b border-line bg-transparent px-1 py-1 focus:outline-none focus:border-line-strong"
+            className="w-full text-sm border-b border-line bg-transparent px-1 py-1 focus:outline-none focus:border-line-strong"
           />
         )}
       </div>
@@ -372,7 +372,7 @@ function AskUserQuestion({
               onAnswer({ key: picked, label: o?.label });
             }
           }}
-          className="text-[11px] rounded-md bg-ink text-paper px-2.5 py-1 hover:bg-ink/80 disabled:opacity-40"
+          className="text-xs rounded-md bg-ink text-paper px-2.5 py-1 hover:bg-ink/80 disabled:opacity-40"
         >
           Submit
         </button>

@@ -39,7 +39,7 @@ export default async function ApprovalsPage({
       <div className="max-w-3xl mx-auto space-y-4">
         <header>
           <h1 className="text-xl tracking-tight">Approvals</h1>
-          <p className="text-[12px] text-ink-muted">
+          <p className="text-sm text-ink-muted">
             Decisions agents need from you before continuing.
           </p>
         </header>
@@ -51,10 +51,10 @@ export default async function ApprovalsPage({
             >
               <div className="flex items-start justify-between gap-3">
                 <div>
-                  <div className="text-[11px] uppercase tracking-wider text-ink-soft">
+                  <div className="text-xs uppercase tracking-wider text-ink-soft">
                     {a.agent} · waiting {a.waiting}
                   </div>
-                  <h2 className="text-[14px] font-medium tracking-tight">
+                  <h2 className="text-md font-medium tracking-tight">
                     <Link
                       href={`/${org}/approvals/${a.id}`}
                       className="hover:underline decoration-stone-300 underline-offset-2"
@@ -64,7 +64,7 @@ export default async function ApprovalsPage({
                   </h2>
                 </div>
                 <span
-                  className={`text-[10px] uppercase rounded px-1.5 py-0.5 ${
+                  className={`text-2xs uppercase rounded px-1.5 py-0.5 ${
                     a.impact === "low"
                       ? "bg-sage/30 text-sage-ink"
                       : a.impact === "medium"
@@ -75,20 +75,20 @@ export default async function ApprovalsPage({
                   {a.impact} impact
                 </span>
               </div>
-              <p className="text-[12px] text-ink-muted leading-snug">
+              <p className="text-sm text-ink-muted leading-snug">
                 {a.body}
               </p>
               <div className="flex items-center justify-end gap-2">
                 <Link
                   href={`/${org}/approvals/${a.id}`}
-                  className="inline-flex items-center gap-1 text-[11px] rounded-md border border-line bg-paper px-2 py-1 hover:border-line-strong"
+                  className="inline-flex items-center gap-1 text-xs rounded-md border border-line bg-paper px-2 py-1 hover:border-line-strong"
                 >
                   <AlertCircle className="size-3" /> Discuss
                 </Link>
-                <button className="inline-flex items-center gap-1 text-[11px] rounded-md border border-brick/40 bg-paper text-brick-ink px-2 py-1 hover:bg-brick/10">
+                <button className="inline-flex items-center gap-1 text-xs rounded-md border border-brick/40 bg-paper text-brick-ink px-2 py-1 hover:bg-brick/10">
                   <XCircle className="size-3" /> Decline
                 </button>
-                <button className="inline-flex items-center gap-1 text-[11px] rounded-md bg-ink text-paper px-2 py-1">
+                <button className="inline-flex items-center gap-1 text-xs rounded-md bg-ink text-paper px-2 py-1">
                   <CheckCircle2 className="size-3" /> Approve
                 </button>
               </div>

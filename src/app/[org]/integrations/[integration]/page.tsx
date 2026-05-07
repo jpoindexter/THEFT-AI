@@ -120,7 +120,7 @@ export default async function IntegrationDetailPage({
       <div className="max-w-3xl mx-auto space-y-4">
         <Link
           href={`/${org}/integrations`}
-          className="inline-flex items-center gap-1 text-[12px] text-ink-muted hover:text-ink"
+          className="inline-flex items-center gap-1 text-sm text-ink-muted hover:text-ink"
         >
           <ArrowLeft className="size-3" /> Back to integrations
         </Link>
@@ -128,20 +128,20 @@ export default async function IntegrationDetailPage({
         <header className="flex items-start justify-between">
           <div>
             <h1 className="text-xl tracking-tight">{i.name}</h1>
-            <p className="text-[12px] text-ink-muted max-w-prose mt-1">
+            <p className="text-sm text-ink-muted max-w-prose mt-1">
               {i.desc}
             </p>
             <a
               href={i.docs}
               target="_blank"
               rel="noreferrer"
-              className="inline-flex items-center gap-1 text-[11px] text-ink-muted hover:text-ink mt-1"
+              className="inline-flex items-center gap-1 text-xs text-ink-muted hover:text-ink mt-1"
             >
               {i.docs} <ExternalLink className="size-3" />
             </a>
           </div>
           <span
-            className={`text-[10px] uppercase rounded px-1.5 py-0.5 shrink-0 ${
+            className={`text-2xs uppercase rounded px-1.5 py-0.5 shrink-0 ${
               i.status === "connected"
                 ? "bg-sage/30 text-sage-ink"
                 : "bg-cream text-ink-muted"
@@ -152,17 +152,17 @@ export default async function IntegrationDetailPage({
         </header>
 
         <section className="rounded-lg border border-line/70 bg-paper p-4 space-y-2">
-          <div className="text-[10px] uppercase tracking-wider text-ink-soft">
+          <div className="text-2xs uppercase tracking-wider text-ink-soft">
             Scopes
           </div>
           {i.scopes.length === 0 ? (
-            <p className="text-[12px] text-ink-muted">No scopes granted.</p>
+            <p className="text-sm text-ink-muted">No scopes granted.</p>
           ) : (
             <div className="flex flex-wrap gap-1">
               {i.scopes.map((s) => (
                 <code
                   key={s}
-                  className="text-[11px] font-mono px-1.5 py-0.5 rounded bg-cream text-ink"
+                  className="text-xs font-mono px-1.5 py-0.5 rounded bg-cream text-ink"
                 >
                   {s}
                 </code>
@@ -172,21 +172,21 @@ export default async function IntegrationDetailPage({
         </section>
 
         <section className="rounded-lg border border-line/70 bg-paper p-4 space-y-2">
-          <div className="text-[10px] uppercase tracking-wider text-ink-soft">
+          <div className="text-2xs uppercase tracking-wider text-ink-soft">
             Tools exposed to agents ({i.tools.length})
           </div>
           {i.tools.length === 0 ? (
-            <p className="text-[12px] text-ink-muted">
+            <p className="text-sm text-ink-muted">
               No tools yet. Connect to populate.
             </p>
           ) : (
             <ul className="divide-y divide-line/60">
               {i.tools.map((t) => (
                 <li key={t.name} className="py-2">
-                  <code className="text-[12px] font-mono text-ink">
+                  <code className="text-sm font-mono text-ink">
                     {t.name}
                   </code>
-                  <div className="text-[11px] text-ink-muted">
+                  <div className="text-xs text-ink-muted">
                     {t.description}
                   </div>
                 </li>
@@ -196,23 +196,23 @@ export default async function IntegrationDetailPage({
         </section>
 
         <section className="rounded-lg border border-line/70 bg-paper p-4 space-y-2">
-          <div className="text-[10px] uppercase tracking-wider text-ink-soft inline-flex items-center gap-1">
+          <div className="text-2xs uppercase tracking-wider text-ink-soft inline-flex items-center gap-1">
             <Activity className="size-3" /> Recent calls
           </div>
           {i.recent.length === 0 ? (
-            <p className="text-[12px] text-ink-muted">No recent activity.</p>
+            <p className="text-sm text-ink-muted">No recent activity.</p>
           ) : (
             <ul className="divide-y divide-line/60">
               {i.recent.map((r, idx) => (
                 <li
                   key={idx}
-                  className="py-2 flex items-center justify-between text-[12px]"
+                  className="py-2 flex items-center justify-between text-sm"
                 >
                   <span>
                     <code className="font-mono">{r.tool}</code>{" "}
                     <span className="text-ink-muted">— {r.result}</span>
                   </span>
-                  <span className="text-[10px] text-ink-soft">{r.when} ago</span>
+                  <span className="text-2xs text-ink-soft">{r.when} ago</span>
                 </li>
               ))}
             </ul>
@@ -221,11 +221,11 @@ export default async function IntegrationDetailPage({
 
         <div className="flex justify-end gap-2">
           {i.status === "connected" ? (
-            <button className="inline-flex items-center gap-1 text-[11px] rounded-md border border-brick/40 bg-paper text-brick-ink px-2 py-1 hover:bg-brick/10">
+            <button className="inline-flex items-center gap-1 text-xs rounded-md border border-brick/40 bg-paper text-brick-ink px-2 py-1 hover:bg-brick/10">
               <Trash2 className="size-3" /> Disconnect
             </button>
           ) : (
-            <button className="text-[11px] rounded-md bg-ink text-paper px-3 py-1.5">
+            <button className="text-xs rounded-md bg-ink text-paper px-3 py-1.5">
               Connect
             </button>
           )}

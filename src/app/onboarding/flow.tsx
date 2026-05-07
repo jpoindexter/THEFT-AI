@@ -94,7 +94,7 @@ export default function OnboardingFlow() {
     <div className="min-h-screen bg-[#f3f1ec] text-ink relative">
       <button
         type="button"
-        className="absolute top-4 left-4 text-[12px] text-ink-muted inline-flex items-center gap-1.5 hover:text-ink"
+        className="absolute top-4 left-4 text-sm text-ink-muted inline-flex items-center gap-1.5 hover:text-ink"
       >
         <LogOut className="size-3" /> Log out
       </button>
@@ -140,7 +140,7 @@ export default function OnboardingFlow() {
             )}
             {step === 3 && (
               <div className="space-y-6 text-center">
-                <h2 className="text-[15px] tracking-tight">
+                <h2 className="text-md tracking-tight">
                   Create your company
                 </h2>
                 <div className="flex justify-center">
@@ -150,12 +150,12 @@ export default function OnboardingFlow() {
             )}
             {step === 4 && (
               <div className="space-y-5 text-center">
-                <h2 className="text-[15px] tracking-tight">
+                <h2 className="text-md tracking-tight">
                   Create your company
                 </h2>
                 <div className="space-y-1.5 text-left">
                   <label
-                    className="text-[11px] text-ink-muted"
+                    className="text-xs text-ink-muted"
                     htmlFor="company-name"
                   >
                     Company name
@@ -165,10 +165,10 @@ export default function OnboardingFlow() {
                     autoFocus
                     value={companyName}
                     onChange={(e) => setCompanyName(e.target.value)}
-                    className="w-full rounded-md border border-blue-400 ring-2 ring-blue-100 bg-paper px-3 py-2 text-[13px] focus:outline-none focus:ring-blue-200"
+                    className="w-full rounded-md border border-line-strong ring-2 ring-line bg-paper px-3 py-2 text-base focus:outline-none focus:ring-line-strong"
                   />
                 </div>
-                {err && <p className="text-[12px] text-brick-ink">{err}</p>}
+                {err && <p className="text-sm text-brick-ink">{err}</p>}
                 <div className="flex flex-col items-center gap-2 pt-1">
                   <PillButton
                     onClick={complete}
@@ -179,7 +179,7 @@ export default function OnboardingFlow() {
                   <button
                     type="button"
                     onClick={() => setStep(3)}
-                    className="text-[12px] text-ink-muted hover:text-ink underline underline-offset-2"
+                    className="text-sm text-ink-muted hover:text-ink underline underline-offset-2"
                   >
                     Back
                   </button>
@@ -210,19 +210,19 @@ function Question({
 }) {
   return (
     <div className="space-y-6">
-      <h2 className="text-[15px] tracking-tight text-center">{title}</h2>
+      <h2 className="text-md tracking-tight text-center">{title}</h2>
       <div className="space-y-2">
         {options.map((o) => (
           <button
             key={o.key}
             onClick={o.onSelect}
-            className={`w-full text-left flex items-center gap-3 rounded-md border bg-paper px-4 py-2.5 text-[13px] transition-colors ${
+            className={`w-full text-left flex items-center gap-3 rounded-md border bg-paper px-4 py-2.5 text-base transition-colors ${
               o.selected
-                ? "border-ink ring-1 ring-stone-900"
+                ? "border-ink ring-1 ring-ink"
                 : "border-line hover:border-line-strong"
             }`}
           >
-            <span className="text-ink-soft tabular-nums w-6 text-[11px] font-mono">
+            <span className="text-ink-soft tabular-nums w-6 text-xs font-mono">
               {String(o.index).padStart(2, "0")}
             </span>
             <span>{o.label}</span>
@@ -233,7 +233,7 @@ function Question({
         <button
           onClick={onContinue}
           disabled={!onContinue}
-          className="text-[13px] text-ink-muted hover:text-ink disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+          className="text-base text-ink-muted hover:text-ink disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
         >
           Continue →
         </button>
@@ -254,8 +254,8 @@ function StageSlider({
   const idx = STAGES.findIndex((s) => s.key === value);
   return (
     <div className="space-y-7 text-center">
-      <h2 className="text-[15px] tracking-tight">What stage is your idea?</h2>
-      <div className="flex items-center justify-between text-[11px]">
+      <h2 className="text-md tracking-tight">What stage is your idea?</h2>
+      <div className="flex items-center justify-between text-xs">
         {STAGES.map((s, i) => {
           const active = i === idx;
           return (
@@ -265,7 +265,7 @@ function StageSlider({
               onClick={() => onChange(s.key)}
               className={`px-2.5 py-1 rounded transition-colors ${
                 active
-                  ? "bg-blue-50 text-blue-700"
+                  ? "bg-cream text-ink"
                   : "text-ink-soft hover:text-ink"
               }`}
             >
@@ -294,7 +294,7 @@ function StageSlider({
           aria-label="Idea stage"
         />
         <div
-          className="absolute top-1/2 -translate-y-1/2 size-2 rounded-full bg-blue-500 pointer-events-none"
+          className="absolute top-1/2 -translate-y-1/2 size-2 rounded-full bg-cream0 pointer-events-none"
           style={{
             left: `calc(${(idx / (STAGES.length - 1)) * 100}% - 4px)`,
           }}
@@ -321,7 +321,7 @@ function PillButton({
       type="button"
       onClick={onClick}
       disabled={disabled}
-      className="rounded-md bg-paper border border-line px-5 py-1.5 text-[13px] disabled:opacity-40 disabled:cursor-not-allowed hover:border-line-strong transition-colors shadow-[0_1px_0_rgba(0,0,0,0.02)]"
+      className="rounded-md bg-paper border border-line px-5 py-1.5 text-base disabled:opacity-40 disabled:cursor-not-allowed hover:border-line-strong transition-colors shadow-[0_1px_0_rgba(0,0,0,0.02)]"
     >
       {children}
     </button>

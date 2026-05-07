@@ -71,7 +71,7 @@ export default async function McpServerDetailPage({
       <div className="max-w-3xl mx-auto space-y-4">
         <Link
           href={`/${org}/integrations/mcp`}
-          className="inline-flex items-center gap-1 text-[12px] text-ink-muted hover:text-ink"
+          className="inline-flex items-center gap-1 text-sm text-ink-muted hover:text-ink"
         >
           <ArrowLeft className="size-3" /> Back to MCP servers
         </Link>
@@ -81,12 +81,12 @@ export default async function McpServerDetailPage({
             <h1 className="text-xl tracking-tight inline-flex items-center gap-2">
               <Server className="size-5 text-ink-muted" /> {s.name}
             </h1>
-            <code className="text-[11px] font-mono text-ink-muted block mt-1">
+            <code className="text-xs font-mono text-ink-muted block mt-1">
               {s.cmd}
             </code>
           </div>
           <span
-            className={`text-[10px] uppercase rounded px-1.5 py-0.5 shrink-0 ${
+            className={`text-2xs uppercase rounded px-1.5 py-0.5 shrink-0 ${
               STATUS_TONE[s.status]
             }`}
           >
@@ -95,17 +95,17 @@ export default async function McpServerDetailPage({
         </header>
 
         <section className="rounded-lg border border-line/70 bg-paper p-4 space-y-2">
-          <div className="text-[10px] uppercase tracking-wider text-ink-soft">
+          <div className="text-2xs uppercase tracking-wider text-ink-soft">
             Environment
           </div>
           <ul className="space-y-1">
             {s.env.map((e) => (
               <li
                 key={e}
-                className="text-[12px] font-mono flex items-center justify-between"
+                className="text-sm font-mono flex items-center justify-between"
               >
                 <span>{e}</span>
-                <span className="text-[10px] text-ink-soft">
+                <span className="text-2xs text-ink-soft">
                   set · encrypted
                 </span>
               </li>
@@ -114,14 +114,14 @@ export default async function McpServerDetailPage({
         </section>
 
         <section className="rounded-lg border border-line/70 bg-paper p-4 space-y-2">
-          <div className="text-[10px] uppercase tracking-wider text-ink-soft">
+          <div className="text-2xs uppercase tracking-wider text-ink-soft">
             Tools ({s.tools.length})
           </div>
           <ul className="divide-y divide-line/60">
             {s.tools.map((t) => (
               <li key={t.name} className="py-2">
-                <code className="text-[12px] font-mono">{t.name}</code>
-                <div className="text-[11px] text-ink-muted">
+                <code className="text-sm font-mono">{t.name}</code>
+                <div className="text-xs text-ink-muted">
                   {t.description}
                 </div>
               </li>
@@ -130,15 +130,15 @@ export default async function McpServerDetailPage({
         </section>
 
         <section className="rounded-lg border border-line/70 bg-paper p-4 space-y-2">
-          <div className="text-[10px] uppercase tracking-wider text-ink-soft inline-flex items-center gap-1">
+          <div className="text-2xs uppercase tracking-wider text-ink-soft inline-flex items-center gap-1">
             <Activity className="size-3" /> Logs
           </div>
           {s.logs.length === 0 ? (
-            <p className="text-[12px] text-ink-muted">
+            <p className="text-sm text-ink-muted">
               No logs yet. Start the server to see output.
             </p>
           ) : (
-            <pre className="text-[11px] font-mono whitespace-pre-wrap leading-relaxed bg-canvas rounded-md p-2 max-h-64 overflow-y-auto">
+            <pre className="text-xs font-mono whitespace-pre-wrap leading-relaxed bg-canvas rounded-md p-2 max-h-64 overflow-y-auto">
               {s.logs
                 .map((l) => `${l.ts} [${l.level}] ${l.msg}`)
                 .join("\n")}
@@ -148,15 +148,15 @@ export default async function McpServerDetailPage({
 
         <div className="flex justify-end gap-2">
           {s.status === "running" ? (
-            <button className="text-[11px] rounded-md border border-line bg-paper px-2 py-1 hover:border-line-strong">
+            <button className="text-xs rounded-md border border-line bg-paper px-2 py-1 hover:border-line-strong">
               Restart
             </button>
           ) : (
-            <button className="text-[11px] rounded-md bg-ink text-paper px-3 py-1.5">
+            <button className="text-xs rounded-md bg-ink text-paper px-3 py-1.5">
               Start
             </button>
           )}
-          <button className="inline-flex items-center gap-1 text-[11px] rounded-md border border-brick/40 bg-paper text-brick-ink px-2 py-1 hover:bg-brick/10">
+          <button className="inline-flex items-center gap-1 text-xs rounded-md border border-brick/40 bg-paper text-brick-ink px-2 py-1 hover:bg-brick/10">
             <Trash2 className="size-3" /> Remove
           </button>
         </div>

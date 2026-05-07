@@ -32,11 +32,10 @@ export default function SignInPage() {
       <Header />
       <main className="flex-1 grid place-items-center px-4 py-10">
         <div className="w-full max-w-sm space-y-5">
-          <CrossStitch />
           <header className="text-center space-y-1">
             <h1 className="text-xl tracking-tight">Sign in to THEFT</h1>
             <p className="text-xs text-ink-muted">
-              We'll email you a one-time link. No passwords.
+              We&apos;ll email you a one-time link. No passwords.
             </p>
           </header>
 
@@ -77,25 +76,28 @@ export default function SignInPage() {
             <a className="underline" href="#">privacy policy</a>.
           </p>
 
-          <div className="rounded-md border border-mustard/40 bg-mustard/15 p-3 text-xs">
-            <div className="flex items-center justify-between gap-2">
-              <span className="inline-flex items-center gap-1.5 text-mustard-ink">
-                <Wrench className="size-3.5" /> Dev mode
-              </span>
-              <button
-                type="button"
-                onClick={devLogin}
-                disabled={devBusy}
-                className="text-xs rounded-md bg-ink text-paper px-2 py-1 hover:opacity-90 disabled:opacity-40"
-              >
-                {devBusy ? "Signing in…" : "Continue as dev"}
-              </button>
+          {process.env.NODE_ENV !== "production" && (
+            <div className="rounded-md border border-mustard/40 bg-mustard/15 p-3 text-xs">
+              <div className="flex items-center justify-between gap-2">
+                <span className="inline-flex items-center gap-1.5 text-mustard-ink">
+                  <Wrench className="size-3.5" /> Dev mode
+                </span>
+                <button
+                  type="button"
+                  onClick={devLogin}
+                  disabled={devBusy}
+                  className="text-xs rounded-md bg-ink text-paper px-2 py-1 hover:opacity-90 disabled:opacity-40"
+                >
+                  {devBusy ? "Signing in…" : "Continue as dev"}
+                </button>
+              </div>
+              <p className="text-2xs text-ink-muted mt-1">
+                Skips the magic link, drops a dev cookie, and lands on the
+                first workspace. Or bookmark{" "}
+                <code className="font-mono">/dev</code>.
+              </p>
             </div>
-            <p className="text-2xs text-ink-muted mt-1">
-              Skips the magic link, drops a dev cookie, and lands on the first
-              workspace. Or bookmark <code className="font-mono">/dev</code>.
-            </p>
-          </div>
+          )}
         </div>
       </main>
     </div>
@@ -105,32 +107,19 @@ export default function SignInPage() {
 function Header() {
   return (
     <div className="flex items-center justify-between p-4">
-      <Link href="/" className="text-sm tracking-tight inline-flex items-center gap-2">
-        <span className="size-3.5 rounded-sm bg-mustard" /> THEFT
+      <Link
+        href="/"
+        className="text-sm font-medium tracking-tight inline-flex items-center gap-2"
+      >
+        THEFT
       </Link>
-      <Link href="/" className="text-xs text-ink-muted hover:text-ink inline-flex items-center gap-1">
+      <Link
+        href="/"
+        className="text-xs text-ink-muted hover:text-ink inline-flex items-center gap-1"
+      >
         Back home <ArrowRight className="size-3" />
       </Link>
     </div>
-  );
-}
-
-function CrossStitch() {
-  return (
-    <svg viewBox="0 0 80 80" className="mx-auto size-16">
-      <defs>
-        <pattern id="stitch-signin" width="6" height="6" patternUnits="userSpaceOnUse">
-          <path d="M0 0 L6 6 M6 0 L0 6" stroke="currentColor" strokeWidth="1" fill="none" />
-        </pattern>
-      </defs>
-      <circle
-        cx="40"
-        cy="40"
-        r="30"
-        fill="url(#stitch-signin)"
-        className="text-ink"
-      />
-    </svg>
   );
 }
 

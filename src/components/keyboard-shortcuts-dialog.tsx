@@ -50,28 +50,28 @@ export default function KeyboardShortcutsDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-lg p-0 bg-paper">
         <DialogHeader className="px-4 py-3 border-b border-line/70">
-          <DialogTitle className="text-[14px] font-medium tracking-tight">
+          <DialogTitle className="text-md font-medium tracking-tight">
             Keyboard shortcuts
           </DialogTitle>
         </DialogHeader>
         <div className="p-4 space-y-4 max-h-[60vh] overflow-y-auto">
           {GROUPS.map((g) => (
             <section key={g.name}>
-              <div className="text-[10px] uppercase tracking-[0.14em] text-ink-soft mb-2">
+              <div className="text-2xs uppercase tracking-[0.14em] text-ink-soft mb-2">
                 {g.name}
               </div>
               <ul className="space-y-1">
                 {g.rows.map((r) => (
                   <li
                     key={r.label}
-                    className="flex items-center justify-between text-[12px]"
+                    className="flex items-center justify-between text-sm"
                   >
                     <span className="text-ink">{r.label}</span>
                     <span className="flex items-center gap-1">
                       {r.keys.map((k) => (
                         <kbd
                           key={k}
-                          className="rounded border border-line bg-canvas px-1.5 py-0.5 text-[10px] font-mono text-ink min-w-[20px] text-center"
+                          className="rounded border border-line bg-canvas px-1.5 py-0.5 text-2xs font-mono text-ink min-w-[20px] text-center"
                         >
                           {k}
                         </kbd>

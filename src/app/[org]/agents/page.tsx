@@ -31,14 +31,14 @@ export default async function AgentsIndexPage({
         <header className="flex items-center justify-between">
           <div>
             <h1 className="text-xl tracking-tight">Agents</h1>
-            <p className="text-[12px] text-ink-muted">
+            <p className="text-sm text-ink-muted">
               Every employee in this workspace. Click one to inspect its skills,
               tasks, and configuration.
             </p>
           </div>
           <Link
             href={`/${orgSlug}/agents/new`}
-            className="inline-flex items-center gap-1 rounded-md bg-ink text-paper px-3 py-1.5 text-[12px]"
+            className="inline-flex items-center gap-1 rounded-md bg-ink text-paper px-3 py-1.5 text-sm"
           >
             <Plus className="size-3.5" /> New agent
           </Link>
@@ -78,10 +78,10 @@ export default async function AgentsIndexPage({
                       />
                     </span>
                     <div className="min-w-0">
-                      <div className="text-[13px] font-medium tracking-tight">
+                      <div className="text-base font-medium tracking-tight">
                         {a.name}
                       </div>
-                      <div className="text-[11px] text-ink-muted">
+                      <div className="text-xs text-ink-muted">
                         {a.title ?? a.role}
                         {a.department_id &&
                           ` · ${deptName.get(a.department_id) ?? ""}`}
@@ -91,7 +91,7 @@ export default async function AgentsIndexPage({
                     </div>
                   </div>
                   <span
-                    className={`text-[10px] uppercase rounded px-1.5 py-0.5 shrink-0 ${
+                    className={`text-2xs uppercase rounded px-1.5 py-0.5 shrink-0 ${
                       STATUS_TONE[a.status] ?? "bg-cream text-ink-muted"
                     }`}
                   >

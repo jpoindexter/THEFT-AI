@@ -27,24 +27,24 @@ export default function DeleteAccountDialog({
         <DialogHeader>
           <DialogTitle>Delete Your Account</DialogTitle>
         </DialogHeader>
-        <p className="text-[12px] text-ink-muted leading-snug">
+        <p className="text-sm text-ink-muted leading-snug">
           This action is irreversible. All your data, sessions, integrations,
           and billing will be permanently deleted.
         </p>
-        <p className="text-[12px] text-ink-muted">
+        <p className="text-sm text-ink-muted">
           Please type <strong>DELETE</strong> to confirm.
         </p>
         <input
           autoFocus
           value={text}
           onChange={(e) => setText(e.target.value)}
-          className="w-full rounded-md border border-line bg-paper px-3 py-2 text-[13px] focus:outline-none focus:border-line-strong"
+          className="w-full rounded-md border border-line bg-paper px-3 py-2 text-base focus:outline-none focus:border-line-strong"
         />
         <DialogFooter>
           <button
             type="button"
             onClick={() => onOpenChange(false)}
-            className="text-[12px] rounded-md border border-line bg-paper px-3 py-1.5 hover:border-line-strong"
+            className="text-sm rounded-md border border-line bg-paper px-3 py-1.5 hover:border-line-strong"
           >
             Cancel
           </button>
@@ -52,7 +52,7 @@ export default function DeleteAccountDialog({
             type="button"
             disabled={!valid}
             onClick={onConfirm}
-            className="text-[12px] rounded-md bg-brick text-paper px-3 py-1.5 disabled:opacity-40"
+            className="text-sm rounded-md bg-brick text-paper px-3 py-1.5 disabled:opacity-40"
           >
             Delete Account
           </button>

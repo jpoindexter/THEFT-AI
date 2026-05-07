@@ -33,14 +33,14 @@ export default async function Billing({
       />
 
       <SettingsCard>
-        <div className="space-y-2 text-[13px]">
+        <div className="space-y-2 text-base">
           <div className="flex items-baseline justify-between">
             <span>Plan</span>
             <span className="inline-flex items-center gap-2">
               <Pill tone="mustard">Team</Pill>
               <Link
                 href={`/${org}/billing/upgrade`}
-                className="text-[11px] underline text-ink-muted hover:text-ink"
+                className="text-xs underline text-ink-muted hover:text-ink"
               >
                 Change plan
               </Link>
@@ -61,9 +61,9 @@ export default async function Billing({
         title="This cycle"
         description="Per-line breakdown for the current billing month."
       >
-        <table className="w-full text-[13px]">
+        <table className="w-full text-base">
           <thead>
-            <tr className="text-left text-[10px] uppercase tracking-wider text-ink-soft border-b border-line/60">
+            <tr className="text-left text-2xs uppercase tracking-wider text-ink-soft border-b border-line/60">
               <th className="py-2">Line</th>
               <th className="py-2 text-right">Count</th>
               <th className="py-2 text-right">Cost</th>
@@ -94,7 +94,7 @@ export default async function Billing({
           {INVOICES.map((i) => (
             <li
               key={i.id}
-              className="py-2 flex items-center justify-between text-[13px]"
+              className="py-2 flex items-center justify-between text-base"
             >
               <span className="font-mono">{i.id}</span>
               <span className="text-ink-muted">{i.date}</span>
@@ -104,7 +104,7 @@ export default async function Billing({
               </Pill>
               <a
                 href={`/api/${org}/invoices/${i.id}`}
-                className="text-[11px] underline text-ink-muted hover:text-ink"
+                className="text-xs underline text-ink-muted hover:text-ink"
               >
                 Download
               </a>
@@ -117,12 +117,12 @@ export default async function Billing({
         title="Payment method"
         description="The card we charge each cycle."
       >
-        <div className="rounded-md border border-line/70 px-3 py-2 text-[13px] flex items-center justify-between">
+        <div className="rounded-md border border-line/70 px-3 py-2 text-base flex items-center justify-between">
           <div>
             <div className="font-medium">Visa •••• 4242</div>
-            <div className="text-[11px] text-ink-muted">Expires 09/29</div>
+            <div className="text-xs text-ink-muted">Expires 09/29</div>
           </div>
-          <button className="text-[11px] rounded-md border border-line px-2 py-0.5 hover:border-line-strong">
+          <button className="text-xs rounded-md border border-line px-2 py-0.5 hover:border-line-strong">
             Update
           </button>
         </div>

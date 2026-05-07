@@ -94,7 +94,7 @@ export default function SsoSettings() {
           />
 
           <div className="space-y-1 pt-2">
-            <label className="text-[12px] text-ink-muted">
+            <label className="text-sm text-ink-muted">
               IdP metadata XML (paste here)
             </label>
             <textarea
@@ -147,7 +147,7 @@ export default function SsoSettings() {
             </li>
           ))}
         </ul>
-        <button className="mt-2 text-[11px] rounded-md border border-line px-2 py-1 hover:border-line-strong">
+        <button className="mt-2 text-xs rounded-md border border-line px-2 py-1 hover:border-line-strong">
           + Add mapping
         </button>
       </SettingsCard>
@@ -179,7 +179,7 @@ function ConfigRow({
   return (
     <div className="flex items-center justify-between gap-2">
       <div className="min-w-0 flex-1">
-        <div className="text-[12px] text-ink-muted">{label}</div>
+        <div className="text-sm text-ink-muted">{label}</div>
         <div className="text-xs font-mono truncate">{value}</div>
       </div>
       <button
@@ -204,7 +204,7 @@ function Field({
 }) {
   return (
     <div className="space-y-1">
-      <label className="text-[12px] text-ink-muted">{label}</label>
+      <label className="text-sm text-ink-muted">{label}</label>
       <input
         type={type}
         placeholder={placeholder}

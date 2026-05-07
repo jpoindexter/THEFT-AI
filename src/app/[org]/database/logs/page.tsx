@@ -22,12 +22,12 @@ export default function LogsPage() {
         <h1 className="text-lg font-medium tracking-tight inline-flex items-center gap-2">
           <ScrollText className="size-4 text-ink-muted" /> Logs
         </h1>
-        <p className="text-[12px] text-ink-muted">
+        <p className="text-sm text-ink-muted">
           Live tail across edge functions, API routes, database, and auth.
         </p>
       </header>
 
-      <div className="flex items-center gap-2 text-[11px]">
+      <div className="flex items-center gap-2 text-xs">
         <select className="rounded-md border border-line bg-paper px-2 py-1">
           <option>All sources</option>
           <option>api</option>
@@ -48,12 +48,12 @@ export default function LogsPage() {
       </div>
 
       <div className="rounded-lg border border-line/70 bg-ink p-3 max-h-[420px] overflow-y-auto">
-        <ul className="space-y-1 font-mono text-[11px]">
+        <ul className="space-y-1 font-mono text-xs">
           {LOGS.map((l, i) => (
             <li key={i} className="flex items-start gap-2 text-line-strong">
               <span className="text-ink-muted shrink-0">{l.ts}</span>
               <span
-                className={`uppercase rounded px-1 text-[9px] shrink-0 ${
+                className={`uppercase rounded px-1 text-2xs shrink-0 ${
                   LEVEL_TONE[l.level] ?? "bg-cream text-ink"
                 }`}
               >

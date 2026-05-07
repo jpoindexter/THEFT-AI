@@ -132,7 +132,7 @@ export default function LayoutHeader({
   const goto = (href: string) => () => router.push(href);
 
   return (
-    <header className="h-12 px-3 flex items-center justify-between text-[13px]">
+    <header className="h-12 px-3 flex items-center justify-between text-base">
       <div className="flex items-center gap-1.5 min-w-0">
         <DropdownMenu>
           <DropdownMenuTrigger
@@ -142,7 +142,7 @@ export default function LayoutHeader({
                 aria-label="Workspace menu"
                 className="inline-flex items-center gap-1 rounded hover:bg-line/60 px-1 py-1"
               >
-                <span className="size-6 rounded-full bg-line inline-flex items-center justify-center text-[11px] font-medium text-ink-muted">
+                <span className="size-6 rounded-full bg-line inline-flex items-center justify-center text-xs font-medium text-ink-muted">
                   {founderInitial}
                 </span>
                 <ChevronDown className="size-3 text-ink-soft" />
@@ -152,7 +152,7 @@ export default function LayoutHeader({
           <DropdownMenuContent align="start" className="w-56">
             {orgs.length > 1 && (
               <>
-                <div className="px-2 py-1.5 text-[10px] uppercase tracking-wider text-ink-muted">
+                <div className="px-2 py-1.5 text-2xs uppercase tracking-wider text-ink-muted">
                   Workspaces
                 </div>
                 {orgs.map((o) => (
@@ -180,7 +180,7 @@ export default function LayoutHeader({
               </>
             )}
             {orgs.length <= 1 && (
-              <div className="px-2 py-1.5 text-[10px] uppercase tracking-wider text-ink-muted">
+              <div className="px-2 py-1.5 text-2xs uppercase tracking-wider text-ink-muted">
                 {orgName}
               </div>
             )}
@@ -326,7 +326,7 @@ export default function LayoutHeader({
         {hasPlan && (
           <Link
             href={`/${orgSlug}`}
-            className="ml-1 tracking-tight text-[12px] uppercase text-ink hover:text-ink"
+            className="ml-1 tracking-tight text-sm uppercase text-ink hover:text-ink"
           >
             {orgName}
           </Link>
@@ -341,7 +341,7 @@ export default function LayoutHeader({
       <div className="flex items-center gap-1 text-ink-muted">
         <Link
           href={`/${orgSlug}/billing/upgrade`}
-          className="rounded-md bg-ink text-paper px-2.5 py-1 text-[11px] font-medium tracking-wide hover:opacity-90 inline-flex items-center gap-1"
+          className="rounded-md bg-ink text-paper px-2.5 py-1 text-xs font-medium tracking-wide hover:opacity-90 inline-flex items-center gap-1"
           title="Upgrade plan"
         >
           <SunMedium className="size-3 text-mustard" />
@@ -387,7 +387,7 @@ function MenuRow({
   return (
     <DropdownMenuItem
       onClick={onSelect}
-      className="text-[12px] gap-2 cursor-pointer"
+      className="text-sm gap-2 cursor-pointer"
     >
       {icon}
       {label}

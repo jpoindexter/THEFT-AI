@@ -33,13 +33,13 @@ export default async function LibraryPage({
         <header className="flex items-center justify-between">
           <div>
             <h1 className="text-xl tracking-tight">Library</h1>
-            <p className="text-[12px] text-ink-muted">
+            <p className="text-sm text-ink-muted">
               Shared file system. Every agent in the workspace can read and
               write here.
             </p>
           </div>
           <div className="flex items-center gap-2">
-            <div className="flex items-center gap-1 rounded-md border border-line bg-paper px-2 py-1 text-[12px]">
+            <div className="flex items-center gap-1 rounded-md border border-line bg-paper px-2 py-1 text-sm">
               <Search className="size-3 text-ink-soft" />
               <input
                 placeholder="Search files"
@@ -48,7 +48,7 @@ export default async function LibraryPage({
             </div>
             <Link
               href={`/${orgSlug}/library/upload`}
-              className="inline-flex items-center gap-1 rounded-md border border-line bg-paper px-2 py-1 text-[12px] hover:border-line-strong"
+              className="inline-flex items-center gap-1 rounded-md border border-line bg-paper px-2 py-1 text-sm hover:border-line-strong"
             >
               <Upload className="size-3" /> Upload
             </Link>
@@ -57,7 +57,7 @@ export default async function LibraryPage({
 
         {pinned.length > 0 && (
           <section className="space-y-2">
-            <div className="text-[10px] uppercase tracking-[0.14em] text-ink-soft inline-flex items-center gap-1">
+            <div className="text-2xs uppercase tracking-[0.14em] text-ink-soft inline-flex items-center gap-1">
               <Pin className="size-3" /> Pinned
             </div>
             <ul className="rounded-lg border border-line/70 bg-paper divide-y divide-line/60">
@@ -65,10 +65,10 @@ export default async function LibraryPage({
                 <li key={a.id}>
                   <Link
                     href={`/${orgSlug}/library/${a.id}`}
-                    className="px-3 py-2 text-[13px] flex items-center justify-between hover:bg-canvas"
+                    className="px-3 py-2 text-base flex items-center justify-between hover:bg-canvas"
                   >
                     <span className="truncate">{a.name}</span>
-                    <span className="text-[10px] text-ink-muted uppercase">
+                    <span className="text-2xs text-ink-muted uppercase">
                       {a.kind}
                     </span>
                   </Link>
@@ -79,7 +79,7 @@ export default async function LibraryPage({
         )}
 
         <section>
-          <div className="text-[10px] uppercase tracking-[0.14em] text-ink-soft mb-2">
+          <div className="text-2xs uppercase tracking-[0.14em] text-ink-soft mb-2">
             By department
           </div>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
@@ -97,7 +97,7 @@ export default async function LibraryPage({
                     className="aspect-[16/10]"
                     style={{ background: COVER[d.slug] ?? "#f5f4f0" }}
                   />
-                  <div className="p-2 text-[12px] flex items-center justify-between">
+                  <div className="p-2 text-sm flex items-center justify-between">
                     <span>{d.name}</span>
                     <span className="text-ink-soft">{count}</span>
                   </div>
@@ -120,7 +120,7 @@ export default async function LibraryPage({
 
         {artifacts.length > 0 && (
           <section className="space-y-2">
-            <div className="text-[10px] uppercase tracking-[0.14em] text-ink-soft">
+            <div className="text-2xs uppercase tracking-[0.14em] text-ink-soft">
               All files
             </div>
             <ul className="rounded-lg border border-line/70 bg-paper divide-y divide-line/60">
@@ -128,10 +128,10 @@ export default async function LibraryPage({
                 <li key={a.id}>
                   <Link
                     href={`/${orgSlug}/library/${a.id}`}
-                    className="px-3 py-2 text-[13px] flex items-center justify-between hover:bg-canvas"
+                    className="px-3 py-2 text-base flex items-center justify-between hover:bg-canvas"
                   >
                     <span className="truncate">{a.name}</span>
-                    <span className="text-[10px] text-ink-muted uppercase">
+                    <span className="text-2xs text-ink-muted uppercase">
                       {a.kind}
                     </span>
                   </Link>

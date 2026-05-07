@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { db } from "@/lib/db/store";
-import { Card, CardBody, Eyebrow, Hint, PageTitle, Pill } from "@/components/ui/primitives";
+import { Card, CardBody, Eyebrow, Hint, PageTitle, StatCard } from "@/components/ui/primitives";
 import { Building2, ExternalLink } from "lucide-react";
 
 export default async function AdminWorkspacesPage() {
@@ -85,39 +85,19 @@ export default async function AdminWorkspacesPage() {
         <CardBody>
           <Eyebrow>Health</Eyebrow>
           <div className="grid grid-cols-4 gap-3 mt-2">
-            <Stat label="Workspaces" value={String(enriched.length)} />
-            <Stat
+            <StatCard label="Workspaces" value={String(enriched.length)} />
+            <StatCard
               label="Active agents"
               value={String(enriched.reduce((s, e) => s + e.agentCount, 0))}
             />
-            <Stat
+            <StatCard
               label="Total tasks"
               value={String(enriched.reduce((s, e) => s + e.taskCount, 0))}
             />
-            <Stat label="Region" value="us-east-1" tone="sage" />
+            <StatCard label="Region" value="us-east-1" tone="sage" />
           </div>
         </CardBody>
       </Card>
-    </div>
-  );
-}
-
-function Stat({
-  label,
-  value,
-  tone,
-}: {
-  label: string;
-  value: string;
-  tone?: "sage" | "mustard" | "brick";
-}) {
-  return (
-    <div className="rounded-md border border-line/70 bg-paper p-3">
-      <div className="text-2xs uppercase tracking-wider text-ink-soft">{label}</div>
-      <div className="text-base font-medium tracking-tight mt-0.5 text-ink inline-flex items-center gap-2">
-        {value}
-        {tone && <Pill tone={tone}>ok</Pill>}
-      </div>
     </div>
   );
 }

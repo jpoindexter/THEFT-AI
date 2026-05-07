@@ -62,7 +62,7 @@ export default async function SkillsPage({
         <header className="flex items-start justify-between gap-3">
           <div>
             <h1 className="text-xl tracking-tight">Skills</h1>
-            <p className="text-[13px] text-ink-muted">
+            <p className="text-base text-ink-muted">
               Reusable guidance packages that any agent can have attached. Drop
               a skill into <code>/skills/&lt;name&gt;/SKILL.md</code> and it
               will appear here.
@@ -70,7 +70,7 @@ export default async function SkillsPage({
           </div>
           <Link
             href={`/${org}/skills/new`}
-            className="inline-flex items-center gap-1 rounded-md bg-ink text-paper px-3 py-1.5 text-[12px] shrink-0"
+            className="inline-flex items-center gap-1 rounded-md bg-ink text-paper px-3 py-1.5 text-sm shrink-0"
           >
             + New skill
           </Link>
@@ -83,20 +83,20 @@ export default async function SkillsPage({
               className="rounded-lg border border-line/70 bg-paper p-3 hover:border-line-strong transition-colors"
             >
               <div className="flex items-center justify-between gap-2 mb-1">
-                <div className="text-[13px] font-medium tracking-tight">
+                <div className="text-base font-medium tracking-tight">
                   {s.name}
                 </div>
-                <code className="text-[10px] font-mono text-ink-soft">
+                <code className="text-2xs font-mono text-ink-soft">
                   {s.slug}
                 </code>
               </div>
-              <p className="text-[12px] text-ink-muted leading-snug line-clamp-3">
+              <p className="text-sm text-ink-muted leading-snug line-clamp-3">
                 {s.description}
               </p>
             </Link>
           ))}
           {skills.length === 0 && (
-            <div className="col-span-2 rounded-md border border-line/70 bg-paper p-6 text-center text-[12px] text-ink-muted">
+            <div className="col-span-2 rounded-md border border-line/70 bg-paper p-6 text-center text-sm text-ink-muted">
               No skills found. Add a skill at{" "}
               <code>/skills/&lt;name&gt;/SKILL.md</code>.
             </div>

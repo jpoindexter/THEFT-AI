@@ -62,7 +62,7 @@ export default async function DomainDetailPage({
     <>
       <Link
         href={`/${org}/settings/domains`}
-        className="inline-flex items-center gap-1 text-[12px] text-ink-muted hover:text-ink mb-3"
+        className="inline-flex items-center gap-1 text-sm text-ink-muted hover:text-ink mb-3"
       >
         <ArrowLeft className="size-3" /> Back to domains
       </Link>
@@ -73,7 +73,7 @@ export default async function DomainDetailPage({
       />
 
       <SettingsCard title="Status">
-        <div className="flex items-center gap-2 text-[13px]">
+        <div className="flex items-center gap-2 text-base">
           <span
             className={`size-2 rounded-full ${
               d.status === "verified"
@@ -85,7 +85,7 @@ export default async function DomainDetailPage({
           />
           <span className="capitalize">{d.status}</span>
           {d.status === "pending" && (
-            <span className="text-[11px] text-ink-muted">
+            <span className="text-xs text-ink-muted">
               · waiting for DNS propagation
             </span>
           )}
@@ -98,8 +98,8 @@ export default async function DomainDetailPage({
       >
         <ul className="divide-y divide-line/60">
           {d.records.map((r, i) => (
-            <li key={i} className="py-2 grid grid-cols-[40px_80px_1fr_auto] gap-3 items-center text-[12px]">
-              <span className="font-mono text-[10px] uppercase rounded bg-cream px-1.5 py-0.5 text-ink inline-block w-fit">
+            <li key={i} className="py-2 grid grid-cols-[40px_80px_1fr_auto] gap-3 items-center text-sm">
+              <span className="font-mono text-2xs uppercase rounded bg-cream px-1.5 py-0.5 text-ink inline-block w-fit">
                 {r.kind}
               </span>
               <span className="font-mono text-ink truncate">{r.host}</span>
@@ -108,7 +108,7 @@ export default async function DomainDetailPage({
                 {r.ok && <CheckCircle2 className="size-3.5 text-sage-ink" />}
                 <button
                   type="button"
-                  className="text-[10px] inline-flex items-center gap-1 rounded-md border border-line px-1.5 py-0.5 hover:border-line-strong"
+                  className="text-2xs inline-flex items-center gap-1 rounded-md border border-line px-1.5 py-0.5 hover:border-line-strong"
                 >
                   <Copy className="size-3" /> Copy
                 </button>
@@ -122,7 +122,7 @@ export default async function DomainDetailPage({
         title="Connected services"
         description="Domains can be wired to multiple services."
       >
-        <ul className="space-y-1.5 text-[12px]">
+        <ul className="space-y-1.5 text-sm">
           <li className="flex justify-between rounded-md border border-line/70 px-3 py-2">
             <span>Vercel deployment</span>
             <span className="text-ink-muted">app.theft.ai → theft-app</span>

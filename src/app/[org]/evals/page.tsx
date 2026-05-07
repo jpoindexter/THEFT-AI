@@ -6,6 +6,7 @@ import {
   Hint,
   PageTitle,
   Pill,
+  StatCard,
 } from "@/components/ui/primitives";
 import { FlaskConical, Plus, CheckCircle2, XCircle, Clock } from "lucide-react";
 
@@ -115,14 +116,14 @@ export default async function EvalsPage({
         </header>
 
         <div className="grid grid-cols-4 gap-3">
-          <SummaryStat label="Suites" value={String(SUITES.length)} />
-          <SummaryStat label="Cases" value={String(totals.cases)} />
-          <SummaryStat
+          <StatCard label="Suites" value={String(SUITES.length)} />
+          <StatCard label="Cases" value={String(totals.cases)} />
+          <StatCard
             label="Pass rate"
             value={`${passRate}%`}
             tone={passRate >= 95 ? "sage" : passRate >= 85 ? "mustard" : "brick"}
           />
-          <SummaryStat label="Failing" value={String(totals.fail)} tone="brick" />
+          <StatCard label="Failing" value={String(totals.fail)} tone="brick" />
         </div>
 
         <Card>
@@ -188,22 +189,3 @@ export default async function EvalsPage({
   );
 }
 
-function SummaryStat({
-  label,
-  value,
-  tone,
-}: {
-  label: string;
-  value: string;
-  tone?: Tone;
-}) {
-  return (
-    <div className="rounded-md border border-line/70 bg-paper p-3">
-      <div className="text-2xs uppercase tracking-wider text-ink-soft">{label}</div>
-      <div className="text-base font-medium tracking-tight mt-0.5 text-ink inline-flex items-center gap-2">
-        {value}
-        {tone && <Pill tone={tone}>·</Pill>}
-      </div>
-    </div>
-  );
-}

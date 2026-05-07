@@ -61,7 +61,7 @@ export default async function ReviewPage({
           <h1 className="text-xl tracking-tight inline-flex items-center gap-2">
             <Eye className="size-5 text-ink-muted" /> Review
           </h1>
-          <p className="text-[12px] text-ink-muted">
+          <p className="text-sm text-ink-muted">
             Things agents prepared that need a human decision before they ship,
             send, or merge.
           </p>
@@ -81,21 +81,21 @@ export default async function ReviewPage({
                   </span>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
-                      <span className="text-[10px] uppercase tracking-wider text-ink-muted">
+                      <span className="text-2xs uppercase tracking-wider text-ink-muted">
                         {q.kind}
                       </span>
-                      <span className="text-[10px] text-ink-soft">
+                      <span className="text-2xs text-ink-soft">
                         · by {q.by} · {q.age} ago
                       </span>
                     </div>
-                    <div className="text-[13px] font-medium tracking-tight mt-0.5">
+                    <div className="text-base font-medium tracking-tight mt-0.5">
                       {q.title}
                     </div>
-                    <div className="text-[12px] text-ink-muted mt-0.5">
+                    <div className="text-sm text-ink-muted mt-0.5">
                       {q.detail}
                     </div>
                   </div>
-                  <span className="text-[10px] uppercase rounded bg-mustard/30 text-mustard-ink px-1.5 py-0.5 shrink-0 self-center">
+                  <span className="text-2xs uppercase rounded bg-mustard/30 text-mustard-ink px-1.5 py-0.5 shrink-0 self-center">
                     {q.waitingOn}
                   </span>
                 </Link>
@@ -104,7 +104,7 @@ export default async function ReviewPage({
           })}
         </ul>
 
-        <p className="text-[11px] text-ink-muted text-center">
+        <p className="text-xs text-ink-muted text-center">
           {QUEUE.length} items waiting. Action one to reduce the queue.
         </p>
       </div>

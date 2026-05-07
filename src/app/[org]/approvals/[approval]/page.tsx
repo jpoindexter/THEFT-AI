@@ -87,13 +87,13 @@ export default async function ApprovalDetailPage({
       <div className="max-w-2xl mx-auto space-y-4">
         <Link
           href={`/${org}/approvals`}
-          className="inline-flex items-center gap-1 text-[12px] text-ink-muted hover:text-ink"
+          className="inline-flex items-center gap-1 text-sm text-ink-muted hover:text-ink"
         >
           <ArrowLeft className="size-3" /> Back to approvals
         </Link>
 
         <header className="space-y-1">
-          <div className="text-[10px] uppercase tracking-wider text-ink-soft inline-flex items-center gap-2">
+          <div className="text-2xs uppercase tracking-wider text-ink-soft inline-flex items-center gap-2">
             {a.agent}
             <span className="inline-flex items-center gap-1 text-ink-muted">
               <Clock className="size-3" />
@@ -102,7 +102,7 @@ export default async function ApprovalDetailPage({
           </div>
           <h1 className="text-xl tracking-tight">{a.title}</h1>
           <span
-            className={`inline-block text-[10px] uppercase rounded px-1.5 py-0.5 mt-1 ${
+            className={`inline-block text-2xs uppercase rounded px-1.5 py-0.5 mt-1 ${
               a.impact === "low"
                 ? "bg-sage/30 text-sage-ink"
                 : a.impact === "medium"
@@ -112,16 +112,16 @@ export default async function ApprovalDetailPage({
           >
             {a.impact} impact
           </span>
-          <p className="text-[13px] text-ink leading-relaxed pt-2 max-w-prose">
+          <p className="text-base text-ink leading-relaxed pt-2 max-w-prose">
             {a.body}
           </p>
         </header>
 
         <section className="rounded-lg border border-line/70 bg-paper p-4 space-y-2">
-          <div className="text-[10px] uppercase tracking-wider text-ink-soft inline-flex items-center gap-1">
+          <div className="text-2xs uppercase tracking-wider text-ink-soft inline-flex items-center gap-1">
             <ShieldAlert className="size-3" /> Risks
           </div>
-          <ul className="list-disc pl-5 space-y-1 text-[12px] text-ink">
+          <ul className="list-disc pl-5 space-y-1 text-sm text-ink">
             {a.risks.map((r, i) => (
               <li key={i}>{r}</li>
             ))}
@@ -129,13 +129,13 @@ export default async function ApprovalDetailPage({
         </section>
 
         <section className="rounded-lg border border-line/70 bg-paper p-4 space-y-2">
-          <div className="text-[10px] uppercase tracking-wider text-ink-soft">
+          <div className="text-2xs uppercase tracking-wider text-ink-soft">
             Execution plan
           </div>
-          <ol className="space-y-1.5 text-[13px] text-ink">
+          <ol className="space-y-1.5 text-base text-ink">
             {a.plan.map((step, i) => (
               <li key={i} className="flex items-start gap-2">
-                <span className="size-4 rounded-full border border-line-strong inline-flex items-center justify-center text-[10px] text-ink-muted shrink-0 mt-0.5">
+                <span className="size-4 rounded-full border border-line-strong inline-flex items-center justify-center text-2xs text-ink-muted shrink-0 mt-0.5">
                   {i + 1}
                 </span>
                 {step}
@@ -145,10 +145,10 @@ export default async function ApprovalDetailPage({
         </section>
 
         <section className="rounded-lg border border-line/70 bg-paper p-4 space-y-1">
-          <div className="text-[10px] uppercase tracking-wider text-ink-soft">
+          <div className="text-2xs uppercase tracking-wider text-ink-soft">
             Rollback
           </div>
-          <pre className="text-[11px] font-mono text-ink whitespace-pre-wrap">
+          <pre className="text-xs font-mono text-ink whitespace-pre-wrap">
             {a.rollback}
           </pre>
         </section>

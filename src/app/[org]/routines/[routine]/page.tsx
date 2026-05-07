@@ -69,17 +69,17 @@ export default async function RoutineDetailPage({
       <div className="max-w-3xl mx-auto space-y-4">
         <Link
           href={`/${org}/routines`}
-          className="inline-flex items-center gap-1 text-[12px] text-ink-muted hover:text-ink"
+          className="inline-flex items-center gap-1 text-sm text-ink-muted hover:text-ink"
         >
           <ArrowLeft className="size-3" /> Back to routines
         </Link>
 
         <header>
-          <div className="text-[10px] uppercase tracking-wider text-ink-soft">
+          <div className="text-2xs uppercase tracking-wider text-ink-soft">
             Routine · {r.agent}
           </div>
           <h1 className="text-xl tracking-tight">{r.name}</h1>
-          <div className="text-[12px] text-ink-muted inline-flex items-center gap-3 mt-1">
+          <div className="text-sm text-ink-muted inline-flex items-center gap-3 mt-1">
             <span className="inline-flex items-center gap-1">
               <Calendar className="size-3" /> <code className="font-mono">{r.cron}</code>
             </span>
@@ -87,18 +87,18 @@ export default async function RoutineDetailPage({
         </header>
 
         <section className="rounded-lg border border-line/70 bg-paper p-4 space-y-2">
-          <div className="text-[10px] uppercase tracking-wider text-ink-soft">
+          <div className="text-2xs uppercase tracking-wider text-ink-soft">
             Prompt
           </div>
-          <p className="text-[13px] text-ink leading-snug">{r.prompt}</p>
+          <p className="text-base text-ink leading-snug">{r.prompt}</p>
         </section>
 
         <section className="rounded-lg border border-line/70 bg-paper p-4 space-y-2">
-          <div className="text-[10px] uppercase tracking-wider text-ink-soft">
+          <div className="text-2xs uppercase tracking-wider text-ink-soft">
             Recent runs
           </div>
           {r.runs.length === 0 ? (
-            <p className="text-[12px] text-ink-muted">
+            <p className="text-sm text-ink-muted">
               No runs yet. First run scheduled at{" "}
               <code className="font-mono">{r.cron}</code>.
             </p>
@@ -108,15 +108,15 @@ export default async function RoutineDetailPage({
                 <li key={i} className="py-2 flex items-start gap-3">
                   <Clock className="size-3.5 text-ink-soft mt-0.5 shrink-0" />
                   <div className="flex-1 min-w-0">
-                    <div className="text-[12px] font-mono text-ink">
+                    <div className="text-sm font-mono text-ink">
                       {run.when}
                     </div>
-                    <div className="text-[12px] text-ink-muted">
+                    <div className="text-sm text-ink-muted">
                       {run.summary}
                     </div>
                   </div>
                   <span
-                    className={`text-[10px] uppercase rounded px-1.5 py-0.5 ${
+                    className={`text-2xs uppercase rounded px-1.5 py-0.5 ${
                       run.status === "ok"
                         ? "bg-sage/30 text-sage-ink"
                         : "bg-brick/15 text-brick-ink"
@@ -131,15 +131,15 @@ export default async function RoutineDetailPage({
         </section>
 
         <div className="flex justify-end gap-2">
-          <button className="text-[12px] rounded-md border border-line bg-paper px-3 py-1.5 hover:border-line-strong">
+          <button className="text-sm rounded-md border border-line bg-paper px-3 py-1.5 hover:border-line-strong">
             Pause
           </button>
-          <button className="text-[12px] rounded-md border border-line bg-paper px-3 py-1.5 hover:border-line-strong">
+          <button className="text-sm rounded-md border border-line bg-paper px-3 py-1.5 hover:border-line-strong">
             Run now
           </button>
           <Link
             href={`/${org}/routines/${routine}/edit`}
-            className="text-[12px] rounded-md bg-ink text-paper px-3 py-1.5 hover:opacity-90"
+            className="text-sm rounded-md bg-ink text-paper px-3 py-1.5 hover:opacity-90"
           >
             Edit
           </Link>

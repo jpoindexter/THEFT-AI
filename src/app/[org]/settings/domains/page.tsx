@@ -31,10 +31,10 @@ export default async function Domains({
       />
       <SettingsCard title="Domains">
         {DOMAINS.length === 0 ? (
-          <div className="rounded-md border border-dashed border-line-strong p-8 text-center text-[12px] text-ink-muted flex flex-col items-center gap-2">
+          <div className="rounded-md border border-dashed border-line-strong p-8 text-center text-sm text-ink-muted flex flex-col items-center gap-2">
             <Globe className="size-5" />
             No domains added yet.
-            <button className="inline-flex items-center gap-1 rounded-md bg-ink text-paper px-3 py-1.5 text-[12px]">
+            <button className="inline-flex items-center gap-1 rounded-md bg-ink text-paper px-3 py-1.5 text-sm">
               <Plus className="size-3" />
               Add or buy a domain
             </button>
@@ -55,8 +55,8 @@ export default async function Domains({
                           : "bg-mustard/150"
                       }`}
                     />
-                    <span className="text-[13px] font-mono">{d.domain}</span>
-                    <span className="text-[11px] text-ink-muted">
+                    <span className="text-base font-mono">{d.domain}</span>
+                    <span className="text-xs text-ink-muted">
                       {d.target}
                     </span>
                   </div>
@@ -67,12 +67,12 @@ export default async function Domains({
           </ul>
         )}
         <div className="flex justify-end pt-1">
-          <button className="inline-flex items-center gap-1 rounded-md border border-line px-2 py-1 text-[11px] hover:border-line-strong">
+          <button className="inline-flex items-center gap-1 rounded-md border border-line px-2 py-1 text-xs hover:border-line-strong">
             <Plus className="size-3" />
             Add or buy a domain
           </button>
         </div>
-        <p className="text-[11px] text-ink-muted">
+        <p className="text-xs text-ink-muted">
           Propagation can take up to 24 hours. Buying through Cofounder runs
           DNS, nameserver, and Postmark setup automatically.
         </p>
@@ -81,7 +81,7 @@ export default async function Domains({
         title="Inbox domains"
         description="Once a domain is verified for inbound email, you can route it to specific agents in Settings → Inbox."
       >
-        <p className="text-[12px] text-ink-muted">
+        <p className="text-sm text-ink-muted">
           {DOMAINS.filter((d) => d.status === "verified").length} verified
           domain(s) available for inbound routing.
         </p>

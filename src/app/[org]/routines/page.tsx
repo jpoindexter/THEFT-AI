@@ -40,20 +40,20 @@ export default async function RoutinesPage({
         <header className="flex items-center justify-between">
           <div>
             <h1 className="text-xl tracking-tight">Routines</h1>
-            <p className="text-[12px] text-ink-muted">
+            <p className="text-sm text-ink-muted">
               Scheduled, recurring tasks an agent runs without you asking.
             </p>
           </div>
           <div className="flex items-center gap-1">
             <Link
               href={`/${org}/timeline`}
-              className="inline-flex items-center gap-1 rounded-md border border-line bg-paper px-2 py-1 text-[11px] hover:border-line-strong"
+              className="inline-flex items-center gap-1 rounded-md border border-line bg-paper px-2 py-1 text-xs hover:border-line-strong"
             >
               Timeline
             </Link>
             <Link
               href={`/${org}/routines/new`}
-              className="inline-flex items-center gap-1 rounded-md bg-ink text-paper px-3 py-1.5 text-[12px]"
+              className="inline-flex items-center gap-1 rounded-md bg-ink text-paper px-3 py-1.5 text-sm"
             >
               <Plus className="size-3.5" /> New routine
             </Link>
@@ -69,10 +69,10 @@ export default async function RoutinesPage({
               />
               <div className="relative z-10 px-4 py-3 flex items-center justify-between pointer-events-none">
                 <div>
-                  <div className="text-[13px] font-medium tracking-tight">
+                  <div className="text-base font-medium tracking-tight">
                     {r.name}
                   </div>
-                  <div className="text-[11px] text-ink-muted inline-flex items-center gap-2 mt-0.5">
+                  <div className="text-xs text-ink-muted inline-flex items-center gap-2 mt-0.5">
                     <span>{r.agent}</span>
                     <span>·</span>
                     <span className="inline-flex items-center gap-1">
@@ -85,7 +85,7 @@ export default async function RoutinesPage({
                 </div>
                 <div className="flex items-center gap-2 pointer-events-auto">
                   <span
-                    className={`text-[10px] uppercase rounded px-1.5 py-0.5 ${
+                    className={`text-2xs uppercase rounded px-1.5 py-0.5 ${
                       r.enabled
                         ? "bg-sage/30 text-sage-ink"
                         : "bg-cream text-ink-muted"
@@ -95,7 +95,7 @@ export default async function RoutinesPage({
                   </span>
                   <Link
                     href={`/${org}/routines/${r.id}`}
-                    className="text-[11px] rounded-md border border-line bg-paper px-2 py-1 hover:border-line-strong"
+                    className="text-xs rounded-md border border-line bg-paper px-2 py-1 hover:border-line-strong"
                   >
                     Edit
                   </Link>

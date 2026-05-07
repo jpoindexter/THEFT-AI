@@ -75,7 +75,7 @@ export default function PublishTargetPage() {
 
   if (!target) {
     return (
-      <div className="absolute inset-0 grid place-items-center text-[12px] text-ink-muted">
+      <div className="absolute inset-0 grid place-items-center text-sm text-ink-muted">
         Unknown publish target.
       </div>
     );
@@ -86,14 +86,14 @@ export default function PublishTargetPage() {
       <div className="max-w-3xl mx-auto space-y-5">
         <Link
           href={`/${params.org}/publishing`}
-          className="inline-flex items-center gap-1 text-[12px] text-ink-muted hover:text-ink"
+          className="inline-flex items-center gap-1 text-sm text-ink-muted hover:text-ink"
         >
           <ArrowLeft className="size-3" /> Back to publishing
         </Link>
 
         <header className="flex items-start justify-between gap-4">
           <div>
-            <div className="text-[10px] uppercase tracking-wider text-ink-soft">
+            <div className="text-2xs uppercase tracking-wider text-ink-soft">
               Publishing
             </div>
             <h1 className="text-xl tracking-tight">{target.label}</h1>
@@ -101,19 +101,19 @@ export default function PublishTargetPage() {
               href={`https://${target.domain}`}
               target="_blank"
               rel="noreferrer"
-              className="text-[11px] text-ink-muted inline-flex items-center gap-1 hover:text-ink mt-1"
+              className="text-xs text-ink-muted inline-flex items-center gap-1 hover:text-ink mt-1"
             >
               {target.domain}
               <ExternalLink className="size-3" />
             </a>
           </div>
-          <span className="text-[10px] uppercase tracking-wider rounded bg-mustard/30 text-mustard-ink px-1.5 py-0.5">
+          <span className="text-2xs uppercase tracking-wider rounded bg-mustard/30 text-mustard-ink px-1.5 py-0.5">
             {target.commits.length} commits ahead
           </span>
         </header>
 
         <section className="rounded-lg border border-line/70 bg-paper p-4 space-y-2">
-          <div className="text-[14px] font-medium tracking-tight">
+          <div className="text-md font-medium tracking-tight">
             Changes since prod
           </div>
           <ul className="divide-y divide-line/60">
@@ -121,8 +121,8 @@ export default function PublishTargetPage() {
               <li key={c.sha} className="py-2 flex items-start gap-3">
                 <GitCommit className="size-3.5 text-ink-soft mt-0.5 shrink-0" />
                 <div className="flex-1 min-w-0">
-                  <div className="text-[13px]">{c.msg}</div>
-                  <div className="text-[10px] text-ink-muted font-mono">
+                  <div className="text-base">{c.msg}</div>
+                  <div className="text-2xs text-ink-muted font-mono">
                     {c.sha} · {c.by} · {c.when} ago
                   </div>
                 </div>
@@ -132,31 +132,31 @@ export default function PublishTargetPage() {
         </section>
 
         <section className="rounded-lg border border-line/70 bg-paper p-4 space-y-3">
-          <div className="text-[14px] font-medium tracking-tight inline-flex items-center gap-2">
+          <div className="text-md font-medium tracking-tight inline-flex items-center gap-2">
             <GitPullRequest className="size-4 text-ink-muted" />
             Open publish PR
           </div>
           <input
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            className="w-full h-9 rounded-md border border-line bg-paper px-3 text-[13px] focus:outline-none focus:border-line-strong"
+            className="w-full h-9 rounded-md border border-line bg-paper px-3 text-base focus:outline-none focus:border-line-strong"
           />
           <textarea
             value={body}
             onChange={(e) => setBody(e.target.value)}
             rows={6}
-            className="w-full rounded-md border border-line bg-paper px-3 py-2 text-[12px] font-mono focus:outline-none focus:border-line-strong"
+            className="w-full rounded-md border border-line bg-paper px-3 py-2 text-sm font-mono focus:outline-none focus:border-line-strong"
           />
           <div className="flex justify-end gap-2">
             <button
               type="button"
-              className="text-[12px] rounded-md border border-line bg-paper px-3 py-1.5 hover:border-line-strong"
+              className="text-sm rounded-md border border-line bg-paper px-3 py-1.5 hover:border-line-strong"
             >
               Save as draft
             </button>
             <button
               type="button"
-              className="text-[12px] rounded-md bg-ink text-paper px-3 py-1.5"
+              className="text-sm rounded-md bg-ink text-paper px-3 py-1.5"
             >
               Open PR &rarr; prod
             </button>

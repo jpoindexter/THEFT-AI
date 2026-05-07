@@ -31,10 +31,10 @@ export default async function DatabaseLayout({
   const { org } = await params;
   return (
     <div className="absolute inset-0 grid grid-cols-[200px_1fr]">
-      <aside className="border-r border-line/70 p-3 text-[13px] flex flex-col gap-0.5 bg-canvas/50">
-        <div className="px-2 py-1 text-[11px] text-ink-muted">
+      <aside className="border-r border-line/70 p-3 text-base flex flex-col gap-0.5 bg-canvas/50">
+        <div className="px-2 py-1 text-xs text-ink-muted">
           theft-ai
-          <div className="text-[9px] text-ink-soft mt-0.5">Managed Supabase</div>
+          <div className="text-2xs text-ink-soft mt-0.5">Managed Supabase</div>
         </div>
         <div className="my-2 border-t border-line/70" />
         {NAV.map(({ slug, label, Icon }) => {

@@ -89,7 +89,7 @@ export default function SecuritySettings() {
             </li>
           ))}
         </ul>
-        <button className="mt-2 text-[11px] rounded-md border border-line px-2 py-1 hover:border-line-strong">
+        <button className="mt-2 text-xs rounded-md border border-line px-2 py-1 hover:border-line-strong">
           + Register key
         </button>
       </SettingsCard>
@@ -132,7 +132,7 @@ export default function SecuritySettings() {
             );
           })}
         </ul>
-        <button className="mt-2 text-[11px] rounded-md border border-brick/40 bg-brick/10 text-brick-ink px-2 py-1 hover:bg-brick/20">
+        <button className="mt-2 text-xs rounded-md border border-brick/40 bg-brick/10 text-brick-ink px-2 py-1 hover:bg-brick/20">
           Sign out all other sessions
         </button>
       </SettingsCard>

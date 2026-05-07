@@ -45,14 +45,14 @@ export default async function InboxPage({
             <h1 className="text-xl tracking-tight inline-flex items-center gap-2">
               <Inbox className="size-5 text-ink-muted" /> Inbox
             </h1>
-            <p className="text-[12px] text-ink-muted">
+            <p className="text-sm text-ink-muted">
               Per-agent email addresses. Inbound messages route to the agent
               and become tasks.
             </p>
           </div>
           <Link
             href={`/${org}/settings/inbox`}
-            className="inline-flex items-center gap-1 rounded-md border border-line bg-paper px-2 py-1 text-[12px] hover:border-line-strong"
+            className="inline-flex items-center gap-1 rounded-md border border-line bg-paper px-2 py-1 text-sm hover:border-line-strong"
           >
             <Settings className="size-3" /> Settings
           </Link>
@@ -70,18 +70,18 @@ export default async function InboxPage({
                 className="px-4 py-3 flex items-center justify-between hover:bg-canvas"
               >
                 <div className="min-w-0">
-                  <div className="text-[13px] font-medium">{a.name}</div>
-                  <div className="text-[11px] font-mono text-ink-muted">
+                  <div className="text-base font-medium">{a.name}</div>
+                  <div className="text-xs font-mono text-ink-muted">
                     {a.address}
                   </div>
-                  <div className="text-[12px] text-ink mt-1 truncate">
+                  <div className="text-sm text-ink mt-1 truncate">
                     {a.last_message}
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
-                  <span className="text-[10px] text-ink-soft">{a.when}</span>
+                  <span className="text-2xs text-ink-soft">{a.when}</span>
                   <span
-                    className={`text-[10px] uppercase rounded px-1.5 py-0.5 ${
+                    className={`text-2xs uppercase rounded px-1.5 py-0.5 ${
                       a.enabled
                         ? "bg-sage/30 text-sage-ink"
                         : "bg-cream text-ink-muted"

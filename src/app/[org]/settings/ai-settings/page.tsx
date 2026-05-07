@@ -43,8 +43,8 @@ export default function AISettings() {
           </Select>
         </Row>
         <div className="space-y-1">
-          <div className="text-[13px]">Global Prompt Personalization</div>
-          <p className="text-[11px] text-ink-muted">
+          <div className="text-base">Global Prompt Personalization</div>
+          <p className="text-xs text-ink-muted">
             Add context that should be included globally across chats and agents.
           </p>
           <Textarea
@@ -52,7 +52,7 @@ export default function AISettings() {
             className="min-h-24"
           />
           <div className="flex justify-end">
-            <button className="text-[11px] rounded-md bg-ink text-paper px-3 py-1">
+            <button className="text-xs rounded-md bg-ink text-paper px-3 py-1">
               Save
             </button>
           </div>
@@ -93,14 +93,14 @@ export default function AISettings() {
           <input
             type="email"
             placeholder="test@theft.ai"
-            className="w-72 h-9 rounded-md border border-line bg-paper px-3 text-[13px] focus:outline-none focus:border-line-strong"
+            className="w-72 h-9 rounded-md border border-line bg-paper px-3 text-base focus:outline-none focus:border-line-strong"
           />
         </Row>
         <Row label="Password">
           <input
             type="password"
             placeholder="••••••••"
-            className="w-72 h-9 rounded-md border border-line bg-paper px-3 text-[13px] font-mono focus:outline-none focus:border-line-strong"
+            className="w-72 h-9 rounded-md border border-line bg-paper px-3 text-base font-mono focus:outline-none focus:border-line-strong"
           />
         </Row>
       </SettingsCard>
