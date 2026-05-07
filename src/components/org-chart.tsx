@@ -6,8 +6,30 @@ import {
   DEPT_PREVIEWS,
   PreviewScene,
 } from "@/components/org-chart-preview";
+import {
+  Code2,
+  Palette,
+  Megaphone,
+  Briefcase,
+  ClipboardList,
+  Wallet,
+  Scale,
+  LifeBuoy,
+  Sparkles,
+} from "lucide-react";
 
 type Department = { id: string; slug: string; name: string };
+
+const DEPT_ICON: Record<string, React.ComponentType<{ className?: string }>> = {
+  engineering: Code2,
+  design: Palette,
+  marketing: Megaphone,
+  sales: Briefcase,
+  operations: ClipboardList,
+  finance: Wallet,
+  legal: Scale,
+  support: LifeBuoy,
+};
 
 const RING_R = 30;
 const LABEL_R = 30;
@@ -72,9 +94,11 @@ function Ring() {
 
 function Center({ orgName }: { orgName: string }) {
   return (
-    <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-10 flex flex-col items-center gap-1.5">
-      <div className="size-4 rounded-full bg-mustard" />
-      <div className="text-sm tracking-tight text-ink">{orgName}</div>
+    <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-10">
+      <div className="rounded-full bg-paper border border-line/70 px-3 py-1 inline-flex items-center gap-1.5 shadow-sm">
+        <Sparkles className="size-3 text-mustard-ink" />
+        <span className="text-sm tracking-tight text-ink">{orgName}</span>
+      </div>
     </div>
   );
 }
@@ -115,9 +139,14 @@ function DeptNode({
       >
         <Link
           href={`/${orgSlug}/${dept.slug}`}
-          className="rounded-full bg-paper border border-line/70 px-2.5 py-0.5 text-xs tracking-tight inline-flex items-center gap-1 hover:border-line-strong"
+          className="rounded-full bg-paper border border-line/70 px-2.5 py-0.5 text-xs tracking-tight inline-flex items-center gap-1.5 hover:border-line-strong"
         >
-          <span className="size-1.5 rounded-full bg-line-strong group-hover:bg-ink" />
+          {(() => {
+            const Icon = DEPT_ICON[dept.slug] ?? Sparkles;
+            return (
+              <Icon className="size-3 text-ink-muted group-hover:text-ink" />
+            );
+          })()}
           {dept.name}
         </Link>
 

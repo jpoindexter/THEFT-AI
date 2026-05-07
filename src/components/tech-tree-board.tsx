@@ -1,11 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { X, Folder, ArrowUpRight } from "lucide-react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { Eyebrow, ButtonPrimary } from "@/components/ui/primitives";
 import { TreeCard, type TechNode } from "@/components/tech-tree-card";
+import TechTreeArrows from "@/components/tech-tree-arrows";
 
 const STAGES = [
   { key: "idea", label: "IDEA STAGE" },
@@ -26,12 +27,20 @@ export default function TechTreeBoard({
 }) {
   const [selected, setSelected] = useState<TechNode | null>(null);
   const titlesById = new Map(nodes.map((n) => [n.id, n.title]));
+  const scrollRef = useRef<HTMLDivElement>(null);
+
+  const edges = nodes.flatMap((n) =>
+    n.dependencies
+      .filter((depId) => titlesById.has(depId))
+      .map((depId) => ({ from: depId, to: n.id })),
+  );
 
   return (
     <div className="absolute inset-0 bg-cream flex flex-col">
       <BoardHeader orgName={orgName} />
-      <div className="flex-1 overflow-auto p-6">
-        <div className="flex gap-8 min-w-max">
+      <div ref={scrollRef} className="flex-1 overflow-auto p-6 relative">
+        <TechTreeArrows edges={edges} containerRef={scrollRef} />
+        <div className="flex gap-8 min-w-max relative">
           {STAGES.map((stage) => (
             <StageColumn
               key={stage.key}

@@ -39,6 +39,7 @@ export function TreeCard({
     <button
       type="button"
       onClick={onSelect}
+      data-tt-node={n.id}
       className={`text-left rounded-md border bg-paper px-3 py-2 transition-all ${toneClass} ${
         isLocked ? "opacity-40" : "hover:border-line-strong"
       }`}
