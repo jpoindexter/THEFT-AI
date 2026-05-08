@@ -1,21 +1,32 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { db } from "@/lib/db/store";
-import { Search, Upload, Pin } from "lucide-react";
-import EmptyState from "@/components/empty-state";
+import {
+  PageTitle,
+  Hint,
+  Pill,
+  Card,
+  CardBody,
+  SectionTitle,
+} from "@/components/ui/primitives";
+import { Folder, Pin, Upload, Search } from "lucide-react";
+import type { Artifact } from "@/lib/db/store";
 
-const COVER: Record<string, string> = {
-  engineering: "linear-gradient(135deg,#fde7c0,#f5d6a8)",
-  design: "linear-gradient(135deg,#e0e0e0,#bdbdbd)",
-  marketing: "linear-gradient(135deg,#ffd9b5,#f3a26a)",
-  sales: "linear-gradient(135deg,#d8e8d4,#a3c69a)",
-  operations: "linear-gradient(135deg,#dbe1c9,#b6c2a3)",
-  finance: "linear-gradient(135deg,#dfe2c2,#aab48a)",
-  legal: "linear-gradient(135deg,#cfd2bd,#9ea08e)",
-  support: "linear-gradient(135deg,#d5cfc1,#a89f8f)",
+type ArtifactKind = Artifact["kind"];
+
+const KIND_TONE: Record<ArtifactKind, React.ComponentProps<typeof Pill>["tone"]> = {
+  markdown: "neutral",
+  code: "mustard",
+  image: "sage",
+  pdf: "brick",
+  json: "neutral",
+  video: "neutral",
+  brand_kit: "sage",
+  business_plan: "neutral",
+  other: "neutral",
 };
 
-export default async function LibraryPage({
+export default async function LibraryIndexPage({
   params,
 }: {
   params: Promise<{ org: string }>;
@@ -23,123 +34,151 @@ export default async function LibraryPage({
   const { org: orgSlug } = await params;
   const organization = await db.getOrgBySlug(orgSlug);
   if (!organization) notFound();
-  const departments = await db.listDepartments(organization.id);
-  const artifacts = await db.listArtifacts(organization.id);
-  const pinned = artifacts.filter((a) => a.pinned);
+
+  const [departments, artifacts] = await Promise.all([
+    db.listDepartments(organization.id),
+    db.listArtifacts(organization.id),
+  ]);
+
+  const recent = [...artifacts]
+    .sort((a, b) => b.created_at.localeCompare(a.created_at))
+    .slice(0, 10);
+
+  const deptMap = new Map(departments.map((d) => [d.id, d.name]));
 
   return (
-    <div className="absolute inset-0 overflow-y-auto p-6">
-      <div className="max-w-4xl mx-auto space-y-6">
-        <header className="flex items-center justify-between">
-          <div>
-            <h1 className="text-xl tracking-tight">Library</h1>
-            <p className="text-sm text-ink-muted">
-              Shared file system. Every agent in the workspace can read and
-              write here.
-            </p>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="flex items-center gap-1 rounded-md border border-line bg-paper px-2 py-1 text-sm">
-              <Search className="size-3 text-ink-soft" />
-              <input
-                placeholder="Search files"
-                className="bg-transparent focus:outline-none w-40"
-              />
-            </div>
-            <Link
-              href={`/${orgSlug}/library/upload`}
-              className="inline-flex items-center gap-1 rounded-md border border-line bg-paper px-2 py-1 text-sm hover:border-line-strong"
-            >
-              <Upload className="size-3" /> Upload
-            </Link>
-          </div>
-        </header>
+    <div className="absolute inset-0 overflow-y-auto">
+      <div className="p-6 space-y-6">
 
-        {pinned.length > 0 && (
-          <section className="space-y-2">
-            <div className="text-2xs uppercase tracking-[0.14em] text-ink-soft inline-flex items-center gap-1">
-              <Pin className="size-3" /> Pinned
-            </div>
-            <ul className="rounded-lg border border-line/70 bg-paper divide-y divide-line/60">
-              {pinned.map((a) => (
-                <li key={a.id}>
+        {/* Header */}
+        <div className="space-y-1">
+          <PageTitle>Library</PageTitle>
+          <Hint>
+            Shared files, documents, and generated assets. Every agent can
+            access every file.
+          </Hint>
+        </div>
+
+        {/* Toolbar */}
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            className="inline-flex items-center gap-1.5 rounded-md bg-ink text-paper text-xs px-3 py-1.5 hover:opacity-90 transition-opacity"
+          >
+            <Upload className="size-3" />
+            Upload
+          </button>
+          <div className="relative flex-1 max-w-xs">
+            <Search className="absolute left-2 top-1/2 -translate-y-1/2 size-3 text-ink-soft pointer-events-none" />
+            <input
+              type="search"
+              placeholder="Search files…"
+              className="w-full rounded-md border border-line bg-paper text-xs text-ink pl-7 pr-3 py-1.5 placeholder:text-ink-soft focus:outline-none focus:border-line-strong"
+            />
+          </div>
+        </div>
+
+        {/* Department folders */}
+        {departments.length > 0 && (
+          <section className="space-y-3">
+            <SectionTitle>Departments</SectionTitle>
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+              {departments.map((dept) => {
+                const deptArtifacts = artifacts.filter(
+                  (a) => a.department_id === dept.id,
+                );
+                const pinnedCount = deptArtifacts.filter(
+                  (a) => a.pinned,
+                ).length;
+
+                return (
                   <Link
-                    href={`/${orgSlug}/library/${a.id}`}
-                    className="px-3 py-2 text-base flex items-center justify-between hover:bg-canvas"
+                    key={dept.id}
+                    href={`/${orgSlug}/library?dept=${dept.id}`}
+                    className="group rounded-lg border border-line/70 bg-paper p-4 space-y-2 hover:border-line-strong transition-colors"
                   >
-                    <span className="truncate">{a.name}</span>
-                    <span className="text-2xs text-ink-muted uppercase">
-                      {a.kind}
-                    </span>
+                    <div className="flex items-center gap-2">
+                      <Folder className="size-4 text-ink-soft shrink-0" />
+                      <span className="text-sm font-medium text-ink truncate">
+                        {dept.name}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2 text-2xs text-ink-muted">
+                      <span>{deptArtifacts.length} files</span>
+                      {pinnedCount > 0 && (
+                        <>
+                          <span aria-hidden="true">·</span>
+                          <span className="inline-flex items-center gap-0.5">
+                            <Pin className="size-2.5" />
+                            {pinnedCount} pinned
+                          </span>
+                        </>
+                      )}
+                    </div>
                   </Link>
-                </li>
-              ))}
-            </ul>
+                );
+              })}
+            </div>
           </section>
         )}
 
-        <section>
-          <div className="text-2xs uppercase tracking-[0.14em] text-ink-soft mb-2">
-            By department
-          </div>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-            {departments.map((d) => {
-              const count = artifacts.filter(
-                (a) => a.department_id === d.id,
-              ).length;
-              return (
-                <Link
-                  key={d.id}
-                  href={`/${orgSlug}/${d.slug}`}
-                  className="rounded-lg border border-line/70 overflow-hidden bg-paper hover:border-line-strong transition-colors"
-                >
-                  <div
-                    className="aspect-[16/10]"
-                    style={{ background: COVER[d.slug] ?? "#f5f4f0" }}
-                  />
-                  <div className="p-2 text-sm flex items-center justify-between">
-                    <span>{d.name}</span>
-                    <span className="text-ink-soft">{count}</span>
-                  </div>
-                </Link>
-              );
-            })}
-          </div>
+        {/* Recent files */}
+        <section className="space-y-3">
+          <SectionTitle>Recent files</SectionTitle>
+
+          {artifacts.length === 0 ? (
+            <Card>
+              <CardBody className="flex flex-col items-center justify-center py-12 text-center gap-2">
+                <Folder className="size-8 text-ink-soft" />
+                <p className="text-sm text-ink">No files yet.</p>
+                <p className="text-xs text-ink-muted max-w-xs">
+                  Agents save outputs here automatically. You can also upload
+                  files from any task.
+                </p>
+              </CardBody>
+            </Card>
+          ) : (
+            <Card>
+              <ul className="divide-y divide-line/60">
+                {recent.map((artifact) => {
+                  const deptName = artifact.department_id
+                    ? (deptMap.get(artifact.department_id) ?? "—")
+                    : "—";
+
+                  return (
+                    <li key={artifact.id}>
+                      <Link
+                        href={`/${orgSlug}/library/${artifact.id}`}
+                        className="flex items-center gap-3 px-4 py-2.5 hover:bg-cream transition-colors"
+                      >
+                        <span className="flex-1 min-w-0 flex items-center gap-1.5">
+                          {artifact.pinned && (
+                            <Pin
+                              className="size-3 text-ink-soft shrink-0"
+                              aria-label="Pinned"
+                            />
+                          )}
+                          <span className="text-sm text-ink truncate">
+                            {artifact.name}
+                          </span>
+                        </span>
+                        <Pill tone={KIND_TONE[artifact.kind]}>
+                          {artifact.kind}
+                        </Pill>
+                        <span className="hidden sm:block text-xs text-ink-muted shrink-0 w-24 truncate">
+                          {deptName}
+                        </span>
+                        <span className="text-2xs text-ink-soft shrink-0">
+                          {new Date(artifact.created_at).toLocaleDateString()}
+                        </span>
+                      </Link>
+                    </li>
+                  );
+                })}
+              </ul>
+            </Card>
+          )}
         </section>
-
-        {artifacts.length === 0 && (
-          <EmptyState
-            Icon={Upload}
-            title="Library is empty"
-            body="Drop a brief, brand kit, prospect list, or anything agents should reference. Pinned files travel with every prompt."
-            actions={[
-              { label: "Upload artifact", href: `/${orgSlug}/library/upload`, primary: true },
-            ]}
-          />
-        )}
-
-        {artifacts.length > 0 && (
-          <section className="space-y-2">
-            <div className="text-2xs uppercase tracking-[0.14em] text-ink-soft">
-              All files
-            </div>
-            <ul className="rounded-lg border border-line/70 bg-paper divide-y divide-line/60">
-              {artifacts.map((a) => (
-                <li key={a.id}>
-                  <Link
-                    href={`/${orgSlug}/library/${a.id}`}
-                    className="px-3 py-2 text-base flex items-center justify-between hover:bg-canvas"
-                  >
-                    <span className="truncate">{a.name}</span>
-                    <span className="text-2xs text-ink-muted uppercase">
-                      {a.kind}
-                    </span>
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </section>
-        )}
       </div>
     </div>
   );
