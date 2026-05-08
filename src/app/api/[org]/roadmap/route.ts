@@ -20,6 +20,8 @@ export async function GET(
       slug: n.slug,
       title: n.title,
       status: statusMap.get(n.id) ?? "locked",
+      stage: n.stage ?? null,
+      department: n.department ?? null,
     })),
   });
 }

@@ -109,7 +109,7 @@ export default function Canvas({
       onPointerMove={onPointerMove}
       onPointerUp={onPointerUp}
       onPointerCancel={onPointerUp}
-      className={`relative overflow-hidden ${dragStart.current ? "cursor-grabbing" : "cursor-grab"} ${className ?? ""}`}
+      className={`overflow-hidden ${dragStart.current ? "cursor-grabbing" : "cursor-grab"} ${className ?? ""}`}
       data-canvas-bg
     >
       <div

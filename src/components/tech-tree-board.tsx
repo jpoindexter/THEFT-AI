@@ -2,7 +2,7 @@
 
 import { useRef, useState } from "react";
 import { X, Folder, Box } from "lucide-react";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { Eyebrow, ButtonPrimary } from "@/components/ui/primitives";
 import { TreeCard, type TechNode } from "@/components/tech-tree-card";
 import TechTreeArrows from "@/components/tech-tree-arrows";
@@ -129,7 +129,9 @@ function DetailDrawer({
   allNodes: TechNode[];
   onClose: () => void;
 }) {
-  useParams<{ org: string }>();
+  const { org } = useParams<{ org: string }>();
+  const router = useRouter();
+  const [launching, setLaunching] = useState(false);
   const deps = n.dependencies
     .map((id) => allNodes.find((x) => x.id === id))
     .filter((x): x is TechNode => Boolean(x));
@@ -260,7 +262,28 @@ function DetailDrawer({
         )}
 
         {n.agent_can_do_this && n.status !== "locked" && (
-          <ButtonPrimary className="w-full">Launch Agent</ButtonPrimary>
+          <ButtonPrimary
+            className="w-full"
+            disabled={launching}
+            onClick={async () => {
+              setLaunching(true);
+              try {
+                const res = await fetch(`/api/${org}/tasks`, {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({ description: n.title }),
+                });
+                const data = (await res.json()) as { task?: { id: string } };
+                if (data.task?.id) {
+                  router.push(`/${org}/tasks/${data.task.id}`);
+                }
+              } finally {
+                setLaunching(false);
+              }
+            }}
+          >
+            {launching ? "Starting…" : "Launch Agent"}
+          </ButtonPrimary>
         )}
       </div>
     </aside>

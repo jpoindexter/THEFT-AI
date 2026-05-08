@@ -1,108 +1,74 @@
-import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowLeft, ExternalLink, Activity, Trash2 } from "lucide-react";
+import Link from "next/link";
+import { ArrowLeft } from "lucide-react";
+
+type Tool = { name: string; description: string };
 
 const INTEGRATIONS: Record<
   string,
   {
     name: string;
     desc: string;
-    docs: string;
-    status: "connected" | "disconnected";
-    scopes: string[];
-    tools: { name: string; description: string }[];
-    recent: { when: string; tool: string; result: string }[];
+    color: string;
+    letter: string;
+    triggers: Tool[];
+    actions: Tool[];
   }
 > = {
-  github: {
-    name: "GitHub",
-    desc: "Source control + PR previews. The Engineer pushes branches and opens PRs against your repos.",
-    docs: "https://docs.github.com",
-    status: "connected",
-    scopes: ["repo", "workflow", "read:user"],
-    tools: [
-      {
-        name: "open_pull_request",
-        description: "Open a PR with branch + diff.",
-      },
-      { name: "comment_on_pr", description: "Reply on a PR." },
-      { name: "list_repos", description: "List repos in the org." },
-    ],
-    recent: [
-      {
-        when: "2m",
-        tool: "open_pull_request",
-        result: "PR #42 opened",
-      },
-      { when: "1h", tool: "list_repos", result: "12 repos" },
-    ],
-  },
-  vercel: {
-    name: "Vercel",
-    desc: "Deployments + preview environments per branch.",
-    docs: "https://vercel.com/docs",
-    status: "connected",
-    scopes: ["deployments", "domains"],
-    tools: [
-      { name: "deploy_branch", description: "Trigger a deployment." },
-      {
-        name: "get_preview_url",
-        description: "Return the preview URL for a branch.",
-      },
-    ],
-    recent: [
-      { when: "12m", tool: "deploy_branch", result: "main → prod" },
-    ],
-  },
-  supabase: {
-    name: "Supabase",
-    desc: "Postgres, auth, storage, realtime.",
-    docs: "https://supabase.com/docs",
-    status: "connected",
-    scopes: ["projects", "sql", "storage"],
-    tools: [
-      { name: "execute_sql", description: "Run SQL on the project DB." },
-      {
-        name: "apply_migration",
-        description: "Apply an additive migration.",
-      },
-    ],
-    recent: [],
-  },
-  postmark: {
-    name: "Postmark",
-    desc: "Transactional email and inbound parsing.",
-    docs: "https://postmarkapp.com/developer",
-    status: "connected",
-    scopes: ["send", "receive"],
-    tools: [
-      {
-        name: "send_email",
-        description: "Send a transactional email.",
-      },
-    ],
-    recent: [],
-  },
-  stripe: {
-    name: "Stripe",
-    desc: "Checkout, subscriptions, billing.",
-    docs: "https://stripe.com/docs",
-    status: "disconnected",
-    scopes: [],
-    tools: [],
-    recent: [],
-  },
   linear: {
     name: "Linear",
-    desc: "Issue tracker.",
-    docs: "https://developers.linear.app",
-    status: "connected",
-    scopes: ["read", "write"],
-    tools: [
-      { name: "create_issue", description: "Create a new Linear issue." },
-      { name: "update_issue", description: "Update an issue's state." },
+    desc: "Manage Linear issues and projects",
+    color: "#5E6AD2",
+    letter: "L",
+    triggers: [
+      { name: "Issue Created", description: "New issues in Linear" },
+      { name: "Issue Updated", description: "Issues updated in Linear" },
+      { name: "Issue Deleted", description: "Issues deleted in Linear" },
+      { name: "Issue Commented", description: "Issues commented in Linear" },
+      { name: "Project Updates", description: "Project updates in Linear" },
     ],
-    recent: [],
+    actions: [
+      { name: "Create Linear Comment", description: "Adds a comment to an existing Linear issue." },
+      { name: "Create Linear Issue", description: "Creates a new Linear issue." },
+      { name: "List Linear Labels", description: "Lists all available labels in the Linear workspace. Can be filtered by team." },
+      { name: "List Linear Projects", description: "Retrieves a list of all projects within the Linear workspace." },
+      { name: "List Linear Project Milestones", description: "Retrieves a list of all milestones for a specific project within the Linear workspace." },
+      { name: "List Linear Teams", description: "Retrieves a list of all teams within the Linear workspace." },
+      { name: "List Linear Users", description: "Retrieves a list of all users within the Linear organization." },
+      { name: "List Linear Workflow States", description: "Retrieves a list of all workflow statuses available in Linear, optionally filtered by team." },
+      { name: "Search Linear Issues", description: "Searches for issues in Linear across all teams with support for filtering by assignee, state, priority, labels, project, and due dates. Automatically excludes Done, Canceled, and Duplicate issues" },
+      { name: "Update Linear Issue", description: "Updates an existing Linear issue with new information such as assignee, title, description, or state." },
+      { name: "Update Linear Project", description: "Updates an existing project within the Linear workspace." },
+    ],
+  },
+  postiz: {
+    name: "Postiz",
+    desc: "Manage social media posts and channels",
+    color: "#8B5CF6",
+    letter: "P",
+    triggers: [
+      { name: "Post Published", description: "When a scheduled post goes live" },
+      { name: "Post Failed", description: "When a post fails to publish" },
+    ],
+    actions: [
+      { name: "Create Post", description: "Schedule a post across connected channels." },
+      { name: "List Channels", description: "List all connected social channels." },
+      { name: "Get Post Status", description: "Check the publish status of a scheduled post." },
+    ],
+  },
+  ramp: {
+    name: "Ramp",
+    desc: "View Ramp cards, transactions, and business details",
+    color: "#16A34A",
+    letter: "R",
+    triggers: [
+      { name: "Transaction Created", description: "New transaction on a Ramp card" },
+      { name: "Card Limit Updated", description: "Card spend limit was changed" },
+    ],
+    actions: [
+      { name: "List Transactions", description: "Retrieve recent card transactions." },
+      { name: "Get Card Details", description: "Look up details for a specific Ramp card." },
+    ],
   },
 };
 
@@ -116,121 +82,78 @@ export default async function IntegrationDetailPage({
   if (!i) notFound();
 
   return (
-    <div className="absolute inset-0 overflow-y-auto p-6">
-      <div className="max-w-3xl mx-auto space-y-4">
-        <Link
-          href={`/${org}/integrations`}
-          className="inline-flex items-center gap-1 text-sm text-ink-muted hover:text-ink"
-        >
-          <ArrowLeft className="size-3" /> Back to integrations
-        </Link>
-
-        <header className="flex items-start justify-between">
-          <div>
-            <h1 className="text-xl tracking-tight">{i.name}</h1>
-            <p className="text-sm text-ink-muted max-w-prose mt-1">
-              {i.desc}
-            </p>
-            <a
-              href={i.docs}
-              target="_blank"
-              rel="noreferrer"
-              className="inline-flex items-center gap-1 text-xs text-ink-muted hover:text-ink mt-1"
-            >
-              {i.docs} <ExternalLink className="size-3" />
-            </a>
-          </div>
-          <span
-            className={`text-2xs uppercase rounded px-1.5 py-0.5 shrink-0 ${
-              i.status === "connected"
-                ? "bg-sage/30 text-sage-ink"
-                : "bg-cream text-ink-muted"
-            }`}
+    <div className="space-y-5">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <Link
+            href={`/${org}/integrations`}
+            className="text-ink-muted hover:text-ink"
+            aria-label="Back"
           >
-            {i.status}
-          </span>
-        </header>
-
-        <section className="rounded-lg border border-line/70 bg-paper p-4 space-y-2">
-          <div className="text-2xs uppercase tracking-wider text-ink-soft">
-            Scopes
+            <ArrowLeft className="size-4" />
+          </Link>
+          <div
+            className="size-7 rounded-md flex items-center justify-center text-white font-semibold text-xs shrink-0"
+            style={{ backgroundColor: i.color }}
+          >
+            {i.letter}
           </div>
-          {i.scopes.length === 0 ? (
-            <p className="text-sm text-ink-muted">No scopes granted.</p>
-          ) : (
-            <div className="flex flex-wrap gap-1">
-              {i.scopes.map((s) => (
-                <code
-                  key={s}
-                  className="text-xs font-mono px-1.5 py-0.5 rounded bg-cream text-ink"
-                >
-                  {s}
-                </code>
-              ))}
-            </div>
-          )}
-        </section>
-
-        <section className="rounded-lg border border-line/70 bg-paper p-4 space-y-2">
-          <div className="text-2xs uppercase tracking-wider text-ink-soft">
-            Tools exposed to agents ({i.tools.length})
-          </div>
-          {i.tools.length === 0 ? (
-            <p className="text-sm text-ink-muted">
-              No tools yet. Connect to populate.
-            </p>
-          ) : (
-            <ul className="divide-y divide-line/60">
-              {i.tools.map((t) => (
-                <li key={t.name} className="py-2">
-                  <code className="text-sm font-mono text-ink">
-                    {t.name}
-                  </code>
-                  <div className="text-xs text-ink-muted">
-                    {t.description}
-                  </div>
-                </li>
-              ))}
-            </ul>
-          )}
-        </section>
-
-        <section className="rounded-lg border border-line/70 bg-paper p-4 space-y-2">
-          <div className="text-2xs uppercase tracking-wider text-ink-soft inline-flex items-center gap-1">
-            <Activity className="size-3" /> Recent calls
-          </div>
-          {i.recent.length === 0 ? (
-            <p className="text-sm text-ink-muted">No recent activity.</p>
-          ) : (
-            <ul className="divide-y divide-line/60">
-              {i.recent.map((r, idx) => (
-                <li
-                  key={idx}
-                  className="py-2 flex items-center justify-between text-sm"
-                >
-                  <span>
-                    <code className="font-mono">{r.tool}</code>{" "}
-                    <span className="text-ink-muted">— {r.result}</span>
-                  </span>
-                  <span className="text-2xs text-ink-soft">{r.when} ago</span>
-                </li>
-              ))}
-            </ul>
-          )}
-        </section>
-
-        <div className="flex justify-end gap-2">
-          {i.status === "connected" ? (
-            <button className="inline-flex items-center gap-1 text-xs rounded-md border border-brick/40 bg-paper text-brick-ink px-2 py-1 hover:bg-brick/10">
-              <Trash2 className="size-3" /> Disconnect
-            </button>
-          ) : (
-            <button className="text-xs rounded-md bg-ink text-paper px-3 py-1.5">
-              Connect
-            </button>
-          )}
+          <h1 className="text-xl tracking-tight">{i.name}</h1>
         </div>
+        <button
+          type="button"
+          className="text-sm rounded-md border border-line bg-paper px-3 py-1.5 hover:border-line-strong"
+        >
+          Connect
+        </button>
       </div>
+
+      <p className="text-sm text-ink-muted">{i.desc}</p>
+
+      <div className="relative">
+        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-ink-soft">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <circle cx="11" cy="11" r="8" /><path d="m21 21-4.35-4.35" />
+          </svg>
+        </span>
+        <input
+          placeholder="Search triggers and actions..."
+          className="w-full h-9 rounded-md border border-line bg-paper pl-9 pr-3 text-base focus:outline-none focus:border-line-strong"
+        />
+      </div>
+
+      {i.triggers.length > 0 && (
+        <section className="space-y-2">
+          <div>
+            <h2 className="text-base font-medium">Triggers</h2>
+            <p className="text-sm text-ink-muted">
+              You can set up Cofounder to run when these events happen.
+            </p>
+          </div>
+          <div className="rounded-lg border border-line/70 bg-paper divide-y divide-line/60">
+            {i.triggers.map((t) => (
+              <div key={t.name} className="px-4 py-3">
+                <div className="text-base font-medium">{t.name}</div>
+                <div className="text-sm text-ink-muted">{t.description}</div>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {i.actions.length > 0 && (
+        <section className="space-y-2">
+          <h2 className="text-base font-medium">Actions</h2>
+          <div className="rounded-lg border border-line/70 bg-paper divide-y divide-line/60">
+            {i.actions.map((a) => (
+              <div key={a.name} className="px-4 py-3">
+                <div className="text-base font-medium">{a.name}</div>
+                <div className="text-sm text-ink-muted">{a.description}</div>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
     </div>
   );
 }

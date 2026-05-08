@@ -5,7 +5,7 @@
 // tools to call, what artifacts to produce.
 
 import { Fragment, useEffect, useRef, useState } from "react";
-import { ChevronDown, ChevronRight, ArrowUp, Wrench, Maximize2 } from "lucide-react";
+import { ChevronDown, ChevronRight, ChevronLeft, ArrowUp, Wrench, Maximize2 } from "lucide-react";
 import SlashMenu from "@/components/slash-menu";
 
 type Answer = { key?: string; label?: string; custom?: string };
@@ -120,6 +120,22 @@ export default function AgentChat({
     }
   }
 
+  function goBack() {
+    let lastAnswerIdx = -1;
+    for (let i = turns.length - 1; i >= 0; i--) {
+      if (turns[i].kind === "tool_answer") { lastAnswerIdx = i; break; }
+    }
+    if (lastAnswerIdx < 0) return;
+    const trimmed = turns.slice(0, lastAnswerIdx);
+    let prevPause: typeof paused = null;
+    for (let i = trimmed.length - 1; i >= 0; i--) {
+      const t = trimmed[i];
+      if (t.kind === "pause") { prevPause = t; break; }
+    }
+    setTurns(trimmed);
+    setPaused(prevPause);
+  }
+
   async function answer(a: Answer) {
     if (!paused || busy) return;
     setBusy(true);
@@ -192,6 +208,7 @@ export default function AgentChat({
                 step={step}
                 total={total}
                 onAnswer={answer}
+                onBack={goBack}
                 onDecideThis={() => void send("Decide this one for me")}
                 onDecideAll={() => void send("Decide all remaining questions for me")}
               />
@@ -257,6 +274,7 @@ function Turn({
   step,
   total,
   onAnswer,
+  onBack,
   onDecideThis,
   onDecideAll,
 }: {
@@ -266,6 +284,7 @@ function Turn({
   step?: number;
   total?: number;
   onAnswer: (a: Answer) => void;
+  onBack?: () => void;
   onDecideThis?: () => void;
   onDecideAll?: () => void;
 }) {
@@ -318,6 +337,7 @@ function Turn({
         step={step}
         total={total}
         onAnswer={onAnswer}
+        onBack={onBack}
         onDecideThis={onDecideThis}
         onDecideAll={onDecideAll}
       />
@@ -360,6 +380,7 @@ function AskUserQuestion({
   step,
   total,
   onAnswer,
+  onBack,
   onDecideThis,
   onDecideAll,
 }: {
@@ -368,6 +389,7 @@ function AskUserQuestion({
   step?: number;
   total?: number;
   onAnswer: (a: Answer) => void;
+  onBack?: () => void;
   onDecideThis?: () => void;
   onDecideAll?: () => void;
 }) {
@@ -379,6 +401,17 @@ function AskUserQuestion({
     <div className="rounded-lg border border-line/80 bg-paper">
       <div className="px-3 py-1.5 border-b border-line/70 flex items-center justify-between">
         <div className="inline-flex items-center gap-1 text-xs text-ink-muted">
+          {step !== undefined && step > 1 && onBack && (
+            <button
+              type="button"
+              onClick={onBack}
+              disabled={disabled}
+              className="hover:text-ink disabled:opacity-40"
+              aria-label="Previous question"
+            >
+              <ChevronLeft className="size-3" />
+            </button>
+          )}
           {step !== undefined && total !== undefined && (
             <span className="font-mono">{step}/{total}</span>
           )}

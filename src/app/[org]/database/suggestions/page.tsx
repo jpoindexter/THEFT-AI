@@ -34,12 +34,9 @@ export default function SuggestionsPage() {
   return (
     <div className="space-y-4">
       <header>
-        <h1 className="text-lg font-medium tracking-tight inline-flex items-center gap-2">
-          <Lightbulb className="size-4 text-ink-muted" /> Suggestions
-        </h1>
+        <h1 className="text-lg font-medium tracking-tight">Advisors</h1>
         <p className="text-sm text-ink-muted">
-          Observations from the schema linter and query profiler. The Engineer
-          agent can implement any of these.
+          Improve your project&apos;s security and performance.
         </p>
       </header>
 

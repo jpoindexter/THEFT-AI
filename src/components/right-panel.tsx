@@ -9,7 +9,7 @@ import TasksTab from "./tasks-tab";
 import LibraryTab from "./library-tab";
 import CompanyTab from "./company-tab";
 import DepartmentPanel from "./department-panel";
-import { ChevronRight, RefreshCw, Circle } from "lucide-react";
+import { ChevronRight, RefreshCw, Circle, X } from "lucide-react";
 import Sunflower from "@/components/sunflower";
 
 type Org = { id: string; slug: string; name: string };
@@ -47,6 +47,7 @@ export default function RightPanel({
     serverDepartment,
   );
   const [onboardingStarted, setOnboardingStarted] = useState(false);
+  const [selectedSuggested, setSelectedSuggested] = useState<SuggestedNode | null>(null);
 
   // detect dept slug from URL: /[org]/[deptSlug] (excluding well-known sections)
   const RESERVED = new Set([
@@ -56,7 +57,7 @@ export default function RightPanel({
     "integrations",
     "referrals",
     "database",
-    "design",
+    "tasks",
   ]);
   const segments = pathname.replace(/^\/+|\/+$/g, "").split("/");
   const sub = segments[1];
@@ -76,6 +77,14 @@ export default function RightPanel({
       });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [deptSlug, organization.slug]);
+
+  // Auto-switch to Tasks tab when navigating to a task detail page
+  const allSegs = pathname.replace(/^\/+|\/+$/g, "").split("/");
+  const activeTaskId = allSegs[1] === "tasks" && allSegs[2] ? allSegs[2] : null;
+
+  useEffect(() => {
+    if (activeTaskId) setTab("tasks");
+  }, [activeTaskId]);
 
   // When in onboarding (no plan yet), the panel becomes a single
   // task-style header with the cofounder chat + inline brief beneath.
@@ -142,128 +151,296 @@ export default function RightPanel({
               department={department}
             />
           ) : (
-            <HomeTab organization={organization} founderName={founderName} />
+            <HomeTab
+              organization={organization}
+              founderName={founderName}
+              selectedSuggested={selectedSuggested}
+              onSelectSuggested={setSelectedSuggested}
+              onClearSuggested={() => setSelectedSuggested(null)}
+            />
           ))}
         {tab === "cofounder" && <AgentChat organization={organization} />}
         {tab === "company" && <CompanyTab organization={organization} />}
-        {tab === "tasks" && <TasksTab organization={organization} />}
+        {tab === "tasks" && (
+          <TasksTab
+            organization={organization}
+            taskId={activeTaskId ?? undefined}
+            onSelectSuggested={(n) => { setSelectedSuggested(n); setTab("home"); }}
+          />
+        )}
         {tab === "library" && <LibraryTab organization={organization} />}
       </div>
     </aside>
   );
 }
 
-type ActiveTask = { id: string; title: string };
-type SuggestedNode = { id: string; title: string };
+type ActiveTask = {
+  id: string;
+  title: string;
+  description: string | null;
+  status: string;
+  agent_id: string | null;
+  department_id: string | null;
+  created_at: string;
+};
+type SuggestedNode = { id: string; title: string; slug: string; stage?: string | null; department?: string | null };
+type Agent = { id: string; name: string };
+type Department = { id: string; slug: string };
+
+const DEPT_DOT: Record<string, string> = {
+  engineering: "bg-[#c8a87a]",
+  design: "bg-[#7ab4c8]",
+  marketing: "bg-[#e0907a]",
+  sales: "bg-[#7ac87a]",
+  operations: "bg-[#7ac8b4]",
+  finance: "bg-[#9a7ac8]",
+  legal: "bg-[#4a5a6a]",
+  support: "bg-[#e0a050]",
+};
+
+function relativeTime(iso: string): string {
+  const diff = Date.now() - new Date(iso).getTime();
+  const mins = Math.floor(diff / 60_000);
+  if (mins < 1) return "just now";
+  if (mins < 60) return `${mins} min ago`;
+  const hrs = Math.floor(mins / 60);
+  if (hrs < 24) return `about ${hrs} hour${hrs > 1 ? "s" : ""} ago`;
+  return `${Math.floor(hrs / 24)} day${Math.floor(hrs / 24) > 1 ? "s" : ""} ago`;
+}
 
 function HomeTab({
   organization,
   founderName,
+  selectedSuggested,
+  onSelectSuggested,
+  onClearSuggested,
 }: {
   organization: Org;
   founderName: string;
+  selectedSuggested?: SuggestedNode | null;
+  onSelectSuggested?: (n: SuggestedNode) => void;
+  onClearSuggested?: () => void;
 }) {
   const hour = new Date().getHours();
   const greeting =
     hour < 12 ? "Good morning" : hour < 18 ? "Good afternoon" : "Good evening";
 
   const [activeTasks, setActiveTasks] = useState<ActiveTask[]>([]);
+  const [agents, setAgents] = useState<Agent[]>([]);
+  const [departments, setDepartments] = useState<Department[]>([]);
   const [suggested, setSuggested] = useState<SuggestedNode[]>([]);
   const [completePct, setCompletePct] = useState<number>(0);
+  const [selected, setSelected] = useState<ActiveTask | null>(null);
 
   useEffect(() => {
-    void fetch(`/api/${organization.slug}/tasks`)
-      .then((r) => r.json())
-      .then((j: { tasks?: ActiveTask[] }) => {
-        setActiveTasks(j.tasks ?? []);
-      });
-    void fetch(`/api/${organization.slug}/roadmap`)
-      .then((r) => r.json())
-      .then((j: { nodes?: { id: string; title: string; status: string }[] }) => {
-        const nodes = j.nodes ?? [];
-        const available = nodes.filter((n) => n.status === "available");
-        const complete = nodes.filter((n) => n.status === "complete");
-        setSuggested(available.slice(0, 5));
-        if (nodes.length > 0) {
-          setCompletePct(Math.round((complete.length / nodes.length) * 100));
-        }
-      });
+    void Promise.all([
+      fetch(`/api/${organization.slug}/tasks`).then((r) => r.json()),
+      fetch(`/api/${organization.slug}/roadmap`).then((r) => r.json()),
+      fetch(`/api/${organization.slug}/agents`).then((r) => r.json()),
+      fetch(`/api/${organization.slug}/departments`).then((r) => r.json()),
+    ]).then(([tr, rr, ar, dr]) => {
+      setActiveTasks(tr.tasks ?? []);
+      setAgents(ar.agents ?? []);
+      setDepartments(dr.departments ?? []);
+      const nodes: { id: string; slug: string; title: string; status: string; stage?: string | null; department?: string | null }[] = rr.nodes ?? [];
+      const available = nodes.filter((n) => n.status === "available");
+      const complete = nodes.filter((n) => n.status === "complete");
+      setSuggested(available.slice(0, 5).map((n) => ({ id: n.id, slug: n.slug, title: n.title, stage: n.stage, department: n.department })));
+      if (nodes.length > 0) {
+        setCompletePct(Math.round((complete.length / nodes.length) * 100));
+      }
+    });
   }, [organization.slug]);
 
-  return (
-    <div className="flex-1 overflow-y-auto p-4 space-y-5">
-      <h2 className="text-lg tracking-tight">
-        {greeting}, <span className="text-ink-soft">{founderName}</span>
-      </h2>
+  const deptById = new Map(departments.map((d) => [d.id, d.slug]));
+  const agentById = new Map(agents.map((a) => [a.id, a.name]));
 
-      <Link
-        href={`/${organization.slug}/roadmap`}
-        className="block rounded-lg overflow-hidden border border-line/70 relative aspect-[16/8]"
-      >
-        <div className="absolute inset-0 bg-cream" aria-hidden />
-        <div
-          className="absolute inset-0"
-          style={{
-            backgroundImage:
-              "radial-gradient(circle at 78% 22%, rgba(255,255,255,0.85) 0%, transparent 22%), radial-gradient(circle at 30% 70%, rgba(255,210,170,0.55) 0%, transparent 28%)",
-          }}
-          aria-hidden
-        />
-        <div className="absolute inset-0 flex items-end justify-between p-3">
-          <div className="text-sm tracking-tight text-ink backdrop-blur-sm bg-paper/60 px-2 py-0.5 rounded">
-            {organization.name} Roadmap
+  if (selectedSuggested) {
+    const integrationSlug = selectedSuggested.slug.replace(/^connect[-_]?/i, "").toLowerCase() || selectedSuggested.slug;
+    return (
+      <div className="flex-1 overflow-y-auto p-4 space-y-4">
+        <button
+          type="button"
+          onClick={onClearSuggested}
+          className="flex items-center gap-1 text-sm text-ink-muted hover:text-ink"
+        >
+          <ChevronRight className="size-3.5 rotate-180" />
+          Back
+        </button>
+        <div className="rounded-xl border border-line/70 bg-canvas p-4 space-y-3">
+          <div>
+            <div className="font-semibold text-base">{selectedSuggested.title}</div>
+            <div className="text-sm text-ink-muted mt-0.5">Needs your input</div>
+            <div className="text-sm text-ink mt-2">
+              This is the next founder-owned step in the company path.
+            </div>
           </div>
-          <div className="absolute top-3 right-3 text-2xs text-ink bg-paper/80 backdrop-blur-sm rounded px-1.5 py-0.5">
-            {completePct}%
+          <div className="flex justify-end">
+            <Link
+              href={`/${organization.slug}/integrations/${integrationSlug}`}
+              className="text-sm rounded-md bg-ink text-paper px-3 py-1.5 hover:opacity-90"
+            >
+              Connect
+            </Link>
           </div>
         </div>
-      </Link>
+      </div>
+    );
+  }
 
-      {activeTasks.length > 0 && (
-        <Section label="Active tasks">
-          <ul className="space-y-1">
-            {activeTasks.map((t) => (
-              <li
-                key={t.id}
-                className="flex items-center gap-2 rounded-md hover:bg-canvas px-1 py-1.5 text-base text-ink cursor-pointer"
-              >
-                <span className="size-3 rounded-full bg-mustard inline-block shrink-0" />
-                <span className="truncate flex-1">{t.title}</span>
-                <ChevronRight className="size-3.5 text-ink-soft shrink-0" />
-              </li>
-            ))}
-          </ul>
-        </Section>
-      )}
+  return (
+    <>
+      <div className="flex-1 overflow-y-auto p-4 space-y-5">
+        <h2 className="text-lg tracking-tight">
+          {greeting}, <span className="text-ink-soft">{founderName}</span>
+        </h2>
 
-      {suggested.length > 0 && (
-        <Section
-          label="Suggested next"
-          right={
-            <button
-              type="button"
-              className="text-ink-soft hover:text-ink"
-              aria-label="Refresh"
-            >
-              <RefreshCw className="size-3" />
-            </button>
-          }
+        <Link
+          href={`/${organization.slug}/roadmap`}
+          className="block rounded-lg overflow-hidden border border-line/70 relative aspect-[16/8]"
         >
-          <ul className="space-y-1.5">
-            {suggested.map((n) => (
-              <li
-                key={n.id}
-                className="flex items-center gap-2 text-base text-ink"
-              >
-                <Circle className="size-3 text-line-strong" />
-                <span>{n.title}</span>
-              </li>
-            ))}
-          </ul>
-        </Section>
-      )}
+          <div className="absolute inset-0 bg-cream" aria-hidden />
+          <div
+            className="absolute inset-0"
+            style={{
+              backgroundImage:
+                "radial-gradient(circle at 78% 22%, rgba(255,255,255,0.85) 0%, transparent 22%), radial-gradient(circle at 30% 70%, rgba(255,210,170,0.55) 0%, transparent 28%)",
+            }}
+            aria-hidden
+          />
+          <div className="absolute inset-0 flex items-end justify-between p-3">
+            <div className="text-sm tracking-tight text-ink backdrop-blur-sm bg-paper/60 px-2 py-0.5 rounded">
+              {organization.name} Roadmap
+            </div>
+            <div className="absolute top-3 right-3 text-2xs text-ink bg-paper/80 backdrop-blur-sm rounded px-1.5 py-0.5">
+              {completePct}%
+            </div>
+          </div>
+        </Link>
 
-      <CofounderInlineComposer organization={organization} />
+        {activeTasks.length > 0 && (
+          <Section label="Active tasks">
+            <ul className="space-y-1">
+              {activeTasks.map((t) => (
+                <li key={t.id}>
+                  <button
+                    type="button"
+                    onClick={() => setSelected(selected?.id === t.id ? null : t)}
+                    className={`w-full flex items-center gap-2 rounded-md hover:bg-canvas px-1 py-1.5 text-base text-ink ${selected?.id === t.id ? "bg-canvas" : ""}`}
+                  >
+                    <span className={`size-3 rounded-full shrink-0 ${DEPT_DOT[deptById.get(t.department_id ?? "") ?? ""] ?? "bg-mustard"}`} />
+                    <span className="truncate flex-1 text-left">{t.title}</span>
+                    <ChevronRight className="size-3.5 text-ink-soft shrink-0" />
+                  </button>
+                </li>
+              ))}
+            </ul>
+          </Section>
+        )}
+
+        {suggested.length > 0 && (
+          <Section
+            label="Suggested next"
+            right={
+              <button type="button" className="text-ink-soft hover:text-ink" aria-label="Refresh">
+                <RefreshCw className="size-3" />
+              </button>
+            }
+          >
+            <ul className="space-y-1.5">
+              {suggested.map((n) => (
+                <li key={n.id}>
+                  <button
+                    type="button"
+                    onClick={() => onSelectSuggested?.(n)}
+                    className="flex items-center gap-2 text-base text-ink w-full text-left hover:text-ink-strong"
+                  >
+                    <Circle className="size-3 text-line-strong shrink-0" />
+                    <span>{n.title}</span>
+                  </button>
+                </li>
+              ))}
+            </ul>
+          </Section>
+        )}
+
+        <CofounderInlineComposer organization={organization} />
+      </div>
+
+      {selected && (
+        <HomeTaskPopup
+          task={selected}
+          orgSlug={organization.slug}
+          agentName={agentById.get(selected.agent_id ?? "") ?? null}
+          deptSlug={deptById.get(selected.department_id ?? "") ?? null}
+          onClose={() => setSelected(null)}
+        />
+      )}
+    </>
+  );
+}
+
+function HomeTaskPopup({
+  task,
+  orgSlug,
+  agentName,
+  deptSlug,
+  onClose,
+}: {
+  task: ActiveTask;
+  orgSlug: string;
+  agentName: string | null;
+  deptSlug: string | null;
+  onClose: () => void;
+}) {
+  const dotColor = DEPT_DOT[deptSlug ?? ""] ?? "bg-mustard";
+  return (
+    <div className="fixed right-[296px] top-[100px] z-50 w-64 rounded-xl border border-line/70 bg-paper shadow-lg">
+      <div className="px-4 pt-4 pb-3 space-y-3">
+        <div className="flex items-start justify-between gap-2">
+          <span className="text-2xs uppercase tracking-wider text-ink-soft font-medium">
+            Instruction
+          </span>
+          <button
+            type="button"
+            onClick={onClose}
+            className="text-ink-soft hover:text-ink -mt-0.5"
+            aria-label="Close"
+          >
+            <X className="size-3.5" />
+          </button>
+        </div>
+
+        {task.description && (
+          <p className="text-xs text-ink leading-snug line-clamp-4">{task.description}</p>
+        )}
+
+        <Link
+          href={`/${orgSlug}/tasks/${task.id}`}
+          onClick={onClose}
+          className="text-xs font-medium text-ink leading-snug truncate block hover:underline"
+        >
+          {task.title}
+        </Link>
+
+        <div className="space-y-1.5 pt-1 border-t border-line/50">
+          <div className="flex items-center justify-between text-2xs">
+            <span className="text-ink-soft">Agent</span>
+            <span className="flex items-center gap-1.5 text-ink">
+              <span className={`size-2 rounded-full ${dotColor}`} />
+              {agentName ?? "Auto-assign"}
+            </span>
+          </div>
+          <div className="flex items-center justify-between text-2xs">
+            <span className="text-ink-soft">Status</span>
+            <span className="text-ink capitalize">{task.status.replace(/_/g, " ")}</span>
+          </div>
+          <div className="flex items-center justify-between text-2xs">
+            <span className="text-ink-soft">Created</span>
+            <span className="text-ink">{relativeTime(task.created_at)}</span>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

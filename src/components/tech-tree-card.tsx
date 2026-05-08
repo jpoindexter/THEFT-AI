@@ -13,6 +13,7 @@ export type TechNode = {
   agent_can_do_this: boolean;
   status: string;
   dependencies: string[];
+  department?: string;
 };
 
 export function TreeCard({

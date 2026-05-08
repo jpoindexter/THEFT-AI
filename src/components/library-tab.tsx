@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Upload, Search, Grid2x2, AlignJustify, X, Folder, ChevronDown, ChevronRight } from "lucide-react";
+import { PreviewScene } from "@/components/org-chart-preview";
 
 type Artifact = {
   id: string;
@@ -14,16 +15,7 @@ type Artifact = {
 
 type Department = { id: string; slug: string; name: string };
 
-const COVER_IMG: Record<string, string> = {
-  engineering: "linear-gradient(135deg,#c8b8a0 0%,#8a7a60 100%)",
-  design:      "linear-gradient(135deg,#b8c8d8 0%,#7090a0 100%)",
-  marketing:   "linear-gradient(135deg,#f0c090 0%,#d08040 100%)",
-  sales:       "linear-gradient(135deg,#a0c890 0%,#507840 100%)",
-  operations:  "linear-gradient(135deg,#a8c0b8 0%,#507068 100%)",
-  finance:     "linear-gradient(135deg,#b8b890 0%,#787848 100%)",
-  legal:       "linear-gradient(135deg,#a0a898 0%,#585e58 100%)",
-  support:     "linear-gradient(135deg,#d0b898 0%,#906848 100%)",
-};
+const VALID_SCENES = new Set(["engineering","design","marketing","sales","operations","finance","legal","support"]);
 
 type ViewMode = "gallery" | "files";
 
@@ -155,17 +147,18 @@ function GalleryView({
     <div className="grid grid-cols-2 gap-2">
       {filtered.map((d) => {
         const count = artifacts.filter((a) => a.department_id === d.id).length;
-        const cover = COVER_IMG[d.slug] ?? "linear-gradient(135deg,#e8e4dc,#c8c4bc)";
+        const scene = VALID_SCENES.has(d.slug)
+          ? (d.slug as Parameters<typeof PreviewScene>[0]["scene"])
+          : "engineering";
         return (
           <a
             key={d.id}
             href={`/${orgSlug}/${d.slug}`}
-            className="rounded-lg border border-line/80 overflow-hidden bg-paper hover:border-line-strong transition-colors"
+            className="rounded-lg border border-line/80 overflow-hidden bg-canvas hover:border-line-strong transition-colors"
           >
-            <div
-              className="aspect-[16/9] relative"
-              style={{ background: cover }}
-            >
+            <div className="aspect-[16/9] relative">
+              <PreviewScene scene={scene} />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent pointer-events-none" />
               <div className="absolute bottom-1 left-2 text-xs font-medium text-white/90 drop-shadow">
                 {d.name}
               </div>

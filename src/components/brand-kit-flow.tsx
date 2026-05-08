@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { Sparkles, Plus, ChevronDown } from "lucide-react";
 
 type Vibe = {
@@ -50,11 +51,11 @@ const BUILTIN_VIBES: Vibe[] = [
 ];
 
 const ROADMAP_ITEMS = [
-  { key: "brand-kit",   label: "Brand kit",       sub: "Choose vibe, set brand" },
-  { key: "design-logo", label: "Design logo",      sub: "Generate logo set" },
-  { key: "pitch-deck",  label: "Create pitch deck",sub: "Business context sketch" },
-  { key: "components",  label: "Build components", sub: "Gathering up styles" },
-  { key: "refine",      label: "Refine brand",     sub: "Keep refining" },
+  { key: "brand-kit",   label: "Brand kit",        sub: "Choose vibe, set brand",    href: "brand-kit"          },
+  { key: "design-logo", label: "Design logo",       sub: "Generate logo set",         href: "design/logo"        },
+  { key: "pitch-deck",  label: "Create pitch deck", sub: "Business context sketch",   href: "design/pitch-deck"  },
+  { key: "components",  label: "Build components",  sub: "Gathering up styles",       href: "design/components"  },
+  { key: "refine",      label: "Refine brand",      sub: "Keep refining",             href: "brand-kit"          },
 ];
 
 type Phase = "intro" | "vibes" | "generating" | "complete" | "locked";
@@ -158,12 +159,13 @@ function IntroPhase({
       </div>
       <div className="flex gap-2 pt-2">
         {ROADMAP_ITEMS.map((r, i) => (
-          <div
+          <Link
             key={r.key}
-            className={`rounded-md border px-2 py-1.5 text-left w-28 ${
+            href={i === 0 ? "#" : `/${orgSlug}/${r.href}`}
+            className={`rounded-md border px-2 py-1.5 text-left w-28 transition-colors ${
               i === 0
-                ? "border-line-strong bg-cream"
-                : "border-line/60 opacity-60"
+                ? "border-line-strong bg-cream pointer-events-none"
+                : "border-line/60 opacity-60 hover:opacity-100 hover:border-line-strong"
             }`}
           >
             <div className="text-2xs font-medium text-ink truncate">
@@ -172,7 +174,7 @@ function IntroPhase({
             <div className="text-2xs text-ink-muted mt-0.5 truncate">
               {r.sub}
             </div>
-          </div>
+          </Link>
         ))}
       </div>
     </div>

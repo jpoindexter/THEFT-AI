@@ -1,191 +1,110 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
-import { useParams } from "next/navigation";
-import { ArrowLeft, Server, ArrowRight } from "lucide-react";
 
-const INSTALLED = [
-  { slug: "linear", name: "Linear", status: "running" },
-  { slug: "notion", name: "Notion", status: "running" },
-  { slug: "postgres", name: "Postgres", status: "stopped" },
+const TOOLKITS = [
+  { name: "Outlook", tools: 282, color: "#0078D4", letter: "O" },
+  { name: "Perplexity AI", tools: 9, color: "#20808D", letter: "P" },
+  { name: "HubSpot", tools: 232, color: "#FF7A59", letter: "H" },
+  { name: "Code Interpreter", tools: 5, color: "#6B7280", letter: "C" },
+  { name: "SerpApi", tools: 48, color: "#16A34A", letter: "S" },
+  { name: "Jira", tools: 94, color: "#0052CC", letter: "J" },
+  { name: "Firecrawl", tools: 29, color: "#EF4444", letter: "F" },
+  { name: "Tavily", tools: 5, color: "#8B5CF6", letter: "T" },
+  { name: "YouTube", tools: 47, color: "#FF0000", letter: "Y" },
+  { name: "Slackbot", tools: 85, color: "#4A154B", letter: "S" },
+  { name: "Canvas", tools: 573, color: "#E66000", letter: "C" },
 ];
 
-const SUGGESTED = [
-  {
-    name: "Linear",
-    cmd: "npx -y @linear/mcp-server",
-    desc: "Issues, projects, cycles. Read + write.",
-  },
-  {
-    name: "Notion",
-    cmd: "npx -y @notionhq/mcp-server",
-    desc: "Pages, databases, search.",
-  },
-  {
-    name: "Postgres",
-    cmd: "npx -y @modelcontextprotocol/server-postgres",
-    desc: "Read-only SQL against any Postgres URL.",
-  },
-  {
-    name: "Slack",
-    cmd: "npx -y slack-mcp",
-    desc: "Channel messages and DM history.",
-  },
-];
+const PAGE_SIZE = 7;
 
-export default function McpSetupPage() {
-  const params = useParams<{ org: string }>();
-  const [name, setName] = useState("");
-  const [cmd, setCmd] = useState("");
-  const [env, setEnv] = useState("");
+export default function McpPage() {
+  const [query, setQuery] = useState("");
+  const [shown, setShown] = useState(PAGE_SIZE);
+  const [added, setAdded] = useState<Set<string>>(new Set());
+
+  const filtered = query
+    ? TOOLKITS.filter((t) => t.name.toLowerCase().includes(query.toLowerCase()))
+    : TOOLKITS;
+
+  const visible = filtered.slice(0, shown);
+  const hasMore = filtered.length > shown;
 
   return (
-    <div className="absolute inset-0 overflow-y-auto p-6">
-      <div className="max-w-3xl mx-auto space-y-5">
-        <Link
-          href={`/${params.org}/integrations`}
-          className="inline-flex items-center gap-1 text-sm text-ink-muted hover:text-ink"
-        >
-          <ArrowLeft className="size-3" /> Back to integrations
-        </Link>
+    <div className="space-y-5">
+      <header>
+        <h1 className="text-xl tracking-tight">MCP</h1>
+        <p className="text-sm text-ink-muted mt-0.5">
+          Connect third-party apps via Composio for your agent to use.
+        </p>
+      </header>
 
-        <header>
-          <h1 className="text-xl tracking-tight inline-flex items-center gap-2">
-            <Server className="size-5 text-ink-muted" /> MCP servers
-          </h1>
-          <p className="text-sm text-ink-muted">
-            Plug any Model Context Protocol server into the workspace. Tools
-            exposed by the server become callable by every agent.
-          </p>
-        </header>
+      <div className="relative">
+        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-ink-soft">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <circle cx="11" cy="11" r="8" /><path d="m21 21-4.35-4.35" />
+          </svg>
+        </span>
+        <input
+          value={query}
+          onChange={(e) => { setQuery(e.target.value); setShown(PAGE_SIZE); }}
+          placeholder="Search toolkits..."
+          className="w-full h-9 rounded-md border border-line bg-paper pl-9 pr-3 text-base focus:outline-none focus:border-line-strong"
+        />
+      </div>
 
-        {INSTALLED.length > 0 && (
-          <section>
-            <div className="text-2xs uppercase tracking-[0.14em] text-ink-soft mb-2">
-              Installed
+      <div className="rounded-lg border border-line/70 bg-paper divide-y divide-line/60">
+        {visible.map((t) => (
+          <div key={t.name} className="px-4 py-3 flex items-center gap-3">
+            <div
+              className="size-7 rounded-md flex items-center justify-center text-white font-semibold text-xs shrink-0"
+              style={{ backgroundColor: t.color }}
+            >
+              {t.letter}
             </div>
-            <ul className="rounded-lg border border-line/70 bg-paper divide-y divide-line/60">
-              {INSTALLED.map((s) => (
-                <li key={s.slug}>
-                  <Link
-                    href={`/${params.org}/integrations/mcp/${s.slug}`}
-                    className="px-4 py-3 flex items-center justify-between hover:bg-canvas"
-                  >
-                    <div className="flex items-center gap-2">
-                      <span
-                        className={`size-2 rounded-full ${
-                          s.status === "running"
-                            ? "bg-sage"
-                            : "bg-line"
-                        }`}
-                      />
-                      <span className="text-base font-medium">{s.name}</span>
-                      <span className="text-2xs uppercase tracking-wider text-ink-muted">
-                        {s.status}
-                      </span>
-                    </div>
-                    <ArrowRight className="size-3 text-ink-soft" />
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </section>
-        )}
-
-        <section>
-          <div className="text-2xs uppercase tracking-[0.14em] text-ink-soft mb-2">
-            Suggested
-          </div>
-          <ul className="rounded-lg border border-line/70 bg-paper divide-y divide-line/60">
-            {SUGGESTED.map((s) => (
-              <li
-                key={s.name}
-                className="px-4 py-3 flex items-center justify-between"
-              >
-                <div className="min-w-0">
-                  <div className="text-base font-medium">{s.name}</div>
-                  <div className="text-xs text-ink-muted">{s.desc}</div>
-                  <code className="text-2xs font-mono text-ink-soft block mt-1 truncate">
-                    {s.cmd}
-                  </code>
-                </div>
+            <div className="flex-1 min-w-0">
+              <div className="text-base font-medium">{t.name}</div>
+              <div className="text-xs text-ink-muted">{t.tools} tools</div>
+            </div>
+            <div className="flex items-center gap-3 shrink-0">
+              <div className="flex items-center gap-1.5 text-xs text-ink-muted">
+                <span className="size-2 rounded-full border border-ink-soft inline-block" />
+                Not connected
+              </div>
+              {added.has(t.name) ? (
+                <span className="text-xs rounded-md border border-sage bg-sage/10 text-sage-ink px-2 py-1">
+                  Added
+                </span>
+              ) : (
                 <button
                   type="button"
-                  onClick={() => {
-                    setName(s.name);
-                    setCmd(s.cmd);
-                  }}
-                  className="text-xs rounded-md border border-line bg-paper px-2 py-1 hover:border-line-strong shrink-0"
+                  onClick={() => setAdded((prev) => new Set([...prev, t.name]))}
+                  className="text-xs rounded-md border border-line bg-paper px-2 py-1 hover:border-line-strong"
                 >
-                  Use
+                  Add
                 </button>
-              </li>
-            ))}
-          </ul>
-        </section>
-
-        <section className="rounded-lg border border-line/70 bg-paper p-4 space-y-3">
-          <div className="text-md font-medium tracking-tight">
-            Add server
+              )}
+            </div>
           </div>
-          <Field label="Name">
-            <input
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder="e.g. Linear"
-              className="w-full h-9 rounded-md border border-line bg-paper px-3 text-base focus:outline-none focus:border-line-strong"
-            />
-          </Field>
-          <Field label="Command" hint="The CLI command that starts the MCP server.">
-            <input
-              value={cmd}
-              onChange={(e) => setCmd(e.target.value)}
-              placeholder="npx -y @vendor/mcp-server"
-              className="w-full h-9 rounded-md border border-line bg-paper px-3 text-base font-mono focus:outline-none focus:border-line-strong"
-            />
-          </Field>
-          <Field
-            label="Environment"
-            hint="One KEY=VALUE per line. Stored encrypted."
-          >
-            <textarea
-              value={env}
-              onChange={(e) => setEnv(e.target.value)}
-              rows={4}
-              placeholder="LINEAR_API_KEY=lin_..."
-              className="w-full rounded-md border border-line bg-paper px-3 py-2 text-sm font-mono focus:outline-none focus:border-line-strong"
-            />
-          </Field>
-          <div className="flex justify-end pt-1">
-            <button
-              type="button"
-              disabled={!name || !cmd}
-              className="text-sm rounded-md bg-ink text-paper px-3 py-1.5 disabled:opacity-40"
-            >
-              Add server
-            </button>
+        ))}
+        {visible.length === 0 && (
+          <div className="px-4 py-6 text-sm text-ink-muted text-center">
+            No toolkits match &ldquo;{query}&rdquo;
           </div>
-        </section>
+        )}
       </div>
-    </div>
-  );
-}
 
-function Field({
-  label,
-  hint,
-  children,
-}: {
-  label: string;
-  hint?: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <div className="space-y-1">
-      <div className="text-sm text-ink">{label}</div>
-      {children}
-      {hint && <p className="text-xs text-ink-muted">{hint}</p>}
+      {hasMore && (
+        <div className="flex justify-center">
+          <button
+            type="button"
+            onClick={() => setShown((n) => n + PAGE_SIZE)}
+            className="text-sm rounded-md border border-line bg-paper px-4 py-1.5 hover:border-line-strong"
+          >
+            Load more
+          </button>
+        </div>
+      )}
     </div>
   );
 }

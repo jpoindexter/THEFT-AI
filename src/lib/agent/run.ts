@@ -235,6 +235,7 @@ async function executeTool(opts: {
         priority: "normal",
         mode: "execute",
         due_at: null,
+        started_at: null,
         result: null,
       });
       return { ok: true, task_id: task.id };

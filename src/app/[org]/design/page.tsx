@@ -1,5 +1,7 @@
 import { db } from "@/lib/db/store";
 import BrandKitFlow from "@/components/brand-kit-flow";
+import TaskContextBar from "@/components/task/task-context-bar";
+import { PreviewScene } from "@/components/org-chart-preview";
 import { promises as fs } from "node:fs";
 import path from "node:path";
 
@@ -57,5 +59,46 @@ export default async function DesignPage({
     // skills folder not present — keep going with empty list
   }
 
-  return <BrandKitFlow orgSlug={orgSlug} vibes={vibes} />;
+  const [departments, agents, tasks] = await Promise.all([
+    db.listDepartments(organization.id),
+    db.listAgents(organization.id),
+    db.listTasks(organization.id),
+  ]);
+  const designDept = departments.find((d) => d.slug === "design") ?? null;
+  const designAgent = designDept ? agents.find((a) => a.department_id === designDept.id) ?? null : null;
+  const hasActiveTasks = tasks.some(
+    (t) => t.department_id === designDept?.id && t.status !== "done" && t.status !== "cancelled",
+  );
+
+  // Use display label — DB name "Design" maps to "Design Agent" for display
+  const agentName = "Design Agent";
+
+  return (
+    <div className="absolute inset-0">
+      <div className="absolute top-4 inset-x-0 flex justify-center z-10 pointer-events-none">
+        <TaskContextBar
+          organization={{ id: organization.id, slug: organization.slug }}
+          agentName={agentName}
+          deptSlug="design"
+        />
+      </div>
+      {hasActiveTasks ? (
+        <BrandKitFlow orgSlug={orgSlug} vibes={vibes} />
+      ) : (
+        <div className="absolute inset-0 flex items-center justify-center">
+          <div className="relative rounded-2xl overflow-hidden w-72 aspect-[4/3] shadow-[0_8px_40px_-12px_rgba(0,0,0,0.3)] bg-canvas">
+            <PreviewScene scene="design" />
+            <div className="absolute inset-0 flex flex-col items-center justify-end pb-8 px-4 text-center bg-gradient-to-t from-black/60 to-transparent">
+              <p className="text-white text-lg font-semibold tracking-tight drop-shadow">
+                No tasks yet
+              </p>
+              <p className="text-white/70 text-xs mt-1 drop-shadow">
+                {agentName} is ready for new tasks
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
 }

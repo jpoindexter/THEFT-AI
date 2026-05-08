@@ -166,6 +166,7 @@ export async function runAgentCli(opts: {
             priority: "normal",
             mode: "execute",
             due_at: null,
+            started_at: null,
             result: null,
           });
         }

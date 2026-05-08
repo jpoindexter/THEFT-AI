@@ -165,6 +165,30 @@ export default function CompanyTab({
               ))}
             </div>
           </div>
+
+          <div>
+            <div className="text-2xs uppercase tracking-[0.12em] text-ink-soft mb-1.5">
+              Ideal Customer Profile
+            </div>
+            <div className="space-y-0.5">
+              {[
+                { label: "Company size",    value: "5–50 employees" },
+                { label: "Industry",        value: "B2B SaaS, Agencies, DTC" },
+                { label: "Growth stage",    value: "Seed → Series A" },
+                { label: "Geography",       value: "US, UK, CA" },
+                { label: "Trigger event",   value: "Hiring ops / RevOps role, Series A, compliance change" },
+                { label: "Budget",          value: "$500–$3,000 / mo" },
+              ].map((row) => (
+                <div
+                  key={row.label}
+                  className="flex items-start justify-between rounded-md border border-line/70 bg-paper px-3 py-1.5 text-sm gap-2"
+                >
+                  <span className="text-ink-muted shrink-0 text-xs">{row.label}</span>
+                  <span className="text-xs text-ink text-right leading-snug">{row.value}</span>
+                </div>
+              ))}
+            </div>
+          </div>
         </>
       )}
     </div>

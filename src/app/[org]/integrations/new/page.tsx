@@ -2,8 +2,6 @@
 
 import { useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { ArrowLeft } from "lucide-react";
-import Link from "next/link";
 
 const AUTH_KINDS = [
   { id: "bearer", label: "Bearer token" },
@@ -24,15 +22,7 @@ export default function NewIntegrationPage() {
   );
 
   return (
-    <div className="absolute inset-0 overflow-y-auto p-6">
-      <div className="max-w-3xl mx-auto space-y-6">
-        <Link
-          href={`/${params.org}/integrations`}
-          className="inline-flex items-center gap-1 text-sm text-ink-muted hover:text-ink"
-        >
-          <ArrowLeft className="size-3" /> Back to integrations
-        </Link>
-
+    <div className="space-y-6">
         <header>
           <h1 className="text-xl tracking-tight">New custom integration</h1>
           <p className="text-sm text-ink-muted">
@@ -113,7 +103,6 @@ export default function NewIntegrationPage() {
             Save integration
           </button>
         </div>
-      </div>
     </div>
   );
 }

@@ -63,6 +63,7 @@ export default function LayoutHeader({
   const [shortcutsOpen, setShortcutsOpen] = useState(false);
   const [paletteOpen, setPaletteOpen] = useState(false);
   const [shareOpen, setShareOpen] = useState(false);
+  const [extraCrumbs, setExtraCrumbs] = useState<{ label: string; href?: string }[]>([]);
 
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
@@ -80,6 +81,60 @@ export default function LayoutHeader({
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, [router, orgSlug]);
+  // Dept slugs that live at /[org]/[slug] but are NOT departments
+  const NON_DEPT = new Set([
+    "roadmap", "settings", "skills", "integrations", "referrals",
+    "database", "tasks", "agents", "team", "approvals", "inbox",
+    "routines", "activity", "costs", "publishing", "referrals",
+    "managed-services", "memory", "diagnostics", "billing", "review",
+    "search", "library", "marketplace", "studio", "timeline", "dashboard",
+    "share", "import", "sandbox", "whats-new", "help", "feed",
+  ]);
+
+  const DEPT_AGENT_LABEL: Record<string, string> = {
+    engineering: "Engineer",
+    design: "Design Agent",
+    marketing: "Marketing Agent",
+    sales: "Sales Agent",
+    operations: "Operations Agent",
+    finance: "Finance Agent",
+    legal: "Legal Agent",
+    support: "Support Agent",
+  };
+
+  useEffect(() => {
+    const segs = pathname.replace(/^\/+|\/+$/g, "").split("/");
+    if (!hasPlan) { setExtraCrumbs([]); return; }
+
+    // Task detail page: /[org]/tasks/[taskId]
+    if (segs[1] === "tasks" && segs[2]) {
+      void fetch(`/api/${orgSlug}/tasks/${segs[2]}`)
+        .then((r) => r.json())
+        .then((d: { task: { title: string }; agentName: string | null; deptName: string | null; deptSlug: string | null }) => {
+          const crumbs: { label: string; href?: string }[] = [];
+          if (d.deptSlug) crumbs.push({ label: d.deptName ?? capitalize(d.deptSlug), href: `/${orgSlug}/${d.deptSlug}` });
+          if (d.agentName) crumbs.push({ label: d.agentName });
+          crumbs.push({ label: d.task.title });
+          setExtraCrumbs(crumbs);
+        })
+        .catch(() => setExtraCrumbs([]));
+      return;
+    }
+
+    // Department page: /[org]/[deptSlug]
+    if (segs[1] && !NON_DEPT.has(segs[1]) && segs.length === 2) {
+      const deptSlug = segs[1];
+      setExtraCrumbs([
+        { label: capitalize(deptSlug), href: `/${orgSlug}/${deptSlug}` },
+        { label: DEPT_AGENT_LABEL[deptSlug] ?? capitalize(deptSlug) + " Agent" },
+      ]);
+      return;
+    }
+
+    setExtraCrumbs([]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pathname, orgSlug, hasPlan]);
+
   const segments = pathname.replace(/^\/+|\/+$/g, "").split("/");
   const after = segments.slice(1);
   const isSubpage = after.length > 0;
@@ -331,11 +386,31 @@ export default function LayoutHeader({
             {orgName}
           </Link>
         )}
-        {isSubpage && hasPlan && subLabel && (
-          <>
-            <span className="mx-1 text-line-strong">›</span>
-            <span className="tracking-tight text-ink">{subLabel}</span>
-          </>
+        {hasPlan && isSubpage && (
+          extraCrumbs.length > 0 ? (
+            extraCrumbs.map((c, i) => (
+              <span key={i} className="inline-flex items-center gap-1">
+                <span className="mx-1 text-line-strong">›</span>
+                {c.href ? (
+                  <Link
+                    href={c.href}
+                    className="tracking-tight text-ink max-w-[140px] truncate hover:underline"
+                  >
+                    {c.label}
+                  </Link>
+                ) : (
+                  <span className="tracking-tight text-ink max-w-[140px] truncate">
+                    {c.label}
+                  </span>
+                )}
+              </span>
+            ))
+          ) : subLabel ? (
+            <>
+              <span className="mx-1 text-line-strong">›</span>
+              <span className="tracking-tight text-ink">{subLabel}</span>
+            </>
+          ) : null
         )}
       </div>
       <div className="flex items-center gap-1 text-ink-muted">

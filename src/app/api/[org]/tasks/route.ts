@@ -53,6 +53,7 @@ export async function POST(
     priority: "normal",
     mode: body.mode,
     due_at: null,
+    started_at: null,
     result: null,
   });
   return NextResponse.json({ task });

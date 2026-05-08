@@ -88,6 +88,7 @@ export type Task = {
   priority: "low" | "normal" | "high" | "urgent";
   mode: "plan" | "execute";
   due_at: string | null;
+  started_at: string | null;
   result: unknown;
   created_at: string;
   updated_at: string;
@@ -141,6 +142,7 @@ export type TechTreeNode = {
   position: number;
   agent_can_do_this: boolean;
   dependencies: string[]; // depends_on node ids
+  department?: string;
 };
 
 export type MemoryItem = {
@@ -375,6 +377,7 @@ export const db = {
     const task: Task = {
       ...input,
       due_at: input.due_at ?? null,
+      started_at: null,
       id: randomUUID(),
       created_at: now,
       updated_at: now,
@@ -792,7 +795,34 @@ function node(
   };
 }
 
-const TECH_TREE_NODES: TechTreeNode[] = [
+const DEPT_MAP: Record<string, string> = {
+  "prepare-repository": "engineering",
+  "build-app": "engineering",
+  "add-auth": "engineering",
+  "deploy": "engineering",
+  "set-up-transactional-email": "engineering",
+  "brand-identity": "design",
+  "buy-domain": "operations",
+  "setup-social-presence": "marketing",
+  "define-positioning": "marketing",
+  "build-marketing-website": "marketing",
+  "connect-postiz": "marketing",
+  "grow-social-presence": "marketing",
+  "public-launch": "marketing",
+  "press-coverage": "marketing",
+  "product-hunt": "marketing",
+  "gather-prospects": "sales",
+  "outbound-emails": "sales",
+  "setup-outbound-email": "sales",
+  "first-customers": "sales",
+  "close-deals": "sales",
+  "onboard-accounts": "sales",
+  "launch-referral-program": "sales",
+  "setup-bookkeeping": "finance",
+  "open-bank-account": "finance",
+};
+
+const TECH_TREE_NODES: TechTreeNode[] = ([
   node("initial-idea", "idea", "Initial idea", 1, false,
     "The initial company concept exists as a usable starting point.",
     "Provide your input.",
@@ -927,4 +957,6 @@ const TECH_TREE_NODES: TechTreeNode[] = [
     "Agent can do this.",
     ["first-customers"],
   ),
-];
+] as TechTreeNode[]).map((n) =>
+  DEPT_MAP[n.slug] ? { ...n, department: DEPT_MAP[n.slug] } : n,
+);

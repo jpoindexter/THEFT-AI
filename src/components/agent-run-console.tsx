@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { ChevronRight, Cpu, Wrench, MessageCircle, Pause } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { ChevronRight, Cpu, Wrench, MessageCircle, Pause, Play, CheckCircle2 } from "lucide-react";
 import {
   Card,
   CardBody,
@@ -16,6 +16,28 @@ type Turn =
   | { kind: "tool_result"; tool: string; output: unknown; ok: boolean; ts: string }
   | { kind: "pause"; reason: string; ts: string }
   | { kind: "done"; summary: string; ts: string };
+
+type RawTurn =
+  | { kind: "user_message"; text: string }
+  | { kind: "text"; text: string }
+  | { kind: "tool_call"; tool_use_id: string; name: string; input: unknown }
+  | { kind: "tool_result"; tool_use_id: string; name: string; output: unknown }
+  | { kind: "tool_answer"; tool_use_id: string; answer: unknown }
+  | { kind: "pause"; tool_use_id: string; tool: string; input: { question?: string } }
+  | { kind: "done" };
+
+function adaptTurn(t: RawTurn): Turn | null {
+  const ts = new Date().toLocaleTimeString("en", { timeStyle: "medium" });
+  switch (t.kind) {
+    case "user_message": return { kind: "user_message", text: t.text, ts };
+    case "text": return { kind: "text", text: t.text, ts };
+    case "tool_call": return { kind: "tool_call", tool: t.name, input: t.input, ts };
+    case "tool_result": return { kind: "tool_result", tool: t.name, output: t.output, ok: true, ts };
+    case "pause": return { kind: "pause", reason: t.input.question ?? "Waiting for input", ts };
+    case "done": return { kind: "done", summary: "Task complete.", ts };
+    case "tool_answer": return null;
+  }
+}
 
 const SAMPLE: Turn[] = [
   {
@@ -56,12 +78,122 @@ const SAMPLE: Turn[] = [
 ];
 
 export default function AgentRunConsole({
-  turns = SAMPLE,
-  status = "paused",
+  turns: propTurns,
+  status: propStatus,
+  taskId,
+  orgSlug,
+  noCard,
 }: {
   turns?: Turn[];
   status?: "running" | "paused" | "done" | "error" | "idle";
+  taskId?: string;
+  orgSlug?: string;
+  noCard?: boolean;
 }) {
+  const isLive = Boolean(taskId && orgSlug);
+  const [liveTurns, setLiveTurns] = useState<Turn[]>([]);
+  const [liveStatus, setLiveStatus] = useState<"idle" | "running" | "paused" | "done" | "error">("idle");
+  const startedRef = useRef(false);
+
+  const turns = isLive ? liveTurns : (propTurns ?? SAMPLE);
+  const status = isLive ? liveStatus : (propStatus ?? "paused");
+
+  useEffect(() => {
+    if (!isLive || startedRef.current) return;
+    startedRef.current = true;
+
+    fetch(`/api/${orgSlug}/tasks/${taskId}/run`)
+      .then((r) => r.json())
+      .then((d: { turns?: RawTurn[]; paused?: unknown }) => {
+        if (d.turns?.length) {
+          const adapted = d.turns.flatMap((t) => {
+            const a = adaptTurn(t);
+            return a ? [a] : [];
+          });
+          setLiveTurns(adapted);
+          setLiveStatus(d.paused ? "paused" : "done");
+        }
+        // No existing turns → show empty state; user clicks "Run agent" to start
+      })
+      .catch(() => { /* keep idle */ });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  async function startRun() {
+    if (!taskId || !orgSlug) return;
+    setLiveStatus("running");
+    let res: Response;
+    try {
+      res = await fetch(`/api/${orgSlug}/tasks/${taskId}/run`, { method: "POST" });
+    } catch {
+      setLiveStatus("error");
+      return;
+    }
+    if (!res.body) { setLiveStatus("error"); return; }
+
+    const reader = res.body.getReader();
+    const decoder = new TextDecoder();
+    let buffer = "";
+    let finalStatus: "done" | "paused" | "error" = "done";
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      buffer += decoder.decode(value, { stream: true });
+      const lines = buffer.split("\n");
+      buffer = lines.pop() ?? "";
+      for (const line of lines) {
+        if (!line.trim()) continue;
+        try {
+          const raw = JSON.parse(line) as RawTurn;
+          const adapted = adaptTurn(raw);
+          if (adapted) setLiveTurns((prev) => [...prev, adapted]);
+          if (raw.kind === "done") finalStatus = "done";
+          if (raw.kind === "pause") finalStatus = "paused";
+        } catch { /* skip malformed line */ }
+      }
+    }
+    setLiveStatus(finalStatus);
+  }
+
+  // Inline empty state (used when noCard=true and no content yet)
+  const isEmpty = turns.length === 0 && status !== "running";
+
+  if (noCard) {
+    if (isEmpty) {
+      return (
+        <div className="flex flex-col items-center justify-center py-12 gap-3 text-center">
+          <CheckCircle2 className="size-8 text-line-strong" />
+          <div>
+            <div className="text-base font-medium text-ink">No workflow items</div>
+            <p className="text-xs text-ink-muted mt-1 max-w-xs">
+              This workflow has no pending approvals or generated artifacts right now.
+            </p>
+          </div>
+          {isLive && (
+            <button
+              type="button"
+              onClick={() => void startRun()}
+              className="inline-flex items-center gap-1 text-2xs rounded-md bg-ink text-paper px-2.5 py-1.5"
+            >
+              <Play className="size-2.5" /> Run agent
+            </button>
+          )}
+        </div>
+      );
+    }
+    return (
+      <ol className="space-y-2">
+        {turns.map((t, i) => (
+          <Row key={i} t={t} />
+        ))}
+        {status === "running" && (
+          <li className="text-2xs text-ink-soft animate-pulse">Agent is thinking…</li>
+        )}
+      </ol>
+    );
+  }
+
   return (
     <Card>
       <CardBody>
@@ -69,24 +201,38 @@ export default function AgentRunConsole({
           <Eyebrow className="inline-flex items-center gap-1.5">
             <Cpu className="size-3" /> Agent run
           </Eyebrow>
-          <Pill
-            tone={
-              status === "running"
-                ? "sage"
-                : status === "paused"
-                  ? "mustard"
-                  : status === "error"
-                    ? "brick"
-                    : "neutral"
-            }
-          >
-            {status}
-          </Pill>
+          <div className="flex items-center gap-2">
+            {isLive && liveStatus === "idle" && (
+              <button
+                type="button"
+                onClick={() => void startRun()}
+                className="inline-flex items-center gap-1 text-2xs rounded-md bg-ink text-paper px-2 py-1"
+              >
+                <Play className="size-2.5" /> Run
+              </button>
+            )}
+            <Pill
+              tone={
+                status === "running"
+                  ? "sage"
+                  : status === "paused"
+                    ? "mustard"
+                    : status === "error"
+                      ? "brick"
+                      : "neutral"
+              }
+            >
+              {status}
+            </Pill>
+          </div>
         </div>
         <ol className="mt-3 space-y-2">
           {turns.map((t, i) => (
             <Row key={i} t={t} />
           ))}
+          {status === "running" && (
+            <li className="text-2xs text-ink-soft animate-pulse">Agent is thinking…</li>
+          )}
         </ol>
       </CardBody>
     </Card>
@@ -154,13 +300,13 @@ function ToolRow({
         <span className="font-mono text-ink">{t.tool}</span>
         <span className="text-ink-soft">·</span>
         <span className="text-ink-muted">
-          {isCall ? "called" : t.ok ? "ok" : "failed"}
+          {isCall ? "called" : (t as Extract<Turn, { kind: "tool_result" }>).ok ? "ok" : "failed"}
         </span>
         <span className="ml-auto text-ink-soft">{t.ts}</span>
       </button>
       {open && (
         <pre className="mt-1 text-2xs font-mono whitespace-pre-wrap leading-relaxed bg-canvas border border-line/70 rounded-md p-2 text-ink">
-          {JSON.stringify(isCall ? t.input : t.output, null, 2)}
+          {JSON.stringify(isCall ? (t as Extract<Turn, { kind: "tool_call" }>).input : (t as Extract<Turn, { kind: "tool_result" }>).output, null, 2)}
         </pre>
       )}
     </li>
