@@ -1,4 +1,4 @@
-// Tools the Cofounder agent can call. Each tool has:
+// Tools the Operator agent can call. Each tool has:
 //   - server-only execution (mutates the org state) OR
 //   - client-pause (e.g. ask_user_question — server returns and waits)
 //
@@ -6,9 +6,9 @@
 
 import type Anthropic from "@anthropic-ai/sdk";
 
-export type CofounderTool = Anthropic.Tool;
+export type OperatorTool = Anthropic.Tool;
 
-export const COFOUNDER_TOOLS: CofounderTool[] = [
+export const OPERATOR_TOOLS: OperatorTool[] = [
   {
     name: "ask_user_question",
     description:

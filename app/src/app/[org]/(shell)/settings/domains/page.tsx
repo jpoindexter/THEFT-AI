@@ -73,7 +73,7 @@ export default async function Domains({
           </button>
         </div>
         <p className="text-xs text-ink-muted">
-          Propagation can take up to 24 hours. Buying through Cofounder runs
+          Propagation can take up to 24 hours. Buying through Operator runs
           DNS, nameserver, and Postmark setup automatically.
         </p>
       </SettingsCard>

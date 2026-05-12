@@ -1,9 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ChevronDown, Search, Bell } from "lucide-react";
+import { ChevronDown, Search, Bell, PanelRight } from "lucide-react";
 import CommandPalette from "@/components/command-palette";
 
 export default function OrgTopBar({
@@ -12,12 +11,16 @@ export default function OrgTopBar({
   founderInitial,
   breadcrumb,
   orgs,
+  chatOpen,
+  onToggleChat,
 }: {
   orgName: string;
   orgSlug: string;
   founderInitial: string;
   breadcrumb: string;
   orgs: { slug: string; name: string }[];
+  chatOpen: boolean;
+  onToggleChat: () => void;
 }) {
   const router = useRouter();
   const [paletteOpen, setPaletteOpen] = useState(false);
@@ -149,6 +152,24 @@ export default function OrgTopBar({
         <span style={{ fontSize: 11, color: "var(--t-ink-soft)", fontFamily: "inherit" }}>
           ⌘K
         </span>
+      </button>
+
+      <button
+        type="button"
+        onClick={onToggleChat}
+        aria-label={chatOpen ? "Hide chat tray" : "Show chat tray"}
+        aria-pressed={chatOpen}
+        title={chatOpen ? "Hide chat tray" : "Show chat tray"}
+        className="flex items-center justify-center rounded transition-colors"
+        style={{
+          width: 30,
+          height: 30,
+          color: chatOpen ? "var(--t-ink)" : "var(--t-ink-muted)",
+          background: chatOpen ? "var(--t-paper)" : "transparent",
+          border: chatOpen ? "1px solid var(--t-line)" : "1px solid transparent",
+        }}
+      >
+        <PanelRight size={17} />
       </button>
 
       {/* Bell */}

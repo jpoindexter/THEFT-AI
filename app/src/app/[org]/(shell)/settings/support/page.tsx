@@ -6,7 +6,7 @@ export default function Support() {
     <>
       <SectionHeader
         title="Support"
-        description="Reach the Cofounder team and review your support reports."
+        description="Reach the Operator team and review your support reports."
       />
 
       <section className="rounded-lg border border-line/70 bg-paper p-5 mb-4">

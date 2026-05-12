@@ -319,7 +319,7 @@ function ChatHead() {
   return (
     <div style={{ padding: "16px 20px", borderBottom: "1px solid var(--t-line)", flexShrink: 0 }}>
       <div style={{ fontSize: 13, fontWeight: 600, color: "var(--t-ink)", display: "flex", alignItems: "center", gap: 8 }}>
-        <span style={{ color: "var(--t-ink-muted)" }}>✦</span> Setup Agent
+        <span style={{ color: "var(--t-ink-muted)" }}>✦</span> Operator
       </div>
       <div style={{ fontSize: 11, color: "var(--t-ink-soft)", marginTop: 4 }}>Building your company brief</div>
     </div>

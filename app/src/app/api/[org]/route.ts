@@ -7,6 +7,8 @@ const PatchBody = z.object({
   goal: z.string().nullable().optional(),
   ai_model: z.string().nullable().optional(),
   engineer_model: z.string().nullable().optional(),
+  llm_backend: z.string().nullable().optional(),
+  llm_base_url: z.string().nullable().optional(),
   global_prompt: z.string().nullable().optional(),
   review_bot_mode: z.string().nullable().optional(),
   budget_monthly_usd: z.number().nullable().optional(),

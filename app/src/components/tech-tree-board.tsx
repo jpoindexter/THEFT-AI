@@ -392,7 +392,7 @@ function DetailDrawer({
           <div className="flex flex-col items-stretch gap-1">
             <ButtonPrimary onClick={() => { /* no-op for now */ }}>Mark complete</ButtonPrimary>
             <button type="button" className="text-xs text-ink-muted hover:text-ink mt-1">
-              ✗ Ask Cofounder
+              ✗ Ask Operator
             </button>
           </div>
         )}

@@ -10,12 +10,12 @@ import { composeAgentPromptForDept } from "@/lib/agent/compose-prompt";
 import { err, invalidInput, notFound, ok } from "@/lib/api/responses";
 import type Anthropic from "@anthropic-ai/sdk";
 
-async function buildCofounderPrompt(orgId: string, orgName: string, businessPlan: unknown): Promise<{ system: string; model: string } | null> {
+async function buildOperatorPrompt(orgId: string, orgName: string, businessPlan: unknown): Promise<{ system: string; model: string } | null> {
   const planJson = businessPlan
     ? `\nCurrent business plan:\n${JSON.stringify(businessPlan, null, 2)}`
     : `\nNo business plan yet. Help the founder shape one through guided questions.`;
 
-  const directive = `Speak as "Cofounder" — the meta-agent that helps the founder run "${orgName}" with a team of AI agents.
+  const directive = `Speak as "Operator" — the meta-agent that helps the founder run "${orgName}" with a team of AI agents.
 
 You operate by reasoning out loud, asking the user pointed multiple-choice questions, and producing concrete deliverables — never vague advice.
 
@@ -62,8 +62,8 @@ export async function POST(
   const org = await db.getOrgBySlug(orgSlug);
   if (!org) return notFound("organization");
 
-  const composed = await buildCofounderPrompt(org.id, org.name, org.business_plan);
-  if (!composed) return err(500, "agent_unavailable", "Cofounder agent not configured");
+  const composed = await buildOperatorPrompt(org.id, org.name, org.business_plan);
+  if (!composed) return err(500, "agent_unavailable", "Operator agent not configured");
   const { system: sys, model } = composed;
 
   const state = await loadAgentState(org.id);

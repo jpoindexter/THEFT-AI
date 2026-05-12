@@ -8,7 +8,7 @@ import path from "node:path";
 import { db, type Org } from "@/lib/db/store";
 import { burstSkillCache } from "@/lib/agent/compose-prompt";
 import {
-  COFOUNDER_TOOLS,
+  OPERATOR_TOOLS,
   type AskUserQuestionInput,
   type SetBusinessPlanInput,
   type DelegateInput,
@@ -98,7 +98,7 @@ export async function runAgent(opts: {
       model,
       max_tokens: 2000,
       system: opts.systemPrompt,
-      tools: COFOUNDER_TOOLS,
+      tools: OPERATOR_TOOLS,
       messages,
     });
 
@@ -195,7 +195,7 @@ async function recordUsage(orgId: string, model: string, inputTokens: number, ou
     await db.recordUsage({
       organization_id: orgId,
       agent_id: null,
-      agent_name: "Cofounder",
+      agent_name: "Operator",
       task_id: null,
       model,
       input_tokens: inputTokens,
@@ -367,4 +367,3 @@ async function executeTool(opts: {
       return { ok: false, error: `unknown tool: ${name}` };
   }
 }
-

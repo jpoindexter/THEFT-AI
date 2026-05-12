@@ -19,8 +19,8 @@ const STEPS: Step[] = [
     cta: null,
   },
   {
-    title: "Talk to your cofounder",
-    body: "The chat in the bottom-right is your cofounder. Tell it what you want; it routes to the right agent and shows you the plan first.",
+    title: "Talk to Operator",
+    body: "The chat in the bottom-right is Operator. Tell it what you want; it routes to the right agent and shows you the plan first.",
     cta: null,
   },
   {

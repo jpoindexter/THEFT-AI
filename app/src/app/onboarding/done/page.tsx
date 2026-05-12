@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { CheckSquare } from "lucide-react";
 
 const STAGES = [
   "Provisioning workspace",
@@ -45,7 +46,7 @@ export default function OnboardingDonePage() {
           </h1>
           <p className="text-base text-ink-muted mt-1">
             {done
-              ? "Your cofounder and department agents are standing by."
+              ? "Operator and the department agents are ready."
               : "This usually takes about 30 seconds."}
           </p>
         </header>
@@ -92,30 +93,8 @@ export default function OnboardingDonePage() {
 
 function CrossStitchBadge() {
   return (
-    <svg viewBox="0 0 80 80" className="mx-auto size-20">
-      <defs>
-        <pattern
-          id="stitch-done"
-          width="6"
-          height="6"
-          patternUnits="userSpaceOnUse"
-        >
-          <path
-            d="M0 0 L6 6 M6 0 L0 6"
-            stroke="#1c1917"
-            strokeWidth="1"
-            fill="none"
-          />
-        </pattern>
-      </defs>
-      <circle
-        cx="40"
-        cy="40"
-        r="30"
-        fill="url(#stitch-done)"
-        stroke="#1c1917"
-        strokeWidth="1.5"
-      />
-    </svg>
+    <div className="mx-auto size-16 rounded-lg border border-line/70 bg-paper inline-flex items-center justify-center">
+      <CheckSquare className="size-7 text-ink-muted" />
+    </div>
   );
 }

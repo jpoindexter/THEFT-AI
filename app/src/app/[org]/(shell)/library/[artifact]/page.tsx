@@ -91,7 +91,7 @@ export default async function ArtifactDetailPage({
               },
               {
                 v: "v1",
-                by: "Cofounder",
+                by: "Operator",
                 when: "1d ago",
                 note: "Initial draft",
                 current: false,

@@ -157,15 +157,15 @@ export default function AgentPanel({
           )}
         </div>
 
-        {/* Cofounder composer */}
+        {/* Operator composer */}
         <div className="mt-auto pt-2">
           <div className="rounded-lg border border-line/70 bg-paper">
             <div className="px-3 py-2 border-b border-line/70 inline-flex items-center gap-1.5 text-xs">
               <span className="size-3 rounded-full bg-mustard/30 inline-block" />
-              <span className="text-ink-muted">Cofounder</span>
+              <span className="text-ink-muted">Operator</span>
             </div>
             <textarea
-              placeholder="Ask Cofounder anything about your company…"
+              placeholder="Ask Operator anything about your company…"
               rows={2}
               className="w-full resize-none bg-transparent px-3 py-2 text-sm focus:outline-none placeholder:text-ink-soft"
             />

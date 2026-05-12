@@ -1,9 +1,8 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { ChevronRight, ChevronDown, X } from "lucide-react";
+import { ChevronRight, ChevronDown, X, Sparkles } from "lucide-react";
 import { QUESTIONS, type BriefAnswer } from "@/lib/business-brief/questions";
-import Sunflower from "@/components/sunflower";
 
 type Msg = {
   id: string;
@@ -26,7 +25,7 @@ type BriefPlan = {
   company_values?: string[];
 } & Record<string, unknown>;
 
-export default function CofounderChat({
+export default function OperatorChat({
   organization,
   showBrief = false,
   onboarding = false,
@@ -164,7 +163,9 @@ export default function CofounderChat({
       <div ref={scrollRef} className="flex-1 overflow-y-auto p-4 space-y-4">
         {isEmpty && onboarding && (
           <div className="flex flex-col items-center text-center gap-3 pt-4 pb-2">
-            <Sunflower size={140} />
+            <div className="size-14 rounded-lg border border-line/70 bg-canvas inline-flex items-center justify-center">
+              <Sparkles className="size-6 text-ink-muted" />
+            </div>
             <p className="text-sm text-ink tracking-tight">
               Tell me more about your company
             </p>
@@ -175,9 +176,11 @@ export default function CofounderChat({
         )}
         {isEmpty && !onboarding && (
           <div className="flex flex-col items-center justify-center h-full text-center gap-3 px-6">
-            <Sunflower size={80} />
+            <div className="size-10 rounded-lg border border-line/70 bg-canvas inline-flex items-center justify-center">
+              <Sparkles className="size-5 text-ink-muted" />
+            </div>
             <p className="text-base text-ink-muted leading-snug">
-              Ask Cofounder anything about{" "}
+              Ask Operator anything about{" "}
               <span className="text-ink">{organization.slug}</span>.
             </p>
           </div>
@@ -191,7 +194,7 @@ export default function CofounderChat({
         {showBrief && briefStarted && !briefDone && briefLoading && (
           <div className="rounded-lg border border-line/80 bg-paper p-4 text-sm text-ink-muted inline-flex items-center gap-2">
             <span className="size-2 rounded-full bg-mustard animate-pulse" />
-            Cofounder is building a brief from your idea…
+            Operator is building a brief from your idea…
           </div>
         )}
         {showBrief && briefStarted && !briefDone && !briefLoading && (
@@ -250,7 +253,7 @@ export default function CofounderChat({
 
         {busy && !briefStarted && (
           <div className="text-2xs uppercase tracking-[0.12em] text-ink-soft">
-            Cofounder is thinking…
+            Operator is thinking…
           </div>
         )}
       </div>
@@ -270,7 +273,7 @@ export default function CofounderChat({
                 ? "Share what you're building…"
                 : briefDone
                   ? "Ask for follow up changes…"
-                  : "Ask Cofounder anything…"
+                  : "Ask Operator anything…"
             }
             rows={2}
             className="flex-1 resize-none bg-transparent px-3 py-2 text-base focus:outline-none placeholder:text-ink-soft"
@@ -304,7 +307,7 @@ function Message({ m }: { m: Msg }) {
     <div className="space-y-1.5">
       <div className="inline-flex items-center gap-1.5 text-xs text-ink-muted bg-mustard/30 px-1.5 py-0.5 rounded-sm">
         <span className="size-3 rounded-full  bg-mustard/30 inline-block" />
-        Cofounder
+        Operator
       </div>
       <div className="text-sm leading-relaxed text-ink whitespace-pre-wrap bg-mustard/30 px-1 rounded-sm">
         {m.text}

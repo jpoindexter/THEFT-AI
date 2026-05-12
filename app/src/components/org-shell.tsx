@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { usePathname } from "next/navigation";
 import Sidebar from "@/components/sidebar";
 import OrgTopBar from "@/components/org-top-bar";
@@ -27,6 +28,7 @@ export default function OrgShell({
   orgs: { slug: string; name: string }[];
 }) {
   const pathname = usePathname();
+  const [chatOpen, setChatOpen] = useState(false);
   const segs = pathname.replace(/^\/+|\/+$/g, "").split("/");
 
   const DEPT_SLUGS = new Set([
@@ -49,10 +51,12 @@ export default function OrgShell({
         founderInitial={founderInitial}
         breadcrumb={breadcrumb}
         orgs={orgs}
+        chatOpen={chatOpen}
+        onToggleChat={() => setChatOpen((open) => !open)}
       />
       <div
         className="flex-1 min-h-0"
-        style={{ display: "grid", gridTemplateColumns: "232px 1fr 380px" }}
+        style={{ display: "grid", gridTemplateColumns: "232px minmax(0, 1fr)" }}
       >
         <Sidebar
           orgSlug={organization.slug}
@@ -62,9 +66,22 @@ export default function OrgShell({
         <div className="relative flex flex-col min-w-0 min-h-0">
           {children}
         </div>
+      </div>
+
+      <div
+        className="fixed right-0 bottom-0 z-40 flex flex-col border-l border-line bg-canvas shadow-[-12px_0_30px_-24px_rgba(0,0,0,0.45)] transition-transform duration-200 ease-out"
+        aria-hidden={!chatOpen}
+        style={{
+          top: 52,
+          width: "min(380px, calc(100vw - 24px))",
+          transform: chatOpen ? "translateX(0)" : "translateX(100%)",
+          pointerEvents: chatOpen ? "auto" : "none",
+        }}
+      >
         <OrgChatPanel
           organization={organization}
           hasPlan={hasPlan}
+          onClose={() => setChatOpen(false)}
         />
       </div>
     </div>

@@ -53,6 +53,9 @@ Output schema: { "product_or_service": string, "icp": string, "mission": string,
     const json = await generate({
       system: composed.system,
       messages: [{ role: "user", text: "Output the business plan JSON now." }],
+      model: org.ai_model ?? undefined,
+      backend: org.llm_backend,
+      baseUrl: org.llm_base_url,
       maxTokens: 1200,
     });
     plan = parseJsonLoose(json) ?? {

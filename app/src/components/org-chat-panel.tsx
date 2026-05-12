@@ -9,7 +9,7 @@ import {
   Sparkles,
   ArrowUp,
   RefreshCw,
-  ChevronDown,
+  X,
 } from "lucide-react";
 
 type Org = { id: string; slug: string; name: string };
@@ -37,9 +37,11 @@ const DEPT_SLUGS = new Set(Object.keys(DEPT_LABELS));
 export default function OrgChatPanel({
   organization,
   hasPlan,
+  onClose,
 }: {
   organization: Org;
   hasPlan: boolean;
+  onClose?: () => void;
 }) {
   const pathname = usePathname();
   const segs = pathname.replace(/^\/+|\/+$/g, "").split("/");
@@ -70,6 +72,7 @@ export default function OrgChatPanel({
             ? "Department agent · idle"
             : "Company-level agent"
         }
+        onClose={onClose}
       />
 
       <div
@@ -79,10 +82,9 @@ export default function OrgChatPanel({
         {!hasPlan ? (
           <PlaceholderHint body="Complete onboarding to activate agents." />
         ) : isOperator ? (
-          <CofounderMessages organization={organization} />
+          <OperatorMessages organization={organization} />
         ) : (
           <DeptMessages
-            organization={organization}
             deptSlug={activeDeptSlug!}
           />
         )}
@@ -106,10 +108,12 @@ function ChatHeader({
   title,
   subtitle,
   onBack,
+  onClose,
 }: {
   title: string;
   subtitle?: string;
   onBack?: () => void;
+  onClose?: () => void;
 }) {
   return (
     <div
@@ -146,12 +150,25 @@ function ChatHeader({
           </span>
         )}
       </div>
-      <button
-        className="flex items-center justify-center rounded hover:bg-canvas transition-colors"
-        style={{ width: 26, height: 26, color: "var(--t-ink-muted)" }}
-      >
-        <MoreHorizontal size={15} />
-      </button>
+      {onClose ? (
+        <button
+          type="button"
+          onClick={onClose}
+          aria-label="Close chat"
+          className="flex items-center justify-center rounded hover:bg-canvas transition-colors"
+          style={{ width: 26, height: 26, color: "var(--t-ink-muted)" }}
+        >
+          <X size={15} />
+        </button>
+      ) : (
+        <button
+          type="button"
+          className="flex items-center justify-center rounded hover:bg-canvas transition-colors"
+          style={{ width: 26, height: 26, color: "var(--t-ink-muted)" }}
+        >
+          <MoreHorizontal size={15} />
+        </button>
+      )}
     </div>
   );
 }
@@ -174,7 +191,7 @@ function PlaceholderHint({ body }: { body: string }) {
   );
 }
 
-function CofounderMessages({ organization }: { organization: Org }) {
+function OperatorMessages({ organization }: { organization: Org }) {
   const [messages, setMessages] = useState<Msg[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -241,10 +258,8 @@ function CofounderMessages({ organization }: { organization: Org }) {
 }
 
 function DeptMessages({
-  organization,
   deptSlug,
 }: {
-  organization: Org;
   deptSlug: string;
 }) {
   return (

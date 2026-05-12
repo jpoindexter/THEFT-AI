@@ -25,19 +25,19 @@ export async function POST(
 
   const history = await db.listMessages(organization.id, 40);
 
-  // Cofounder is the meta-agent at the org level. We compose through the
+  // Operator is the meta-agent at the org level. We compose through the
   // sales agent (closest to GTM/orchestration) and override the directive so
-  // it speaks as Cofounder rather than as a sales operator.
+  // it speaks as Operator rather than as a sales operator.
   const planJson = organization.business_plan
     ? `\nCurrent business plan:\n${JSON.stringify(organization.business_plan, null, 2)}`
     : `\nNo business plan yet. Help the founder shape one through guided questions.`;
 
-  const taskDirective = `Speak as "Cofounder" — the meta-agent that helps the founder run "${organization.name}" with a team of AI agents.
+  const taskDirective = `Speak as "Operator" — the meta-agent that helps the founder run "${organization.name}" with a team of AI agents.
 
 You delegate work to department agents (Engineering, Design, Marketing, Sales, Operations, Finance, Legal, Support) instead of doing it yourself. Be brief. State assumptions, propose the next concrete step, ask only when ambiguity is high.${planJson}`;
 
   const composed = await composeAgentPromptForDept(organization.id, "sales", taskDirective);
-  if (!composed) return err(500, "agent_unavailable", "Cofounder agent not configured");
+  if (!composed) return err(500, "agent_unavailable", "Operator agent not configured");
 
   let replyText: string;
   try {
@@ -47,9 +47,12 @@ You delegate work to department agents (Engineering, Design, Marketing, Sales, O
         role: m.role === "assistant" ? "assistant" : "user",
         text: m.text,
       })),
+      model: organization.ai_model ?? undefined,
+      backend: organization.llm_backend,
+      baseUrl: organization.llm_base_url,
     });
   } catch (e) {
-    replyText = `[Cofounder error] ${e instanceof Error ? e.message : "unknown"}`;
+    replyText = `[Operator error] ${e instanceof Error ? e.message : "unknown"}`;
   }
 
   await db.appendMessage({

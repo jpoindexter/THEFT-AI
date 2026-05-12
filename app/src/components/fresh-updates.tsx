@@ -5,7 +5,7 @@ import Link from "next/link";
 import { X } from "lucide-react";
 
 const VERSION = "v1.0.1";
-const STORAGE_KEY = "cofounder-dismissed-update";
+const STORAGE_KEY = "operator-dismissed-update";
 
 const UPDATE = {
   title: "Platform updates: faster infrastructure and stronger coding agents",
@@ -13,7 +13,7 @@ const UPDATE = {
   sections: [
     {
       title: "More Reliable Infrastructure",
-      body: "Cofounder now handles local development, previews, and longer-running agent work more reliably, with fewer interruptions during active tasks.",
+      body: "Operator now handles local development, previews, and longer-running agent work more reliably, with fewer interruptions during active tasks.",
     },
     {
       title: "Stronger Coding Agents",
@@ -57,7 +57,7 @@ export default function FreshUpdates() {
             <span className="text-2xs text-ink-soft">{VERSION}</span>
           </div>
           <p className="text-xs text-ink-muted leading-snug mb-2">
-            Cofounder 2: infrastructure for the one-person billion-dollar company, orchestrating agents across engineering, sales, marketing, ops, and design.
+            Operator 2: infrastructure for the one-person billion-dollar company, orchestrating agents across engineering, sales, marketing, ops, and design.
           </p>
           <button
             type="button"

@@ -31,7 +31,7 @@ type Action =
   | { type: "complete_onboarding" }
   | { type: "done" };
 
-const SCHEMA_PROMPT = `You are Cofounder. You communicate by emitting a JSON array of actions.
+const SCHEMA_PROMPT = `You are Operator. You communicate by emitting a JSON array of actions.
 
 Each turn, output ONLY a single JSON array — no prose, no code fences, no commentary.
 
@@ -89,7 +89,7 @@ export async function runAgentCli(opts: {
     if (!actions || actions.length === 0) {
       turns.push({
         kind: "text",
-        text: "(Cofounder produced no parseable output)",
+        text: "(Operator produced no parseable output)",
       });
       return { history, turns };
     }

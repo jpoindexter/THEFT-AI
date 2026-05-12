@@ -218,7 +218,7 @@ export default function AgentChat({
         {busy && (
           <div className="text-xs text-ink-soft inline-flex items-center gap-1.5">
             <span className="size-2 rounded-full bg-mustard animate-pulse" />
-            Cofounder is thinking…
+            Operator is thinking…
           </div>
         )}
       </div>
@@ -240,7 +240,7 @@ export default function AgentChat({
                   ? "Share what you're building…"
                   : onboarding
                     ? "Ask for follow up changes…"
-                    : 'Ask Cofounder anything… ("/" for commands)'
+                    : 'Ask Operator anything… ("/" for commands)'
             }
             rows={2}
             className="flex-1 resize-none bg-transparent px-3 py-2 text-base focus:outline-none placeholder:text-ink-soft"
@@ -302,7 +302,7 @@ function Turn({
       <div className="space-y-1">
         <div className="inline-flex items-center gap-1.5 text-xs text-ink-muted bg-mustard/30 px-1.5 py-0.5 rounded-sm">
           <span className="size-3 rounded-full  bg-mustard/30 inline-block" />
-          Cofounder
+          Operator
         </div>
         <div className="text-base leading-relaxed text-ink bg-mustard/30 px-1 py-0.5 rounded-sm whitespace-pre-wrap">
           {t.text}

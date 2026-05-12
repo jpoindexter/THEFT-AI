@@ -53,7 +53,7 @@ export default function OrgOnboardingFlow({ organization }: { organization: Org 
     setLoadError(null);
     setTranscript([{ kind: "user", text: d }]);
     setTimeout(() => {
-      setTranscript((t) => [...t, { kind: "agent", text: "Got it. Let me sharpen this into a brief — give me a moment." }]);
+      setTranscript((t) => [...t, { kind: "agent", text: "Got it. I’ll turn this into a company brief and setup questions." }]);
     }, 350);
     try {
       const res = await fetch(`/api/${organization.slug}/brief/generate`, {
@@ -118,7 +118,7 @@ export default function OrgOnboardingFlow({ organization }: { organization: Org 
         <div style={{ flex: 1 }} />
         <div style={{ fontSize: 11, color: "var(--t-ink-muted)", textTransform: "uppercase", letterSpacing: "0.02em" }}>
           <strong style={{ color: "var(--t-ink)", fontWeight: 500 }}>{organization.name}</strong>
-          {" · "}New workspace · 2 / 2
+          {" · "}Workspace setup · 2 / 2
         </div>
       </header>
 
@@ -263,7 +263,7 @@ function BriefDoc({ orgName, description, phase, questions, answers, briefPhase 
         <div style={{ borderTop: "1px dashed var(--t-line-strong)", paddingTop: 18 }}>
           <h3 style={docH2}><DocHash2 />Next</h3>
           <p style={{ ...docP, marginBottom: 0 }}>
-            Brief locked. Generating your roadmap — 30+ capabilities across 8 stages.
+            Brief locked. Generating your roadmap, department agents, and first work queue.
           </p>
         </div>
       )}

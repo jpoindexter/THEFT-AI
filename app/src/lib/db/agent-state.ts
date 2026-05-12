@@ -1,4 +1,4 @@
-// Persisted Cofounder agent conversation state per org.
+// Persisted Operator agent conversation state per org.
 // Stores the full Anthropic message history + a flat list of UI turns so we
 // can replay the conversation without re-running the LLM.
 

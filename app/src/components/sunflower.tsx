@@ -1,6 +1,6 @@
 "use client";
 
-// Cross-stitch sunflower used on onboarding screens and the right panel brief prompt.
+// Cross-stitch sunflower legacy asset.
 // Renders as × glyphs (not filled squares) to match the textile aesthetic.
 
 const GRID = [

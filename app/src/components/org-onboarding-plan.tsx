@@ -3,7 +3,6 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowUp, Briefcase, Code2, FileText, LifeBuoy, Maximize2, Megaphone, Palette, Plus, Scale, Sparkles, Wallet, ClipboardList } from "lucide-react";
-import Sunflower from "@/components/sunflower";
 import BrandKitFlow, { type BrandKitPhase } from "@/components/brand-kit-flow";
 import { buildPlan, type Phase, type Question } from "@/components/org-onboarding-flow";
 
@@ -96,7 +95,7 @@ function PlanPanel({ phase, plan, orgName, orgSlug, onPhaseChange }: {
           <FileText className="size-4 text-ink-muted" />
         </div>
         <div className="min-w-0">
-          <div className="text-sm font-medium text-ink">Onboarding</div>
+          <div className="text-sm font-medium text-ink">Workspace setup</div>
           <div className="text-xs text-ink-muted truncate">{orgName} · jpoindexter</div>
         </div>
       </div>
@@ -118,7 +117,9 @@ function PlanPanel({ phase, plan, orgName, orgSlug, onPhaseChange }: {
               Activating departments…
             </button>
             <div className="rounded-lg border border-line/70 bg-canvas p-3 flex items-start gap-2.5">
-              <div className="w-5 h-5 shrink-0 mt-0.5"><Sunflower size={20} /></div>
+              <div className="size-5 shrink-0 mt-0.5 rounded border border-line/70 bg-paper flex items-center justify-center">
+                <Sparkles className="size-3 text-ink-muted" />
+              </div>
               <div>
                 <div className="text-2xs font-medium text-ink uppercase tracking-wide">
                   Next: Brand Design <span className="text-ink-soft font-normal normal-case">· business content saved</span>
@@ -135,7 +136,9 @@ function PlanPanel({ phase, plan, orgName, orgSlug, onPhaseChange }: {
               Accept &amp; activate departments
             </button>
             <div className="rounded-lg border border-line/70 bg-canvas p-3 flex items-start gap-2.5">
-              <div className="w-5 h-5 shrink-0 mt-0.5"><Sunflower size={20} /></div>
+              <div className="size-5 shrink-0 mt-0.5 rounded border border-line/70 bg-paper flex items-center justify-center">
+                <Palette className="size-3 text-ink-muted" />
+              </div>
               <div>
                 <div className="text-2xs font-medium text-ink uppercase tracking-wide">
                   Brand Design is Ready <span className="text-ink-soft font-normal normal-case">· business context saved</span>
@@ -229,47 +232,38 @@ function BItem({ text }: { text: string }) {
 
 function ActivatedCanvas({ orgSlug }: { orgSlug: string }) {
   return (
-    <div className="absolute inset-0 flex items-center justify-center">
-      <div className="relative" style={{ width: 480, height: 480 }}>
-        <svg className="absolute inset-0 size-full pointer-events-none" viewBox="0 0 100 100">
-          <circle cx="50" cy="50" r="30" fill="none" stroke="currentColor" className="text-line-strong" strokeWidth="0.18" strokeDasharray="0.4 1.2" />
-          {DEPTS.map((d, i) => {
-            const angle = (i / DEPTS.length) * 2 * Math.PI - Math.PI / 2;
-            const lx = 50 + Math.cos(angle) * 30;
-            const ly = 50 + Math.sin(angle) * 30;
-            return (
-              <g key={d.slug}>
-                <line x1="50" y1="50" x2={lx} y2={ly} stroke="currentColor" className="text-line" strokeWidth="0.15" strokeDasharray="0.5 1" />
-                <circle cx={lx} cy={ly} r="0.6" fill="currentColor" className="text-line-strong" />
-              </g>
-            );
-          })}
-        </svg>
-        <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-10">
-          <div className="rounded-full bg-paper border border-line/70 px-3 py-1 inline-flex items-center gap-1.5 shadow-sm">
-            <div className="w-4 h-4 shrink-0"><Sunflower size={16} /></div>
-            <span className="text-sm tracking-tight text-ink">Cofounder</span>
+    <div className="absolute inset-0 flex items-center justify-center p-8">
+      <div className="w-full max-w-3xl rounded-lg border border-line/70 bg-paper shadow-sm overflow-hidden">
+        <div className="border-b border-line/70 px-5 py-4 flex items-center justify-between">
+          <div>
+            <div className="text-2xs uppercase tracking-wider text-ink-muted">Operator</div>
+            <h2 className="text-lg font-medium tracking-tight text-ink mt-1">Departments activated</h2>
+          </div>
+          <div className="rounded-md border border-line/70 bg-canvas px-2 py-1 text-xs text-ink-muted">
+            8 agents ready
           </div>
         </div>
-        {DEPTS.map((d, i) => {
-          const angle = (i / DEPTS.length) * 2 * Math.PI - Math.PI / 2;
-          const lx = 50 + Math.cos(angle) * 30;
-          const ly = 50 + Math.sin(angle) * 30;
+        <div className="grid grid-cols-2 gap-px bg-line/70">
+          {DEPTS.map((d) => {
           const Icon = DEPT_ICON[d.slug] ?? Sparkles;
           const color = DEPT_COLOR[d.slug] ?? "bg-ink text-paper";
           return (
-            <div key={d.slug} className="absolute inset-0 pointer-events-none">
-              <div className="absolute pointer-events-auto" style={{ left: `${lx}%`, top: `${ly}%`, transform: "translate(-50%,-50%)" }}>
-                <a href={`/${orgSlug}/${d.slug}`} className="rounded-full bg-paper border border-line/70 pl-1 pr-2.5 py-0.5 text-xs tracking-tight inline-flex items-center gap-1.5 hover:border-line-strong shadow-sm">
-                  <span className={`size-4 rounded-full inline-flex items-center justify-center shrink-0 ${color}`}>
-                    <Icon className="size-2.5" />
-                  </span>
-                  {d.name}
-                </a>
-              </div>
-            </div>
+            <a
+              key={d.slug}
+              href={`/${orgSlug}/${d.slug}`}
+              className="bg-paper px-4 py-3 flex items-center gap-3 hover:bg-canvas transition-colors"
+            >
+              <span className={`size-7 rounded-md inline-flex items-center justify-center shrink-0 ${color}`}>
+                <Icon className="size-3.5" />
+              </span>
+              <span className="min-w-0">
+                <span className="block text-sm text-ink">{d.name}</span>
+                <span className="block text-xs text-ink-muted">Ready for first task</span>
+              </span>
+            </a>
           );
         })}
+        </div>
       </div>
     </div>
   );

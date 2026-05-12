@@ -1,7 +1,9 @@
 "use client";
 
-import { useState, useMemo, useRef } from "react";
+import { useState, useMemo } from "react";
+import { useRouter } from "next/navigation";
 import { Lock, ArrowRight, X, ExternalLink, Plus } from "lucide-react";
+import { toast } from "@/components/toast-host";
 
 type NodeStatus = "locked" | "available" | "in_progress" | "complete";
 
@@ -194,8 +196,55 @@ function NodeDrawer({
   onClose: () => void;
   orgSlug: string;
 }) {
+  const router = useRouter();
+  const [launching, setLaunching] = useState(false);
   const prereqs = node.dependencies.map((id) => nodes.find((n) => n.id === id)).filter(Boolean) as RNode[];
   const downstream = nodes.filter((n) => n.dependencies.includes(node.id));
+
+  async function launchAgent() {
+    if (launching) return;
+    if (node.status === "in_progress") {
+      router.push(`/${orgSlug}/tasks`);
+      return;
+    }
+
+    setLaunching(true);
+    try {
+      const description = [
+        node.title,
+        node.how_to_move_forward,
+        node.department ? `Department: ${node.department}` : null,
+      ].filter(Boolean).join("\n\n");
+
+      const taskRes = await fetch(`/api/${orgSlug}/tasks`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ description, mode: "execute" }),
+      });
+      if (!taskRes.ok) throw new Error("Could not create the agent task.");
+      const data = await taskRes.json().catch(() => ({}));
+
+      await fetch(`/api/${orgSlug}/roadmap/${node.slug}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status: "in_progress" }),
+      });
+
+      toast("Agent task launched", "ok");
+      if (data?.task?.id) router.push(`/${orgSlug}/tasks/${data.task.id}`);
+      else router.refresh();
+    } catch (e) {
+      toast(e instanceof Error ? e.message : "Could not launch agent task.", "warn");
+    } finally {
+      setLaunching(false);
+    }
+  }
+
+  function openDetail() {
+    const href = `/${orgSlug}/roadmap/${node.slug}`;
+    const opened = window.open(href, "_blank", "noopener,noreferrer");
+    if (!opened) router.push(href);
+  }
 
   return (
     <div
@@ -241,7 +290,9 @@ function NodeDrawer({
           </span>
           <div style={{ flex: 1 }} />
           <button
+            type="button"
             onClick={onClose}
+            aria-label="Close roadmap detail"
             style={{
               width: 26,
               height: 26,
@@ -385,6 +436,9 @@ function NodeDrawer({
         }}
       >
         <button
+          type="button"
+          onClick={() => void launchAgent()}
+          disabled={launching}
           style={{
             flex: 1,
             height: 40,
@@ -397,14 +451,21 @@ function NodeDrawer({
             border: "1px solid var(--t-ink)",
             borderRadius: 4,
             fontSize: 13,
-            cursor: "pointer",
+            cursor: launching ? "default" : "pointer",
             fontFamily: "inherit",
+            opacity: launching ? 0.7 : 1,
           }}
         >
-          {node.status === "in_progress" ? "Open running task" : "Launch agent"}
+          {launching
+            ? "Launching..."
+            : node.status === "in_progress"
+              ? "Open running task"
+              : "Launch agent"}
           <ArrowRight size={14} />
         </button>
         <button
+          type="button"
+          onClick={openDetail}
           style={{
             width: 44,
             height: 40,
@@ -510,6 +571,7 @@ export default function RoadmapView({
   orgName: string;
   orgSlug: string;
 }) {
+  const router = useRouter();
   const [hoverId, setHoverId] = useState<string | null>(null);
   const [drawerNodeId, setDrawerNodeId] = useState<string | null>(null);
 
@@ -625,6 +687,8 @@ export default function RoadmapView({
             <Pill tone="mustard">{counts.in_progress} in progress</Pill>
             <Pill>{counts.available} available</Pill>
             <button
+              type="button"
+              onClick={() => router.push(`/${orgSlug}/tasks/new`)}
               style={{
                 marginLeft: 6,
                 height: 26,

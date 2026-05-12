@@ -12,8 +12,8 @@ const EXAMPLES = [
 const NEXT_STEPS = [
   {
     n: "01",
-    title: "Cofounder interview",
-    desc: "5–10 min conversation to nail down ICP, problem, and what kind of business you actually want.",
+    title: "Workspace setup",
+    desc: "A short setup pass to lock ICP, problem, operating model, and approval boundaries.",
   },
   {
     n: "02",
@@ -99,8 +99,8 @@ export default function OnboardingFlow() {
           </h1>
 
           <p style={{ fontSize: 13, color: "var(--t-ink-muted)", lineHeight: 1.55, maxWidth: "56ch", margin: 0 }}>
-            After naming, you&apos;ll do a quick Cofounder interview that generates
-            your roadmap — capabilities, departments, what to ship first.
+            After naming, Operator will turn the idea into a company brief,
+            roadmap, departments, and the first work queue.
           </p>
 
           {/* Input card */}

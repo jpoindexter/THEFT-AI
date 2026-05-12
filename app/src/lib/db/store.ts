@@ -38,6 +38,8 @@ export type Org = {
   created_at: string;
   ai_model: string | null;
   engineer_model: string | null;
+  llm_backend: string | null;
+  llm_base_url: string | null;
   global_prompt: string | null;
   review_bot_mode: string | null;
   budget_monthly_usd: number | null;
@@ -288,6 +290,8 @@ export const db = {
       created_at: new Date().toISOString(),
       ai_model: null,
       engineer_model: null,
+      llm_backend: null,
+      llm_base_url: null,
       global_prompt: null,
       review_bot_mode: null,
       budget_monthly_usd: null,

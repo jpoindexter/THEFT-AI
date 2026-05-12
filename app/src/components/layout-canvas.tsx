@@ -133,7 +133,7 @@ export default function LayoutCanvas({
               />
               <AlertToggle
                 label="Only when I'm away"
-                description="Skip alerts while you're active in Cofounder."
+                description="Skip alerts while you're active in Operator."
                 value={alertAway}
                 onChange={setAlertAway}
               />
@@ -145,7 +145,7 @@ export default function LayoutCanvas({
               />
             </div>
             <p className="text-xs text-ink-muted leading-relaxed">
-              Browser permission is local to this browser. Cofounder keeps its own alert setting separate, so you can turn alerts off here without changing site permissions.
+              Browser permission is local to this browser. Operator keeps its own alert setting separate, so you can turn alerts off here without changing site permissions.
             </p>
             <div className="flex justify-end">
               <button type="button" onClick={() => setAlertsOpen(false)} className="text-sm text-ink-muted hover:text-ink">

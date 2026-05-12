@@ -3,22 +3,20 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import CofounderChat from "./cofounder-chat";
 import AgentChat from "./agent-chat";
 import TasksTab from "./tasks-tab";
 import LibraryTab from "./library-tab";
 import CompanyTab from "./company-tab";
 import DepartmentPanel from "./department-panel";
 import AgentPanel from "./agent-panel";
-import { ChevronRight, RefreshCw, Circle, X } from "lucide-react";
-import Sunflower from "@/components/sunflower";
+import { ChevronRight, RefreshCw, Circle, X, Sparkles } from "lucide-react";
 
 type Org = { id: string; slug: string; name: string };
 type Tab = "home" | "cofounder" | "company" | "tasks" | "library";
 
 const TABS: { key: Tab; label: string }[] = [
   { key: "home", label: "Home" },
-  { key: "cofounder", label: "Cofounder" },
+  { key: "cofounder", label: "Operator" },
   { key: "company", label: "Company" },
   { key: "tasks", label: "Tasks" },
   { key: "library", label: "Library" },
@@ -125,7 +123,7 @@ export default function RightPanel({
   const activeTaskId = allSegs[1] === "tasks" && allSegs[2] ? allSegs[2] : null;
 
   // When in onboarding (no plan yet), the panel becomes a single
-  // task-style header with the cofounder chat + inline brief beneath.
+  // task-style header with the Operator chat + inline brief beneath.
   if (!hasPlan) {
     return (
       <aside className="rounded-lg bg-paper border border-line/70 flex flex-col overflow-hidden">
@@ -136,7 +134,7 @@ export default function RightPanel({
             </div>
             <div className="leading-tight">
               <div className="text-md tracking-tight font-medium">
-                Onboarding
+                Workspace setup
               </div>
               <div className="text-xs text-ink-muted mt-0.5">
                 {organization.name} · {founderName}
@@ -150,7 +148,9 @@ export default function RightPanel({
           onFirstTurn={() => setOnboardingStarted(true)}
           emptyHeader={
             <div className="flex flex-col items-center text-center gap-2 pt-6 pb-2">
-              <Sunflower size={168} />
+              <div className="size-16 rounded-lg border border-line/70 bg-canvas inline-flex items-center justify-center">
+                <Sparkles className="size-7 text-ink-muted" />
+              </div>
               <p className="text-md text-ink tracking-tight mt-1">
                 Tell me more about your company
               </p>
@@ -353,7 +353,7 @@ function HomeTab({
           </Section>
         )}
 
-        <CofounderInlineComposer organization={organization} />
+        <OperatorInlineComposer organization={organization} />
       </div>
 
       {selected && (
@@ -456,7 +456,7 @@ function Section({
   );
 }
 
-function CofounderInlineComposer({
+function OperatorInlineComposer({
   organization,
 }: {
   organization: { slug: string };
@@ -467,12 +467,12 @@ function CofounderInlineComposer({
       <div className="rounded-lg border border-line/70 bg-paper">
         <div className="px-3 py-2 border-b border-line/70 inline-flex items-center gap-1.5 text-xs">
           <span className="size-3 rounded-full  bg-mustard/30 inline-block" />
-          <span className="text-ink-muted">Cofounder</span>
+          <span className="text-ink-muted">Operator</span>
         </div>
         <textarea
           value={text}
           onChange={(e) => setText(e.target.value)}
-          placeholder={`Ask Cofounder anything about your company…`}
+          placeholder={`Ask Operator anything about your company…`}
           rows={2}
           className="w-full resize-none bg-transparent px-3 py-2 text-sm focus:outline-none placeholder:text-ink-soft"
         />

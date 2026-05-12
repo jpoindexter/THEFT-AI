@@ -79,6 +79,9 @@ Output JSON only — no prose, no code fences. Schema:
   const text = await generate({
     system: composed.system,
     messages: [{ role: "user", text: "Output the brand kit JSON now." }],
+    model: o.ai_model ?? undefined,
+    backend: o.llm_backend,
+    baseUrl: o.llm_base_url,
     maxTokens: 4000,
   });
 
