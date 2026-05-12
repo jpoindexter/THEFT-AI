@@ -48,3 +48,5 @@ yarn-error.log*
 
 # App data
 .theft-data/
+app/.theft-data/
+app/.theft-data*/
