@@ -32,56 +32,58 @@ export default function OrgTopBar({
       style={{ height: 52, padding: "0 20px", position: "sticky", top: 0, zIndex: 30 }}
     >
       {/* Wordmark + org switcher */}
-      <button
-        onClick={() => setOrgMenuOpen((o) => !o)}
-        className="flex items-center gap-2 relative"
-        style={{ gap: 8 }}
-      >
-        <span
-          style={{
-            fontFamily: "var(--font-geist-mono), ui-monospace, monospace",
-            fontSize: 13,
-            fontWeight: 500,
-            letterSpacing: "0.02em",
-            textTransform: "uppercase",
-            color: "var(--t-ink)",
-          }}
+      <div className="relative">
+        <button
+          type="button"
+          onClick={() => setOrgMenuOpen((o) => !o)}
+          className="flex items-center gap-2"
+          style={{ gap: 8 }}
         >
-          THEFT<span style={{ color: "var(--t-mustard)" }}> &amp;</span>
-        </span>
-
-        <span
-          style={{
-            width: 1,
-            height: 18,
-            background: "var(--t-line-strong)",
-            margin: "0 4px",
-          }}
-        />
-
-        <span className="flex items-center gap-1.5" style={{ fontWeight: 500 }}>
           <span
             style={{
-              width: 18,
-              height: 18,
-              borderRadius: 5,
-              background: "var(--t-ink)",
-              color: "var(--t-paper)",
-              display: "inline-flex",
-              alignItems: "center",
-              justifyContent: "center",
-              fontSize: 10,
-              fontWeight: 600,
-              flexShrink: 0,
+              fontFamily: "var(--font-geist-mono), ui-monospace, monospace",
+              fontSize: 13,
+              fontWeight: 500,
+              letterSpacing: "0.02em",
+              textTransform: "uppercase",
+              color: "var(--t-ink)",
             }}
           >
-            {founderInitial}
+            THEFT<span style={{ color: "var(--t-mustard)" }}> &amp;</span>
           </span>
-          <span style={{ fontSize: 13 }}>{orgName}</span>
-          <ChevronDown size={14} style={{ color: "var(--t-ink-soft)" }} />
-        </span>
 
-        {/* Org dropdown */}
+          <span
+            style={{
+              width: 1,
+              height: 18,
+              background: "var(--t-line-strong)",
+              margin: "0 4px",
+            }}
+          />
+
+          <span className="flex items-center gap-1.5" style={{ fontWeight: 500 }}>
+            <span
+              style={{
+                width: 18,
+                height: 18,
+                borderRadius: 5,
+                background: "var(--t-ink)",
+                color: "var(--t-paper)",
+                display: "inline-flex",
+                alignItems: "center",
+                justifyContent: "center",
+                fontSize: 10,
+                fontWeight: 600,
+                flexShrink: 0,
+              }}
+            >
+              {founderInitial}
+            </span>
+            <span style={{ fontSize: 13 }}>{orgName}</span>
+            <ChevronDown size={14} style={{ color: "var(--t-ink-soft)" }} />
+          </span>
+        </button>
+
         {orgMenuOpen && (
           <div
             className="absolute top-full left-0 mt-2 rounded-md border border-line-strong bg-paper shadow-md"
@@ -121,7 +123,7 @@ export default function OrgTopBar({
             </button>
           </div>
         )}
-      </button>
+      </div>
 
       {/* Breadcrumb */}
       <span style={{ color: "var(--t-ink-soft)", fontSize: 13 }}>/</span>
