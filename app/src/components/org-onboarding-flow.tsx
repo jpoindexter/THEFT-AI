@@ -91,6 +91,22 @@ export default function OrgOnboardingFlow({ organization }: { organization: Org 
     if (qIndex < questions.length - 1) setQIndex((i) => i + 1);
     else setPhase("plan");
   }
+  function recommendedAnswer(index: number) {
+    const q = questions[index];
+    return q?.options.find((o) => o.recommended)?.label ?? q?.options[0]?.label ?? null;
+  }
+  function decideThisOne() {
+    const finalAnswer = customTexts[qIndex].trim() || answers[qIndex] || recommendedAnswer(qIndex);
+    setAnswers((prev) => { const next = [...prev]; next[qIndex] = finalAnswer; return next; });
+    if (qIndex < questions.length - 1) setQIndex((i) => i + 1);
+    else setPhase("plan");
+  }
+  function decideAll() {
+    setAnswers((prev) =>
+      questions.map((_, i) => customTexts[i]?.trim() || prev[i] || recommendedAnswer(i)),
+    );
+    setPhase("plan");
+  }
   function goBack() {
     if (qIndex > 0) setQIndex((i) => i - 1);
   }
@@ -159,8 +175,9 @@ export default function OrgOnboardingFlow({ organization }: { organization: Org 
               onSelect={selectAnswer}
               onCustomText={(val) => { setCustomText(val); if (val.trim()) selectAnswer(""); }}
               onNext={advance}
+              onDecideThis={decideThisOne}
               onBack={goBack}
-              onSkipAll={() => setPhase("plan")}
+              onDecideAll={decideAll}
             />
           ) : (
             <OrgOnboardingPlanPhases

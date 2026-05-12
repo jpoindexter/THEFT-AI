@@ -26,8 +26,9 @@ type Props = {
   onSelect: (v: string) => void;
   onCustomText: (v: string) => void;
   onNext: () => void;
+  onDecideThis: () => void;
   onBack: () => void;
-  onSkipAll: () => void;
+  onDecideAll: () => void;
 };
 
 export function OrgOnboardingChat(props: Props) {
@@ -166,7 +167,7 @@ function LoadingPhase({ transcript }: { transcript: TranscriptMsg[] }) {
   );
 }
 
-function QuestionPhase({ transcript, questions, qIndex, answers, customTexts, onSelect, onCustomText, onNext, onBack, onSkipAll }: Props) {
+function QuestionPhase({ transcript, questions, qIndex, answers, customTexts, onSelect, onCustomText, onNext, onDecideThis, onBack, onDecideAll }: Props) {
   const q = questions[qIndex];
   if (!q) return null;
   const selected = answers[qIndex];
@@ -216,7 +217,7 @@ function QuestionPhase({ transcript, questions, qIndex, answers, customTexts, on
               <span style={{ fontSize: 12, color: "var(--t-ink-soft)" }}>›</span>
             </div>
             <button
-              type="button" onClick={onSkipAll} aria-label="Skip all questions"
+              type="button" onClick={onDecideAll} aria-label="Decide all remaining questions"
               style={{
                 width: 20, height: 20, display: "inline-flex", alignItems: "center", justifyContent: "center",
                 color: "var(--t-ink-soft)", background: "none", border: "none", cursor: "pointer",
@@ -280,7 +281,7 @@ function QuestionPhase({ transcript, questions, qIndex, answers, customTexts, on
 
           <div style={{ display: "flex", gap: 8 }}>
             <button
-              type="button" onClick={onSkipAll}
+              type="button" onClick={onDecideAll}
               style={{
                 flex: 1, height: 34, borderRadius: 6,
                 background: "var(--t-paper)", border: "1px solid var(--t-line)",
@@ -292,20 +293,20 @@ function QuestionPhase({ transcript, questions, qIndex, answers, customTexts, on
               onMouseEnter={(e) => { e.currentTarget.style.borderColor = "var(--t-line-strong)"; e.currentTarget.style.color = "var(--t-ink)"; }}
               onMouseLeave={(e) => { e.currentTarget.style.borderColor = "var(--t-line)"; e.currentTarget.style.color = "var(--t-ink-muted)"; }}
             >
-              Skip interview
+              Decide all
             </button>
             <button
-              type="button" onClick={onNext} disabled={!canAdvance}
+              type="button" onClick={canAdvance ? onNext : onDecideThis}
               style={{
                 flex: 1, height: 34, borderRadius: 6, border: "none",
-                background: canAdvance ? "var(--t-ink)" : "var(--t-line-strong)",
+                background: "var(--t-ink)",
                 color: "var(--t-paper)", fontSize: 12, fontWeight: 500,
                 display: "inline-flex", alignItems: "center", justifyContent: "center",
-                cursor: canAdvance ? "pointer" : "not-allowed", fontFamily: "inherit",
+                cursor: "pointer", fontFamily: "inherit",
                 transition: "opacity 120ms ease",
               }}
             >
-              {isLast ? "Submit" : "Decide this one →"}
+              {canAdvance ? (isLast ? "Submit" : "Next →") : "Decide this one"}
             </button>
           </div>
         </div>
