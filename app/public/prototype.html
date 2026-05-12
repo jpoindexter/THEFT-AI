@@ -1,0 +1,3458 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>THEFT AI — Prototype</title>
+<meta name="viewport" content="width=1440" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,300;1,9..40,400&family=Inter+Tight:wght@400;500;600;700;800;900&family=Inter:wght@400;500;600;700&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500;600;700&family=Press+Start+2P&family=Geist:wght@100;200;300;400;500;600;700;800;900&family=Geist+Mono:wght@100;200;300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  /* ==========================================================================
+     COMMON BASE — theme-agnostic resets, utilities, animations, structural layout
+     ========================================================================== */
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; height: 100%; }
+  button { font-family: inherit; cursor: pointer; border: none; background: none; color: inherit; padding: 0; }
+  input, textarea { font-family: inherit; color: inherit; }
+
+  .row { display: flex; align-items: center; gap: 8px; }
+  .col { display: flex; flex-direction: column; }
+  .grow { flex: 1; min-width: 0; }
+  .hidden { display: none !important; }
+
+  #app { min-height: 100vh; display: flex; flex-direction: column; }
+
+  .topbar {
+    display: flex; align-items: center; gap: 12px;
+    border-bottom: 1px solid var(--line);
+    background: var(--canvas);
+    position: sticky; top: 0; z-index: 30;
+  }
+
+  .shell { display: grid; flex: 1; min-height: 0; }
+  .shell.full { grid-template-columns: 1fr; }
+
+  .card { background: var(--paper); border: 1px solid var(--line); }
+
+  .pill {
+    display: inline-flex; align-items: center; gap: 4px;
+    background: var(--cream-2); color: var(--ink-muted);
+    border: 1px solid var(--line); white-space: nowrap;
+  }
+
+  .btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+    background: var(--paper); color: var(--ink); border: 1px solid var(--line);
+    transition: background 120ms ease, border-color 120ms ease;
+  }
+  .btn.ghost { background: transparent; border-color: transparent; color: var(--ink-muted); }
+  .btn.ghost:hover { background: var(--cream); color: var(--ink); }
+
+  .roadmap-connectors { position: absolute; inset: 0; pointer-events: none; z-index: 0; }
+  .roadmap-connectors path { fill: none; transition: stroke 200ms, stroke-width 200ms, opacity 200ms; }
+  .roadmap-connectors path.dim { opacity: 0.25; }
+
+  .anim-spin { animation: spin 1.2s linear infinite; transform-origin: center; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .anim-pulse { animation: pulse 1.6s ease-in-out infinite; }
+  @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.5; } }
+  .fade-in { animation: fadeIn 180ms ease-out both; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(2px); } to { opacity: 1; transform: none; } }
+  .slide-in-right { animation: slideInRight 220ms cubic-bezier(0.2, 0.7, 0.2, 1) both; }
+  @keyframes slideInRight { from { transform: translateX(8px); opacity: 0; } to { transform: none; opacity: 1; } }
+
+  ::-webkit-scrollbar { width: 10px; height: 10px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+
+  /* ==========================================================================
+     THEME V1 — Warm Paper (Inter + Instrument Serif + JetBrains Mono)
+     ========================================================================== */
+  body[data-theme="v1"] {
+    --canvas: oklch(0.985 0.005 90);
+    --paper: oklch(1 0 0);
+    --cream: oklch(0.965 0.012 85);
+    --cream-2: oklch(0.945 0.014 85);
+    --ink: oklch(0.22 0.012 85);
+    --ink-muted: oklch(0.45 0.012 85);
+    --ink-soft: oklch(0.65 0.012 85);
+    --line: oklch(0.92 0.005 85);
+    --line-strong: oklch(0.86 0.006 85);
+    --mustard: oklch(0.85 0.12 90);
+    --mustard-ink: oklch(0.45 0.12 85);
+    --mustard-soft: oklch(0.95 0.05 90);
+    --sage: oklch(0.82 0.08 145);
+    --sage-ink: oklch(0.42 0.08 145);
+    --sage-soft: oklch(0.95 0.035 145);
+    --brick: oklch(0.62 0.18 25);
+    --brick-soft: oklch(0.96 0.04 25);
+    --shadow-card: 0 1px 0 oklch(0.92 0.005 85), 0 4px 14px -8px oklch(0.6 0.02 85 / 0.18);
+    --shadow-pop: 0 2px 0 oklch(0.92 0.005 85), 0 16px 40px -16px oklch(0.4 0.04 85 / 0.32);
+    background: var(--canvas);
+    font-family: 'Inter', system-ui, sans-serif;
+    color: var(--ink);
+    font-size: 13px;
+    font-feature-settings: "ss01", "cv11";
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+  body[data-theme="v1"] .serif { font-family: 'Instrument Serif', Georgia, serif; font-weight: 400; letter-spacing: -0.01em; }
+  body[data-theme="v1"] .mono { font-family: 'JetBrains Mono', ui-monospace, monospace; }
+  body[data-theme="v1"] .micro { font-size: 11px; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-muted); }
+  body[data-theme="v1"] .topbar { height: 48px; padding: 0 16px; gap: 12px; }
+  body[data-theme="v1"] .wordmark { font-family: 'Instrument Serif', serif; font-size: 22px; letter-spacing: -0.02em; }
+  body[data-theme="v1"] .wordmark .ampersand { font-style: italic; color: var(--ink-muted); }
+  body[data-theme="v1"] .shell { grid-template-columns: 220px 1fr 360px; }
+  body[data-theme="v1"] .shell.no-chat { grid-template-columns: 220px 1fr; }
+  body[data-theme="v1"] .card { border-radius: 10px; }
+  body[data-theme="v1"] .pill {
+    height: 20px; padding: 0 8px; border-radius: 999px;
+    font-size: 11px; font-weight: 500; letter-spacing: 0.04em;
+  }
+  body[data-theme="v1"] .pill.mustard { background: var(--mustard-soft); color: var(--mustard-ink); border-color: oklch(0.88 0.08 90); }
+  body[data-theme="v1"] .pill.sage    { background: var(--sage-soft); color: var(--sage-ink); border-color: oklch(0.88 0.06 145); }
+  body[data-theme="v1"] .pill.brick   { background: var(--brick-soft); color: var(--brick); border-color: oklch(0.88 0.08 25); }
+  body[data-theme="v1"] .pill.ghost   { background: transparent; }
+  body[data-theme="v1"] .btn { height: 32px; padding: 0 14px; border-radius: 8px; font-weight: 500; font-size: 13px; }
+  body[data-theme="v1"] .btn:hover { background: var(--cream); }
+  body[data-theme="v1"] .btn.primary { background: var(--mustard); border-color: oklch(0.78 0.13 90); color: oklch(0.25 0.05 85); }
+  body[data-theme="v1"] .btn.primary:hover { background: oklch(0.82 0.13 90); }
+  body[data-theme="v1"] .btn.danger { color: var(--brick); border-color: oklch(0.85 0.08 25); }
+  body[data-theme="v1"] .btn.lg { height: 40px; padding: 0 16px; font-size: 14px; border-radius: 9px; }
+  body[data-theme="v1"] .btn.sm { height: 26px; padding: 0 10px; font-size: 12px; border-radius: 6px; }
+  body[data-theme="v1"] .placeholder-bg {
+    background:
+      repeating-linear-gradient(135deg, oklch(0.95 0.008 85) 0 6px, transparent 6px 12px),
+      var(--cream);
+  }
+  body[data-theme="v1"] .roadmap-connectors path { stroke: oklch(0.85 0.07 90); stroke-width: 1.25; stroke-dasharray: 3 3; }
+  body[data-theme="v1"] .roadmap-connectors path.hi { stroke: var(--mustard); stroke-width: 1.8; stroke-dasharray: none; opacity: 1; }
+  body[data-theme="v1"] ::-webkit-scrollbar-thumb { background: oklch(0.88 0.006 85); border-radius: 5px; border: 2px solid var(--canvas); }
+  body[data-theme="v1"] ::-webkit-scrollbar-thumb:hover { background: oklch(0.78 0.008 85); }
+
+  /* ==========================================================================
+     THEME V2 — Factory Orange (Geist + Geist Mono + code orange accent)
+     ========================================================================== */
+  body[data-theme="v2"] {
+    --color-factory-black: #020202;
+    --color-factory-light-gray: #eeeeee;
+    --color-faded-silver: #fafafa;
+    --color-cool-gray: #b8b3b0;
+    --color-graphite: #3d3a39;
+    --color-ash-gray: #a49d9a;
+    /* Accent: deep violet — bold single-hue against Factory cool grays (t72t direction).
+       Variable name preserved so existing rules still apply — just the hue swaps. */
+    --color-code-orange: #7c3aed;
+    --canvas: #eeeeee;
+    --paper: #fafafa;
+    --cream: #eeeeee;
+    --cream-2: #e4e0dd;
+    --ink: #020202;
+    --ink-muted: #3d3a39;
+    --ink-soft: #a49d9a;
+    --line: #b8b3b0;
+    --line-strong: #a49d9a;
+    --mustard: #7c3aed;
+    --mustard-ink: #7c3aed;
+    --mustard-soft: #fafafa;
+    --sage: #020202;
+    --sage-ink: #020202;
+    --sage-soft: #fafafa;
+    --brick: #020202;
+    --brick-soft: #eeeeee;
+    --shadow-card: none;
+    --shadow-pop: none;
+    background: var(--canvas);
+    font-family: 'Geist', ui-sans-serif, system-ui, -apple-system, sans-serif;
+    color: var(--ink);
+    font-size: 14px;
+    letter-spacing: -0.01em;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+  /* Display headlines — Factory signature: Geist 500 with very tight (-0.07em) tracking */
+  body[data-theme="v2"] .serif { font-family: 'Geist', ui-sans-serif, sans-serif; font-weight: 500; letter-spacing: -0.07em; }
+  /* Display sizes from Factory token scale: heading-lg 48/-2.3px, display 60/-2.88px, heading 24 */
+  body[data-theme="v2"] .serif[style*="font-size: 30"] { font-size: 48px !important; line-height: 1.05 !important; letter-spacing: -0.048em !important; }
+  body[data-theme="v2"] .serif[style*="font-size: 22"] { font-size: 24px !important; line-height: 1.2 !important; letter-spacing: -0.03em !important; }
+  body[data-theme="v2"] .serif[style*="font-size: 44"] { font-size: 60px !important; line-height: 1 !important; letter-spacing: -0.048em !important; }
+  /* Italic phrase inside display headline — stay in the Geist system (no serif mix).
+     Use weight + accent color for emphasis; strip the faux-italic (looks ragged at display sizes). */
+  body[data-theme="v2"] .serif span[style*="italic"] {
+    font-style: normal !important;
+    font-weight: 400 !important;
+    color: var(--color-code-orange) !important;
+    letter-spacing: -0.04em;
+  }
+  body[data-theme="v2"] .serif em, body[data-theme="v2"] .serif i { font-style: normal; color: var(--color-code-orange); font-weight: 500; }
+  body[data-theme="v2"] .mono { font-family: 'Geist Mono', ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: -0.02em; }
+  body[data-theme="v2"] .micro { font-family: 'Geist Mono', ui-monospace, monospace; font-size: 12px; font-weight: 400; letter-spacing: 0; text-transform: uppercase; color: var(--ink-muted); }
+  body[data-theme="v2"] .topbar { height: 52px; padding: 0 20px; gap: 16px; border-radius: 0; }
+  body[data-theme="v2"] .wordmark { font-family: 'Geist Mono', monospace; font-size: 14px; font-weight: 500; letter-spacing: 0.02em; text-transform: uppercase; color: var(--ink); }
+  body[data-theme="v2"] .wordmark .ampersand { font-style: normal; color: var(--color-code-orange); margin-left: 1px; }
+  body[data-theme="v2"] .shell { grid-template-columns: 232px 1fr 380px; }
+  body[data-theme="v2"] .shell.no-chat { grid-template-columns: 232px 1fr; }
+  body[data-theme="v2"] .card { border-radius: 6px; }
+  body[data-theme="v2"] .pill {
+    height: 22px; padding: 0 8px; border-radius: 4px;
+    font-family: 'Geist Mono', monospace; font-size: 11px; font-weight: 400; letter-spacing: -0.01em;
+    background: transparent; color: var(--ink-muted); text-transform: uppercase;
+  }
+  body[data-theme="v2"] .pill.mustard { background: transparent; color: var(--color-code-orange); border-color: var(--color-code-orange); }
+  body[data-theme="v2"] .pill.sage    { background: transparent; color: var(--ink); border-color: var(--ink); }
+  body[data-theme="v2"] .pill.brick   { background: transparent; color: var(--ink); border-color: var(--ink); }
+  body[data-theme="v2"] .pill.ghost   { background: transparent; border-color: transparent; }
+  body[data-theme="v2"] .btn {
+    height: 32px; padding: 0 12px; border-radius: 4px;
+    font-family: 'Geist', sans-serif; font-weight: 400; font-size: 14px; letter-spacing: -0.01em;
+    background: var(--color-faded-silver); color: var(--ink); border: 1px solid var(--color-ash-gray);
+  }
+  body[data-theme="v2"] .btn:hover { background: var(--cream-2); }
+  body[data-theme="v2"] .btn.primary { background: var(--ink); color: var(--color-factory-light-gray); border-color: var(--ink); }
+  body[data-theme="v2"] .btn.primary:hover { background: var(--color-graphite); border-color: var(--color-graphite); }
+  body[data-theme="v2"] .btn.danger { color: var(--ink); border-color: var(--ink); }
+  body[data-theme="v2"] .btn.lg { height: 40px; padding: 0 16px; font-size: 16px; border-radius: 4px; }
+  body[data-theme="v2"] .btn.sm { height: 26px; padding: 0 10px; font-size: 13px; border-radius: 4px; }
+  body[data-theme="v2"] .placeholder-bg {
+    background-image: radial-gradient(var(--color-cool-gray) 1px, transparent 1px);
+    background-size: 8px 8px; background-color: var(--color-faded-silver);
+  }
+  body[data-theme="v2"] .roadmap-connectors path { stroke: var(--color-cool-gray); stroke-width: 1; stroke-dasharray: 2 4; }
+  body[data-theme="v2"] .roadmap-connectors path.hi { stroke: var(--color-code-orange); stroke-width: 1.5; stroke-dasharray: none; opacity: 1; }
+  body[data-theme="v2"] [style*="var(--mustard)"][style*="border-radius: 50%"] { color: var(--color-factory-light-gray) !important; }
+  body[data-theme="v2"] ::-webkit-scrollbar-thumb { background: var(--color-cool-gray); border-radius: 0; border: 2px solid var(--canvas); }
+  body[data-theme="v2"] ::-webkit-scrollbar-thumb:hover { background: var(--color-ash-gray); }
+
+  /* ==========================================================================
+     THEME V3 — t72t.com "Mono-Forward Technical Specimen"
+     JetBrains Mono everywhere. Warm off-white canvas. Signal-orange #ff3d00 accent.
+     Black 1px hairlines. Square edges (2px radius). All-caps headings.
+     Repeating-marquee wordmark prefix. Diagonal-hatched placeholders.
+     ========================================================================== */
+  body[data-theme="v3"] {
+    --canvas: #e9e4db;
+    --paper: #f3efe6;
+    --cream: #e9e4db;
+    --cream-2: #ddd6c8;
+    --ink: #050505;
+    --ink-muted: #2a2a2a;
+    --ink-soft: #7c766a;
+    --line: #050505;
+    --line-strong: #050505;
+    --accent: #ff3d00;
+    --mustard: #ff3d00;
+    --mustard-ink: #ff3d00;
+    --mustard-soft: #f3efe6;
+    --sage: #050505;
+    --sage-ink: #050505;
+    --sage-soft: #f3efe6;
+    --brick: #ff3d00;
+    --brick-soft: #f3efe6;
+    --shadow-card: none;
+    --shadow-pop: none;
+    background: var(--canvas);
+    font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, monospace;
+    color: var(--ink);
+    font-size: 12px;
+    line-height: 1.45;
+    letter-spacing: -0.01em;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+  /* Display class — large mono caps */
+  body[data-theme="v3"] .serif {
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: -0.03em;
+  }
+  body[data-theme="v3"] .serif em, body[data-theme="v3"] .serif i { font-style: normal; color: var(--accent); }
+  body[data-theme="v3"] .mono { font-family: 'JetBrains Mono', monospace; letter-spacing: 0; }
+  body[data-theme="v3"] .micro {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10.5px; font-weight: 500; letter-spacing: 0.04em;
+    text-transform: uppercase; color: var(--ink-muted);
+  }
+  body[data-theme="v3"] .topbar { height: 56px; padding: 0 20px; gap: 16px; border-bottom: 1px solid var(--ink); }
+  body[data-theme="v3"] .wordmark {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px; font-weight: 600; letter-spacing: 0.04em;
+    text-transform: uppercase; color: var(--ink);
+    display: inline-flex; align-items: center; gap: 8px;
+  }
+  /* Repeating-marquee prefix — renders as "THEFT_AI / THEFT_AI / THEFT &" */
+  body[data-theme="v3"] .wordmark::before {
+    content: 'THEFT_AI / THEFT_AI / ';
+    color: var(--ink-soft);
+    font-weight: 400;
+  }
+  body[data-theme="v3"] .wordmark .ampersand { color: var(--accent); margin-left: 2px; font-style: normal; }
+  body[data-theme="v3"] .shell { grid-template-columns: 232px 1fr 380px; }
+  body[data-theme="v3"] .shell.no-chat { grid-template-columns: 232px 1fr; }
+  body[data-theme="v3"] .card { border-radius: 2px; border: 1px solid var(--ink); }
+  body[data-theme="v3"] .pill {
+    height: 20px; padding: 0 7px; border-radius: 2px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px; font-weight: 500; letter-spacing: 0.05em;
+    background: transparent; color: var(--ink); border: 1px solid var(--ink);
+    text-transform: uppercase;
+  }
+  body[data-theme="v3"] .pill.mustard { background: var(--accent); color: var(--paper); border-color: var(--accent); }
+  body[data-theme="v3"] .pill.sage    { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+  body[data-theme="v3"] .pill.brick   { background: transparent; color: var(--accent); border-color: var(--accent); }
+  body[data-theme="v3"] .pill.ghost   { background: transparent; border-color: transparent; }
+  body[data-theme="v3"] .btn {
+    height: 30px; padding: 0 12px; border-radius: 2px;
+    font-family: 'JetBrains Mono', monospace; font-weight: 500; font-size: 12px;
+    letter-spacing: 0.02em; text-transform: uppercase;
+    background: transparent; color: var(--ink); border: 1px solid var(--ink);
+    transition: background 100ms ease, color 100ms ease;
+  }
+  body[data-theme="v3"] .btn:hover { background: var(--ink); color: var(--paper); }
+  body[data-theme="v3"] .btn.primary { background: var(--accent); color: var(--paper); border-color: var(--accent); }
+  body[data-theme="v3"] .btn.primary:hover { background: var(--ink); border-color: var(--ink); color: var(--paper); }
+  body[data-theme="v3"] .btn.ghost { background: transparent; border-color: transparent; color: var(--ink-muted); text-transform: uppercase; }
+  body[data-theme="v3"] .btn.ghost:hover { background: transparent; color: var(--ink); }
+  body[data-theme="v3"] .btn.danger { color: var(--accent); border-color: var(--accent); }
+  body[data-theme="v3"] .btn.lg { height: 40px; padding: 0 16px; font-size: 13px; }
+  body[data-theme="v3"] .btn.sm { height: 24px; padding: 0 9px; font-size: 11px; }
+  /* Placeholder — diagonal hatched (t72t signature) */
+  body[data-theme="v3"] .placeholder-bg {
+    background-image: repeating-linear-gradient(
+      45deg, transparent 0, transparent 6px,
+      rgba(0,0,0,0.12) 6px, rgba(0,0,0,0.12) 7px
+    );
+    background-color: var(--cream-2);
+  }
+  body[data-theme="v3"] .roadmap-connectors path { stroke: var(--ink); stroke-width: 1; stroke-dasharray: 2 3; opacity: 0.45; }
+  body[data-theme="v3"] .roadmap-connectors path.dim { opacity: 0.12; }
+  body[data-theme="v3"] .roadmap-connectors path.hi { stroke: var(--accent); stroke-width: 1.5; stroke-dasharray: none; opacity: 1; }
+  /* Avatar dots use --mustard background — text should read on orange */
+  body[data-theme="v3"] [style*="var(--mustard)"][style*="border-radius: 50%"] { color: var(--paper) !important; }
+  /* Force all h1-h4 to mono caps (in case any view uses them directly) */
+  body[data-theme="v3"] h1, body[data-theme="v3"] h2, body[data-theme="v3"] h3, body[data-theme="v3"] h4 {
+    font-family: 'JetBrains Mono', monospace; text-transform: uppercase; letter-spacing: -0.02em;
+  }
+  /* Inputs/textareas — square, mono */
+  body[data-theme="v3"] textarea, body[data-theme="v3"] input[type="text"] {
+    border-radius: 2px !important; font-family: 'JetBrains Mono', monospace !important;
+  }
+  /* Approval-card left accent bar (JSX uses width: 4) — switch sage/mustard fills to signal orange */
+  body[data-theme="v3"] div[style*="background: var(--sage)"][style*="width: 4"],
+  body[data-theme="v3"] div[style*="background: var(--mustard)"][style*="width: 4"] { background: var(--accent) !important; }
+  /* Sub-step "complete" check uses hardcoded green oklch — override to paper-on-black */
+  body[data-theme="v3"] [style*="oklch(0.3 0.04 145)"] { color: var(--paper) !important; }
+  body[data-theme="v3"] ::-webkit-scrollbar { width: 8px; height: 8px; }
+  body[data-theme="v3"] ::-webkit-scrollbar-thumb { background: var(--ink); border-radius: 0; border: 2px solid var(--canvas); }
+
+  /* ==========================================================================
+     THEME V4 — "Technical Editorial" (V2 × V3 hybrid)
+     Body/display: Geist (V2's readable modern type).
+     Labels/pills/buttons/wordmark: JetBrains Mono uppercase (V3's technical character).
+     Accent: Factory code orange #ef6f2e (V2's refined hue, not V3's neon).
+     Canvas: warm light gray (between V2 silver and V3 cream).
+     Radii: 4px (between V2 6px and V3 2px).
+     Wordmark: marquee prefix from V3. Placeholders: hatched from V3.
+     ========================================================================== */
+  body[data-theme="v4"] {
+    --canvas: #f0ece6;
+    --paper: #fafafa;
+    --cream: #f0ece6;
+    --cream-2: #e8e2d8;
+    --ink: #0a0a0a;
+    --ink-muted: #3d3a39;
+    --ink-soft: #8a8380;
+    --line: #c9c4be;
+    --line-strong: #0a0a0a;
+    --accent: #ef6f2e;
+    --mustard: #ef6f2e;
+    --mustard-ink: #ef6f2e;
+    --mustard-soft: #fafafa;
+    --sage: #0a0a0a;
+    --sage-ink: #0a0a0a;
+    --sage-soft: #fafafa;
+    --brick: #ef6f2e;
+    --brick-soft: #fafafa;
+    --shadow-card: none;
+    --shadow-pop: none;
+    background: var(--canvas);
+    font-family: 'Geist', ui-sans-serif, system-ui, -apple-system, sans-serif;
+    color: var(--ink);
+    font-size: 14px;
+    letter-spacing: -0.01em;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+  /* Display — Geist 500, big confident scale (V2's typography), italics in accent orange */
+  body[data-theme="v4"] .serif { font-family: 'Geist', ui-sans-serif, sans-serif; font-weight: 500; letter-spacing: -0.048em; }
+  body[data-theme="v4"] .serif[style*="font-size: 30"] { font-size: 48px !important; line-height: 1.05 !important; letter-spacing: -0.048em !important; }
+  body[data-theme="v4"] .serif[style*="font-size: 22"] { font-size: 24px !important; line-height: 1.2 !important; letter-spacing: -0.03em !important; }
+  body[data-theme="v4"] .serif[style*="font-size: 44"] { font-size: 60px !important; line-height: 1 !important; letter-spacing: -0.048em !important; }
+  /* Italic emphasis in display — Instrument Serif italic for editorial accent at large sizes */
+  body[data-theme="v4"] .serif span[style*="italic"] {
+    font-family: 'Instrument Serif', Georgia, serif !important;
+    font-weight: 400;
+    letter-spacing: -0.02em;
+  }
+  body[data-theme="v4"] .serif em, body[data-theme="v4"] .serif i { font-style: normal; color: var(--accent); font-weight: 500; }
+  body[data-theme="v4"] .mono { font-family: 'JetBrains Mono', ui-monospace, monospace; letter-spacing: 0; }
+  /* Micro labels — JetBrains Mono uppercase (V3's technical character) */
+  body[data-theme="v4"] .micro {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px; font-weight: 500; letter-spacing: 0.05em;
+    text-transform: uppercase; color: var(--ink-muted);
+  }
+  body[data-theme="v4"] .topbar { height: 52px; padding: 0 20px; gap: 16px; border-bottom: 1px solid var(--line); }
+  /* Wordmark — JetBrains Mono caps with marquee prefix from V3 */
+  body[data-theme="v4"] .wordmark {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px; font-weight: 600; letter-spacing: 0.04em;
+    text-transform: uppercase; color: var(--ink);
+    display: inline-flex; align-items: center; gap: 8px;
+  }
+  body[data-theme="v4"] .wordmark::before {
+    content: 'THEFT_AI / THEFT_AI / ';
+    color: var(--ink-soft);
+    font-weight: 400;
+  }
+  body[data-theme="v4"] .wordmark .ampersand { color: var(--accent); margin-left: 2px; font-style: normal; }
+  body[data-theme="v4"] .shell { grid-template-columns: 232px 1fr 380px; }
+  body[data-theme="v4"] .shell.no-chat { grid-template-columns: 232px 1fr; }
+  /* Cards — 4px radius, soft gray border (V2-leaning) */
+  body[data-theme="v4"] .card { border-radius: 4px; border: 1px solid var(--line); background: var(--paper); }
+  /* Pills — JetBrains Mono uppercase (V3 character), 4px radius */
+  body[data-theme="v4"] .pill {
+    height: 20px; padding: 0 8px; border-radius: 4px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10.5px; font-weight: 500; letter-spacing: 0.04em;
+    background: transparent; color: var(--ink-muted); border: 1px solid var(--line);
+    text-transform: uppercase;
+  }
+  body[data-theme="v4"] .pill.mustard { background: transparent; color: var(--accent); border-color: var(--accent); }
+  body[data-theme="v4"] .pill.sage    { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+  body[data-theme="v4"] .pill.brick   { background: transparent; color: var(--accent); border-color: var(--accent); }
+  body[data-theme="v4"] .pill.ghost   { background: transparent; border-color: transparent; }
+  /* Buttons — JetBrains Mono uppercase (V3 character), 4px radius */
+  body[data-theme="v4"] .btn {
+    height: 30px; padding: 0 12px; border-radius: 4px;
+    font-family: 'JetBrains Mono', monospace; font-weight: 500; font-size: 11.5px;
+    letter-spacing: 0.04em; text-transform: uppercase;
+    background: var(--paper); color: var(--ink); border: 1px solid var(--line);
+    transition: background 120ms ease, border-color 120ms ease, color 120ms ease;
+  }
+  body[data-theme="v4"] .btn:hover { background: var(--cream-2); }
+  body[data-theme="v4"] .btn.primary { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+  body[data-theme="v4"] .btn.primary:hover { background: var(--accent); border-color: var(--accent); color: var(--paper); }
+  body[data-theme="v4"] .btn.ghost { background: transparent; border-color: transparent; color: var(--ink-muted); }
+  body[data-theme="v4"] .btn.ghost:hover { background: var(--cream-2); color: var(--ink); }
+  body[data-theme="v4"] .btn.danger { color: var(--accent); border-color: var(--accent); }
+  body[data-theme="v4"] .btn.lg { height: 40px; padding: 0 16px; font-size: 13px; border-radius: 4px; }
+  body[data-theme="v4"] .btn.sm { height: 24px; padding: 0 10px; font-size: 10.5px; border-radius: 4px; }
+  /* Placeholder — diagonal hatched (V3 signature) */
+  body[data-theme="v4"] .placeholder-bg {
+    background-image: repeating-linear-gradient(
+      45deg, transparent 0, transparent 6px,
+      rgba(10,10,10,0.10) 6px, rgba(10,10,10,0.10) 7px
+    );
+    background-color: var(--cream-2);
+  }
+  body[data-theme="v4"] .roadmap-connectors path { stroke: var(--ink-soft); stroke-width: 1; stroke-dasharray: 2 4; opacity: 0.55; }
+  body[data-theme="v4"] .roadmap-connectors path.dim { opacity: 0.18; }
+  body[data-theme="v4"] .roadmap-connectors path.hi { stroke: var(--accent); stroke-width: 1.5; stroke-dasharray: none; opacity: 1; }
+  /* Avatar dots use --mustard background — text reads paper-on-orange */
+  body[data-theme="v4"] [style*="var(--mustard)"][style*="border-radius: 50%"] { color: var(--paper) !important; }
+  /* Sub-step "complete" check — hardcoded green oklch needs readable color on black sage bg */
+  body[data-theme="v4"] [style*="oklch(0.3 0.04 145)"] { color: var(--paper) !important; }
+  body[data-theme="v4"] ::-webkit-scrollbar { width: 9px; height: 9px; }
+  body[data-theme="v4"] ::-webkit-scrollbar-thumb { background: var(--ink-soft); border-radius: 0; border: 2px solid var(--canvas); }
+  body[data-theme="v4"] ::-webkit-scrollbar-thumb:hover { background: var(--ink-muted); }
+
+  /* ==========================================================================
+     THEME V5 — Chrome (2027-AI baseline from theft-ai handoff v3)
+     Pure white canvas + black ink/lines + electric blue #2960ff accent.
+     JetBrains Mono everywhere. 2px square corners. Marquee wordmark prefix.
+     Density: standard (12px body, 56px topbar, 30px button h).
+     ========================================================================== */
+  body[data-theme="v5"] {
+    --canvas: #ffffff;
+    --paper: #ffffff;
+    --cream: #f7f7f7;
+    --cream-2: #ededed;
+    --ink: #000000;
+    --ink-muted: #4a4a4a;
+    --ink-soft: #9a9a9a;
+    --line: #000000;
+    --line-strong: #000000;
+    --accent: #2960ff;
+    --on-accent: #ffffff;
+    --mustard: #2960ff;
+    --mustard-ink: #2960ff;
+    --mustard-soft: #ffffff;
+    --sage: #000000;
+    --sage-ink: #000000;
+    --sage-soft: #ffffff;
+    --brick: #2960ff;
+    --brick-soft: #ffffff;
+    --shadow-card: none;
+    --shadow-pop: none;
+    background: var(--canvas);
+    font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, monospace;
+    color: var(--ink);
+    font-size: 12px;
+    line-height: 1.45;
+    letter-spacing: -0.01em;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+  body[data-theme="v5"] .serif {
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: -0.03em;
+  }
+  body[data-theme="v5"] .serif em, body[data-theme="v5"] .serif i { font-style: normal; color: var(--accent); }
+  body[data-theme="v5"] .mono { font-family: 'JetBrains Mono', monospace; letter-spacing: 0; }
+  body[data-theme="v5"] .micro {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10.5px; font-weight: 500; letter-spacing: 0.04em;
+    text-transform: uppercase; color: var(--ink-muted);
+  }
+  body[data-theme="v5"] .topbar { height: 56px; padding: 0 20px; gap: 16px; border-bottom: 1px solid var(--ink); }
+  body[data-theme="v5"] .wordmark {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px; font-weight: 600; letter-spacing: 0.04em;
+    text-transform: uppercase; color: var(--ink);
+    display: inline-flex; align-items: center; gap: 8px;
+  }
+  body[data-theme="v5"] .wordmark::before {
+    content: 'THEFT_AI / THEFT_AI / ';
+    color: var(--ink-soft);
+    font-weight: 400;
+  }
+  body[data-theme="v5"] .wordmark .ampersand { color: var(--accent); margin-left: 2px; font-style: normal; }
+  body[data-theme="v5"] .shell { grid-template-columns: 232px 1fr 380px; }
+  body[data-theme="v5"] .shell.no-chat { grid-template-columns: 232px 1fr; }
+  body[data-theme="v5"] .card { border-radius: 2px; border: 1px solid var(--ink); background: var(--paper); }
+  body[data-theme="v5"] .pill {
+    height: 20px; padding: 0 7px; border-radius: 2px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px; font-weight: 500; letter-spacing: 0.05em;
+    background: transparent; color: var(--ink); border: 1px solid var(--ink);
+    text-transform: uppercase;
+  }
+  body[data-theme="v5"] .pill.mustard { background: var(--accent); color: var(--on-accent); border-color: var(--accent); }
+  body[data-theme="v5"] .pill.sage    { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+  body[data-theme="v5"] .pill.brick   { background: transparent; color: var(--accent); border-color: var(--accent); }
+  body[data-theme="v5"] .pill.ghost   { background: transparent; border-color: transparent; }
+  body[data-theme="v5"] .btn {
+    height: 30px; padding: 0 12px; border-radius: 2px;
+    font-family: 'JetBrains Mono', monospace; font-weight: 500; font-size: 12px;
+    letter-spacing: 0.02em; text-transform: uppercase;
+    background: transparent; color: var(--ink); border: 1px solid var(--ink);
+    transition: background 100ms ease, color 100ms ease;
+  }
+  body[data-theme="v5"] .btn:hover { background: var(--ink); color: var(--paper); }
+  body[data-theme="v5"] .btn.primary { background: var(--accent); color: var(--on-accent); border-color: var(--accent); }
+  body[data-theme="v5"] .btn.primary:hover { background: var(--ink); border-color: var(--ink); color: var(--paper); }
+  body[data-theme="v5"] .btn.ghost { background: transparent; border-color: transparent; color: var(--ink-muted); text-transform: uppercase; }
+  body[data-theme="v5"] .btn.ghost:hover { background: transparent; color: var(--ink); }
+  body[data-theme="v5"] .btn.danger { color: var(--accent); border-color: var(--accent); }
+  body[data-theme="v5"] .btn.lg { height: 40px; padding: 0 16px; font-size: 13px; }
+  body[data-theme="v5"] .btn.sm { height: 24px; padding: 0 9px; font-size: 11px; }
+  body[data-theme="v5"] .placeholder-bg {
+    background-image: repeating-linear-gradient(
+      45deg, transparent 0, transparent 6px,
+      rgba(0,0,0,0.12) 6px, rgba(0,0,0,0.12) 7px
+    );
+    background-color: var(--cream-2);
+  }
+  body[data-theme="v5"] .roadmap-connectors path { stroke: var(--ink); stroke-width: 1; stroke-dasharray: 2 3; opacity: 0.45; }
+  body[data-theme="v5"] .roadmap-connectors path.dim { opacity: 0.12; }
+  body[data-theme="v5"] .roadmap-connectors path.hi { stroke: var(--accent); stroke-width: 1.5; stroke-dasharray: none; opacity: 1; }
+  body[data-theme="v5"] [style*="var(--mustard)"][style*="border-radius: 50%"] { color: var(--on-accent) !important; }
+  body[data-theme="v5"] h1, body[data-theme="v5"] h2, body[data-theme="v5"] h3, body[data-theme="v5"] h4 {
+    font-family: 'JetBrains Mono', monospace; text-transform: uppercase; letter-spacing: -0.02em;
+  }
+  body[data-theme="v5"] textarea, body[data-theme="v5"] input[type="text"] {
+    border-radius: 2px !important; font-family: 'JetBrains Mono', monospace !important;
+  }
+  body[data-theme="v5"] div[style*="background: var(--sage)"][style*="width: 4"],
+  body[data-theme="v5"] div[style*="background: var(--mustard)"][style*="width: 4"] { background: var(--accent) !important; }
+  body[data-theme="v5"] [style*="oklch(0.3 0.04 145)"] { color: var(--paper) !important; }
+  body[data-theme="v5"] ::-webkit-scrollbar { width: 8px; height: 8px; }
+  body[data-theme="v5"] ::-webkit-scrollbar-thumb { background: var(--ink); border-radius: 0; border: 2px solid var(--canvas); }
+
+  /* ==========================================================================
+     V6 — Charcoal / DM Sans / Pale Periwinkle + Rose
+     Single typeface (DM Sans), weight hierarchy only. Dark canvas.
+     ========================================================================== */
+  body[data-theme="v6"] {
+    --canvas: #14141c;
+    --paper: #1c1c27;
+    --cream: #222230;
+    --cream-2: #2a2a3a;
+    --ink: #e2e2ef;
+    --ink-muted: #8686a2;
+    --ink-soft: #4e4e6a;
+    --line: #272738;
+    --line-strong: #353550;
+    --accent: #90b4ee;
+    --accent-b: #ee90b8;
+    --on-accent: #0c0c18;
+    --mustard: #90b4ee;
+    --mustard-ink: #90b4ee;
+    --mustard-soft: #1c1c27;
+    --sage: #ee90b8;
+    --sage-ink: #ee90b8;
+    --sage-soft: #1c1c27;
+    --brick: #90b4ee;
+    --brick-soft: #1c1c27;
+    --shadow-card: 0 1px 3px rgba(0,0,0,0.45), 0 0 0 1px rgba(144,180,238,0.05);
+    --shadow-pop: 0 8px 28px rgba(0,0,0,0.6);
+    background: var(--canvas);
+    font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+    color: var(--ink);
+    font-size: 13px;
+    line-height: 1.5;
+    letter-spacing: -0.01em;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+  body[data-theme="v6"] .serif {
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 300;
+    letter-spacing: 0.01em;
+  }
+  body[data-theme="v6"] .serif em, body[data-theme="v6"] .serif i {
+    font-style: normal; color: var(--accent); font-weight: 400;
+  }
+  body[data-theme="v6"] .mono {
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 500; letter-spacing: 0;
+  }
+  body[data-theme="v6"] .micro {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 10px; font-weight: 600; letter-spacing: 0.07em;
+    text-transform: uppercase; color: var(--ink-soft);
+  }
+  body[data-theme="v6"] .topbar {
+    height: 52px; padding: 0 20px; gap: 16px;
+    border-bottom: 1px solid var(--line);
+    background: var(--canvas);
+  }
+  body[data-theme="v6"] .wordmark {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px; font-weight: 700; letter-spacing: -0.03em;
+    color: var(--ink);
+    display: inline-flex; align-items: center; gap: 4px;
+  }
+  body[data-theme="v6"] .wordmark .ampersand {
+    color: var(--accent); font-style: normal; font-weight: 300; letter-spacing: 0;
+  }
+  body[data-theme="v6"] .shell { grid-template-columns: 228px 1fr 372px; }
+  body[data-theme="v6"] .shell.no-chat { grid-template-columns: 228px 1fr; }
+  body[data-theme="v6"] .card {
+    border-radius: 8px;
+    border: 1px solid var(--line);
+    background: var(--paper);
+    box-shadow: var(--shadow-card);
+  }
+  body[data-theme="v6"] .pill {
+    height: 22px; padding: 0 10px; border-radius: 100px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 11px; font-weight: 500; letter-spacing: 0.01em;
+    background: var(--cream-2); color: var(--ink-muted); border: 1px solid var(--line-strong);
+  }
+  body[data-theme="v6"] .pill.mustard {
+    background: rgba(144,180,238,0.1);
+    color: var(--accent);
+    border-color: rgba(144,180,238,0.3);
+  }
+  body[data-theme="v6"] .pill.sage {
+    background: rgba(238,144,184,0.1);
+    color: var(--accent-b);
+    border-color: rgba(238,144,184,0.3);
+  }
+  body[data-theme="v6"] .pill.brick {
+    background: transparent; color: var(--accent); border-color: rgba(144,180,238,0.5);
+  }
+  body[data-theme="v6"] .pill.ghost { background: transparent; border-color: transparent; }
+  body[data-theme="v6"] .btn {
+    height: 32px; padding: 0 14px; border-radius: 6px;
+    font-family: 'DM Sans', sans-serif; font-weight: 500; font-size: 13px;
+    letter-spacing: -0.01em;
+    background: var(--cream-2); color: var(--ink); border: 1px solid var(--line-strong);
+    transition: background 120ms ease, border-color 120ms ease;
+  }
+  body[data-theme="v6"] .btn:hover { background: var(--cream); }
+  body[data-theme="v6"] .btn.primary {
+    background: var(--accent); color: var(--on-accent); border-color: transparent;
+    font-weight: 600;
+  }
+  body[data-theme="v6"] .btn.primary:hover { background: #a6c6f2; }
+  body[data-theme="v6"] .btn.ghost {
+    background: transparent; border-color: transparent; color: var(--ink-muted);
+  }
+  body[data-theme="v6"] .btn.ghost:hover { background: var(--cream-2); color: var(--ink); }
+  body[data-theme="v6"] .btn.danger {
+    color: var(--accent-b); border-color: rgba(238,144,184,0.35);
+  }
+  body[data-theme="v6"] .btn.lg { height: 40px; padding: 0 18px; font-size: 14px; }
+  body[data-theme="v6"] .btn.sm { height: 26px; padding: 0 10px; font-size: 11px; }
+  body[data-theme="v6"] .placeholder-bg {
+    background-image: repeating-linear-gradient(
+      45deg, transparent 0, transparent 10px,
+      rgba(144,180,238,0.04) 10px, rgba(144,180,238,0.04) 11px
+    );
+    background-color: var(--cream);
+  }
+  body[data-theme="v6"] .roadmap-connectors path {
+    stroke: var(--line-strong); stroke-width: 1; stroke-dasharray: 3 4; opacity: 0.7;
+  }
+  body[data-theme="v6"] .roadmap-connectors path.dim { opacity: 0.18; }
+  body[data-theme="v6"] .roadmap-connectors path.hi {
+    stroke: var(--accent); stroke-width: 1.5; stroke-dasharray: none; opacity: 1;
+  }
+  body[data-theme="v6"] [style*="var(--mustard)"][style*="border-radius: 50%"] {
+    color: var(--on-accent) !important;
+  }
+  body[data-theme="v6"] [style*="var(--sage)"][style*="border-radius: 50%"] {
+    color: var(--on-accent) !important;
+  }
+  body[data-theme="v6"] div[style*="background: var(--sage)"][style*="width: 4"],
+  body[data-theme="v6"] div[style*="background: var(--mustard)"][style*="width: 4"] {
+    background: var(--accent) !important;
+  }
+  body[data-theme="v6"] h1, body[data-theme="v6"] h2,
+  body[data-theme="v6"] h3, body[data-theme="v6"] h4 {
+    font-family: 'DM Sans', sans-serif; font-weight: 600; letter-spacing: -0.025em;
+  }
+  body[data-theme="v6"] textarea, body[data-theme="v6"] input[type="text"] {
+    border-radius: 6px !important;
+    background: var(--cream) !important;
+    border-color: var(--line-strong) !important;
+    color: var(--ink) !important;
+    font-family: 'DM Sans', sans-serif !important;
+  }
+  body[data-theme="v6"] ::-webkit-scrollbar { width: 6px; height: 6px; }
+  body[data-theme="v6"] ::-webkit-scrollbar-track { background: transparent; }
+  body[data-theme="v6"] ::-webkit-scrollbar-thumb {
+    background: var(--line-strong); border-radius: 100px;
+  }
+
+  /* ==========================================================================
+     V7 — Charcoal / JetBrains Mono / Pale Periwinkle + Rose
+     Same V6 palette, swapped to mono. Terminal feel, uppercase labels.
+     ========================================================================== */
+  body[data-theme="v7"] {
+    --canvas: #14141c;
+    --paper: #1c1c27;
+    --cream: #222230;
+    --cream-2: #2a2a3a;
+    --ink: #e2e2ef;
+    --ink-muted: #8686a2;
+    --ink-soft: #4e4e6a;
+    --line: #272738;
+    --line-strong: #353550;
+    --accent: #90b4ee;
+    --accent-b: #ee90b8;
+    --on-accent: #0c0c18;
+    --mustard: #90b4ee;
+    --mustard-ink: #90b4ee;
+    --mustard-soft: #1c1c27;
+    --sage: #ee90b8;
+    --sage-ink: #ee90b8;
+    --sage-soft: #1c1c27;
+    --brick: #90b4ee;
+    --brick-soft: #1c1c27;
+    --shadow-card: 0 1px 3px rgba(0,0,0,0.45);
+    --shadow-pop: 0 8px 28px rgba(0,0,0,0.6);
+    background: var(--canvas);
+    font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, monospace;
+    color: var(--ink);
+    font-size: 12px;
+    line-height: 1.55;
+    letter-spacing: -0.01em;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+  body[data-theme="v7"] .serif {
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 400; letter-spacing: 0.01em;
+  }
+  body[data-theme="v7"] .serif em, body[data-theme="v7"] .serif i {
+    font-style: normal; color: var(--accent); font-weight: 500;
+  }
+  body[data-theme="v7"] .mono {
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 500; letter-spacing: 0;
+  }
+  body[data-theme="v7"] .micro {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9.5px; font-weight: 500; letter-spacing: 0.06em;
+    text-transform: uppercase; color: var(--ink-soft);
+  }
+  body[data-theme="v7"] .topbar {
+    height: 50px; padding: 0 18px; gap: 14px;
+    border-bottom: 1px solid var(--line);
+    background: var(--canvas);
+  }
+  body[data-theme="v7"] .wordmark {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px; font-weight: 600; letter-spacing: 0.06em;
+    text-transform: uppercase; color: var(--ink);
+    display: inline-flex; align-items: center; gap: 6px;
+  }
+  body[data-theme="v7"] .wordmark .ampersand {
+    color: var(--accent); font-style: normal; font-weight: 400; letter-spacing: 0;
+  }
+  body[data-theme="v7"] .shell { grid-template-columns: 228px 1fr 372px; }
+  body[data-theme="v7"] .shell.no-chat { grid-template-columns: 228px 1fr; }
+  body[data-theme="v7"] .card {
+    border-radius: 4px;
+    border: 1px solid var(--line);
+    background: var(--paper);
+    box-shadow: var(--shadow-card);
+  }
+  body[data-theme="v7"] .pill {
+    height: 20px; padding: 0 7px; border-radius: 3px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9.5px; font-weight: 500; letter-spacing: 0.06em;
+    text-transform: uppercase;
+    background: var(--cream-2); color: var(--ink-muted); border: 1px solid var(--line-strong);
+  }
+  body[data-theme="v7"] .pill.mustard {
+    background: rgba(144,180,238,0.1);
+    color: var(--accent);
+    border-color: rgba(144,180,238,0.35);
+  }
+  body[data-theme="v7"] .pill.sage {
+    background: rgba(238,144,184,0.1);
+    color: var(--accent-b);
+    border-color: rgba(238,144,184,0.35);
+  }
+  body[data-theme="v7"] .pill.brick {
+    background: transparent; color: var(--accent); border-color: rgba(144,180,238,0.5);
+  }
+  body[data-theme="v7"] .pill.ghost { background: transparent; border-color: transparent; }
+  body[data-theme="v7"] .btn {
+    height: 30px; padding: 0 12px; border-radius: 3px;
+    font-family: 'JetBrains Mono', monospace; font-weight: 500; font-size: 11px;
+    letter-spacing: 0.04em; text-transform: uppercase;
+    background: var(--cream-2); color: var(--ink); border: 1px solid var(--line-strong);
+    transition: background 120ms ease, border-color 120ms ease;
+  }
+  body[data-theme="v7"] .btn:hover { background: var(--cream); }
+  body[data-theme="v7"] .btn.primary {
+    background: var(--accent); color: var(--on-accent); border-color: transparent;
+    font-weight: 600;
+  }
+  body[data-theme="v7"] .btn.primary:hover { background: #a6c6f2; }
+  body[data-theme="v7"] .btn.ghost {
+    background: transparent; border-color: transparent; color: var(--ink-muted);
+  }
+  body[data-theme="v7"] .btn.ghost:hover { background: var(--cream-2); color: var(--ink); }
+  body[data-theme="v7"] .btn.danger {
+    color: var(--accent-b); border-color: rgba(238,144,184,0.35);
+  }
+  body[data-theme="v7"] .btn.lg { height: 38px; padding: 0 16px; font-size: 12px; }
+  body[data-theme="v7"] .btn.sm { height: 24px; padding: 0 8px; font-size: 10px; }
+  body[data-theme="v7"] .placeholder-bg {
+    background-image: repeating-linear-gradient(
+      45deg, transparent 0, transparent 8px,
+      rgba(144,180,238,0.04) 8px, rgba(144,180,238,0.04) 9px
+    );
+    background-color: var(--cream);
+  }
+  body[data-theme="v7"] .roadmap-connectors path {
+    stroke: var(--line-strong); stroke-width: 1; stroke-dasharray: 2 4; opacity: 0.65;
+  }
+  body[data-theme="v7"] .roadmap-connectors path.dim { opacity: 0.15; }
+  body[data-theme="v7"] .roadmap-connectors path.hi {
+    stroke: var(--accent); stroke-width: 1.5; stroke-dasharray: none; opacity: 1;
+  }
+  body[data-theme="v7"] [style*="var(--mustard)"][style*="border-radius: 50%"] {
+    color: var(--on-accent) !important;
+  }
+  body[data-theme="v7"] [style*="var(--sage)"][style*="border-radius: 50%"] {
+    color: var(--on-accent) !important;
+  }
+  body[data-theme="v7"] div[style*="background: var(--sage)"][style*="width: 4"],
+  body[data-theme="v7"] div[style*="background: var(--mustard)"][style*="width: 4"] {
+    background: var(--accent) !important;
+  }
+  body[data-theme="v7"] h1, body[data-theme="v7"] h2,
+  body[data-theme="v7"] h3, body[data-theme="v7"] h4 {
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 600; letter-spacing: -0.02em; text-transform: uppercase;
+  }
+  body[data-theme="v7"] textarea, body[data-theme="v7"] input[type="text"] {
+    border-radius: 3px !important;
+    background: var(--cream) !important;
+    border-color: var(--line-strong) !important;
+    color: var(--ink) !important;
+    font-family: 'JetBrains Mono', monospace !important;
+  }
+  body[data-theme="v7"] ::-webkit-scrollbar { width: 6px; height: 6px; }
+  body[data-theme="v7"] ::-webkit-scrollbar-track { background: transparent; }
+  body[data-theme="v7"] ::-webkit-scrollbar-thumb {
+    background: var(--line-strong); border-radius: 2px;
+  }
+
+  /* ==========================================================================
+     V8 — Brutalist / Inter Tight / Monotone
+     0-radius. Pure value contrast — #0a0a0a black, #ebebeb off-white, no hue.
+     ========================================================================== */
+  body[data-theme="v8"] {
+    --canvas: #0a0a0a;
+    --paper: #111111;
+    --cream: #181818;
+    --cream-2: #222222;
+    --ink: #ebebeb;
+    --ink-muted: rgba(235,235,235,0.5);
+    --ink-soft: rgba(235,235,235,0.25);
+    --line: rgba(235,235,235,0.12);
+    --line-strong: rgba(235,235,235,0.28);
+    --accent: #ebebeb;
+    --on-accent: #0a0a0a;
+    --mustard: #ebebeb;
+    --mustard-ink: #ebebeb;
+    --mustard-soft: #111111;
+    --sage: #ebebeb;
+    --sage-ink: #ebebeb;
+    --sage-soft: #111111;
+    --brick: #ebebeb;
+    --brick-soft: #111111;
+    --shadow-card: none;
+    --shadow-pop: none;
+    background: var(--canvas);
+    font-family: 'Inter Tight', 'Inter', ui-sans-serif, sans-serif;
+    color: var(--ink);
+    font-size: 13px;
+    line-height: 1.5;
+    letter-spacing: -0.015em;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+  body[data-theme="v8"] .serif {
+    font-family: 'Inter Tight', sans-serif;
+    font-weight: 800;
+    letter-spacing: -0.04em;
+  }
+  body[data-theme="v8"] .serif em, body[data-theme="v8"] .serif i {
+    font-style: italic; color: var(--accent); font-weight: 800;
+  }
+  body[data-theme="v8"] .mono {
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 500; letter-spacing: 0;
+  }
+  body[data-theme="v8"] .micro {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9.5px; font-weight: 500; letter-spacing: 0.16em;
+    text-transform: uppercase; color: var(--ink-muted);
+  }
+  body[data-theme="v8"] .topbar {
+    height: 52px; padding: 0 20px; gap: 16px;
+    border-bottom: 1px solid var(--ink);
+    background: var(--canvas);
+  }
+  body[data-theme="v8"] .wordmark {
+    font-family: 'Inter Tight', sans-serif;
+    font-size: 16px; font-weight: 900; letter-spacing: -0.04em;
+    color: var(--ink);
+    display: inline-flex; align-items: center; gap: 2px;
+  }
+  body[data-theme="v8"] .wordmark .ampersand {
+    color: var(--accent); font-style: normal;
+  }
+  body[data-theme="v8"] .shell { grid-template-columns: 228px 1fr 372px; }
+  body[data-theme="v8"] .shell.no-chat { grid-template-columns: 228px 1fr; }
+  body[data-theme="v8"] .card {
+    border-radius: 0;
+    border: 1px solid var(--line-strong);
+    background: var(--paper);
+  }
+  body[data-theme="v8"] .pill {
+    height: 22px; padding: 0 8px; border-radius: 0;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9.5px; font-weight: 500; letter-spacing: 0.14em;
+    text-transform: uppercase;
+    background: transparent; color: var(--ink-muted); border: 1px solid var(--line-strong);
+  }
+  body[data-theme="v8"] .pill.mustard {
+    background: var(--accent); color: var(--on-accent); border-color: var(--accent);
+  }
+  body[data-theme="v8"] .pill.sage {
+    background: var(--ink); color: var(--canvas); border-color: var(--ink);
+  }
+  body[data-theme="v8"] .pill.brick {
+    background: transparent; color: var(--accent); border-color: var(--accent);
+  }
+  body[data-theme="v8"] .pill.ghost { background: transparent; border-color: transparent; }
+  body[data-theme="v8"] .btn {
+    height: 34px; padding: 0 14px; border-radius: 0;
+    font-family: 'JetBrains Mono', monospace; font-weight: 600; font-size: 10.5px;
+    letter-spacing: 0.14em; text-transform: uppercase;
+    background: transparent; color: var(--ink); border: 1px solid var(--ink);
+    transition: background 80ms ease, color 80ms ease;
+  }
+  body[data-theme="v8"] .btn:hover { background: var(--ink); color: var(--canvas); }
+  body[data-theme="v8"] .btn.primary {
+    background: var(--accent); color: var(--on-accent); border-color: var(--accent);
+    font-weight: 700;
+  }
+  body[data-theme="v8"] .btn.primary:hover {
+    background: var(--ink); border-color: var(--ink); color: var(--canvas);
+  }
+  body[data-theme="v8"] .btn.ghost {
+    background: transparent; border-color: var(--line-strong); color: var(--ink-muted);
+  }
+  body[data-theme="v8"] .btn.ghost:hover { background: var(--cream-2); color: var(--ink); }
+  body[data-theme="v8"] .btn.danger {
+    color: var(--accent); border-color: var(--accent);
+  }
+  body[data-theme="v8"] .btn.lg { height: 42px; padding: 0 18px; font-size: 11.5px; }
+  body[data-theme="v8"] .btn.sm { height: 26px; padding: 0 9px; font-size: 9.5px; }
+  body[data-theme="v8"] .placeholder-bg {
+    background-image: repeating-linear-gradient(
+      45deg, transparent 0, transparent 12px,
+      rgba(212,255,58,0.06) 12px, rgba(212,255,58,0.06) 13px
+    );
+    background-color: var(--cream);
+  }
+  body[data-theme="v8"] .roadmap-connectors path {
+    stroke: var(--line-strong); stroke-width: 1; stroke-dasharray: 2 4; opacity: 0.6;
+  }
+  body[data-theme="v8"] .roadmap-connectors path.dim { opacity: 0.15; }
+  body[data-theme="v8"] .roadmap-connectors path.hi {
+    stroke: var(--accent); stroke-width: 2; stroke-dasharray: none; opacity: 1;
+  }
+  body[data-theme="v8"] [style*="var(--mustard)"][style*="border-radius: 50%"] {
+    color: var(--on-accent) !important;
+  }
+  body[data-theme="v8"] [style*="var(--sage)"][style*="border-radius: 50%"] {
+    color: var(--canvas) !important;
+  }
+  body[data-theme="v8"] div[style*="background: var(--sage)"][style*="width: 4"],
+  body[data-theme="v8"] div[style*="background: var(--mustard)"][style*="width: 4"] {
+    background: var(--accent) !important;
+  }
+  body[data-theme="v8"] h1, body[data-theme="v8"] h2,
+  body[data-theme="v8"] h3, body[data-theme="v8"] h4 {
+    font-family: 'Inter Tight', sans-serif;
+    font-weight: 800; letter-spacing: -0.03em;
+  }
+  body[data-theme="v8"] textarea, body[data-theme="v8"] input[type="text"] {
+    border-radius: 0 !important;
+    background: var(--cream) !important;
+    border-color: var(--line-strong) !important;
+    color: var(--ink) !important;
+    font-family: 'JetBrains Mono', monospace !important;
+  }
+  body[data-theme="v8"] ::-webkit-scrollbar { width: 6px; height: 6px; }
+  body[data-theme="v8"] ::-webkit-scrollbar-track { background: var(--canvas); }
+  body[data-theme="v8"] ::-webkit-scrollbar-thumb { background: var(--line-strong); border-radius: 0; }
+
+  /* ==========================================================================
+     V9 — Droid / Press Start 2P display + Instrument Serif taglines + Mono chrome
+     Black canvas. Warm off-white text. Muted amber accent.
+     Inspired by Ghostty's splash: pixel wordmark, italic serif, terminal mono.
+     ========================================================================== */
+  body[data-theme="v9"] {
+    --canvas: #0d0d0d;
+    --paper: #141414;
+    --cream: #1c1c1c;
+    --cream-2: #242424;
+    --ink: #dedad2;
+    --ink-muted: rgba(222,218,210,0.5);
+    --ink-soft: rgba(222,218,210,0.25);
+    --line: rgba(222,218,210,0.12);
+    --line-strong: rgba(222,218,210,0.28);
+    --accent: #dedad2;
+    --on-accent: #0d0d0d;
+    --mustard: #dedad2;
+    --mustard-ink: #dedad2;
+    --mustard-soft: #141414;
+    --sage: #dedad2;
+    --sage-ink: #dedad2;
+    --sage-soft: #141414;
+    --brick: #dedad2;
+    --brick-soft: #141414;
+    --shadow-card: none;
+    --shadow-pop: none;
+    background: var(--canvas);
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    color: var(--ink);
+    font-size: 12px;
+    line-height: 1.6;
+    letter-spacing: 0;
+    -webkit-font-smoothing: antialiased;
+    image-rendering: pixelated;
+  }
+  /* Display headings: pixel font — section titles, roadmap node names */
+  body[data-theme="v9"] h1, body[data-theme="v9"] h2 {
+    font-family: 'Press Start 2P', monospace;
+    font-weight: 400;
+    letter-spacing: -0.01em;
+    line-height: 1.4;
+    font-size: 11px;
+    text-transform: uppercase;
+  }
+  body[data-theme="v9"] h3, body[data-theme="v9"] h4 {
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    font-size: 10px;
+  }
+  /* .serif used on taglines / display blocks → italic serif like the Ghostty subtitle */
+  body[data-theme="v9"] .serif {
+    font-family: 'Press Start 2P', monospace;
+    font-weight: 400;
+    font-size: 0.9em;
+    letter-spacing: 0.01em;
+    line-height: 1.6;
+  }
+  body[data-theme="v9"] .serif em, body[data-theme="v9"] .serif i {
+    font-style: normal; color: var(--accent);
+  }
+  body[data-theme="v9"] .mono {
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 500; letter-spacing: 0;
+  }
+  body[data-theme="v9"] .micro {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9.5px; font-weight: 500; letter-spacing: 0.1em;
+    text-transform: uppercase; color: var(--ink-soft);
+  }
+  body[data-theme="v9"] .topbar {
+    height: 50px; padding: 0 20px; gap: 14px;
+    border-bottom: 1px solid var(--line-strong);
+    background: var(--canvas);
+  }
+  /* Wordmark: pixel font, small — the key identity moment */
+  body[data-theme="v9"] .wordmark {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 10px; font-weight: 400; letter-spacing: 0.02em;
+    text-transform: uppercase; color: var(--ink);
+    display: inline-flex; align-items: center; gap: 8px;
+  }
+  body[data-theme="v9"] .wordmark .ampersand {
+    color: var(--accent); font-style: normal;
+  }
+  body[data-theme="v9"] .shell { grid-template-columns: 228px 1fr 372px; }
+  body[data-theme="v9"] .shell.no-chat { grid-template-columns: 228px 1fr; }
+  body[data-theme="v9"] .card {
+    border-radius: 0;
+    border: 1px solid var(--line-strong);
+    background: var(--paper);
+  }
+  body[data-theme="v9"] .pill {
+    height: 20px; padding: 0 7px; border-radius: 0;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px; font-weight: 500; letter-spacing: 0.1em;
+    text-transform: uppercase;
+    background: transparent; color: var(--ink-muted); border: 1px solid var(--line-strong);
+  }
+  body[data-theme="v9"] .pill.mustard {
+    background: var(--accent); color: var(--on-accent); border-color: var(--accent);
+  }
+  body[data-theme="v9"] .pill.sage {
+    background: var(--ink); color: var(--canvas); border-color: var(--ink);
+  }
+  body[data-theme="v9"] .pill.brick {
+    background: transparent; color: var(--accent); border-color: var(--accent);
+  }
+  body[data-theme="v9"] .pill.ghost { background: transparent; border-color: transparent; }
+  body[data-theme="v9"] .btn {
+    height: 32px; padding: 0 12px; border-radius: 0;
+    font-family: 'JetBrains Mono', monospace; font-weight: 500; font-size: 10.5px;
+    letter-spacing: 0.1em; text-transform: uppercase;
+    background: transparent; color: var(--ink); border: 1px solid var(--line-strong);
+    transition: background 80ms, color 80ms;
+  }
+  body[data-theme="v9"] .btn:hover { background: var(--ink); color: var(--canvas); }
+  body[data-theme="v9"] .btn.primary {
+    background: var(--accent); color: var(--on-accent); border-color: var(--accent);
+  }
+  body[data-theme="v9"] .btn.primary:hover {
+    background: var(--ink); border-color: var(--ink); color: var(--canvas);
+  }
+  body[data-theme="v9"] .btn.ghost {
+    background: transparent; border-color: transparent; color: var(--ink-muted);
+  }
+  body[data-theme="v9"] .btn.ghost:hover { background: var(--cream-2); color: var(--ink); }
+  body[data-theme="v9"] .btn.danger { color: var(--accent); border-color: var(--accent); }
+  body[data-theme="v9"] .btn.lg { height: 38px; padding: 0 16px; font-size: 11px; }
+  body[data-theme="v9"] .btn.sm { height: 24px; padding: 0 8px; font-size: 9px; }
+  body[data-theme="v9"] .placeholder-bg {
+    background-image: repeating-linear-gradient(
+      45deg, transparent 0, transparent 8px,
+      rgba(200,217,122,0.05) 8px, rgba(200,217,122,0.05) 9px
+    );
+    background-color: var(--cream);
+  }
+  body[data-theme="v9"] .roadmap-connectors path {
+    stroke: var(--line-strong); stroke-width: 1; stroke-dasharray: 2 4; opacity: 0.6;
+  }
+  body[data-theme="v9"] .roadmap-connectors path.dim { opacity: 0.15; }
+  body[data-theme="v9"] .roadmap-connectors path.hi {
+    stroke: var(--accent); stroke-width: 1.5; stroke-dasharray: none; opacity: 1;
+  }
+  body[data-theme="v9"] [style*="var(--mustard)"][style*="border-radius: 50%"] {
+    color: var(--on-accent) !important;
+  }
+  body[data-theme="v9"] [style*="var(--sage)"][style*="border-radius: 50%"] {
+    color: var(--canvas) !important;
+  }
+  body[data-theme="v9"] div[style*="background: var(--sage)"][style*="width: 4"],
+  body[data-theme="v9"] div[style*="background: var(--mustard)"][style*="width: 4"] {
+    background: var(--accent) !important;
+  }
+  body[data-theme="v9"] textarea, body[data-theme="v9"] input[type="text"] {
+    border-radius: 0 !important;
+    background: var(--cream) !important;
+    border-color: var(--line-strong) !important;
+    color: var(--ink) !important;
+    font-family: 'JetBrains Mono', monospace !important;
+  }
+  body[data-theme="v9"] ::-webkit-scrollbar { width: 6px; height: 6px; }
+  body[data-theme="v9"] ::-webkit-scrollbar-track { background: var(--canvas); }
+  body[data-theme="v9"] ::-webkit-scrollbar-thumb { background: var(--line-strong); border-radius: 0; }
+
+  /* ==========================================================================
+     V10 — FL-41 / Geist / Warm Rose
+     FL-41 medical tint: blocks 480–500nm blue-green. Dark warm sepia canvas,
+     peach-cream text, rose-coral accent. Designed for extended sessions.
+     ========================================================================== */
+  body[data-theme="v10"] {
+    --canvas: #0f0a08;
+    --paper: #181210;
+    --cream: #221810;
+    --cream-2: #2c2018;
+    --ink: #f0dece;
+    --ink-muted: rgba(240,222,206,0.52);
+    --ink-soft: rgba(240,222,206,0.26);
+    --line: rgba(240,222,206,0.1);
+    --line-strong: rgba(240,222,206,0.22);
+    --accent: #cc7a72;
+    --on-accent: #0f0a08;
+    --mustard: #cc7a72;
+    --mustard-ink: #cc7a72;
+    --mustard-soft: #181210;
+    --sage: #e8a898;
+    --sage-ink: #e8a898;
+    --sage-soft: #181210;
+    --brick: #cc7a72;
+    --brick-soft: #181210;
+    --shadow-card: 0 1px 4px rgba(0,0,0,0.5);
+    --shadow-pop: 0 8px 24px rgba(0,0,0,0.6);
+    background: var(--canvas);
+    font-family: 'Geist', -apple-system, sans-serif;
+    color: var(--ink);
+    font-size: 13px;
+    line-height: 1.5;
+    letter-spacing: -0.01em;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+  body[data-theme="v10"] .serif {
+    font-family: 'Geist', sans-serif;
+    font-weight: 300; letter-spacing: 0.01em;
+  }
+  body[data-theme="v10"] .serif em, body[data-theme="v10"] .serif i {
+    font-style: normal; color: var(--accent); font-weight: 400;
+  }
+  body[data-theme="v10"] .mono {
+    font-family: 'Geist Mono', monospace;
+    font-weight: 400; letter-spacing: 0;
+  }
+  body[data-theme="v10"] .micro {
+    font-family: 'Geist Mono', monospace;
+    font-size: 10px; font-weight: 500; letter-spacing: 0.07em;
+    text-transform: uppercase; color: var(--ink-soft);
+  }
+  body[data-theme="v10"] .topbar {
+    height: 52px; padding: 0 20px; gap: 16px;
+    border-bottom: 1px solid var(--line-strong);
+    background: var(--canvas);
+  }
+  body[data-theme="v10"] .wordmark {
+    font-family: 'Geist', sans-serif;
+    font-size: 14px; font-weight: 700; letter-spacing: -0.03em;
+    color: var(--ink);
+    display: inline-flex; align-items: center; gap: 4px;
+  }
+  body[data-theme="v10"] .wordmark .ampersand {
+    color: var(--accent); font-style: normal; font-weight: 300;
+  }
+  body[data-theme="v10"] .shell { grid-template-columns: 228px 1fr 372px; }
+  body[data-theme="v10"] .shell.no-chat { grid-template-columns: 228px 1fr; }
+  body[data-theme="v10"] .card {
+    border-radius: 6px;
+    border: 1px solid var(--line-strong);
+    background: var(--paper);
+    box-shadow: var(--shadow-card);
+  }
+  body[data-theme="v10"] .pill {
+    height: 22px; padding: 0 9px; border-radius: 100px;
+    font-family: 'Geist Mono', monospace;
+    font-size: 10px; font-weight: 500; letter-spacing: 0.04em;
+    text-transform: uppercase;
+    background: var(--cream-2); color: var(--ink-muted); border: 1px solid var(--line-strong);
+  }
+  body[data-theme="v10"] .pill.mustard {
+    background: rgba(204,122,114,0.15);
+    color: var(--accent);
+    border-color: rgba(204,122,114,0.4);
+  }
+  body[data-theme="v10"] .pill.sage {
+    background: rgba(232,168,152,0.12);
+    color: var(--sage);
+    border-color: rgba(232,168,152,0.35);
+  }
+  body[data-theme="v10"] .pill.brick {
+    background: transparent; color: var(--accent); border-color: rgba(204,122,114,0.5);
+  }
+  body[data-theme="v10"] .pill.ghost { background: transparent; border-color: transparent; }
+  body[data-theme="v10"] .btn {
+    height: 32px; padding: 0 14px; border-radius: 5px;
+    font-family: 'Geist', sans-serif; font-weight: 500; font-size: 13px;
+    letter-spacing: -0.01em;
+    background: var(--cream-2); color: var(--ink); border: 1px solid var(--line-strong);
+    transition: background 100ms ease;
+  }
+  body[data-theme="v10"] .btn:hover { background: var(--cream); }
+  body[data-theme="v10"] .btn.primary {
+    background: var(--accent); color: var(--on-accent); border-color: transparent;
+  }
+  body[data-theme="v10"] .btn.primary:hover { background: #d98c84; }
+  body[data-theme="v10"] .btn.ghost {
+    background: transparent; border-color: transparent; color: var(--ink-muted);
+  }
+  body[data-theme="v10"] .btn.ghost:hover { background: var(--cream-2); color: var(--ink); }
+  body[data-theme="v10"] .btn.danger { color: var(--sage); border-color: rgba(232,168,152,0.4); }
+  body[data-theme="v10"] .btn.lg { height: 40px; padding: 0 18px; font-size: 14px; }
+  body[data-theme="v10"] .btn.sm { height: 26px; padding: 0 10px; font-size: 11px; }
+  body[data-theme="v10"] .placeholder-bg {
+    background-image: repeating-linear-gradient(
+      45deg, transparent 0, transparent 10px,
+      rgba(204,122,114,0.05) 10px, rgba(204,122,114,0.05) 11px
+    );
+    background-color: var(--cream);
+  }
+  body[data-theme="v10"] .roadmap-connectors path {
+    stroke: var(--line-strong); stroke-width: 1; stroke-dasharray: 3 4; opacity: 0.6;
+  }
+  body[data-theme="v10"] .roadmap-connectors path.dim { opacity: 0.15; }
+  body[data-theme="v10"] .roadmap-connectors path.hi {
+    stroke: var(--accent); stroke-width: 1.5; stroke-dasharray: none; opacity: 1;
+  }
+  body[data-theme="v10"] [style*="var(--mustard)"][style*="border-radius: 50%"] {
+    color: var(--on-accent) !important;
+  }
+  body[data-theme="v10"] [style*="var(--sage)"][style*="border-radius: 50%"] {
+    color: var(--on-accent) !important;
+  }
+  body[data-theme="v10"] div[style*="background: var(--sage)"][style*="width: 4"],
+  body[data-theme="v10"] div[style*="background: var(--mustard)"][style*="width: 4"] {
+    background: var(--accent) !important;
+  }
+  body[data-theme="v10"] h1, body[data-theme="v10"] h2,
+  body[data-theme="v10"] h3, body[data-theme="v10"] h4 {
+    font-family: 'Geist', sans-serif; font-weight: 600; letter-spacing: -0.025em;
+  }
+  body[data-theme="v10"] textarea, body[data-theme="v10"] input[type="text"] {
+    border-radius: 5px !important;
+    background: var(--cream) !important;
+    border-color: var(--line-strong) !important;
+    color: var(--ink) !important;
+    font-family: 'Geist Mono', monospace !important;
+  }
+  body[data-theme="v10"] ::-webkit-scrollbar { width: 6px; height: 6px; }
+  body[data-theme="v10"] ::-webkit-scrollbar-track { background: transparent; }
+  body[data-theme="v10"] ::-webkit-scrollbar-thumb {
+    background: var(--line-strong); border-radius: 100px;
+  }
+
+  /* ==========================================================================
+     V11 — V2 system × FL-41 warm dark × monotone
+     Geist + Geist Mono. Dark warm sepia canvas. Peach-cream text.
+     No accent color — pure value contrast. Inverted states only.
+     ========================================================================== */
+  body[data-theme="v11"] {
+    --canvas: #0f0a08;
+    --paper: #181210;
+    --cream: #221810;
+    --cream-2: #2e2018;
+    --ink: #f0dece;
+    --ink-muted: rgba(240,222,206,0.52);
+    --ink-soft: rgba(240,222,206,0.26);
+    --line: rgba(240,222,206,0.1);
+    --line-strong: rgba(240,222,206,0.22);
+    --mustard: #f0dece;
+    --mustard-ink: #f0dece;
+    --mustard-soft: #181210;
+    --sage: #f0dece;
+    --sage-ink: #f0dece;
+    --sage-soft: #181210;
+    --brick: #f0dece;
+    --brick-soft: #181210;
+    --shadow-card: none;
+    --shadow-pop: none;
+    background: var(--canvas);
+    font-family: 'Geist', ui-sans-serif, system-ui, -apple-system, sans-serif;
+    color: var(--ink);
+    font-size: 14px;
+    line-height: 1.5;
+    letter-spacing: -0.01em;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+  body[data-theme="v11"] .serif {
+    font-family: 'Geist', sans-serif;
+    font-weight: 500; letter-spacing: -0.07em;
+  }
+  body[data-theme="v11"] .serif[style*="font-size: 30"] { font-size: 48px !important; line-height: 1.05 !important; letter-spacing: -0.048em !important; }
+  body[data-theme="v11"] .serif[style*="font-size: 22"] { font-size: 24px !important; line-height: 1.2 !important; letter-spacing: -0.03em !important; }
+  body[data-theme="v11"] .serif[style*="font-size: 44"] { font-size: 60px !important; line-height: 1 !important; letter-spacing: -0.048em !important; }
+  body[data-theme="v11"] .serif span[style*="italic"] { font-style: normal !important; font-weight: 400 !important; letter-spacing: -0.04em; }
+  body[data-theme="v11"] .serif em, body[data-theme="v11"] .serif i { font-style: normal; font-weight: 500; }
+  body[data-theme="v11"] .mono {
+    font-family: 'Geist Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+    letter-spacing: -0.02em;
+  }
+  body[data-theme="v11"] .micro {
+    font-family: 'Geist Mono', monospace;
+    font-size: 12px; font-weight: 400; letter-spacing: 0;
+    text-transform: uppercase; color: var(--ink-muted);
+  }
+  body[data-theme="v11"] .topbar { height: 52px; padding: 0 20px; gap: 16px; border-radius: 0; border-bottom: 1px solid var(--line-strong); }
+  body[data-theme="v11"] .wordmark {
+    font-family: 'Geist Mono', monospace;
+    font-size: 14px; font-weight: 500; letter-spacing: 0.02em;
+    text-transform: uppercase; color: var(--ink);
+  }
+  body[data-theme="v11"] .wordmark .ampersand { font-style: normal; color: var(--ink-muted); margin-left: 1px; }
+  body[data-theme="v11"] .shell { grid-template-columns: 232px 1fr 380px; }
+  body[data-theme="v11"] .shell.no-chat { grid-template-columns: 232px 1fr; }
+  body[data-theme="v11"] .card { border-radius: 6px; border: 1px solid var(--line-strong); background: var(--paper); }
+  body[data-theme="v11"] .pill {
+    height: 22px; padding: 0 8px; border-radius: 4px;
+    font-family: 'Geist Mono', monospace; font-size: 11px; font-weight: 400; letter-spacing: -0.01em;
+    background: transparent; color: var(--ink-muted); border: 1px solid var(--line-strong); text-transform: uppercase;
+  }
+  body[data-theme="v11"] .pill.mustard { background: transparent; color: var(--ink); border-color: var(--ink); }
+  body[data-theme="v11"] .pill.sage    { background: transparent; color: var(--ink); border-color: var(--ink); }
+  body[data-theme="v11"] .pill.brick   { background: transparent; color: var(--ink); border-color: var(--ink); }
+  body[data-theme="v11"] .pill.ghost   { background: transparent; border-color: transparent; }
+  body[data-theme="v11"] .btn {
+    height: 32px; padding: 0 12px; border-radius: 4px;
+    font-family: 'Geist', sans-serif; font-weight: 400; font-size: 14px; letter-spacing: -0.01em;
+    background: var(--cream-2); color: var(--ink); border: 1px solid var(--line-strong);
+    transition: background 100ms ease;
+  }
+  body[data-theme="v11"] .btn:hover { background: var(--cream); }
+  body[data-theme="v11"] .btn.primary { background: var(--ink); color: var(--canvas); border-color: var(--ink); }
+  body[data-theme="v11"] .btn.primary:hover { background: var(--ink-muted); border-color: var(--ink-muted); }
+  body[data-theme="v11"] .btn.ghost { background: transparent; border-color: transparent; color: var(--ink-muted); }
+  body[data-theme="v11"] .btn.ghost:hover { background: var(--cream-2); color: var(--ink); }
+  body[data-theme="v11"] .btn.danger { color: var(--ink); border-color: var(--line-strong); }
+  body[data-theme="v11"] .btn.lg { height: 40px; padding: 0 16px; font-size: 16px; border-radius: 4px; }
+  body[data-theme="v11"] .btn.sm { height: 26px; padding: 0 10px; font-size: 13px; border-radius: 4px; }
+  body[data-theme="v11"] .placeholder-bg {
+    background-image: radial-gradient(rgba(240,222,206,0.18) 1px, transparent 1px);
+    background-size: 8px 8px; background-color: var(--cream);
+  }
+  body[data-theme="v11"] .roadmap-connectors path {
+    stroke: var(--line-strong); stroke-width: 1; stroke-dasharray: 2 4; opacity: 1;
+  }
+  body[data-theme="v11"] .roadmap-connectors path.dim { opacity: 0.2; }
+  body[data-theme="v11"] .roadmap-connectors path.hi {
+    stroke: var(--ink); stroke-width: 1.5; stroke-dasharray: none; opacity: 1;
+  }
+  body[data-theme="v11"] [style*="var(--mustard)"][style*="border-radius: 50%"] { color: var(--canvas) !important; }
+  body[data-theme="v11"] [style*="var(--sage)"][style*="border-radius: 50%"] { color: var(--canvas) !important; }
+  body[data-theme="v11"] div[style*="background: var(--sage)"][style*="width: 4"],
+  body[data-theme="v11"] div[style*="background: var(--mustard)"][style*="width: 4"] { background: var(--ink) !important; }
+  body[data-theme="v11"] textarea, body[data-theme="v11"] input[type="text"] {
+    border-radius: 4px !important;
+    background: var(--cream) !important;
+    border-color: var(--line-strong) !important;
+    color: var(--ink) !important;
+  }
+  body[data-theme="v11"] ::-webkit-scrollbar { width: 8px; height: 8px; }
+  body[data-theme="v11"] ::-webkit-scrollbar-thumb { background: var(--line-strong); border-radius: 0; border: 2px solid var(--canvas); }
+  body[data-theme="v11"] ::-webkit-scrollbar-thumb:hover { background: var(--ink-muted); }
+
+  /* ==========================================================================
+     V12 — Factory Dark / Geist / Inverted Cards
+     Dark canvas #111111 + warm cream cards #f2ede4 + Factory orange-red accent.
+     Cards invert: cream bg, dark text. Canvas: dark bg, cream text.
+     ========================================================================== */
+  body[data-theme="v12"] {
+    --canvas: #111111;
+    --paper: #f2ede4;
+    --cream: #e8e2d8;
+    --cream-2: #ddd6ca;
+    --ink: #f0ece4;
+    --ink-muted: rgba(240,236,228,0.52);
+    --ink-soft: rgba(240,236,228,0.26);
+    --line: rgba(240,236,228,0.1);
+    --line-strong: rgba(240,236,228,0.22);
+    --ink-on-paper: #111111;
+    --ink-muted-on-paper: rgba(17,17,17,0.5);
+    --ink-soft-on-paper: rgba(17,17,17,0.28);
+    --line-on-paper: rgba(17,17,17,0.1);
+    --line-strong-on-paper: rgba(17,17,17,0.2);
+    --accent: #e05a38;
+    --on-accent: #f2ede4;
+    --mustard: #e05a38;
+    --mustard-ink: #e05a38;
+    --mustard-soft: #f2ede4;
+    --sage: #f0ece4;
+    --sage-ink: #f0ece4;
+    --sage-soft: #111111;
+    --brick: #e05a38;
+    --brick-soft: #f2ede4;
+    --shadow-card: 0 2px 12px rgba(0,0,0,0.35);
+    --shadow-pop: 0 8px 32px rgba(0,0,0,0.5);
+    background: var(--canvas);
+    font-family: 'Geist', ui-sans-serif, system-ui, -apple-system, sans-serif;
+    color: var(--ink);
+    font-size: 14px;
+    line-height: 1.5;
+    letter-spacing: -0.01em;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+  /* Cards invert — cream bg, dark text */
+  body[data-theme="v12"] .card {
+    background: var(--paper);
+    color: var(--ink-on-paper);
+    border-color: rgba(17,17,17,0.08);
+    border-radius: 12px;
+    box-shadow: var(--shadow-card);
+  }
+  /* Text helpers inside cards get dark equivalents */
+  body[data-theme="v12"] .card .micro { color: var(--ink-muted-on-paper); }
+  body[data-theme="v12"] .card .pill {
+    background: var(--cream-2); color: rgba(17,17,17,0.55);
+    border-color: rgba(17,17,17,0.15);
+  }
+  body[data-theme="v12"] .card .pill.mustard {
+    background: transparent; color: var(--accent); border-color: var(--accent);
+  }
+  body[data-theme="v12"] .card .pill.sage {
+    background: transparent; color: var(--ink-on-paper); border-color: rgba(17,17,17,0.3);
+  }
+  body[data-theme="v12"] .card .btn {
+    background: var(--cream-2); color: var(--ink-on-paper);
+    border-color: rgba(17,17,17,0.18);
+  }
+  body[data-theme="v12"] .card .btn:hover { background: var(--cream); }
+  body[data-theme="v12"] .card .btn.primary {
+    background: var(--ink-on-paper); color: var(--paper); border-color: var(--ink-on-paper);
+  }
+  /* Accent dot on micro labels — Factory signature */
+  body[data-theme="v12"] .micro::before {
+    content: '● '; color: var(--accent); font-size: 7px; vertical-align: middle;
+  }
+  body[data-theme="v12"] .serif {
+    font-family: 'Geist', sans-serif;
+    font-weight: 500; letter-spacing: -0.07em;
+  }
+  body[data-theme="v12"] .serif[style*="font-size: 30"] { font-size: 48px !important; line-height: 1.05 !important; letter-spacing: -0.048em !important; }
+  body[data-theme="v12"] .serif[style*="font-size: 22"] { font-size: 24px !important; line-height: 1.2 !important; letter-spacing: -0.03em !important; }
+  body[data-theme="v12"] .serif[style*="font-size: 44"] { font-size: 60px !important; line-height: 1 !important; letter-spacing: -0.048em !important; }
+  body[data-theme="v12"] .serif span[style*="italic"] { font-style: normal !important; font-weight: 400 !important; letter-spacing: -0.04em; }
+  body[data-theme="v12"] .serif em, body[data-theme="v12"] .serif i { font-style: normal; color: var(--accent); font-weight: 500; }
+  body[data-theme="v12"] .mono {
+    font-family: 'Geist Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+    letter-spacing: -0.02em;
+  }
+  body[data-theme="v12"] .micro {
+    font-family: 'Geist Mono', monospace;
+    font-size: 12px; font-weight: 400; letter-spacing: 0;
+    text-transform: uppercase; color: var(--ink-muted);
+  }
+  body[data-theme="v12"] .topbar { height: 52px; padding: 0 20px; gap: 16px; border-radius: 0; border-bottom: 1px solid var(--line-strong); }
+  body[data-theme="v12"] .wordmark {
+    font-family: 'Geist', sans-serif;
+    font-size: 14px; font-weight: 600; letter-spacing: -0.04em;
+    color: var(--ink);
+    display: inline-flex; align-items: center; gap: 4px;
+  }
+  body[data-theme="v12"] .wordmark .ampersand { font-style: normal; color: var(--accent); font-weight: 400; margin-left: 1px; }
+  body[data-theme="v12"] .shell { grid-template-columns: 232px 1fr 380px; }
+  body[data-theme="v12"] .shell.no-chat { grid-template-columns: 232px 1fr; }
+  body[data-theme="v12"] .pill {
+    height: 22px; padding: 0 8px; border-radius: 4px;
+    font-family: 'Geist Mono', monospace; font-size: 11px; font-weight: 400; letter-spacing: -0.01em;
+    background: rgba(240,236,228,0.08); color: var(--ink-muted); border: 1px solid var(--line-strong); text-transform: uppercase;
+  }
+  body[data-theme="v12"] .pill.mustard { background: transparent; color: var(--accent); border-color: var(--accent); }
+  body[data-theme="v12"] .pill.sage    { background: transparent; color: var(--ink); border-color: var(--line-strong); }
+  body[data-theme="v12"] .pill.brick   { background: transparent; color: var(--accent); border-color: var(--accent); }
+  body[data-theme="v12"] .pill.ghost   { background: transparent; border-color: transparent; }
+  body[data-theme="v12"] .btn {
+    height: 32px; padding: 0 12px; border-radius: 4px;
+    font-family: 'Geist', sans-serif; font-weight: 400; font-size: 14px; letter-spacing: -0.01em;
+    background: rgba(240,236,228,0.08); color: var(--ink); border: 1px solid var(--line-strong);
+    transition: background 100ms ease;
+  }
+  body[data-theme="v12"] .btn:hover { background: rgba(240,236,228,0.14); }
+  body[data-theme="v12"] .btn.primary { background: var(--ink); color: var(--canvas); border-color: var(--ink); }
+  body[data-theme="v12"] .btn.primary:hover { background: var(--ink-muted); }
+  body[data-theme="v12"] .btn.ghost { background: transparent; border-color: transparent; color: var(--ink-muted); }
+  body[data-theme="v12"] .btn.ghost:hover { background: rgba(240,236,228,0.08); color: var(--ink); }
+  body[data-theme="v12"] .btn.danger { color: var(--accent); border-color: rgba(224,90,56,0.4); }
+  body[data-theme="v12"] .btn.lg { height: 40px; padding: 0 16px; font-size: 16px; border-radius: 4px; }
+  body[data-theme="v12"] .btn.sm { height: 26px; padding: 0 10px; font-size: 13px; border-radius: 4px; }
+  body[data-theme="v12"] .placeholder-bg {
+    background-image: radial-gradient(rgba(240,236,228,0.15) 1px, transparent 1px);
+    background-size: 8px 8px; background-color: rgba(240,236,228,0.04);
+  }
+  body[data-theme="v12"] .roadmap-connectors path {
+    stroke: var(--line-strong); stroke-width: 1; stroke-dasharray: 2 4;
+  }
+  body[data-theme="v12"] .roadmap-connectors path.dim { opacity: 0.2; }
+  body[data-theme="v12"] .roadmap-connectors path.hi {
+    stroke: var(--accent); stroke-width: 1.5; stroke-dasharray: none; opacity: 1;
+  }
+  body[data-theme="v12"] [style*="var(--mustard)"][style*="border-radius: 50%"] { color: var(--on-accent) !important; }
+  body[data-theme="v12"] [style*="var(--sage)"][style*="border-radius: 50%"] { color: var(--canvas) !important; }
+  body[data-theme="v12"] div[style*="background: var(--sage)"][style*="width: 4"],
+  body[data-theme="v12"] div[style*="background: var(--mustard)"][style*="width: 4"] { background: var(--accent) !important; }
+  body[data-theme="v12"] textarea, body[data-theme="v12"] input[type="text"] {
+    border-radius: 4px !important;
+    background: rgba(240,236,228,0.06) !important;
+    border-color: var(--line-strong) !important;
+    color: var(--ink) !important;
+  }
+  body[data-theme="v12"] ::-webkit-scrollbar { width: 8px; height: 8px; }
+  body[data-theme="v12"] ::-webkit-scrollbar-thumb { background: var(--line-strong); border-radius: 0; border: 2px solid var(--canvas); }
+  body[data-theme="v12"] ::-webkit-scrollbar-thumb:hover { background: var(--ink-muted); }
+
+  /* ==========================================================================
+     V13 — GitHub Dark Colorblind
+     Exact token mapping from the VS Code theme.
+     #0d1117 canvas · #161b22 paper · #e6edf3 text · #388bfd accent blue
+     ========================================================================== */
+  body[data-theme="v13"] {
+    --canvas:       #0d1117;   /* editor.background */
+    --paper:        #161b22;   /* sideBar.background / panel.background */
+    --cream:        #1c2128;   /* editorGroupHeader / hover bg */
+    --cream-2:      #21262d;   /* list.hoverBackground / input */
+    --ink:          #e6edf3;   /* editor.foreground */
+    --ink-muted:    #8b949e;   /* editorLineNumber / comments */
+    --ink-soft:     #6e7681;   /* descriptionForeground */
+    --line:         #21262d;   /* panel.border subtle */
+    --line-strong:  #30363d;   /* panel.border default */
+    --accent:       #388bfd;   /* focusBorder / button.background */
+    --accent-dim:   #1f6feb;   /* button.hoverBackground */
+    --on-accent:    #ffffff;
+    --mustard:      #388bfd;
+    --mustard-ink:  #388bfd;
+    --mustard-soft: #161b22;
+    --sage:         #3fb950;   /* git added — kept for status colors only */
+    --sage-ink:     #3fb950;
+    --sage-soft:    #161b22;
+    --brick:        #f85149;   /* git deleted / error */
+    --brick-soft:   #161b22;
+    --shadow-card:  0 1px 3px rgba(1,4,9,0.8), 0 0 0 1px #30363d;
+    --shadow-pop:   0 8px 24px rgba(1,4,9,0.8);
+    background: var(--canvas);
+    font-family: 'Geist', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    color: var(--ink);
+    font-size: 14px;
+    line-height: 1.5;
+    letter-spacing: -0.006em;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+  body[data-theme="v13"] .serif {
+    font-family: 'Geist', sans-serif;
+    font-weight: 600; letter-spacing: -0.04em;
+  }
+  body[data-theme="v13"] .serif[style*="font-size: 30"] { font-size: 32px !important; line-height: 1.1 !important; letter-spacing: -0.03em !important; }
+  body[data-theme="v13"] .serif[style*="font-size: 22"] { font-size: 22px !important; line-height: 1.25 !important; letter-spacing: -0.02em !important; }
+  body[data-theme="v13"] .serif[style*="font-size: 44"] { font-size: 48px !important; line-height: 1.05 !important; letter-spacing: -0.04em !important; }
+  body[data-theme="v13"] .serif span[style*="italic"] { font-style: normal !important; font-weight: 400 !important; }
+  body[data-theme="v13"] .serif em, body[data-theme="v13"] .serif i { font-style: normal; color: var(--accent); font-weight: 400; }
+  body[data-theme="v13"] .mono {
+    font-family: 'Geist Mono', ui-monospace, 'SFMono-Regular', Consolas, monospace;
+    letter-spacing: 0; font-size: 0.93em;
+  }
+  body[data-theme="v13"] .micro {
+    font-family: 'Geist Mono', monospace;
+    font-size: 11px; font-weight: 400; letter-spacing: 0.02em;
+    text-transform: uppercase; color: var(--ink-muted);
+  }
+  body[data-theme="v13"] .topbar {
+    height: 48px; padding: 0 16px; gap: 12px;
+    border-bottom: 1px solid var(--line-strong);
+    background: var(--paper);
+  }
+  body[data-theme="v13"] .wordmark {
+    font-family: 'Geist', sans-serif;
+    font-size: 14px; font-weight: 600; letter-spacing: -0.03em;
+    color: var(--ink);
+    display: inline-flex; align-items: center; gap: 4px;
+  }
+  body[data-theme="v13"] .wordmark .ampersand { color: var(--accent); font-weight: 400; margin-left: 1px; }
+  body[data-theme="v13"] .shell { grid-template-columns: 232px 1fr 380px; }
+  body[data-theme="v13"] .shell.no-chat { grid-template-columns: 232px 1fr; }
+  body[data-theme="v13"] .card {
+    border-radius: 6px;
+    border: 1px solid var(--line-strong);
+    background: var(--paper);
+    box-shadow: var(--shadow-card);
+  }
+  body[data-theme="v13"] .pill {
+    height: 20px; padding: 0 7px; border-radius: 100px;
+    font-family: 'Geist Mono', monospace; font-size: 11px; font-weight: 400; letter-spacing: 0;
+    background: var(--cream-2); color: var(--ink-muted); border: 1px solid var(--line-strong);
+    text-transform: uppercase;
+  }
+  body[data-theme="v13"] .pill.mustard {
+    background: rgba(56,139,253,0.15); color: var(--accent); border-color: rgba(56,139,253,0.4);
+  }
+  body[data-theme="v13"] .pill.sage {
+    background: rgba(63,185,80,0.15); color: var(--sage); border-color: rgba(63,185,80,0.4);
+  }
+  body[data-theme="v13"] .pill.brick {
+    background: rgba(248,81,73,0.15); color: var(--brick); border-color: rgba(248,81,73,0.4);
+  }
+  body[data-theme="v13"] .pill.ghost { background: transparent; border-color: transparent; }
+  body[data-theme="v13"] .btn {
+    height: 32px; padding: 0 12px; border-radius: 6px;
+    font-family: 'Geist', sans-serif; font-weight: 500; font-size: 14px; letter-spacing: -0.006em;
+    background: var(--cream-2); color: var(--ink); border: 1px solid var(--line-strong);
+    transition: background 100ms ease, border-color 100ms ease;
+  }
+  body[data-theme="v13"] .btn:hover { background: var(--cream); border-color: #8b949e; }
+  body[data-theme="v13"] .btn.primary {
+    background: var(--accent); color: var(--on-accent); border-color: rgba(240,246,252,0.1);
+    font-weight: 500;
+  }
+  body[data-theme="v13"] .btn.primary:hover { background: var(--accent-dim); }
+  body[data-theme="v13"] .btn.ghost { background: transparent; border-color: transparent; color: var(--ink-muted); }
+  body[data-theme="v13"] .btn.ghost:hover { background: var(--cream-2); color: var(--ink); }
+  body[data-theme="v13"] .btn.danger { color: var(--brick); border-color: rgba(248,81,73,0.4); }
+  body[data-theme="v13"] .btn.lg { height: 40px; padding: 0 16px; font-size: 15px; }
+  body[data-theme="v13"] .btn.sm { height: 26px; padding: 0 10px; font-size: 12px; }
+  body[data-theme="v13"] .placeholder-bg {
+    background-image: radial-gradient(#21262d 1px, transparent 1px);
+    background-size: 8px 8px; background-color: var(--cream);
+  }
+  body[data-theme="v13"] .roadmap-connectors path {
+    stroke: var(--line-strong); stroke-width: 1; stroke-dasharray: 2 4; opacity: 1;
+  }
+  body[data-theme="v13"] .roadmap-connectors path.dim { opacity: 0.25; }
+  body[data-theme="v13"] .roadmap-connectors path.hi {
+    stroke: var(--accent); stroke-width: 1.5; stroke-dasharray: none; opacity: 1;
+  }
+  body[data-theme="v13"] [style*="var(--mustard)"][style*="border-radius: 50%"] { color: var(--on-accent) !important; }
+  body[data-theme="v13"] [style*="var(--sage)"][style*="border-radius: 50%"] { color: var(--canvas) !important; }
+  body[data-theme="v13"] div[style*="background: var(--sage)"][style*="width: 4"],
+  body[data-theme="v13"] div[style*="background: var(--mustard)"][style*="width: 4"] { background: var(--accent) !important; }
+  body[data-theme="v13"] textarea, body[data-theme="v13"] input[type="text"] {
+    border-radius: 6px !important;
+    background: var(--cream-2) !important;
+    border-color: var(--line-strong) !important;
+    color: var(--ink) !important;
+    font-family: 'Geist Mono', monospace !important;
+  }
+  body[data-theme="v13"] textarea:focus, body[data-theme="v13"] input[type="text"]:focus {
+    outline: 2px solid var(--accent) !important; outline-offset: -1px !important;
+    border-color: var(--accent) !important;
+  }
+  body[data-theme="v13"] ::-webkit-scrollbar { width: 8px; height: 8px; }
+  body[data-theme="v13"] ::-webkit-scrollbar-track { background: var(--canvas); }
+  body[data-theme="v13"] ::-webkit-scrollbar-thumb {
+    background: #30363d; border-radius: 100px; border: 2px solid var(--canvas);
+  }
+  body[data-theme="v13"] ::-webkit-scrollbar-thumb:hover { background: #484f58; }
+
+  /* ==========================================================================
+     V14 — V2 palette × Geist Mono everything
+     Same Factory cool-gray colors as V2. Pure mono typeface throughout.
+     ========================================================================== */
+  body[data-theme="v14"] {
+    --color-code-orange: #7c3aed;
+    --canvas: #eeeeee;
+    --paper: #fafafa;
+    --cream: #eeeeee;
+    --cream-2: #e4e0dd;
+    --ink: #020202;
+    --ink-muted: #3d3a39;
+    --ink-soft: #a49d9a;
+    --line: #b8b3b0;
+    --line-strong: #a49d9a;
+    --mustard: #7c3aed;
+    --mustard-ink: #7c3aed;
+    --mustard-soft: #fafafa;
+    --sage: #020202;
+    --sage-ink: #020202;
+    --sage-soft: #fafafa;
+    --brick: #020202;
+    --brick-soft: #eeeeee;
+    --shadow-card: none;
+    --shadow-pop: none;
+    background: var(--canvas);
+    font-family: 'Geist Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+    color: var(--ink);
+    font-size: 13px;
+    line-height: 1.55;
+    letter-spacing: -0.02em;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+  body[data-theme="v14"] .serif {
+    font-family: 'Geist Mono', monospace;
+    font-weight: 600; letter-spacing: -0.04em;
+  }
+  body[data-theme="v14"] .serif[style*="font-size: 30"] { font-size: 36px !important; line-height: 1.1 !important; letter-spacing: -0.04em !important; }
+  body[data-theme="v14"] .serif[style*="font-size: 22"] { font-size: 22px !important; line-height: 1.2 !important; letter-spacing: -0.03em !important; }
+  body[data-theme="v14"] .serif[style*="font-size: 44"] { font-size: 44px !important; line-height: 1.05 !important; letter-spacing: -0.04em !important; }
+  body[data-theme="v14"] .serif span[style*="italic"] { font-style: normal !important; font-weight: 400 !important; color: var(--color-code-orange) !important; }
+  body[data-theme="v14"] .serif em, body[data-theme="v14"] .serif i { font-style: normal; color: var(--color-code-orange); font-weight: 600; }
+  body[data-theme="v14"] .mono { font-family: 'Geist Mono', monospace; letter-spacing: -0.02em; }
+  body[data-theme="v14"] .micro {
+    font-family: 'Geist Mono', monospace;
+    font-size: 11px; font-weight: 400; letter-spacing: 0.02em;
+    text-transform: uppercase; color: var(--ink-muted);
+  }
+  body[data-theme="v14"] .topbar { height: 52px; padding: 0 20px; gap: 16px; border-radius: 0; }
+  body[data-theme="v14"] .wordmark {
+    font-family: 'Geist Mono', monospace;
+    font-size: 13px; font-weight: 500; letter-spacing: 0.02em;
+    text-transform: uppercase; color: var(--ink);
+  }
+  body[data-theme="v14"] .wordmark .ampersand { font-style: normal; color: var(--color-code-orange); margin-left: 1px; }
+  body[data-theme="v14"] .shell { grid-template-columns: 232px 1fr 380px; }
+  body[data-theme="v14"] .shell.no-chat { grid-template-columns: 232px 1fr; }
+  body[data-theme="v14"] .card { border-radius: 6px; border: 1px solid var(--line); background: var(--paper); }
+  body[data-theme="v14"] .pill {
+    height: 22px; padding: 0 8px; border-radius: 4px;
+    font-family: 'Geist Mono', monospace; font-size: 11px; font-weight: 400; letter-spacing: -0.01em;
+    background: transparent; color: var(--ink-muted); border: 1px solid var(--line); text-transform: uppercase;
+  }
+  body[data-theme="v14"] .pill.mustard { background: transparent; color: var(--color-code-orange); border-color: var(--color-code-orange); }
+  body[data-theme="v14"] .pill.sage    { background: transparent; color: var(--ink); border-color: var(--ink); }
+  body[data-theme="v14"] .pill.brick   { background: transparent; color: var(--ink); border-color: var(--ink); }
+  body[data-theme="v14"] .pill.ghost   { background: transparent; border-color: transparent; }
+  body[data-theme="v14"] .btn {
+    height: 32px; padding: 0 12px; border-radius: 4px;
+    font-family: 'Geist Mono', monospace; font-weight: 400; font-size: 12px; letter-spacing: -0.01em;
+    background: var(--paper); color: var(--ink); border: 1px solid var(--ink-soft);
+    transition: background 100ms ease;
+  }
+  body[data-theme="v14"] .btn:hover { background: var(--cream-2); }
+  body[data-theme="v14"] .btn.primary { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+  body[data-theme="v14"] .btn.primary:hover { background: var(--ink-muted); border-color: var(--ink-muted); }
+  body[data-theme="v14"] .btn.ghost { background: transparent; border-color: transparent; color: var(--ink-muted); }
+  body[data-theme="v14"] .btn.ghost:hover { background: var(--cream-2); color: var(--ink); }
+  body[data-theme="v14"] .btn.danger { color: var(--ink); border-color: var(--ink); }
+  body[data-theme="v14"] .btn.lg { height: 40px; padding: 0 16px; font-size: 14px; border-radius: 4px; }
+  body[data-theme="v14"] .btn.sm { height: 26px; padding: 0 10px; font-size: 11px; border-radius: 4px; }
+  body[data-theme="v14"] .placeholder-bg {
+    background-image: radial-gradient(#b8b3b0 1px, transparent 1px);
+    background-size: 8px 8px; background-color: var(--paper);
+  }
+  body[data-theme="v14"] .roadmap-connectors path { stroke: #b8b3b0; stroke-width: 1; stroke-dasharray: 2 4; }
+  body[data-theme="v14"] .roadmap-connectors path.dim { opacity: 0.35; }
+  body[data-theme="v14"] .roadmap-connectors path.hi { stroke: var(--color-code-orange); stroke-width: 1.5; stroke-dasharray: none; opacity: 1; }
+  body[data-theme="v14"] [style*="var(--mustard)"][style*="border-radius: 50%"] { color: #fafafa !important; }
+  body[data-theme="v14"] div[style*="background: var(--sage)"][style*="width: 4"],
+  body[data-theme="v14"] div[style*="background: var(--mustard)"][style*="width: 4"] { background: var(--color-code-orange) !important; }
+  body[data-theme="v14"] textarea, body[data-theme="v14"] input[type="text"] {
+    border-radius: 4px !important;
+    font-family: 'Geist Mono', monospace !important;
+  }
+  body[data-theme="v14"] ::-webkit-scrollbar-thumb { background: #b8b3b0; border-radius: 0; border: 2px solid var(--canvas); }
+  body[data-theme="v14"] ::-webkit-scrollbar-thumb:hover { background: #a49d9a; }
+
+  /* ==========================================================================
+     V15 — V2 system · Dark mono · Muted accents
+     V2 structure (Geist + Geist Mono, 6px cards, 4px buttons) on a dark canvas.
+     Near-black bg · near-white text · muted functional colors only.
+     ========================================================================== */
+  body[data-theme="v15"] {
+    --canvas:      #f0f0f0;
+    --paper:       #fafafa;
+    --cream:       #f0f0f0;
+    --cream-2:     #e8e8e8;
+    --ink:         #111111;
+    --ink-muted:   #777777;
+    --ink-soft:    #aaaaaa;
+    --line:        #dedede;
+    --line-strong: #cccccc;
+    --color-code-orange: #999999;
+    --mustard:           #999999;
+    --mustard-ink:       #999999;
+    --mustard-soft:      #fafafa;
+    --sage:              #4a8c5c;
+    --sage-ink:          #4a8c5c;
+    --sage-soft:         #fafafa;
+    --brick:             #b05858;
+    --brick-soft:        #fafafa;
+    --shadow-card:       none;
+    --shadow-pop:        0 4px 16px rgba(0,0,0,0.12);
+    background: var(--canvas);
+    font-family: 'Geist Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+    color: var(--ink);
+    font-size: 13px;
+    line-height: 1.55;
+    letter-spacing: -0.02em;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+  body[data-theme="v15"] .serif { font-family: 'Geist Mono', monospace; font-weight: 600; letter-spacing: -0.04em; }
+  body[data-theme="v15"] .serif[style*="font-size: 30"] { font-size: 48px !important; line-height: 1.05 !important; letter-spacing: -0.048em !important; }
+  body[data-theme="v15"] .serif[style*="font-size: 22"] { font-size: 24px !important; line-height: 1.2 !important; letter-spacing: -0.03em !important; }
+  body[data-theme="v15"] .serif[style*="font-size: 44"] { font-size: 60px !important; line-height: 1 !important; letter-spacing: -0.048em !important; }
+  body[data-theme="v15"] .serif span[style*="italic"] { font-style: normal !important; font-weight: 400 !important; color: var(--color-code-orange) !important; letter-spacing: -0.04em; }
+  body[data-theme="v15"] .serif em, body[data-theme="v15"] .serif i { font-style: normal; color: var(--ink-muted); font-weight: 600; }
+  body[data-theme="v15"] .mono { font-family: 'Geist Mono', monospace; letter-spacing: -0.02em; }
+  body[data-theme="v15"] .micro { font-family: 'Geist Mono', monospace; font-size: 11px; font-weight: 400; letter-spacing: 0.02em; text-transform: uppercase; color: var(--ink-muted); }
+  body[data-theme="v15"] .topbar { height: 52px; padding: 0 20px; gap: 16px; border-radius: 0; border-bottom: 1px solid var(--line-strong); background: var(--canvas); }
+  body[data-theme="v15"] .wordmark { font-family: 'Geist Mono', monospace; font-size: 13px; font-weight: 500; letter-spacing: 0.02em; text-transform: uppercase; color: var(--ink); }
+  body[data-theme="v15"] .wordmark .ampersand { font-style: normal; color: var(--color-code-orange); margin-left: 1px; }
+  body[data-theme="v15"] .shell { grid-template-columns: 232px 1fr 380px; }
+  body[data-theme="v15"] .shell.no-chat { grid-template-columns: 232px 1fr; }
+  body[data-theme="v15"] .card { border-radius: 6px; border: 1px solid var(--line-strong); background: var(--paper); box-shadow: var(--shadow-card); }
+  body[data-theme="v15"] .pill {
+    height: 22px; padding: 0 8px; border-radius: 4px;
+    font-family: 'Geist Mono', monospace; font-size: 11px; font-weight: 400; letter-spacing: -0.01em;
+    background: transparent; color: var(--ink-muted); border: 1px solid var(--line-strong); text-transform: uppercase;
+  }
+  body[data-theme="v15"] .pill.mustard { background: rgba(0,0,0,0.06); color: var(--color-code-orange); border-color: rgba(0,0,0,0.2); }
+  body[data-theme="v15"] .pill.sage    { background: rgba(74,140,92,0.1);  color: var(--sage);             border-color: rgba(74,140,92,0.35); }
+  body[data-theme="v15"] .pill.brick   { background: rgba(176,88,88,0.1);  color: var(--brick);            border-color: rgba(176,88,88,0.35); }
+  body[data-theme="v15"] .pill.ghost   { background: transparent; border-color: transparent; }
+  body[data-theme="v15"] .btn {
+    height: 32px; padding: 0 12px; border-radius: 4px;
+    font-family: 'Geist Mono', monospace; font-weight: 400; font-size: 12px; letter-spacing: -0.01em;
+    background: var(--cream-2); color: var(--ink); border: 1px solid var(--line-strong);
+    transition: background 100ms ease;
+  }
+  body[data-theme="v15"] .btn:hover { background: var(--cream-2); }
+  body[data-theme="v15"] .btn.primary { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+  body[data-theme="v15"] .btn.primary:hover { background: #333333; border-color: #333333; }
+  body[data-theme="v15"] .btn.ghost { background: transparent; border-color: transparent; color: var(--ink-muted); }
+  body[data-theme="v15"] .btn.ghost:hover { background: var(--cream-2); color: var(--ink); }
+  body[data-theme="v15"] .btn.danger { color: var(--brick); border-color: rgba(196,112,112,0.4); }
+  body[data-theme="v15"] .btn.lg { height: 40px; padding: 0 16px; font-size: 16px; border-radius: 4px; }
+  body[data-theme="v15"] .btn.sm { height: 26px; padding: 0 10px; font-size: 13px; border-radius: 4px; }
+  body[data-theme="v15"] .placeholder-bg {
+    background-image: radial-gradient(#333333 1px, transparent 1px);
+    background-size: 8px 8px; background-color: var(--cream);
+  }
+  body[data-theme="v15"] .roadmap-connectors path { stroke: var(--line-strong); stroke-width: 1; stroke-dasharray: 2 4; opacity: 1; }
+  body[data-theme="v15"] .roadmap-connectors path.dim { opacity: 0.2; }
+  body[data-theme="v15"] .roadmap-connectors path.hi { stroke: var(--color-code-orange); stroke-width: 1.5; stroke-dasharray: none; opacity: 1; }
+  body[data-theme="v15"] [style*="var(--mustard)"][style*="border-radius: 50%"] { color: var(--canvas) !important; }
+  body[data-theme="v15"] [style*="var(--sage)"][style*="border-radius: 50%"] { color: var(--canvas) !important; }
+  body[data-theme="v15"] div[style*="background: var(--sage)"][style*="width: 4"],
+  body[data-theme="v15"] div[style*="background: var(--mustard)"][style*="width: 4"] { background: var(--color-code-orange) !important; }
+  body[data-theme="v15"] textarea, body[data-theme="v15"] input[type="text"] {
+    border-radius: 4px !important; background: var(--cream-2) !important;
+    border-color: var(--line-strong) !important; color: var(--ink) !important;
+  }
+  body[data-theme="v15"] ::-webkit-scrollbar-thumb { background: var(--line-strong); border-radius: 0; border: 2px solid var(--canvas); }
+  body[data-theme="v15"] ::-webkit-scrollbar-thumb:hover { background: var(--ink-muted); }
+</style>
+</head>
+<body data-theme="v15">
+<div id="app" data-screen-label="00 THEFT AI"></div>
+
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" crossorigin="anonymous"></script>
+
+<script type="text/babel" data-presets="react">
+// ============================================================================
+// icons.jsx — Lucide-style line icons. 1.5 stroke, currentColor.
+// ============================================================================
+const Icon = ({ size = 16, children, style, className }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none"
+       stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"
+       style={{ flexShrink: 0, ...style }} className={className}>
+    {children}
+  </svg>
+);
+
+const IconHome = (p) => <Icon {...p}><path d="M3 11.5 12 4l9 7.5"/><path d="M5 10v10h14V10"/></Icon>;
+const IconMap = (p) => <Icon {...p}><path d="M9 4 3 6v14l6-2 6 2 6-2V4l-6 2-6-2Z"/><path d="M9 4v14"/><path d="M15 6v14"/></Icon>;
+const IconList = (p) => <Icon {...p}><path d="M8 6h13"/><path d="M8 12h13"/><path d="M8 18h13"/><path d="M3 6h.01"/><path d="M3 12h.01"/><path d="M3 18h.01"/></Icon>;
+const IconBell = (p) => <Icon {...p}><path d="M6 8a6 6 0 1 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></Icon>;
+const IconBook = (p) => <Icon {...p}><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20V3H6.5A2.5 2.5 0 0 0 4 5.5v14Z"/><path d="M4 19.5V21h14"/></Icon>;
+const IconChevron = (p) => <Icon {...p}><path d="m9 6 6 6-6 6"/></Icon>;
+const IconChevronDown = (p) => <Icon {...p}><path d="m6 9 6 6 6-6"/></Icon>;
+const IconChevronLeft = (p) => <Icon {...p}><path d="m15 6-6 6 6 6"/></Icon>;
+const IconArrowRight = (p) => <Icon {...p}><path d="M5 12h14"/><path d="m13 5 7 7-7 7"/></Icon>;
+const IconArrowUp = (p) => <Icon {...p}><path d="M5 12h14"/><path d="m13 19 7-7-7-7"/></Icon>;
+const IconCheck = (p) => <Icon {...p}><path d="M5 12.5 10 17l9-11"/></Icon>;
+const IconX = (p) => <Icon {...p}><path d="M18 6 6 18"/><path d="m6 6 12 12"/></Icon>;
+const IconPlus = (p) => <Icon {...p}><path d="M12 5v14"/><path d="M5 12h14"/></Icon>;
+const IconMore = (p) => <Icon {...p}><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></Icon>;
+const IconLock = (p) => <Icon {...p}><rect x="4.5" y="11" width="15" height="10" rx="2"/><path d="M8 11V7a4 4 0 1 1 8 0v4"/></Icon>;
+const IconSearch = (p) => <Icon {...p}><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></Icon>;
+const IconPaperclip = (p) => <Icon {...p}><path d="M20 12.5 12.5 20a5.5 5.5 0 1 1-7.78-7.78l8.49-8.49a3.5 3.5 0 0 1 5 5L9.7 17.24a1.5 1.5 0 0 1-2.12-2.12l7.07-7.07"/></Icon>;
+const IconExternal = (p) => <Icon {...p}><path d="M15 3h6v6"/><path d="m10 14 11-11"/><path d="M21 14v7H3V3h7"/></Icon>;
+const IconRefresh = (p) => <Icon {...p}><path d="M3 12a9 9 0 0 1 15.5-6.36L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-15.5 6.36L3 16"/><path d="M3 21v-5h5"/></Icon>;
+const IconClock = (p) => <Icon {...p}><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></Icon>;
+const IconUser = (p) => <Icon {...p}><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></Icon>;
+const IconSpark = (p) => <Icon {...p}><path d="M12 3v3"/><path d="M12 18v3"/><path d="m5.6 5.6 2.1 2.1"/><path d="m16.3 16.3 2.1 2.1"/><path d="M3 12h3"/><path d="M18 12h3"/><path d="m5.6 18.4 2.1-2.1"/><path d="m16.3 7.7 2.1-2.1"/></Icon>;
+const IconDot = ({ size = 8, color = 'currentColor' }) => (
+  <span style={{ display: 'inline-block', width: size, height: size, borderRadius: '50%', background: color }} />
+);
+const IconStop = (p) => <Icon {...p}><rect x="6.5" y="6.5" width="11" height="11" rx="1.5"/></Icon>;
+const IconCircle = (p) => <Icon {...p}><circle cx="12" cy="12" r="8"/></Icon>;
+const IconFile = (p) => <Icon {...p}><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M14 3v6h6"/></Icon>;
+
+const DeptEngineering = (p) => <Icon {...p}><rect x="3" y="5" width="18" height="11" rx="1.5"/><path d="M2 19h20"/><path d="M9 12h6"/></Icon>;
+const DeptDesign = (p) => <Icon {...p}><path d="M3 21h4l11-11-4-4L3 17v4Z"/><path d="m13 6 4 4"/></Icon>;
+const DeptMarketing = (p) => <Icon {...p}><path d="m3 11 14-6v14L3 13Z"/><path d="M7 13v5a2 2 0 0 0 4 0v-3"/><path d="M17 9v6"/></Icon>;
+const DeptSales = (p) => <Icon {...p}><path d="m6 12 4-4 3 3 4-4 2 2"/><path d="M12 19V8"/><path d="M5 19h14"/></Icon>;
+const DeptOps = (p) => <Icon {...p}><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 0 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1A2 2 0 0 1 4.3 17l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 0 1 0-4h.1A1.7 1.7 0 0 0 4.6 9 1.7 1.7 0 0 0 4.3 7l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 0 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 0 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 0 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1Z"/></Icon>;
+const DeptFinance = (p) => <Icon {...p}><path d="M12 2v20"/><path d="M17 6H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></Icon>;
+const DeptLegal = (p) => <Icon {...p}><path d="M12 3v18"/><path d="M5 21h14"/><path d="m4 9 4-4 4 4"/><path d="m12 9 4-4 4 4"/><path d="M4 9c0 2 2 4 4 4s4-2 4-4"/><path d="M12 9c0 2 2 4 4 4s4-2 4-4"/></Icon>;
+const DeptSupport = (p) => <Icon {...p}><path d="M3 18v-6a9 9 0 0 1 18 0v6"/><path d="M21 19a2 2 0 0 1-2 2h-1v-6h1a2 2 0 0 1 2 2Z"/><path d="M3 19a2 2 0 0 0 2 2h1v-6H5a2 2 0 0 0-2 2Z"/></Icon>;
+
+const DEPT_ICON = {
+  engineering: DeptEngineering, design: DeptDesign, marketing: DeptMarketing, sales: DeptSales,
+  ops: DeptOps, finance: DeptFinance, legal: DeptLegal, support: DeptSupport,
+};
+
+// ============================================================================
+// data.jsx — Departments, agents, stages, capability tree, approvals
+// ============================================================================
+const DEPARTMENTS = [
+  { id: 'engineering', name: 'Engineering', short: 'Eng', desc: 'Builds, deploys, and maintains the product.' },
+  { id: 'design', name: 'Design', short: 'Des', desc: 'Brand, product UI, and visual systems.' },
+  { id: 'marketing', name: 'Marketing', short: 'Mkt', desc: 'Demand, distribution, and growth experiments.' },
+  { id: 'sales', name: 'Sales', short: 'Sls', desc: 'Pipeline, outreach, and closing.' },
+  { id: 'ops', name: 'Operations', short: 'Ops', desc: 'Stack, vendors, processes, and tooling.' },
+  { id: 'finance', name: 'Finance', short: 'Fin', desc: 'Cash, invoices, runway, and reporting.' },
+  { id: 'legal', name: 'Legal', short: 'Lgl', desc: 'Contracts, entity, IP, and compliance.' },
+  { id: 'support', name: 'Support', short: 'Sup', desc: 'Customer help and retention.' },
+];
+const DEPT_BY_ID = Object.fromEntries(DEPARTMENTS.map(d => [d.id, d]));
+
+const STAGES = [
+  { id: 'idea', name: 'Idea' }, { id: 'initial', name: 'Initial' },
+  { id: 'identity', name: 'Identity' }, { id: 'build', name: 'Build' },
+  { id: 'gtm', name: 'GTM' }, { id: 'launch', name: 'Launch' },
+  { id: 'scale', name: 'Scale' }, { id: 'mature', name: 'Mature' },
+];
+
+const NODES = [
+  { id: 'idea.shape',     stage: 'idea',     dept: 'ops',         title: 'Idea shaped',           status: 'complete',    needs: [] },
+  { id: 'idea.icp',       stage: 'idea',     dept: 'marketing',   title: 'ICP defined',           status: 'complete',    needs: ['idea.shape'] },
+  { id: 'idea.problem',   stage: 'idea',     dept: 'marketing',   title: 'Problem validated',     status: 'complete',    needs: ['idea.icp'] },
+  { id: 'init.entity',    stage: 'initial',  dept: 'legal',       title: 'Entity filed',          status: 'complete',    needs: ['idea.shape'] },
+  { id: 'init.bank',      stage: 'initial',  dept: 'finance',     title: 'Bank account opened',   status: 'complete',    needs: ['init.entity'] },
+  { id: 'init.stack',     stage: 'initial',  dept: 'ops',         title: 'Core tools set up',     status: 'complete',    needs: ['init.entity'] },
+  { id: 'init.domain',    stage: 'initial',  dept: 'ops',         title: 'Domain + email',        status: 'in_progress', needs: ['init.entity'] },
+  { id: 'id.name',        stage: 'identity', dept: 'marketing',   title: 'Name + positioning',    status: 'complete',    needs: ['idea.problem'] },
+  { id: 'id.brand',       stage: 'identity', dept: 'design',      title: 'Brand identity',        status: 'in_progress', needs: ['id.name'] },
+  { id: 'id.voice',       stage: 'identity', dept: 'marketing',   title: 'Voice + messaging',     status: 'in_progress', needs: ['id.name'] },
+  { id: 'id.site',        stage: 'identity', dept: 'design',      title: 'Landing page live',     status: 'available',   needs: ['id.brand', 'init.domain'] },
+  { id: 'build.repo',     stage: 'build',    dept: 'engineering', title: 'Repo scaffolded',       status: 'complete',    needs: ['init.stack'] },
+  { id: 'build.auth',     stage: 'build',    dept: 'engineering', title: 'Auth + accounts',       status: 'complete',    needs: ['build.repo'] },
+  { id: 'build.core',     stage: 'build',    dept: 'engineering', title: 'Core product flow',     status: 'in_progress', needs: ['build.auth'] },
+  { id: 'build.billing',  stage: 'build',    dept: 'engineering', title: 'Billing integrated',    status: 'available',   needs: ['build.core'] },
+  { id: 'build.dash',     stage: 'build',    dept: 'engineering', title: 'Customer dashboard',    status: 'available',   needs: ['build.core'] },
+  { id: 'build.deploy',   stage: 'build',    dept: 'ops',         title: 'Production deploy',     status: 'locked',      needs: ['build.billing', 'build.dash'] },
+  { id: 'build.legal',    stage: 'build',    dept: 'legal',       title: 'ToS + Privacy',         status: 'available',   needs: ['id.name'] },
+  { id: 'gtm.waitlist',   stage: 'gtm',      dept: 'marketing',   title: 'Waitlist',              status: 'in_progress', needs: ['id.site'] },
+  { id: 'gtm.content',    stage: 'gtm',      dept: 'marketing',   title: 'Content engine',        status: 'available',   needs: ['id.voice'] },
+  { id: 'gtm.outbound',   stage: 'gtm',      dept: 'sales',       title: 'Outbound playbook',     status: 'available',   needs: ['id.voice'] },
+  { id: 'gtm.pricing',    stage: 'gtm',      dept: 'finance',     title: 'Pricing + plans',       status: 'available',   needs: ['id.name'] },
+  { id: 'lch.beta',       stage: 'launch',   dept: 'sales',       title: 'Private beta — 10 users', status: 'locked',    needs: ['build.deploy', 'gtm.waitlist'] },
+  { id: 'lch.public',     stage: 'launch',   dept: 'marketing',   title: 'Public launch',         status: 'locked',      needs: ['lch.beta'] },
+  { id: 'lch.first',      stage: 'launch',   dept: 'sales',       title: 'First paying customer', status: 'locked',      needs: ['build.billing', 'gtm.pricing'] },
+  { id: 'lch.support',    stage: 'launch',   dept: 'support',     title: 'Support inbox set up',  status: 'available',   needs: ['init.domain'] },
+  { id: 'scl.hire',       stage: 'scale',    dept: 'ops',         title: 'First contractor',      status: 'locked',      needs: ['lch.first'] },
+  { id: 'scl.10k',        stage: 'scale',    dept: 'finance',     title: '$10K MRR',              status: 'locked',      needs: ['lch.public'] },
+  { id: 'scl.refer',      stage: 'scale',    dept: 'marketing',   title: 'Referral loop',         status: 'locked',      needs: ['lch.public'] },
+  { id: 'scl.partners',   stage: 'scale',    dept: 'sales',       title: 'Partner channel',       status: 'locked',      needs: ['lch.public'] },
+  { id: 'mat.50k',        stage: 'mature',   dept: 'finance',     title: '$50K MRR',              status: 'locked',      needs: ['scl.10k'] },
+  { id: 'mat.team',       stage: 'mature',   dept: 'ops',         title: 'First full-time hire',  status: 'locked',      needs: ['scl.10k'] },
+  { id: 'mat.docs',       stage: 'mature',   dept: 'support',     title: 'Help center + docs',    status: 'locked',      needs: ['scl.10k'] },
+];
+const NODE_BY_ID = Object.fromEntries(NODES.map(n => [n.id, n]));
+
+const NODE_DETAILS = {
+  'id.brand': {
+    summary: 'Lock in a visual identity — logotype, color, type, and a one-page mini-guide. Once locked the brand becomes the default for the landing page, deck, and any artifact agents publish.',
+    checklist: [
+      { title: 'Logotype direction picked', status: 'Done' },
+      { title: 'Color + type system drafted', status: 'Waiting' },
+      { title: 'Mini brand guide PDF', status: 'Launch' },
+    ],
+    unlocks: ['id.site', 'gtm.content', 'gtm.outbound'],
+  },
+  'build.core': {
+    summary: 'Wire the primary customer-facing workflow end-to-end on the staging build. Agent will scaffold routes, model the core entities, and produce a working stub flow ready for design polish.',
+    checklist: [
+      { title: 'Spec drafted from positioning + ICP', status: 'Done' },
+      { title: 'Scaffold routes and models', status: 'Waiting' },
+      { title: 'Stub flow walkthrough', status: 'Launch' },
+    ],
+    unlocks: ['build.billing', 'build.dash'],
+  },
+  'gtm.content': {
+    summary: 'Spin up a content engine: weekly newsletter, a 3-post launch series, and a topic backlog seeded from ICP pain points. Engineering agent wires the publishing surface, Marketing writes the copy.',
+    checklist: [
+      { title: 'Editorial calendar (8 weeks)', status: 'Waiting' },
+      { title: 'Newsletter signup wired', status: 'Waiting' },
+      { title: 'First post drafted + scheduled', status: 'Launch' },
+    ],
+    unlocks: ['scl.refer'],
+  },
+};
+const DEFAULT_DETAIL = {
+  summary: 'Cofounder has scoped this capability. The lead department agent can run it end-to-end. Review the checklist below, then launch.',
+  checklist: [
+    { title: 'Agent scopes work + drafts plan', status: 'Waiting' },
+    { title: 'Approval checkpoint if required', status: 'Waiting' },
+    { title: 'Ship + log artifact', status: 'Launch' },
+  ],
+  unlocks: [],
+};
+
+const NAV = [
+  { id: 'roadmap',   label: 'Roadmap',      Icon: IconMap,  badge: null },
+  { id: 'departments', label: 'Departments', Icon: IconList, badge: null, isHeader: false },
+  { id: 'tasks',     label: 'Tasks',        Icon: IconHome, badge: '4' },
+  { id: 'approvals', label: 'Approvals',    Icon: IconBell, badge: '3' },
+  { id: 'library',   label: 'Library',      Icon: IconBook, badge: null },
+];
+
+const APPROVALS = [
+  { id: 'apr1', type: 'SEND EMAIL', state: 'pending', agent: { dept: 'marketing', name: 'Marketing' }, when: '2 min ago',
+    title: 'Send launch email to 2,418 waitlist subscribers',
+    body: 'Subject: "We\'re opening the doors." Body uses approved positioning and the v3 hero image. Send Tuesday 8am ET — opens have been highest in that window.',
+    task: 'Public launch comms' },
+  { id: 'apr2', type: 'SPEND', state: 'pending', agent: { dept: 'ops', name: 'Operations' }, when: '14 min ago',
+    title: 'Subscribe to Linear (Pro, $8/seat/mo, 2 seats)',
+    body: 'Replaces the spreadsheet roadmap. Cost: $16/mo. Annual: $172.80. Within Q4 ops budget. Cancellation: monthly.',
+    task: 'Project tracking tool' },
+  { id: 'apr3', type: 'DEPLOY', state: 'pending', agent: { dept: 'engineering', name: 'Engineering' }, when: '38 min ago',
+    title: 'Deploy v0.4.1 to production (12 commits since v0.4.0)',
+    body: 'Includes billing fixes, dashboard polish, and a Stripe webhook upgrade. Staging green on all 84 tests. Zero-downtime rollout, takes ~3 min.',
+    task: 'Production deploy' },
+  { id: 'apr4', type: 'SIGN', state: 'pending', agent: { dept: 'legal', name: 'Legal' }, when: '1 hr ago',
+    title: 'Sign Stripe terms of service (updated 2026-04-15)',
+    body: 'Required to enable payouts. Legal agent reviewed diff: 3 substantive changes, none flagged as concerning. See annotated PDF.',
+    task: 'Billing integrated' },
+  { id: 'apr5', type: 'PUBLISH', state: 'approved', agent: { dept: 'marketing', name: 'Marketing' }, when: 'Yesterday',
+    title: 'Publish the v3 landing page',
+    body: 'Approved at 4:12pm. Page is live at theft.studio. Indexed by Google within 90 min.',
+    task: 'Landing page live' },
+  { id: 'apr6', type: 'HIRE', state: 'rejected', agent: { dept: 'ops', name: 'Operations' }, when: 'Yesterday',
+    title: 'Engage Slate Type Co. for custom logotype ($2,400)',
+    body: 'Rejected — too early. Marked to revisit after $10K MRR.',
+    task: 'Brand identity' },
+];
+
+const ENG_PROJECTS = [
+  { id: 'p1', name: 'theft-app',       status: 'LIVE',      branch: 'main',          desc: 'Customer-facing product. 14 routes, 22 components.', tone: 'mustard' },
+  { id: 'p2', name: 'theft-marketing', status: 'LIVE',      branch: 'main',          desc: 'Landing page + blog. Astro + Vercel.', tone: 'mustard' },
+  { id: 'p3', name: 'theft-billing',   status: 'PENDING',   branch: 'feat/stripe',   desc: 'Stripe integration in review. Waiting on approval.', tone: 'ink' },
+  { id: 'p4', name: 'theft-internal',  status: 'NOT READY', branch: 'main',          desc: 'Internal admin tools. Stubs only.', tone: 'ghost' },
+];
+const ENG_ARTIFACTS = [
+  { id: 'a1', name: 'core-flow.mdx',            kind: 'spec',  when: '14 min ago' },
+  { id: 'a2', name: 'billing-architecture.png', kind: 'image', when: '1 hr ago' },
+  { id: 'a3', name: 'db-schema.sql',            kind: 'code',  when: '3 hr ago' },
+  { id: 'a4', name: 'pr-#42.diff',              kind: 'diff',  when: 'Yesterday' },
+  { id: 'a5', name: 'auth-test-report.md',      kind: 'spec',  when: 'Yesterday' },
+  { id: 'a6', name: 'webhook-endpoint.ts',      kind: 'code',  when: '2 days ago' },
+];
+
+const COFOUNDER_INTRO = [
+  { who: 'agent', body: 'Morning. Brand identity and core product flow are both running. Engineering is two approvals away from a production deploy — I\'d clear those first today.' },
+  { who: 'agent', body: 'You also have 2,418 people on the waitlist. The marketing agent has a launch email queued for Tuesday.', badges: ['waitlist.csv'] },
+];
+
+const SALES_TASK = {
+  agent: { dept: 'sales', name: 'Sales Agent' },
+  title: 'Define positioning for outbound',
+  conversation: [
+    { who: 'user', body: 'Start outbound for the 200 design-services firms on our list. Cold but warm — they\'ve been to the site.' },
+    { who: 'agent', body: 'Got it. Before drafting the sequence I want to align positioning with the ICP we defined. Pulling context.', badges: ['ICP.md', 'positioning.md'] },
+    { who: 'agent', body: 'I\'ll search r/Entrepreneur and IndieHackers for how this audience talks about the problem, then write three angles and stop for your pick.', badges: ['Reddit', 'IndieHackers'] },
+  ],
+  building: {
+    title: 'Building positioning sweep',
+    steps: [
+      { name: 'Reading positioning.md and ICP.md',               status: 'complete', tool: 'file' },
+      { name: 'Searching general library for related artifacts', status: 'complete', tool: 'search' },
+      { name: 'Pulling 38 Reddit + IndieHackers threads',         status: 'complete', tool: 'reddit' },
+      { name: 'Clustering pain-point language',                   status: 'running',  tool: 'spark' },
+      { name: 'Drafting three positioning angles',                status: 'pending',  tool: 'file' },
+      { name: 'Stop and confirm angle with founder',              status: 'pending',  tool: 'user' },
+    ],
+    credits: { used: 1842, cap: 4982 },
+  },
+};
+
+// ============================================================================
+// shell.jsx — Top bar + sidebar
+// ============================================================================
+const Logo = () => (
+  <span className="wordmark">THEFT<span className="ampersand"> &</span></span>
+);
+
+const TopBar = ({ orgName = 'Designer Subs', breadcrumb = 'Roadmap', minimal = false, onLogo }) => (
+  <header className="topbar">
+    <button className="row" onClick={onLogo} style={{ gap: 8 }}>
+      <Logo />
+      {!minimal && (<>
+        <span style={{ width: 1, height: 18, background: 'var(--line-strong)', margin: '0 4px' }} />
+        <span className="row" style={{ gap: 6, fontWeight: 500 }}>
+          <span style={{ width: 18, height: 18, borderRadius: 5, background: 'var(--ink)',
+            color: 'var(--paper)', display: 'inline-flex', alignItems: 'center',
+            justifyContent: 'center', fontSize: 10, fontWeight: 600 }}>DS</span>
+          <span>{orgName}</span>
+          <IconChevronDown size={14} style={{ color: 'var(--ink-soft)' }} />
+        </span>
+      </>)}
+    </button>
+    {!minimal && (<>
+      <span style={{ color: 'var(--ink-soft)' }}>/</span>
+      <span style={{ color: 'var(--ink-muted)', fontWeight: 500 }}>{breadcrumb}</span>
+    </>)}
+    <div className="grow" />
+    {!minimal && (<>
+      <div className="row" style={{ height: 30, padding: '0 10px', border: '1px solid var(--line)',
+        borderRadius: 8, gap: 8, color: 'var(--ink-soft)', minWidth: 220, background: 'var(--paper)' }}>
+        <IconSearch size={14} />
+        <span style={{ fontSize: 12 }}>Search company, agents, artifacts…</span>
+        <span className="grow" />
+        <span className="mono" style={{ fontSize: 11, color: 'var(--ink-soft)' }}>⌘K</span>
+      </div>
+      <button className="btn ghost" style={{ width: 30, padding: 0 }} aria-label="notifications">
+        <IconBell size={16} />
+      </button>
+      <button className="row" style={{ gap: 6 }}>
+        <span style={{ width: 26, height: 26, borderRadius: '50%', background: 'var(--mustard)',
+          display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+          fontSize: 11, fontWeight: 600, color: 'oklch(0.3 0.05 85)' }}>EM</span>
+      </button>
+    </>)}
+  </header>
+);
+
+const SidebarItem = ({ item, active, onClick }) => (
+  <button onClick={onClick}
+    style={{ display: 'flex', alignItems: 'center', gap: 10, width: '100%', height: 32, padding: '0 10px',
+      borderRadius: 7, color: active ? 'var(--ink)' : 'var(--ink-muted)',
+      background: active ? 'var(--cream-2)' : 'transparent',
+      fontWeight: active ? 600 : 500, fontSize: 13, position: 'relative' }}
+    onMouseEnter={(e) => { if (!active) e.currentTarget.style.background = 'var(--cream)'; }}
+    onMouseLeave={(e) => { if (!active) e.currentTarget.style.background = 'transparent'; }}>
+    <item.Icon size={15} />
+    <span style={{ flex: 1, textAlign: 'left' }}>{item.label}</span>
+    {item.badge && (
+      <span style={{ minWidth: 18, height: 18, padding: '0 5px', borderRadius: 5,
+        background: active ? 'var(--mustard)' : 'var(--cream-2)',
+        border: '1px solid ' + (active ? 'oklch(0.78 0.13 90)' : 'var(--line)'),
+        color: active ? 'oklch(0.3 0.05 85)' : 'var(--ink-muted)',
+        fontSize: 10, fontWeight: 600,
+        display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>{item.badge}</span>
+    )}
+  </button>
+);
+
+const Sidebar = ({ view, dept, onNav, onDept }) => {
+  const [openDepts, setOpenDepts] = React.useState(true);
+  return (
+    <aside style={{ borderRight: '1px solid var(--line)', background: 'var(--canvas)',
+      padding: '10px 10px 16px', display: 'flex', flexDirection: 'column', gap: 2 }}>
+      <div className="micro" style={{ padding: '8px 10px 4px' }}>Workspace</div>
+      {NAV.map(item => {
+        if (item.id === 'departments') {
+          return (
+            <React.Fragment key={item.id}>
+              <button onClick={() => setOpenDepts(o => !o)}
+                style={{ display: 'flex', alignItems: 'center', gap: 10, width: '100%', height: 32,
+                  padding: '0 10px', borderRadius: 7, color: 'var(--ink-muted)', fontWeight: 500, fontSize: 13,
+                  background: 'transparent' }}>
+                <item.Icon size={15} />
+                <span style={{ flex: 1, textAlign: 'left' }}>{item.label}</span>
+                <IconChevronDown size={14} style={{ transform: openDepts ? 'none' : 'rotate(-90deg)',
+                  transition: 'transform 150ms', color: 'var(--ink-soft)' }} />
+              </button>
+              {openDepts && (
+                <div style={{ paddingLeft: 14, display: 'flex', flexDirection: 'column', gap: 1 }}>
+                  {DEPARTMENTS.map(d => {
+                    const DI = DEPT_ICON[d.id];
+                    const isActive = view === 'department' && dept === d.id;
+                    return (
+                      <button key={d.id} onClick={() => onDept(d.id)}
+                        style={{ display: 'flex', alignItems: 'center', gap: 8, width: '100%', height: 28,
+                          padding: '0 10px', borderRadius: 6,
+                          color: isActive ? 'var(--ink)' : 'var(--ink-muted)',
+                          background: isActive ? 'var(--cream-2)' : 'transparent',
+                          fontWeight: isActive ? 600 : 400, fontSize: 12.5 }}
+                        onMouseEnter={(e) => { if (!isActive) e.currentTarget.style.background = 'var(--cream)'; }}
+                        onMouseLeave={(e) => { if (!isActive) e.currentTarget.style.background = 'transparent'; }}>
+                        <DI size={13} style={{ color: isActive ? 'var(--mustard-ink)' : 'var(--ink-soft)' }} />
+                        <span style={{ flex: 1, textAlign: 'left' }}>{d.name}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+            </React.Fragment>
+          );
+        }
+        return <SidebarItem key={item.id} item={item} active={view === item.id} onClick={() => onNav(item.id)} />;
+      })}
+      <div className="grow" />
+      <div style={{ borderTop: '1px solid var(--line)', paddingTop: 12, marginTop: 8,
+        display: 'flex', flexDirection: 'column', gap: 8 }}>
+        <div style={{ padding: '0 10px' }} className="micro">Credits this month</div>
+        <div style={{ padding: '0 10px' }}>
+          <div style={{ height: 6, borderRadius: 3, background: 'var(--cream-2)',
+            border: '1px solid var(--line)', overflow: 'hidden' }}>
+            <div style={{ width: '37%', height: '100%', background: 'var(--mustard)' }} />
+          </div>
+          <div className="row" style={{ marginTop: 6, fontSize: 11, color: 'var(--ink-soft)' }}>
+            <span>1,842 / 5,000</span><span className="grow" /><span>13 days left</span>
+          </div>
+        </div>
+        <div style={{ padding: '0 6px' }}>
+          <button className="row" style={{ width: '100%', gap: 8, padding: '8px 8px', borderRadius: 8, background: 'transparent' }}
+            onMouseEnter={(e) => e.currentTarget.style.background = 'var(--cream)'}
+            onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}>
+            <span style={{ width: 26, height: 26, borderRadius: '50%', background: 'var(--mustard)',
+              display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+              fontSize: 11, fontWeight: 600, color: 'oklch(0.3 0.05 85)' }}>EM</span>
+            <span className="col" style={{ gap: 0, textAlign: 'left' }}>
+              <span style={{ fontSize: 12.5, fontWeight: 500 }}>Eli Marsh</span>
+              <span style={{ fontSize: 11, color: 'var(--ink-soft)' }}>Founder</span>
+            </span>
+            <span className="grow" />
+            <IconMore size={14} style={{ color: 'var(--ink-soft)' }} />
+          </button>
+        </div>
+      </div>
+    </aside>
+  );
+};
+
+// ============================================================================
+// chat.jsx — Right-side chat panel
+// ============================================================================
+const ChatHeader = ({ title, subtitle, onBack, deptId }) => {
+  const D = deptId ? DEPT_ICON[deptId] : null;
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 12px',
+      borderBottom: '1px solid var(--line)', minHeight: 50 }}>
+      {onBack && (
+        <button className="btn ghost" onClick={onBack} style={{ width: 26, height: 26, padding: 0, borderRadius: 6 }}>
+          <IconChevronLeft size={15} />
+        </button>
+      )}
+      {D && (
+        <span style={{ width: 28, height: 28, borderRadius: 7, background: 'var(--mustard-soft)',
+          border: '1px solid oklch(0.88 0.08 90)', color: 'var(--mustard-ink)',
+          display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+          <D size={15} />
+        </span>
+      )}
+      <div className="col" style={{ minWidth: 0 }}>
+        <span style={{ fontWeight: 600, fontSize: 13.5, lineHeight: '16px' }}>{title}</span>
+        {subtitle && <span style={{ fontSize: 11.5, color: 'var(--ink-soft)' }}>{subtitle}</span>}
+      </div>
+      <span className="grow" />
+      <button className="btn ghost" style={{ width: 26, height: 26, padding: 0, borderRadius: 6 }}>
+        <IconMore size={15} />
+      </button>
+    </div>
+  );
+};
+
+const InlineBadge = ({ label }) => {
+  const isFile = /\.[a-z]+$/i.test(label);
+  return (
+    <span className={isFile ? 'mono' : ''} style={{ display: 'inline-flex', alignItems: 'center', gap: 4,
+      height: 20, padding: '0 7px', borderRadius: 5, fontSize: 11, fontWeight: 500,
+      background: isFile ? 'var(--cream-2)' : 'oklch(0.97 0.012 85)',
+      border: '1px solid var(--line)', color: 'var(--ink-muted)' }}>
+      {!isFile && <IconDot size={6} color="var(--ink-soft)" />}
+      {isFile && <IconFile size={10} />}
+      {label}
+    </span>
+  );
+};
+
+const Bubble = ({ who, body, badges, deptId }) => {
+  const isUser = who === 'user';
+  const D = deptId ? DEPT_ICON[deptId] : null;
+  return (
+    <div style={{ display: 'flex', gap: 8, justifyContent: isUser ? 'flex-end' : 'flex-start',
+      marginBottom: 10, alignItems: 'flex-start' }}>
+      {!isUser && D && (
+        <span style={{ width: 22, height: 22, borderRadius: 6, background: 'var(--cream-2)',
+          border: '1px solid var(--line)', color: 'var(--ink-muted)',
+          display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginTop: 2 }}>
+          <D size={12} />
+        </span>
+      )}
+      <div style={{ maxWidth: '78%', padding: '8px 11px', borderRadius: 10,
+        background: isUser ? 'var(--cream-2)' : 'var(--paper)',
+        border: '1px solid var(--line)', fontSize: 13, lineHeight: 1.5, color: 'var(--ink)' }}>
+        <div>{body}</div>
+        {badges && badges.length > 0 && (
+          <div className="row" style={{ marginTop: 6, gap: 4, flexWrap: 'wrap' }}>
+            {badges.map((b, i) => <InlineBadge key={i} label={b} />)}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+const ToolIcon = ({ tool }) => {
+  const map = {
+    file: <IconFile size={12} />, search: <IconSearch size={12} />,
+    reddit: <Icon size={12}><path d="M12 8c4 0 7 2 7 5s-3 5-7 5-7-2-7-5 3-5 7-5Z"/><circle cx="9" cy="13" r=".8"/><circle cx="15" cy="13" r=".8"/><path d="M9 16c1 .6 2 .8 3 .8s2-.2 3-.8"/></Icon>,
+    spark: <IconSpark size={12} />, user: <IconUser size={12} />,
+  };
+  return map[tool] || null;
+};
+
+const SubStep = ({ step, idx }) => {
+  const isComplete = step.status === 'complete';
+  const isRunning = step.status === 'running';
+  return (
+    <div style={{ display: 'flex', gap: 10, padding: '6px 0', alignItems: 'center',
+      borderTop: idx === 0 ? 'none' : '1px solid var(--line)' }}>
+      <span style={{ width: 16, height: 16, flexShrink: 0, display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+        {isComplete && (
+          <span style={{ width: 14, height: 14, borderRadius: '50%', background: 'var(--sage)',
+            display: 'inline-flex', alignItems: 'center', justifyContent: 'center', color: 'oklch(0.3 0.04 145)' }}>
+            <IconCheck size={9} />
+          </span>
+        )}
+        {isRunning && (
+          <svg width="14" height="14" viewBox="0 0 24 24" className="anim-spin">
+            <circle cx="12" cy="12" r="9" fill="none" stroke="oklch(0.92 0.005 85)" strokeWidth="3" />
+            <path d="M12 3 a9 9 0 0 1 9 9" fill="none" stroke="var(--mustard)" strokeWidth="3" strokeLinecap="round"/>
+          </svg>
+        )}
+        {!isComplete && !isRunning && (
+          <span style={{ width: 12, height: 12, borderRadius: '50%', border: '1.5px solid var(--line-strong)' }} />
+        )}
+      </span>
+      <span style={{ flex: 1, fontSize: 12.5, color: isComplete ? 'var(--ink-muted)' : 'var(--ink)' }}>{step.name}</span>
+      <span style={{ color: 'var(--ink-soft)' }}><ToolIcon tool={step.tool} /></span>
+    </div>
+  );
+};
+
+const BuildingCard = ({ task }) => (
+  <div style={{ border: '1px solid var(--line)', borderRadius: 10, background: 'var(--paper)',
+    padding: '10px 12px', marginTop: 4 }}>
+    <div className="row" style={{ marginBottom: 6 }}>
+      <span style={{ fontWeight: 600, fontSize: 13 }}>{task.title}</span>
+      <span className="grow" />
+      <span className="pill mustard" style={{ height: 18, fontSize: 10 }}>
+        <span style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--mustard)' }} className="anim-pulse" />
+        Working
+      </span>
+    </div>
+    <div>{task.steps.map((s, i) => <SubStep key={i} step={s} idx={i} />)}</div>
+  </div>
+);
+
+const StopAndCredits = ({ credits }) => (
+  <div className="row" style={{ marginTop: 8, padding: '0 2px' }}>
+    <button className="btn sm" style={{ borderColor: 'oklch(0.85 0.08 25)', color: 'var(--brick)' }}>
+      <IconStop size={11} />Stop
+    </button>
+    <span className="grow" />
+    <span className="mono" style={{ fontSize: 11, color: 'var(--ink-soft)' }}>
+      {credits.used.toLocaleString()} / {credits.cap.toLocaleString()}
+    </span>
+  </div>
+);
+
+const ChatInput = ({ placeholder = 'Ask Cofounder anything about your company…', wide }) => {
+  const [v, setV] = React.useState('');
+  return (
+    <div style={{ borderTop: '1px solid var(--line)', padding: 10, background: 'var(--canvas)' }}>
+      <div className="card" style={{ padding: 8, display: 'flex', flexDirection: 'column', gap: 6,
+        boxShadow: 'var(--shadow-card)' }}>
+        <textarea value={v} onChange={e => setV(e.target.value)} placeholder={placeholder}
+          style={{ border: 'none', outline: 'none', resize: 'none', background: 'transparent',
+            fontSize: 13, lineHeight: 1.45, minHeight: wide ? 60 : 44, padding: '4px 6px', color: 'var(--ink)' }} />
+        <div className="row">
+          <button className="btn ghost sm" style={{ width: 26, padding: 0 }}>
+            <IconPaperclip size={14} />
+          </button>
+          <button className="btn ghost sm" style={{ padding: '0 8px' }}>
+            <IconSpark size={13} />Skills
+          </button>
+          <span className="grow" />
+          <button className="btn primary sm" style={{ width: 28, padding: 0 }} aria-label="send">
+            <IconArrowUp size={14} />
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const ActivityLog = () => {
+  const [open, setOpen] = React.useState(false);
+  return (
+    <div style={{ marginTop: 8, border: '1px solid var(--line)', borderRadius: 10, background: 'var(--cream)' }}>
+      <button onClick={() => setOpen(o => !o)} className="row" style={{ width: '100%', padding: '8px 10px', gap: 8 }}>
+        <IconRefresh size={12} style={{ color: 'var(--ink-soft)' }} />
+        <span style={{ fontSize: 12, color: 'var(--ink-muted)' }}>Ran 7 actions in this turn</span>
+        <span className="grow" />
+        <IconChevronDown size={13} style={{ color: 'var(--ink-soft)',
+          transform: open ? 'rotate(180deg)' : 'none', transition: 'transform 150ms' }} />
+      </button>
+      {open && (
+        <div className="fade-in" style={{ padding: '6px 12px 10px', borderTop: '1px solid var(--line)' }}>
+          {['Read positioning.md', 'Read ICP.md', 'Searched library', 'Reddit search · "design subscription"',
+            'IndieHackers search · "productized service"', 'Pulled 38 threads', 'Clustered language'].map((a, i) => (
+            <div key={i} className="row" style={{ padding: '4px 0', fontSize: 12, color: 'var(--ink-muted)' }}>
+              <IconDot size={4} color="var(--ink-soft)" />
+              <span style={{ marginLeft: 6 }}>{a}</span>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+};
+
+const ChatPanelEmpty = ({ deptId, title, body }) => {
+  const D = deptId ? DEPT_ICON[deptId] : null;
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100%',
+      borderLeft: '1px solid var(--line)', background: 'var(--canvas)' }}>
+      <ChatHeader title={title || 'Cofounder'}
+        subtitle={deptId ? 'Department agent · idle' : 'Always-on chief of staff'}
+        deptId={deptId || null} />
+      <div className="grow" style={{ padding: '20px 16px', overflowY: 'auto' }}>
+        <div style={{ padding: 12, borderRadius: 10, background: 'var(--cream)',
+          border: '1px dashed var(--line-strong)', color: 'var(--ink-muted)',
+          fontSize: 12.5, lineHeight: 1.5 }}>
+          {body || 'Ask anything — strategy, status, "what should I do next." I can also launch other agents on your behalf.'}
+        </div>
+        {!deptId && (
+          <div style={{ marginTop: 16 }}>
+            {COFOUNDER_INTRO.map((m, i) => (
+              <Bubble key={i} who={m.who} body={m.body} badges={m.badges} deptId="ops" />
+            ))}
+            <div className="row" style={{ marginTop: 4, padding: '0 4px', gap: 6, flexWrap: 'wrap' }}>
+              {['Walk me through approvals', 'What\'s in progress?', 'Show me the next milestone'].map(s => (
+                <button key={s} className="pill" style={{ cursor: 'pointer' }}>{s}</button>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+      <ChatInput placeholder={deptId ? `Ask the ${DEPT_BY_ID[deptId].name} agent anything…` : 'Ask Cofounder anything about your company…'} />
+    </div>
+  );
+};
+
+const ChatPanelWorkspace = ({ onBack }) => {
+  const task = SALES_TASK;
+  const scrollRef = React.useRef(null);
+  React.useEffect(() => {
+    if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+  }, []);
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100%',
+      borderLeft: '1px solid var(--line)', background: 'var(--canvas)' }}>
+      <ChatHeader title={task.agent.name + ' · ' + task.title}
+        subtitle="Sales Department" onBack={onBack} deptId="sales" />
+      <div ref={scrollRef} className="grow" style={{ padding: '14px 14px 4px', overflowY: 'auto' }}>
+        {task.conversation.map((m, i) => (
+          <Bubble key={i} who={m.who} body={m.body} badges={m.badges} deptId="sales" />
+        ))}
+        <BuildingCard task={task.building} />
+        <ActivityLog />
+        <StopAndCredits credits={task.building.credits} />
+      </div>
+      <ChatInput placeholder="Send live feedback to adjust the build…" />
+    </div>
+  );
+};
+
+// ============================================================================
+// roadmap.jsx — Tech-tree column layout + node drawer
+// ============================================================================
+const NODE_W = 220;
+const NODE_H = 64;
+const COL_W = 244;
+const COL_GAP = 24;
+const ROW_GAP = 12;
+
+const STATUS_LABEL = {
+  locked: 'Locked', available: 'Available', in_progress: 'In progress', complete: 'Complete',
+};
+
+const NodeCard = ({ node, isHovered, onMouseEnter, onMouseLeave, onClick, dim }) => {
+  const D = DEPT_ICON[node.dept];
+  const isLocked = node.status === 'locked';
+  const isComplete = node.status === 'complete';
+  const isProgress = node.status === 'in_progress';
+  const isAvail = node.status === 'available';
+  const borderColor = isProgress ? 'var(--mustard)' : isComplete ? 'oklch(0.88 0.06 145)' : 'var(--line)';
+  const opacity = isLocked ? 0.42 : (dim ? 0.4 : 1);
+  return (
+    <div onMouseEnter={onMouseEnter} onMouseLeave={onMouseLeave} onClick={onClick}
+      style={{ width: NODE_W, minHeight: NODE_H, background: 'var(--paper)',
+        border: '1px solid ' + borderColor, borderRadius: 9, padding: '8px 10px',
+        opacity, cursor: isLocked ? 'default' : 'pointer',
+        transition: 'opacity 200ms, border-color 200ms, transform 120ms, box-shadow 120ms',
+        boxShadow: isHovered ? 'var(--shadow-pop)' : 'var(--shadow-card)',
+        transform: isHovered && !isLocked ? 'translateY(-1px)' : 'none',
+        position: 'relative', display: 'flex', flexDirection: 'column', gap: 4 }}>
+      <div className="row" style={{ gap: 6 }}>
+        {isProgress && <span style={{ width: 7, height: 7, borderRadius: '50%', background: 'var(--mustard)' }} className="anim-pulse" />}
+        {isComplete && <span style={{ width: 7, height: 7, borderRadius: '50%', background: 'var(--sage)' }} />}
+        {isAvail && <span className="pill mustard" style={{ height: 16, padding: '0 6px', fontSize: 9.5, letterSpacing: '0.05em' }}>AVAILABLE</span>}
+        {isLocked && <IconLock size={11} style={{ color: 'var(--ink-soft)' }} />}
+        <span className="grow" />
+        <span style={{ color: 'var(--ink-soft)', display: 'inline-flex', alignItems: 'center' }}><D size={13} /></span>
+      </div>
+      <div style={{ fontSize: 13, fontWeight: 600, lineHeight: 1.3, color: 'var(--ink)' }}>{node.title}</div>
+      <div style={{ fontSize: 11, color: 'var(--ink-soft)' }}>
+        {isLocked ? 'Needs earlier steps' : STATUS_LABEL[node.status]}
+      </div>
+    </div>
+  );
+};
+
+function layoutNodes() {
+  const cols = STAGES.map(s => NODES.filter(n => n.stage === s.id));
+  const pos = {};
+  cols.forEach((col, cIdx) => {
+    col.forEach((node, rIdx) => {
+      pos[node.id] = { x: cIdx * COL_W, y: rIdx * (NODE_H + ROW_GAP) + 40, w: NODE_W, h: NODE_H, col: cIdx, row: rIdx };
+    });
+  });
+  const cols_max = Math.max(...cols.map(c => c.length));
+  const height = cols_max * (NODE_H + ROW_GAP) + 60;
+  const width = STAGES.length * COL_W;
+  return { pos, cols, height, width };
+}
+
+function connectorPath(a, b) {
+  const x1 = a.x + a.w; const y1 = a.y + a.h / 2;
+  const x2 = b.x; const y2 = b.y + b.h / 2;
+  const dx = (x2 - x1) / 2;
+  return `M ${x1} ${y1} C ${x1 + dx} ${y1}, ${x2 - dx} ${y2}, ${x2} ${y2}`;
+}
+
+const RoadmapView = ({ onOpenNode }) => {
+  const layout = React.useMemo(layoutNodes, []);
+  const [hoverId, setHoverId] = React.useState(null);
+  const stageStats = STAGES.map(s => {
+    const list = NODES.filter(n => n.stage === s.id);
+    const done = list.filter(n => n.status === 'complete').length;
+    return { ...s, done, total: list.length };
+  });
+  const edges = [];
+  NODES.forEach(n => {
+    n.needs.forEach(nid => {
+      if (layout.pos[nid] && layout.pos[n.id]) edges.push({ from: nid, to: n.id });
+    });
+  });
+  const hi = new Set();
+  if (hoverId) {
+    edges.forEach(e => {
+      if (e.from === hoverId || e.to === hoverId) hi.add(e.from + '->' + e.to);
+    });
+  }
+  return (
+    <div style={{ flex: 1, minHeight: 0, overflow: 'auto', background: 'var(--canvas)' }}>
+      <div style={{ padding: '20px 28px 14px', borderBottom: '1px solid var(--line)' }}>
+        <div className="row" style={{ marginBottom: 4 }}>
+          <div className="col" style={{ gap: 4 }}>
+            <div className="micro">Company roadmap</div>
+            <div className="serif" style={{ fontSize: 30, lineHeight: 1.1, letterSpacing: '-0.01em' }}>
+              Designer Subs <span style={{ color: 'var(--ink-soft)', fontStyle: 'italic' }}>— from idea to mature.</span>
+            </div>
+          </div>
+          <span className="grow" />
+          <div className="row" style={{ gap: 6 }}>
+            <span className="pill"><IconDot size={6} color="var(--ink-soft)" /> 11 complete</span>
+            <span className="pill mustard"><IconDot size={6} color="var(--mustard-ink)" /> 5 in progress</span>
+            <span className="pill"><IconDot size={6} color="var(--ink-soft)" /> 8 available</span>
+            <button className="btn sm" style={{ marginLeft: 6 }}>
+              <IconPlus size={13} /> Add capability
+            </button>
+          </div>
+        </div>
+        <div className="row" style={{ marginTop: 10, gap: 14, color: 'var(--ink-muted)', fontSize: 12 }}>
+          <span>The tree below is your full build. Hover any card to see what depends on it. Click to launch the agent.</span>
+        </div>
+      </div>
+      <div style={{ padding: '20px 28px 40px', position: 'relative' }}>
+        <div style={{ position: 'relative', width: layout.width, height: layout.height, paddingBottom: 8 }}>
+          {STAGES.map((s, i) => {
+            const stats = stageStats[i];
+            return (
+              <div key={s.id} style={{ position: 'absolute', top: 0, left: i * COL_W, width: NODE_W,
+                display: 'flex', alignItems: 'center', gap: 8, padding: '0 2px 8px' }}>
+                <div className="micro" style={{ color: 'var(--ink)' }}>{s.name} stage</div>
+                <span className="grow" />
+                <span className="mono" style={{ fontSize: 11, color: 'var(--ink-soft)' }}>{stats.done}/{stats.total}</span>
+              </div>
+            );
+          })}
+          {STAGES.slice(0, -1).map((s, i) => (
+            <div key={s.id} style={{ position: 'absolute', top: 0, bottom: 0,
+              left: i * COL_W + NODE_W + COL_GAP / 2 - 1,
+              width: 1, background: 'var(--line)', opacity: 0.5 }} />
+          ))}
+          <svg className="roadmap-connectors" width={layout.width} height={layout.height}
+            viewBox={`0 0 ${layout.width} ${layout.height}`}>
+            {edges.map(e => {
+              const a = layout.pos[e.from]; const b = layout.pos[e.to];
+              const isHi = hi.has(e.from + '->' + e.to);
+              const isDim = hoverId && !isHi;
+              return (
+                <path key={e.from + '->' + e.to} d={connectorPath(a, b)}
+                  className={isHi ? 'hi' : (isDim ? 'dim' : '')} />
+              );
+            })}
+          </svg>
+          {NODES.map(n => {
+            const p = layout.pos[n.id];
+            return (
+              <div key={n.id} style={{ position: 'absolute', left: p.x, top: p.y, zIndex: 1 }}>
+                <NodeCard node={n}
+                  isHovered={hoverId === n.id}
+                  onMouseEnter={() => setHoverId(n.id)}
+                  onMouseLeave={() => setHoverId(null)}
+                  onClick={() => n.status !== 'locked' && onOpenNode(n.id)}
+                  dim={hoverId && hoverId !== n.id && !hi.has(hoverId + '->' + n.id) && !hi.has(n.id + '->' + hoverId)} />
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const RoadmapStrip = ({ deptId, onOpenNode }) => {
+  const nodes = NODES.filter(n => n.dept === deptId);
+  const byStage = STAGES.map(s => ({ stage: s, nodes: nodes.filter(n => n.stage === s.id) }))
+                       .filter(g => g.nodes.length > 0);
+  return (
+    <div style={{ display: 'flex', gap: 16, overflowX: 'auto', paddingBottom: 6 }}>
+      {byStage.map(g => (
+        <div key={g.stage.id} className="col" style={{ minWidth: NODE_W, gap: 8 }}>
+          <div className="micro" style={{ paddingBottom: 2 }}>{g.stage.name}</div>
+          {g.nodes.map(n => (
+            <NodeCard key={n.id} node={n} onClick={() => n.status !== 'locked' && onOpenNode(n.id)} />
+          ))}
+        </div>
+      ))}
+    </div>
+  );
+};
+
+const DrawerSection = ({ label, children }) => (
+  <div style={{ marginBottom: 18 }}>
+    <div className="micro" style={{ marginBottom: 8 }}>{label}</div>
+    {children}
+  </div>
+);
+
+const NodeDrawer = ({ nodeId, onClose, onLaunch }) => {
+  const n = NODE_BY_ID[nodeId];
+  if (!n) return null;
+  const det = NODE_DETAILS[nodeId] || DEFAULT_DETAIL;
+  const D = DEPT_ICON[n.dept];
+  const stage = STAGES.find(s => s.id === n.stage);
+  const dept = DEPT_BY_ID[n.dept];
+  const downstream = NODES.filter(x => x.needs.includes(n.id));
+  return (
+    <div className="slide-in-right" style={{ position: 'absolute', top: 0, right: 0, bottom: 0, width: 360,
+      background: 'var(--paper)', borderLeft: '1px solid var(--line)',
+      display: 'flex', flexDirection: 'column', zIndex: 20,
+      boxShadow: '-12px 0 32px -16px oklch(0.4 0.04 85 / 0.18)' }}>
+      <div style={{ padding: '14px 18px 10px', borderBottom: '1px solid var(--line)' }}>
+        <div className="row" style={{ marginBottom: 10 }}>
+          <span className="micro">{stage.name} stage · {dept.name}</span>
+          <span className="grow" />
+          <button className="btn ghost" onClick={onClose} style={{ width: 26, height: 26, padding: 0 }}>
+            <IconX size={14} />
+          </button>
+        </div>
+        <div className="row" style={{ gap: 12, alignItems: 'flex-start' }}>
+          <span style={{ width: 36, height: 36, borderRadius: 8, background: 'var(--mustard-soft)',
+            border: '1px solid oklch(0.88 0.08 90)', color: 'var(--mustard-ink)',
+            display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+            <D size={18} />
+          </span>
+          <div className="col" style={{ gap: 6, minWidth: 0 }}>
+            <div className="serif" style={{ fontSize: 22, lineHeight: 1.15, letterSpacing: '-0.01em' }}>{n.title}</div>
+            <div className="row" style={{ gap: 6, flexWrap: 'wrap' }}>
+              <span className="pill">{dept.name}</span>
+              {n.status === 'available' && <span className="pill mustard">Agent can do this</span>}
+              {n.status === 'in_progress' && <span className="pill mustard">Running now</span>}
+              {n.status === 'complete' && <span className="pill sage">Complete</span>}
+              {n.status === 'locked' && <span className="pill">Needs your input</span>}
+            </div>
+          </div>
+        </div>
+      </div>
+      <div className="grow" style={{ overflowY: 'auto', padding: '14px 18px 90px' }}>
+        <DrawerSection label="How to move this forward">
+          <p style={{ margin: 0, color: 'var(--ink-muted)', lineHeight: 1.55, fontSize: 13 }}>{det.summary}</p>
+        </DrawerSection>
+        <DrawerSection label="To complete">
+          <div className="col" style={{ gap: 6 }}>
+            {det.checklist.map((c, i) => (
+              <div key={i} className="row" style={{ gap: 9, padding: '8px 10px',
+                border: '1px solid var(--line)', borderRadius: 8, background: 'var(--cream)' }}>
+                <span style={{ width: 16, height: 16, borderRadius: 4,
+                  border: '1.5px solid var(--line-strong)',
+                  background: c.status === 'Done' ? 'var(--sage)' : 'var(--paper)',
+                  display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                  {c.status === 'Done' && <IconCheck size={11} style={{ color: 'oklch(0.3 0.04 145)' }} />}
+                </span>
+                <span style={{ flex: 1, fontSize: 13 }}>{c.title}</span>
+                <span className={'pill ' + (c.status === 'Done' ? 'sage' : c.status === 'Launch' ? 'mustard' : '')}
+                  style={{ height: 18, fontSize: 10 }}>{c.status}</span>
+              </div>
+            ))}
+          </div>
+        </DrawerSection>
+        <DrawerSection label="Required first">
+          {n.needs.length === 0 ? (
+            <div style={{ color: 'var(--ink-soft)', fontSize: 12 }}>No prerequisites.</div>
+          ) : (
+            <div className="col" style={{ gap: 4 }}>
+              {n.needs.map(nid => {
+                const p = NODE_BY_ID[nid]; if (!p) return null;
+                const ok = p.status === 'complete';
+                return (
+                  <div key={nid} className="row" style={{ padding: '4px 0', fontSize: 13 }}>
+                    <span style={{ width: 7, height: 7, borderRadius: '50%',
+                      background: ok ? 'var(--sage)' : 'var(--line-strong)' }} />
+                    <span style={{ marginLeft: 8, color: ok ? 'var(--ink)' : 'var(--ink-muted)' }}>{p.title}</span>
+                    <span className="grow" />
+                    <span style={{ fontSize: 11, color: 'var(--ink-soft)' }}>
+                      {ok ? 'Done' : STATUS_LABEL[p.status]}
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </DrawerSection>
+        <DrawerSection label="Completing this unlocks">
+          {downstream.length === 0 ? (
+            <div style={{ color: 'var(--ink-soft)', fontSize: 12 }}>Nothing further depends on this yet.</div>
+          ) : (
+            <div className="col" style={{ gap: 4 }}>
+              {downstream.map(d => (
+                <div key={d.id} className="row" style={{ padding: '4px 0', fontSize: 13 }}>
+                  <IconArrowRight size={12} style={{ color: 'var(--ink-soft)' }} />
+                  <span style={{ marginLeft: 8 }}>{d.title}</span>
+                  <span className="grow" />
+                  <span style={{ fontSize: 11, color: 'var(--ink-soft)' }}>{DEPT_BY_ID[d.dept].name}</span>
+                </div>
+              ))}
+            </div>
+          )}
+        </DrawerSection>
+      </div>
+      <div style={{ position: 'absolute', left: 0, right: 0, bottom: 0,
+        borderTop: '1px solid var(--line)', padding: 14, background: 'var(--paper)',
+        display: 'flex', gap: 8 }}>
+        <button className="btn primary lg" style={{ flex: 1 }} onClick={onLaunch}>
+          {n.status === 'in_progress' ? 'Open running task' : 'Launch agent'}
+          <IconArrowRight size={14} />
+        </button>
+        <button className="btn lg" style={{ width: 44, padding: 0 }} aria-label="external">
+          <IconExternal size={14} />
+        </button>
+      </div>
+    </div>
+  );
+};
+
+// ============================================================================
+// screens.jsx — Department, Approvals, Onboarding, Tasks, Library
+// ============================================================================
+const SAMPLE_PROJECTS = {
+  marketing: [
+    { id: 'm1', name: 'theft.studio',     status: 'LIVE',    branch: 'main',         desc: 'Public landing + waitlist.', tone: 'mustard' },
+    { id: 'm2', name: 'launch-campaign',  status: 'PENDING', branch: 'draft/launch', desc: '3-post launch series + email.', tone: 'ink' },
+  ],
+  design: [
+    { id: 'd1', name: 'brand-system',     status: 'PENDING',   branch: 'v2-explore', desc: 'Color, type, logotype — v2 in review.', tone: 'ink' },
+    { id: 'd2', name: 'product-ui-kit',   status: 'NOT READY', branch: 'main',       desc: 'Component library. Waiting on core flow.', tone: 'ghost' },
+  ],
+  sales: [
+    { id: 's1', name: 'outbound-list',    status: 'PENDING', branch: 'wave-1', desc: '200 design-services firms scoped.', tone: 'ink' },
+    { id: 's2', name: 'beta-signups',     status: 'LIVE',    branch: 'main',   desc: '14 hand-recruited beta users.', tone: 'mustard' },
+  ],
+  ops: [], finance: [], legal: [], support: [],
+};
+
+const Section = ({ title, subtitle, actions, children }) => (
+  <section style={{ padding: '22px 28px 4px' }}>
+    <div className="row" style={{ marginBottom: 12 }}>
+      <div className="col" style={{ gap: 2 }}>
+        <div style={{ fontSize: 16, fontWeight: 600 }}>{title}</div>
+        {subtitle && <div style={{ fontSize: 12, color: 'var(--ink-soft)' }}>{subtitle}</div>}
+      </div>
+      <span className="grow" />
+      {actions}
+    </div>
+    {children}
+  </section>
+);
+
+const STATUS_PILL_TONE = { LIVE: 'mustard', PENDING: '', 'NOT READY': '', BLOCKED: 'brick', DRAFT: '' };
+
+const ProjectCard = ({ p }) => (
+  <div className="card" style={{ padding: 14, display: 'flex', flexDirection: 'column', gap: 8 }}>
+    <div className="row">
+      <span className={'pill ' + STATUS_PILL_TONE[p.status]} style={{ fontSize: 10 }}>{p.status}</span>
+      <span className="grow" />
+      <button className="btn ghost sm" style={{ width: 24, padding: 0 }}><IconMore size={13} /></button>
+    </div>
+    <div className="col" style={{ gap: 2 }}>
+      <div className="mono" style={{ fontSize: 13, fontWeight: 500 }}>{p.name}</div>
+      <div className="row" style={{ fontSize: 11, color: 'var(--ink-soft)', gap: 6 }}>
+        <span>branch</span><span className="mono">{p.branch}</span>
+      </div>
+    </div>
+    <div style={{ fontSize: 12.5, color: 'var(--ink-muted)', lineHeight: 1.45, minHeight: 36 }}>{p.desc}</div>
+    <div className="row" style={{ gap: 6 }}>
+      <button className="btn sm" style={{ flex: 1 }}><IconExternal size={11} /> Preview</button>
+      <button className="btn sm primary" style={{ flex: 1 }}><IconArrowUp size={11} /> Deploy</button>
+    </div>
+  </div>
+);
+
+const ArtifactCard = ({ a }) => (
+  <div className="card" style={{ padding: 10, display: 'flex', flexDirection: 'column', gap: 8 }}>
+    <div className="placeholder-bg" style={{ height: 88, borderRadius: 6,
+      border: '1px dashed var(--line-strong)',
+      display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <IconFile size={20} style={{ color: 'var(--ink-soft)' }} />
+    </div>
+    <div className="row">
+      <span className="mono" style={{ fontSize: 12, fontWeight: 500 }}>{a.name}</span>
+      <span className="grow" />
+      <span style={{ fontSize: 10.5, color: 'var(--ink-soft)' }}>{a.when}</span>
+    </div>
+  </div>
+);
+
+const EmptyState = ({ title, body }) => (
+  <div style={{ padding: '36px 24px', border: '1px dashed var(--line-strong)',
+    borderRadius: 10, background: 'var(--cream)',
+    textAlign: 'center', color: 'var(--ink-muted)' }}>
+    <div style={{ fontWeight: 600, color: 'var(--ink)', marginBottom: 4 }}>{title}</div>
+    <div style={{ fontSize: 12.5 }}>{body}</div>
+  </div>
+);
+
+const DepartmentView = ({ deptId, onOpenNode }) => {
+  const d = DEPT_BY_ID[deptId];
+  const DI = DEPT_ICON[deptId];
+  const nodes = NODES.filter(n => n.dept === deptId);
+  const stats = {
+    done: nodes.filter(n => n.status === 'complete').length,
+    progress: nodes.filter(n => n.status === 'in_progress').length,
+    avail: nodes.filter(n => n.status === 'available').length,
+    locked: nodes.filter(n => n.status === 'locked').length,
+  };
+  return (
+    <div style={{ flex: 1, overflow: 'auto', background: 'var(--canvas)' }}>
+      <div style={{ padding: '20px 28px 16px', borderBottom: '1px solid var(--line)' }}>
+        <div className="row" style={{ gap: 14, alignItems: 'flex-start' }}>
+          <span style={{ width: 44, height: 44, borderRadius: 10, background: 'var(--paper)',
+            border: '1px solid var(--line)', color: 'var(--ink)',
+            display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+            <DI size={22} />
+          </span>
+          <div className="col" style={{ gap: 4 }}>
+            <div className="micro">Department</div>
+            <div className="serif" style={{ fontSize: 30, lineHeight: 1.1, letterSpacing: '-0.01em' }}>
+              {d.name} Department
+            </div>
+            <div style={{ color: 'var(--ink-muted)', fontSize: 13 }}>{d.desc}</div>
+          </div>
+          <span className="grow" />
+          <button className="btn"><IconRefresh size={13} /> Sync</button>
+          <button className="btn primary"><IconPlus size={13} /> Launch task</button>
+        </div>
+        <div className="row" style={{ gap: 6, marginTop: 14 }}>
+          <span className="pill sage"><IconDot size={6} color="var(--sage-ink)" /> {stats.done} complete</span>
+          <span className="pill mustard"><IconDot size={6} color="var(--mustard-ink)" /> {stats.progress} in progress</span>
+          <span className="pill"><IconDot size={6} color="var(--ink-soft)" /> {stats.avail} available</span>
+          <span className="pill"><IconLock size={10} /> {stats.locked} locked</span>
+        </div>
+      </div>
+      <Section title="Your projects" actions={<button className="btn sm">View all</button>}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))', gap: 12 }}>
+          {(deptId === 'engineering' ? ENG_PROJECTS : SAMPLE_PROJECTS[deptId] || []).map(p => (
+            <ProjectCard key={p.id} p={p} />
+          ))}
+        </div>
+      </Section>
+      <Section title="Roadmap" subtitle="Just this department's capabilities — same tree, filtered.">
+        <RoadmapStrip deptId={deptId} onOpenNode={onOpenNode} />
+      </Section>
+      <Section title="Recent artifacts" actions={
+        <div className="row" style={{ gap: 4 }}>
+          <button className="btn sm">All</button>
+          <button className="btn sm ghost">Code</button>
+          <button className="btn sm ghost">Specs</button>
+        </div>
+      }>
+        {ENG_ARTIFACTS.length === 0 ? (
+          <EmptyState title="No artifacts yet"
+            body="When an agent ships work in this department it will land here." />
+        ) : (
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12 }}>
+            {ENG_ARTIFACTS.map(a => <ArtifactCard key={a.id} a={a} />)}
+          </div>
+        )}
+      </Section>
+    </div>
+  );
+};
+
+const ApprovalCard = ({ a, active, onClick, onAct }) => {
+  const D = DEPT_ICON[a.agent.dept];
+  const dept = DEPT_BY_ID[a.agent.dept];
+  const bar = a.state === 'pending' ? 'var(--mustard)' : a.state === 'approved' ? 'var(--sage)' : 'var(--brick)';
+  const typeTone = a.state === 'pending' ? 'mustard' : a.state === 'approved' ? 'sage' : 'brick';
+  return (
+    <div onClick={onClick} className="card" style={{ padding: 0, display: 'flex', overflow: 'hidden', cursor: 'pointer',
+      borderColor: active ? 'oklch(0.78 0.13 90)' : 'var(--line)',
+      boxShadow: active ? 'var(--shadow-pop)' : 'var(--shadow-card)',
+      transition: 'border-color 120ms, box-shadow 120ms' }}>
+      <div style={{ width: 4, background: bar }} />
+      <div style={{ flex: 1, padding: '12px 14px 12px 14px' }}>
+        <div className="row" style={{ gap: 8, marginBottom: 6 }}>
+          <span className={'pill ' + typeTone} style={{ height: 18, fontSize: 10 }}>{a.type}</span>
+          <span className="row" style={{ gap: 5, color: 'var(--ink-muted)', fontSize: 12 }}>
+            <span style={{ width: 18, height: 18, borderRadius: 5, background: 'var(--cream-2)',
+              border: '1px solid var(--line)',
+              display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+              <D size={11} />
+            </span>
+            {dept.name} Agent
+          </span>
+          <span className="grow" />
+          <span style={{ fontSize: 11.5, color: 'var(--ink-soft)' }}>{a.when}</span>
+        </div>
+        <div style={{ fontSize: 14.5, fontWeight: 600, marginBottom: 4 }}>{a.title}</div>
+        <div style={{ fontSize: 13, color: 'var(--ink-muted)', lineHeight: 1.5 }}>{a.body}</div>
+        <div className="row" style={{ marginTop: 10, gap: 8 }}>
+          <button className="pill" style={{ cursor: 'pointer' }}>
+            <IconList size={10} />{a.task}
+          </button>
+          <span className="grow" />
+          {a.state === 'pending' && (<>
+            <button className="btn sm ghost" style={{ color: 'var(--ink-muted)' }}>Discuss</button>
+            <button className="btn sm" onClick={e => { e.stopPropagation(); onAct(a.id, 'reject'); }}>Reject</button>
+            <button className="btn sm primary" onClick={e => { e.stopPropagation(); onAct(a.id, 'approve'); }}>
+              <IconCheck size={11} /> Approve
+            </button>
+          </>)}
+          {a.state === 'approved' && <span className="pill sage"><IconCheck size={10} /> Approved · 4:12 PM</span>}
+          {a.state === 'rejected' && <span className="pill brick"><IconX size={10} /> Rejected</span>}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const ApprovalsView = ({ selected, onSelect, onAct }) => {
+  const [filter, setFilter] = React.useState('Pending');
+  const filtered = APPROVALS.filter(a => filter === 'All' ? true : a.state === filter.toLowerCase());
+  return (
+    <div style={{ flex: 1, overflow: 'auto', background: 'var(--canvas)' }}>
+      <div style={{ padding: '20px 28px 14px', borderBottom: '1px solid var(--line)' }}>
+        <div className="row" style={{ marginBottom: 4 }}>
+          <div className="col" style={{ gap: 4 }}>
+            <div className="micro">Inbox</div>
+            <div className="serif" style={{ fontSize: 30, lineHeight: 1.1, letterSpacing: '-0.01em' }}>Approvals</div>
+            <div style={{ color: 'var(--ink-muted)', fontSize: 13, marginTop: 2 }}>
+              Agents are waiting for your decision on the following actions.
+            </div>
+          </div>
+          <span className="grow" />
+          <button className="btn sm"><IconClock size={12} /> Auto-approve rules</button>
+        </div>
+        <div className="row" style={{ marginTop: 14, gap: 4 }}>
+          {['All', 'Pending', 'Approved', 'Rejected'].map(f => (
+            <button key={f} onClick={() => setFilter(f)}
+              className={'btn sm ' + (filter === f ? 'primary' : 'ghost')}>
+              {f}
+              {f === 'Pending' && (
+                <span style={{ background: filter === f ? 'oklch(0.35 0.05 85)' : 'var(--cream-2)',
+                  color: filter === f ? 'var(--paper)' : 'var(--ink-muted)',
+                  border: '1px solid ' + (filter === f ? 'transparent' : 'var(--line)'),
+                  fontSize: 10, padding: '0 5px', height: 16, borderRadius: 4,
+                  display: 'inline-flex', alignItems: 'center', marginLeft: 2 }}>
+                  {APPROVALS.filter(a => a.state === 'pending').length}
+                </span>
+              )}
+            </button>
+          ))}
+        </div>
+      </div>
+      <div style={{ padding: '16px 28px 40px', display: 'flex', flexDirection: 'column', gap: 10 }}>
+        {filtered.map(a => (
+          <ApprovalCard key={a.id} a={a} active={selected === a.id}
+            onClick={() => onSelect(a.id)} onAct={onAct} />
+        ))}
+        {filtered.length === 0 && (
+          <EmptyState title="Nothing to approve" body="When an agent needs your call it will land here." />
+        )}
+      </div>
+    </div>
+  );
+};
+
+const OnboardingView = ({ onContinue }) => {
+  const [v, setV] = React.useState('');
+  const examples = ['AI marketing agency', 'Subscription design service', 'B2B SaaS for accountants'];
+  return (
+    <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center',
+      justifyContent: 'center', padding: '40px 24px', background: 'var(--canvas)' }}>
+      <div style={{ width: '100%', maxWidth: 640 }}>
+        <div className="micro" style={{ marginBottom: 12 }}>New company · step 1 of 3</div>
+        <h1 className="serif" style={{ fontSize: 44, lineHeight: 1.05, letterSpacing: '-0.02em', margin: 0 }}>
+          What are you <span style={{ fontStyle: 'italic', color: 'var(--mustard-ink)' }}>building</span>?
+        </h1>
+        <p style={{ fontSize: 15, color: 'var(--ink-muted)', maxWidth: '60ch',
+          lineHeight: 1.55, marginTop: 14 }}>
+          Describe your business idea in one or two sentences. The Cofounder agent
+          will ask a few clarifying questions, then generate a roadmap of capabilities
+          to build — and the eight department agents who'll build them.
+        </p>
+        <div className="card" style={{ marginTop: 28, padding: 14,
+          boxShadow: 'var(--shadow-card)', background: 'var(--paper)' }}>
+          <textarea autoFocus value={v} onChange={e => setV(e.target.value)}
+            placeholder="A subscription service for designers who need ongoing brand work. Customers pay monthly, we deliver one design request at a time."
+            style={{ width: '100%', minHeight: 130, resize: 'vertical',
+              border: 'none', outline: 'none', background: 'transparent',
+              fontSize: 15, lineHeight: 1.55, padding: 6, color: 'var(--ink)' }} />
+          <div className="row" style={{ paddingTop: 4 }}>
+            <span style={{ fontSize: 11, color: 'var(--ink-soft)' }}>{v.length} / 600</span>
+            <span className="grow" />
+            <button className="btn ghost sm"><IconPaperclip size={12} /> Attach a deck</button>
+          </div>
+        </div>
+        <div className="row" style={{ marginTop: 14, gap: 6, flexWrap: 'wrap' }}>
+          <span style={{ fontSize: 11.5, color: 'var(--ink-soft)', marginRight: 4 }}>Try:</span>
+          {examples.map(e => (
+            <button key={e} onClick={() => setV(e + ' — ')} className="pill" style={{ cursor: 'pointer' }}>{e}</button>
+          ))}
+        </div>
+        <div className="row" style={{ marginTop: 24 }}>
+          <button className="btn ghost" style={{ color: 'var(--ink-soft)' }}>Skip — I'll fill this in later</button>
+          <span className="grow" />
+          <button className="btn primary lg" onClick={onContinue}>
+            Continue <IconArrowRight size={14} />
+          </button>
+        </div>
+        <div style={{ marginTop: 56, paddingTop: 22, borderTop: '1px dashed var(--line-strong)' }}>
+          <div className="micro" style={{ marginBottom: 10 }}>What happens next</div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 14 }}>
+            {[
+              { n: '1', t: 'Cofounder interview', d: '5–10 minute conversation to nail down ICP, problem, and what kind of business you actually want.' },
+              { n: '2', t: 'Roadmap generated', d: 'A tech-tree of ~30 capabilities across 8 stages and 8 departments.' },
+              { n: '3', t: 'First agents launch', d: 'You pick the next move; the relevant department agent does it.' },
+            ].map(s => (
+              <div key={s.n} className="col" style={{ gap: 4 }}>
+                <span className="mono" style={{ fontSize: 12, color: 'var(--mustard-ink)' }}>0{s.n}</span>
+                <span style={{ fontSize: 13, fontWeight: 600 }}>{s.t}</span>
+                <span style={{ fontSize: 12, color: 'var(--ink-soft)', lineHeight: 1.45 }}>{s.d}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const TasksView = ({ onOpenWorkspace }) => (
+  <div style={{ flex: 1, overflow: 'auto', background: 'var(--canvas)' }}>
+    <div style={{ padding: '20px 28px 14px', borderBottom: '1px solid var(--line)' }}>
+      <div className="micro">In flight</div>
+      <div className="serif" style={{ fontSize: 30, lineHeight: 1.1, letterSpacing: '-0.01em', marginTop: 4 }}>Tasks</div>
+      <div style={{ color: 'var(--ink-muted)', fontSize: 13, marginTop: 6 }}>
+        Every job an agent is currently running, across every department.
+      </div>
+    </div>
+    <div style={{ padding: 28, display: 'flex', flexDirection: 'column', gap: 10 }}>
+      {[
+        { dept: 'sales',       title: 'Define positioning for outbound',     status: 'running', step: '4 / 6',  agent: 'Sales Agent' },
+        { dept: 'engineering', title: 'Wire core product flow',              status: 'running', step: '8 / 14', agent: 'Engineering Agent' },
+        { dept: 'design',      title: 'Brand identity — v2 exploration',     status: 'running', step: '3 / 5',  agent: 'Design Agent' },
+        { dept: 'marketing',   title: 'Voice + messaging draft',             status: 'waiting', step: 'Needs your input', agent: 'Marketing Agent' },
+        { dept: 'ops',         title: 'Domain + email set-up',               status: 'waiting', step: 'Waiting on DNS', agent: 'Operations Agent' },
+      ].map((t, i) => {
+        const D = DEPT_ICON[t.dept]; const dept = DEPT_BY_ID[t.dept];
+        return (
+          <div key={i} className="card row" onClick={onOpenWorkspace}
+            style={{ padding: '12px 14px', gap: 12, cursor: 'pointer' }}>
+            <span style={{ width: 28, height: 28, borderRadius: 7, background: 'var(--cream-2)',
+              border: '1px solid var(--line)', color: 'var(--ink-muted)',
+              display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+              <D size={14} />
+            </span>
+            <div className="col" style={{ minWidth: 0 }}>
+              <div style={{ fontSize: 13.5, fontWeight: 600 }}>{t.title}</div>
+              <div style={{ fontSize: 11.5, color: 'var(--ink-soft)' }}>{t.agent} · {dept.name}</div>
+            </div>
+            <span className="grow" />
+            {t.status === 'running' && (
+              <span className="pill mustard">
+                <span style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--mustard)' }} className="anim-pulse" />
+                Running · {t.step}
+              </span>
+            )}
+            {t.status === 'waiting' && <span className="pill">{t.step}</span>}
+            <IconChevron size={14} style={{ color: 'var(--ink-soft)' }} />
+          </div>
+        );
+      })}
+    </div>
+  </div>
+);
+
+const LibraryView = () => (
+  <div style={{ flex: 1, overflow: 'auto', background: 'var(--canvas)' }}>
+    <div style={{ padding: '20px 28px 14px', borderBottom: '1px solid var(--line)' }}>
+      <div className="micro">Reference</div>
+      <div className="serif" style={{ fontSize: 30, lineHeight: 1.1, letterSpacing: '-0.01em', marginTop: 4 }}>Library</div>
+      <div style={{ color: 'var(--ink-muted)', fontSize: 13, marginTop: 6 }}>
+        Every artifact every agent has shipped, plus context you've pasted in.
+      </div>
+    </div>
+    <div style={{ padding: 28 }}>
+      <EmptyState title="Library viewer is a follow-up screen"
+        body="The 6-screen prototype scope ships Library as a stub. Wire the artifact viewer once core flows are validated." />
+    </div>
+  </div>
+);
+
+// ============================================================================
+// App + ScreenSwitcher
+// ============================================================================
+const { useState, useEffect } = React;
+
+function goTarget(target, setView, setDept, setDrawerNode, setChatMode, setSelectedApproval) {
+  setDrawerNode(null); setSelectedApproval(null);
+  if (target === 'onboarding') { setView('onboarding'); return; }
+  if (target === 'roadmap')    { setView('roadmap'); setChatMode('cofounder'); return; }
+  if (target === 'drawer')     { setView('roadmap'); setDrawerNode('id.brand'); setChatMode('cofounder'); return; }
+  if (target === 'chat')       { setView('roadmap'); setChatMode('workspace'); return; }
+  if (target === 'department') { setView('department'); setDept('engineering'); setChatMode('department'); return; }
+  if (target === 'approvals')  { setView('approvals'); setChatMode('cofounder'); return; }
+}
+
+const THEMES = [
+  { id: 'v1', label: 'V1 · Warm Paper',          hint: 'Inter + Instrument Serif. Mustard accent.' },
+  { id: 'v2', label: 'V2 · Factory Violet',       hint: 'Geist. Deep-violet accent. Pure system.' },
+  { id: 'v3', label: 'V3 · Mono Specimen',       hint: 'JetBrains Mono. Signal-orange accent. (t72t)' },
+  { id: 'v4', label: 'V4 · Technical Editorial', hint: 'Geist body + mono labels. V2 × V3 hybrid.' },
+  { id: 'v5', label: 'V5 · Chrome',              hint: 'JetBrains Mono. White + black + electric blue.' },
+  { id: 'v6', label: 'V6 · Charcoal',            hint: 'DM Sans only. Pale blue + rose. Dark canvas.' },
+  { id: 'v7', label: 'V7 · Charcoal Mono',       hint: 'JetBrains Mono. Same palette as V6 — terminal feel.' },
+  { id: 'v8', label: 'V8 · Brutalist',            hint: 'Inter Tight 900. Pure monotone — black + off-white only.' },
+  { id: 'v9', label: 'V9 · Droid',               hint: 'Press Start 2P + JetBrains Mono. Monotone warm off-white.' },
+  { id: 'v10', label: 'V10 · FL-41',              hint: 'Geist. FL-41 rose — dark warm sepia, peach cream text.' },
+  { id: 'v11', label: 'V11 · Warm Mono',          hint: 'V2 system × FL-41 palette. Geist. No color — pure value.' },
+  { id: 'v12', label: 'V12 · Factory Dark',       hint: 'Geist. Dark canvas + inverted cream cards. Orange-red accent.' },
+  { id: 'v13', label: 'V13 · GitHub Dark CB',     hint: 'Exact GitHub Dark Colorblind tokens. #0d1117 · #388bfd.' },
+  { id: 'v14', label: 'V14 · Factory Mono',       hint: 'V2 colors. Geist Mono only — no sans mixing.' },
+  { id: 'v15', label: 'V15 · Light Mono',          hint: 'V2 structure. Geist Mono only. Light canvas, gray accent.' },
+];
+
+const ThemeSwitcher = ({ theme, onChange }) => {
+  const [open, setOpen] = useState(false);
+  const current = THEMES.find(t => t.id === theme) || THEMES[2];
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 8 }}>
+      {open && (
+        <div className="fade-in card" style={{ padding: 8, minWidth: 280,
+          display: 'flex', flexDirection: 'column', gap: 2 }}>
+          <div className="micro" style={{ padding: '4px 8px' }}>Theme</div>
+          {THEMES.map(t => (
+            <button key={t.id} onClick={() => { onChange(t.id); setOpen(false); }}
+              style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start',
+                gap: 2, padding: '8px 10px', textAlign: 'left',
+                background: t.id === theme ? 'var(--cream-2)' : 'transparent',
+                borderRadius: 4 }}>
+              <span style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 12.5,
+                fontWeight: t.id === theme ? 600 : 500 }}>
+                <span style={{ width: 6, height: 6, borderRadius: '50%',
+                  background: t.id === theme ? 'var(--mustard)' : 'var(--line-strong)' }} />
+                {t.label}
+              </span>
+              <span style={{ fontSize: 11, color: 'var(--ink-soft)', paddingLeft: 14 }}>{t.hint}</span>
+            </button>
+          ))}
+        </div>
+      )}
+      <button className="btn" onClick={() => setOpen(o => !o)}
+        style={{ paddingLeft: 12, paddingRight: 12 }}>
+        Theme: {current.id.toUpperCase()} {open ? '▾' : '▴'}
+      </button>
+    </div>
+  );
+};
+
+const ScreenSwitcher = ({ view, drawerOpen, chatMode, onGo, theme, onThemeChange }) => {
+  const [open, setOpen] = useState(false);
+  const screens = [
+    { id: 'roadmap',    label: '1 · Roadmap home',         active: view === 'roadmap' && !drawerOpen && chatMode === 'cofounder' },
+    { id: 'drawer',     label: '2 · Node detail (drawer)', active: view === 'roadmap' && drawerOpen },
+    { id: 'chat',       label: '3 · Chat workspace',       active: chatMode === 'workspace' },
+    { id: 'department', label: '4 · Department drill-in',  active: view === 'department' },
+    { id: 'approvals',  label: '5 · Approvals inbox',      active: view === 'approvals' },
+    { id: 'onboarding', label: '6 · Onboarding',           active: view === 'onboarding' },
+  ];
+  return (
+    <div style={{ position: 'fixed', bottom: 16, right: 16, zIndex: 50,
+      display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 8 }}>
+      <ThemeSwitcher theme={theme} onChange={onThemeChange} />
+      {open && (
+        <div className="fade-in card" style={{ padding: 8, minWidth: 240,
+          boxShadow: 'var(--shadow-pop)', display: 'flex', flexDirection: 'column', gap: 2 }}>
+          <div className="micro" style={{ padding: '4px 8px' }}>Prototype · jump to screen</div>
+          {screens.map(s => (
+            <button key={s.id} onClick={() => { onGo(s.id); }} style={{
+              display: 'flex', alignItems: 'center', gap: 8, padding: '6px 8px', borderRadius: 6, textAlign: 'left',
+              background: s.active ? 'var(--cream-2)' : 'transparent',
+              fontWeight: s.active ? 600 : 500, fontSize: 12.5 }}>
+              <span style={{ width: 6, height: 6, borderRadius: '50%',
+                background: s.active ? 'var(--mustard)' : 'var(--line-strong)' }} />
+              {s.label}
+            </button>
+          ))}
+        </div>
+      )}
+      <button className="btn primary" onClick={() => setOpen(o => !o)}
+        style={{ borderRadius: 999, paddingLeft: 14, paddingRight: 14, boxShadow: 'var(--shadow-pop)' }}>
+        Screens {open ? '▾' : '▴'}
+      </button>
+    </div>
+  );
+};
+
+function App() {
+  const [view, setView] = useState('roadmap');
+  const [dept, setDept] = useState('engineering');
+  const [drawerNode, setDrawerNode] = useState(null);
+  const [chatMode, setChatMode] = useState('cofounder');
+  const [selectedApproval, setSelectedApproval] = useState(null);
+  const [theme, setTheme] = useState(() => {
+    try { return localStorage.getItem('theft-theme') || 'v3'; } catch { return 'v3'; }
+  });
+
+  useEffect(() => {
+    document.body.dataset.theme = theme;
+    try { localStorage.setItem('theft-theme', theme); } catch {}
+  }, [theme]);
+
+  useEffect(() => {
+    if (view === 'department') setChatMode('department');
+    else if (view !== 'tasks') setChatMode('cofounder');
+  }, [view]);
+
+  const onOpenNode = (id) => setDrawerNode(id);
+  const onLaunchAgent = () => { setChatMode('workspace'); setDrawerNode(null); };
+  const onApprovalAct = (id, action) => {
+    APPROVALS.forEach(a => { if (a.id === id) a.state = action === 'approve' ? 'approved' : 'rejected'; });
+    setSelectedApproval(s => s);
+    setView(v => v);
+  };
+
+  if (view === 'onboarding') {
+    return (<>
+      <TopBar minimal onLogo={() => setView('roadmap')} />
+      <div className="shell full" data-screen-label="06 Onboarding">
+        <OnboardingView onContinue={() => setView('roadmap')} />
+      </div>
+      <ScreenSwitcher view={view} dept={dept} drawerOpen={false} chatMode={chatMode}
+        theme={theme} onThemeChange={setTheme}
+        onGo={(t) => goTarget(t, setView, setDept, setDrawerNode, setChatMode, setSelectedApproval)} />
+    </>);
+  }
+
+  let crumb = 'Roadmap';
+  if (view === 'tasks') crumb = 'Tasks';
+  else if (view === 'approvals') crumb = 'Approvals';
+  else if (view === 'library') crumb = 'Library';
+  else if (view === 'department') crumb = 'Departments / ' + DEPT_BY_ID[dept].name;
+
+  let center = null;
+  if (view === 'roadmap') center = <RoadmapView onOpenNode={onOpenNode} drawerOpen={!!drawerNode} />;
+  else if (view === 'department') center = <DepartmentView deptId={dept} onOpenNode={onOpenNode} />;
+  else if (view === 'approvals') center = <ApprovalsView selected={selectedApproval} onSelect={setSelectedApproval} onAct={onApprovalAct} />;
+  else if (view === 'tasks') center = <TasksView onOpenWorkspace={() => setChatMode('workspace')} />;
+  else if (view === 'library') center = <LibraryView />;
+
+  let chat = null;
+  if (chatMode === 'workspace')
+    chat = <ChatPanelWorkspace onBack={() => setChatMode(view === 'department' ? 'department' : 'cofounder')} />;
+  else if (chatMode === 'department')
+    chat = <ChatPanelEmpty deptId={dept} title={DEPT_BY_ID[dept].name + ' Agent'} />;
+  else chat = <ChatPanelEmpty title="Cofounder" />;
+
+  const labels = {
+    roadmap: '01 Roadmap', department: '04 Department · ' + DEPT_BY_ID[dept].name,
+    approvals: '05 Approvals', tasks: 'Tasks', library: 'Library',
+  };
+
+  return (<>
+    <TopBar orgName="Designer Subs" breadcrumb={crumb} onLogo={() => setView('roadmap')} />
+    <div className="shell" data-screen-label={labels[view] || view}>
+      <Sidebar view={view} dept={dept}
+        onNav={(v) => { setView(v); setDrawerNode(null); }}
+        onDept={(d) => { setView('department'); setDept(d); setDrawerNode(null); }} />
+      <div style={{ position: 'relative', display: 'flex', flexDirection: 'column', minWidth: 0, overflow: 'hidden' }}>
+        {center}
+        {drawerNode && <NodeDrawer nodeId={drawerNode} onClose={() => setDrawerNode(null)} onLaunch={onLaunchAgent} />}
+      </div>
+      {chat}
+    </div>
+    <ScreenSwitcher view={view} dept={dept} drawerOpen={!!drawerNode} chatMode={chatMode}
+      theme={theme} onThemeChange={setTheme}
+      onGo={(t) => goTarget(t, setView, setDept, setDrawerNode, setChatMode, setSelectedApproval)} />
+  </>);
+}
+
+const root = ReactDOM.createRoot(document.getElementById('app'));
+root.render(<App />);
+</script>
+</body>
+</html>

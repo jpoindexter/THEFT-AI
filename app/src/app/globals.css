@@ -1,0 +1,231 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+
+  /* THEFT semantic colors */
+  --color-canvas: var(--t-canvas);
+  --color-paper: var(--t-paper);
+  --color-cream: var(--t-cream);
+  --color-cream-2: var(--t-cream-2);
+  --color-ink: var(--t-ink);
+  --color-ink-muted: var(--t-ink-muted);
+  --color-ink-soft: var(--t-ink-soft);
+  --color-line: var(--t-line);
+  --color-line-strong: var(--t-line-strong);
+  --color-mustard: var(--t-mustard);
+  --color-mustard-ink: var(--t-mustard-ink);
+  --color-sage: var(--t-sage);
+  --color-sage-ink: var(--t-sage-ink);
+  --color-brick: var(--t-brick);
+  --color-brick-ink: var(--t-brick-ink);
+
+  /* Type scale aliases (for arbitrary `text-2xs` etc) */
+  --text-2xs: var(--t-text-2xs);
+  --text-xs: var(--t-text-xs);
+  --text-sm: var(--t-text-sm);
+  --text-base: var(--t-text-base);
+  --text-md: var(--t-text-md);
+  --text-lg: var(--t-text-lg);
+  --text-xl: var(--t-text-xl);
+
+  --font-sans: var(--font-geist-mono), ui-monospace, SFMono-Regular, Menlo, monospace;
+  --font-mono: var(--font-geist-mono), ui-monospace, SFMono-Regular, Menlo, monospace;
+  --font-heading: var(--font-geist-mono), ui-monospace, SFMono-Regular, Menlo, monospace;
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+  --radius-3xl: calc(var(--radius) * 2.2);
+  --radius-4xl: calc(var(--radius) * 2.6);
+}
+
+:root {
+  /* === THEFT AI V2 design tokens ===
+   *
+   * Aesthetic: Factory.ai palette. Geist Mono throughout.
+   * Canvas #eeeeee, paper #fafafa, ink #020202 (near-black).
+   * Code Orange (#ef6f2e) is the sole accent hue. Green/red for status only.
+   */
+
+  /* Brand */
+  --t-cream: #eeeeee;
+  --t-cream-2: #e4e0dd;
+  --t-canvas: #eeeeee;
+  --t-paper: #fafafa;
+  --t-ink: #020202;
+  --t-ink-muted: #3d3a39;
+  --t-ink-soft: #a49d9a;
+  --t-line: #b8b3b0;
+  --t-line-strong: #a49d9a;
+
+  /* Accent: Code Orange for active/primary states. Sage/brick for status signals. */
+  --t-mustard: #ef6f2e;
+  --t-mustard-ink: #ef6f2e;
+  --t-sage: #4a8c5c;
+  --t-sage-ink: #2d6640;
+  --t-brick: #b05858;
+  --t-brick-ink: #8a3a3a;
+
+  /* Spacing scale (4px base) */
+  --t-space-1: 0.25rem;
+  --t-space-2: 0.5rem;
+  --t-space-3: 0.75rem;
+  --t-space-4: 1rem;
+  --t-space-5: 1.5rem;
+  --t-space-6: 2rem;
+  --t-space-8: 3rem;
+
+  /* Typography scale — small, dense; cofounder uses 10-15px */
+  --t-text-2xs: 0.625rem;   /* 10px — eyebrow, badges */
+  --t-text-xs: 0.6875rem;   /* 11px — meta */
+  --t-text-sm: 0.75rem;     /* 12px — body small */
+  --t-text-base: 0.8125rem; /* 13px — body */
+  --t-text-md: 0.875rem;    /* 14px — section titles */
+  --t-text-lg: 0.9375rem;   /* 15px — page eyebrow */
+  --t-text-xl: 1.25rem;     /* 20px — page H1 */
+
+  /* Radii */
+  --t-radius-sm: 0.375rem;
+  --t-radius-md: 0.5rem;
+  --t-radius-lg: 0.75rem;
+  --t-radius-pill: 9999px;
+
+  /* Motion */
+  --t-ease: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --t-dur-1: 120ms;
+  --t-dur-2: 200ms;
+  --t-dur-3: 320ms;
+
+  /* shadcn aliases that downstream components read */
+  --background: var(--t-cream);
+  --foreground: var(--t-ink);
+  --card: var(--t-paper);
+  --card-foreground: var(--t-ink);
+  --popover: var(--t-paper);
+  --popover-foreground: var(--t-ink);
+  --primary: var(--t-ink);
+  --primary-foreground: var(--t-canvas);
+  --secondary: var(--t-canvas);
+  --secondary-foreground: var(--t-ink);
+  --muted: var(--t-canvas);
+  --muted-foreground: var(--t-ink-muted);
+  --accent: var(--t-canvas);
+  --accent-foreground: var(--t-ink);
+  --destructive: var(--t-brick);
+  --border: var(--t-line);
+  --input: var(--t-line);
+  --ring: var(--t-line-strong);
+  --chart-1: oklch(0.87 0 0);
+  --chart-2: oklch(0.556 0 0);
+  --chart-3: oklch(0.439 0 0);
+  --chart-4: oklch(0.371 0 0);
+  --chart-5: oklch(0.269 0 0);
+  --radius: 0.625rem;
+  --sidebar: oklch(0.985 0 0);
+  --sidebar-foreground: oklch(0.145 0 0);
+  --sidebar-primary: oklch(0.205 0 0);
+  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-accent: oklch(0.97 0 0);
+  --sidebar-accent-foreground: oklch(0.205 0 0);
+  --sidebar-border: oklch(0.922 0 0);
+  --sidebar-ring: oklch(0.708 0 0);
+}
+
+.dark {
+  /* V15 dark — same monotone, inverted */
+  --t-cream: #111111;
+  --t-canvas: #141414;
+  --t-paper: #1a1a1a;
+  --t-ink: #f0f0f0;
+  --t-ink-muted: #888888;
+  --t-ink-soft: #555555;
+  --t-line: #2a2a2a;
+  --t-line-strong: #333333;
+
+  --t-mustard: #222222;
+  --t-mustard-ink: #888888;
+  --t-sage: #4a8c5c;
+  --t-sage-ink: #6ab87c;
+  --t-brick: #b05858;
+  --t-brick-ink: #d07878;
+
+  --background: var(--t-cream);
+  --foreground: var(--t-ink);
+  --card: var(--t-paper);
+  --card-foreground: var(--t-ink);
+  --popover: var(--t-paper);
+  --popover-foreground: var(--t-ink);
+  --primary: var(--t-ink);
+  --primary-foreground: var(--t-cream);
+  --secondary: var(--t-canvas);
+  --secondary-foreground: var(--t-ink);
+  --muted: var(--t-canvas);
+  --muted-foreground: var(--t-ink-muted);
+  --accent: var(--t-canvas);
+  --accent-foreground: var(--t-ink);
+  --destructive: var(--t-brick);
+  --border: var(--t-line);
+  --input: var(--t-line);
+  --ring: var(--t-line-strong);
+  --chart-1: oklch(0.87 0 0);
+  --chart-2: oklch(0.556 0 0);
+  --chart-3: oklch(0.439 0 0);
+  --chart-4: oklch(0.371 0 0);
+  --chart-5: oklch(0.269 0 0);
+  --sidebar: oklch(0.205 0 0);
+  --sidebar-foreground: oklch(0.985 0 0);
+  --sidebar-primary: oklch(0.488 0.243 264.376);
+  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-accent: oklch(0.269 0 0);
+  --sidebar-accent-foreground: oklch(0.985 0 0);
+  --sidebar-border: oklch(1 0 0 / 10%);
+  --sidebar-ring: oklch(0.556 0 0);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-canvas text-ink font-mono;
+    font-size: 13px;
+    line-height: 1.55;
+    letter-spacing: -0.02em;
+  }
+}

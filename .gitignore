@@ -1,0 +1,23 @@
+# OS
+.DS_Store
+
+# Visual reference frames (binary assets, not source)
+frames/
+frames2/
+twinframes/
+screenshots/
+
+# Reference clones and read-only platform (not project code)
+_reference/
+paperclip/
+
+# Claude Code local config
+.claude/
+
+# Node
+node_modules/
+
+# Env
+.env
+.env.local
+.env*.local

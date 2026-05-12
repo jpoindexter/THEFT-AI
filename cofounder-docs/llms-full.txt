@@ -1,0 +1,2397 @@
+# Cofounder Docs
+
+> Standalone docs site for the Superoptimizers-hosted Cofounder documentation.
+
+This document contains the full content of all documentation pages for AI consumption.
+
+---
+
+## Introduction
+
+**URL:** https://docs.cofounder.co/
+**Description:** Get started with Cofounder and run your business with agents.
+
+## What is Cofounder?
+
+Cofounder is a workspace for running your company with agents.
+
+Work is organized into departments, and each department has agents with their own scope, tools, and skills. That might mean a Marketing Agent that has learned how you want go-to-market work handled, or an engineering agent focused on building product. You hand work to the right agent, and Cofounder keeps it organized in one place.
+
+## Start Here
+
+  
+  
+  
+
+## Docs Access
+
+Cofounder has access to all of these docs.
+
+## Explore The Product
+
+---
+
+## Custom Agents
+
+**URL:** https://docs.cofounder.co/agents/custom-agents
+**Description:** Create your own agents and route work to the right custom agent.
+
+## Custom Agents
+
+Custom agents let you turn repeatable work into a reusable agent in Cofounder.
+
+Use a custom agent when the same kind of work shows up again and you want it handled with the same instructions, tools, and output format each time.
+
+## When To Add A Custom Agent
+
+Use a custom agent when the task is:
+
+- Repeated often
+- Owned by a clear specialty
+- Best handled with the same instructions every time
+- Dependent on a known set of tools or approvals
+- Easier to automate with a focused workflow than with a general-purpose agent
+
+Custom agents are a good fit for work such as:
+
+- A marketing agent that writes campaign briefs and updates launch docs
+- An engineering agent that follows your review and testing process
+- An operations agent that collects data and prepares status updates
+
+## Common Workflows
+
+### Create a custom agent
+
+1. Open **Canvas** and use the `+` button to add a new agent.
+2. Give the agent a clear name and purpose.
+3. Add the instructions, model, skills, and tools it should use.
+4. Save it as a reusable agent.
+
+Use names that describe the job, not the underlying model. For example, **Launch Planner**, **QA Reviewer**, or **Support Triage Agent** are easier to understand than a generic label.
+
+### Route work to the right agent
+
+Cofounder can automatically match work to the most appropriate custom agent in your workspace.
+
+- A support request can go to a support agent
+- A launch request can go to a marketing agent
+- A test failure can go to a QA or engineering agent
+
+Automatic matching works best when each agent has a clear purpose and a distinct scope.
+
+## Customize A Custom Agent
+
+The agent editor lets you configure the agent's main working contract.
+
+Depending on the agent, you can set:
+
+- the agent name
+- custom instructions
+- model choice
+- connected apps
+- scheduled tasks
+
+### Refine the instructions
+
+Instructions are the most direct way to shape how an agent behaves.
+
+Use them to define:
+
+- The agent’s role
+- The expected result
+- The tone and format
+- Decision rules
+- What to do when information is missing
+
+### Add skills
+
+Skills extend an agent with repeatable behaviors for a specific kind of work.
+
+Use skills when the agent needs to:
+
+- Follow a checklist
+- Format output in a specific way
+- Apply a known process
+- Handle a recurring task with the same steps each time
+
+### Connect the right tools
+
+Custom agents work best when they can access the tools they actually need.
+
+For example, an agent might use:
+
+- `GitHub`, `Linear`, `Vercel`, or `Supabase` for engineering work
+- `Notion`, `Google Docs`, `Google Drive`, or `Airtable` for content and planning work
+- `Slack`, `Gmail`, or `Intercom` for support and communication workflows
+- `Stripe`, `Metabase`, `PostHog`, or `Attio` for billing, reporting, and go-to-market work
+
+### Scheduled Tasks
+
+Scheduled tasks belong to an agent.
+
+Use a scheduled task when the same agent should run on a cadence such as every morning, every weekday, or every week.
+
+One agent can have multiple scheduled tasks. For example, the same operations agent might run a daily status update, a weekly metrics review, and a monthly cleanup checklist.
+
+Each scheduled task can have its own:
+
+- title
+- instructions
+- cadence
+- enabled or paused state
+
+Use separate scheduled tasks when the timing, instructions, or expected output are different, even if the same agent should do the work.
+
+## Next Steps
+
+- [Agents Overview](/agents/overview)
+- [Skills](/agents/skills)
+- [Integrations Overview](/integrations/overview)
+
+---
+
+## Design Agent
+
+**URL:** https://docs.cofounder.co/agents/design-agent
+**Description:** Use the Design Agent for brand systems, visual assets, decks, email templates, and UI kits.
+
+## What The Design Agent Is For
+
+The Design Agent owns brand identity, visual systems, decks, email templates, and UI kits.
+
+Use it when you need design output that should follow the company's brand system rather than a one-off visual draft.
+
+Good Design Agent tasks include:
+
+- logo directions after brand setup is locked
+- branded pitch decks and internal decks
+- email templates
+- UI kits, component guidance, and design tokens
+- visual system refinements
+- brand-aligned image directions and asset sets
+
+For campaign strategy, messaging, naming, or marketing assets, use the **Marketing Agent**. For implementation-heavy UI changes in the app repo, use the **Engineer**.
+
+## How To Start
+
+Open **Canvas**, choose **Design Agent**, and describe the asset or system you want.
+
+Strong requests include the intended audience, format, brand constraints, and where the output should be used:
+
+- `Create logo directions from the locked brand kit.`
+- `Create a branded pitch deck for seed investors.`
+- `Create three email templates for onboarding, activation, and renewal.`
+- `Generate a UI kit with tokens, component rules, and examples.`
+- `Refine the brand system for a more enterprise-facing sales motion.`
+
+## What It Uses
+
+When available, the Design Agent uses the workspace brand files as source of truth, especially `DESIGN.md` and brand-kit history in the Library.
+
+That keeps new assets aligned with the current visual system instead of restarting brand work from scratch.
+
+## What It Creates
+
+Common outputs include:
+
+- logo direction notes and visual options
+- deck artifacts
+- email template artifacts
+- UI kit guidance
+- design-token recommendations
+- component examples and usage rules
+- image directions or generated visuals
+
+Generated files and artifacts should land in the **Library** so the team can review and reuse them.
+
+## Review Before Using Externally
+
+Review brand and design assets before sending them to customers, investors, prospects, or production channels.
+
+Check that the work matches the current brand system, uses the right claims and numbers, and fits the audience before publishing or sharing.
+
+## Next Steps
+
+- [Library](/workspace/library)
+- [Marketing Agent](/agents/marketing-agent)
+- [Engineer Agent](/agents/engineer-agent)
+- [Agents Overview](/agents/overview)
+
+---
+
+## Engineer Agent
+
+**URL:** https://docs.cofounder.co/agents/engineer-agent
+**Description:** Use the Engineer for product code, app changes, debugging, PRs, and local verification.
+
+## What The Engineer Is For
+
+The Engineer owns product and app implementation work.
+
+Use it when the task needs code changes, repository investigation, debugging, tests, migrations, previews, or a pull request.
+
+Good Engineer tasks include:
+
+- fixing bugs in app or backend flows
+- building product features
+- changing UI, routing, APIs, jobs, or data flows
+- adding or updating database migrations
+- debugging failed previews, builds, tests, or deploys
+- implementing Stripe, billing, checkout, subscriptions, or webhooks
+- making technical SEO or site changes that require repository edits
+
+For campaign strategy, naming, content, or creative assets, use the **Marketing Agent**. For brand systems, decks, email templates, or UI kits, use the **Design Agent**. For ICP, outbound, customer development, or pipeline work, use the **Sales Agent**.
+
+## How To Start
+
+Open **Canvas**, choose **Engineer**, and describe the product or code outcome you want.
+
+Strong requests include the expected behavior, affected area, repo context, constraints, and verification you want:
+
+- `Fix the checkout error when a user changes plans. Add tests and open a PR.`
+- `Add a settings toggle for workspace notifications and verify it locally.`
+- `Debug why the preview build is failing and send the smallest safe fix.`
+- `Add the Supabase migration for saved reports, then update the app UI.`
+- `Implement Stripe checkout for the new plan and verify the happy path.`
+
+## What It Does
+
+The Engineer can inspect the repository, change files, run commands, run tests, start the app locally, use local Supabase, and open a PR when the work is ready.
+
+For user-facing changes, ask it to verify the affected flow in the sandbox before handing the work back. The Engineer should report what it tested, what passed, and any remaining manual review needed.
+
+## Current App Stack Support
+
+The managed app platform currently works best for **Next.js** apps. The app repository, Vercel previews, Supabase wiring, publishing flow, and sandbox browser verification are primarily built around that path.
+
+Mobile app functionality is currently being implemented through **React Native** and **Expo** integration. For now, mobile app requests should be treated as in-progress platform support rather than the same default flow as Next.js app work.
+
+## Testing Changes Locally
+
+The Engineer can test app changes in a sandbox before you review a PR.
+
+That means it can make a change, run the app locally, open the app in a browser, and check the affected flow before handing the work back to you.
+
+This is especially useful for:
+
+- product flows that need clicking through
+- UI changes that should be checked visually
+- forms, dashboards, and authenticated screens
+- database-backed features
+- Supabase migrations or schema changes
+
+For browser testing, the Engineer opens the local version of the app inside its sandbox and interacts with it like a user. It can load changed pages, click through flows, fill out forms, check desktop and mobile layouts, and fix issues it finds before asking you to review.
+
+You can ask for this directly:
+
+- `Test the signup flow in the sandbox before opening the PR.`
+- `Click through the dashboard and make sure the new empty state looks right.`
+- `Check this change on desktop and mobile.`
+- `Run the app locally and include screenshots of the tested flow.`
+
+If the app requires a login, add browser test credentials in [AI Settings](/settings/ai-settings) so the Engineer can use a test account instead of your personal account.
+
+If browser verification runs into a login wall, missing account, missing organization, or empty test data, the Engineer should keep going when it can do so safely. It should use test credentials, start local Supabase, create a local-only test user or seed data, and retry the browser flow instead of stopping at the first setup issue.
+
+## Local Supabase Verification
+
+When a change depends on the database, auth, or storage, the Engineer can run Supabase locally in the sandbox.
+
+Local Supabase gives the Engineer a safe backend for testing app behavior without touching production data.
+
+The Engineer can use it to:
+
+- apply and test migrations
+- confirm new tables or columns work with the app
+- create test data
+- test login and auth-dependent flows
+- verify database-backed UI before the PR is ready for review
+
+For schema changes, the Engineer should still put migrations in the app repo and send them through the normal review and publishing flow.
+
+For authenticated flows, ask the Engineer to create a local-only test user before browser testing. If the agent changes `seed.sql`, it should run `supabase db reset` against the local Supabase stack before retrying the browser flow so the running database sees the new seed data.
+
+You can copy and paste this:
+
+```text
+Set up a local-only test user for this app using seed.sql.
+Then run supabase db reset locally so the seed is applied.
+Run the app with local Supabase and use that test user to
+browser-test the changed flow end to end.
+
+Do not use my personal account. Use non-sensitive test data,
+and include the local test login plus what you verified in your
+final summary or PR notes.
+```
+
+## Database Viewer
+
+The database viewer lives on Canvas as the **Database** artifact in the **Engineering** workspace.
+
+Use it to browse tables in the managed Supabase project from inside Cofounder. It also lets you upload a CSV file directly into one of those tables without leaving the Engineering workspace.
+
+The Database artifact lets you:
+
+- browse tables in the managed Supabase project
+- open a table and see its records
+- upload a CSV file into the currently opened table
+
+To upload a CSV:
+
+1. Open **Canvas**.
+2. Open the **Engineering** workspace.
+3. Open the **Database** artifact or **Database** tab.
+4. Pick a schema and open the table you want to import into.
+5. In the table view, click **Upload CSV** in the header.
+
+The import flow walks through file selection, header mapping review, and import. Rows are appended to the table. Existing rows are not touched, and the import does not truncate or replace data.
+
+CSV imports expect a standard `.csv` file with a header row. Headers must match columns on the target table, and the importer rejects unsupported mappings such as generated columns, unsupported identity columns, array columns, unknown columns, or missing required columns.
+
+Empty cells for non-text columns are treated as "not provided", so column defaults and nulls still apply. If some rows fail validation, Cofounder reports row-level errors so you can fix the CSV and run the import again.
+
+## Previews And Feedback
+
+When the Engineer puts up a PR, Cofounder can show the preview right in the workspace.
+
+The preview is the staged version of the PR. You can review the app or site as it exists in that branch before deciding what should happen next.
+
+Previews also support [**Agentation**](https://www.agentation.com/). Use the Agentation bar in the bottom right of the preview to leave feedback directly on the UI and point to the part of the page you want changed.
+
+That feedback can be handed back to the Engineer as follow-up work. In practice, you can review the preview, leave comments, and have the Engineer keep working from that feedback instead of starting over in a separate flow.
+
+Markdown artifacts also support direct comments. Open a Markdown artifact, switch between **Preview** and **Source** when needed, select text or comment on the whole document, then send the comments to the artifact's chat. Cofounder keeps the selected quote, surrounding context, and current version with the message so the Engineer can make a scoped edit or reply when the request is ambiguous.
+
+Before a PR reaches preview, the Engineer can also run the changed app in a sandbox and test the affected flow in a browser. For database-backed changes, it can use local Supabase to verify the app behavior before asking you to review.
+
+## Plan First When The Change Is Risky
+
+Choose **Plan** when the engineering change is large, risky, or touches several systems.
+
+Plan mode is useful for:
+
+- schema or migration work
+- auth, billing, permissions, or security-sensitive changes
+- work across frontend, backend, and infrastructure
+- unclear bugs where the fix path is not obvious
+
+After you approve the plan, the agent can continue into implementation.
+
+## Review Before Shipping
+
+Review the PR, preview, migration, and test notes before merging.
+
+Pay extra attention to:
+
+- database migrations and data changes
+- auth, billing, secrets, and permissions
+- user-visible UI changes
+- external service changes
+- tests the agent could not run
+
+## Next Steps
+
+- [Migrations](/managed-services/migrations)
+- [Agents Overview](/agents/overview)
+
+---
+
+## Marketing Agent
+
+**URL:** https://docs.cofounder.co/agents/marketing-agent
+**Description:** Use the Marketing Agent for campaigns, positioning, creative assets, launches, and marketing-site planning.
+
+## What The Marketing Agent Is For
+
+The Marketing Agent owns campaign, content, creative, positioning, growth, and marketing-site work.
+
+Use it when you want to turn a marketing question into durable outputs you can review, reuse, and share across the workspace.
+
+Good Marketing Agent tasks include:
+
+- launch plans and campaign briefs
+- positioning, messaging, and naming work
+- channel plans, launch calendars, and content systems
+- landing-page briefs and marketing-site recommendations
+- marketing decks, one-pagers, images, social assets, audio, and short videos
+- measurement plans and SEO briefs
+
+For sales pipeline, outbound, ICP, or customer-development work, use the [Sales Agent](/agents/sales-agent). For brand systems, decks, email templates, or UI kits, use the [Design Agent](/agents/design-agent). For broad app, backend, infrastructure, or risky code changes, use the [Engineer](/agents/engineer-agent).
+
+## How To Start
+
+Open **Canvas**, choose **Marketing Agent**, and ask for the outcome you want.
+
+Strong requests include the audience, goal, channel, source context, and review format:
+
+- `Create a launch campaign for our new team inbox feature. Audience: seed-stage founders. Include the core message, channel plan, launch calendar, and first-pass copy.`
+- `Build an investor update deck from last month's metrics. Keep it board-ready and easy to revise.`
+- `Generate three hero image directions for our homepage, then recommend the strongest one for the current positioning.`
+- `Create a 15-second launch teaser for this release.`
+- `Turn this campaign brief into an SEO brief with query themes, target pages, proof points, and measurement expectations.`
+
+## What The Marketing Agent Can Generate
+
+The Marketing Agent is not limited to planning. It can also create marketing assets and save useful outputs to the **Library**.
+
+Common outputs include:
+
+- **HTML** decks, presentations, mini-sites, and rich one-pagers that render directly in Cofounder for review and iteration
+- standalone marketing images generated with **GPT Image 2**, **Nano Banana**, or **Gemini** for hero art, ad creative, and editorial illustrations in square, landscape, or portrait formats
+- **Stitch** screen concepts and design variants for early UI exploration, best treated as concept sketches rather than production-ready UI
+- **Gamma** assets only when you specifically need a Gamma-native template, share link, or fallback export path
+- original campaign music with **ACE-Step** for jingles, sonic logos, intro/outro cues, and background music beds when the ACE-Step runtime is configured
+- short AI-generated videos with **Seedance** for teaser-style marketing assets and launch visuals
+- campaign briefs, messaging matrices, channel plans, launch calendars, content systems, social bundles, measurement plans, and SEO briefs
+- publishing-ready drafts when the right integrations are connected, while keeping live sends and posts review-gated
+
+Generated files and artifacts should land in the **Library** so you can review them, reuse them, and bring them into later agent tasks.
+
+These are best used when you already know the outcome you want, even if the first draft still needs iteration.
+
+Example requests:
+
+- `Build me an HTML investor update deck from last month's metrics.`
+- `Generate a landscape hero image for our landing page, minimal style.`
+- `Sketch three variants of a pricing page for me.`
+- `Create an original sonic logo and intro music bed for this launch.`
+- `Create a short teaser video for this launch.`
+
+## Ask For The Outcome
+
+Ask for the result you want, not the tool you think should create it.
+
+Cofounder will choose the best available format for the job and save reviewable work in the **Library**. You can still ask for a specific format when it matters, such as a deck, one-pager, image set, social draft pack, or launch teaser.
+
+Good format-specific requests:
+
+- `Build an investor update deck from these metrics.`
+- `Create a 10-slide launch narrative with speaker notes.`
+- `Turn this campaign plan into a one-page internal brief.`
+
+## How It Works
+
+The Marketing Agent starts from the context available in your workspace, then creates the most useful next artifact for the request.
+
+That might be a strategy brief, a draft pack, a visual direction, a campaign plan, or a brief for another agent. Not every workspace has every integration connected, so the agent should use what is available and make any missing context clear.
+
+## Review Before Publishing
+
+The Marketing Agent can prepare assets and publishing drafts, but you should review anything that leaves the workspace.
+
+Review before:
+
+- sending email campaigns
+- scheduling or publishing social posts
+- changing a live marketing site
+- using generated claims, customer quotes, pricing, or performance numbers
+- sharing decks or assets with external audiences
+
+This review step is part of the normal workflow. It lets the agent move quickly while keeping final judgment with the team.
+
+## Next Steps
+
+- [Library](/workspace/library)
+- [Quickstart](/get-started/quickstart)
+- [Engineer Agent](/agents/engineer-agent)
+- [Design Agent](/agents/design-agent)
+- [Sales Agent](/agents/sales-agent)
+- [Agents Overview](/agents/overview)
+- [SEO Agent And Departments](/workspace/departments)
+
+---
+
+## Agents Overview
+
+**URL:** https://docs.cofounder.co/agents/overview
+**Description:** Understand what an agent is in Cofounder, what it consists of, which agents are created by default, and how to add new ones.
+
+## What An Agent Is
+
+Agents are the units that do work in Cofounder.
+
+Each one is responsible for a particular kind of job. That might be engineering work, go-to-market work, SEO, security, or infrastructure. When you start a task, you are handing that work to an agent with the right scope for the job.
+
+Agents are organized inside departments.
+
+**Cofounder** is the exception. It is the top-level agent for the workspace, accessible from the side panel. It can help create or route tasks across the workspace instead of acting like a department-specific agent.
+
+## What An Agent Includes
+
+Every agent has a few core parts:
+
+- **Instructions** that define what the agent owns and how it should behave
+- **Model** that defines the reasoning engine the agent uses
+- **Integrations** that define which tools and systems it can use
+- **Skills** that add reusable guidance for a specific kind of work
+- **Department** that determines which lane of the company the agent belongs to
+
+An engineering agent and a Marketing Agent should have different instructions, different tools, different skills, and live in different departments.
+
+## Default Agents
+
+After onboarding, Cofounder is available from the side panel and your workspace is seeded with agents for the main operating areas.
+
+The seeded default agents are:
+
+- **Operations Agent**
+- **Engineer**
+- **Marketing Agent**
+- **Design Agent**
+- **Sales Agent**
+- **Support Agent**
+- **Ops Agent**
+- **Finance Agent**
+
+## Default Agent Roles
+
+- **Cofounder** is the top-level workspace agent in the side panel
+- **Operations Agent** handles broad tasks and routes work to the right tools or agents
+- **Engineer** is for product and app work
+- **Marketing Agent** is for launches, messaging, campaigns, and marketing asset generation such as HTML decks, images, UI concepts, music, and short videos
+- **Design Agent** is for brand systems, decks, email templates, visual assets, and UI kits
+- **Sales Agent** is for ICP, outbound, customer development, pipeline, and GTM execution
+- **Support Agent** is for support replies, ticket triage, and support workflow improvements
+- **Ops Agent** is for reconciliation, recurring reporting, and operational cleanup
+- **Finance Agent** is for collections, close support, billing inbox triage, and finance reporting
+
+Cofounder sits above that layer as the workspace-level agent, while the seeded agents are for specific kinds of work.
+
+## Adding New Agents
+
+You can add new agents when you need an agent that does not already exist in the workspace. Examples include support, operations, finance, recruiting, or a specific internal workflow.
+
+New agents usually include:
+
+- one clear job
+- the right integrations for that job
+- the few skills that actually help
+
+## Agents Vs. Skills Vs. Departments
+
+- An **agent** is the worker
+- A **skill** is reusable guidance attached to that worker
+- A **department** is the operating area that groups agents and their work
+
+## Next Steps
+
+- [Engineer Agent](/agents/engineer-agent)
+- [Marketing Agent](/agents/marketing-agent)
+- [Design Agent](/agents/design-agent)
+- [Sales Agent](/agents/sales-agent)
+- [Departments](/workspace/departments)
+- [Skills](/agents/skills)
+- [Canvas](/workspace/canvas)
+
+---
+
+## Sales Agent
+
+**URL:** https://docs.cofounder.co/agents/sales-agent
+**Description:** Use the Sales Agent for ICP, outbound, customer development, pipeline, and GTM execution.
+
+## What The Sales Agent Is For
+
+The Sales Agent owns sales and go-to-market execution.
+
+Use it when the task involves ICP, target accounts, customer development, outbound, qualified pipeline, follow-up, consult calls, pitches, negotiation, or account handoff.
+
+Good Sales Agent tasks include:
+
+- defining positioning from market and competitor research
+- finding qualified accounts and buyer contacts
+- preparing outbound domains and inbox setup
+- drafting and sending approved cold outreach
+- scheduling consult calls
+- qualifying opportunities
+- reviewing consult notes and pitch feedback
+- preparing negotiation or close plans
+- onboarding a newly closed account
+
+For campaign creative, brand direction, content, or marketing-site work, use the **Marketing Agent**. For technical SEO or site implementation, use the **Engineer**.
+
+## How To Start
+
+Open **Canvas**, choose **Sales Agent**, and describe the sales outcome you want.
+
+Strong requests include the target segment, source context, desired CRM updates, and whether external outreach should be drafted or sent:
+
+- `Define our ICP and positioning for mid-market fintech teams.`
+- `Gather qualified prospects for our ICP and save reliable account notes.`
+- `Draft cold outreach for these accounts, but do not send until I approve.`
+- `Review this consult transcript and update the opportunity next steps.`
+- `Prepare negotiation options for this deal.`
+
+## How It Works
+
+The Sales Agent starts from existing product, company, research, CRM, contact, email, calendar, and task context when those sources are connected.
+
+It should keep sales records current as work happens. That includes Accounts, Contacts, Opportunities, and Activity when reliable facts, owners, next steps, or follow-up history are available.
+
+The agent should not invent accounts, contacts, replies, pipeline status, or customer evidence.
+
+## Review Before External Actions
+
+External actions stay review-gated.
+
+Review before the agent:
+
+- sends cold outreach or follow-up
+- changes calendar events
+- updates important opportunity status
+- marks a deal as closed
+- commits to pricing, scope, or customer promises
+
+The Sales Agent can draft the message, sequence, meeting plan, or CRM update first. Approve the action when you are ready for it to happen.
+
+## Next Steps
+
+- [Marketing Agent](/agents/marketing-agent)
+- [Agents Overview](/agents/overview)
+- [Company](/workspace/company)
+- [Library](/workspace/library)
+
+---
+
+## Skills
+
+**URL:** https://docs.cofounder.co/agents/skills
+**Description:** Create reusable guidance packages and attach them to your agents.
+
+Skills are reusable guidance assets.
+
+Each skill includes:
+
+- a name
+- a description
+- a `SKILL.md`
+- optional supporting files
+
+From the Skills UI, you can:
+
+- create a new skill
+- import a skill from GitHub
+- open a skill and browse its files
+- edit custom skills directly in the app
+- upload additional files into a custom skill
+- attach selected skills to an agent from the agent form
+
+Built-in skills can be read-only. Custom skills can be edited or deleted.
+
+The **Skills** tab starts with create and import actions. If your workspace has no skills yet, Cofounder shows an empty state with those same actions.
+
+## When To Use A Skill
+
+Use a skill when:
+
+- the guidance should be shared across multiple agents
+- the instructions are deep enough that they deserve their own file
+- you want supporting reference files, not just one text box
+
+Use agent custom instructions when the guidance is specific to one agent and does not need its own reusable package.
+
+## Next Steps
+
+- [Agents Overview](/agents/overview)
+- [Custom Agents](/agents/custom-agents)
+- [Integrations Overview](/integrations/overview)
+
+---
+
+## What Happens After Onboarding
+
+**URL:** https://docs.cofounder.co/get-started/after-onboarding
+**Description:** Understand what Cofounder sets up during onboarding and how your workspace is organized once you are ready to start work.
+
+## Your Workspace Is Already Structured
+
+After onboarding, Cofounder should feel like a working company system, not a blank sandbox.
+
+After onboarding, your workspace already has departments for the parts of the business you want to run, agents inside those departments, and the core infrastructure those agents need.
+
+## What Onboarding Sets Up
+
+Every onboarded workspace gets:
+
+- an **app** GitHub repository for the main app codebase
+- a **marketing** GitHub repository for the site, launch pages, and growth surface
+- corresponding **Vercel** projects so app and marketing work can ship to the right deploy target
+- a managed **Supabase** project for the organization's database and backend operations
+- starter departments and agents aligned to the way the company runs
+- a shared **Library** for files that agents and users need to reference across work
+
+## Current App Platform Support
+
+Today, the managed platform mainly supports web apps built with **Next.js**.
+
+That is the default path for the app repository, Vercel deployment flow, Supabase wiring, previews, publishing, and Engineer Agent verification.
+
+Mobile app functionality is currently being implemented through **React Native** and **Expo** integration. Until that support is fully available, treat mobile app builds as in-progress platform support rather than the same mature path as Next.js apps.
+
+## Multiple Organizations
+
+Multiple organizations are available on paid subscriptions. Each organization requires its own subscription.
+
+The $15 free credit applies only to the first organization on your account. If you create or join additional organizations, those organizations do not receive a separate $15 free credit.
+
+## How That Maps To Departments
+
+Cofounder organizes work through departments.
+
+A department owns a slice of the company, and the agents inside that department inherit the context, tools, and scope that make sense for that lane of work.
+
+For example:
+
+- the **Engineering** or **Product** department might contain agents that can work in the app repo, inspect PRs, and reason about the main app
+- the **GTM** or **Marketing** department might contain agents focused on launches, messaging, campaigns, and the marketing repo
+
+## What Agents Actually Do Next
+
+Once onboarding is complete, the normal flow is:
+
+1. Open **Canvas**.
+2. Check the **Company** view to understand stack status, active agents, and any available metrics.
+3. Use the **Roadmap** or suggested next tasks when you want a guided next step.
+4. Go to the department that owns the job.
+5. Choose the agent with the right scope.
+6. Give it a concrete task.
+7. Review the result from the task detail page or the Canvas attention queue, then refine the setup if needed.
+
+## Next Steps
+
+- [Quickstart](/get-started/quickstart)
+- [Company](/workspace/company)
+- [Tasks](/workspace/tasks)
+- [Library](/workspace/library)
+- [Departments](/workspace/departments)
+- [Agents Overview](/agents/overview)
+- [Managed Services](/managed-services/overview)
+- [Integrations Overview](/integrations/overview)
+
+---
+
+## Quickstart
+
+**URL:** https://docs.cofounder.co/get-started/quickstart
+**Description:** Use department onboarding to start Engineering, Marketing, Sales, or Design workflows.
+
+## Choose The Department
+
+Open **Canvas**, then choose a department workspace or open the **Roadmap** and pick an available department step.
+
+Department onboarding choices include:
+
+- **Engineering** when you want to build or change the app
+- **Marketing** when you want a launch plan, campaign, content, or marketing-site work
+- **Sales** when you want ICP, outbound, consult notes, or pipeline work
+- **Design** when you want brand identity, decks, email templates, or UI kits
+
+The exact label can vary by workspace, but you are looking for the onboarding task for that department, such as **Build your app**, **Run marketing campaign**, or **Send email outreach**.
+
+If you are not sure which department onboarding to start, ask Cofounder in the side panel:
+
+`Which department onboarding should I start based on our current company setup?`
+
+## Start The Department Onboarding Task
+
+Start from the department workspace, the Roadmap step, or the **+** menu on Canvas.
+
+Attach any files the department needs and use **Auto Assign** if you want Cofounder to pick the right agent.
+
+Example requests:
+
+- **Engineering**: `Build the first version of the app flow and open a PR with a preview.`
+- **Marketing**: `Run the first launch campaign workflow and create the draft pack for review.`
+- **Sales**: `Define the ICP, find the first target accounts, and draft outreach without sending it.`
+- **Design**: `Set up the brand identity and save the brand kit for future work.`
+
+## Review The Department's Output
+
+The output should match the department you chose:
+
+- **Engineering** should produce a PR, preview, test notes, or implementation plan.
+- **Marketing** should produce a campaign brief, draft pack, copy, or marketing artifact in the **Library**.
+- **Sales** should produce ICP notes, account research, outreach drafts, CRM updates, or next-step recommendations.
+- **Design** should produce brand assets, a brand kit, deck material, templates, or design guidance.
+
+Open the task detail page or Canvas attention queue, then approve, request changes, or ask the agent to keep going.
+
+## Move To The Next Department
+
+When you are ready to continue, go back to the **Roadmap** or **Canvas** and pick the next department.
+
+Add integrations, files, and department context as the next workflow calls for them.
+
+## Next Steps
+
+- [Departments](/workspace/departments)
+- [Roadmap](/workspace/roadmap)
+- [Agents Overview](/agents/overview)
+- [Engineer Agent](/agents/engineer-agent)
+- [Marketing Agent](/agents/marketing-agent)
+- [Sales Agent](/agents/sales-agent)
+- [Design Agent](/agents/design-agent)
+
+---
+
+## Custom Integrations
+
+**URL:** https://docs.cofounder.co/integrations/custom-integrations
+**Description:** Connect unsupported APIs with private keys, allowed domains, and secure runtime placeholders.
+
+## What Custom Integrations Are
+
+Use **Integrations > Custom Integrations** when an agent needs to call a private API, internal service, or vendor tool that is not already available as a built-in integration or MCP toolkit.
+
+Custom integrations are lighter than MCP integrations. They do not add a new `cofounder run` tool. Instead, they give eligible agents secure environment variables that scripts can read at runtime.
+
+That makes them a good fit for:
+
+- an internal admin API
+- a private reporting endpoint
+- a vendor API key
+- a small workflow service your company owns
+- an API that is not supported natively or through MCP yet
+
+## What You Configure
+
+Each custom integration stores:
+
+- a name
+- a private API key
+- one or more allowed domains or URLs
+- an optional docs link
+- whether agents can change data through the integration
+
+Allowed domains define where the credential is allowed to be used. You can paste a full API URL in the domain field, and Cofounder stores the hostname.
+
+By default, custom integrations are read-only. Read-only integrations can make safe read requests and recognized search or query requests. Turn on **Let agents change data** only when the API needs mutation, write, or state-changing endpoints.
+
+## How Agents Use Them
+
+Custom integrations are env-var based, not tool-based.
+
+Eligible agents discover available custom integrations from the runtime context
+that Cofounder injects when a task starts. The user-facing CLI does not expose a
+separate custom-integration command; use the app to configure integrations and
+the Library to save scripts that consume their environment variables.
+
+When an agent needs to use a custom integration repeatedly, the usual pattern is to write a saved script in the Library. The script reads the integration's environment variables, calls the API, and writes results back to the workspace.
+
+### Example Runtime Context
+
+When an eligible agent starts, its available custom integrations appear in the
+runtime context in a dedicated section:
+
+```text
+Custom integrations (env-var based, not tool-based):
+  [custom:My API] My API
+    API key env var: MY_API_API_KEY
+    Endpoint env var: MY_API_ENDPOINT_URL (not configured)
+    Docs: https://docs.example.com/api
+    Usage: custom integrations are env-var based, not tool-based. Write a script in the sandbox
+    that reads the env var(s) directly and calls the API. There is no 'cofounder run' subcommand
+    for custom integrations.
+
+Total: 42 tools, 1 custom integrations
+```
+
+The environment variable names are based on the integration name. For example, **Lead Enrichment API** becomes `LEAD_ENRICHMENT_API_API_KEY` and `LEAD_ENRICHMENT_API_ENDPOINT_URL`.
+
+## How Credentials Stay Safe
+
+Custom integration credentials are double encrypted when stored, and raw secret values are not shown in the UI or CLI output.
+
+At runtime, agents see the integration name, docs link, allowed domains, and environment variable names. The LLM only needs a placeholder value for the secret. Cofounder's trusted backend securely swaps that placeholder for the real credential when the script makes an allowed proxied request.
+
+The backend also enforces the allowed domains and read/write setting. If an integration is read-only, mutation-style requests are blocked unless **Let agents change data** is enabled.
+
+## Example: Enrich A CSV With A Custom API
+
+Say your team uses a private lead enrichment API.
+
+First, add a custom integration:
+
+- **Name:** Lead Enrichment API
+- **API key:** the private key from your vendor
+- **Domains:** `api.enrich.example`
+- **Docs link:** `https://docs.enrich.example`
+- **Let agents change data:** off, unless the API requires writes
+
+Then ask an agent to create a reusable Library script:
+
+```text
+Use the Lead Enrichment API custom integration to write enrich_leads.py.
+It should read an uploaded CSV, call the enrichment API for each row, and
+save an enriched CSV back to the workspace. Save it as a reusable Library script.
+```
+
+The script can read the custom integration at runtime:
+
+```python
+#!/usr/bin/env python3
+
+from pathlib import Path
+
+API_KEY = os.environ["LEAD_ENRICHMENT_API_API_KEY"]
+BASE_URL = os.environ.get("LEAD_ENRICHMENT_API_ENDPOINT_URL", "https://api.enrich.example")
+
+def enrich(row):
+    response = requests.get(
+        f"{BASE_URL.rstrip('/')}/v1/enrich",
+        params={"domain": row["domain"]},
+        headers={"Authorization": f"Bearer {API_KEY}"},
+        timeout=30,
+    )
+    response.raise_for_status()
+    return {**row, **response.json()}
+
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--input", required=True)
+    parser.add_argument("--output", default="/workspace/artifacts/enriched-leads.csv")
+    args = parser.parse_args()
+
+    with open(args.input, newline="") as source:
+        rows = list(csv.DictReader(source))
+
+    enriched_rows = [enrich(row) for row in rows]
+    fieldnames = sorted({key for row in enriched_rows for key in row})
+
+    Path(args.output).parent.mkdir(parents=True, exist_ok=True)
+    with open(args.output, "w", newline="") as target:
+        writer = csv.DictWriter(target, fieldnames=fieldnames)
+        writer.writeheader()
+        writer.writerows(enriched_rows)
+
+    print(f"Wrote {len(enriched_rows)} enriched rows to {args.output}")
+
+if __name__ == "__main__":
+    main()
+```
+
+After the script is saved, you can run it from the Library and choose an uploaded CSV as the input file. Cofounder passes that file to the script as `--input <path>`, so the same script can be reused for the next enrichment batch.
+
+## Next Steps
+
+- [Integrations Overview](/integrations/overview)
+- [MCP Toolkits](/integrations/mcp-toolkits)
+- [Library](/workspace/library)
+- [Custom Agents](/agents/custom-agents)
+
+---
+
+## MCP
+
+**URL:** https://docs.cofounder.co/integrations/mcp-toolkits
+**Description:** Use Composio-powered MCP integrations to connect more apps to your workspace.
+
+## MCP
+
+MCP in Cofounder is powered by **Composio**.
+
+You can find it from **Integrations**, under the **MCP** tab.
+
+From there, you can connect additional apps for your workspace and make them available to agents.
+
+## How It Works
+
+1. Open **Integrations**.
+2. Go to the **MCP** tab.
+3. Search for the app you want to connect.
+4. Complete the connection flow.
+5. Use it from the relevant agent once it is available.
+
+## Next Steps
+
+- [Integrations Overview](/integrations/overview)
+- [Agents Overview](/agents/overview)
+
+---
+
+## Integrations Overview
+
+**URL:** https://docs.cofounder.co/integrations/overview
+**Description:** Understand which integrations are already connected after onboarding and which ones you can add later.
+
+## Built-In Integrations
+
+Agents already have built-in integrations to **GitHub**, **Vercel**, and **Supabase**.
+
+These connect automatically to the managed repos and projects created during onboarding:
+
+- the app GitHub repo
+- the marketing GitHub repo
+- the corresponding Vercel projects
+- the managed Supabase project
+
+That means agents can start working against your core engineering and infrastructure setup without extra connection work.
+
+## Adding More Integrations
+
+You can add additional integrations from the **Integrations** page when agents need access to more of your stack.
+
+The Integrations area has three surfaces:
+
+- **Integrations** for standard app connections
+- **MCP** for Composio-powered third-party app connections
+- **Custom Integrations** for private API keys and optional endpoint URLs
+
+Common examples include:
+
+- **Linear** for issues and project work
+- **Slack** for team communication
+- **Notion** for docs and planning
+- **Gmail** for email workflows
+- **Intercom** for support
+- **Stripe** for billing and payments
+
+## Linear
+
+After you connect **Linear**, Cofounder can be used as an agent inside Linear and can automatically work on tasks in Linear.
+
+That gives you a way to start work from Linear itself instead of only from Canvas.
+
+## Next Steps
+
+- [Payments And Stripe](/integrations/payments-and-stripe)
+- [What Happens After Onboarding](/get-started/after-onboarding)
+- [Custom Agents](/agents/custom-agents)
+- [MCP Toolkits](/integrations/mcp-toolkits)
+- [Custom Integrations](/integrations/custom-integrations)
+
+---
+
+## Payments And Stripe
+
+**URL:** https://docs.cofounder.co/integrations/payments-and-stripe
+**Description:** Connect Stripe, sync it into the managed app, and use the Engineer Agent to add billing to your app.
+
+## Where To Add Stripe Keys
+
+Add Stripe from **Settings > Payments**.
+
+The page shows whether the managed app is ready for payment setup. If the app has not been set up yet, Cofounder explains that payment work needs a managed Vercel product app before Stripe credentials and billing code can be installed.
+
+Org admins can add:
+
+- the Stripe test publishable key
+- the Stripe test secret key
+- the Stripe live publishable key
+- the Stripe live secret key
+
+Cofounder verifies the keys before treating Stripe as connected.
+
+You can add test keys, live keys, or both. Use test keys while building and checking payment flows. Add live keys when the app is ready to accept real payments.
+
+## What Happens When Stripe Is Connected
+
+Once the keys are valid:
+
+- Stripe shows up as a connected integration for the workspace
+- Cofounder syncs the Stripe config into the managed app
+- the app is ready for Stripe implementation work
+- the Stripe webhook is configured to point at the managed app
+
+Cofounder keeps test and live keys separate. Test keys stay out of production. Live keys sync to production only.
+
+The Payments page also shows credential slots for **Test** and **Live**. Each slot tracks whether keys, environment variables, and webhooks are present.
+
+## Engineer Agent
+
+From **Settings > Payments**, you can kick off payment implementation with the **Engineer Agent**.
+
+The Engineer Agent works with you to add Stripe to the app. That can include:
+
+- wiring Stripe into the app
+- adding checkout or subscription flows
+- setting up billing-related app logic
+- finishing work when Stripe is already partially connected
+
+This is the path to use when you want Cofounder to help implement payments, not just store keys.
+
+If setup is blocked, the page shows the next step before the agent can safely proceed.
+
+## Stripe In The Managed App
+
+When Stripe is connected, Cofounder syncs the Stripe configuration into the managed app project.
+
+That includes:
+
+- the publishable key
+- the secret key
+- the webhook signing secret
+
+## Stripe Webhook
+
+When you connect Stripe, Cofounder also configures the Stripe webhook for the managed app automatically.
+
+The webhook points at the managed Vercel app's Stripe webhook route:
+
+`/api/stripe/webhook`
+
+If a domain has already been assigned to the app, Cofounder uses that domain for the webhook URL. Otherwise it uses the managed Vercel app URL.
+
+The webhook signing secret is then synced into the managed app as well.
+
+## Seeded Webhook Route
+
+The managed app starter already includes a Stripe webhook route.
+
+That route verifies the Stripe signature and gives the app a starting point for webhook handling. The Engineer Agent can then help add the app-specific billing logic on top of it.
+
+## Next Steps
+
+- [Integrations Overview](/integrations/overview)
+- [Managed Services](/managed-services/overview)
+- [Migrations](/managed-services/migrations)
+
+---
+
+## GitHub
+
+**URL:** https://docs.cofounder.co/managed-services/github
+**Description:** Understand how managed GitHub repositories are created during onboarding.
+
+## GitHub
+
+During onboarding, Cofounder creates two managed GitHub repositories:
+
+- an **app** repository
+- a **marketing** repository
+
+These repositories are private and auto-initialized during provisioning.
+
+## Role
+
+GitHub is where the code lives.
+
+- the **app** repository holds the main product codebase
+- the **marketing** repository holds the site, launch pages, and growth surface
+
+## What Cofounder Sets Up
+
+After the repositories are created, Cofounder also seeds:
+
+- baseline repository config
+- initial folder structure
+- `.github/workflows` CI files
+
+## How GitHub Connects To The Rest Of The Stack
+
+The managed GitHub repositories are what the managed Vercel projects get linked to during onboarding.
+
+They are also the repositories the engineering agents work against when they open branches, make changes, and put up pull requests.
+
+## Import Your Own Repo
+
+Some workspaces also let you replace the managed app repo or marketing repo with a repo you already own.
+
+That flow lives in **Settings > Advanced**.
+
+It covers:
+
+- choosing whether the repo is for the app or marketing site
+- selecting the GitHub repo
+- making sure the Cofounder GitHub app is installed
+- linking the managed Vercel project to that repo
+- setting the root directory
+- syncing env vars
+
+For app repos, it can also keep managed Supabase env wiring, migrations, and the `prod` branch setup aligned.
+
+## Next Steps
+
+- [Vercel](/managed-services/vercel)
+- [Managed Services](/managed-services/overview)
+
+---
+
+## Migrations
+
+**URL:** https://docs.cofounder.co/managed-services/migrations
+**Description:** Understand how database migrations work in the managed app repo.
+
+## Migrations
+
+Use migrations for database schema changes in the managed app repo.
+
+That includes changes like:
+
+- adding tables
+- changing columns
+- updating indexes or other schema-level database setup
+
+If you are adding tables, this is the workflow to use.
+
+In practice, have the **Engineer** agent work on the schema change and add the migration in the app repository.
+
+## Where Migrations Live
+
+Migrations live in `supabase/migrations/` in the app repository.
+
+## How The Workflow Works
+
+1. Add the migration file in the app repository.
+2. Put up a GitHub pull request with that migration.
+3. When that PR is open, the seeded GitHub workflow lint checks the migration files.
+4. When that PR is merged into `main`, the seeded staging migration workflow runs automatically.
+5. When those changes are later published from `main` to `prod`, the seeded production migration workflow runs automatically.
+
+## Staging And Production
+
+- merging a migration PR into `main` applies it to staging
+- publishing to `prod` applies it to production
+
+That keeps migrations lined up with the same staging-to-production flow as the app code.
+
+## Next Steps
+
+- [Supabase](/managed-services/supabase)
+- [Publishing](/publishing/overview)
+- [Environments](/publishing/environments)
+
+---
+
+## Managed Services
+
+**URL:** https://docs.cofounder.co/managed-services/overview
+**Description:** Understand how managed GitHub, Vercel, Supabase, and Postmark are set up during onboarding.
+
+## Managed Services
+
+During onboarding, Cofounder sets up a managed stack for the workspace.
+
+That stack includes:
+
+- managed **GitHub** repositories
+- managed **Vercel** projects
+- a managed **Supabase** project
+- a managed **Postmark** server
+
+These services are linked together during onboarding so agents can start working against them right away.
+
+## Access
+
+Users get access differently depending on the service:
+
+- **GitHub**: users are given access to the managed repositories during onboarding
+- **Vercel**: users are invited to the managed Vercel projects during onboarding
+- **Supabase**: Cofounder manages the project for the workspace, but users are not invited into Supabase yet
+- **Postmark**: Postmark is managed for the workspace in the background
+
+## What Gets Managed
+
+- **GitHub** holds the app and marketing repositories
+- **Vercel** runs the app and marketing projects, plus staging environments
+- **Supabase** provides the managed backend, with staging and production for the app
+- **Postmark** handles transactional email and sending-domain setup
+
+## Pages
+
+- [GitHub](/managed-services/github)
+- [Vercel](/managed-services/vercel)
+- [Supabase](/managed-services/supabase)
+- [Migrations](/managed-services/migrations)
+- [Postmark](/managed-services/postmark)
+- [Publishing](/publishing/overview)
+
+---
+
+## Postmark
+
+**URL:** https://docs.cofounder.co/managed-services/postmark
+**Description:** Understand how Postmark handles transactional email in Cofounder.
+
+## Postmark
+
+During onboarding, Cofounder provisions a managed Postmark server for the workspace.
+
+It also prepares the default email setup for the workspace.
+
+## Role
+
+Postmark handles transactional email for the workspace.
+
+- it powers product emails like sign-in links and other system email
+- it connects sending domains to the managed app setup
+- it gives Cofounder a managed email provider instead of making users wire this up themselves
+
+## Domain Sync
+
+When a domain is assigned in `Settings > Domains`, Cofounder can sync that domain to Postmark as well.
+
+The user still needs to activate the domain for Postmark before email can send from it.
+
+## Next Steps
+
+- [Settings: Domains](/settings/domains)
+- [Managed Services](/managed-services/overview)
+
+---
+
+## Supabase
+
+**URL:** https://docs.cofounder.co/managed-services/supabase
+**Description:** Understand how the managed Supabase project is created and what Cofounder configures automatically.
+
+## Supabase
+
+During onboarding, Cofounder sets up a managed Supabase backend for the workspace.
+
+That gives the workspace a production setup and a staging setup for app work.
+
+## Role
+
+Supabase is the managed backend for the app.
+
+- it powers the database
+- it handles auth
+- it gives the workspace a production backend and a staging backend
+
+## What Cofounder Configures
+
+After setup, Cofounder configures Supabase for the app.
+
+That includes:
+
+- the app site URL
+- auth redirect URLs
+- the staging auth redirect URL
+
+Cofounder also connects the app Vercel project to the managed Supabase backend.
+
+## How Supabase Connects To The Rest Of The Stack
+
+Supabase is wired into the managed app setup, auth configuration, and domain/email setup.
+
+When a domain is assigned, Cofounder updates the managed Supabase auth config so the site URL and redirect URLs match the domain.
+
+## Local Supabase For Agent Testing
+
+For app changes that depend on the database, auth, or storage, the Engineer agent can run Supabase locally in its sandbox.
+
+That lets the agent test migrations, create test data, and click through database-backed flows before a PR is ready for review. Local Supabase is separate from staging and production, so it is a safe place for the agent to verify behavior while it is still working.
+
+## Import Your Own Supabase
+
+If you already have a Supabase project, Cofounder can import it into the workspace.
+
+You can connect your Supabase account, choose the project, and map production and staging.
+
+If your project already has both environments, you can map them directly. If not, you can import production first and add staging later.
+
+If branch creation is available, Cofounder can also create a persistent staging branch for you.
+
+## Next Steps
+
+- [Database Viewer](/agents/engineer-agent#database-viewer)
+- [Migrations](/managed-services/migrations)
+- [Postmark](/managed-services/postmark)
+- [Testing Changes Locally](/agents/engineer-agent#testing-changes-locally)
+- [Managed Services](/managed-services/overview)
+
+---
+
+## Vercel
+
+**URL:** https://docs.cofounder.co/managed-services/vercel
+**Description:** Understand how managed Vercel projects are created during onboarding.
+
+## Vercel
+
+During onboarding, Cofounder creates two managed Vercel projects:
+
+- one for the **app**
+- one for **marketing**
+
+Each project is linked to its corresponding managed GitHub repository.
+
+## Role
+
+Vercel is where the app and marketing site get deployed.
+
+- the **app** project runs the product
+- the **marketing** project runs the site and launch surface
+- staging environments give the workspace a separate place to test changes
+
+## What Cofounder Sets Up
+
+For each managed project, Cofounder:
+
+- links the GitHub repository
+- sets the production branch
+- creates a staging environment
+
+## What Else Gets Synced To Vercel
+
+Managed Vercel projects are where Cofounder pushes:
+
+- Supabase environment variables for the app
+- Postmark environment variables for email
+- staging and production environment variables needed by the managed app and marketing site
+
+The onboarding flow also configures automation access on the managed Vercel projects so agent-driven deployment workflows can run.
+
+## Next Steps
+
+- [Supabase](/managed-services/supabase)
+- [Managed Services](/managed-services/overview)
+
+---
+
+## Environments
+
+**URL:** https://docs.cofounder.co/publishing/environments
+**Description:** Understand how staging and production work for publishing.
+
+## Environments
+
+During onboarding, Cofounder sets up staging and production for the managed app stack.
+
+Staging is where changes get reviewed and tested before they go live. Production is what powers the live app.
+
+## Staging And Production
+
+For the app:
+
+- **GitHub** uses `main` for staging work and `prod` for production
+- **Vercel** has a staging environment and a production deployment
+- **Supabase** has a staging backend and a production backend
+
+For marketing:
+
+- **GitHub** uses `main` for staging work and `prod` for production
+- **Vercel** has a staging environment and a production deployment
+
+## How They Link Together
+
+For app publishing:
+
+- code changes live on `main`
+- Vercel uses the staging setup for review
+- the app can run against the staging Supabase backend
+
+After publish:
+
+- the code is on `prod`
+- Vercel serves the live production app
+- the live app continues running against the production Supabase backend
+
+Marketing publishing follows the same GitHub and Vercel flow, without the managed Supabase backend.
+
+## Next Steps
+
+- [Publishing](/publishing/overview)
+- [Managed Services](/managed-services/overview)
+
+---
+
+## Publishing
+
+**URL:** https://docs.cofounder.co/publishing/overview
+**Description:** Understand how publishing works across GitHub, Vercel, and Supabase.
+
+## Publishing
+
+Publishing is how changes move from staging to the live app or website.
+
+You can publish from the publish button in Canvas, or ask **Cofounder** to publish for you.
+
+In either case, Cofounder runs the publish flow for the app or marketing repository you selected.
+
+## How Publishing Works
+
+When you publish, Cofounder creates or reuses a GitHub pull request from `main` to `prod`.
+
+That pull request is the publish step. It gives you one place to review status, checks, and whether the selected target is ready to go live.
+
+Once that pull request is merged:
+
+- the `prod` branch becomes the current production branch
+- Vercel updates the live production deployment for that target
+- the live app or website reflects the published changes
+
+## Environments
+
+Publishing uses the staging and production environments that Cofounder sets up during onboarding.
+
+## Next Steps
+
+- [Environments](/publishing/environments)
+- [Migrations](/managed-services/migrations)
+- [Managed Services](/managed-services/overview)
+- [GitHub](/managed-services/github)
+- [Vercel](/managed-services/vercel)
+
+---
+
+## AI Settings
+
+**URL:** https://docs.cofounder.co/settings/ai-settings
+**Description:** Choose models and set global AI behavior for your workspace.
+
+## AI Settings
+
+Use **Settings > AI Settings** to configure Cofounder model and agent settings.
+
+## What You Can Set
+
+This page includes:
+
+- auto-merge for PRs created by the Engineer
+- suggested task generation
+- global prompt personalization
+- model selection for Cofounder and agent work
+
+## Global Prompt Personalization
+
+Use global prompt personalization for context Cofounder should include across chats and agents, such as preferred response style or durable working assumptions.
+
+## Model Selection
+
+You can choose which models power the main agent experiences in the workspace.
+
+That includes the main conversation flow and agent work across the workspace.
+
+## Related Pages
+
+- [Testing Changes Locally](/agents/engineer-agent#testing-changes-locally)
+- [Environment Files & Secrets](/settings/env-files-and-secrets)
+- [Workspace](/workspace/canvas)
+
+---
+
+## Company Context
+
+**URL:** https://docs.cofounder.co/settings/company-context
+**Description:** Import company context from other AI tools into Company Memory.
+
+## Company Context
+
+Use **Settings > Organization > Company Context** to import useful company knowledge from another AI tool into Cofounder.
+
+This is useful when ChatGPT, Claude, or another tool already knows things about your company that Cofounder should remember for future work.
+
+## When To Use It
+
+Use a Company Context import when you want Cofounder to remember context such as:
+
+- what the company does
+- product and customer facts
+- important decisions and why they were made
+- team preferences and recurring workflows
+- active projects, goals, constraints, risks, and open questions
+
+Do not use it for one-off task instructions. Put task-specific context in the task itself.
+
+## How It Works
+
+1. Open **Settings > Organization**.
+2. Find **Company Context**.
+3. Choose the source tool.
+4. Copy the generated prompt.
+5. Paste the prompt into the source tool.
+6. Bring the generated report back to Cofounder.
+7. Preview the items Cofounder found.
+8. Import the items you want saved.
+
+The source tool is not connected directly. It only generates a report that you paste or upload back into Cofounder.
+
+## Preview Before Importing
+
+Preview shows the memory items Cofounder plans to create.
+
+Review the title, summary, type, and evidence for each item before importing. If the preview looks wrong, edit the report or regenerate it in the source tool before trying again.
+
+## What Not To Import
+
+Do not import:
+
+- secrets, passwords, API keys, tokens, or private keys
+- raw transcripts or long logs
+- private personal context that is not about the company
+- guesses that the source tool cannot support
+
+## Import History
+
+Cofounder keeps a history of completed imports so admins can see what was brought into Company Memory.
+
+Only organization admins can import company context.
+
+## Related Pages
+
+- [Company](/workspace/company)
+- [AI Settings](/settings/ai-settings)
+- [Agents Overview](/agents/overview)
+
+---
+
+## Domains
+
+**URL:** https://docs.cofounder.co/settings/domains
+**Description:** Buy domains from Cofounder, manage DNS and nameservers, and assign domains to your app and email setup.
+
+## Domains
+
+You can manage domains directly from Cofounder.
+
+The domain page has two main tabs:
+
+- **Search** to find and secure a new domain
+- **Owned** to view domains your organization already controls
+
+You can also start a domain transfer from the domain page.
+
+Depending on the domain state, you can:
+
+- search for domains
+- buy a domain from the site
+- import an existing domain
+- transfer a domain in
+- view domains your org already owns
+- edit DNS records
+- update nameservers
+- manage auto-renew
+
+## Propagation Takes Time
+
+After you buy a domain or change nameservers, it can take a while for DNS and nameserver changes to propagate.
+
+Expect that to take anywhere from a few minutes to a few hours.
+
+During that window, parts of the setup may still show as pending while providers catch up.
+
+## Assigning A Domain
+
+When you assign a domain, Cofounder wires it into the managed app and marketing setup created during onboarding.
+
+That assignment sets up:
+
+- the apex domain on the managed marketing project
+- `staging.<your-domain>` on the managed marketing staging environment
+- `app.<your-domain>` on the managed app project
+- `staging.app.<your-domain>` on the managed app staging environment
+
+It also updates the managed Supabase auth configuration so the app site URL and auth redirect URLs match the assigned domain.
+
+The same assignment also registers the domain with Postmark and prepares the DNS records needed for email sending.
+
+## Inbox Domains
+
+Your domains can also be used for agent inboxes.
+
+In `Settings > Inbox`, you can choose which of your domains should be available as inbox domains for agents. Once a domain is ready there, you can assign inbox addresses to agents on that domain.
+
+## Email Sending With Postmark
+
+Assigned domains are also used for transactional email through Postmark.
+
+When the sending domain verifies, Cofounder turns on Postmark-backed SMTP for the managed Supabase projects.
+
+It also syncs the Postmark configuration into the managed Vercel projects, including:
+
+- the Postmark server token
+- the Postmark server ID
+- the message stream IDs
+- the default from address
+
+If the domain is using managed Vercel nameservers, Cofounder can also auto-create the Postmark DNS records. Otherwise, Cofounder shows the records you need to add manually.
+
+## Related Pages
+
+- [Inbox](/settings/inbox)
+- [Environment Files & Secrets](/settings/env-files-and-secrets)
+- [Integrations Overview](/integrations/overview)
+
+---
+
+## Environment Files & Secrets
+
+**URL:** https://docs.cofounder.co/settings/env-files-and-secrets
+**Description:** Upload env files, download managed staging env files, and add project secrets.
+
+## Environment Files & Secrets
+
+Use **Settings > Env Files & Secrets** to manage project configuration.
+
+This page has three areas:
+
+- **Environment Files** for uploading and editing encrypted `.env` files
+- **Managed Vercel Staging Export** for downloading staging environment variables from managed Vercel projects
+- **Secrets** for adding API keys to managed Vercel projects and making selected keys available to agents
+
+## Environment Files
+
+Upload `.env` files when you want Cofounder to store project configuration as editable variables.
+
+After upload, open the file to view and edit individual variables.
+
+## Managed Vercel Staging Export
+
+When a managed app or marketing Vercel project exists, Cofounder can download that project's staging environment variables as a `.env` file.
+
+If no managed project is available yet, the project selector and download action stay disabled.
+
+## Secrets
+
+Use **Add Secret** for API keys that should be pushed directly to a managed Vercel project.
+
+Choose the secret name, value, target environments, and project. Secret values are sent to Vercel and are not stored in our systems.
+
+Turn on **Make available to agents** when code running in the agent's sandbox needs to use the secret through an environment variable. This is useful for local verification against a third-party API, payment provider, or internal service.
+
+Secrets marked this way show an **Agents** badge. You can change agent access later from the pencil icon and save with **Save Agent Access**.
+
+Only make a secret available to agents when the task needs it. Do not paste secret values into task messages or chat.
+
+## How Agent Secret Access Stays Safe
+
+Agent access does not mean the raw credential is written into the conversation or stored in the workspace.
+
+When a sandbox starts, the agent can use the same environment variable name, such as `STRIPE_SECRET_KEY` or `OPENAI_API_KEY`. The value inside the sandbox is a placeholder, not the raw secret.
+
+When sandbox code makes a brokered network request with that placeholder, Cofounder's trusted backend swaps in the real credential for the outbound request. This lets the code call the service without exposing the secret value to the agent's files, chat messages, or normal command output.
+
+If a task no longer needs the credential, turn off **Make available to agents** for that secret.
+
+## Related Pages
+
+- [Testing Changes Locally](/agents/engineer-agent#testing-changes-locally)
+- [Domains](/settings/domains)
+- [Integrations Overview](/integrations/overview)
+
+---
+
+## Inbox
+
+**URL:** https://docs.cofounder.co/settings/inbox
+**Description:** Set up Agentmail inbox domains, provision inboxes for agents, and let agents work over email.
+
+## Inbox
+
+Use **Settings > Inbox** to give custom agents their own email addresses.
+
+This setup uses **Agentmail**.
+
+## Start With A Domain
+
+Before you can provision an agent inbox, you need a domain first.
+
+Start in **Settings > Domains** to buy a domain from Cofounder, import one, or transfer one in.
+
+After that, go to **Settings > Inbox** and choose which domain should be used for agent inboxes.
+
+## Inbox Domain Setup Takes Time
+
+Inbox domain setup is not instant.
+
+After domain or nameserver changes, Agentmail still needs time to provision and verify the inbox domain. During that window, the inbox domain can show as pending or still checking setup.
+
+## Provision An Inbox For An Agent
+
+Once an inbox domain is ready, you can provision an inbox for a custom agent.
+
+In **Settings > Inbox**, pick the agent, choose the inbox-ready domain, set the inbox handle, and provision the inbox.
+
+That gives the agent its own email address on your domain.
+
+## What Happens After Provisioning
+
+When an inbox is provisioned for an agent:
+
+- Cofounder creates the inbox for that agent
+- the agent can send and receive email through that inbox
+- incoming messages are available to that agent's email workflow
+
+Scheduled follow-up work for that agent is managed separately with scheduled tasks.
+
+## What Inbox Settings Control
+
+Inbox settings let you manage:
+
+- which domains are available for agent inboxes
+- which agent gets which inbox address
+- the inbox handle and display name
+- whether that inbox is enabled
+
+Disabled inboxes still exist, but they stop processing incoming email.
+
+## Related Pages
+
+- [Domains](/settings/domains)
+- [Custom Agents](/agents/custom-agents)
+
+---
+
+## Canvas
+
+**URL:** https://docs.cofounder.co/workspace/canvas
+**Description:** Use the canvas as the live workspace for tasks, agents, reviews, and related work.
+
+## What Canvas Is
+
+Canvas is the main operating surface for Cofounder. It is the default landing page for an organization and the fastest way to understand what is active, what is blocked, and what should happen next.
+
+## What You Can See On The Canvas
+
+Depending on what is running, Canvas can show:
+
+- active tasks and their current state
+- agents and the work assigned to them
+- departments and department-level workspaces
+- department artifacts, such as the **Database** artifact in Engineering
+- work waiting on review
+- suggested next tasks from the Roadmap or recent workspace activity
+- staging URLs for deterministic preview links
+- attention queue items
+
+## Using Canvas
+
+### Launch work from the create menu
+
+Use the **+** menu to create either a new task or a new agent.
+
+For tasks, add the request, attach any useful files, and either choose an agent yourself or let Cofounder auto-assign the work.
+
+For agents, create a reusable worker with its own name, instructions, model, apps, and scheduled tasks.
+
+### Work at the department level
+
+Departments open as focused workspaces inside Canvas.
+
+Inside a department you can see its agents, tasks, files, rules, and context. Department context and rules help the agents in that lane share the same operating assumptions.
+
+The **Engineering** workspace also includes a [**Database** artifact](/agents/engineer-agent#database-viewer) when managed Supabase is connected. Open it to browse tables, inspect records, or upload CSV data without leaving Canvas.
+
+### Use the attention queue
+
+The attention queue is the button in the bottom right of Canvas. It appears when agents have work ready for you.
+
+Open it to review finished work, approvals, and follow-ups without digging through every task.
+
+From review mode, move through each item, open the task, snooze it for later, or dismiss it when no action is needed.
+
+### Chat with Cofounder
+
+The side panel lets you ask Cofounder questions about the company or ask it to spin up new work.
+
+Use this when you are not sure which agent should handle a request. Cofounder can help route the task to the right agent or workspace.
+
+### Save staging URLs
+
+When you have a staging deployment URL for a task or preview, save it on the Canvas node. That gives the workspace a stable preview link it can reopen later.
+
+## Next Steps
+
+- [Company](/workspace/company)
+- [Tasks](/workspace/tasks)
+- [Previews And Feedback](/agents/engineer-agent#previews-and-feedback)
+- [Roadmap](/workspace/roadmap)
+- [Departments](/workspace/departments)
+- [Agents Overview](/agents/overview)
+
+---
+
+## Company
+
+**URL:** https://docs.cofounder.co/workspace/company
+**Description:** Use the Company view to understand your workspace stack, agents, and setup status.
+
+## Company
+
+The **Company** view is the workspace-level overview for your organization.
+
+Use it when you want to see what Cofounder knows about the company itself, not just one task or one department.
+
+## What It Shows
+
+The Company view can show:
+
+- metric cards for MRR, active users, churn, and signups, which stay empty until a real data source is connected
+- stack setup status for domains, email, payments, hosting, and other company infrastructure
+- the active agents available to the workspace
+- Company Memory imported from other AI tools
+
+Metric cards without a connected data source stay empty. Stack items with no data yet show an empty or setup-needed state instead of guessing.
+
+## Company Memory
+
+Company Memory is shared workspace context that agents can search when they need prior decisions, project notes, workflows, or company facts.
+
+It can come from completed tasks, connected integrations, and [Company Context](/settings/company-context) imports. Use it for reusable company context, not one-off task instructions.
+
+Good memory includes:
+
+- company and product facts
+- important decisions and why they were made
+- recurring workflows and team preferences
+- active projects, goals, risks, and open questions
+- source notes that help another agent trust the context later
+
+Do not store secrets, API keys, private credentials, or raw transcripts in Company Memory.
+
+Memory can lag behind recent updates. If an important detail matters for a customer, production change, or external send, ask the agent to verify it against the source before acting.
+
+To change memory, tell Cofounder what to update in chat, update the connected source, or import cleaner context through [Company Context](/settings/company-context).
+
+## Stack Status
+
+The stack area helps you see what is ready and what still needs setup.
+
+For example, domains, payments, email, and hosting can each show whether Cofounder has enough connected infrastructure to use them in agent work.
+
+When a stack item needs setup, open the related settings page or start the suggested agent task from the Company or Canvas flow.
+
+## Engineering Workspace
+
+Open **Canvas** and go to the **Engineering** workspace for app infrastructure work.
+
+That workspace is where you can:
+
+- open the [**Database** artifact](/agents/engineer-agent#database-viewer) to view tables, inspect records, and upload CSV data
+- use **Stack** to see the services connected to the app
+- use **Deployments** to review previews, publish, and deploy the app
+
+## Next Steps
+
+- [Canvas](/workspace/canvas)
+- [Tasks](/workspace/tasks)
+- [Company Context](/settings/company-context)
+- [Agents Overview](/agents/overview)
+- [Roadmap](/workspace/roadmap)
+
+---
+
+## Departments
+
+**URL:** https://docs.cofounder.co/workspace/departments
+**Description:** Understand the department workspaces in Cofounder and what each one is for.
+
+## Departments
+
+Each department owns a part of the company and groups the agents, context, rules, tasks, and artifacts for that area.
+
+## After Onboarding
+
+After onboarding, your workspace has department workspaces for the main lanes of company work.
+
+The department workspaces are:
+
+- **Engineering** for product, app, repository, infrastructure, security, database, and deployment work
+- **Sales** for pipeline, leads, outreach, customer conversations, and revenue work
+- **Marketing** for positioning, content, SEO, launch work, and marketing-site work
+- **Design** for brand identity, visual systems, decks, email templates, UI kits, and product design support
+- **Support** for customer support, issue resolution, and customer success operations
+- **Operations** for recurring workflows, internal process, reporting, research, and cross-system cleanup
+- **Finance** for billing operations, collections, accounting handoff, close support, and financial reporting
+- **Legal** for contract support, policy review, compliance artifacts, and legal-ops workflows
+
+## Default Agents By Department
+
+Seeded default agents are organized by department. The exact agents in your workspace can change as your setup changes, but onboarding starts with:
+
+- **Engineering**: `Engineer`
+- **Sales**: `Sales Agent`
+- **Marketing**: `Marketing Agent`
+- **Design**: `Design Agent`
+- **Support**: `Support Agent`
+- **Operations**: `Operations Agent`, `Ops Agent`
+- **Finance**: `Finance Agent`
+
+## Inside A Department
+
+A department contains:
+
+- **Agents** for the work that belongs in that lane
+- **Tasks** for the active and completed work tied to those agents
+- **Department Context** for durable background information that agents in that department should share
+- **Artifacts/Files** for outputs and working files created by that department's work
+
+The Engineering department can also show the managed Supabase [**Database** artifact](/agents/engineer-agent#database-viewer) on Canvas. Use that artifact when you need to browse tables, inspect records, or upload CSV data.
+
+Files in the Library still need a department association, even though every agent can access every Library file. The department acts as a routing hint, not an access boundary.
+
+## Department Context
+
+Department context is for background information that should be shared across agents in that department.
+
+Examples:
+
+- product constraints for Engineering
+- audience and positioning notes for Sales or Marketing
+- brand and visual direction for Design
+- support policies for Support
+- reporting definitions for Operations
+- billing and close process notes for Finance
+- contract, policy, and compliance notes for Legal
+
+## Next Steps
+
+- [Library](/workspace/library)
+- [Canvas](/workspace/canvas)
+- [Agents Overview](/agents/overview)
+- [Skills](/agents/skills)
+
+---
+
+## Library
+
+**URL:** https://docs.cofounder.co/workspace/library
+**Description:** Use the Library tab to upload, browse, and share files across all agents in the workspace.
+
+## What The Library Is
+
+The Library is the shared file system for your workspace.
+
+Every agent can access every file in the Library. That makes it the default place for documents, uploads, generated files, and other reference material that should stay available across tasks.
+
+## How Departments Work In The Library
+
+Every file in the Library must be associated with a department.
+
+That department does not limit access. All agents can still read the file.
+
+Instead, the department acts as a hint about which lane of work the file is most closely related to. For example, a pricing model might live under Finance, while a launch brief might live under Marketing.
+
+## What Users Can Do In The Library Tab
+
+In the Library tab, users can:
+
+- upload files into the shared library
+- search across library files
+- browse files by department folder
+- open directories and files
+- pin important files so they stay surfaced at the top of the file list for that file's department
+- chat with a specific file when you want an agent to use it as focused context
+- use department association to understand which files are most relevant to which kind of work
+
+## Browsing Files
+
+The Library starts at the folder level.
+
+Open a department folder to see that department's files and directories. From there, you can move back to all folders, move up to a parent directory, search within the library, open a file, or pin a file.
+
+When a file is open, Cofounder shows the file contents in the Library view so you can inspect the artifact without leaving the workspace.
+
+## Editing Markdown And Text Files
+
+You can edit supported Markdown and plain-text files directly from Library
+preview.
+
+Open an editable file, choose **Edit**, make your changes, then save. Cofounder
+updates the shared Library file and refreshes the preview after the save
+completes.
+
+Editing is available for small Markdown and plain-text files when Cofounder can
+load the complete file and confirm which version you opened. It is not
+available for folders, archived files, locked files, read-only files, truncated
+large files, or preview-only formats such as CSV, HTML, JSON, code, images,
+PDFs, binary files, and specialized artifact data.
+
+If someone or an agent changes the file after you opened it, Cofounder treats
+the save as a conflict. Reload the latest preview, review your draft, and save
+again only if your changes still apply.
+
+For formats that are not editable in preview, use file chat or ask an agent to
+update the file.
+
+## Pinned Files
+
+Pinning a file in the Library tab keeps that file at the top of the list for its department.
+
+This is a visibility feature, not an access-control feature.
+
+Pinned files are still regular Library files. All agents can still access them, and the file still belongs to the same department as before. Pinning simply makes the file easier to find when someone is browsing that department's files.
+
+This is useful for files that people need to come back to often, such as:
+
+- core strategy docs
+- recurring templates
+- team reference material
+- important spreadsheets
+- current working briefs
+
+If a department has multiple pinned files, they appear before the department's unpinned files.
+
+## What Agents Do With Library Files
+
+Agents can use Library files as shared context across the workspace.
+
+Any file an agent creates should be automatically saved to the Library, so it stays available for future work and for other agents that may need it later.
+
+That means the Library becomes the durable record for generated outputs like reports, docs, exports, plans, and other working files.
+
+For example, marketing work often lands here automatically as:
+
+- campaign briefs, launch plans, and messaging docs
+- decks, presentations, one-pagers, and branded docs
+- image directions, page concepts, and design variants
+- audio, short video, and social draft assets
+- measurement notes, SEO briefs, and follow-up plans
+
+That makes the Library the default place to review, reuse, and share generated marketing assets across the workspace.
+
+## Reusable Scripts
+
+Agents can also save reusable scripts to the Library.
+
+Scripts live under `scripts/` and can be written in Python, Bash, TypeScript, or JavaScript. They are useful when a workflow needs to be run again later with new inputs, such as enriching a CSV, transforming exported data, checking records against an API, or producing a recurring report.
+
+Agents can list saved scripts, read an existing script before changing it, write a new script, and run a saved script inside the session sandbox. If an agent writes a script with the same filename as an existing Library script, the saved script is updated.
+
+From the Library, users can open a saved script and choose **Run script**. The run dialog can pass an optional input file from the Library, or an exact `/workspace/` path, to the script. Scripts that accept files should expose an `--input <path>` argument so the Library run flow can pass the selected file directly.
+
+A common pattern is:
+
+- add a custom integration for a private enrichment API
+- ask an agent to write `enrich_leads.py` and save it to the Library
+- upload a new leads CSV
+- run the script from the Library with that CSV selected
+
+The script can read the custom integration's environment variables at runtime, call the API, and write the enriched results back to the workspace.
+
+## Next Steps
+
+- [Departments](/workspace/departments)
+- [Canvas](/workspace/canvas)
+- [Agents Overview](/agents/overview)
+- [Custom Integrations](/integrations/custom-integrations)
+
+---
+
+## Roadmap
+
+**URL:** https://docs.cofounder.co/workspace/roadmap
+**Description:** Use the Roadmap as a guide for moving through Cofounder and building out your business.
+
+## Roadmap
+
+The Roadmap is a guide for moving through Cofounder's different features and building out your business.
+
+It gives the workspace a structured path instead of a blank starting point.
+
+## What It Has
+
+The Roadmap is organized into:
+
+- **Stages** like idea, initial setup, identity, build, GTM, launch, scale, and mature company work
+- **Tracks** across areas like product, engineering, brand, research, operations, revenue, and support
+- **Steps** for specific milestones in the journey
+
+Each stage shows completion progress, such as `1/4`, so you can see how far along that part of the company-building path is.
+
+## Step Status
+
+Roadmap steps can show up as:
+
+- **Available** when you can work on them now
+- **In Progress** when work for that step is already underway
+- **Completed** when Cofounder sees that the step has been finished
+- **Locked** when another step still needs to happen first
+
+## Step Details
+
+Open a step to see its detail panel.
+
+Step details can explain:
+
+- why the step matters
+- how to move it forward
+- subtasks involved in the step
+- which prerequisite steps are required first
+- what completing the step unlocks
+
+If the step is agent-backed and available, the detail panel includes a launch action that starts the task with the right agent.
+
+## Kicking Off Work
+
+You can open the Roadmap from Canvas.
+
+For steps that are agent-backed, you can launch the work directly from the Roadmap and Cofounder will start the task with the right seeded agent.
+
+Some steps are not agent runs. Those can be manual actions, approvals, or system-managed steps.
+
+## How Items Get Checked Off
+
+Roadmap items get checked off as Cofounder sees the workspace change.
+
+That can include things like:
+
+- completed tasks
+- approved work
+- created artifacts
+- connected integrations
+- managed infrastructure or configuration being set up
+
+As that evidence appears, steps move forward from locked or available to in progress and completed.
+
+## How To Use It
+
+The Roadmap is useful when you want a clearer sense of what to do next across both the product and the business.
+
+It also feeds suggested next steps, so Cofounder can point you toward the next available step instead of making you figure it out from scratch.
+
+## Next Steps
+
+- [Canvas](/workspace/canvas)
+- [Tasks](/workspace/tasks)
+- [Departments](/workspace/departments)
+- [Agents Overview](/agents/overview)
+
+---
+
+## Tasks
+
+**URL:** https://docs.cofounder.co/workspace/tasks
+**Description:** Track running work, review completed work, and open task details from one place.
+
+## Tasks
+
+The **Tasks** page is the list view for work across the current workspace.
+
+Use it when you want to see what is running, what is waiting on you, and what has finished recently.
+
+## Task Sections
+
+Tasks are grouped by what is happening with the work now.
+
+The Tasks page shows these sections:
+
+- **Needs Action** for work waiting on you
+- **Ongoing** for work that is waiting to start or currently running
+- **Done** for work that finished and no longer needs action
+- **Todo** for task rows that are not running yet
+
+You can also open archived tasks when you need to look up older work.
+
+## Needs Action
+
+Use **Needs Action** when you want to clear everything waiting on you.
+
+Tasks move here when:
+
+- the agent asks a clarification question
+- the agent needs approval to continue
+- a tool or permission approval is required
+- the agent produced something reviewable, such as an artifact, preview, pull request, export, or review URL
+- the task failed, errored, or stopped and needs follow-up
+
+Reviewable output appears as **Ready to review**. Open the task, inspect the result, then approve, respond, or mark the task complete.
+
+Clarification questions and approval requests stay in **Needs Action** until you answer, approve, or close them.
+
+## Ongoing
+
+**Ongoing** contains tasks that are still in motion.
+
+A task can show:
+
+- **Waiting to start...** while it is queued or being prepared
+- **Running...** while the agent is actively working
+
+Running work stays in **Ongoing** until the agent stops, asks for input, needs approval, produces reviewable output, fails, or finishes.
+
+## Done
+
+**Done** contains tasks that no longer need action.
+
+There are two common finished states:
+
+- **Completed** means the task was marked complete
+- **Finished turn** means the agent finished without a separate output that needs review
+
+Finished-turn tasks stay available in task history, but they do not show up as review items.
+
+## Todo
+
+**Todo** is for task rows that exist but are not currently running.
+
+Most agent tasks move through **Ongoing**, **Needs Action**, and **Done**. If a task is already queued for an agent run, it usually appears in **Ongoing** as **Waiting to start...** rather than Todo.
+
+## Task Details
+
+Open a task to see the task detail view.
+
+Depending on the task, the detail view can show:
+
+- the original request
+- the assigned agent
+- task state and elapsed time
+- workflow items, approvals, and generated artifacts
+- the conversation with the agent
+- options such as reporting an issue or opening more task actions
+
+If there is nothing pending, Cofounder shows that clearly instead of leaving an empty review panel.
+
+## Editing A Previous Message
+
+When **Edit message** is available on one of your messages, you can change that message and send it again.
+
+The agent continues from the edited message. Later messages from the previous path are removed from the active conversation, so use this when you want to change direction rather than add another note.
+
+You can edit your own messages when the agent is not currently running.
+
+## Reviewing Work
+
+Tasks that need action appear on the Tasks page and in review mode on Canvas.
+
+From review mode, you can move between waiting items, snooze an item for later, dismiss items that no longer need action, or exit review mode and return to normal navigation.
+
+Use this when several tasks have produced outputs, approvals, clarification
+questions, failures, or stopped runs and you want to process them without
+hunting through task lists.
+
+If an agent simply finished without producing a review item, Cofounder keeps the
+task in history instead of asking you to review it.
+
+## Closing Task Work
+
+Tasks move into **Needs Action** automatically when an agent asks a question,
+requests approval, fails, stops, or produces something reviewable.
+
+Once you are done with waiting, failed, stopped, or reviewable work, mark it
+complete to move it into **Done**. If you complete something by mistake, the
+task action menu can mark it active again.
+
+## Creating Tasks
+
+You can create a task from the **+** menu on Canvas.
+
+The task form lets you:
+
+- write the task description
+- attach images or screenshots
+- let Cofounder auto-assign the best agent
+- choose a repository when the task needs code context
+- choose **Execute** or **Plan**
+
+The **Create Task** button becomes available once the task has enough information to run.
+
+## Plan Mode
+
+Choose **Plan** when you want an agent to propose the approach before it starts the work.
+
+Plan mode is useful for:
+
+- large product or engineering changes
+- work that touches several files, systems, or teams
+- tasks where you want to approve the approach first
+- research or setup work where the next step is not obvious
+
+When the plan is ready, the agent shows it as a review item. You can approve it and let the agent continue, or ask for changes.
+
+Use **Execute** for straightforward tasks where the agent can start right away.
+
+## Next Steps
+
+- [Canvas](/workspace/canvas)
+- [Previews And Feedback](/agents/engineer-agent#previews-and-feedback)
+- [Library](/workspace/library)
+- [Agents Overview](/agents/overview)
+
+---
+
+## Links
+
+- [Support](mailto:support@generalintelligencecompany.com)
