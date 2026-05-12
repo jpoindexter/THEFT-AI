@@ -7,6 +7,7 @@ import TaskHandoff from "@/components/task-handoff";
 import SubtaskTree from "@/components/task/subtask-tree";
 import TaskContextBar from "@/components/task/task-context-bar";
 import TaskStopButton from "@/components/task/task-stop-button";
+import { loadTaskState } from "@/lib/db/task-state";
 
 export default async function TaskDetailPage({
   params,
@@ -16,10 +17,11 @@ export default async function TaskDetailPage({
   const { org: orgSlug, task: taskId } = await params;
   const organization = await db.getOrgBySlug(orgSlug);
   if (!organization) notFound();
-  const [tasks, agents, departments] = await Promise.all([
+  const [tasks, agents, departments, taskState] = await Promise.all([
     db.listTasks(organization.id),
     db.listAgents(organization.id),
     db.listDepartments(organization.id),
+    loadTaskState(taskId),
   ]);
   const task = tasks.find((t) => t.id === taskId);
   if (!task) notFound();
@@ -41,7 +43,12 @@ export default async function TaskDetailPage({
       agent: agents.find((a) => a.id === c.agent_id)?.name ?? null,
     }));
 
-  const statusText = computeStatusText(task.status, task.created_at, task.started_at);
+  const statusText = computeStatusText(
+    task.status,
+    task.created_at,
+    task.started_at,
+    Boolean(taskState.paused),
+  );
 
   return (
     <div className="absolute inset-0">
@@ -142,7 +149,14 @@ export default async function TaskDetailPage({
   );
 }
 
-function computeStatusText(status: string, createdAt: string, startedAt?: string | null): string {
+function computeStatusText(
+  status: string,
+  createdAt: string,
+  startedAt?: string | null,
+  hasPendingQuestion = false,
+): string {
+  if (hasPendingQuestion) return "Waiting for you";
+
   const baseline = (status === "in_progress" && startedAt) ? startedAt : createdAt;
   const elapsed = Date.now() - new Date(baseline).getTime();
   const totalSecs = Math.floor(elapsed / 1000);

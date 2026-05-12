@@ -17,14 +17,33 @@ type Turn =
   | { kind: "pause"; reason: string; ts: string }
   | { kind: "done"; summary: string; ts: string };
 
+type Answer = { key?: string; label?: string; custom?: string };
+
+type PauseInput = {
+  question?: string;
+  options?: {
+    key: string;
+    label: string;
+    description?: string;
+    recommended?: boolean;
+  }[];
+  allow_custom?: boolean;
+};
+
 type RawTurn =
   | { kind: "user_message"; text: string }
   | { kind: "text"; text: string }
   | { kind: "tool_call"; tool_use_id: string; name: string; input: unknown }
   | { kind: "tool_result"; tool_use_id: string; name: string; output: unknown }
-  | { kind: "tool_answer"; tool_use_id: string; answer: unknown }
-  | { kind: "pause"; tool_use_id: string; tool: string; input: { question?: string } }
+  | { kind: "tool_answer"; tool_use_id: string; answer: Answer }
+  | { kind: "pause"; tool_use_id: string; tool: string; input: PauseInput }
   | { kind: "done" };
+
+type Paused = {
+  tool_use_id: string;
+  tool: "ask_user_question";
+  input: PauseInput;
+} | null;
 
 function adaptTurn(t: RawTurn): Turn | null {
   const ts = new Date().toLocaleTimeString("en", { timeStyle: "medium" });
@@ -35,7 +54,11 @@ function adaptTurn(t: RawTurn): Turn | null {
     case "tool_result": return { kind: "tool_result", tool: t.name, output: t.output, ok: true, ts };
     case "pause": return { kind: "pause", reason: t.input.question ?? "Waiting for input", ts };
     case "done": return { kind: "done", summary: "Task complete.", ts };
-    case "tool_answer": return null;
+    case "tool_answer": return {
+      kind: "user_message",
+      text: t.answer.custom ?? t.answer.label ?? t.answer.key ?? "Answered",
+      ts,
+    };
   }
 }
 
@@ -93,6 +116,7 @@ export default function AgentRunConsole({
   const isLive = Boolean(taskId && orgSlug);
   const [liveTurns, setLiveTurns] = useState<Turn[]>([]);
   const [liveStatus, setLiveStatus] = useState<"idle" | "running" | "paused" | "done" | "error">("idle");
+  const [livePaused, setLivePaused] = useState<Paused>(null);
   const startedRef = useRef(false);
 
   const turns = isLive ? liveTurns : (propTurns ?? SAMPLE);
@@ -104,7 +128,7 @@ export default function AgentRunConsole({
 
     fetch(`/api/${orgSlug}/tasks/${taskId}/run`)
       .then((r) => r.json())
-      .then((d: { turns?: RawTurn[]; paused?: unknown }) => {
+      .then((d: { turns?: RawTurn[]; paused?: Paused }) => {
         if (d.turns?.length) {
           const adapted = d.turns.flatMap((t) => {
             const a = adaptTurn(t);
@@ -112,6 +136,7 @@ export default function AgentRunConsole({
           });
           setLiveTurns(adapted);
           setLiveStatus(d.paused ? "paused" : "done");
+          setLivePaused(d.paused ?? null);
         }
         // No existing turns → show empty state; user clicks "Run agent" to start
       })
@@ -149,7 +174,79 @@ export default function AgentRunConsole({
           const adapted = adaptTurn(raw);
           if (adapted) setLiveTurns((prev) => [...prev, adapted]);
           if (raw.kind === "done") finalStatus = "done";
-          if (raw.kind === "pause") finalStatus = "paused";
+          if (raw.kind === "pause") {
+            finalStatus = "paused";
+            setLivePaused({
+              tool_use_id: raw.tool_use_id,
+              tool: "ask_user_question",
+              input: raw.input,
+            });
+          }
+        } catch { /* skip malformed line */ }
+      }
+    }
+    setLiveStatus(finalStatus);
+  }
+
+  async function answerPaused(answer: Answer) {
+    if (!taskId || !orgSlug || !livePaused) return;
+    setLiveStatus("running");
+    setLiveTurns((prev) => [
+      ...prev,
+      {
+        kind: "user_message",
+        text: answer.custom ?? answer.label ?? answer.key ?? "Answered",
+        ts: new Date().toLocaleTimeString("en", { timeStyle: "medium" }),
+      },
+    ]);
+    setLivePaused(null);
+
+    let res: Response;
+    try {
+      res = await fetch(`/api/${orgSlug}/tasks/${taskId}/run`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          kind: "tool_result",
+          tool_use_id: livePaused.tool_use_id,
+          answer,
+        }),
+      });
+    } catch {
+      setLiveStatus("error");
+      return;
+    }
+    if (!res.ok || !res.body) {
+      setLiveStatus("error");
+      return;
+    }
+
+    const reader = res.body.getReader();
+    const decoder = new TextDecoder();
+    let buffer = "";
+    let finalStatus: "done" | "paused" | "error" = "done";
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      buffer += decoder.decode(value, { stream: true });
+      const lines = buffer.split("\n");
+      buffer = lines.pop() ?? "";
+      for (const line of lines) {
+        if (!line.trim()) continue;
+        try {
+          const raw = JSON.parse(line) as RawTurn;
+          const adapted = adaptTurn(raw);
+          if (adapted) setLiveTurns((prev) => [...prev, adapted]);
+          if (raw.kind === "done") finalStatus = "done";
+          if (raw.kind === "pause") {
+            finalStatus = "paused";
+            setLivePaused({
+              tool_use_id: raw.tool_use_id,
+              tool: "ask_user_question",
+              input: raw.input,
+            });
+          }
         } catch { /* skip malformed line */ }
       }
     }
@@ -189,6 +286,11 @@ export default function AgentRunConsole({
         ))}
         {status === "running" && (
           <li className="text-2xs text-ink-soft animate-pulse">Agent is thinking…</li>
+        )}
+        {status === "paused" && livePaused && (
+          <li>
+            <PauseAnswer input={livePaused.input} onAnswer={(a) => void answerPaused(a)} />
+          </li>
         )}
       </ol>
     );
@@ -276,6 +378,92 @@ function Row({ t }: { t: Turn }) {
       <Eyebrow className="text-sage-ink">Done · {t.ts}</Eyebrow>
       <p className="mt-1 text-ink">{t.summary}</p>
     </li>
+  );
+}
+
+function PauseAnswer({
+  input,
+  onAnswer,
+}: {
+  input: PauseInput;
+  onAnswer: (answer: Answer) => void;
+}) {
+  const [custom, setCustom] = useState("");
+  const options = input.options ?? [];
+  const canCustom = input.allow_custom !== false;
+
+  function submitCustom() {
+    const text = custom.trim();
+    if (!text) return;
+    onAnswer({ custom: text });
+    setCustom("");
+  }
+
+  return (
+    <div className="rounded-md border border-line/70 bg-canvas p-3 space-y-3">
+      <div>
+        <div className="text-2xs uppercase tracking-wider text-ink-soft">
+          Waiting for your answer
+        </div>
+        {input.question && (
+          <p className="text-sm text-ink mt-1">{input.question}</p>
+        )}
+      </div>
+
+      {options.length > 0 && (
+        <div className="grid gap-2">
+          {options.map((option) => (
+            <button
+              key={option.key}
+              type="button"
+              onClick={() => onAnswer({
+                key: option.key,
+                label: option.label,
+              })}
+              className="text-left rounded-md border border-line/70 bg-paper px-3 py-2 hover:border-line-strong transition-colors"
+            >
+              <span className="flex items-center justify-between gap-2">
+                <span className="text-sm font-medium text-ink">{option.label}</span>
+                {option.recommended && (
+                  <span className="text-2xs text-ink-muted">Recommended</span>
+                )}
+              </span>
+              {option.description && (
+                <span className="block text-xs text-ink-muted mt-1">
+                  {option.description}
+                </span>
+              )}
+            </button>
+          ))}
+        </div>
+      )}
+
+      {canCustom && (
+        <div className="flex items-end gap-2">
+          <textarea
+            value={custom}
+            onChange={(e) => setCustom(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" && !e.shiftKey) {
+                e.preventDefault();
+                submitCustom();
+              }
+            }}
+            rows={2}
+            placeholder="Type an answer..."
+            className="min-h-16 flex-1 resize-none rounded-md border border-line/70 bg-paper px-3 py-2 text-sm text-ink outline-none focus:border-line-strong"
+          />
+          <button
+            type="button"
+            onClick={submitCustom}
+            disabled={!custom.trim()}
+            className="rounded-md bg-ink text-paper px-3 py-2 text-xs font-medium disabled:opacity-40"
+          >
+            Send
+          </button>
+        </div>
+      )}
+    </div>
   );
 }
 

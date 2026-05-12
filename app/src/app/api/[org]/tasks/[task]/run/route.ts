@@ -2,7 +2,19 @@ import { db } from "@/lib/db/store";
 import { loadTaskState, saveTaskState } from "@/lib/db/task-state";
 import { runAgent, type AgentTurn } from "@/lib/agent/run";
 import { composeAgentPromptForDept, composeAgentPrompt } from "@/lib/agent/compose-prompt";
-import { ok, notFound } from "@/lib/api/responses";
+import { err, invalidInput, ok, notFound } from "@/lib/api/responses";
+import type Anthropic from "@anthropic-ai/sdk";
+import { z } from "zod";
+
+const Body = z.object({
+  kind: z.literal("tool_result"),
+  tool_use_id: z.string(),
+  answer: z.object({
+    key: z.string().optional(),
+    label: z.string().optional(),
+    custom: z.string().optional(),
+  }),
+});
 
 export async function GET(
   _req: Request,
@@ -18,7 +30,7 @@ export async function GET(
 }
 
 export async function POST(
-  _req: Request,
+  req: Request,
   { params }: { params: Promise<{ org: string; task: string }> },
 ) {
   const { org: orgSlug, task: taskId } = await params;
@@ -28,10 +40,46 @@ export async function POST(
   const task = tasks.find((t) => t.id === taskId);
   if (!task) return notFound("task");
 
-  const now = new Date().toISOString();
-  await db.updateTask(taskId, { status: "in_progress", started_at: now });
-
   const state = await loadTaskState(taskId);
+  const rawBody = await req.text();
+  let parsedBody: ReturnType<typeof Body.safeParse> | null = null;
+  if (rawBody.trim().length > 0) {
+    try {
+      parsedBody = Body.safeParse(JSON.parse(rawBody));
+    } catch {
+      return err(400, "invalid_json", "request body is not valid JSON");
+    }
+  }
+
+  if (parsedBody && !parsedBody.success) return invalidInput(parsedBody.error);
+
+  if (parsedBody?.success) {
+    const body = parsedBody.data;
+    if (!state.paused || state.paused.tool_use_id !== body.tool_use_id) {
+      return err(400, "no_paused_tool", "no matching paused task question");
+    }
+
+    const toolResult: Anthropic.Messages.ToolResultBlockParam = {
+      type: "tool_result",
+      tool_use_id: body.tool_use_id,
+      content: JSON.stringify(body.answer),
+    };
+    state.history = [
+      ...state.history,
+      { role: "user", content: [toolResult] },
+    ];
+    state.turns.push({
+      kind: "tool_answer",
+      tool_use_id: body.tool_use_id,
+      answer: body.answer,
+    });
+    state.paused = null;
+  } else if (state.paused) {
+    return err(409, "task_waiting_for_user", "answer the pending task question before running again");
+  }
+
+  const now = new Date().toISOString();
+  await db.updateTask(taskId, { status: "in_progress", started_at: task.started_at ?? now });
 
   // Compose system prompt through the dept agent that owns this task.
   // Falls back to the task-agent record if no dept resolved.
@@ -104,6 +152,7 @@ Keep responses concise and action-oriented.`;
               input: (paused as Extract<AgentTurn, { kind: "pause" }>).input,
             }
           : null;
+        if (state.paused) await db.updateTask(taskId, { status: "blocked" });
         await saveTaskState(state);
       } catch (err) {
         const errTurn: AgentTurn = {
@@ -111,6 +160,7 @@ Keep responses concise and action-oriented.`;
           text: `Agent error: ${String(err)}`,
         };
         emit(errTurn);
+        await db.updateTask(taskId, { status: "blocked" });
       }
       controller.close();
     },

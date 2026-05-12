@@ -22,6 +22,7 @@ const DEFAULT_AGENTS = [
     capabilities: "Writes code, runs migrations, ships features.",
     skills: [
       "dev-workflow",
+      "gic-coding-agent-skills",
       "supabase",
       "supabase-postgres-best-practices",
       "debugging-vercel-builds",
@@ -49,7 +50,7 @@ const DEFAULT_AGENTS = [
     role: "marketer",
     title: "Default marketer",
     capabilities: "Campaigns, copy, content.",
-    skills: ["content-engine", "last30days-research"],
+    skills: ["gic-skills", "content-engine", "last30days-research"],
   },
   {
     department: "sales",
@@ -58,7 +59,7 @@ const DEFAULT_AGENTS = [
     role: "sales",
     title: "Default sales",
     capabilities: "ICP, outbound, pipeline.",
-    skills: [],
+    skills: ["gic-skills", "company-naming", "last30days-research"],
   },
   {
     department: "operations",
@@ -94,7 +95,7 @@ const DEFAULT_AGENTS = [
     role: "support",
     title: "Default support",
     capabilities: "Customer support, issue triage, escalation, knowledge base.",
-    skills: [],
+    skills: ["gic-skills"],
   },
 ];
 

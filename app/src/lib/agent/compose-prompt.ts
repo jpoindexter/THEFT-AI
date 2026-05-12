@@ -47,8 +47,9 @@ export async function composeAgentPrompt(
   const skillsLoaded: string[] = [];
   const skillsMissing: string[] = [];
   const skillTexts: string[] = [];
+  const skillIds = mergeSkillIds(agent.attached_skills, defaultSkillsForAgent(agent));
 
-  for (const skillId of agent.attached_skills ?? []) {
+  for (const skillId of skillIds) {
     const body = await loadSkillBody(skillId);
     if (body) {
       skillsLoaded.push(skillId);
@@ -71,6 +72,31 @@ export async function composeAgentPrompt(
     skillsLoaded,
     skillsMissing,
   };
+}
+
+function mergeSkillIds(...sets: (string[] | null | undefined)[]): string[] {
+  const seen = new Set<string>();
+  const merged: string[] = [];
+  for (const set of sets) {
+    for (const skillId of set ?? []) {
+      if (seen.has(skillId)) continue;
+      seen.add(skillId);
+      merged.push(skillId);
+    }
+  }
+  return merged;
+}
+
+function defaultSkillsForAgent(agent: { slug: string; name: string }): string[] {
+  const key = `${agent.slug} ${agent.name}`.toLowerCase();
+  if (key.includes("engineer")) return ["dev-workflow", "gic-coding-agent-skills"];
+  if (key.includes("marketing")) return ["gic-skills", "content-engine", "last30days-research"];
+  if (key.includes("sales")) return ["gic-skills", "company-naming", "last30days-research"];
+  if (key.includes("design")) return ["web-design-guidelines"];
+  if (key.includes("operations")) return ["ops-agent-skills"];
+  if (key.includes("finance")) return ["finance-agent-skills"];
+  if (key.includes("support")) return ["gic-skills"];
+  return [];
 }
 
 async function loadSkillBody(skillId: string): Promise<string | null> {
