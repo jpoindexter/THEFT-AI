@@ -48,6 +48,12 @@ function DescribePhase({ onSubmit, loadError, initialText }: {
 }) {
   const [input, setInput] = useState(initialText ?? "");
 
+  function submit(text: string) {
+    const trimmed = text.trim();
+    if (!trimmed) return;
+    onSubmit(trimmed);
+  }
+
   return (
     <div style={{ display: "flex", flexDirection: "column", height: "100%" }}>
       <ChatHead />
@@ -73,7 +79,7 @@ function DescribePhase({ onSubmit, loadError, initialText }: {
             <button
               key={ex}
               type="button"
-              onClick={() => setInput(`A ${ex.toLowerCase()} for early-stage operators.`)}
+              onClick={() => submit(`A ${ex.toLowerCase()} for early-stage operators.`)}
               style={{
                 height: 26, padding: "0 10px", border: "1px solid var(--t-line)",
                 borderRadius: 4, background: "var(--t-paper)", fontSize: 11,
@@ -106,7 +112,12 @@ function DescribePhase({ onSubmit, loadError, initialText }: {
             placeholder="A subscription service for designers who need ongoing brand work…"
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            onKeyDown={(e) => { if (e.key === "Enter" && (e.metaKey || e.ctrlKey) && input.trim()) onSubmit(input.trim()); }}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" && !e.shiftKey) {
+                e.preventDefault();
+                submit(input);
+              }
+            }}
             rows={3}
             style={{
               border: "none", outline: "none", background: "transparent",
@@ -115,10 +126,10 @@ function DescribePhase({ onSubmit, loadError, initialText }: {
             }}
           />
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-            <span style={{ fontSize: 11, color: "var(--t-ink-soft)" }}>⌘↵ to send</span>
+            <span style={{ fontSize: 11, color: "var(--t-ink-soft)" }}>Enter to send · Shift+Enter newline</span>
             <button
               type="button"
-              onClick={() => { if (input.trim()) onSubmit(input.trim()); }}
+              onClick={() => submit(input)}
               disabled={!input.trim()}
               aria-label="Send"
               style={{
