@@ -25,11 +25,11 @@ THEFT AI — an AI-agent platform that runs a real company across 8 departments 
 BUILD-FROM-THIS/    Source of truth for what to build. Read first.
 _archive/           Old docs (BUILD-MAP.md, PLAN.md, CLONE-GAPS.md, etc.) — do NOT use as source.
 app/                Next.js 16 app. All code changes happen here.
-paperclip/          Read-only agent-platform reference. Never modify, never run.
+paperclip/          Read-only agent-platform reference. Never modify, never run. (not tracked in git)
 cofounder-docs/     32 MD files mirroring docs.cofounder.co. Feature spec.
 skills/             Skill packets attached to agents (SKILL.md per skill).
-frames/, frames2/   Visual reference (~4300 frames). NOT a pixel spec — visual hint only.
-screenshots/        Earlier visual reference. Same status as frames.
+frames/, frames2/   Visual reference (~4300 frames). NOT a pixel spec — visual hint only. (not tracked in git)
+screenshots/        Earlier visual reference. Same status as frames. (not tracked in git)
 dev.sh, reset.sh    Helpers. dev.sh starts the app from project root.
 ```
 
