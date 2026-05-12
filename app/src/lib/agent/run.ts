@@ -217,6 +217,7 @@ async function executeTool(opts: {
     case "set_business_plan": {
       const i = input as SetBusinessPlanInput;
       await db.updateOrg(org.id, { business_plan: i });
+      await db.completeOnboardingRoadmap(org.id);
       await db.createArtifact({
         organization_id: org.id,
         department_id: null,
@@ -273,29 +274,7 @@ async function executeTool(opts: {
       return { ok: true, artifact_id: a.id };
     }
     case "complete_onboarding": {
-      // Mark foundational nodes complete — these are answered by the business plan
-      const completedAtOnboarding = ["initial-idea", "pick-company-name"];
-      for (const slug of completedAtOnboarding) {
-        await db.upsertTechTreeNodeStatus(org.id, slug, "complete");
-      }
-      // Unlock nodes whose dependencies are now all satisfied
-      const allNodes = await db.listTechTreeNodes();
-      const statusRows = await db.listTechTreeStatus(org.id);
-      const statusMap = new Map(statusRows.map((s) => [s.node_id, s.status]));
-      // Treat newly-completed nodes as complete in the map
-      const completedIds = new Set(
-        allNodes.filter((n) => completedAtOnboarding.includes(n.slug)).map((n) => n.id),
-      );
-      for (const n of allNodes) {
-        if (completedAtOnboarding.includes(n.slug)) continue;
-        if ((statusMap.get(n.id) ?? "locked") !== "locked") continue;
-        const allDepsDone = n.dependencies.every(
-          (depId) => completedIds.has(depId) || statusMap.get(depId) === "complete",
-        );
-        if (allDepsDone && n.dependencies.length > 0) {
-          await db.upsertTechTreeNodeStatus(org.id, n.slug, "available");
-        }
-      }
+      await db.completeOnboardingRoadmap(org.id);
       return { ok: true };
     }
     case "web_search": {

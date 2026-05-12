@@ -70,6 +70,7 @@ Output schema: { "product_or_service": string, "icp": string, "mission": string,
   }
 
   await db.updateOrg(org.id, { business_plan: plan });
+  await db.completeOnboardingRoadmap(org.id);
   await db.createArtifact({
     organization_id: org.id,
     department_id: null,

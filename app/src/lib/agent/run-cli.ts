@@ -125,6 +125,7 @@ export async function runAgentCli(opts: {
       }
       if (a.type === "set_business_plan") {
         await db.updateOrg(opts.org.id, { business_plan: a });
+        await db.completeOnboardingRoadmap(opts.org.id);
         await db.createArtifact({
           organization_id: opts.org.id,
           department_id: null,
@@ -238,6 +239,7 @@ export async function runAgentCli(opts: {
         continue;
       }
       if (a.type === "complete_onboarding") {
+        await db.completeOnboardingRoadmap(opts.org.id);
         const id = `co_${loop}`;
         turns.push({
           kind: "tool_call",

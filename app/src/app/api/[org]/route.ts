@@ -38,6 +38,9 @@ export async function PATCH(
   const parsed = PatchBody.safeParse(await req.json());
   if (!parsed.success) return invalidInput(parsed.error);
   await db.updateOrg(o.id, parsed.data);
+  if (parsed.data.business_plan && Object.keys(parsed.data.business_plan).length > 0) {
+    await db.completeOnboardingRoadmap(o.id);
+  }
   return ok({ ok: true });
 }
 

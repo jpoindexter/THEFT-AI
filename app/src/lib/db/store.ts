@@ -454,14 +454,19 @@ export const db = {
   },
   async seedTechTreeStatus(orgId: string): Promise<void> {
     const all = await readTable<TechTreeStatus>("tech_tree_status");
-    if (all.some((s) => s.organization_id === orgId)) return;
-    const seeded = TECH_TREE_NODES.map((n) => ({
+    const existingNodeIds = new Set(
+      all
+        .filter((s) => s.organization_id === orgId)
+        .map((s) => s.node_id),
+    );
+    const seeded = TECH_TREE_NODES.filter((n) => !existingNodeIds.has(n.id)).map((n) => ({
       organization_id: orgId,
       node_id: n.id,
       status:
         n.slug === "initial-idea" ? ("available" as const) : ("locked" as const),
       completed_at: null,
     }));
+    if (seeded.length === 0) return;
     await writeTable("tech_tree_status", [...all, ...seeded]);
   },
 
@@ -491,6 +496,35 @@ export const db = {
           completed_at: status === "complete" ? now : null,
         },
       ]);
+    }
+  },
+
+  async completeOnboardingRoadmap(orgId: string): Promise<void> {
+    await this.seedTechTreeStatus(orgId);
+
+    const completedAtOnboarding = ["initial-idea", "pick-company-name"];
+    for (const slug of completedAtOnboarding) {
+      await this.upsertTechTreeNodeStatus(orgId, slug, "complete");
+    }
+
+    const allNodes = await this.listTechTreeNodes();
+    const statusRows = await this.listTechTreeStatus(orgId);
+    const statusMap = new Map(statusRows.map((s) => [s.node_id, s.status]));
+    const completedIds = new Set(
+      allNodes
+        .filter((n) => completedAtOnboarding.includes(n.slug))
+        .map((n) => n.id),
+    );
+
+    for (const n of allNodes) {
+      if (completedAtOnboarding.includes(n.slug)) continue;
+      if ((statusMap.get(n.id) ?? "locked") !== "locked") continue;
+      const allDepsDone = n.dependencies.every(
+        (depId) => completedIds.has(depId) || statusMap.get(depId) === "complete",
+      );
+      if (allDepsDone && n.dependencies.length > 0) {
+        await this.upsertTechTreeNodeStatus(orgId, n.slug, "available");
+      }
     }
   },
 

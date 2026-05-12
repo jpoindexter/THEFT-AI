@@ -60,6 +60,17 @@ describe("seedTechTreeStatus", () => {
     expect(statuses.length).toBe(nodes.length);
   });
 
+  it("fills missing rows when some roadmap statuses already exist", async () => {
+    const org = await db.createOrg({ name: "Partial Seed Test" });
+    await db.upsertTechTreeNodeStatus(org.id, "initial-idea", "complete");
+
+    await db.seedTechTreeStatus(org.id);
+
+    const statuses = await db.listTechTreeStatus(org.id);
+    const nodes = await db.listTechTreeNodes();
+    expect(statuses.length).toBe(nodes.length);
+  });
+
   it("isolates statuses by org", async () => {
     const orgA = await db.createOrg({ name: "Org A" });
     const orgB = await db.createOrg({ name: "Org B" });
@@ -120,6 +131,45 @@ describe("upsertTechTreeNodeStatus", () => {
     await expect(
       db.upsertTechTreeNodeStatus(org.id, "not-a-real-node", "complete"),
     ).resolves.toBeUndefined();
+  });
+});
+
+describe("completeOnboardingRoadmap", () => {
+  it("marks initial idea and company name complete", async () => {
+    const org = await db.createOrg({ name: "Onboarding Test" });
+
+    await db.completeOnboardingRoadmap(org.id);
+
+    const nodes = await db.listTechTreeNodes();
+    const statuses = await db.listTechTreeStatus(org.id);
+    const statusBySlug = new Map(
+      nodes.map((n) => [
+        n.slug,
+        statuses.find((s) => s.node_id === n.id)?.status,
+      ]),
+    );
+
+    expect(statusBySlug.get("initial-idea")).toBe("complete");
+    expect(statusBySlug.get("pick-company-name")).toBe("complete");
+  });
+
+  it("keeps the roadmap fully seeded and unlocks newly available next steps", async () => {
+    const org = await db.createOrg({ name: "Unlock Test" });
+
+    await db.completeOnboardingRoadmap(org.id);
+
+    const nodes = await db.listTechTreeNodes();
+    const statuses = await db.listTechTreeStatus(org.id);
+    const statusBySlug = new Map(
+      nodes.map((n) => [
+        n.slug,
+        statuses.find((s) => s.node_id === n.id)?.status,
+      ]),
+    );
+
+    expect(statuses.length).toBe(nodes.length);
+    expect(statusBySlug.get("prepare-repository")).toBe("available");
+    expect(statusBySlug.get("brand-identity")).toBe("available");
   });
 });
 
