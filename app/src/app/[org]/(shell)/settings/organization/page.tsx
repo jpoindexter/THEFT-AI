@@ -12,7 +12,6 @@ import { db } from "@/lib/db/store";
 import { notFound } from "next/navigation";
 import DangerZone from "@/components/settings/danger-zone";
 import TransferOwnership from "@/components/settings/transfer-ownership";
-import Link from "next/link";
 
 const SOURCES = ["ChatGPT", "Claude", "Perplexity", "OpenAI", "Other"];
 
@@ -113,12 +112,14 @@ export default async function Organization({
           >
             <Download className="size-3" /> Download workspace.json
           </a>
-          <Link
-            href={`/${org}/settings/import`}
-            className="inline-flex items-center gap-1 text-sm rounded-md border border-line px-3 py-1.5 hover:border-line-strong"
+          <button
+            type="button"
+            disabled
+            className="inline-flex items-center gap-1 text-sm rounded-md border border-line px-3 py-1.5 text-ink-muted opacity-60 cursor-not-allowed"
+            title="Import flow is not implemented in local mode yet."
           >
-            Import workspace.json
-          </Link>
+            Import workspace.json (soon)
+          </button>
         </div>
       </SettingsCard>
 

@@ -1,6 +1,6 @@
 # HANDOFF — THEFT x Paperclip Merge
 
-> Last updated: 2026-05-14 (settings happy-path route fix).
+> Last updated: 2026-05-14 (settings import dead-link removal).
 > Branch: `codex-current-design-migration`.
 > Read this first if continuing in Claude, Codex, Gemini, or another local agent.
 
@@ -100,6 +100,8 @@ In progress:
   - settings root now redirects to `/:org/settings/organization` (implemented page) instead of missing `/settings/preferences`.
 - `app/src/app/[org]/(shell)/settings/nav.tsx`
   - removed links to unimplemented sections (`preferences`, `notifications`, `advanced`) and aligned nav to implemented settings routes only.
+- `app/src/app/[org]/(shell)/settings/organization/page.tsx`
+  - replaced dead `/settings/import` link with a disabled local-mode placeholder button until import flow/API exists.
 
 Not started yet:
 
