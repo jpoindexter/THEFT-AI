@@ -39,6 +39,7 @@ import {
 import {
   ONBOARDING_STAGES,
   type OnboardingStage,
+  getOnboardingStageTaskTemplate,
   mergeDescriptionWithOnboardingContext,
 } from "../lib/onboarding-context";
 import { buildNewAgentRuntimeConfig } from "../lib/new-agent-runtime-config";
@@ -73,6 +74,22 @@ const DEFAULT_TASK_DESCRIPTION = `You are the CEO. You set the direction for the
 - hire a founding engineer
 - write a hiring plan
 - break the roadmap into concrete tasks and start delegating work`;
+
+function buildInterviewContextSection(input: {
+  stage: OnboardingStage;
+  prompt: string;
+  answer: string;
+}) {
+  const answer = input.answer.trim();
+  if (!answer) return "";
+  return [
+    "",
+    "Onboarding context",
+    `- stage: ${input.stage}`,
+    `- ${input.prompt}`,
+    `  ${answer}`,
+  ].join("\n");
+}
 
 export function OnboardingWizard() {
   const { onboardingOpen, onboardingOptions, closeOnboarding } = useDialog();
@@ -143,6 +160,8 @@ export function OnboardingWizard() {
   const [taskDescription, setTaskDescription] = useState(
     DEFAULT_TASK_DESCRIPTION
   );
+  const [taskTemplateCustomized, setTaskTemplateCustomized] = useState(false);
+  const [stageInterviewAnswer, setStageInterviewAnswer] = useState("");
 
   // Auto-grow textarea for task description
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -295,6 +314,16 @@ export function OnboardingWizard() {
         entries: [...entries].sort((a, b) => a.id.localeCompare(b.id))
       }));
   }, [filteredModels, adapterType]);
+  const stageTaskTemplate = useMemo(
+    () => getOnboardingStageTaskTemplate(companyStage),
+    [companyStage],
+  );
+
+  useEffect(() => {
+    if (taskTemplateCustomized) return;
+    setTaskTitle(stageTaskTemplate.taskTitle);
+    setTaskDescription(stageTaskTemplate.taskDescription);
+  }, [stageTaskTemplate, taskTemplateCustomized]);
 
   function reset() {
     setStep(1);
@@ -322,6 +351,8 @@ export function OnboardingWizard() {
     setUnsetAnthropicLoading(false);
     setTaskTitle("Hire your first engineer and create a hiring plan");
     setTaskDescription(DEFAULT_TASK_DESCRIPTION);
+    setTaskTemplateCustomized(false);
+    setStageInterviewAnswer("");
     setCreatedCompanyId(null);
     setCreatedCompanyPrefix(null);
     setCreatedCompanyGoalId(null);
@@ -603,7 +634,11 @@ export function OnboardingWizard() {
           createdCompanyId,
           buildOnboardingIssuePayload({
             title: taskTitle,
-            description: taskDescription,
+            description: `${taskDescription.trim()}${buildInterviewContextSection({
+              stage: companyStage,
+              prompt: stageTaskTemplate.interviewPrompt,
+              answer: stageInterviewAnswer,
+            })}`.trim(),
             assigneeAgentId: createdAgentId,
             projectId,
             goalId
@@ -1252,7 +1287,10 @@ export function OnboardingWizard() {
                       className="w-full rounded-md border border-border bg-transparent px-3 py-2 text-sm outline-none focus:ring-1 focus:ring-ring placeholder:text-muted-foreground/50"
                       placeholder="e.g. Research competitor pricing"
                       value={taskTitle}
-                      onChange={(e) => setTaskTitle(e.target.value)}
+                      onChange={(e) => {
+                        setTaskTemplateCustomized(true);
+                        setTaskTitle(e.target.value);
+                      }}
                       autoFocus
                     />
                   </div>
@@ -1265,7 +1303,21 @@ export function OnboardingWizard() {
                       className="w-full rounded-md border border-border bg-transparent px-3 py-2 text-sm outline-none focus:ring-1 focus:ring-ring placeholder:text-muted-foreground/50 resize-none min-h-[120px] max-h-[300px] overflow-y-auto"
                       placeholder="Add more detail about what the agent should do..."
                       value={taskDescription}
-                      onChange={(e) => setTaskDescription(e.target.value)}
+                      onChange={(e) => {
+                        setTaskTemplateCustomized(true);
+                        setTaskDescription(e.target.value);
+                      }}
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs text-muted-foreground mb-1 block">
+                      Stage interview: {stageTaskTemplate.interviewPrompt}
+                    </label>
+                    <textarea
+                      className="w-full rounded-md border border-border bg-transparent px-3 py-2 text-sm outline-none focus:ring-1 focus:ring-ring placeholder:text-muted-foreground/50 resize-none min-h-[72px]"
+                      placeholder={stageTaskTemplate.interviewPlaceholder}
+                      value={stageInterviewAnswer}
+                      onChange={(e) => setStageInterviewAnswer(e.target.value)}
                     />
                   </div>
                 </div>

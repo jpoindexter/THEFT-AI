@@ -38,7 +38,7 @@ Goal: THEFT runs as one local app backed by Paperclip's runtime. A founder can c
 - [ ] Sign in/local entry.
 - [x] Name company.
 - [x] Pick company stage: pre-idea, idea, validating, building, launched, revenue, scaling, existing business.
-- [ ] Guided setup adapts to stage.
+- [x] Guided setup adapts to stage. (Step 3 task/interview prompt now varies by selected company stage.)
 - [ ] Setup steps can be marked done, skipped, or named as existing. (Started in Step 1; not yet fully wired into all setup stages.)
 - [ ] Create Paperclip company, company goal, Operator, 8 department agents, roadmap goals/issues, and first tasks.
 - [ ] Hide credits/billing in local onboarding.

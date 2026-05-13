@@ -1,5 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { buildOnboardingContextBlock, mergeDescriptionWithOnboardingContext } from "./onboarding-context";
+import {
+  buildOnboardingContextBlock,
+  getOnboardingStageTaskTemplate,
+  mergeDescriptionWithOnboardingContext,
+} from "./onboarding-context";
 
 describe("onboarding context", () => {
   it("builds a structured onboarding context block", () => {
@@ -29,5 +33,11 @@ describe("onboarding context", () => {
     expect(merged).toContain("We build workflow tools.");
     expect(merged).toContain("stage=validating");
     expect(merged).toContain("- offer:done");
+  });
+
+  it("returns stage-specific task templates", () => {
+    const template = getOnboardingStageTaskTemplate("scaling");
+    expect(template.taskTitle).toContain("scale");
+    expect(template.interviewPrompt).toContain("volume");
   });
 });

@@ -1,6 +1,6 @@
 # HANDOFF — THEFT x Paperclip Merge
 
-> Last updated: 2026-05-13 (staged onboarding step-1 checkpoint).
+> Last updated: 2026-05-13 (staged onboarding adaptive interview checkpoint).
 > Branch: `codex-current-design-migration`.
 > Read this first if continuing in Claude, Codex, Gemini, or another local agent.
 
@@ -76,6 +76,10 @@ In progress:
   - onboarding context is persisted into company description on create.
 - `paperclip/ui/src/lib/onboarding-context.ts`
   - shared parser/formatter for persisted onboarding context block.
+  - includes per-stage task/interview templates for adaptive onboarding.
+- `paperclip/ui/src/components/OnboardingWizard.tsx`
+  - Step 3 now auto-prefills stage-specific task title/description.
+  - Step 3 now asks one stage-specific interview question and appends the answer to the launched issue description.
 
 Not started yet:
 
@@ -110,7 +114,7 @@ Results:
 1. Replace Paperclip generic onboarding with full THEFT staged onboarding:
    - name company
    - choose stage: pre-idea, idea, validating, building, launched, revenue, scaling, existing business
-   - adaptive setup questions by stage
+   - adaptive setup questions by stage (now partially done: step-3 interview)
    - complete "already done", "skip", and note/name fields across all setup steps
 2. Seed one Paperclip company with:
    - Operator
