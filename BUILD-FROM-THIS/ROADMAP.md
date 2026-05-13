@@ -13,13 +13,13 @@ Goal: THEFT runs as one local app backed by Paperclip's runtime. A founder can c
 - [x] Create `PARITY-DELTA.md`.
 - [x] Append locked decisions.
 - [x] Update repo guidance (`AGENTS.md`, constitution) to reflect Paperclip-host direction.
-- [ ] Decide host promotion path: tracked Paperclip subtree in this repo vs Paperclip fork repo.
+- [x] Decide host promotion path: tracked Paperclip subtree in this repo vs Paperclip fork repo.
 
 ## Slice 0.1 — Promote A Single Host
 
-- [ ] Stop treating the bridge as final architecture.
-- [ ] Create a tracked Paperclip-host branch or repo.
-- [ ] Bring `BUILD-FROM-THIS/` and `skills/` into the host.
+- [x] Stop treating the bridge as final architecture.
+- [x] Create a tracked Paperclip-host branch or repo.
+- [ ] Bring `BUILD-FROM-THIS/` and `skills/` into the host. Started with `paperclip/THEFT.md` and `paperclip/AGENTS.md` pointers; full skill import remains Slice 0.2.
 - [ ] Add THEFT design tokens/branding to the host UI.
 - [ ] Mark current `app/` as migration reference once host exists.
 - [ ] Make one dev command for the host.

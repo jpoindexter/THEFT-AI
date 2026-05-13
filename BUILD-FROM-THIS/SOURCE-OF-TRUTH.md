@@ -27,10 +27,10 @@ The current `app/` Next.js app is now a **migration reference and product protot
 ### Current Repo Reality
 
 - `paperclip/` currently runs and has the runtime we need.
-- `paperclip/` is currently ignored by `.gitignore`, so changes inside it are not tracked by this repo.
+- `paperclip/` is now promoted into tracked parent-repo source as of `PAPERCLIP-HOST-PROMOTION.md`.
 - `app/` is tracked, but it duplicates Paperclip concepts and still uses a local JSON store.
 
-This means the next cleanup step is not more bridge code. It is choosing and executing the host promotion path.
+This means the next cleanup step is not more bridge code. It is importing THEFT skills and porting the first product surfaces into the Paperclip host.
 
 ## Host Promotion Options
 
@@ -40,7 +40,7 @@ This means the next cleanup step is not more bridge code. It is choosing and exe
 | Move THEFT work into a Paperclip fork repo | Treat Paperclip fork as the app repo; copy THEFT docs/skills/design into it | Cleanest runtime base | Splits current repo unless migrated carefully | Preferred if GitHub repo ownership is flexible |
 | Keep bridge from `app/` to `paperclip/` | Current temporary path | Fast smoke testing | Violates "one app"; duplicates state forever | Not final |
 
-**Recommended:** promote Paperclip into a tracked THEFT host, then archive/deprecate `app/` once parity is reached.
+**Selected:** track `paperclip/` in this repo. Archive/deprecate `app/` once parity is reached.
 
 ## Source Materials And Authority
 
@@ -48,6 +48,7 @@ This means the next cleanup step is not more bridge code. It is choosing and exe
 |---|---|---|
 | `BUILD-FROM-THIS/SOURCE-OF-TRUTH.md` | Highest | This merge architecture and repo cleanup direction |
 | `BUILD-FROM-THIS/PARITY-DELTA.md` | Highest | What maps, what is missing, what to build/subtract |
+| `BUILD-FROM-THIS/PAPERCLIP-HOST-PROMOTION.md` | Highest | How Paperclip was promoted into tracked source |
 | `cofounder-docs/` | Product behavior | Departments, tasks, library, managed services, settings, agent roles |
 | `frames2/` | Flow/visual reference | Sign-in, name company, setup interview, brand kit, canvas, tech tree, task review |
 | `paperclip/` | Runtime implementation | Control plane, adapters, skills, companies, goals, issues, heartbeats |

@@ -12,15 +12,15 @@
 | T003 | Append new locked decisions | ✅ done |
 | T004 | Update `README.md` read order | ✅ done |
 | T005 | Update constitution and `AGENTS.md` to stop saying Paperclip is reference-only | ✅ done |
-| T006 | Decide host promotion path: tracked subtree vs Paperclip fork repo | ☐ todo |
+| T006 | Decide host promotion path: tracked subtree vs Paperclip fork repo | ✅ done |
 
 ## Slice 0.1 — Promote A Single Host
 
 | ID | Title | Status |
 |---|---|---|
-| T010 | Create Paperclip-host branch/repo plan with exact git operations | ☐ todo |
-| T011 | Promote Paperclip into tracked source or move work to Paperclip fork | ☐ todo |
-| T012 | Copy/port `BUILD-FROM-THIS/` and `skills/` into the host | ☐ todo |
+| T010 | Create Paperclip-host branch/repo plan with exact git operations | ✅ done |
+| T011 | Promote Paperclip into tracked source or move work to Paperclip fork | ✅ done |
+| T012 | Copy/port `BUILD-FROM-THIS/` and `skills/` into the host | ▶ doing |
 | T013 | Add THEFT design tokens/brand shell to Paperclip UI | ☐ todo |
 | T014 | Add one host dev command and document it | ☐ todo |
 | T015 | Mark current `app/` as migration reference after host boots | ☐ todo |

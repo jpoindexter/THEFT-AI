@@ -13,13 +13,13 @@ Current repo reality:
 
 | Area | Status | Notes |
 |---|---|---|
-| `paperclip/` | **RUNS, UNTRACKED** | Local runtime host candidate. It is still ignored by git, so product changes inside it are not safely tracked yet. |
+| `paperclip/` | **RUNS, TRACKED HOST** | Local runtime host promoted into parent git. Product changes should happen here. |
 | `app/` | **MIGRATION REFERENCE** | Tracked THEFT prototype with design/onboarding/routes, but it duplicates Paperclip concepts and uses JSON state. Do not expand it as final runtime. |
 | Paperclip bridge in `app/` | **TEMPORARY** | Commit `45c4550` proved onboarding can seed Paperclip company/agents/issues. It is not the final architecture. |
 | `BUILD-FROM-THIS/` | **SOURCE OF TRUTH** | Read `SOURCE-OF-TRUTH.md`, then `PARITY-DELTA.md`, then roadmap/tasks. |
 | `skills/` | **PRODUCT DATA** | Must be imported/registered into Paperclip company skills before agents can depend on THEFT skill slugs. |
 
-Next blocking decision: promote `paperclip/` into tracked source in this repo or move THEFT work into a Paperclip fork repo. Until that is decided, avoid building new runtime features in either app.
+Next blocking work: import THEFT skills into Paperclip and port the staged onboarding flow into the tracked host. Avoid building new runtime features in `app/`.
 
 ## Legacy THEFT App Engine (`app/src/lib/`)
 

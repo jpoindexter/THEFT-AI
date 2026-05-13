@@ -8,9 +8,34 @@ frames2/
 twinframes/
 screenshots/
 
-# Reference clones and read-only platform (not project code)
+# Reference clones (not project code)
 _reference/
-paperclip/
+
+# Paperclip is the tracked runtime host. Keep local clone metadata,
+# dependencies, build outputs, and runtime data out of parent git.
+paperclip/.git-upstream/
+paperclip/node_modules/
+paperclip/**/node_modules/
+paperclip/dist/
+paperclip/**/dist/
+paperclip/.vite/
+paperclip/coverage/
+paperclip/data/
+paperclip/.paperclip/
+paperclip/.paperclip-local/
+paperclip/.pnpm-store/
+paperclip/tmp/
+paperclip/tmp-*/
+paperclip/cli/tmp/
+paperclip/diagnostics/
+paperclip/feedback-export-*
+paperclip/ui/storybook-static/
+paperclip/drizzle/meta/
+paperclip/tests/e2e/test-results/
+paperclip/tests/e2e/playwright-report/
+paperclip/tests/release-smoke/test-results/
+paperclip/tests/release-smoke/playwright-report/
+paperclip/.superset/
 
 # Claude Code local config
 .claude/
@@ -45,6 +70,8 @@ yarn-error.log*
 # Env
 .env*
 !.env.example
+!paperclip/.env.example
+!paperclip/docker/.env.aws.example
 
 # App data
 .theft-data/
