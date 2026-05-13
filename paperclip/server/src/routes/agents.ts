@@ -95,6 +95,7 @@ import {
   loadDefaultAgentInstructionsBundle,
   resolveDefaultAgentInstructionsBundleRole,
 } from "../services/default-agent-instructions.js";
+import { resolveTheftDefaultDesiredSkillsForRole } from "../services/theft-default-skills.js";
 import { getTelemetryClient } from "../telemetry.js";
 import { assertEnvironmentSelectionForCompany } from "./environment-selection.js";
 import { recoveryService } from "../services/recovery/service.js";
@@ -1239,10 +1240,16 @@ export function agentRoutes(
   async function resolveDesiredSkillAssignment(
     companyId: string,
     adapterType: string,
+    role: string,
     adapterConfig: Record<string, unknown>,
     requestedDesiredSkills: string[] | undefined,
   ) {
-    if (!requestedDesiredSkills) {
+    const seedDefaults = !requestedDesiredSkills || requestedDesiredSkills.length === 0;
+    const desiredSkillReferences = seedDefaults
+      ? resolveTheftDefaultDesiredSkillsForRole(role)
+      : requestedDesiredSkills;
+
+    if (!desiredSkillReferences || desiredSkillReferences.length === 0) {
       return {
         adapterConfig,
         desiredSkills: null as string[] | null,
@@ -1252,7 +1259,7 @@ export function agentRoutes(
 
     const resolvedRequestedSkills = await companySkills.resolveRequestedSkillKeys(
       companyId,
-      requestedDesiredSkills,
+      desiredSkillReferences,
     );
     const runtimeSkillEntries = await companySkills.listRuntimeSkillEntries(companyId, {
       materializeMissing: shouldMaterializeRuntimeSkillsForAdapter(adapterType),
@@ -1531,6 +1538,7 @@ export function agentRoutes(
       } = await resolveDesiredSkillAssignment(
         agent.companyId,
         agent.adapterType,
+        agent.role,
         agent.adapterConfig as Record<string, unknown>,
         requestedSkills,
       );
@@ -1974,6 +1982,7 @@ export function agentRoutes(
     const desiredSkillAssignment = await resolveDesiredSkillAssignment(
       companyId,
       hireInput.adapterType,
+      hireInput.role,
       requestedAdapterConfig,
       Array.isArray(requestedDesiredSkills) ? requestedDesiredSkills : undefined,
     );
@@ -2160,6 +2169,7 @@ export function agentRoutes(
     const desiredSkillAssignment = await resolveDesiredSkillAssignment(
       companyId,
       createInput.adapterType,
+      createInput.role,
       requestedAdapterConfig,
       Array.isArray(requestedDesiredSkills) ? requestedDesiredSkills : undefined,
     );

@@ -1,6 +1,6 @@
 # HANDOFF — THEFT x Paperclip Merge
 
-> Last updated: 2026-05-13.
+> Last updated: 2026-05-13 (skill-default seeding checkpoint).
 > Branch: `codex-current-design-migration`.
 > Read this first if continuing in Claude, Codex, Gemini, or another local agent.
 
@@ -64,10 +64,14 @@ In progress:
   - derives canonical keys as `theft/skills/<slug>`.
 - `paperclip/server/src/__tests__/company-skills-service.test.ts`
   - includes a regression test for `theft/skills/company-naming`.
+- `paperclip/server/src/routes/agents.ts`
+  - now applies THEFT default `desiredSkills` by role when no skills are explicitly provided.
+  - this runs for both `POST /agent-hires` and `POST /agents`.
+- `paperclip/server/src/services/theft-default-skills.ts`
+  - central role-to-`theft/skills/*` mapping used by agent creation routes.
 
 Not started yet:
 
-- Default department agents are not yet seeded with the audited skill keys.
 - Onboarding is not yet replaced with THEFT staged onboarding.
 - Current `app/` prototype is not archived.
 - Fake credits/billing are not fully hidden in the Paperclip host.
@@ -92,21 +96,19 @@ Results:
 
 ## Next Exact Tasks
 
-1. Commit and push the current skill-runtime checkpoint.
-2. Wire default department agents to `theft/skills/*` keys.
-3. Verify `desiredSkills` accepts those keys without validation errors.
-4. Replace Paperclip generic onboarding with THEFT staged onboarding:
+1. Verify `desiredSkills` accepts the seeded THEFT role defaults in a route-level happy path.
+2. Replace Paperclip generic onboarding with THEFT staged onboarding:
    - name company
    - choose stage: pre-idea, idea, validating, building, launched, revenue, scaling, existing business
    - adaptive setup questions
    - allow "already done", "skip", and note/name fields
-5. Seed one Paperclip company with:
+3. Seed one Paperclip company with:
    - Operator
    - Engineering, Design, Marketing, Sales, Operations, Finance, Legal, Support
    - first roadmap goals/issues
    - imported THEFT skill selections
-6. Hide or remove local-only fake credits/billing UX.
-7. Browser-test the full happy path from onboarding to task execution.
+4. Hide or remove local-only fake credits/billing UX.
+5. Browser-test the full happy path from onboarding to task execution.
 
 ## Important Product Rules
 
