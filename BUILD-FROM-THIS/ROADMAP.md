@@ -30,7 +30,7 @@ Goal: THEFT runs as one local app backed by Paperclip's runtime. A founder can c
 - [x] Register THEFT skills as Paperclip company skills.
 - [ ] Preserve read-only/custom skill distinction.
 - [x] Map skills to default department agents.
-- [ ] Verify Paperclip agents can use imported skill selections without `desiredSkills` validation errors.
+- [x] Verify Paperclip agents can use imported skill selections without `desiredSkills` validation errors.
 
 ## Slice 0.3 — THEFT Staged Onboarding In Paperclip
 

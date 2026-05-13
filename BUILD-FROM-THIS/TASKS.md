@@ -33,7 +33,7 @@
 | T021 | Add local skill import command/API for THEFT skill packs | ✅ done |
 | T022 | Register skills as Paperclip company skills | ✅ done |
 | T023 | Map default department agents to imported skills | ✅ done |
-| T024 | Verify `desiredSkills` works with THEFT skill slugs | ▶ doing |
+| T024 | Verify `desiredSkills` works with THEFT skill slugs | ✅ done |
 
 ## Slice 0.3 — Staged Onboarding
 

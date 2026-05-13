@@ -538,6 +538,34 @@ describe.sequential("agent skill routes", () => {
     );
   });
 
+  it("seeds THEFT default desired skills by role when creating an agent directly", async () => {
+    const res = await requestApp(await createApp(), (baseUrl) => request(baseUrl)
+      .post("/api/companies/company-1/agents")
+      .send({
+        name: "Ops Lead",
+        role: "devops",
+        adapterType: "claude_local",
+        adapterConfig: {},
+      }));
+
+    expect([200, 201], JSON.stringify(res.body)).toContain(res.status);
+    expect(mockAgentService.create).toHaveBeenCalledWith(
+      "company-1",
+      expect.objectContaining({
+        adapterConfig: expect.objectContaining({
+          paperclipSkillSync: expect.objectContaining({
+            desiredSkills: expect.arrayContaining([
+              "paperclipai/paperclip/paperclip",
+              "theft/skills/ops-agent-skills",
+              "theft/skills/debugging-vercel-builds",
+              "theft/skills/supabase",
+            ]),
+          }),
+        }),
+      }),
+    );
+  });
+
   it("accepts the security role on direct agent creation and preserves it in telemetry", async () => {
     const res = await requestApp(await createApp(), (baseUrl) => request(baseUrl)
       .post("/api/companies/company-1/agents")
@@ -709,6 +737,36 @@ describe.sequential("agent skill routes", () => {
           requestedConfigurationSnapshot: expect.objectContaining({
             desiredSkills: ["paperclipai/paperclip/paperclip"],
           }),
+        }),
+      }),
+    );
+  });
+
+  it("seeds THEFT default desired skills by role for hire approvals when desiredSkills is omitted", async () => {
+    const db = createDb(true);
+
+    const res = await request(await createApp(db))
+      .post("/api/companies/company-1/agent-hires")
+      .send({
+        name: "Growth Lead",
+        role: "cmo",
+        adapterType: "claude_local",
+        adapterConfig: {},
+      });
+
+    expect(res.status, JSON.stringify(res.body)).toBe(201);
+    expect(mockApprovalService.create).toHaveBeenCalledWith(
+      "company-1",
+      expect.objectContaining({
+        payload: expect.objectContaining({
+          desiredSkills: expect.arrayContaining([
+            "paperclipai/paperclip/paperclip",
+            "theft/skills/content-engine",
+            "theft/skills/last30days-research",
+            "theft/skills/company-naming",
+            "theft/skills/gic-skills",
+            "theft/skills/hyperframes",
+          ]),
         }),
       }),
     );

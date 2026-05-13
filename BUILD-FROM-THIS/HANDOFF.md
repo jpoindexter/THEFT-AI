@@ -1,6 +1,6 @@
 # HANDOFF — THEFT x Paperclip Merge
 
-> Last updated: 2026-05-13 (skill-default seeding checkpoint).
+> Last updated: 2026-05-13 (desiredSkills route verification checkpoint).
 > Branch: `codex-current-design-migration`.
 > Read this first if continuing in Claude, Codex, Gemini, or another local agent.
 
@@ -69,6 +69,8 @@ In progress:
   - this runs for both `POST /agent-hires` and `POST /agents`.
 - `paperclip/server/src/services/theft-default-skills.ts`
   - central role-to-`theft/skills/*` mapping used by agent creation routes.
+- `paperclip/server/src/__tests__/agent-skills-routes.test.ts`
+  - verifies `POST /agents` and `POST /agent-hires` seed role-based THEFT defaults when `desiredSkills` is omitted.
 
 Not started yet:
 
@@ -84,6 +86,7 @@ Commands run:
 ```bash
 git diff --check
 pnpm -C paperclip exec vitest run server/src/__tests__/company-skills-service.test.ts
+pnpm -C paperclip exec vitest run server/src/__tests__/agent-skills-routes.test.ts
 pnpm -C paperclip build
 ```
 
@@ -91,24 +94,24 @@ Results:
 
 - `git diff --check` passed.
 - Targeted Vitest needed escalated local bind permission; after that it started, but embedded Postgres tests skipped on this machine because the embedded Postgres init script exited with code 1.
+- Route-level agent skills test passed after rerun with escalated local bind permission.
 - `pnpm -C paperclip build` passed.
 - Build only reports existing Vite chunk-size/dynamic-import warnings.
 
 ## Next Exact Tasks
 
-1. Verify `desiredSkills` accepts the seeded THEFT role defaults in a route-level happy path.
-2. Replace Paperclip generic onboarding with THEFT staged onboarding:
+1. Replace Paperclip generic onboarding with THEFT staged onboarding:
    - name company
    - choose stage: pre-idea, idea, validating, building, launched, revenue, scaling, existing business
    - adaptive setup questions
    - allow "already done", "skip", and note/name fields
-3. Seed one Paperclip company with:
+2. Seed one Paperclip company with:
    - Operator
    - Engineering, Design, Marketing, Sales, Operations, Finance, Legal, Support
    - first roadmap goals/issues
    - imported THEFT skill selections
-4. Hide or remove local-only fake credits/billing UX.
-5. Browser-test the full happy path from onboarding to task execution.
+3. Hide or remove local-only fake credits/billing UX.
+4. Browser-test the full happy path from onboarding to task execution.
 
 ## Important Product Rules
 
