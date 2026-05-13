@@ -90,6 +90,30 @@ describeEmbeddedPostgres("companySkillService.list", () => {
     });
   });
 
+  it("loads THEFT bundled skills with stable company skill keys", async () => {
+    const companyId = randomUUID();
+
+    await db.insert(companies).values({
+      id: companyId,
+      name: "THEFT",
+      issuePrefix: `T${companyId.replace(/-/g, "").slice(0, 6).toUpperCase()}`,
+      requireBoardApprovalForNewAgents: false,
+    });
+
+    const listed = await svc.list(companyId);
+    const namingSkill = listed.find((entry) => entry.key === "theft/skills/company-naming");
+
+    expect(namingSkill).toMatchObject({
+      slug: "company-naming",
+      name: "company-naming",
+      sourceType: "local_path",
+      sourceLabel: "THEFT bundled",
+      sourceBadge: "local",
+      editable: false,
+      editableReason: "THEFT bundled skills are managed in the repo.",
+    });
+  });
+
   it("rejects skill inventory refresh for a missing company", async () => {
     await expect(svc.list(randomUUID())).rejects.toMatchObject({
       status: 404,

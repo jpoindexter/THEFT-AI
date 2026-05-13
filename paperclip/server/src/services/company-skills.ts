@@ -334,6 +334,9 @@ function deriveCanonicalSkillKey(
   if (sourceKind === "paperclip_bundled") {
     return `paperclipai/paperclip/${slug}`;
   }
+  if (sourceKind === "theft_bundled") {
+    return `theft/skills/${slug}`;
+  }
 
   const owner = normalizeSkillSlug(asString(metadata?.owner));
   const repo = normalizeSkillSlug(asString(metadata?.repo));
@@ -708,12 +711,29 @@ export function parseSkillImportSourceInput(rawInput: string): ParsedSkillImport
   };
 }
 
-function resolveBundledSkillsRoot() {
+function resolveBundledSkillsRoots() {
   const moduleDir = path.dirname(fileURLToPath(import.meta.url));
   return [
-    path.resolve(moduleDir, "../../skills"),
-    path.resolve(process.cwd(), "skills"),
-    path.resolve(moduleDir, "../../../skills"),
+    {
+      root: path.resolve(moduleDir, "../../skills"),
+      sourceKind: "paperclip_bundled",
+    },
+    {
+      root: path.resolve(process.cwd(), "skills"),
+      sourceKind: "paperclip_bundled",
+    },
+    {
+      root: path.resolve(moduleDir, "../../../skills"),
+      sourceKind: "paperclip_bundled",
+    },
+    {
+      root: path.resolve(process.cwd(), "../skills"),
+      sourceKind: "theft_bundled",
+    },
+    {
+      root: path.resolve(moduleDir, "../../../../skills"),
+      sourceKind: "theft_bundled",
+    },
   ];
 }
 
@@ -1438,6 +1458,15 @@ function deriveSkillSourceInfo(skill: SkillSourceInfoTarget): {
       sourcePath: null,
     };
   }
+  if (metadata.sourceKind === "theft_bundled") {
+    return {
+      editable: false,
+      editableReason: "THEFT bundled skills are managed in the repo.",
+      sourceLabel: "THEFT bundled",
+      sourceBadge: "local",
+      sourcePath: null,
+    };
+  }
 
   if (skill.sourceType === "skills_sh") {
     const owner = asString(metadata.owner) ?? null;
@@ -1550,29 +1579,34 @@ export function companySkillService(db: Db) {
   const projects = projectService(db);
 
   async function ensureBundledSkills(companyId: string) {
-    for (const skillsRoot of resolveBundledSkillsRoot()) {
-      const stats = await fs.stat(skillsRoot).catch(() => null);
+    const imported: CompanySkill[] = [];
+    const seen = new Set<string>();
+    for (const { root: skillsRoot, sourceKind } of resolveBundledSkillsRoots()) {
+      const resolvedRoot = path.resolve(skillsRoot);
+      if (seen.has(`${sourceKind}:${resolvedRoot}`)) continue;
+      seen.add(`${sourceKind}:${resolvedRoot}`);
+      const stats = await fs.stat(resolvedRoot).catch(() => null);
       if (!stats?.isDirectory()) continue;
-      const bundledSkills = await readLocalSkillImports(companyId, skillsRoot)
+      const bundledSkills = await readLocalSkillImports(companyId, resolvedRoot)
         .then((skills) => skills.map((skill) => ({
           ...skill,
           key: deriveCanonicalSkillKey(companyId, {
             ...skill,
             metadata: {
               ...(skill.metadata ?? {}),
-              sourceKind: "paperclip_bundled",
+              sourceKind,
             },
           }),
           metadata: {
             ...(skill.metadata ?? {}),
-            sourceKind: "paperclip_bundled",
+            sourceKind,
           },
         })))
         .catch(() => [] as ImportedSkill[]);
       if (bundledSkills.length === 0) continue;
-      return upsertImportedSkills(companyId, bundledSkills);
+      imported.push(...await upsertImportedSkills(companyId, bundledSkills));
     }
-    return [];
+    return imported;
   }
 
   async function pruneMissingLocalPathSkills(companyId: string) {

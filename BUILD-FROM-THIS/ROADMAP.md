@@ -26,8 +26,8 @@ Goal: THEFT runs as one local app backed by Paperclip's runtime. A founder can c
 
 ## Slice 0.2 — Skill Library Import
 
-- [ ] Add a local skill import path for `skills/*/SKILL.md`.
-- [ ] Register THEFT skills as Paperclip company skills.
+- [x] Add a local skill import path for `skills/*/SKILL.md`.
+- [x] Register THEFT skills as Paperclip company skills.
 - [ ] Preserve read-only/custom skill distinction.
 - [ ] Map skills to default department agents.
 - [ ] Verify Paperclip agents can use imported skill selections without `desiredSkills` validation errors.

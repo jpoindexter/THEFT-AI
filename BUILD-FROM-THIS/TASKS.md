@@ -29,9 +29,9 @@
 
 | ID | Title | Status |
 |---|---|---|
-| T020 | Audit all `skills/*/SKILL.md` packets and classify by department | ☐ todo |
-| T021 | Add local skill import command/API for THEFT skill packs | ☐ todo |
-| T022 | Register skills as Paperclip company skills | ☐ todo |
+| T020 | Audit all `skills/*/SKILL.md` packets and classify by department | ✅ done |
+| T021 | Add local skill import command/API for THEFT skill packs | ✅ done |
+| T022 | Register skills as Paperclip company skills | ✅ done |
 | T023 | Map default department agents to imported skills | ☐ todo |
 | T024 | Verify `desiredSkills` works with THEFT skill slugs | ☐ todo |
 
