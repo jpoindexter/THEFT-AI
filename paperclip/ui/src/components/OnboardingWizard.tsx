@@ -42,6 +42,7 @@ import {
   getOnboardingStageTaskTemplate,
   mergeDescriptionWithOnboardingContext,
 } from "../lib/onboarding-context";
+import { DEPARTMENT_SEED_SPECS } from "../lib/onboarding-seed";
 import { buildNewAgentRuntimeConfig } from "../lib/new-agent-runtime-config";
 import {
   DEFAULT_CODEX_LOCAL_BYPASS_APPROVALS_AND_SANDBOX,
@@ -185,6 +186,7 @@ export function OnboardingWizard() {
   const [createdAgentId, setCreatedAgentId] = useState<string | null>(null);
   const [createdProjectId, setCreatedProjectId] = useState<string | null>(null);
   const [createdIssueRef, setCreatedIssueRef] = useState<string | null>(null);
+  const [seededDepartmentAgentIds, setSeededDepartmentAgentIds] = useState<Record<string, string>>({});
 
   useEffect(() => {
     setRouteDismissed(false);
@@ -203,6 +205,7 @@ export function OnboardingWizard() {
     setCreatedProjectId(null);
     setCreatedAgentId(null);
     setCreatedIssueRef(null);
+    setSeededDepartmentAgentIds({});
   }, [
     effectiveOnboardingOpen,
     effectiveOnboardingOptions.companyId,
@@ -359,6 +362,7 @@ export function OnboardingWizard() {
     setCreatedAgentId(null);
     setCreatedProjectId(null);
     setCreatedIssueRef(null);
+    setSeededDepartmentAgentIds({});
   }
 
   function handleClose() {
@@ -650,6 +654,50 @@ export function OnboardingWizard() {
           queryKey: queryKeys.issues.list(createdCompanyId)
         });
       }
+
+      const nextSeededDepartmentAgentIds = { ...seededDepartmentAgentIds };
+      for (const spec of DEPARTMENT_SEED_SPECS) {
+        if (nextSeededDepartmentAgentIds[spec.key]) continue;
+        const hire = await agentsApi.hire(createdCompanyId, {
+          name: spec.agentName,
+          role: spec.role,
+          title: spec.title,
+          reportsTo: createdAgentId,
+          adapterType,
+          adapterConfig: buildAdapterConfig(),
+          desiredSkills: spec.desiredSkills,
+          runtimeConfig: buildNewAgentRuntimeConfig(),
+        });
+        if (hire.approval) {
+          await approvalsApi.approve(
+            hire.approval.id,
+            "Approved during onboarding department seed."
+          );
+        }
+        nextSeededDepartmentAgentIds[spec.key] = hire.agent.id;
+      }
+      setSeededDepartmentAgentIds(nextSeededDepartmentAgentIds);
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.agents.list(createdCompanyId),
+      });
+
+      for (const spec of DEPARTMENT_SEED_SPECS) {
+        const assigneeAgentId = nextSeededDepartmentAgentIds[spec.key];
+        if (!assigneeAgentId) continue;
+        await issuesApi.create(
+          createdCompanyId,
+          buildOnboardingIssuePayload({
+            title: spec.taskTitleByStage[companyStage],
+            description: `${spec.taskDescriptionByStage[companyStage]}\n\nDepartment seed: ${spec.title}`,
+            assigneeAgentId,
+            projectId,
+            goalId,
+          })
+        );
+      }
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.issues.list(createdCompanyId),
+      });
 
       setSelectedCompanyId(createdCompanyId);
       reset();

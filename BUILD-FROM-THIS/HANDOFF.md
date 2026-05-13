@@ -1,6 +1,6 @@
 # HANDOFF — THEFT x Paperclip Merge
 
-> Last updated: 2026-05-13 (staged onboarding adaptive interview checkpoint).
+> Last updated: 2026-05-13 (department seeding checkpoint).
 > Branch: `codex-current-design-migration`.
 > Read this first if continuing in Claude, Codex, Gemini, or another local agent.
 
@@ -80,6 +80,10 @@ In progress:
 - `paperclip/ui/src/components/OnboardingWizard.tsx`
   - Step 3 now auto-prefills stage-specific task title/description.
   - Step 3 now asks one stage-specific interview question and appends the answer to the launched issue description.
+- `paperclip/ui/src/lib/onboarding-seed.ts`
+  - defines 8 department seed specs (role/title/desiredSkills + stage-specific starter task templates).
+- `paperclip/ui/src/components/OnboardingWizard.tsx`
+  - launch step now hires the 8 department agents under Operator, auto-approves onboarding hire approvals, and seeds one starter issue per department.
 
 Not started yet:
 
@@ -106,6 +110,7 @@ Results:
 - Targeted Vitest needed escalated local bind permission; after that it started, but embedded Postgres tests skipped on this machine because the embedded Postgres init script exited with code 1.
 - Route-level agent skills test passed after rerun with escalated local bind permission.
 - Onboarding context utility test passed.
+- Department seed implementation compiles in `pnpm -C paperclip build`.
 - `pnpm -C paperclip build` passed.
 - Build only reports existing Vite chunk-size/dynamic-import warnings.
 

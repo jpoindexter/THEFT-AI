@@ -39,8 +39,8 @@ Goal: THEFT runs as one local app backed by Paperclip's runtime. A founder can c
 - [x] Name company.
 - [x] Pick company stage: pre-idea, idea, validating, building, launched, revenue, scaling, existing business.
 - [x] Guided setup adapts to stage. (Step 3 task/interview prompt now varies by selected company stage.)
-- [ ] Setup steps can be marked done, skipped, or named as existing. (Started in Step 1; not yet fully wired into all setup stages.)
-- [ ] Create Paperclip company, company goal, Operator, 8 department agents, roadmap goals/issues, and first tasks.
+- [x] Setup steps can be marked done, skipped, or named as existing. (Step 1 status + note controls persist into onboarding context.)
+- [ ] Create Paperclip company, company goal, Operator, 8 department agents, roadmap goals/issues, and first tasks. (Operator + department agent seeding and per-department starter issues are now wired; remaining work is route-level completion-state parity and full browser E2E.)
 - [ ] Hide credits/billing in local onboarding.
 
 ## Slice 0.4 — THEFT Canvas On Paperclip Data

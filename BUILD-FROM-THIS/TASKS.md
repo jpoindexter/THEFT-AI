@@ -43,9 +43,9 @@
 | T031 | Add company name step | ✅ done |
 | T032 | Add company stage picker: pre-idea, idea, validating, building, launched, revenue, scaling, existing business | ✅ done |
 | T033 | Add adaptive setup interview per stage | ✅ done |
-| T034 | Add "already done", "skip", and note/name fields for setup items | ▶ doing |
-| T035 | Create Paperclip company profile metadata from onboarding | ▶ doing |
-| T036 | Seed Operator, 8 departments/agents, roadmap goals/issues, and first tasks | ☐ todo |
+| T034 | Add "already done", "skip", and note/name fields for setup items | ✅ done |
+| T035 | Create Paperclip company profile metadata from onboarding | ✅ done |
+| T036 | Seed Operator, 8 departments/agents, roadmap goals/issues, and first tasks | ▶ doing |
 | T037 | Hide local credits/billing prompts during onboarding | ☐ todo |
 | T038 | Browser-test onboarding desktop/mobile | ☐ todo |
 

@@ -19,7 +19,7 @@ Current repo reality:
 | `BUILD-FROM-THIS/` | **SOURCE OF TRUTH** | Read `SOURCE-OF-TRUTH.md`, then `PARITY-DELTA.md`, then roadmap/tasks. |
 | `skills/` | **PRODUCT DATA** | Must be imported/registered into Paperclip company skills before agents can depend on THEFT skill slugs. |
 
-Next blocking work: finish porting staged onboarding flow into the tracked host (adaptive setup + full step wiring) and seed Operator/departments/tasks directly from that flow. Avoid building new runtime features in `app/`.
+Next blocking work: finish onboarding route parity (node completion and happy-path transitions), then browser-test end-to-end from onboarding into active department/task routes in the Paperclip host. Avoid building new runtime features in `app/`.
 
 ## Legacy THEFT App Engine (`app/src/lib/`)
 
