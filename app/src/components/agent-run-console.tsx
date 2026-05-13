@@ -129,6 +129,8 @@ export default function AgentRunConsole({
     fetch(`/api/${orgSlug}/tasks/${taskId}/run`)
       .then((r) => r.json())
       .then((d: { turns?: RawTurn[]; paused?: Paused }) => {
+        setLivePaused(d.paused ?? null);
+        if (d.paused) setLiveStatus("paused");
         if (d.turns?.length) {
           const adapted = d.turns.flatMap((t) => {
             const a = adaptTurn(t);
@@ -136,7 +138,6 @@ export default function AgentRunConsole({
           });
           setLiveTurns(adapted);
           setLiveStatus(d.paused ? "paused" : "done");
-          setLivePaused(d.paused ?? null);
         }
         // No existing turns → show empty state; user clicks "Run agent" to start
       })
@@ -154,7 +155,15 @@ export default function AgentRunConsole({
       setLiveStatus("error");
       return;
     }
-    if (!res.body) { setLiveStatus("error"); return; }
+    if (res.status === 409) {
+      const snapshot = await fetch(`/api/${orgSlug}/tasks/${taskId}/run`).then((r) => r.json()).catch(() => null);
+      if (snapshot?.paused) {
+        setLivePaused(snapshot.paused as Paused);
+        setLiveStatus("paused");
+        return;
+      }
+    }
+    if (!res.ok || !res.body) { setLiveStatus("error"); return; }
 
     const reader = res.body.getReader();
     const decoder = new TextDecoder();
