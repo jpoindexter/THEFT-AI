@@ -3,7 +3,8 @@
 // JSON envelope describing what it wants to do, parse it, dispatch, and loop.
 
 import { generate } from "./anthropic";
-import { db, type Org } from "@/lib/db/store";
+import { type Org } from "@/lib/db/store";
+import { executeEngineTool } from "@/lib/engine/tool-dispatcher";
 import type {
   AgentTurn,
   AgentMessage,
@@ -12,7 +13,12 @@ import type {
   AskUserQuestionInput,
   SetBusinessPlanInput,
   DelegateInput,
+  ListFilesInput,
+  ReadFileInput,
+  WebFetchInput,
+  WebSearchInput,
   WriteArtifactInput,
+  WriteSkillInput,
 } from "./tools";
 import type Anthropic from "@anthropic-ai/sdk";
 
@@ -22,6 +28,11 @@ type Action =
   | ({ type: "set_business_plan" } & SetBusinessPlanInput)
   | ({ type: "delegate_to_department" } & DelegateInput)
   | ({ type: "write_artifact" } & WriteArtifactInput)
+  | ({ type: "web_search" } & WebSearchInput)
+  | ({ type: "web_fetch" } & WebFetchInput)
+  | ({ type: "read_file" } & ReadFileInput)
+  | ({ type: "list_files" } & ListFilesInput)
+  | ({ type: "write_skill" } & WriteSkillInput)
   | {
       type: "set_tech_tree_node_status";
       node_slug: string;
@@ -42,6 +53,11 @@ Available actions (each is an object with a "type"):
 - {"type":"set_business_plan","product":"...","icp":"...","business_model":"...","mission":"...","differentiator":"...","go_to_market":"..."}
 - {"type":"delegate_to_department","department_slug":"engineering|design|marketing|sales|operations|finance|legal|support","title":"...","description":"..."}
 - {"type":"write_artifact","name":"...","kind":"markdown|json|business_plan|brand_kit|other","content":"...","department_slug":"..."}
+- {"type":"list_files","department_slug":"engineering|design|marketing|sales|operations|finance|legal|support"}
+- {"type":"read_file","name":"<artifact name or partial name>"}
+- {"type":"web_search","query":"...","max_results":3}
+- {"type":"web_fetch","url":"https://...","max_chars":8000}
+- {"type":"write_skill","name":"<kebab-case>","title":"...","body":"<markdown procedure>"}
 - {"type":"set_tech_tree_node_status","node_slug":"...","status":"available|in_progress|complete"}
 - {"type":"complete_onboarding"}
 - {"type":"done"}  // emit when done with this turn and waiting for user
@@ -55,6 +71,23 @@ Rules:
 Output ONLY the JSON array. Nothing else.`;
 
 const MAX_LOOPS = 6;
+const SERVER_TOOL_ACTIONS = new Set<Action["type"]>([
+  "set_business_plan",
+  "delegate_to_department",
+  "write_artifact",
+  "web_search",
+  "web_fetch",
+  "read_file",
+  "list_files",
+  "write_skill",
+  "set_tech_tree_node_status",
+  "complete_onboarding",
+]);
+
+type ServerToolAction = Exclude<
+  Action,
+  { type: "text" } | ({ type: "ask_user_question" } & AskUserQuestionInput) | { type: "done" }
+>;
 
 export async function runAgentCli(opts: {
   org: Org;
@@ -133,136 +166,17 @@ export async function runAgentCli(opts: {
         );
         break;
       }
-      if (a.type === "set_business_plan") {
-        await db.updateOrg(opts.org.id, { business_plan: a });
-        await db.completeOnboardingRoadmap(opts.org.id);
-        await db.createArtifact({
-          organization_id: opts.org.id,
-          department_id: null,
-          task_id: null,
-          name: "Business Plan",
-          kind: "business_plan",
-          content: JSON.stringify(a, null, 2),
-          metadata: null,
-          pinned: true,
-        });
-        const id = `bp_${loop}`;
-        emit({
-          kind: "tool_call",
-          tool_use_id: id,
-          name: "set_business_plan",
+      if (isServerToolAction(a)) {
+        const id = `${a.type}_${loop}_${Math.random().toString(36).slice(2, 8)}`;
+        emit({ kind: "tool_call", tool_use_id: id, name: a.type, input: a });
+        const output = await executeEngineTool({
+          org: opts.org,
+          name: a.type,
           input: a,
+          source: opts.backend === "offline" ? "offline" : "local-harness",
         });
-        emit({
-          kind: "tool_result",
-          tool_use_id: id,
-          name: "set_business_plan",
-          output: { ok: true },
-        });
-        assistantNoteParts.push("[saved business plan]");
-        continue;
-      }
-      if (a.type === "delegate_to_department") {
-        const dept = await db.getDepartment(opts.org.id, a.department_slug);
-        if (dept) {
-          const agents = await db.listAgents(opts.org.id, dept.id);
-          await db.createTask({
-            organization_id: opts.org.id,
-            department_id: dept.id,
-            agent_id: agents[0]?.id ?? null,
-            parent_task_id: null,
-            title: a.title.slice(0, 80),
-            description: a.description ?? null,
-            status: "todo",
-            priority: "normal",
-            mode: "execute",
-            due_at: null,
-            started_at: null,
-            result: null,
-          });
-        }
-        const id = `dlg_${loop}_${a.department_slug}`;
-        emit({
-          kind: "tool_call",
-          tool_use_id: id,
-          name: "delegate_to_department",
-          input: a,
-        });
-        emit({
-          kind: "tool_result",
-          tool_use_id: id,
-          name: "delegate_to_department",
-          output: { ok: true },
-        });
-        assistantNoteParts.push(`[delegated: ${a.title}]`);
-        continue;
-      }
-      if (a.type === "write_artifact") {
-        const dept = a.department_slug
-          ? await db.getDepartment(opts.org.id, a.department_slug)
-          : null;
-        await db.createArtifact({
-          organization_id: opts.org.id,
-          department_id: dept?.id ?? null,
-          task_id: null,
-          name: a.name,
-          kind: a.kind as
-            | "markdown"
-            | "json"
-            | "code"
-            | "business_plan"
-            | "brand_kit"
-            | "other",
-          content: a.content,
-          metadata: null,
-          pinned: false,
-        });
-        const id = `wa_${loop}_${Date.now()}`;
-        emit({
-          kind: "tool_call",
-          tool_use_id: id,
-          name: "write_artifact",
-          input: a,
-        });
-        emit({
-          kind: "tool_result",
-          tool_use_id: id,
-          name: "write_artifact",
-          output: { ok: true },
-        });
-        continue;
-      }
-      if (a.type === "set_tech_tree_node_status") {
-        const id = `tt_${loop}_${a.node_slug}`;
-        emit({
-          kind: "tool_call",
-          tool_use_id: id,
-          name: "set_tech_tree_node_status",
-          input: a,
-        });
-        emit({
-          kind: "tool_result",
-          tool_use_id: id,
-          name: "set_tech_tree_node_status",
-          output: { ok: true },
-        });
-        continue;
-      }
-      if (a.type === "complete_onboarding") {
-        await db.completeOnboardingRoadmap(opts.org.id);
-        const id = `co_${loop}`;
-        emit({
-          kind: "tool_call",
-          tool_use_id: id,
-          name: "complete_onboarding",
-          input: {},
-        });
-        emit({
-          kind: "tool_result",
-          tool_use_id: id,
-          name: "complete_onboarding",
-          output: { ok: true },
-        });
+        emit({ kind: "tool_result", tool_use_id: id, name: a.type, output });
+        assistantNoteParts.push(`[tool:${a.type}:${JSON.stringify(output)}]`);
         continue;
       }
       if (a.type === "done") {
@@ -297,6 +211,10 @@ export async function runAgentCli(opts: {
 
   emit({ kind: "done" });
   return { history, turns };
+}
+
+function isServerToolAction(action: Action): action is ServerToolAction {
+  return SERVER_TOOL_ACTIONS.has(action.type);
 }
 
 function renderTranscript(

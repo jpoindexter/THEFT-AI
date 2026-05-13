@@ -9,6 +9,6 @@ This version has breaking changes — APIs, conventions, and file structure may 
 GitHub Spec Kit is installed as a shared CLI (`specify`) from the sibling repo at `/Users/jasonpoindexter/Documents/GitHub/spec-kit`. This repo has adopted Spec Kit with Codex skills in `.agents/skills` and project governance in `.specify/memory/constitution.md`. Use `$speckit-*` skills for substantial feature work that needs a durable spec/plan/tasks trail.
 
 <!-- SPECKIT START -->
-For additional context about technologies to be used, project structure,
-shell commands, and other important information, read the current plan
+For the active Paperclip engine adoption work, read `specs/001-paperclip-engine-adoption/plan.md`
+for technical context and `specs/001-paperclip-engine-adoption/tasks.md` for the execution checklist.
 <!-- SPECKIT END -->

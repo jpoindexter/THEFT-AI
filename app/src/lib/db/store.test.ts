@@ -212,6 +212,65 @@ describe("completeWorkspaceSetup", () => {
   });
 });
 
+describe("Paperclip-style engine boundary", () => {
+  it("builds an Agent Company package with departments, agents, tasks, and skills", async () => {
+    const { bootstrapOrganization } = await import("@/lib/orgs/bootstrap");
+    const { completeWorkspaceSetup, fallbackSetupQuestions } = await import("@/lib/onboarding/engine");
+    const { buildAgentCompanyPackage } = await import("@/lib/engine/company-package");
+    const org = await db.createOrg({ name: "Package Test" });
+    await bootstrapOrganization(org.id);
+    const setup = fallbackSetupQuestions("An operator-native design service");
+    await completeWorkspaceSetup(org, {
+      idea: "An operator-native design service",
+      questions: setup.questions,
+      answers: setup.questions.map((q) => ({
+        questionId: q.id,
+        prompt: q.prompt,
+        answer: q.options.find((o) => o.recommended)?.label ?? q.options[0].label,
+      })),
+    });
+
+    const pkg = await buildAgentCompanyPackage(org.id);
+    const engineer = pkg.agents.find((agent) => agent.slug === "engineer");
+
+    expect(pkg.schema).toBe("agentcompanies/v1");
+    expect(pkg.teams).toHaveLength(8);
+    expect(pkg.agents).toHaveLength(8);
+    expect(pkg.tasks).toHaveLength(3);
+    expect(pkg.companyDocument).toContain("schema: agentcompanies/v1");
+    expect(engineer?.skills.some((skill) => skill.slug === "dev-workflow" && skill.exists)).toBe(true);
+    expect(pkg.diagnostics.missingSkills).toHaveLength(0);
+  });
+
+  it("executes registered engine tools through one dispatcher", async () => {
+    const { executeEngineTool, listEngineTools } = await import("@/lib/engine/tool-dispatcher");
+    const org = await db.createOrg({ name: "Dispatcher Test" });
+
+    expect(listEngineTools().map((tool) => tool.name)).toContain("write_artifact");
+
+    const result = await executeEngineTool({
+      org,
+      name: "write_artifact",
+      input: {
+        name: "Dispatcher Artifact",
+        kind: "markdown",
+        content: "# Dispatcher Artifact",
+      },
+      source: "local-harness",
+    });
+    const artifacts = await db.listArtifacts(org.id);
+    const unknown = await executeEngineTool({
+      org,
+      name: "missing_tool",
+      input: {},
+    });
+
+    expect(result).toMatchObject({ ok: true });
+    expect(artifacts.map((a) => a.name)).toContain("Dispatcher Artifact");
+    expect(unknown).toMatchObject({ ok: false, error: "unknown tool: missing_tool" });
+  });
+});
+
 describe("createTask / listTasks", () => {
   it("creates a task and lists it for the org", async () => {
     const org = await db.createOrg({ name: "Task Test" });

@@ -3,25 +3,9 @@
 // client-pause tool (ask_user_question).
 
 import Anthropic from "@anthropic-ai/sdk";
-import { promises as fs } from "node:fs";
-import path from "node:path";
 import { db, type Org } from "@/lib/db/store";
-import { burstSkillCache } from "@/lib/agent/compose-prompt";
-import {
-  OPERATOR_TOOLS,
-  type AskUserQuestionInput,
-  type SetBusinessPlanInput,
-  type DelegateInput,
-  type SetTechTreeStatusInput,
-  type WriteArtifactInput,
-  type WebSearchInput,
-  type WebFetchInput,
-  type ReadFileInput,
-  type ListFilesInput,
-  type WriteSkillInput,
-} from "./tools";
-
-const SKILLS_ROOT = path.join(process.cwd(), "..", "skills");
+import { executeEngineTool, listEngineTools } from "@/lib/engine/tool-dispatcher";
+import { type AskUserQuestionInput } from "./tools";
 
 export type AgentTurn =
   | { kind: "user_message"; text: string }
@@ -110,7 +94,7 @@ export async function runAgent(opts: {
       model,
       max_tokens: 2000,
       system: opts.systemPrompt,
-      tools: OPERATOR_TOOLS,
+      tools: listEngineTools(),
       messages,
     });
 
@@ -148,10 +132,11 @@ export async function runAgent(opts: {
         }
 
         // server-side tools: execute now, capture result
-        const result = await executeTool({
+        const result = await executeEngineTool({
           org: opts.org,
           name: block.name,
           input: block.input,
+          source: "anthropic",
         });
         const r: AgentTurn = {
           kind: "tool_result",
@@ -216,145 +201,5 @@ async function recordUsage(orgId: string, model: string, inputTokens: number, ou
     });
   } catch {
     // non-critical — don't fail the agent turn on a logging error
-  }
-}
-
-async function executeTool(opts: {
-  org: Org;
-  name: string;
-  input: unknown;
-}): Promise<unknown> {
-  const { org, name, input } = opts;
-  switch (name) {
-    case "set_business_plan": {
-      const i = input as SetBusinessPlanInput;
-      await db.updateOrg(org.id, { business_plan: i });
-      await db.completeOnboardingRoadmap(org.id);
-      await db.createArtifact({
-        organization_id: org.id,
-        department_id: null,
-        task_id: null,
-        name: "Business Plan",
-        kind: "business_plan",
-        content: JSON.stringify(i, null, 2),
-        metadata: null,
-        pinned: true,
-      });
-      return { ok: true };
-    }
-    case "delegate_to_department": {
-      const i = input as DelegateInput;
-      const dept = await db.getDepartment(org.id, i.department_slug);
-      if (!dept) return { ok: false, error: "department not found" };
-      const agents = await db.listAgents(org.id, dept.id);
-      const task = await db.createTask({
-        organization_id: org.id,
-        department_id: dept.id,
-        agent_id: agents[0]?.id ?? null,
-        parent_task_id: null,
-        title: i.title.slice(0, 80),
-        description: i.description ?? null,
-        status: "todo",
-        priority: "normal",
-        mode: "execute",
-        due_at: null,
-        started_at: null,
-        result: null,
-      });
-      return { ok: true, task_id: task.id };
-    }
-    case "set_tech_tree_node_status": {
-      const i = input as SetTechTreeStatusInput;
-      await db.upsertTechTreeNodeStatus(org.id, i.node_slug, i.status);
-      return { ok: true, node_slug: i.node_slug, status: i.status };
-    }
-    case "write_artifact": {
-      const i = input as WriteArtifactInput;
-      const dept = i.department_slug
-        ? await db.getDepartment(org.id, i.department_slug)
-        : null;
-      const a = await db.createArtifact({
-        organization_id: org.id,
-        department_id: dept?.id ?? null,
-        task_id: null,
-        name: i.name,
-        kind: i.kind as "markdown" | "json" | "code" | "business_plan" | "brand_kit" | "other",
-        content: i.content,
-        metadata: null,
-        pinned: false,
-      });
-      return { ok: true, artifact_id: a.id };
-    }
-    case "complete_onboarding": {
-      await db.completeOnboardingRoadmap(org.id);
-      return { ok: true };
-    }
-    case "web_search": {
-      const i = input as WebSearchInput;
-      const apiKey = process.env.TAVILY_API_KEY;
-      if (!apiKey) {
-        return { ok: false, error: "TAVILY_API_KEY not set — add it to .env.local to enable web search." };
-      }
-      const numResults = Math.min(i.max_results ?? 3, 5);
-      const res = await fetch("https://api.tavily.com/search", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        // search_depth "basic" = 1 credit; "advanced" = 2 — always basic to protect free quota
-        body: JSON.stringify({ api_key: apiKey, query: i.query, num_results: numResults, search_depth: "basic" }),
-      });
-      if (!res.ok) return { ok: false, error: `Tavily error ${res.status}` };
-      const data = await res.json() as { results?: { title: string; url: string; content: string }[] };
-      return { ok: true, results: (data.results ?? []).map((r) => ({ title: r.title, url: r.url, snippet: r.content })) };
-    }
-    case "web_fetch": {
-      const i = input as WebFetchInput;
-      const maxChars = i.max_chars ?? 8000;
-      const res = await fetch(i.url, {
-        headers: { "User-Agent": "TheftAI/1.0 (agent; +https://theft.studio)" },
-        signal: AbortSignal.timeout(15_000),
-      });
-      if (!res.ok) return { ok: false, error: `HTTP ${res.status} for ${i.url}` };
-      let text = await res.text();
-      // strip HTML tags
-      text = text.replace(/<style[^>]*>[\s\S]*?<\/style>/gi, "")
-                 .replace(/<script[^>]*>[\s\S]*?<\/script>/gi, "")
-                 .replace(/<[^>]+>/g, " ")
-                 .replace(/\s{2,}/g, " ")
-                 .trim();
-      return { ok: true, url: i.url, content: text.slice(0, maxChars) };
-    }
-    case "read_file": {
-      const i = input as ReadFileInput;
-      const artifacts = await db.listArtifacts(org.id);
-      const lower = i.name.toLowerCase();
-      const match = artifacts.find(
-        (a) => a.name.toLowerCase() === lower || a.name.toLowerCase().includes(lower),
-      );
-      if (!match) return { ok: false, error: `No artifact matching "${i.name}"` };
-      return { ok: true, name: match.name, kind: match.kind, content: match.content };
-    }
-    case "list_files": {
-      const i = input as ListFilesInput;
-      const dept = i.department_slug ? await db.getDepartment(org.id, i.department_slug) : null;
-      const artifacts = await db.listArtifacts(org.id, dept?.id);
-      return {
-        ok: true,
-        files: artifacts.map((a) => ({ name: a.name, kind: a.kind, created_at: a.created_at })),
-      };
-    }
-    case "write_skill": {
-      const i = input as WriteSkillInput;
-      const safeSlug = org.slug.replace(/[^a-z0-9-]/g, "-");
-      const safeName = i.name.replace(/[^a-z0-9-]/g, "-");
-      const skillId = `${safeSlug}/${safeName}`;
-      const skillDir = path.join(SKILLS_ROOT, safeSlug, safeName);
-      await fs.mkdir(skillDir, { recursive: true });
-      const content = `---\ntitle: ${i.title}\norgSlug: ${safeSlug}\n---\n\n${i.body}\n`;
-      await fs.writeFile(path.join(skillDir, "SKILL.md"), content, "utf8");
-      burstSkillCache(skillId);
-      return { ok: true, skillId };
-    }
-    default:
-      return { ok: false, error: `unknown tool: ${name}` };
   }
 }

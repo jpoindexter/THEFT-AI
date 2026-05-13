@@ -1,31 +1,34 @@
 # STATUS — What actually exists
 
-> Audit-derived, not assumed. Last updated 2026-05-10 by Claude session.
+> Audit-derived, not assumed. Last updated 2026-05-13 by Codex session.
 > Update when something changes status. Don't fabricate.
 
 ## Engine (`app/src/lib/`)
 
 | Component | LOC | Status | Notes |
 |---|---|---|---|
-| `agent/run.ts` | 271 | **WORKS** | Real Anthropic SDK, tool loop ≤8 iter, pause/resume, cost tracking |
-| `agent/tools.ts` | 175 | **PARTIAL** | Only 6 tools, all onboarding-shaped. No shell, file-write, web-search, email |
-| `agent/anthropic.ts` | 134 | **WORKS** | 3 backends: Ollama / Anthropic SDK / claude CLI |
+| `agent/run.ts` | ? | **WORKS** | Anthropic SDK path uses shared engine tool dispatcher, tool loop ≤8 iter, pause/resume, usage logging |
+| `agent/run-cli.ts` | ? | **WORKS** | Local/provider harness path verified with offline task run; uses shared engine tool dispatcher |
+| `agent/tools.ts` | ? | **PARTIAL** | Tool schemas exist for onboarding, artifacts, library read/list, web search/fetch, and skill write. Still missing shell/file-write/email/PDF/image/CRM/db tools |
+| `agent/anthropic.ts` | ? | **WORKS** | Local/provider generation supports Codex, Claude CLI, Gemini CLI, OpenCode, Ollama, LM Studio/OpenAI-compatible, Anthropic, offline fallback |
 | `agent/compose-prompt.ts` | 105 | **WORKS** | Loads `../skills/<id>/SKILL.md` into system prompt |
-| `agent/run-cli.ts` | ? | UNVERIFIED | OAuth subprocess fallback |
 | `db/store.ts` | 1069 | **WORKS** | File-backed JSON, swappable for Supabase |
-| `orgs/bootstrap.ts` | 117 | **BUG** | Seeds 6 agents, missing Legal + Support |
+| `engine/tool-dispatcher.ts` | ? | **WORKS** | Paperclip-style central dispatcher for server-side tools |
+| `engine/company-package.ts` | ? | **WORKS** | Builds Agent Company package shape from org/departments/agents/tasks/artifacts/skills |
+| `orgs/bootstrap.ts` | ? | **WORKS** | Seeds 8 departments and 8 default agents |
 
-**Foundation verdict:** engine runs, but tool palette is onboarding-only. Dept agents currently can only write markdown to Library.
+**Foundation verdict:** app now creates a usable local company and routes task tools through one Paperclip-style dispatcher. Dept agents still need stronger real-world tools before v0 is complete.
 
 ## Routes inventory (153 page.tsx files)
 
 ### Onboarding — WORKS
 - `/`, `/signin`, `/onboarding`, `/[org]/onboarding`, `/onboarding/done`
+- Verified 2026-05-13: new company completes onboarding, creates 8 departments, 8 agents, 1 Business Plan artifact, 3 starter tasks, completes 2 roadmap nodes, unlocks 5 next nodes.
 
-### 8 Departments — STRUCTURAL EXIST, FUNCTIONAL UNVERIFIED
+### 8 Departments — STRUCTURAL EXIST, BASIC ROUTES VERIFIED
 - `/[org]/[department]/page.tsx` — catch-all dept page
 - `/[org]/engineering`, `/design`, `/marketing`, `/sales`, `/operations`, `/finance`, `/legal`, `/support`
-- Status: pages render but each agent has same 6-tool palette. **Real test never run end-to-end.**
+- Status: pages render for a generated org. Task execution has one local/offline smoke pass, but each department still needs its own canonical smoke task.
 
 ### Dept sub-pages — BUILT FROM PLAN.md (UNVERIFIED AGAINST DOCS)
 Built last session without source-of-truth verification:
@@ -67,25 +70,29 @@ Per cofounder-docs only ~7 settings exist (org/company-context, AI, payments/str
 ## Tools available to agents right now
 
 ```
-ask_user_question        — pause, multiple-choice prompt to user
-set_business_plan        — save org's business plan
-delegate_to_department   — route a task to another dept agent
-set_tech_tree_node_status— mark a roadmap node complete
-write_artifact           — write markdown/json/code to Library
-complete_onboarding      — signal onboarding done
+ask_user_question         — pause, multiple-choice prompt to user
+set_business_plan         — save org's business plan
+delegate_to_department    — route a task to another dept agent
+set_tech_tree_node_status — mark a roadmap node complete
+write_artifact            — write markdown/json/code to Library
+complete_onboarding       — signal onboarding done
+read_file                 — read Library artifact by name
+list_files                — list Library artifacts, optionally by department
+web_search                — Tavily-backed search when env key exists
+web_fetch                 — fetch and strip public URL text
+write_skill               — save reusable local SKILL.md packet
 ```
 
 **Missing for real dept work** (from paperclip + cofounder-docs):
 - `run_command` — shell exec in sandbox (Engineer)
 - `write_file_to_repo` — commit code to managed GitHub (Engineer)
-- `web_search` — research (Marketing, Sales, Legal)
-- `web_fetch` — read URL contents
 - `send_email` — Postmark / outbound (Marketing, Sales, Support)
 - `create_lead` / `update_lead` — CRM mutation (Sales)
 - `query_db` — read managed Supabase (Engineer, Operations)
 - `generate_image` — visual asset gen (Design, Marketing)
 - `generate_pdf` — contracts, decks (Design, Legal)
-- `read_file` / `list_files` — Library nav (all)
+- `run_command` — shell exec in sandbox (Engineer)
+- `write_file_to_repo` — commit code to managed GitHub (Engineer)
 
 ## Skills wired to agents (from `bootstrap.ts`)
 
@@ -97,13 +104,13 @@ complete_onboarding      — signal onboarding done
 | Sales | (none) | Read, write_artifact only |
 | Operations | `ops-agent-skills` | Read, write_artifact only |
 | Finance | `finance-agent-skills` | Read, write_artifact only |
-| Legal | NOT BOOTSTRAPPED | — |
-| Support | NOT BOOTSTRAPPED | — |
+| Legal | (none yet) | Agent exists, needs legal skill packet |
+| Support | `gic-skills` | Agent exists, write_artifact/read/list only |
 
 ## Critical gaps (in priority order)
 
-1. **Bootstrap missing Legal and Support agents** — bug, 1-line fix in `bootstrap.ts`
-2. **Tools are onboarding-only** — engine bottleneck. Need general tool set per dept
-3. **Real end-to-end run never verified** — does `/api/[org]/tasks/[task]/run` actually invoke `runAgent` with the dept agent's prompt and produce a usable result for any of 8 depts?
-4. **Skills loaded but unused** — skill content goes into prompt but agent has no tools to act on it
+1. **Need Paperclip adapter parity** — Codex/Claude/Gemini/OpenCode should move behind a real adapter registry instead of living in `agent/anthropic.ts`
+2. **Need real execution tools** — shell/file-write/email/PDF/image/CRM/db tools are still missing
+3. **Need 8 department smoke tests** — only one generic offline task run has been verified
+4. **Skills need stronger runtime use** — skill content loads into prompts and package export, but many departments still lack tools to act on skills
 5. **150+ pages decorating a corpse** — most page.tsx are seeded UI not wired to real functionality
