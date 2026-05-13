@@ -90,6 +90,7 @@ function PlanPanel({
 }) {
   const [feedback, setFeedback] = useState("");
   const [accepting, setAccepting] = useState(false);
+  const [acceptError, setAcceptError] = useState<string | null>(null);
 
   useEffect(() => {
     if (phase !== "activated") return;
@@ -100,6 +101,7 @@ function PlanPanel({
   async function acceptPlan() {
     if (!plan || accepting) return;
     setAccepting(true);
+    setAcceptError(null);
     try {
       const setupAnswers = (questions ?? []).map((q, i) => ({
         questionId: q.id,
@@ -118,6 +120,8 @@ function PlanPanel({
       });
       if (!res.ok) throw new Error(`Workspace setup failed (${res.status})`);
       onPhaseChange?.("activated");
+    } catch (e) {
+      setAcceptError(e instanceof Error ? e.message : "Workspace setup failed");
     } finally {
       setAccepting(false);
     }
@@ -141,10 +145,17 @@ function PlanPanel({
         {plan && <PlanCard plan={plan} />}
 
         {phase === "plan" && (
-          <button type="button" onClick={() => void acceptPlan()} disabled={accepting}
-            className="w-full py-2 text-sm font-medium bg-ink text-paper rounded-md hover:opacity-90 transition-opacity disabled:opacity-50">
-            {accepting ? "Saving plan…" : "Accept & activate departments"}
-          </button>
+          <>
+            <button type="button" onClick={() => void acceptPlan()} disabled={accepting}
+              className="w-full py-2 text-sm font-medium bg-ink text-paper rounded-md hover:opacity-90 transition-opacity disabled:opacity-50">
+              {accepting ? "Saving plan…" : "Accept & activate departments"}
+            </button>
+            {acceptError && (
+              <div className="rounded-md border border-line/70 bg-canvas px-3 py-2 text-xs text-ink-muted">
+                Activation failed: {acceptError}
+              </div>
+            )}
+          </>
         )}
         {phase === "activated" && (
           <>

@@ -36,6 +36,49 @@ const FALLBACK_SECTIONS = [
   { id: "edge", label: "Wedge — why us", n: 4 },
 ];
 
+const CLIENT_FALLBACK_QUESTIONS: Question[] = [
+  {
+    id: "icp",
+    prompt: "Who is the first buyer we should optimize for?",
+    options: [
+      { key: "founders", label: "Early-stage founders", description: "Founders who need expert execution before they can hire a full team.", recommended: true },
+      { key: "operators", label: "Lean operators", description: "Small teams that already sell but need a repeatable execution system." },
+      { key: "agencies", label: "Agencies and studios", description: "Service businesses that need leverage on delivery, ops, or growth work." },
+      { key: "smb", label: "Small businesses", description: "Owner-led companies that need a practical business system without enterprise overhead." },
+    ],
+  },
+  {
+    id: "offer",
+    prompt: "What should the first paid offer be?",
+    options: [
+      { key: "retainer", label: "Monthly operating retainer", description: "A recurring service with a clear scope and predictable weekly output.", recommended: true },
+      { key: "sprint", label: "Fixed-scope launch sprint", description: "A short project that proves value and creates a reusable delivery system." },
+      { key: "subscription", label: "Productized subscription", description: "A self-serve or assisted plan with tiered usage and repeatable fulfillment." },
+      { key: "pilot", label: "Paid pilot", description: "A lower-friction first engagement designed to learn fast and convert." },
+    ],
+  },
+  {
+    id: "delivery",
+    prompt: "How should work get delivered?",
+    options: [
+      { key: "agent-led", label: "Agent-led with human approval", description: "Agents draft and execute, with the founder approving important decisions.", recommended: true },
+      { key: "human-led", label: "Human-led with agent support", description: "The founder stays hands-on while agents prepare briefs, drafts, and queues." },
+      { key: "done-for-you", label: "Done-for-you service", description: "The customer buys outcomes, not tooling or operational visibility." },
+      { key: "self-serve", label: "Self-serve workflow", description: "Customers use the product directly with agents assisting in the background." },
+    ],
+  },
+  {
+    id: "wedge",
+    prompt: "What is the wedge that makes this hard to ignore?",
+    options: [
+      { key: "speed", label: "Speed to first useful output", description: "Buyers feel value quickly because the system ships real work immediately.", recommended: true },
+      { key: "taste", label: "Taste and judgment", description: "The work is better curated than generic AI output or low-touch outsourcing." },
+      { key: "system", label: "Repeatable operating system", description: "The durable process becomes more valuable than any one deliverable." },
+      { key: "cost", label: "Lower cost than hiring", description: "Buyers get team-like output before they can justify payroll." },
+    ],
+  },
+];
+
 export default function OrgOnboardingFlow({ organization }: { organization: Org }) {
   const router = useRouter();
   const [phase, setPhase] = useState<Phase>("describe");
@@ -74,8 +117,17 @@ export default function OrgOnboardingFlow({ organization }: { organization: Org 
       }
       setPhase("questions");
     } catch (e) {
-      setLoadError(e instanceof Error ? e.message : "Failed to generate brief");
-      setPhase("describe");
+      const fallbackMessage = e instanceof Error ? e.message : "Failed to generate brief";
+      setLoadError(`${fallbackMessage}. Continuing with local setup questions.`);
+      setQuestions(CLIENT_FALLBACK_QUESTIONS);
+      setAnswers(Array(CLIENT_FALLBACK_QUESTIONS.length).fill(null));
+      setCustomTexts(Array(CLIENT_FALLBACK_QUESTIONS.length).fill(""));
+      setQIndex(0);
+      setTranscript((t) => [
+        ...t,
+        { kind: "agent", text: "Brief service was unavailable, so I switched to local setup questions to keep onboarding moving." },
+      ]);
+      setPhase("questions");
     }
   }
 

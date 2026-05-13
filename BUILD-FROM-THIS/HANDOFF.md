@@ -1,6 +1,6 @@
 # HANDOFF — THEFT x Paperclip Merge
 
-> Last updated: 2026-05-13 (app topbar hydration fix + e2e infra note).
+> Last updated: 2026-05-13 (onboarding stall fallback + roadmap first-node completion).
 > Branch: `codex-current-design-migration`.
 > Read this first if continuing in Claude, Codex, Gemini, or another local agent.
 
@@ -86,6 +86,12 @@ In progress:
   - launch step now hires the 8 department agents under Operator, auto-approves onboarding hire approvals, and seeds one starter issue per department.
 - `app/src/components/org-top-bar.tsx`
   - org switcher trigger changed from a `<button>` to an accessible `role="button"` container to prevent nested `<button>` hydration errors when the org menu is open.
+- `app/src/components/org-onboarding-flow.tsx`
+  - if `/api/:org/brief/generate` fails, onboarding now continues with client fallback questions instead of resetting to the first prompt.
+- `app/src/components/org-onboarding-plan.tsx`
+  - activation request failures now show inline error feedback instead of silent stall.
+- `app/src/app/api/[org]/brief/generate/route.ts`
+  - marks roadmap nodes `initial-idea` and `pick-company-name` complete when idea submission starts.
 
 Not started yet:
 

@@ -42,6 +42,16 @@ export async function POST(
   const o = await db.getOrgBySlug(orgSlug);
   if (!o) return NextResponse.json({ error: "not found" }, { status: 404 });
 
+  // As soon as the founder submits the idea in onboarding, mark the first two
+  // setup nodes complete so roadmap state reflects real user progress.
+  try {
+    await db.seedTechTreeStatus(o.id);
+    await db.upsertTechTreeNodeStatus(o.id, "initial-idea", "complete");
+    await db.upsertTechTreeNodeStatus(o.id, "pick-company-name", "complete");
+  } catch {
+    // Do not block onboarding if roadmap status updates fail.
+  }
+
   // Workspace setup must have a guaranteed happy path. The local engine gives
   // the UI immediate, tailored-enough questions; LLM refinement can be enabled
   // explicitly once the model backend is healthy.
