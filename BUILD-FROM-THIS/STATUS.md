@@ -3,7 +3,27 @@
 > Audit-derived, not assumed. Last updated 2026-05-13 by Codex session.
 > Update when something changes status. Don't fabricate.
 
-## Engine (`app/src/lib/`)
+## Current Direction — Paperclip-Host Merge
+
+Canonical direction now lives in `SOURCE-OF-TRUTH.md` and `PARITY-DELTA.md`.
+
+THEFT should become one local app: Paperclip runtime/control plane as the tracked host, with THEFT design, staged onboarding, 8-department company setup, roadmap/canvas, Library, and local skills on top.
+
+Current repo reality:
+
+| Area | Status | Notes |
+|---|---|---|
+| `paperclip/` | **RUNS, UNTRACKED** | Local runtime host candidate. It is still ignored by git, so product changes inside it are not safely tracked yet. |
+| `app/` | **MIGRATION REFERENCE** | Tracked THEFT prototype with design/onboarding/routes, but it duplicates Paperclip concepts and uses JSON state. Do not expand it as final runtime. |
+| Paperclip bridge in `app/` | **TEMPORARY** | Commit `45c4550` proved onboarding can seed Paperclip company/agents/issues. It is not the final architecture. |
+| `BUILD-FROM-THIS/` | **SOURCE OF TRUTH** | Read `SOURCE-OF-TRUTH.md`, then `PARITY-DELTA.md`, then roadmap/tasks. |
+| `skills/` | **PRODUCT DATA** | Must be imported/registered into Paperclip company skills before agents can depend on THEFT skill slugs. |
+
+Next blocking decision: promote `paperclip/` into tracked source in this repo or move THEFT work into a Paperclip fork repo. Until that is decided, avoid building new runtime features in either app.
+
+## Legacy THEFT App Engine (`app/src/lib/`)
+
+This section describes what the tracked `app/` prototype currently contains. It is useful migration context, but `app/` is no longer the target runtime host.
 
 | Component | LOC | Status | Notes |
 |---|---|---|---|
@@ -17,7 +37,7 @@
 | `engine/company-package.ts` | ? | **WORKS** | Builds Agent Company package shape from org/departments/agents/tasks/artifacts/skills |
 | `orgs/bootstrap.ts` | ? | **WORKS** | Seeds 8 departments and 8 default agents |
 
-**Foundation verdict:** app now creates a usable local company and routes task tools through one Paperclip-style dispatcher. Dept agents still need stronger real-world tools before v0 is complete.
+**Foundation verdict:** the tracked app creates a usable local company and routes task tools through one Paperclip-style dispatcher, but this is now a migration reference. The final foundation should be Paperclip's runtime, once it is promoted into tracked source.
 
 ## Routes inventory (153 page.tsx files)
 

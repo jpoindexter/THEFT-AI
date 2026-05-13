@@ -1,94 +1,103 @@
-# ROADMAP
+# ROADMAP — Paperclip-Host Product Merge
 
-> Sequential. Don't start v1 work until v0 ships. No parallel work that touches engine.
+> Sequential. Do not build new product surface until the previous source-of-truth step is complete.
 
-## v0 — Engine works end-to-end across 8 departments
+## v0 — One Local Agentic Company App
 
-Goal: a founder creates an org, hands a real task to each of 8 dept agents, and gets a real result back. Ugly UI is fine.
+Goal: THEFT runs as one local app backed by Paperclip's runtime. A founder can create a company, complete staged onboarding, see 8 departments, run real agent tasks, review outputs, and continue from roadmap/canvas without a second app or duplicated JSON runtime.
 
-### Slice 0.1 — Fix the bootstrap bug
-- [ ] Add Legal agent to `bootstrap.ts` (with appropriate default prompt + skills)
-- [ ] Add Support agent to `bootstrap.ts`
-- [ ] Test: create new org, verify all 8 dept pages have an agent assigned
-- [ ] Type-check clean
+## Slice 0.0 — Source Of Truth Cleanup
 
-### Slice 0.2 — General tool palette for dept agents
-Add tools that let agents actually DO work, not just write markdown.
+- [x] Read `BUILD-FROM-THIS/`, `cofounder-docs/`, key `paperclip/` docs, and frame references.
+- [x] Create `SOURCE-OF-TRUTH.md`.
+- [x] Create `PARITY-DELTA.md`.
+- [x] Append locked decisions.
+- [x] Update repo guidance (`AGENTS.md`, constitution) to reflect Paperclip-host direction.
+- [ ] Decide host promotion path: tracked Paperclip subtree in this repo vs Paperclip fork repo.
 
-Minimum tool set (all 8 depts share these):
-- [ ] `read_file` (Library + workspace)
-- [ ] `list_files` (Library + workspace)
-- [ ] `web_search` (Tavily or Brave Search API — env-keyed)
-- [ ] `web_fetch` (raw HTTP GET, return text)
-- [ ] `write_artifact` (already exists)
-- [ ] `delegate_to_department` (already exists)
-- [ ] `ask_user_question` (already exists)
+## Slice 0.1 — Promote A Single Host
 
-Dept-specific (gate by agent.slug or skill):
-- [ ] Engineer: `run_command` (sandboxed bash), `write_file_to_repo` (commit-style)
-- [ ] Marketing/Sales: `send_email` (Postmark API or stub)
-- [ ] Design: `generate_image` (Anthropic Claude API image input or stub returning placeholder)
-- [ ] Legal: `generate_pdf` (Markdown → PDF via `pdf-lib` or stub)
+- [ ] Stop treating the bridge as final architecture.
+- [ ] Create a tracked Paperclip-host branch or repo.
+- [ ] Bring `BUILD-FROM-THIS/` and `skills/` into the host.
+- [ ] Add THEFT design tokens/branding to the host UI.
+- [ ] Mark current `app/` as migration reference once host exists.
+- [ ] Make one dev command for the host.
 
-### Slice 0.3 — Verify each dept end-to-end
-For each of 8 depts:
-- [ ] Engineering: "Build a hello-world Next.js endpoint" → file written, returned
-- [ ] Design: "Generate a logo concept brief" → markdown artifact in Library
-- [ ] Marketing: "Research top 3 competitors and summarize positioning" → web_search + artifact
-- [ ] Sales: "Draft an outreach email for [persona]" → email artifact
-- [ ] Operations: "Summarize the last 5 tasks across the org" → uses read_file + artifact
-- [ ] Finance: "Estimate monthly burn from current usage records" → reads usage_records
-- [ ] Legal: "Draft an NDA template" → artifact PDF
-- [ ] Support: "Draft a knowledge-base article for [topic]" → artifact
+## Slice 0.2 — Skill Library Import
 
-Each dept gets one canonical "smoke test" task documented in STATUS.md after passing.
+- [ ] Add a local skill import path for `skills/*/SKILL.md`.
+- [ ] Register THEFT skills as Paperclip company skills.
+- [ ] Preserve read-only/custom skill distinction.
+- [ ] Map skills to default department agents.
+- [ ] Verify Paperclip agents can use imported skill selections without `desiredSkills` validation errors.
 
-### Slice 0.4 — Strip dead routes
-Move to `_archive/` everything not on the v0 path:
-- [ ] All sales sub-pages built off PLAN.md (pipeline/leads/competitors/outreach)
-- [ ] All support sub-pages (knowledge-base/decision-trees)
-- [ ] All costs sub-pages (unit-economics/budget/breakdown) — keep `/costs` itself
-- [ ] All analytics pages
-- [ ] All finance/operations/legal sub-pages
-- [ ] All marketing sub-pages
-- [ ] All design sub-pages (logo/components/pitch-deck)
-- [ ] Database sub-pages (keep `/database` only)
-- [ ] Settings: keep org / payments / domains / env / inbox / company-context / support. Archive others.
-- [ ] Misc: marketplace, templates, share, sandbox, studio, feed, whats-new, help, dev, status, release-notes, calendar, timeline, dashboard
+## Slice 0.3 — THEFT Staged Onboarding In Paperclip
 
-Result: ~30 routes instead of 153. Engine work has nowhere to hide.
+- [ ] Replace generic Paperclip company creation with THEFT entry flow.
+- [ ] Sign in/local entry.
+- [ ] Name company.
+- [ ] Pick company stage: pre-idea, idea, validating, building, launched, revenue, scaling, existing business.
+- [ ] Guided setup adapts to stage.
+- [ ] Setup steps can be marked done, skipped, or named as existing.
+- [ ] Create Paperclip company, company goal, Operator, 8 department agents, roadmap goals/issues, and first tasks.
+- [ ] Hide credits/billing in local onboarding.
 
-### Slice 0.5 — Done criterion
-- [ ] Founder can sign in, create org, complete onboarding
-- [ ] All 8 depts visible, each has working agent
-- [ ] Each dept's smoke-test task runs to completion via real Claude
-- [ ] Library shows all 8 produced artifacts
-- [ ] Cost tracking records all 8 runs
-- [ ] No broken routes in shipped code
+## Slice 0.4 — THEFT Canvas On Paperclip Data
 
----
+- [ ] Company view reads Paperclip company/profile/goals/agents.
+- [ ] Department views read Paperclip agents and filtered issues.
+- [ ] Task list/detail reads Paperclip issues, comments, documents, runs, and interactions.
+- [ ] Attention queue reads approvals/interactions/reviewable work.
+- [ ] Operator tray creates Paperclip issues or comments, not JSON tasks.
+- [ ] Tech tree maps to Paperclip goals/projects/issues.
 
-## v1 — After v0 ships AND first real user
+## Slice 0.5 — Library And Outputs
 
-Triggered only after a real human (Jason or someone else) has used v0 to actually run a task.
+- [ ] Map Paperclip issue documents, attachments, and work products to THEFT Library.
+- [ ] Add department folders/association.
+- [ ] Add pinned files.
+- [ ] Add safe markdown/text editing.
+- [ ] Ensure agent output lands in Library by default.
 
-Candidates (re-prioritized after v0 feedback):
-- Real GitHub integration (read repo, push commits)
-- Real Vercel integration (deploy preview)
-- Real Postmark email
-- Real Stripe billing integration
-- Knowledge base + decision trees (rebuilt from cofounder-docs spec, not PLAN.md guesses)
-- Brand kit flow (only if it's load-bearing for design dept)
-- Differentiation work (positioning vs cofounder/paperclip — see PRD.md)
+## Slice 0.6 — Eight Department Runtime Smoke
 
----
+For each department, create one real Paperclip issue, invoke the assigned agent through a local adapter, and verify an output.
 
-## v2 — Aspirational
+- [ ] Engineering: code/repo task.
+- [ ] Design: brand/design artifact.
+- [ ] Marketing: positioning/content artifact.
+- [ ] Sales: ICP/outreach artifact.
+- [ ] Operations: status/process artifact.
+- [ ] Finance: finance/reporting artifact.
+- [ ] Legal: legal document artifact.
+- [ ] Support: support/knowledge artifact.
 
-- Multi-user / team / RBAC
-- Real Supabase backend (replace file-backed store)
-- Routines / scheduled tasks
-- Approvals workflow
-- Webhooks for external triggers
-- Marketplace for custom agents
-- Custom skills creator
+## Slice 0.7 — Subtract Dead Surface
+
+- [ ] Remove duplicated JSON runtime paths from active product.
+- [ ] Archive old THEFT app routes not ported to Paperclip host.
+- [ ] Remove/hide fake credits and unimplemented billing.
+- [ ] Remove LLC/service-company assumptions.
+- [ ] Remove active user-facing Cofounder branding.
+- [ ] Ensure only one app/server is required for the product path.
+
+## v1 — Managed Services After Local v0 Works
+
+Only after v0 is dogfooded locally:
+
+- GitHub repo/workspace management.
+- Vercel preview/publish flow.
+- Supabase project/import/local verification.
+- Postmark/inbox.
+- Stripe/payments.
+- Domains/DNS.
+- Custom integrations/MCP.
+
+## v2 — Scale
+
+- Multi-user/RBAC.
+- Cloud deploy.
+- Marketplace/templates.
+- Advanced routines.
+- Rich plugin surfaces.

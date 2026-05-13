@@ -32,6 +32,7 @@ Append-only. Locked choices. Don't re-litigate without new info.
 - **Choice:** No real DB until v1.
 - **Why:** Already documented in CLAUDE.md. Reaffirmed because nothing in v0 needs concurrent writes or relational queries.
 - **Reversible:** Yes (swap `db/store.ts` interface for Supabase)
+- **Superseded 2026-05-13:** JSON can remain as migration scaffolding only. The target runtime source of truth is Paperclip's embedded local Postgres.
 
 ## 2026-05-10 — Anthropic SDK is the primary agent backend
 - **Choice:** Default to Anthropic SDK. Keep Ollama and claude-CLI fallbacks but don't optimize for them.
@@ -47,3 +48,29 @@ Append-only. Locked choices. Don't re-litigate without new info.
 - **Choice:** No more "should we switch to X" debates.
 - **Why:** Switching stacks before shipping = guaranteed not shipping.
 - **Reversible:** No (until v1 + real user)
+
+## 2026-05-13 — Paperclip becomes the runtime host, not just a reference
+- **Choice:** THEFT will become one Paperclip-based app: Paperclip runtime/control plane with THEFT product/design/onboarding/skills on top.
+- **Alternatives considered:** keep Next app plus Paperclip bridge; continue rebuilding Paperclip concepts inside THEFT.
+- **Why:** The bridge proves feasibility but violates the product goal of one agentic company. Paperclip already has the runtime primitives we need.
+- **Reversible:** No for product direction; implementation path can still be subtree vs fork.
+
+## 2026-05-13 — Current `app/` is a migration reference, not the final host
+- **Choice:** Stop expanding `app/` as the long-term runtime. Use it as reference for THEFT design and flow while porting into the Paperclip host.
+- **Why:** `app/` duplicates company/agent/task/runtime state. Continuing there creates permanent dual-source architecture.
+- **Reversible:** Yes only if Paperclip host promotion fails.
+
+## 2026-05-13 — THEFT skills are product data
+- **Choice:** `skills/` is part of the product and must be imported/registered into Paperclip's company skill system.
+- **Why:** THEFT's differentiation is not only Paperclip runtime; it is the curated skills and company-building workflows.
+- **Reversible:** No.
+
+## 2026-05-13 — Cofounder docs define behavior, frames define flow/reference only
+- **Choice:** Use `cofounder-docs/` for product behavior and `frames2/` for flow/design reference. Do not copy private Cofounder runtime or branding.
+- **Why:** We do not have Cofounder source. Recreating the product flow on Paperclip is the correct path.
+- **Reversible:** No.
+
+## 2026-05-13 — Hide credits/billing for local-first
+- **Choice:** Paperclip budget/cost internals can remain for observability, but THEFT local-first UX must not present fake credits, paid billing, or subscription enforcement.
+- **Why:** The user explicitly called this silly while not implemented. Fake commerce undermines local dogfooding.
+- **Reversible:** Yes when real billing is implemented.

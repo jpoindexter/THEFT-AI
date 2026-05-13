@@ -4,13 +4,13 @@
 
 ## One-liner
 
-**THEFT AI** is an AI-agent platform that runs a real company end-to-end across 8 departments — Engineering, Design, Marketing, Sales, Operations, Finance, Legal, Support.
+**THEFT AI** is an AI-agent platform that runs a real company end-to-end across 8 departments — Engineering, Design, Marketing, Sales, Operations, Finance, Legal, Support — using Paperclip as the runtime/control-plane chassis.
 
 A solo founder gives the company a goal. Agents in each department execute real work — writing code, sending email, drafting contracts, managing leads, paying invoices. The founder reviews, approves, redirects.
 
 ## Why this, why now
 
-Cofounder.co and paperclip both prove the thesis (AI agents running a company) but neither is what theft.studio wants to ship. THEFT AI uses both as scaffolding references — copy the structural model, then redo the visual layer and the differentiation.
+Cofounder.co and Paperclip both prove the thesis (AI agents running a company) but neither alone is what theft.studio wants to ship. THEFT AI uses Paperclip as the runtime base and recreates the better Cofounder-style company setup flow, department model, roadmap, and Library experience with THEFT's design and skills.
 
 ## Primary user
 
@@ -20,7 +20,7 @@ Solo founder building a startup. Has product idea, doesn't have time/money to hi
 
 ## What "v0 done" means
 
-Done when: a founder can create an org, and **for each of the 8 departments**:
+Done when: a founder can create a Paperclip-backed company through THEFT onboarding, and **for each of the 8 departments**:
 1. Navigate to the dept page
 2. See its assigned agent
 3. Create a real task ("Write a launch email", "Draft an LLC operating agreement", "Build a hello-world Next.js endpoint")
@@ -28,7 +28,7 @@ Done when: a founder can create an org, and **for each of the 8 departments**:
 5. See the output land somewhere usable (Library, repo, sent email, signed PDF — depends on dept)
 6. Mark task done
 
-**Not v0:** pixel-matching cofounder.co, polished UI, settings sub-pages, brand kit flow, tech tree visualization, sales/support/finance dashboards built off PLAN.md.
+**Not v0:** pixel-matching cofounder.co, polished UI, fake credits/billing, broad settings sub-pages, real managed GitHub/Vercel/Supabase/Postmark provisioning, sales/support/finance dashboards built off PLAN.md.
 
 ## In scope (v0)
 
@@ -38,7 +38,7 @@ Done when: a founder can create an org, and **for each of the 8 departments**:
 - **Real per-dept tool sets** (Engineer: shell + file write + git; Marketing: web search + content gen; Sales: CRM read/write; Finance: ledger read/write; Legal: doc gen + signing; etc.)
 - Task list, task detail, task status (queued/running/done/blocked)
 - Library (artifacts persist across tasks)
-- File-backed JSON store (no DB)
+- Paperclip embedded local Postgres as runtime source of truth
 - Auth (basic — single user is fine for v0)
 
 ## Out of scope (v0 → PARKED.md)
@@ -69,7 +69,7 @@ Without this, the product is a worse cofounder clone. Fill before v1.
 | Source | What it tells us |
 |---|---|
 | `cofounder-docs/` (32 MD files) | Feature list — what features must exist |
-| `paperclip/` (read-only) | Working engine reference — patterns for tools, agents, runtime |
+| `paperclip/` | Runtime/control-plane host to promote or fork |
 | `frames2/`, `screenshots/` | **Visual reference only** — not pixel spec |
 | `skills/` | Skills attached to agents — instruction packets |
 | **This file (PRD.md)** | What v0 done means |
