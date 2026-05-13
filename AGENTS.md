@@ -6,4 +6,9 @@ This version has breaking changes — APIs, conventions, and file structure may 
 
 ## Spec Kit
 
-GitHub Spec Kit is installed as a shared CLI (`specify`) from the sibling repo at `/Users/jasonpoindexter/Documents/GitHub/spec-kit`. Keep that source checkout outside this project; initialize project-local `.specify` files only when explicitly adopting a Spec Kit workflow for this repo.
+GitHub Spec Kit is installed as a shared CLI (`specify`) from the sibling repo at `/Users/jasonpoindexter/Documents/GitHub/spec-kit`. This repo has adopted Spec Kit with Codex skills in `.agents/skills` and project governance in `.specify/memory/constitution.md`. Use `$speckit-*` skills for substantial feature work that needs a durable spec/plan/tasks trail.
+
+<!-- SPECKIT START -->
+For additional context about technologies to be used, project structure,
+shell commands, and other important information, read the current plan
+<!-- SPECKIT END -->
