@@ -4,98 +4,101 @@
 
 **Created**: 2026-05-13
 
-**Status**: Draft
+**Status**: Pivoted to Paperclip-first
 
 **Input**: User description: "Use Paperclip as the engine blueprint instead of redoing engine work; keep THEFT AI as the company-building product layer and use the repo skills."
 
+**Pivot Update 2026-05-13**: Paperclip is the first-running baseline engine, not only an architectural reference. THEFT AI should boot Paperclip locally, prove the company/agent/issue heartbeat happy path, and then adapt THEFT onboarding, roadmap, skills, and UI surfaces around Paperclip primitives.
+
 ## User Scenarios & Testing
 
-### User Story 1 - Run Tasks Through An Engine Boundary (Priority: P1)
+### User Story 1 - Run Paperclip As The Baseline Engine (Priority: P1)
 
-A founder completes onboarding, receives a company workspace, and every task run goes through a Paperclip-style engine boundary with registered tools, attached skills, durable run state, and clear pause/done outcomes.
+A founder/operator can start Paperclip locally, create a company, attach goals and agents, create work, and see Paperclip heartbeats or board actions advance the work lifecycle.
 
-**Why this priority**: This replaces scattered task execution with the runtime shape needed for all later department work.
+**Why this priority**: THEFT should stop recreating orchestration that Paperclip already has: companies, agents, adapters, issues, checkouts, heartbeats, approvals, skills, and local workspaces.
 
-**Independent Test**: Create a new company, complete onboarding, run one generated task with the local harness, and verify the run uses the central engine dispatcher, writes turns, and finishes or pauses explicitly.
+**Independent Test**: Start Paperclip with embedded Postgres, hit `/api/health`, create a dogfood company, create a company goal, create an Operator agent, create an assigned issue, observe heartbeat checkout behavior, and mark the issue done.
 
 **Acceptance Scenarios**:
 
-1. **Given** a company with a task assigned to a department agent, **When** the task is run, **Then** the engine resolves the agent, skills, tools, business context, and adapter before executing.
-2. **Given** a task run emits a tool action, **When** the action is handled, **Then** the result is routed through a central tool dispatcher rather than duplicated route-specific logic.
-3. **Given** a task cannot continue without a founder decision, **When** the agent asks a question, **Then** the task pauses with a resumable pending tool state.
+1. **Given** Paperclip is installed in `paperclip/`, **When** `pnpm -C paperclip dev` starts, **Then** the UI and API are available at `http://127.0.0.1:3100`.
+2. **Given** a Paperclip company with an active agent, **When** a todo issue is assigned, **Then** Paperclip may immediately claim it by heartbeat before a manual checkout.
+3. **Given** a running Paperclip issue, **When** the board/operator marks it done with a valid run id, **Then** the issue records completion and a comment.
 
 ---
 
-### User Story 2 - Represent Companies As Agent Company Packages (Priority: P2)
+### User Story 2 - Make THEFT Onboarding Create Paperclip Companies (Priority: P2)
 
-An operator can inspect a THEFT AI company as a portable Agent Company package composed of company, team, agent, task, and skill documents compatible with Paperclip's company specification.
+An operator completes THEFT onboarding and the app creates or links a real Paperclip company, goal, Operator/department agents, and first issues instead of only writing THEFT-local JSON state.
 
-**Why this priority**: THEFT AI needs a durable bridge between onboarding, departments, repo skills, and Paperclip-compatible runtime semantics.
+**Why this priority**: The app currently gets stuck after onboarding because the product surface and execution engine are split. Paperclip should be the source of truth for executable work.
 
-**Independent Test**: Export a completed company package and verify it contains a company document, all 8 department teams, all agents with skill references, current tasks, and links to local skill packets.
+**Independent Test**: Complete THEFT onboarding, then verify the Paperclip API contains the created company, company goal, Operator, department agents, and first tasks.
 
 **Acceptance Scenarios**:
 
-1. **Given** a company with departments, agents, tasks, artifacts, and skills, **When** the package is built, **Then** each runtime entity has a stable slug/path identity rather than only database ids.
-2. **Given** an agent has attached skills, **When** the package is built, **Then** each skill resolves by shortname to a local `skills/<slug>/SKILL.md` packet when available.
+1. **Given** a founder already has a business, **When** onboarding asks about business structure or company naming, **Then** the founder can mark that step done and optionally name the existing structure rather than being forced through LLC/service-company assumptions.
+2. **Given** THEFT creates starter work, **When** the work appears in departments, **Then** each visible task maps to a Paperclip issue and lifecycle status.
+3. **Given** repo skills exist in `skills/`, **When** agents are created, **Then** their desired skills or instruction bundles reference those skill packets where applicable.
 
 ---
 
-### User Story 3 - Adopt Paperclip Adapters Incrementally (Priority: P3)
+### User Story 3 - Use Paperclip Adapter Harnesses (Priority: P3)
 
-An engineer can port Paperclip adapter behavior into THEFT AI one adapter at a time without changing product routes or department UI.
+An operator can select Claude, Codex, Gemini, OpenCode, or other local adapters through Paperclip-backed configuration instead of THEFT maintaining a separate harness per route.
 
-**Why this priority**: The app must support Claude, Codex, Gemini, OpenCode, and offline/local modes without route-specific execution hacks.
+**Why this priority**: Paperclip already models local CLI adapters and heartbeats. THEFT should configure and present that system, not rebuild it.
 
-**Independent Test**: Switch an organization runtime backend in AI settings and verify task execution still uses the same engine contract and returns the same run-state shape.
+**Independent Test**: Create an agent with a safe local process adapter, then verify the same path can later use Paperclip's `claude_local`, `codex_local`, `gemini_local`, or `opencode_local` adapters without changing department task routes.
 
 **Acceptance Scenarios**:
 
-1. **Given** an organization selects Codex CLI, Claude CLI, Gemini CLI, OpenCode, or offline mode, **When** a task runs, **Then** the adapter returns a normalized action stream to the engine.
-2. **Given** a new adapter is added later, **When** it is registered, **Then** no task route or department page needs custom adapter logic.
+1. **Given** an organization selects Codex CLI, Claude CLI, Gemini CLI, OpenCode, or process mode, **When** a task runs, **Then** the work is represented as a Paperclip agent heartbeat/run.
+2. **Given** a new adapter is added later, **When** Paperclip registers it, **Then** THEFT surfaces it without route-specific execution logic.
 
 ### Edge Cases
 
-- If a referenced skill packet is missing, the engine must report the missing skill while still allowing the run to proceed with available context.
-- If a tool is not registered, the engine must return a structured tool error and keep the run state inspectable.
-- If a local adapter is not installed or fails, the engine must fall back to deterministic offline behavior for local-first happy paths.
-- If an agent emits malformed actions, the engine must produce a clear blocked run turn rather than silently hanging.
+- If Paperclip is not running, THEFT must show an actionable local engine status instead of silently hanging.
+- If a referenced skill packet is missing, THEFT must report the missing skill while still allowing the company to be created.
+- If a local adapter is not installed or fails, Paperclip's adapter error must be surfaced in THEFT.
+- If Paperclip heartbeats claim work before a manual action, THEFT must reflect the real issue status instead of treating it as stuck.
 
 ## Requirements
 
 ### Functional Requirements
 
-- **FR-001**: System MUST expose a central engine boundary for task execution, tool dispatch, skill resolution, and adapter selection.
-- **FR-002**: System MUST route all server-side tool calls through a registered dispatcher with tool descriptors and handlers.
-- **FR-003**: System MUST keep THEFT AI's onboarding, departments, roadmap, and local file-backed store as the product layer during adoption.
-- **FR-004**: System MUST represent a company using Paperclip-compatible package concepts: company, teams/departments, agents, tasks, artifacts, and skills.
-- **FR-005**: System MUST resolve attached skills from the repo `skills/` directory by stable shortname before task execution.
-- **FR-006**: System MUST normalize adapter output into the existing turn stream: text, tool_call, tool_result, pause, tool_answer, and done.
-- **FR-007**: System MUST support local-first execution without paid services or production database requirements.
-- **FR-008**: System MUST provide smoke tests for onboarding-to-task-run and package construction.
-- **FR-009**: System MUST not modify or run the `paperclip/` reference repo as part of normal THEFT AI execution.
+- **FR-001**: System MUST treat local Paperclip as the first-running engine during adoption.
+- **FR-002**: System MUST expose Paperclip engine health in local development and fail clearly when it is unavailable.
+- **FR-003**: System MUST make THEFT onboarding create or link a Paperclip company, company goal, Operator agent, department agents, and starter issues.
+- **FR-004**: System MUST map THEFT departments and tasks to Paperclip agents and issues.
+- **FR-005**: System MUST resolve attached skills from the repo `skills/` directory by stable shortname when creating agents or instruction bundles.
+- **FR-006**: System MUST support local-first execution without paid services, credits, or production database requirements.
+- **FR-007**: System MUST let the operator manually complete/skips business setup phases that do not apply, with a note/name for the existing business structure when useful.
+- **FR-008**: System MUST remove or hide credit/billing UX that implies unimplemented paid metering in the local-first build.
+- **FR-009**: System MUST keep `paperclip/` source changes out of THEFT feature work until an explicit fork/import decision is made.
 
 ### Key Entities
 
-- **Engine Run**: A task execution attempt with organization, agent, adapter, tools, history, turns, pause state, and terminal status.
-- **Engine Tool**: A named capability with an agent-facing schema and server-side handler.
-- **Agent Company Package**: A markdown-native representation of a THEFT AI company following Paperclip company package semantics.
+- **Paperclip Company**: The source-of-truth executable company record used by the engine.
+- **Paperclip Agent**: A runnable employee with adapter config, skills/instructions, hierarchy, status, and budgets disabled for local-first THEFT.
+- **Paperclip Issue**: The source-of-truth task record with status, checkout, comments, documents, and hierarchy.
+- **THEFT Onboarding State**: The product-specific setup flow that gathers founder intent and seeds Paperclip entities.
 - **Skill Reference**: A stable shortname/path reference to a `SKILL.md` packet used by an agent.
-- **Adapter**: A normalized runtime backend that converts model/CLI output into engine actions.
 
 ## Success Criteria
 
 ### Measurable Outcomes
 
-- **SC-001**: A new company can be created, onboarded, and run at least one task through the engine boundary in under 60 seconds locally.
-- **SC-002**: All tool executions in Anthropic and local harness paths pass through one dispatcher implementation.
-- **SC-003**: Exporting a completed company package includes 8 departments, 8 agents, attached skill references, and current tasks.
-- **SC-004**: Adding one new engine tool requires changing only the tool registration module and tests, not every run route.
-- **SC-005**: Test suite and production build pass after the first adoption slice.
+- **SC-001**: Paperclip starts locally at `http://127.0.0.1:3100` and `/api/health` returns `ok`.
+- **SC-002**: A dogfood company can be created in Paperclip with a company goal, Operator agent, assigned issue, heartbeat checkout, and done completion.
+- **SC-003**: THEFT onboarding creates Paperclip-backed company data visible through `/api/companies`, `/api/companies/{id}/agents`, and `/api/companies/{id}/issues`.
+- **SC-004**: Post-onboarding department task pages load from Paperclip issues instead of hanging on THEFT-only run state.
+- **SC-005**: Local happy paths do not require credits, paid billing setup, or LLC-specific setup assumptions.
 
 ## Assumptions
 
-- Paperclip remains a read-only architectural reference in this repo.
-- The first adoption slice targets in-process local execution, not Paperclip's full database, plugin worker, or sandbox-provider stack.
-- THEFT AI keeps its current file-backed JSON store for v0.
-- Existing CLI adapters remain available through the current local harness while their behavior is progressively aligned with Paperclip adapters.
+- Paperclip remains unmodified while used as a local runtime service.
+- The next adoption slice targets API integration with Paperclip's existing server on port 3100.
+- THEFT can keep file-backed JSON temporarily as a product cache, but Paperclip becomes source of truth for executable work.
+- CLI adapter configuration should move toward Paperclip's adapter model instead of expanding THEFT route-local harnesses.

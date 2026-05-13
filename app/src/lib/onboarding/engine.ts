@@ -1,4 +1,5 @@
 import { db, type Org } from "@/lib/db/store";
+import { syncWorkspaceToPaperclip, type PaperclipSyncResult } from "@/lib/paperclip-engine/sync";
 
 export type SetupQuestionOption = {
   key: string;
@@ -169,15 +170,17 @@ export function fallbackSetupQuestions(idea: string): {
 export async function completeWorkspaceSetup(
   org: Org,
   input: WorkspaceSetupInput,
-): Promise<{ plan: Record<string, unknown>; createdTasks: number }> {
+): Promise<{ plan: Record<string, unknown>; createdTasks: number; paperclip: PaperclipSyncResult }> {
   const plan = buildBusinessPlan(org, input);
 
   await db.updateOrg(org.id, { business_plan: plan });
   await db.completeOnboardingRoadmap(org.id);
   await upsertBusinessPlanArtifact(org.id, plan, input);
   const createdTasks = await seedFirstWorkQueue(org.id);
+  const updatedOrg = (await db.getOrgBySlug(org.slug)) ?? org;
+  const paperclip = await syncWorkspaceToPaperclip(updatedOrg, plan);
 
-  return { plan, createdTasks };
+  return { plan, createdTasks, paperclip };
 }
 
 function buildBusinessPlan(

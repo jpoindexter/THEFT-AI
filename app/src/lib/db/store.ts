@@ -46,6 +46,9 @@ export type Org = {
   budget_hard_limit: boolean | null;
   budget_warn_pct: number | null;
   budget_per_agent: Record<string, number> | null;
+  paperclip_company_id: string | null;
+  paperclip_goal_id: string | null;
+  paperclip_operator_agent_id: string | null;
 };
 
 export type Department = {
@@ -298,6 +301,9 @@ export const db = {
       budget_hard_limit: null,
       budget_warn_pct: null,
       budget_per_agent: null,
+      paperclip_company_id: null,
+      paperclip_goal_id: null,
+      paperclip_operator_agent_id: null,
     };
     await writeTable("organizations", [...all, org]);
     return org;
