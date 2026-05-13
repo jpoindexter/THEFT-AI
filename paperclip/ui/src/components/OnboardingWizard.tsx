@@ -36,6 +36,11 @@ import {
   buildOnboardingProjectPayload,
   selectDefaultCompanyGoalId
 } from "../lib/onboarding-launch";
+import {
+  ONBOARDING_STAGES,
+  type OnboardingStage,
+  mergeDescriptionWithOnboardingContext,
+} from "../lib/onboarding-context";
 import { buildNewAgentRuntimeConfig } from "../lib/new-agent-runtime-config";
 import {
   DEFAULT_CODEX_LOCAL_BYPASS_APPROVALS_AND_SANDBOX,
@@ -107,6 +112,13 @@ export function OnboardingWizard() {
   // Step 1
   const [companyName, setCompanyName] = useState("");
   const [companyGoal, setCompanyGoal] = useState("");
+  const [companyStage, setCompanyStage] = useState<OnboardingStage>("idea");
+  const [setupCompanyNameStatus, setSetupCompanyNameStatus] = useState<"done" | "skipped">("done");
+  const [setupCompanyNameNote, setSetupCompanyNameNote] = useState("");
+  const [setupLegalStatus, setSetupLegalStatus] = useState<"todo" | "done" | "skipped">("todo");
+  const [setupLegalNote, setSetupLegalNote] = useState("");
+  const [setupOfferStatus, setSetupOfferStatus] = useState<"todo" | "done" | "skipped">("todo");
+  const [setupOfferNote, setSetupOfferNote] = useState("");
 
   // Step 2
   const [agentName, setAgentName] = useState("CEO");
@@ -290,6 +302,13 @@ export function OnboardingWizard() {
     setError(null);
     setCompanyName("");
     setCompanyGoal("");
+    setCompanyStage("idea");
+    setSetupCompanyNameStatus("done");
+    setSetupCompanyNameNote("");
+    setSetupLegalStatus("todo");
+    setSetupLegalNote("");
+    setSetupOfferStatus("todo");
+    setSetupOfferNote("");
     setAgentName("CEO");
     setAdapterType("claude_local");
     setModel("");
@@ -389,7 +408,36 @@ export function OnboardingWizard() {
     setLoading(true);
     setError(null);
     try {
-      const company = await companiesApi.create({ name: companyName.trim() });
+      const trimmedName = companyName.trim();
+      const companyDescription = mergeDescriptionWithOnboardingContext({
+        description: companyGoal.trim(),
+        stage: companyStage,
+        setupItems: [
+          {
+            key: "company_name",
+            label: "Company name",
+            status: setupCompanyNameStatus,
+            note: setupCompanyNameNote || trimmedName,
+          },
+          {
+            key: "legal_entity",
+            label: "Legal entity",
+            status: setupLegalStatus,
+            note: setupLegalNote,
+          },
+          {
+            key: "offer",
+            label: "Offer",
+            status: setupOfferStatus,
+            note: setupOfferNote,
+          },
+        ],
+      });
+
+      const company = await companiesApi.create({
+        name: trimmedName,
+        description: companyDescription,
+      });
       setCreatedCompanyId(company.id);
       setCreatedCompanyPrefix(company.issuePrefix);
       setSelectedCompanyId(company.id);
@@ -687,6 +735,105 @@ export function OnboardingWizard() {
                       onChange={(e) => setCompanyName(e.target.value)}
                       autoFocus
                     />
+                  </div>
+                  <div>
+                    <label className="text-xs text-muted-foreground mb-2 block">
+                      Company stage
+                    </label>
+                    <div className="grid grid-cols-2 gap-2">
+                      {ONBOARDING_STAGES.map((stage) => (
+                        <button
+                          key={stage}
+                          type="button"
+                          onClick={() => setCompanyStage(stage)}
+                          className={cn(
+                            "rounded-md border px-2 py-1.5 text-xs text-left",
+                            companyStage === stage
+                              ? "border-foreground bg-accent text-foreground"
+                              : "border-border text-muted-foreground hover:text-foreground hover:bg-accent/40"
+                          )}
+                        >
+                          {stage}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                  <div className="space-y-3">
+                    <div className="text-xs text-muted-foreground">Setup status</div>
+                    <div className="grid gap-2">
+                      <div className="rounded-md border border-border p-2">
+                        <div className="text-xs mb-1">Company name</div>
+                        <div className="flex gap-2 mb-2">
+                          {(["done", "skipped"] as const).map((status) => (
+                            <button
+                              key={`name-${status}`}
+                              type="button"
+                              onClick={() => setSetupCompanyNameStatus(status)}
+                              className={cn(
+                                "rounded border px-2 py-1 text-xs",
+                                setupCompanyNameStatus === status ? "border-foreground bg-accent" : "border-border"
+                              )}
+                            >
+                              {status}
+                            </button>
+                          ))}
+                        </div>
+                        <input
+                          className="w-full rounded-md border border-border bg-transparent px-2 py-1.5 text-xs outline-none focus:ring-1 focus:ring-ring"
+                          placeholder="Name note (optional)"
+                          value={setupCompanyNameNote}
+                          onChange={(e) => setSetupCompanyNameNote(e.target.value)}
+                        />
+                      </div>
+                      <div className="rounded-md border border-border p-2">
+                        <div className="text-xs mb-1">Legal entity</div>
+                        <div className="flex gap-2 mb-2">
+                          {(["todo", "done", "skipped"] as const).map((status) => (
+                            <button
+                              key={`legal-${status}`}
+                              type="button"
+                              onClick={() => setSetupLegalStatus(status)}
+                              className={cn(
+                                "rounded border px-2 py-1 text-xs",
+                                setupLegalStatus === status ? "border-foreground bg-accent" : "border-border"
+                              )}
+                            >
+                              {status}
+                            </button>
+                          ))}
+                        </div>
+                        <input
+                          className="w-full rounded-md border border-border bg-transparent px-2 py-1.5 text-xs outline-none focus:ring-1 focus:ring-ring"
+                          placeholder="Legal note (optional)"
+                          value={setupLegalNote}
+                          onChange={(e) => setSetupLegalNote(e.target.value)}
+                        />
+                      </div>
+                      <div className="rounded-md border border-border p-2">
+                        <div className="text-xs mb-1">Offer / service</div>
+                        <div className="flex gap-2 mb-2">
+                          {(["todo", "done", "skipped"] as const).map((status) => (
+                            <button
+                              key={`offer-${status}`}
+                              type="button"
+                              onClick={() => setSetupOfferStatus(status)}
+                              className={cn(
+                                "rounded border px-2 py-1 text-xs",
+                                setupOfferStatus === status ? "border-foreground bg-accent" : "border-border"
+                              )}
+                            >
+                              {status}
+                            </button>
+                          ))}
+                        </div>
+                        <input
+                          className="w-full rounded-md border border-border bg-transparent px-2 py-1.5 text-xs outline-none focus:ring-1 focus:ring-ring"
+                          placeholder="Offer note (optional)"
+                          value={setupOfferNote}
+                          onChange={(e) => setSetupOfferNote(e.target.value)}
+                        />
+                      </div>
+                    </div>
                   </div>
                   <div className="group">
                     <label

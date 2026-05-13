@@ -40,10 +40,10 @@
 | ID | Title | Status |
 |---|---|---|
 | T030 | Replace Paperclip generic company creation with THEFT entry route | ☐ todo |
-| T031 | Add company name step | ☐ todo |
-| T032 | Add company stage picker: pre-idea, idea, validating, building, launched, revenue, scaling, existing business | ☐ todo |
+| T031 | Add company name step | ✅ done |
+| T032 | Add company stage picker: pre-idea, idea, validating, building, launched, revenue, scaling, existing business | ✅ done |
 | T033 | Add adaptive setup interview per stage | ☐ todo |
-| T034 | Add "already done", "skip", and note/name fields for setup items | ☐ todo |
+| T034 | Add "already done", "skip", and note/name fields for setup items | ▶ doing |
 | T035 | Create Paperclip company profile metadata from onboarding | ☐ todo |
 | T036 | Seed Operator, 8 departments/agents, roadmap goals/issues, and first tasks | ☐ todo |
 | T037 | Hide local credits/billing prompts during onboarding | ☐ todo |
