@@ -92,12 +92,6 @@ function PlanPanel({
   const [accepting, setAccepting] = useState(false);
   const [acceptError, setAcceptError] = useState<string | null>(null);
 
-  useEffect(() => {
-    if (phase !== "activated") return;
-    const id = setTimeout(() => onPhaseChange?.("brand-design"), 2200);
-    return () => clearTimeout(id);
-  }, [phase, onPhaseChange]);
-
   async function acceptPlan() {
     if (!plan || accepting) return;
     setAccepting(true);
@@ -161,7 +155,7 @@ function PlanPanel({
           <>
             <button type="button" disabled
               className="w-full py-2 text-sm text-ink-muted border border-line/50 rounded-md opacity-50 cursor-not-allowed">
-              Activating departments…
+              Activation complete
             </button>
             <div className="rounded-lg border border-line/70 bg-canvas p-3 flex items-start gap-2.5">
               <div className="size-5 shrink-0 mt-0.5 rounded border border-line/70 bg-paper flex items-center justify-center">
@@ -169,9 +163,9 @@ function PlanPanel({
               </div>
               <div>
                 <div className="text-2xs font-medium text-ink uppercase tracking-wide">
-                  Next: Brand Design <span className="text-ink-soft font-normal normal-case">· business content saved</span>
+                  Workspace Ready <span className="text-ink-soft font-normal normal-case">· redirecting…</span>
                 </div>
-                <p className="text-xs text-ink-muted mt-0.5 leading-snug">We&apos;ll use your answers for the look and feel.</p>
+                <p className="text-xs text-ink-muted mt-0.5 leading-snug">Your company brief, agents, and first tasks are set.</p>
               </div>
             </div>
           </>

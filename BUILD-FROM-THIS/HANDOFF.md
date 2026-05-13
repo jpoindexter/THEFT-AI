@@ -1,6 +1,6 @@
 # HANDOFF — THEFT x Paperclip Merge
 
-> Last updated: 2026-05-13 (onboarding stall fallback + roadmap first-node completion).
+> Last updated: 2026-05-13 (auto-exit onboarding after activation).
 > Branch: `codex-current-design-migration`.
 > Read this first if continuing in Claude, Codex, Gemini, or another local agent.
 
@@ -92,6 +92,10 @@ In progress:
   - activation request failures now show inline error feedback instead of silent stall.
 - `app/src/app/api/[org]/brief/generate/route.ts`
   - marks roadmap nodes `initial-idea` and `pick-company-name` complete when idea submission starts.
+- `app/src/components/org-onboarding-flow.tsx`
+  - onboarding now auto-redirects to `/:org` shortly after activation, so the flow does not stall in an intermediate design step.
+- `app/src/components/org-onboarding-plan.tsx`
+  - activation UI copy now reflects completion/redirect instead of a forced next design phase.
 
 Not started yet:
 

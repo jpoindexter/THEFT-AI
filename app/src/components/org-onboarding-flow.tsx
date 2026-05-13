@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { OrgOnboardingChat } from "@/components/org-onboarding-chat";
 import { OrgOnboardingPlanPhases } from "@/components/org-onboarding-plan";
@@ -163,6 +163,12 @@ export default function OrgOnboardingFlow({ organization }: { organization: Org 
     if (qIndex > 0) setQIndex((i) => i - 1);
   }
   function skipOnboarding() { router.replace(`/${organization.slug}`); }
+
+  useEffect(() => {
+    if (phase !== "activated") return;
+    const id = setTimeout(() => router.replace(`/${organization.slug}`), 1600);
+    return () => clearTimeout(id);
+  }, [phase, organization.slug, router]);
 
   const briefPhase = phase === "describe" ? 0
     : phase === "loading" ? 1
