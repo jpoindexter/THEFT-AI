@@ -1,6 +1,6 @@
 # HANDOFF — THEFT x Paperclip Merge
 
-> Last updated: 2026-05-14 (settings import dead-link removal).
+> Last updated: 2026-05-14 (fresh-updates dead-link fix).
 > Branch: `codex-current-design-migration`.
 > Read this first if continuing in Claude, Codex, Gemini, or another local agent.
 
@@ -102,6 +102,8 @@ In progress:
   - removed links to unimplemented sections (`preferences`, `notifications`, `advanced`) and aligned nav to implemented settings routes only.
 - `app/src/app/[org]/(shell)/settings/organization/page.tsx`
   - replaced dead `/settings/import` link with a disabled local-mode placeholder button until import flow/API exists.
+- `app/src/components/fresh-updates.tsx`
+  - changed modal CTA link from missing `/release-notes` route to existing `/status`.
 
 Not started yet:
 

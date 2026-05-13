@@ -105,7 +105,7 @@ export default function FreshUpdates() {
                 Dismiss
               </button>
               <Link
-                href="/release-notes"
+                href="/status"
                 onClick={dismiss}
                 className="px-4 py-2 text-sm text-white/80 border border-white/20 rounded-md hover:border-white/40 hover:text-white transition-colors inline-flex items-center gap-1.5"
               >
