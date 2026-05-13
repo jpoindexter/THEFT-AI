@@ -33,10 +33,19 @@ export default function OrgTopBar({
     >
       {/* Wordmark + org switcher */}
       <div className="relative">
-        <button
-          type="button"
+        <div
+          role="button"
+          tabIndex={0}
           onClick={() => setOrgMenuOpen((o) => !o)}
-          className="flex items-center gap-2"
+          onKeyDown={(e) => {
+            if (e.key === "Enter" || e.key === " ") {
+              e.preventDefault();
+              setOrgMenuOpen((o) => !o);
+            }
+          }}
+          aria-haspopup="menu"
+          aria-expanded={orgMenuOpen}
+          className="flex items-center gap-2 cursor-pointer"
           style={{ gap: 8 }}
         >
           <span
@@ -82,7 +91,7 @@ export default function OrgTopBar({
             <span style={{ fontSize: 13 }}>{orgName}</span>
             <ChevronDown size={14} style={{ color: "var(--t-ink-soft)" }} />
           </span>
-        </button>
+        </div>
 
         {orgMenuOpen && (
           <div

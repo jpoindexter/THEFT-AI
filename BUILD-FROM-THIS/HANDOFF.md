@@ -1,6 +1,6 @@
 # HANDOFF — THEFT x Paperclip Merge
 
-> Last updated: 2026-05-13 (department seeding checkpoint).
+> Last updated: 2026-05-13 (app topbar hydration fix + e2e infra note).
 > Branch: `codex-current-design-migration`.
 > Read this first if continuing in Claude, Codex, Gemini, or another local agent.
 
@@ -84,6 +84,8 @@ In progress:
   - defines 8 department seed specs (role/title/desiredSkills + stage-specific starter task templates).
 - `paperclip/ui/src/components/OnboardingWizard.tsx`
   - launch step now hires the 8 department agents under Operator, auto-approves onboarding hire approvals, and seeds one starter issue per department.
+- `app/src/components/org-top-bar.tsx`
+  - org switcher trigger changed from a `<button>` to an accessible `role="button"` container to prevent nested `<button>` hydration errors when the org menu is open.
 
 Not started yet:
 
@@ -113,6 +115,9 @@ Results:
 - Department seed implementation compiles in `pnpm -C paperclip build`.
 - `pnpm -C paperclip build` passed.
 - Build only reports existing Vite chunk-size/dynamic-import warnings.
+- `pnpm -C app build` passed after topbar fix.
+- `pnpm -C app exec vitest run src/lib/db/store.test.ts` passed (18/18).
+- `pnpm -C paperclip exec playwright test tests/e2e/onboarding.spec.ts --config tests/e2e/playwright.config.ts` is currently blocked in this environment by embedded Postgres init failure during ephemeral `paperclipai onboard --yes --run` startup.
 
 ## Next Exact Tasks
 
