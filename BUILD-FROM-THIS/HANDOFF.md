@@ -1,6 +1,6 @@
 # HANDOFF — THEFT x Paperclip Merge
 
-> Last updated: 2026-05-13 (auto-exit onboarding after activation).
+> Last updated: 2026-05-14 (settings happy-path route fix).
 > Branch: `codex-current-design-migration`.
 > Read this first if continuing in Claude, Codex, Gemini, or another local agent.
 
@@ -96,6 +96,10 @@ In progress:
   - onboarding now auto-redirects to `/:org` shortly after activation, so the flow does not stall in an intermediate design step.
 - `app/src/components/org-onboarding-plan.tsx`
   - activation UI copy now reflects completion/redirect instead of a forced next design phase.
+- `app/src/app/[org]/(shell)/settings/page.tsx`
+  - settings root now redirects to `/:org/settings/organization` (implemented page) instead of missing `/settings/preferences`.
+- `app/src/app/[org]/(shell)/settings/nav.tsx`
+  - removed links to unimplemented sections (`preferences`, `notifications`, `advanced`) and aligned nav to implemented settings routes only.
 
 Not started yet:
 

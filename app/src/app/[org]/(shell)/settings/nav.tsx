@@ -3,25 +3,25 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
-  Sliders,
   Sparkles,
   FileLock2,
-  Bell,
   Building2,
   Inbox,
   LifeBuoy,
-  Wrench,
+  Globe,
+  CreditCard,
+  FileText,
 } from "lucide-react";
 
 const SECTIONS = [
-  { slug: "preferences", label: "Preferences", Icon: Sliders },
+  { slug: "organization", label: "Organization", Icon: Building2 },
+  { slug: "company-context", label: "Company Context", Icon: FileText },
   { slug: "ai-settings", label: "AI Settings", Icon: Sparkles },
   { slug: "env", label: "Env Files & Secrets", Icon: FileLock2 },
-  { slug: "notifications", label: "Notifications", Icon: Bell },
-  { slug: "organization", label: "Organization", Icon: Building2 },
   { slug: "inbox", label: "Inbox", Icon: Inbox },
+  { slug: "payments", label: "Payments", Icon: CreditCard },
+  { slug: "domains", label: "Domains", Icon: Globe },
   { slug: "support", label: "Support", Icon: LifeBuoy },
-  { slug: "advanced", label: "Advanced", Icon: Wrench },
 ];
 
 export default function SettingsNav({ org }: { org: string }) {

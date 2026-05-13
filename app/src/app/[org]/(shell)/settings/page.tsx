@@ -6,5 +6,5 @@ export default async function SettingsRoot({
   params: Promise<{ org: string }>;
 }) {
   const { org } = await params;
-  redirect(`/${org}/settings/preferences`);
+  redirect(`/${org}/settings/organization`);
 }
