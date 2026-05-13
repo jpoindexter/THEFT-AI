@@ -143,7 +143,7 @@ export default function AISettingsForm({
       <div className="pt-4 space-y-3">
         <Row
           label="Runtime backend"
-          hint="Codex, OpenCode, and Claude CLI use your local OAuth/session auth. Ollama, LM Studio, and compatible endpoints run local harnesses."
+          hint="Local CLI adapters use your existing session auth. Choose Claude Code, Codex CLI, Gemini CLI, OpenCode, or BYOK/API endpoints."
         >
           <Select
             value={llmBackend}

@@ -16,7 +16,7 @@ const PREFS = [
   { id: "memory_updates", label: "Memory edits", description: "When an agent writes durable workspace memory.", default: false },
   { id: "weekly_digest", label: "Weekly digest", description: "What shipped, what's blocked, what's coming.", default: true },
   { id: "agent_paused", label: "Agent paused or stalled", description: "When an agent stops without finishing.", default: true },
-  { id: "billing_alerts", label: "Billing alerts", description: "Cost spikes, budget overages, plan changes.", default: true },
+  { id: "adapter_alerts", label: "Adapter alerts", description: "When a local CLI or model endpoint is missing, stalled, or needs attention.", default: true },
 ];
 
 const CHANNELS = ["In-app", "Email", "Mobile push"];

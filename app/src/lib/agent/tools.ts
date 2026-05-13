@@ -158,7 +158,7 @@ export const OPERATOR_TOOLS: OperatorTool[] = [
   {
     name: "web_search",
     description:
-      "Search the web for current information. Use ONLY when the answer is not already known from context — each call costs a credit. Use for competitor research, market data, news, or pricing that requires live data.",
+      "Search the web for current information. Use ONLY when the answer is not already known from context. Use for competitor research, market data, news, or pricing that requires live data.",
     input_schema: {
       type: "object",
       properties: {

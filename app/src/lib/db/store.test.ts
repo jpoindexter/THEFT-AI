@@ -173,6 +173,45 @@ describe("completeOnboardingRoadmap", () => {
   });
 });
 
+describe("completeWorkspaceSetup", () => {
+  it("creates a working post-onboarding workspace state", async () => {
+    const { completeWorkspaceSetup, fallbackSetupQuestions } = await import("@/lib/onboarding/engine");
+    const { bootstrapOrganization } = await import("@/lib/orgs/bootstrap");
+    const org = await db.createOrg({ name: "Engine Test" });
+    await bootstrapOrganization(org.id);
+    const setup = fallbackSetupQuestions("A subscription design service for seed-stage founders");
+
+    const result = await completeWorkspaceSetup(org, {
+      idea: "A subscription design service for seed-stage founders",
+      questions: setup.questions,
+      answers: setup.questions.map((q) => ({
+        questionId: q.id,
+        prompt: q.prompt,
+        answer: q.options.find((o) => o.recommended)?.label ?? q.options[0].label,
+      })),
+    });
+
+    const saved = await db.getOrgBySlug(org.slug);
+    const artifacts = await db.listArtifacts(org.id);
+    const tasks = await db.listTasks(org.id);
+    const statuses = await db.listTechTreeStatus(org.id);
+    const nodes = await db.listTechTreeNodes();
+    const statusBySlug = new Map(
+      nodes.map((n) => [
+        n.slug,
+        statuses.find((s) => s.node_id === n.id)?.status,
+      ]),
+    );
+
+    expect(result.createdTasks).toBe(3);
+    expect(saved?.business_plan).toBeTruthy();
+    expect(artifacts.some((a) => a.kind === "business_plan")).toBe(true);
+    expect(tasks.map((t) => t.title)).toContain("Prepare repository and product workspace");
+    expect(statusBySlug.get("initial-idea")).toBe("complete");
+    expect(statusBySlug.get("pick-company-name")).toBe("complete");
+  });
+});
+
 describe("createTask / listTasks", () => {
   it("creates a task and lists it for the org", async () => {
     const org = await db.createOrg({ name: "Task Test" });

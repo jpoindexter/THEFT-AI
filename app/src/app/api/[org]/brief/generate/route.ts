@@ -3,6 +3,7 @@ import { z } from "zod";
 import { db } from "@/lib/db/store";
 import { generate } from "@/lib/agent/anthropic";
 import { composeAgentPromptForDept } from "@/lib/agent/compose-prompt";
+import { fallbackSetupQuestions } from "@/lib/onboarding/engine";
 
 const Body = z.object({ idea: z.string().min(1).max(2000) });
 
@@ -41,6 +42,13 @@ export async function POST(
   const o = await db.getOrgBySlug(orgSlug);
   if (!o) return NextResponse.json({ error: "not found" }, { status: 404 });
 
+  // Workspace setup must have a guaranteed happy path. The local engine gives
+  // the UI immediate, tailored-enough questions; LLM refinement can be enabled
+  // explicitly once the model backend is healthy.
+  if (process.env.THEFT_ONBOARDING_LLM !== "1") {
+    return NextResponse.json(fallbackSetupQuestions(parsed.data.idea));
+  }
+
   const taskDirective = `Help the founder sharpen their brief into a 4-question multiple-choice survey.
 
 Founder's idea: "${parsed.data.idea.trim()}"
@@ -64,25 +72,27 @@ Rules:
 
   const composed = await composeAgentPromptForDept(o.id, "sales", taskDirective);
   if (!composed) {
-    return NextResponse.json({ error: "Sales agent not configured" }, { status: 500 });
+    return NextResponse.json(fallbackSetupQuestions(parsed.data.idea));
   }
 
-  const text = await generate({
-    system: composed.system,
-    messages: [{ role: "user", text: "Output the 4-question brief JSON now." }],
-    model: o.ai_model ?? undefined,
-    backend: o.llm_backend,
-    baseUrl: o.llm_base_url,
-    maxTokens: 2000,
-  });
+  let text: string;
+  try {
+    text = await generate({
+      system: composed.system,
+      messages: [{ role: "user", text: "Output the 4-question brief JSON now." }],
+      model: o.ai_model ?? undefined,
+      backend: o.llm_backend,
+      baseUrl: o.llm_base_url,
+      maxTokens: 2000,
+    });
+  } catch {
+    return NextResponse.json(fallbackSetupQuestions(parsed.data.idea));
+  }
 
   const raw = parseJsonLoose(text);
   const validated = raw ? QuestionSchema.safeParse(raw) : null;
   if (!validated || !validated.success) {
-    return NextResponse.json(
-      { error: "Brief generation failed", raw: text },
-      { status: 502 },
-    );
+    return NextResponse.json(fallbackSetupQuestions(parsed.data.idea));
   }
 
   return NextResponse.json(validated.data);

@@ -14,7 +14,6 @@ import {
   Cable,
   Gift,
   Database,
-  Receipt,
   Keyboard,
   MessageCircle,
   LifeBuoy,
@@ -23,7 +22,6 @@ import {
   Calendar,
   Inbox,
   Activity,
-  DollarSign,
   Rocket,
   Eye,
   Users,
@@ -87,8 +85,8 @@ export default function LayoutHeader({
   const NON_DEPT = new Set([
     "roadmap", "settings", "skills", "integrations", "referrals",
     "database", "tasks", "agents", "team", "approvals", "inbox",
-    "routines", "activity", "costs", "publishing", "referrals",
-    "managed-services", "memory", "diagnostics", "billing", "review",
+    "routines", "activity", "publishing", "referrals",
+    "managed-services", "memory", "diagnostics", "review",
     "search", "library", "marketplace", "studio", "timeline", "dashboard",
     "share", "import", "sandbox", "whats-new", "help", "feed",
   ]);
@@ -151,7 +149,6 @@ export default function LayoutHeader({
     database: "Database",
     settings: "Settings",
     approvals: "Approvals",
-    costs: "Costs",
     routines: "Routines",
     activity: "Activity",
     inbox: "Inbox",
@@ -165,7 +162,6 @@ export default function LayoutHeader({
     preview: "Preview",
     memory: "Company memory",
     notifications: "Notifications",
-    billing: "Billing",
     sandbox: "Sandbox",
     diagnostics: "Diagnostics",
     "whats-new": "What's new",
@@ -275,11 +271,6 @@ export default function LayoutHeader({
               onSelect={goto(`/${orgSlug}/database`)}
               icon={<Database className="size-3.5" />}
               label="Database"
-            />
-            <MenuRow
-              onSelect={goto(`/${orgSlug}/settings/billing`)}
-              icon={<Receipt className="size-3.5" />}
-              label="Billing & Usage"
             />
             <DropdownMenuSeparator />
             <MenuRow

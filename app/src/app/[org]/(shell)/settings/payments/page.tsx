@@ -1,6 +1,5 @@
-import Link from "next/link";
 import { SectionHeader, SettingsCard } from "@/components/settings/section";
-import { CreditCard, Sparkles, ArrowRight } from "lucide-react";
+import { CreditCard, Sparkles } from "lucide-react";
 
 const KICKOFFS = [
   {
@@ -20,17 +19,12 @@ const KICKOFFS = [
   },
 ];
 
-export default async function PaymentsSettings({
-  params,
-}: {
-  params: Promise<{ org: string }>;
-}) {
-  const { org } = await params;
+export default async function PaymentsSettings() {
   return (
     <>
       <SectionHeader
         title="Payments"
-        description="Connect Stripe and kick off implementation work with the Engineer."
+        description="Plan monetization work without pretending local billing is already wired."
       />
 
       <SettingsCard>
@@ -41,15 +35,9 @@ export default async function PaymentsSettings({
               Stripe
             </div>
             <div className="text-xs text-ink-muted">
-              Add Stripe test or live keys to connect.
+              Not connected in local mode. Use this page to create implementation work when payments become part of the product.
             </div>
           </div>
-          <Link
-            href={`/${org}/settings/stripe`}
-            className="text-xs rounded-md border border-line px-2 py-1 hover:border-line-strong inline-flex items-center gap-1"
-          >
-            Configure <ArrowRight className="size-3" />
-          </Link>
         </div>
       </SettingsCard>
 

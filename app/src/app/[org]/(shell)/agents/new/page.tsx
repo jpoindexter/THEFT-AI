@@ -30,7 +30,6 @@ export default function NewAgentPage() {
   const [department, setDepartment] = useState("operations");
   const [model, setModel] = useState("claude-sonnet-4-6");
   const [instructions, setInstructions] = useState("");
-  const [budget, setBudget] = useState(50);
   const [skills, setSkills] = useState<Skill[]>([]);
   const [attached, setAttached] = useState<string[]>([]);
   const [busy, setBusy] = useState(false);
@@ -124,14 +123,6 @@ export default function NewAgentPage() {
               rows={5}
               placeholder="You are a research agent. You ..."
               className="w-full rounded-md border border-line bg-paper px-3 py-2 text-base focus:outline-none focus:border-line-strong"
-            />
-          </Field>
-          <Field label="Monthly budget" hint="USD. Hard cap on token spend.">
-            <input
-              type="number"
-              value={budget}
-              onChange={(e) => setBudget(Number(e.target.value))}
-              className="w-32 h-9 rounded-md border border-line bg-paper px-3 text-base focus:outline-none focus:border-line-strong"
             />
           </Field>
         </Section>

@@ -56,12 +56,37 @@ export function OrgOnboardingPlanPhases({ side, phase, orgSlug, organization, de
   }
   const plan = description && answers && questions ? buildPlan(description, answers, questions) : null;
   return (
-    <PlanPanel phase={phase} plan={plan} orgName={organization?.name ?? ""} orgSlug={orgSlug} onPhaseChange={onPhaseChange} />
+    <PlanPanel
+      phase={phase}
+      plan={plan}
+      orgName={organization?.name ?? ""}
+      orgSlug={orgSlug}
+      description={description}
+      answers={answers}
+      questions={questions}
+      onPhaseChange={onPhaseChange}
+    />
   );
 }
 
-function PlanPanel({ phase, plan, orgName, orgSlug, onPhaseChange }: {
-  phase: Phase; plan: Plan | null; orgName: string; orgSlug: string; onPhaseChange?: (p: Phase) => void;
+function PlanPanel({
+  phase,
+  plan,
+  orgName,
+  orgSlug,
+  description,
+  answers,
+  questions,
+  onPhaseChange,
+}: {
+  phase: Phase;
+  plan: Plan | null;
+  orgName: string;
+  orgSlug: string;
+  description?: string;
+  answers?: (string | null)[];
+  questions?: Question[];
+  onPhaseChange?: (p: Phase) => void;
 }) {
   const [feedback, setFeedback] = useState("");
   const [accepting, setAccepting] = useState(false);
@@ -76,11 +101,22 @@ function PlanPanel({ phase, plan, orgName, orgSlug, onPhaseChange }: {
     if (!plan || accepting) return;
     setAccepting(true);
     try {
-      await fetch(`/api/${orgSlug}`, {
-        method: "PATCH",
+      const setupAnswers = (questions ?? []).map((q, i) => ({
+        questionId: q.id,
+        prompt: q.prompt,
+        answer: answers?.[i] ?? String(plan[q.id] ?? ""),
+      })).filter((a) => a.answer.trim().length > 0);
+
+      const res = await fetch(`/api/${orgSlug}/onboarding/complete`, {
+        method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ business_plan: plan }),
+        body: JSON.stringify({
+          idea: description ?? String(plan.mission ?? ""),
+          questions: questions ?? [],
+          answers: setupAnswers,
+        }),
       });
+      if (!res.ok) throw new Error(`Workspace setup failed (${res.status})`);
       onPhaseChange?.("activated");
     } finally {
       setAccepting(false);

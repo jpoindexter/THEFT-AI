@@ -15,6 +15,7 @@ export type ModelProvider = {
 
 export const LLM_BACKENDS = [
   { id: "codex-cli", name: "Codex CLI", description: "Uses local Codex OAuth/session auth, Paperclip-style." },
+  { id: "gemini-cli", name: "Gemini CLI", description: "Uses local Gemini CLI auth and model config." },
   { id: "opencode-cli", name: "OpenCode CLI", description: "Uses OpenCode's provider/model registry and local credentials." },
   { id: "claude-cli", name: "Claude CLI", description: "Uses Claude Code OAuth/session auth." },
   { id: "ollama", name: "Ollama", description: "Runs local Ollama models through the native chat API." },
@@ -35,6 +36,16 @@ export const MODEL_PROVIDERS: ModelProvider[] = [
       { id: "google/gemini-3-pro", name: "Gemini 3 Pro" },
       { id: "openrouter/openai/gpt-5", name: "OpenRouter GPT-5" },
       { id: "github-copilot/gpt-5-mini", name: "GitHub Copilot GPT-5 Mini" },
+    ],
+  },
+  {
+    id: "gemini",
+    name: "Gemini CLI",
+    mode: "oauth-cli",
+    models: [
+      { id: "gemini-3-pro", name: "Gemini 3 Pro", recommended: true },
+      { id: "gemini-2.5-pro", name: "Gemini 2.5 Pro" },
+      { id: "default", name: "Default (CLI config)" },
     ],
   },
   {

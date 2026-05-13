@@ -44,7 +44,7 @@ export default async function AgentRunsPage({
           </Eyebrow>
           <PageTitle>Run history</PageTitle>
           <Hint>
-            Every usage record for this agent, with token + cost telemetry.
+            Local adapter run records for this agent.
           </Hint>
         </header>
 
@@ -61,7 +61,6 @@ export default async function AgentRunsPage({
                     <Th>Date</Th>
                     <Th>Model</Th>
                     <Th>Tokens (in / out)</Th>
-                    <Th>Cost</Th>
                     <Th>Task</Th>
                   </tr>
                 </thead>
@@ -76,9 +75,6 @@ export default async function AgentRunsPage({
                       </td>
                       <td className="px-3 py-2 font-mono text-xs">
                         {r.input_tokens.toLocaleString()} / {r.output_tokens.toLocaleString()}
-                      </td>
-                      <td className="px-3 py-2 font-mono text-xs">
-                        ${r.cost_usd.toFixed(4)}
                       </td>
                       <td className="px-3 py-2 text-xs text-ink-muted truncate max-w-[180px]">
                         {r.task_id ? (

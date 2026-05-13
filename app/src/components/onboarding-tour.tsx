@@ -29,9 +29,9 @@ const STEPS: Step[] = [
     cta: { label: "Open memory", href: (o) => `/${o}/memory` },
   },
   {
-    title: "Watch the spend",
-    body: "Costs lives at the bottom of the workspace nav. Set a per-agent budget so a runaway loop can't wreck your month.",
-    cta: { label: "Open costs", href: (o) => `/${o}/costs` },
+    title: "Use local adapters",
+    body: "Choose Claude Code, Codex CLI, Gemini CLI, OpenCode, or a local endpoint in AI Settings. Agents run through that harness first.",
+    cta: { label: "Open AI settings", href: (o) => `/${o}/settings/ai-settings` },
   },
 ];
 

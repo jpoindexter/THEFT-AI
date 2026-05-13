@@ -1,9 +1,10 @@
 // LLM backends.
 //   1. codex-cli -> local Codex OAuth/session auth, Paperclip-style
-//   2. opencode-cli -> OpenCode provider/model registry and local credentials
-//   3. claude-cli -> local Claude Code OAuth/session auth
-//   4. ollama/lmstudio/openai-compatible/anthropic -> direct provider calls
-//   5. offline fallback -> deterministic local output so setup/onboarding works
+//   2. gemini-cli -> local Gemini CLI auth/config
+//   3. opencode-cli -> OpenCode provider/model registry and local credentials
+//   4. claude-cli -> local Claude Code OAuth/session auth
+//   5. ollama/lmstudio/openai-compatible/anthropic -> direct provider calls
+//   6. offline fallback -> deterministic local output so setup/onboarding works
 
 import Anthropic from "@anthropic-ai/sdk";
 import { spawn } from "node:child_process";
@@ -25,6 +26,7 @@ export async function generate(opts: {
     if (backend === "ollama") return await runOllama(opts);
     if (backend === "lmstudio" || backend === "openai-compatible") return await runOpenAICompatible(opts, backend);
     if (backend === "codex-cli") return await runCodexCli(opts);
+    if (backend === "gemini-cli") return await runGeminiCli(opts);
     if (backend === "opencode-cli") return await runOpenCodeCli(opts);
     if (backend === "anthropic") {
       if (!process.env.ANTHROPIC_API_KEY) {
@@ -47,7 +49,7 @@ export async function generate(opts: {
   }
 }
 
-type Backend = "anthropic" | "ollama" | "lmstudio" | "openai-compatible" | "codex-cli" | "opencode-cli" | "claude-cli" | "offline";
+type Backend = "anthropic" | "ollama" | "lmstudio" | "openai-compatible" | "codex-cli" | "gemini-cli" | "opencode-cli" | "claude-cli" | "offline";
 
 function resolveBackend(requested?: string | null, model?: string): Backend {
   const configured = (requested ?? process.env.LLM_BACKEND)?.toLowerCase();
@@ -57,6 +59,7 @@ function resolveBackend(requested?: string | null, model?: string): Backend {
     configured === "lmstudio" ||
     configured === "openai-compatible" ||
     configured === "codex-cli" ||
+    configured === "gemini-cli" ||
     configured === "opencode-cli" ||
     configured === "claude-cli" ||
     configured === "offline"
@@ -69,6 +72,8 @@ function resolveBackend(requested?: string | null, model?: string): Backend {
   if (provider === "openai-compatible") return "openai-compatible";
   if (provider === "opencode") return "opencode-cli";
   if (provider === "codex") return "codex-cli";
+  if (provider === "gemini") return "gemini-cli";
+  if (provider === "google") return "gemini-cli";
   if (provider === "anthropic" && process.env.ANTHROPIC_API_KEY) return "anthropic";
   if (process.env.ANTHROPIC_API_KEY) return "anthropic";
   return "codex-cli";
@@ -80,6 +85,7 @@ function normalizeModelForBackend(model: string | undefined, backend: Backend): 
   if (!parsed.provider) return parsed.model;
   if (backend === "opencode-cli") return model;
   if (backend === "codex-cli" && parsed.provider === "codex") return parsed.model;
+  if (backend === "gemini-cli" && (parsed.provider === "gemini" || parsed.provider === "google")) return parsed.model;
   if (backend === "ollama" && parsed.provider === "ollama") return parsed.model;
   if (backend === "lmstudio" && parsed.provider === "lmstudio") return parsed.model;
   if (backend === "openai-compatible" && parsed.provider === "openai-compatible") return parsed.model;
@@ -174,6 +180,21 @@ function runOffline(opts: {
   system: string;
   messages: ChatMsg[];
 }, cause?: string): string {
+  if (/You communicate by emitting a JSON array of actions/i.test(opts.system)) {
+    const lastUser = opts.messages.at(-1)?.text ?? "No task context supplied.";
+    return JSON.stringify([
+      {
+        type: "text",
+        content: [
+          "Offline harness mode is active.",
+          cause ? `Backend note: ${cause}` : null,
+          `I received the task context and kept the run inside the local adapter contract: ${lastUser.slice(0, 400)}`,
+        ].filter(Boolean).join("\n\n"),
+      },
+      { type: "done" },
+    ]);
+  }
+
   if (/4-question multiple-choice survey/i.test(opts.system)) {
     return JSON.stringify(buildOfflineQuestions(extractIdea(opts.system), cause), null, 2);
   }
@@ -259,7 +280,7 @@ function buildOfflineBusinessPlan(system: string, cause?: string) {
       "Dashboard-triggered priorities that convert metrics into tasks",
       "Human approval boundaries before risky external actions",
     ],
-    pricing_thesis: "Start with a monthly workspace subscription that includes offline/local mode, then add usage-based credits for high-volume agent execution.",
+    pricing_thesis: "Start local-first with CLI adapters and BYOK options. Add billing only after the execution harness and provider controls are real.",
     go_to_market_thesis: "Lead with one self-running department workflow, prove the time saved, then expand into memory, routines, dashboards, and cross-department execution.",
     onboarding_answers: answers,
     mode: "offline",
@@ -352,6 +373,18 @@ function runCodexCli(opts: {
   return runJsonlCli("codex", args, prompt, "codex");
 }
 
+function runGeminiCli(opts: {
+  system: string;
+  messages: ChatMsg[];
+  model?: string;
+}): Promise<string> {
+  const prompt = buildCliPrompt(opts);
+  const args = ["-p", prompt];
+  const model = normalizeModelForBackend(opts.model, "gemini-cli") ?? process.env.GEMINI_MODEL;
+  if (model) args.push("-m", model);
+  return runPlainCli("gemini", args, "", "gemini");
+}
+
 function runOpenCodeCli(opts: {
   system: string;
   messages: ChatMsg[];
@@ -377,6 +410,35 @@ function buildCliPrompt(opts: { system: string; messages: ChatMsg[] }) {
     .map((m) => `${m.role === "user" ? "User" : "Assistant"}: ${m.text.trim()}`)
     .join("\n\n");
   return `${opts.system.trim()}\n\n---\n\n${transcript}`.trim();
+}
+
+function runPlainCli(command: string, args: string[], stdin: string, label: string): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const child = spawn(command, args, {
+      stdio: ["pipe", "pipe", "pipe"],
+      env: process.env,
+    });
+
+    let out = "";
+    let err = "";
+    child.stdout.on("data", (d: Buffer) => {
+      out += d.toString();
+    });
+    child.stderr.on("data", (d: Buffer) => {
+      err += d.toString();
+    });
+    child.on("error", (e) => reject(e));
+    child.on("close", (code) => {
+      if (code === 0) {
+        resolve(out.trim());
+        return;
+      }
+      reject(new Error(`${label} exited ${code}: ${err.trim() || out.trim() || "(no output)"}`));
+    });
+
+    if (stdin) child.stdin.write(stdin);
+    child.stdin.end();
+  });
 }
 
 function runJsonlCli(command: string, args: string[], stdin: string, label: string): Promise<string> {

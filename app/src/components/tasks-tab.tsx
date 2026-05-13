@@ -471,31 +471,23 @@ export default function TasksTab({
 }
 
 const MOCK_BLOCKERS = [
-  { required: 2, available: 1, balance: 1 },
-  { required: 3, available: 1, balance: 1 },
-  { required: 2, available: 1, balance: 1 },
+  "Waiting on a local adapter response.",
+  "Waiting on a human approval.",
+  "Waiting on a configured project path.",
 ];
 
-function BlockerPanel({ orgSlug }: { orgSlug: string }) {
+function BlockerPanel({ orgSlug: _orgSlug }: { orgSlug: string }) {
   return (
     <div className="space-y-2">
       {MOCK_BLOCKERS.map((b, i) => (
         <div key={i} className="rounded-xl border border-amber-200 bg-amber-50 p-4 space-y-3">
           <div className="flex items-center gap-2">
             <AlertTriangle className="size-4 text-amber-500 shrink-0" />
-            <span className="text-sm font-semibold text-amber-900">Credits Exhausted</span>
+            <span className="text-sm font-semibold text-amber-900">Needs attention</span>
           </div>
           <p className="text-xs text-amber-800 leading-relaxed">
-            Insufficient credits. Required: {b.required} credits.<br />
-            Available: {b.available} credits.<br />
-            Your current balance: {b.balance} credits.
+            {b}
           </p>
-          <Link
-            href={`/${orgSlug}/billing`}
-            className="inline-flex items-center justify-center text-xs rounded-lg bg-ink text-paper px-3 py-1.5 hover:opacity-90"
-          >
-            Add Credits
-          </Link>
         </div>
       ))}
     </div>

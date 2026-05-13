@@ -1,9 +1,8 @@
-// Tool-use emulation over the OAuth `claude` CLI. We can't use the SDK's
-// proper tool-use without an API key, so we ask the model to output a JSON
-// envelope describing what it wants to do (text / ask / set_business_plan /
-// delegate / done), parse it, dispatch, and loop.
+// Tool-use emulation over the selected local/provider harness. We can't rely on
+// every adapter exposing Anthropic tool-use, so we ask the model to output a
+// JSON envelope describing what it wants to do, parse it, dispatch, and loop.
 
-import { runClaudeCli } from "./anthropic";
+import { generate } from "./anthropic";
 import { db, type Org } from "@/lib/db/store";
 import type {
   AgentTurn,
@@ -62,6 +61,10 @@ export async function runAgentCli(opts: {
   systemPrompt: string;
   history: Anthropic.Messages.MessageParam[];
   userMessage?: string;
+  model?: string;
+  backend?: string | null;
+  baseUrl?: string | null;
+  onTurn?: (turn: AgentTurn) => void;
 }): Promise<{
   history: Anthropic.Messages.MessageParam[];
   turns: AgentTurn[];
@@ -72,10 +75,14 @@ export async function runAgentCli(opts: {
   }
 
   const turns: AgentTurn[] = [];
+  const emit = (turn: AgentTurn) => {
+    turns.push(turn);
+    opts.onTurn?.(turn);
+  };
 
   for (let loop = 0; loop < MAX_LOOPS; loop++) {
     const transcript = renderTranscript(history);
-    const out = await runClaudeCli({
+    const out = await generate({
       system: `${opts.systemPrompt}\n\n${SCHEMA_PROMPT}`,
       messages: [
         {
@@ -83,11 +90,14 @@ export async function runAgentCli(opts: {
           text: `Conversation so far:\n\n${transcript}\n\nEmit the JSON array of actions for this turn.`,
         },
       ],
+      model: opts.model,
+      backend: opts.backend,
+      baseUrl: opts.baseUrl,
     });
 
     const actions = parseActions(out);
     if (!actions || actions.length === 0) {
-      turns.push({
+      emit({
         kind: "text",
         text: "(Operator produced no parseable output)",
       });
@@ -100,13 +110,13 @@ export async function runAgentCli(opts: {
 
     for (const a of actions) {
       if (a.type === "text") {
-        turns.push({ kind: "text", text: a.content });
+        emit({ kind: "text", text: a.content });
         assistantNoteParts.push(a.content);
         continue;
       }
       if (a.type === "ask_user_question") {
         const id = `ask_${loop}_${Math.random().toString(36).slice(2, 8)}`;
-        turns.push({
+        emit({
           kind: "tool_call",
           tool_use_id: id,
           name: "ask_user_question",
@@ -137,13 +147,13 @@ export async function runAgentCli(opts: {
           pinned: true,
         });
         const id = `bp_${loop}`;
-        turns.push({
+        emit({
           kind: "tool_call",
           tool_use_id: id,
           name: "set_business_plan",
           input: a,
         });
-        turns.push({
+        emit({
           kind: "tool_result",
           tool_use_id: id,
           name: "set_business_plan",
@@ -172,13 +182,13 @@ export async function runAgentCli(opts: {
           });
         }
         const id = `dlg_${loop}_${a.department_slug}`;
-        turns.push({
+        emit({
           kind: "tool_call",
           tool_use_id: id,
           name: "delegate_to_department",
           input: a,
         });
-        turns.push({
+        emit({
           kind: "tool_result",
           tool_use_id: id,
           name: "delegate_to_department",
@@ -208,13 +218,13 @@ export async function runAgentCli(opts: {
           pinned: false,
         });
         const id = `wa_${loop}_${Date.now()}`;
-        turns.push({
+        emit({
           kind: "tool_call",
           tool_use_id: id,
           name: "write_artifact",
           input: a,
         });
-        turns.push({
+        emit({
           kind: "tool_result",
           tool_use_id: id,
           name: "write_artifact",
@@ -224,13 +234,13 @@ export async function runAgentCli(opts: {
       }
       if (a.type === "set_tech_tree_node_status") {
         const id = `tt_${loop}_${a.node_slug}`;
-        turns.push({
+        emit({
           kind: "tool_call",
           tool_use_id: id,
           name: "set_tech_tree_node_status",
           input: a,
         });
-        turns.push({
+        emit({
           kind: "tool_result",
           tool_use_id: id,
           name: "set_tech_tree_node_status",
@@ -241,13 +251,13 @@ export async function runAgentCli(opts: {
       if (a.type === "complete_onboarding") {
         await db.completeOnboardingRoadmap(opts.org.id);
         const id = `co_${loop}`;
-        turns.push({
+        emit({
           kind: "tool_call",
           tool_use_id: id,
           name: "complete_onboarding",
           input: {},
         });
-        turns.push({
+        emit({
           kind: "tool_result",
           tool_use_id: id,
           name: "complete_onboarding",
@@ -270,11 +280,11 @@ export async function runAgentCli(opts: {
     }
 
     if (pause) {
-      turns.push(pause);
+      emit(pause);
       return { history, turns };
     }
     if (done) {
-      turns.push({ kind: "done" });
+      emit({ kind: "done" });
       return { history, turns };
     }
 
@@ -285,7 +295,7 @@ export async function runAgentCli(opts: {
     });
   }
 
-  turns.push({ kind: "done" });
+  emit({ kind: "done" });
   return { history, turns };
 }
 

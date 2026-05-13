@@ -10,8 +10,6 @@ import {
   Building2,
   Inbox,
   LifeBuoy,
-  CreditCard,
-  Receipt,
   Wrench,
 } from "lucide-react";
 
@@ -23,8 +21,6 @@ const SECTIONS = [
   { slug: "organization", label: "Organization", Icon: Building2 },
   { slug: "inbox", label: "Inbox", Icon: Inbox },
   { slug: "support", label: "Support", Icon: LifeBuoy },
-  { slug: "stripe", label: "Stripe", Icon: CreditCard },
-  { slug: "billing", label: "Billing", Icon: Receipt },
   { slug: "advanced", label: "Advanced", Icon: Wrench },
 ];
 

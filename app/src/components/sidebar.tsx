@@ -186,7 +186,7 @@ export default function Sidebar({
 
       <div className="flex-1" />
 
-      {/* Credits */}
+      {/* Local runtime */}
       <div
         style={{
           borderTop: "1px solid var(--t-line)",
@@ -207,7 +207,7 @@ export default function Sidebar({
             color: "var(--t-ink-muted)",
           }}
         >
-          Credits this month
+          Local runtime
         </div>
         <div style={{ padding: "0 10px" }}>
           <div
@@ -221,7 +221,7 @@ export default function Sidebar({
           >
             <div
               style={{
-                width: "20%",
+                width: "100%",
                 height: "100%",
                 background: "var(--t-ink-muted)",
               }}
@@ -231,8 +231,8 @@ export default function Sidebar({
             className="flex items-center justify-between"
             style={{ marginTop: 6, fontSize: 11, color: "var(--t-ink-soft)" }}
           >
-            <span>— / —</span>
-            <span>∞</span>
+            <span>Harness</span>
+            <span>ready</span>
           </div>
         </div>
 

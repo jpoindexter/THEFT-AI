@@ -76,6 +76,8 @@ export async function POST(
       history: state.history,
       userMessage: body.text,
       model,
+      backend: org.llm_backend,
+      baseUrl: org.llm_base_url,
     });
     state.history = r.history;
     state.turns.push({ kind: "user_message", text: body.text });
@@ -99,7 +101,14 @@ export async function POST(
       { role: "user", content: [toolResult] },
     ];
     state.paused = null;
-    const r = await runAgent({ org, systemPrompt: sys, history: updated, model });
+    const r = await runAgent({
+      org,
+      systemPrompt: sys,
+      history: updated,
+      model,
+      backend: org.llm_backend,
+      baseUrl: org.llm_base_url,
+    });
     state.history = r.history;
     state.turns.push({
       kind: "tool_answer",
@@ -113,7 +122,14 @@ export async function POST(
   }
 
   // kick
-  const r = await runAgent({ org, systemPrompt: sys, history: state.history, model });
+  const r = await runAgent({
+    org,
+    systemPrompt: sys,
+    history: state.history,
+    model,
+    backend: org.llm_backend,
+    baseUrl: org.llm_base_url,
+  });
   state.history = r.history;
   state.turns.push(...r.turns);
   state.paused = pauseFromTurns(r.turns);

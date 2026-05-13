@@ -69,16 +69,28 @@ export async function runAgent(opts: {
   history: Anthropic.Messages.MessageParam[];
   userMessage?: string;
   model?: string;
+  backend?: string | null;
+  baseUrl?: string | null;
   onTurn?: (turn: AgentTurn) => void;
 }): Promise<{ history: Anthropic.Messages.MessageParam[]; turns: AgentTurn[] }> {
-  if (!process.env.ANTHROPIC_API_KEY) {
-    // OAuth fallback: tool-use emulation through claude CLI
+  const requestedBackend = opts.backend ?? process.env.LLM_BACKEND ?? null;
+  const shouldUseAnthropicToolApi =
+    (!requestedBackend || requestedBackend === "anthropic") &&
+    Boolean(process.env.ANTHROPIC_API_KEY);
+
+  if (!shouldUseAnthropicToolApi) {
+    // Local/provider harness fallback: tool-use emulation over Codex, OpenCode,
+    // Claude CLI, local OpenAI-compatible servers, or deterministic offline mode.
     const { runAgentCli } = await import("./run-cli");
     return runAgentCli({
       org: opts.org,
       systemPrompt: opts.systemPrompt,
       history: opts.history,
       userMessage: opts.userMessage,
+      model: opts.model,
+      backend: opts.backend,
+      baseUrl: opts.baseUrl,
+      onTurn: opts.onTurn,
     });
   }
   const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });

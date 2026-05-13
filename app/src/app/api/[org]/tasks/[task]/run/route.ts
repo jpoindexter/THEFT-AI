@@ -137,6 +137,8 @@ Keep responses concise and action-oriented.`;
             ? (task.description ?? task.title)
             : undefined,
           model: composed?.agent.model,
+          backend: org.llm_backend,
+          baseUrl: org.llm_base_url,
           onTurn: emit,
         });
         state.history = result.history;
