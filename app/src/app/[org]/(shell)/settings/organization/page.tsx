@@ -68,9 +68,14 @@ export default async function Organization({
                     className="min-h-32 text-xs"
                   />
                   <div className="flex justify-end">
-                    <button className="inline-flex items-center gap-1 text-sm rounded-md border border-line px-2 py-1 hover:border-line-strong">
+                    <button
+                      type="button"
+                      disabled
+                      title="Report preview is not implemented in local mode yet."
+                      className="inline-flex items-center gap-1 text-sm rounded-md border border-line px-2 py-1 text-ink-muted opacity-60 cursor-not-allowed"
+                    >
                       <Upload className="size-3" />
-                      Preview report
+                      Preview report (soon)
                     </button>
                   </div>
                 </div>
@@ -90,14 +95,24 @@ export default async function Organization({
             Admin
           </span>
         </div>
-        <button className="mt-3 text-sm rounded-md border border-line px-2 py-1 hover:border-line-strong">
-          + Invite
+        <button
+          type="button"
+          disabled
+          title="Invites are not implemented in local mode yet."
+          className="mt-3 text-sm rounded-md border border-line px-2 py-1 text-ink-muted opacity-60 cursor-not-allowed"
+        >
+          + Invite (soon)
         </button>
       </SettingsCard>
 
       <SettingsCard title="Organizations" description="Accept organization invitations or create another workspace.">
-        <button className="text-sm rounded-md border border-line px-2 py-1 hover:border-line-strong">
-          Join or Create Organization
+        <button
+          type="button"
+          disabled
+          title="Organization join/create from settings is not implemented in local mode yet."
+          className="text-sm rounded-md border border-line px-2 py-1 text-ink-muted opacity-60 cursor-not-allowed"
+        >
+          Join or Create Organization (soon)
         </button>
       </SettingsCard>
 

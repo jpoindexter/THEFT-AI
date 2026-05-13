@@ -1,6 +1,6 @@
 # HANDOFF — THEFT x Paperclip Merge
 
-> Last updated: 2026-05-14 (fresh-updates dead-link fix).
+> Last updated: 2026-05-14 (disable non-functional settings CTAs).
 > Branch: `codex-current-design-migration`.
 > Read this first if continuing in Claude, Codex, Gemini, or another local agent.
 
@@ -104,6 +104,8 @@ In progress:
   - replaced dead `/settings/import` link with a disabled local-mode placeholder button until import flow/API exists.
 - `app/src/components/fresh-updates.tsx`
   - changed modal CTA link from missing `/release-notes` route to existing `/status`.
+- `app/src/app/[org]/(shell)/settings/organization/page.tsx`
+  - converted non-functional CTAs (`Preview report`, `+ Invite`, `Join or Create Organization`) to disabled local-mode placeholders to avoid broken click paths.
 
 Not started yet:
 
