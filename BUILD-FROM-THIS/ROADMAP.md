@@ -61,6 +61,7 @@ Goal: THEFT runs as one local app backed by Paperclip's runtime. A founder can c
 - [x] Add pinned files.
 - [x] Add safe markdown/text editing.
 - [x] Ensure agent output lands in Library by default.
+- [x] Library primary page frames durable company memory/output, pinned work, department coverage, and latest output summary.
 
 ## Slice 0.6 — Eight Department Runtime Smoke
 

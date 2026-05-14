@@ -37,8 +37,9 @@ Run status:
 - 2026-05-14: Completed `UX010`-`UX015` onboarding UX pass in `paperclip/`: Step 2 is now Company Assembly Preview, model/adapter controls are behind Advanced runtime, Codex local is the default runtime, the launch summary includes 8 departments, and onboarding e2e now covers mobile assembly preview. Also fixed concurrent Codex managed-home auth symlink setup exposed by department wakeups.
 - 2026-05-14: Completed `UX020`-`UX023` Command Center UX pass in `paperclip/`: dashboard breadcrumb/nav now says Command Center, primary copy leads with THEFT company objects instead of Paperclip runtime language, the first viewport includes current bottleneck, departments, Operator tray, attention queue, Tech Tree, and latest Library outputs, and sidebar labels move agent/admin surfaces out of the main happy path.
 - 2026-05-14: Completed `UX030`-`UX032` Task Review UX pass in `paperclip/`: issue detail now starts with a THEFT Task Review summary covering owner department, run timeline, Library output count, decisions, comments, and subtasks while keeping chat/activity/runtime diagnostics lower in the page.
+- 2026-05-14: Completed `UX040`-`UX041` Library UX pass in `paperclip/`: Library copy now frames company memory and shipped output, shows shelf summary stats, uses task/department language in the detail pane, and the mapping helper now summarizes department coverage/important outputs.
 
-Next blocking work: continue `UX040` Library implementation, verify saved Library outputs from real LLM runs, then continue subtracting dead `app/` surface. Avoid building new runtime features in `app/`.
+Next blocking work: run `UX042` to verify saved Library outputs from real LLM runs, then continue subtracting dead `app/` surface. Avoid building new runtime features in `app/`.
 
 Verification coverage:
 
@@ -48,6 +49,7 @@ Verification coverage:
 - Build currently passes with existing Vite warnings about large chunks and `MarkdownEditor.tsx` being both statically and dynamically imported.
 - `UX020`-`UX023` verification passed focused Vitest (`theft-canvas`, `Dashboard`), `git diff --check`, and `pnpm -C paperclip build`.
 - `UX030`-`UX032` verification passed focused Vitest (`IssueDetail`), `git diff --check`, and `pnpm -C paperclip build`.
+- `UX040`-`UX041` verification passed focused Vitest (`library-items`), `git diff --check`, and `pnpm -C paperclip build`.
 
 ## Legacy THEFT App Engine (`app/src/lib/`)
 

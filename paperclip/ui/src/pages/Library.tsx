@@ -28,6 +28,7 @@ import { useCompany } from "../context/CompanyContext";
 import {
   buildLibraryItems,
   groupLibraryItemsByDepartment,
+  summarizeLibraryItems,
   THEFT_DEPARTMENTS,
   type LibraryItem,
   type LibraryIssueBundle,
@@ -137,6 +138,7 @@ export function Library() {
     () => buildLibraryItems(bundles ?? [], agents ?? []),
     [agents, bundles],
   );
+  const librarySummary = useMemo(() => summarizeLibraryItems(allItems), [allItems]);
   const selectedItem = allItems.find((item) => item.id === selectedItemId) ?? allItems[0] ?? null;
 
   useEffect(() => {
@@ -226,7 +228,7 @@ export function Library() {
           <div>
             <h1 className="text-xl font-semibold tracking-normal">Library</h1>
             <p className="mt-1 text-sm text-muted-foreground">
-              Paperclip documents, attachments, and work products grouped by THEFT department.
+              Company memory, decisions, and shipped outputs grouped by department.
             </p>
           </div>
           <Button
@@ -263,6 +265,15 @@ export function Library() {
             ))}
           </select>
         </div>
+        <div className="mt-4 grid gap-2 text-sm sm:grid-cols-4">
+          <LibraryStat label="Outputs" value={librarySummary.totalItems} />
+          <LibraryStat label="Important" value={librarySummary.importantItems} />
+          <LibraryStat label="Departments" value={librarySummary.departmentCount} />
+          <LibraryStat
+            label="Latest"
+            value={librarySummary.latestUpdatedAt ? relativeTime(librarySummary.latestUpdatedAt) : "None"}
+          />
+        </div>
       </div>
 
       {error ? (
@@ -270,15 +281,15 @@ export function Library() {
       ) : isLoading ? (
         <div className="p-5 text-sm text-muted-foreground">Loading Library...</div>
       ) : allItems.length === 0 ? (
-        <EmptyState icon={LibraryIcon} message="No Library items yet. Run a task or add an issue document to create one." />
+        <EmptyState icon={LibraryIcon} message="No Library items yet. Route a task or save a department document to create company memory." />
       ) : (
-        <div className="grid h-[calc(100vh-11rem)] min-h-[640px] grid-cols-1 lg:grid-cols-[minmax(360px,0.9fr)_minmax(0,1.1fr)]">
+        <div className="grid h-[calc(100vh-14rem)] min-h-[640px] grid-cols-1 lg:grid-cols-[minmax(360px,0.9fr)_minmax(0,1.1fr)]">
           <section className="min-h-0 overflow-y-auto border-r border-border p-4">
             {pinnedItems.length > 0 ? (
               <div className="mb-5">
                 <div className="mb-2 flex items-center gap-2 text-xs font-semibold uppercase text-muted-foreground">
                   <Pin className="h-3.5 w-3.5" />
-                  Pinned and important
+                  Pinned company memory
                 </div>
                 <div className="space-y-2">
                   {pinnedItems.slice(0, 6).map((item) => (
@@ -352,6 +363,15 @@ export function Library() {
           </section>
         </div>
       )}
+    </div>
+  );
+}
+
+function LibraryStat({ label, value }: { label: string; value: number | string }) {
+  return (
+    <div className="border border-border bg-card px-3 py-2">
+      <p className="text-sm font-medium tabular-nums">{value}</p>
+      <p className="mt-0.5 text-xs text-muted-foreground">{label}</p>
     </div>
   );
 }
@@ -477,7 +497,7 @@ function LibraryDetail({
 
       <dl className="mt-5 grid gap-3 border-y border-border py-4 text-sm sm:grid-cols-2 lg:grid-cols-4">
         <div>
-          <dt className="text-xs uppercase text-muted-foreground">Issue</dt>
+          <dt className="text-xs uppercase text-muted-foreground">Task</dt>
           <dd className="mt-1 font-medium">
             <Link className="hover:underline" to={`/issues/${item.issueId}`}>
               {item.issueIdentifier ?? item.issueTitle}
@@ -502,7 +522,7 @@ function LibraryDetail({
         {item.kind === "document" ? (
           <div>
             <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
-              <h3 className="text-sm font-semibold">Document body</h3>
+              <h3 className="text-sm font-semibold">Library document</h3>
               {document && !editingDocument ? (
                 <Button variant="outline" size="sm" onClick={onEditDocument}>
                   <FileText className="h-4 w-4" />
@@ -514,7 +534,7 @@ function LibraryDetail({
               <div className="text-sm text-muted-foreground">Loading document...</div>
             ) : !document ? (
               <div className="rounded-md border border-border p-4 text-sm text-muted-foreground">
-                This document could not be loaded from the issue API.
+                This document could not be loaded from the task record.
               </div>
             ) : editingDocument ? (
               <div className="space-y-3">
@@ -554,7 +574,7 @@ function LibraryDetail({
             ) : null}
             {item.kind === "work_product" && !item.href ? (
               <p className="mt-3 text-sm text-muted-foreground">
-                This work product has no external URL yet. It is still tracked as Paperclip runtime output.
+                This work product has no external URL yet. It is still tracked as company runtime output.
               </p>
             ) : null}
           </div>
@@ -563,4 +583,3 @@ function LibraryDetail({
     </div>
   );
 }
-

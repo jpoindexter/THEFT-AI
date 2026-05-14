@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { Agent, Issue, IssueAttachment, IssueDocument, IssueWorkProduct } from "@paperclipai/shared";
-import { buildLibraryItems, groupLibraryItemsByDepartment, inferDepartment, type LibraryItem } from "./library-items";
+import { buildLibraryItems, groupLibraryItemsByDepartment, inferDepartment, summarizeLibraryItems, type LibraryItem } from "./library-items";
 
 const now = new Date("2026-05-14T12:00:00.000Z");
 
@@ -169,5 +169,45 @@ describe("library item mapping", () => {
     ]);
 
     expect(groups.map((group) => group.department)).toEqual(["Engineering", "Legal"]);
+  });
+
+  it("summarizes Library memory for the company shelf", () => {
+    const base = {
+      id: "item",
+      kind: "document",
+      title: "Doc",
+      subtitle: "Doc",
+      issueId: "issue",
+      issueIdentifier: null,
+      issueTitle: "Issue",
+      createdAt: now,
+      href: null,
+    } satisfies Omit<LibraryItem, "department" | "departmentKey" | "updatedAt" | "isImportant">;
+
+    expect(
+      summarizeLibraryItems([
+        {
+          ...base,
+          id: "engineering",
+          department: "Engineering",
+          departmentKey: "engineering",
+          updatedAt: new Date("2026-05-14T12:00:00.000Z"),
+          isImportant: true,
+        },
+        {
+          ...base,
+          id: "legal",
+          department: "Legal",
+          departmentKey: "legal",
+          updatedAt: new Date("2026-05-14T11:00:00.000Z"),
+          isImportant: false,
+        },
+      ]),
+    ).toEqual({
+      totalItems: 2,
+      importantItems: 1,
+      departmentCount: 2,
+      latestUpdatedAt: new Date("2026-05-14T12:00:00.000Z"),
+    });
   });
 });

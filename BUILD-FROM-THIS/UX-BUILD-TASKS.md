@@ -49,8 +49,8 @@ Goal: a founder can create a company, see THEFT assemble it, land in Command Cen
 - [x] UX031 [HIGH] [US3] Keep diagnostics available but secondary in `paperclip/ui/src/components/IssueRunLedger.tsx`, `paperclip/ui/src/components/IssueDocumentsSection.tsx`, and `paperclip/ui/src/components/IssueRelatedWorkPanel.tsx`.
 - [x] UX032 [HIGH] [US3] Add task-review coverage in `paperclip/ui/src/pages/IssueDetail.test.tsx`.
 
-- [ ] UX040 [HIGH] [US4] Reframe `paperclip/ui/src/pages/Library.tsx` as the durable company memory and output shelf, grouped by department and pinned work.
-- [ ] UX041 [HIGH] [US4] Ensure Library item mapping in `paperclip/ui/src/lib/library-items.ts` identifies generated work products from issue documents, attachments, and run outputs.
+- [x] UX040 [HIGH] [US4] Reframe `paperclip/ui/src/pages/Library.tsx` as the durable company memory and output shelf, grouped by department and pinned work.
+- [x] UX041 [HIGH] [US4] Ensure Library item mapping in `paperclip/ui/src/lib/library-items.ts` identifies generated work products from issue documents, attachments, and run outputs.
 - [ ] UX042 [HIGH] [US4] Verify real LLM smoke outputs become Library artifacts by updating `paperclip/scripts/smoke/theft-department-runtime-smoke.mjs` or adding a focused helper if needed.
 
 ## Phase 2 - HIGH Department And Roadmap Surfaces

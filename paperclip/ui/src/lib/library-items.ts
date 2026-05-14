@@ -30,6 +30,13 @@ export interface LibraryItem {
   isImportant: boolean;
 }
 
+export interface LibrarySummary {
+  totalItems: number;
+  importantItems: number;
+  departmentCount: number;
+  latestUpdatedAt: Date | string | null;
+}
+
 export const THEFT_DEPARTMENTS = [
   "Engineering",
   "Design",
@@ -108,7 +115,7 @@ export function buildLibraryItems(bundles: LibraryIssueBundle[], agents: Agent[]
         id: `document:${document.issueId}:${document.key}`,
         kind: "document",
         title,
-        subtitle: `Markdown document on ${bundle.issue.identifier ?? bundle.issue.title}`,
+        subtitle: `Markdown document from ${bundle.issue.identifier ?? bundle.issue.title}`,
         key: document.key,
         createdAt: document.createdAt,
         updatedAt: document.updatedAt,
@@ -154,6 +161,17 @@ export function buildLibraryItems(bundles: LibraryIssueBundle[], agents: Agent[]
   return items.sort((a, b) => itemSortValue(b) - itemSortValue(a));
 }
 
+export function summarizeLibraryItems(items: LibraryItem[]): LibrarySummary {
+  const departments = new Set(items.map((item) => item.departmentKey));
+  const sorted = [...items].sort((a, b) => itemSortValue(b) - itemSortValue(a));
+  return {
+    totalItems: items.length,
+    importantItems: items.filter((item) => item.isImportant).length,
+    departmentCount: departments.size,
+    latestUpdatedAt: sorted[0]?.updatedAt ?? null,
+  };
+}
+
 export function groupLibraryItemsByDepartment(items: LibraryItem[]) {
   const groups = new Map<string, { department: string; departmentKey: string; items: LibraryItem[] }>();
   for (const item of items) {
@@ -180,4 +198,3 @@ export function groupLibraryItemsByDepartment(items: LibraryItem[]) {
     return a.department.localeCompare(b.department);
   });
 }
-
