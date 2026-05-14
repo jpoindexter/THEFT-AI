@@ -65,6 +65,8 @@ A: Solo founders
 
 Output schema: { "product_or_service": string }`,
       messages: [{ role: "user", text: "Output the business plan JSON now." }],
+      // Force an immediate connection failure so this test is deterministic.
+      baseUrl: "http://127.0.0.1:1",
     });
 
     const parsed = JSON.parse(text) as { mode: string; backend_note: string };
