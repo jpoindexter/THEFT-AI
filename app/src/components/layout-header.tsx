@@ -6,7 +6,6 @@ import {
   ChevronDown,
   Map,
   Search,
-  SunMedium,
   Settings,
   Globe,
   Sparkles,
@@ -331,14 +330,6 @@ export default function LayoutHeader({
         )}
       </div>
       <div className="flex items-center gap-1 text-ink-muted">
-        <Link
-          href={`/${orgSlug}/billing/upgrade`}
-          className="rounded-md bg-ink text-paper px-2.5 py-1 text-xs font-medium tracking-wide hover:opacity-90 inline-flex items-center gap-1"
-          title="Upgrade plan"
-        >
-          <SunMedium className="size-3 text-mustard" />
-          Upgrade
-        </Link>
         <ThemeToggle />
         <Link
           href={`/${orgSlug}/roadmap`}
