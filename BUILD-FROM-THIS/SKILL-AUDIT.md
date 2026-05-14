@@ -38,6 +38,7 @@ They appear as read-only local bundled skills in the Paperclip company skill lib
 | `stripe-payment-debugging` | Engineering | Finance |
 | `ops-agent-skills` | Operations | Finance |
 | `finance-agent-skills` | Finance | Operations |
+| `ai-cost-routing` | Operations | Engineering, Operator, Finance |
 
 ## Default Agent Skill Sets
 
@@ -51,6 +52,7 @@ These are the target defaults for the staged onboarding seed:
 | Marketing | `content-engine`, `last30days-research`, `company-naming`, `gic-skills`, `hyperframes` |
 | Sales | `last30days-research`, `content-engine`, `stripe-app-builder` |
 | Operations | `ops-agent-skills`, `debugging-vercel-builds`, `supabase` |
+| Operator (cost ops) | `ai-cost-routing`, `dev-workflow`, `ops-agent-skills` |
 | Finance | `finance-agent-skills`, `ops-agent-skills`, `stripe-app-builder`, `stripe-payment-debugging`, `supabase-postgres-best-practices` |
 | Legal | `gic-skills` until dedicated legal skill exists |
 | Support | `gic-skills`, `content-engine` |
