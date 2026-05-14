@@ -1,19 +1,11 @@
 import OrgNameForm from "@/components/settings/org-name-form";
-import { Textarea } from "@/components/ui/textarea";
-import {
-  Tabs,
-  TabsList,
-  TabsTrigger,
-  TabsContent,
-} from "@/components/ui/tabs";
 import { SectionHeader, SettingsCard, Row } from "@/components/settings/section";
-import { Copy, Upload, Download } from "lucide-react";
+import { Download } from "lucide-react";
 import { db } from "@/lib/db/store";
 import { notFound } from "next/navigation";
 import DangerZone from "@/components/settings/danger-zone";
 import TransferOwnership from "@/components/settings/transfer-ownership";
-
-const SOURCES = ["ChatGPT", "Claude", "Perplexity", "OpenAI", "Other"];
+import CompanyContextImport from "@/components/settings/company-context-import";
 
 export default async function Organization({
   params,
@@ -37,52 +29,7 @@ export default async function Organization({
       </SettingsCard>
 
       <SettingsCard title="Company Context" description="Bring durable company context from other AI tools into this workspace.">
-        <Tabs defaultValue="chatgpt">
-          <TabsList className="bg-cream">
-            {SOURCES.map((s) => (
-              <TabsTrigger key={s} value={s.toLowerCase()} className="text-sm">
-                {s}
-              </TabsTrigger>
-            ))}
-          </TabsList>
-          {SOURCES.map((s) => (
-            <TabsContent key={s} value={s.toLowerCase()} className="mt-3 space-y-3">
-              <div className="grid grid-cols-2 gap-3">
-                <div className="space-y-1.5">
-                  <div className="text-xs uppercase tracking-wider text-ink-muted inline-flex items-center gap-1">
-                    Prompt to paste
-                    <Copy className="size-3" />
-                  </div>
-                  <Textarea
-                    readOnly
-                    defaultValue={`Use your memory, project context, and current conversation context.\n\nCreate a portable Company Context Export based on what you can find in the user's memory.`}
-                    className="min-h-32 text-xs font-mono"
-                  />
-                </div>
-                <div className="space-y-1.5">
-                  <div className="text-xs uppercase tracking-wider text-ink-muted">
-                    Generated report
-                  </div>
-                  <Textarea
-                    placeholder="Paste the generated report from the source tool here…"
-                    className="min-h-32 text-xs"
-                  />
-                  <div className="flex justify-end">
-                    <button
-                      type="button"
-                      disabled
-                      title="Report preview is not implemented in local mode yet."
-                      className="inline-flex items-center gap-1 text-sm rounded-md border border-line px-2 py-1 text-ink-muted opacity-60 cursor-not-allowed"
-                    >
-                      <Upload className="size-3" />
-                      Preview report (soon)
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </TabsContent>
-          ))}
-        </Tabs>
+        <CompanyContextImport />
       </SettingsCard>
 
       <SettingsCard title="Organization Members">

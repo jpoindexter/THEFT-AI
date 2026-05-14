@@ -37,9 +37,9 @@
 ## Day 5 — settings polish
 
 - [ ] All 10 settings pages match `/screenshots/09-settings/settings*.png`
-- [ ] Window-blind shadow effect on settings background
-- [ ] Delete account modal (misc/01)
-- [ ] Company Context tabs with copy-prompt buttons working
+- [x] Window-blind shadow effect on settings background
+- [x] Delete account modal (misc/01)
+- [x] Company Context tabs with copy-prompt buttons working
 
 ## Day 6 — agent execution loop
 

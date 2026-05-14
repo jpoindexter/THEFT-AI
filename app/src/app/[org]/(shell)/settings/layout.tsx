@@ -12,6 +12,15 @@ export default async function SettingsLayout({
   const { org } = await params;
   return (
     <div className="absolute inset-0 grid grid-cols-[220px_1fr] bg-cream">
+      <div
+        className="absolute inset-0 pointer-events-none"
+        aria-hidden
+        style={{
+          backgroundImage:
+            "repeating-linear-gradient(180deg, rgba(0,0,0,0.03) 0px, rgba(0,0,0,0.03) 1px, transparent 1px, transparent 16px)",
+          boxShadow: "inset 0 40px 90px rgba(0,0,0,0.06)",
+        }}
+      />
       <aside className="border-r border-line/70 p-3 text-base flex flex-col gap-1">
         <Link
           href={`/${org}`}

@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { AlertTriangle } from "lucide-react";
 import { SettingsCard } from "@/components/settings/section";
 import { toast } from "@/components/toast-host";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 export default function DangerZone({
   orgSlug,
@@ -50,45 +51,52 @@ export default function DangerZone({
           <AlertTriangle className="size-3" /> Delete workspace
         </button>
       ) : (
-        <div className="rounded-md border border-brick/40 bg-brick/10 p-3 space-y-2 text-xs">
-          <p className="text-ink">
-            This will permanently delete <strong>{orgName}</strong> and every
-            artifact, task, and agent inside it. This cannot be undone.
-          </p>
-          <p className="text-ink">
-            Type <code className="font-mono">{orgName}</code> to confirm.
-          </p>
-          <input
-            value={confirm}
-            onChange={(e) => setConfirm(e.target.value)}
-            placeholder={orgName}
-            className="w-full h-9 rounded-md border border-brick/40 bg-paper px-3 text-xs font-mono focus:outline-none focus:border-brick"
-          />
-          {error && (
-            <p className="text-2xs text-brick-ink font-mono">{error}</p>
-          )}
-          <div className="flex justify-end gap-2 pt-1">
-            <button
-              type="button"
-              onClick={() => {
-                setOpen(false);
-                setConfirm("");
-                setError(null);
-              }}
-              className="text-2xs rounded-md border border-line bg-paper px-2 py-1 hover:border-line-strong"
-            >
-              Cancel
-            </button>
-            <button
-              type="button"
-              disabled={!matches || busy}
-              onClick={destroy}
-              className="text-2xs rounded-md bg-brick text-paper px-3 py-1 hover:opacity-90 disabled:opacity-40"
-            >
-              {busy ? "Deleting…" : "Delete forever"}
-            </button>
-          </div>
-        </div>
+        <Dialog open={open} onOpenChange={setOpen}>
+          <DialogContent className="sm:max-w-md bg-paper">
+            <DialogHeader>
+              <DialogTitle className="text-base">Delete workspace</DialogTitle>
+            </DialogHeader>
+            <div className="rounded-md border border-brick/40 bg-brick/10 p-3 space-y-2 text-xs">
+              <p className="text-ink">
+                This will permanently delete <strong>{orgName}</strong> and every
+                artifact, task, and agent inside it. This cannot be undone.
+              </p>
+              <p className="text-ink">
+                Type <code className="font-mono">{orgName}</code> to confirm.
+              </p>
+              <input
+                value={confirm}
+                onChange={(e) => setConfirm(e.target.value)}
+                placeholder={orgName}
+                className="w-full h-9 rounded-md border border-brick/40 bg-paper px-3 text-xs font-mono focus:outline-none focus:border-brick"
+              />
+              {error && (
+                <p className="text-2xs text-brick-ink font-mono">{error}</p>
+              )}
+            </div>
+            <div className="flex justify-end gap-2">
+              <button
+                type="button"
+                onClick={() => {
+                  setOpen(false);
+                  setConfirm("");
+                  setError(null);
+                }}
+                className="text-xs rounded-md border border-line bg-paper px-2.5 py-1.5 hover:border-line-strong"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                disabled={!matches || busy}
+                onClick={() => void destroy()}
+                className="text-xs rounded-md bg-brick text-paper px-3 py-1.5 hover:opacity-90 disabled:opacity-40"
+              >
+                {busy ? "Deleting…" : "Delete forever"}
+              </button>
+            </div>
+          </DialogContent>
+        </Dialog>
       )}
     </SettingsCard>
   );
