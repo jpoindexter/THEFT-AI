@@ -200,6 +200,7 @@ function NodeDrawer({
 }) {
   const router = useRouter();
   const [launching, setLaunching] = useState(false);
+  const [markingDone, setMarkingDone] = useState(false);
   const prereqs = node.dependencies.map((id) => nodes.find((n) => n.id === id)).filter(Boolean) as RNode[];
   const downstream = nodes.filter((n) => n.dependencies.includes(node.id));
 
@@ -246,6 +247,26 @@ function NodeDrawer({
     const href = `/${orgSlug}/roadmap/${node.slug}`;
     const opened = window.open(href, "_blank", "noopener,noreferrer");
     if (!opened) router.push(href);
+  }
+
+  async function markDone() {
+    if (markingDone || node.status === "complete") return;
+    setMarkingDone(true);
+    try {
+      const res = await fetch(`/api/${orgSlug}/roadmap/${node.slug}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status: "complete" }),
+      });
+      if (!res.ok) throw new Error("Could not mark node complete.");
+      toast("Roadmap node marked complete", "ok");
+      router.refresh();
+      onClose();
+    } catch (e) {
+      toast(e instanceof Error ? e.message : "Could not mark node complete.", "warn");
+    } finally {
+      setMarkingDone(false);
+    }
   }
 
   return (
@@ -503,6 +524,29 @@ function NodeDrawer({
               ? "Open running task"
               : "Launch agent"}
           <ArrowRight size={14} />
+        </button>
+        <button
+          type="button"
+          onClick={() => void markDone()}
+          disabled={markingDone || node.status === "complete"}
+          style={{
+            height: 40,
+            padding: "0 10px",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            background: "transparent",
+            border: "1px solid var(--t-line-strong)",
+            borderRadius: 4,
+            color: "var(--t-ink-muted)",
+            cursor: markingDone || node.status === "complete" ? "default" : "pointer",
+            fontFamily: "inherit",
+            opacity: markingDone || node.status === "complete" ? 0.55 : 1,
+            fontSize: 12,
+            whiteSpace: "nowrap",
+          }}
+        >
+          {markingDone ? "Saving..." : node.status === "complete" ? "Marked done" : "Mark done"}
         </button>
         <button
           type="button"

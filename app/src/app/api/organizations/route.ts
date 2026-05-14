@@ -17,5 +17,7 @@ export async function POST(req: Request) {
   }
   const org = await db.createOrg({ name: parsed.data.name });
   await bootstrapOrganization(org.id);
+  await db.seedTechTreeStatus(org.id);
+  await db.upsertTechTreeNodeStatus(org.id, "pick-company-name", "complete");
   return NextResponse.json({ slug: org.slug });
 }

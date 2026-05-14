@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { db } from "@/lib/db/store";
 import { ArrowLeft, Lock, CheckCircle2, Sparkles } from "lucide-react";
+import RoadmapNodeStatusActions from "@/components/roadmap-node-status-actions";
 
 const STAGE_TONE: Record<string, string> = {
   idea: "bg-cream text-ink",
@@ -176,17 +177,11 @@ export default async function TechTreeNodePage({
           </section>
         )}
 
-        <div className="flex justify-end gap-2 pt-1">
-          <button className="text-sm rounded-md border border-line bg-paper px-3 py-1.5 hover:border-line-strong">
-            Mark locked
-          </button>
-          <button className="text-sm rounded-md border border-line bg-paper px-3 py-1.5 hover:border-line-strong">
-            Mark in progress
-          </button>
-          <button className="text-sm rounded-md bg-ink text-paper px-3 py-1.5">
-            Mark done
-          </button>
-        </div>
+        <RoadmapNodeStatusActions
+          orgSlug={orgSlug}
+          nodeSlug={node.slug}
+          currentStatus={myStatus as "locked" | "available" | "in_progress" | "complete"}
+        />
       </div>
     </div>
   );
