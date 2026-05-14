@@ -127,7 +127,7 @@ export default async function IntegrationDetailPage({
           <div>
             <h2 className="text-base font-medium">Triggers</h2>
             <p className="text-sm text-ink-muted">
-              You can set up Cofounder to run when these events happen.
+              You can set up Operator to run when these events happen.
             </p>
           </div>
           <div className="rounded-lg border border-line/70 bg-paper divide-y divide-line/60">

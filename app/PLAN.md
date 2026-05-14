@@ -69,6 +69,6 @@ Finance:     finance-agent-skills
 ## Reference materials in repo
 
 - `/screenshots/` — every screen named in flow order
-- `/cofounder-docs/` — 33 MD files mirroring docs.cofounder.co
+- `/operator-docs/` — 33 MD files mirroring docs.operator.co
 - `/skills/` — 20 skills ready to attach
-- `/paperclip/` — agent backend reference (don't run, just borrow patterns)
+- `/workspace-sync/` — agent backend reference (don't run, just borrow patterns)

@@ -15,7 +15,7 @@ const ENTRIES = [
     tone: "sage" as const,
     tag: "Improvement",
     title: "Engineer model bumped to Opus 4.7",
-    body: "PRs that touch migrations and auth flows now default to Opus 4.7. Cofounder stays on Sonnet 4.6.",
+    body: "PRs that touch migrations and auth flows now default to Opus 4.7. Operator stays on Sonnet 4.6.",
   },
   {
     date: "2026-05-05",

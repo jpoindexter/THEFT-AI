@@ -117,13 +117,13 @@ export default function Advanced({
             </div>
 
             <div className="space-y-2">
-              <div className="text-sm font-medium text-ink">Give Cofounder access to repositories</div>
+              <div className="text-sm font-medium text-ink">Give Operator access to repositories</div>
               <p className="text-xs text-ink-muted">
-                Choose which public or private repositories Cofounder can access in GitHub, then pick the imported repo here.
+                Choose which public or private repositories Operator can access in GitHub, then pick the imported repo here.
               </p>
               <div className="flex items-center gap-2 py-0.5">
                 <CheckCircle2 className="size-4 text-green-600 shrink-0" />
-                <span className="text-sm text-ink">Cofounder has GitHub access</span>
+                <span className="text-sm text-ink">Operator has GitHub access</span>
               </div>
               <div className="rounded-md border border-line/70 px-3 py-2 text-sm text-ink-muted">
                 No repositories are selected for this installation yet.

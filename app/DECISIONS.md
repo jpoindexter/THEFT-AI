@@ -40,11 +40,11 @@ Append-only. Add new entries at the bottom.
 
 ---
 
-## 2026-05-12 — Provider/model selection follows OpenCode and Paperclip
+## 2026-05-12 — Provider/model selection follows OpenCode and Workspace Sync
 
 **Choice:** Store model IDs as OpenCode-style `provider/model` strings and make local OAuth CLI backends first-class: Codex CLI, OpenCode CLI, and Claude CLI. Also support local harnesses through Ollama, LM Studio, and generic OpenAI-compatible endpoints, with Anthropic API as an optional direct backend.
 
-**Reference:** OpenCode provider/model selection and Paperclip `codex_local` / `claude_local` adapter model.
+**Reference:** OpenCode provider/model selection and Workspace Sync `codex_local` / `claude_local` adapter model.
 
 **Why:** The app should run from the user's existing CLI OAuth/session auth when possible, not require hosted API keys. Local harnesses need a UI path so users can pull Ollama models or point the app at LM Studio or any compatible server.
 

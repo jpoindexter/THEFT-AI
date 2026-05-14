@@ -18,7 +18,7 @@ export default async function AISettings({
     <>
       <SectionHeader
         title="AI Settings"
-        description="Manage global AI behavior and the model used for Cofounder conversations."
+        description="Manage global AI behavior and the model used for Operator conversations."
       />
 
       <SettingsCard title="Agent Configuration">

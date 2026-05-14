@@ -19,7 +19,7 @@ const PLANS = [
     cadence: "free",
     blurb: "$15 in monthly credit. One workspace.",
     features: [
-      "Cofounder + all default agents",
+      "Operator + all default agents",
       "Managed Vercel + Supabase",
       "1 founder seat",
       "Public preview deployments",
@@ -54,7 +54,7 @@ const PLANS = [
       "Bring-your-own GitHub + Supabase",
       "SSO + SCIM",
       "Audit log retention 365d",
-      "Priority response from Cofounder support",
+      "Priority response from Operator support",
     ],
     cta: "Talk to us",
     highlight: false,

@@ -19,7 +19,7 @@ type SocialPost = {
 const POSTS: SocialPost[] = [
   { platform: "linkedin",  content: "We just shipped AI-powered eval suites...",          status: "scheduled", scheduled_for: "May 9 9:00am",   impressions: null, engagement: null },
   { platform: "twitter",   content: "Hot take: most startups don't need...",              status: "published", scheduled_for: "May 7 10:00am",  impressions: 4200, engagement: 312  },
-  { platform: "linkedin",  content: "The cofounder we all wish we had...",                status: "published", scheduled_for: "May 5 9:00am",   impressions: 8100, engagement: 890  },
+  { platform: "linkedin",  content: "The operator we all wish we had...",                status: "published", scheduled_for: "May 5 9:00am",   impressions: 8100, engagement: 890  },
   { platform: "instagram", content: "Behind the build: how we...",                        status: "published", scheduled_for: "May 3 12:00pm",  impressions: 2100, engagement: 441  },
   { platform: "twitter",   content: "3 things your marketing agent should...",            status: "scheduled", scheduled_for: "May 10 2:00pm",  impressions: null, engagement: null },
   { platform: "linkedin",  content: "Unit economics thread: LTV, CAC, and...",            status: "scheduled", scheduled_for: "May 12 9:00am",  impressions: null, engagement: null },

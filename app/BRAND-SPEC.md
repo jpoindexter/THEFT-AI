@@ -7,13 +7,13 @@
 
 ## Aesthetic direction
 
-Cross-stitch + textile, warm cream, dense small-type cofounder
+Cross-stitch + textile, warm cream, dense small-type operator
 workspace. Single accent (mustard) on a near-monochrome stone
 palette. Hand-stitched motifs over glossy SaaS gradients.
 
 | Axis | Choice | Why |
 |---|---|---|
-| Tone | Brutally minimal · workspace | Cofounder reference |
+| Tone | Brutally minimal · workspace | Operator reference |
 | Surface | Cream `--t-cream` + paper `--t-paper` | Warm, not sterile |
 | Accent | Mustard `--t-mustard` (single) | Replaces SaaS purple |
 | Status | Sage success / brick danger / mustard warn | No emoji |

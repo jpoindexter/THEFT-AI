@@ -30,11 +30,11 @@ const EVENTS: Record<
   },
   evt_002: {
     when: "6m ago",
-    actor: "Cofounder",
+    actor: "Operator",
     action: "set business plan",
     target: "Business Plan",
     detail: "Product, ICP, pricing thesis saved",
-    body: "Cofounder finalized the v1 business plan after the onboarding interview. Saved as a pinned artifact in Library.",
+    body: "Operator finalized the v1 business plan after the onboarding interview. Saved as a pinned artifact in Library.",
     metadata: {
       sections: "8",
       "word count": "1,240",

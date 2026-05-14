@@ -36,7 +36,7 @@ const EVENTS: Event[] = [
   { id: "e4", title: "Subscriptions PR review", day: 2, hour: 11, duration: 1, kind: "task", tone: "mustard", who: "Engineer" },
   { id: "e5", title: "Encompass demo", day: 3, hour: 16, duration: 1, kind: "meeting", tone: "neutral", who: "Sales" },
   { id: "e6", title: "Launch broadcast", day: 4, hour: 10, duration: 1, kind: "publish", tone: "mustard", who: "Marketing" },
-  { id: "e7", title: "Deadline · v0 ship", day: 4, hour: 18, duration: 1, kind: "task", tone: "brick", who: "Cofounder" },
+  { id: "e7", title: "Deadline · v0 ship", day: 4, hour: 18, duration: 1, kind: "task", tone: "brick", who: "Operator" },
   { id: "e8", title: "User research recap", day: 5, hour: 10, duration: 2, kind: "task", tone: "neutral", who: "Operations" },
 ];
 

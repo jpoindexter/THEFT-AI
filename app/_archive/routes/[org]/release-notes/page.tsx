@@ -8,7 +8,7 @@ const RELEASES = [
     sections: [
       {
         title: "More Reliable Infrastructure",
-        body: "Cofounder now handles local development, previews, and longer-running agent work more reliably, with fewer interruptions during active tasks.",
+        body: "Operator now handles local development, previews, and longer-running agent work more reliably, with fewer interruptions during active tasks.",
       },
       {
         title: "Stronger Coding Agents",
@@ -21,12 +21,12 @@ const RELEASES = [
     date: "May 4, 2026",
     sections: [
       {
-        title: "Cofounder 2: Run an Entire Company with Agents",
-        body: "Announcing Cofounder 2: The infrastructure for the one-person billion-dollar company — orchestrating agents across engineering, sales, marketing, ops, and design.",
+        title: "Operator 2: Run an Entire Company with Agents",
+        body: "Announcing Operator 2: The infrastructure for the one-person billion-dollar company — orchestrating agents across engineering, sales, marketing, ops, and design.",
       },
       {
         title: "Agents on an Org Chart",
-        body: "Cofounder puts your agents on an org chart, enabling massive parallel work. Each agent gets a specialized workspace tailored to its function. At the highest level, Cofounder manages it all — kicking off tasks, monitoring work, and executing long-term strategy.",
+        body: "Operator puts your agents on an org chart, enabling massive parallel work. Each agent gets a specialized workspace tailored to its function. At the highest level, Operator manages it all — kicking off tasks, monitoring work, and executing long-term strategy.",
       },
       {
         title: "A Roadmap for the Whole Company",
@@ -34,7 +34,7 @@ const RELEASES = [
       },
       {
         title: "Departments That Actually Run",
-        body: "Cofounder orchestrates departments like marketing, sales, and engineering. Watch the sales department prospect for leads, the marketing team draft and distribute content, and engineering ship features — all in parallel.",
+        body: "Operator orchestrates departments like marketing, sales, and engineering. Watch the sales department prospect for leads, the marketing team draft and distribute content, and engineering ship features — all in parallel.",
       },
     ],
   },

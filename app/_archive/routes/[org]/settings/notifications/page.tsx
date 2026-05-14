@@ -6,7 +6,7 @@ export default function Notifications() {
     <>
       <SectionHeader
         title="Notifications"
-        description="Control how Cofounder notifies you about completed work and approvals."
+        description="Control how Operator notifies you about completed work and approvals."
       />
       <SettingsCard>
         <Row
@@ -17,7 +17,7 @@ export default function Notifications() {
         </Row>
         <Row
           label="Only when I'm away"
-          hint="Skip alerts when you're active in Cofounder."
+          hint="Skip alerts when you're active in Operator."
         >
           <Switch />
         </Row>

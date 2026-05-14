@@ -17,7 +17,7 @@ const TABLES = [
   { name: "agents", schema: "public" },
   { name: "tasks", schema: "public" },
   { name: "artifacts", schema: "public" },
-  { name: "cofounder_messages", schema: "public" },
+  { name: "operator_messages", schema: "public" },
   { name: "memory_items", schema: "public" },
   { name: "api_keys", schema: "public" },
   { name: "webhooks", schema: "public" },

@@ -2000,7 +2000,7 @@ const IconPlus = (p) => <Icon {...p}><path d="M12 5v14"/><path d="M5 12h14"/></I
 const IconMore = (p) => <Icon {...p}><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></Icon>;
 const IconLock = (p) => <Icon {...p}><rect x="4.5" y="11" width="15" height="10" rx="2"/><path d="M8 11V7a4 4 0 1 1 8 0v4"/></Icon>;
 const IconSearch = (p) => <Icon {...p}><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></Icon>;
-const IconPaperclip = (p) => <Icon {...p}><path d="M20 12.5 12.5 20a5.5 5.5 0 1 1-7.78-7.78l8.49-8.49a3.5 3.5 0 0 1 5 5L9.7 17.24a1.5 1.5 0 0 1-2.12-2.12l7.07-7.07"/></Icon>;
+const IconWorkspace Sync = (p) => <Icon {...p}><path d="M20 12.5 12.5 20a5.5 5.5 0 1 1-7.78-7.78l8.49-8.49a3.5 3.5 0 0 1 5 5L9.7 17.24a1.5 1.5 0 0 1-2.12-2.12l7.07-7.07"/></Icon>;
 const IconExternal = (p) => <Icon {...p}><path d="M15 3h6v6"/><path d="m10 14 11-11"/><path d="M21 14v7H3V3h7"/></Icon>;
 const IconRefresh = (p) => <Icon {...p}><path d="M3 12a9 9 0 0 1 15.5-6.36L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-15.5 6.36L3 16"/><path d="M3 21v-5h5"/></Icon>;
 const IconClock = (p) => <Icon {...p}><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></Icon>;
@@ -2116,7 +2116,7 @@ const NODE_DETAILS = {
   },
 };
 const DEFAULT_DETAIL = {
-  summary: 'Cofounder has scoped this capability. The lead department agent can run it end-to-end. Review the checklist below, then launch.',
+  summary: 'Operator has scoped this capability. The lead department agent can run it end-to-end. Review the checklist below, then launch.',
   checklist: [
     { title: 'Agent scopes work + drafts plan', status: 'Waiting' },
     { title: 'Approval checkpoint if required', status: 'Waiting' },
@@ -2486,7 +2486,7 @@ const StopAndCredits = ({ credits }) => (
   </div>
 );
 
-const ChatInput = ({ placeholder = 'Ask Cofounder anything about your company…', wide }) => {
+const ChatInput = ({ placeholder = 'Ask Operator anything about your company…', wide }) => {
   const [v, setV] = React.useState('');
   return (
     <div style={{ borderTop: '1px solid var(--line)', padding: 10, background: 'var(--canvas)' }}>
@@ -2497,7 +2497,7 @@ const ChatInput = ({ placeholder = 'Ask Cofounder anything about your company…
             fontSize: 13, lineHeight: 1.45, minHeight: wide ? 60 : 44, padding: '4px 6px', color: 'var(--ink)' }} />
         <div className="row">
           <button className="btn ghost sm" style={{ width: 26, padding: 0 }}>
-            <IconPaperclip size={14} />
+            <IconWorkspace Sync size={14} />
           </button>
           <button className="btn ghost sm" style={{ padding: '0 8px' }}>
             <IconSpark size={13} />Skills
@@ -2543,7 +2543,7 @@ const ChatPanelEmpty = ({ deptId, title, body }) => {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%',
       borderLeft: '1px solid var(--line)', background: 'var(--canvas)' }}>
-      <ChatHeader title={title || 'Cofounder'}
+      <ChatHeader title={title || 'Operator'}
         subtitle={deptId ? 'Department agent · idle' : 'Always-on chief of staff'}
         deptId={deptId || null} />
       <div className="grow" style={{ padding: '20px 16px', overflowY: 'auto' }}>
@@ -2565,7 +2565,7 @@ const ChatPanelEmpty = ({ deptId, title, body }) => {
           </div>
         )}
       </div>
-      <ChatInput placeholder={deptId ? `Ask the ${DEPT_BY_ID[deptId].name} agent anything…` : 'Ask Cofounder anything about your company…'} />
+      <ChatInput placeholder={deptId ? `Ask the ${DEPT_BY_ID[deptId].name} agent anything…` : 'Ask Operator anything about your company…'} />
     </div>
   );
 };
@@ -3150,7 +3150,7 @@ const OnboardingView = ({ onContinue }) => {
         </h1>
         <p style={{ fontSize: 15, color: 'var(--ink-muted)', maxWidth: '60ch',
           lineHeight: 1.55, marginTop: 14 }}>
-          Describe your business idea in one or two sentences. The Cofounder agent
+          Describe your business idea in one or two sentences. The Operator agent
           will ask a few clarifying questions, then generate a roadmap of capabilities
           to build — and the eight department agents who'll build them.
         </p>
@@ -3164,7 +3164,7 @@ const OnboardingView = ({ onContinue }) => {
           <div className="row" style={{ paddingTop: 4 }}>
             <span style={{ fontSize: 11, color: 'var(--ink-soft)' }}>{v.length} / 600</span>
             <span className="grow" />
-            <button className="btn ghost sm"><IconPaperclip size={12} /> Attach a deck</button>
+            <button className="btn ghost sm"><IconWorkspace Sync size={12} /> Attach a deck</button>
           </div>
         </div>
         <div className="row" style={{ marginTop: 14, gap: 6, flexWrap: 'wrap' }}>
@@ -3184,7 +3184,7 @@ const OnboardingView = ({ onContinue }) => {
           <div className="micro" style={{ marginBottom: 10 }}>What happens next</div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 14 }}>
             {[
-              { n: '1', t: 'Cofounder interview', d: '5–10 minute conversation to nail down ICP, problem, and what kind of business you actually want.' },
+              { n: '1', t: 'Operator interview', d: '5–10 minute conversation to nail down ICP, problem, and what kind of business you actually want.' },
               { n: '2', t: 'Roadmap generated', d: 'A tech-tree of ~30 capabilities across 8 stages and 8 departments.' },
               { n: '3', t: 'First agents launch', d: 'You pick the next move; the relevant department agent does it.' },
             ].map(s => (
@@ -3271,11 +3271,11 @@ const { useState, useEffect } = React;
 function goTarget(target, setView, setDept, setDrawerNode, setChatMode, setSelectedApproval) {
   setDrawerNode(null); setSelectedApproval(null);
   if (target === 'onboarding') { setView('onboarding'); return; }
-  if (target === 'roadmap')    { setView('roadmap'); setChatMode('cofounder'); return; }
-  if (target === 'drawer')     { setView('roadmap'); setDrawerNode('id.brand'); setChatMode('cofounder'); return; }
+  if (target === 'roadmap')    { setView('roadmap'); setChatMode('operator'); return; }
+  if (target === 'drawer')     { setView('roadmap'); setDrawerNode('id.brand'); setChatMode('operator'); return; }
   if (target === 'chat')       { setView('roadmap'); setChatMode('workspace'); return; }
   if (target === 'department') { setView('department'); setDept('engineering'); setChatMode('department'); return; }
-  if (target === 'approvals')  { setView('approvals'); setChatMode('cofounder'); return; }
+  if (target === 'approvals')  { setView('approvals'); setChatMode('operator'); return; }
 }
 
 const THEMES = [
@@ -3333,7 +3333,7 @@ const ThemeSwitcher = ({ theme, onChange }) => {
 const ScreenSwitcher = ({ view, drawerOpen, chatMode, onGo, theme, onThemeChange }) => {
   const [open, setOpen] = useState(false);
   const screens = [
-    { id: 'roadmap',    label: '1 · Roadmap home',         active: view === 'roadmap' && !drawerOpen && chatMode === 'cofounder' },
+    { id: 'roadmap',    label: '1 · Roadmap home',         active: view === 'roadmap' && !drawerOpen && chatMode === 'operator' },
     { id: 'drawer',     label: '2 · Node detail (drawer)', active: view === 'roadmap' && drawerOpen },
     { id: 'chat',       label: '3 · Chat workspace',       active: chatMode === 'workspace' },
     { id: 'department', label: '4 · Department drill-in',  active: view === 'department' },
@@ -3372,7 +3372,7 @@ function App() {
   const [view, setView] = useState('roadmap');
   const [dept, setDept] = useState('engineering');
   const [drawerNode, setDrawerNode] = useState(null);
-  const [chatMode, setChatMode] = useState('cofounder');
+  const [chatMode, setChatMode] = useState('operator');
   const [selectedApproval, setSelectedApproval] = useState(null);
   const [theme, setTheme] = useState(() => {
     try { return localStorage.getItem('theft-theme') || 'v3'; } catch { return 'v3'; }
@@ -3385,7 +3385,7 @@ function App() {
 
   useEffect(() => {
     if (view === 'department') setChatMode('department');
-    else if (view !== 'tasks') setChatMode('cofounder');
+    else if (view !== 'tasks') setChatMode('operator');
   }, [view]);
 
   const onOpenNode = (id) => setDrawerNode(id);
@@ -3423,10 +3423,10 @@ function App() {
 
   let chat = null;
   if (chatMode === 'workspace')
-    chat = <ChatPanelWorkspace onBack={() => setChatMode(view === 'department' ? 'department' : 'cofounder')} />;
+    chat = <ChatPanelWorkspace onBack={() => setChatMode(view === 'department' ? 'department' : 'operator')} />;
   else if (chatMode === 'department')
     chat = <ChatPanelEmpty deptId={dept} title={DEPT_BY_ID[dept].name + ' Agent'} />;
-  else chat = <ChatPanelEmpty title="Cofounder" />;
+  else chat = <ChatPanelEmpty title="Operator" />;
 
   const labels = {
     roadmap: '01 Roadmap', department: '04 Department · ' + DEPT_BY_ID[dept].name,

@@ -17,8 +17,8 @@ Release gate (tests + build + route smoke + onboarding checks):
 pnpm gate
 ```
 
-For real Cofounder chat replies, use a local OAuth CLI or local model harness.
-The default backend is Codex CLI, matching the Paperclip-style local adapter
+For real Operator chat replies, use a local OAuth CLI or local model harness.
+The default backend is Codex CLI, matching the Workspace Sync-style local adapter
 model:
 
 ```sh
@@ -43,7 +43,7 @@ folder to reset everything.
 - **Org chart** — radial layout, 8 departments
 - **Department pages** — agent list with attached skills + tasks
 - **Tech tree / roadmap** — 27 nodes across 7 stages, dependency-aware
-- **Cofounder chat** — local CLI or provider-backed agent chat
+- **Operator chat** — local CLI or provider-backed agent chat
 
 ## Where the data lives
 
@@ -53,7 +53,7 @@ folder to reset everything.
 ├── departments.json
 ├── agents.json
 ├── tasks.json
-├── cofounder_messages.json
+├── operator_messages.json
 ├── artifacts.json
 └── tech_tree_status.json
 ```

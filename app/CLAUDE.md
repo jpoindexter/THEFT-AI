@@ -50,7 +50,7 @@ All `[org]/api/...` routes are scoped to an org: `src/app/api/[org]/<resource>/r
 - `src/lib/agent/compose-prompt.ts` — `composeAgentPromptForDept()`: resolves dept → agent → loads attached `SKILL.md` files
 - `src/lib/orgs/bootstrap.ts` — seeds default depts + agents on org creation
 - `src/lib/db/store.ts` — file-backed JSON store; `db.*` is the only way to read/write data
-- `src/lib/db/agent-state.ts` — persists Cofounder conversation state (Anthropic history + `AgentTurn[]` + pause)
+- `src/lib/db/agent-state.ts` — persists Operator conversation state (Anthropic history + `AgentTurn[]` + pause)
 - `src/lib/db/task-state.ts` — same shape for per-task agent runs
 
 ## Store types (defined in `lib/db/store.ts`)
@@ -70,7 +70,7 @@ invalidInput(zodError)
 - `huashu-design` — for HTML prototypes/mockups only, NOT production app code
 - `dev-workflow` — implementation discipline
 
-Skills live at `/Users/jasonpoindexter/Documents/GitHub/THEFT AI/skills/` and `paperclip/skills/`.
+Skills live at `/Users/jasonpoindexter/Documents/GitHub/THEFT AI/skills/` and `workspace-sync/skills/`.
 
 ## Rules
 1. Type-check after every change: `pnpm exec tsc --noEmit`
