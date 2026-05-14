@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { usePathname } from "next/navigation";
-import { Bell, ChevronDown, Clock, ClipboardList, EyeOff, Plus, UserRound, X } from "lucide-react";
+import { Bell, ChevronDown, Clock, ClipboardList, EyeOff, Folder, Plus, UserRound, X } from "lucide-react";
 import NewAgentDialog from "./new-agent-dialog";
 import NewTaskDialog from "./new-task-dialog";
 
@@ -161,8 +161,8 @@ export default function LayoutCanvas({
         <div className="absolute left-1/2 -translate-x-1/2 bottom-3 flex items-center gap-2 z-10">
           {isOrgRoot && (
             <>
-              <RecentCard tint="bg-cream" />
-              <RecentCard tint="bg-mustard/30" />
+              <RecentCard tint="bg-cream" label="Roadmap" />
+              <RecentCard tint="bg-mustard/30" label="Brief" />
             </>
           )}
           <div className="relative">
@@ -342,15 +342,16 @@ function AlertToggle({
   );
 }
 
-function RecentCard({ tint }: { tint: string }) {
+function RecentCard({ tint, label }: { tint: string; label: string }) {
   return (
-    <div className="w-12 h-9 rounded-md bg-paper border border-line/70 overflow-hidden shadow-[0_1px_2px_rgba(0,0,0,0.04)]">
-      <div className={`h-1.5 ${tint}`} />
-      <div className="p-1 space-y-0.5">
-        <div className="h-0.5 rounded bg-line" />
-        <div className="h-0.5 w-2/3 rounded bg-line" />
-      </div>
-    </div>
+    <button
+      type="button"
+      className="h-9 rounded-md bg-paper border border-line/70 overflow-hidden shadow-[0_1px_2px_rgba(0,0,0,0.04)] px-2 min-w-20 inline-flex items-center gap-1.5 hover:border-line-strong"
+    >
+      <span className={`h-5 w-1 rounded-full ${tint}`} />
+      <Folder className="size-3 text-ink-soft" />
+      <span className="text-2xs text-ink-muted">{label}</span>
+    </button>
   );
 }
 

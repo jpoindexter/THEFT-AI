@@ -1,17 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import {
-  Briefcase,
-  Code2,
-  LifeBuoy,
-  Megaphone,
-  Palette,
-  Scale,
-  Sparkles,
-  Wallet,
-  ClipboardList,
-} from "lucide-react";
+import { Sparkles } from "lucide-react";
 
 const DEPT_COLOR: Record<string, string> = {
   engineering: "bg-[#c8a87a] text-white",
@@ -22,17 +12,6 @@ const DEPT_COLOR: Record<string, string> = {
   finance:     "bg-[#9a7ac8] text-white",
   legal:       "bg-[#4a5a6a] text-white",
   support:     "bg-[#e0a050] text-white",
-};
-
-const DEPT_ICON: Record<string, React.ComponentType<{ className?: string }>> = {
-  engineering: Code2,
-  design: Palette,
-  marketing: Megaphone,
-  sales: Briefcase,
-  operations: ClipboardList,
-  finance: Wallet,
-  legal: Scale,
-  support: LifeBuoy,
 };
 
 type Department = { id: string; slug: string; name: string };
@@ -123,8 +102,8 @@ function DeptNode({
   orgSlug: string;
   labelPos: { x: number; y: number };
 }) {
-  const Icon = DEPT_ICON[dept.slug] ?? Sparkles;
   const color = DEPT_COLOR[dept.slug] ?? "bg-ink text-paper";
+  const isMarketing = dept.slug === "marketing";
 
   return (
     <div className="absolute inset-0 pointer-events-none">
@@ -138,9 +117,17 @@ function DeptNode({
           className="rounded-full bg-paper border border-line/70 pl-1 pr-2.5 py-0.5 text-xs tracking-tight inline-flex items-center gap-1.5 hover:border-line-strong hover:shadow-sm transition-shadow"
         >
           <span className={`size-4 rounded-full inline-flex items-center justify-center shrink-0 ${color}`}>
-            <Icon className="size-2.5" />
+            <span className="size-1.5 rounded-full bg-paper/85" />
           </span>
-          {dept.name}
+          <span className="inline-flex items-center gap-1.5">
+            {dept.name}
+            {isMarketing && (
+              <span className="inline-flex items-center gap-0.5 rounded-full border border-line/70 px-1.5 py-0 text-[10px] leading-4 text-ink-muted">
+                <Sparkles className="size-2.5" />
+                +1
+              </span>
+            )}
+          </span>
         </Link>
       </div>
     </div>

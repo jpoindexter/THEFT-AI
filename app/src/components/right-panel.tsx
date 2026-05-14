@@ -9,7 +9,7 @@ import LibraryTab from "./library-tab";
 import CompanyTab from "./company-tab";
 import DepartmentPanel from "./department-panel";
 import AgentPanel from "./agent-panel";
-import { ChevronRight, RefreshCw, Circle, X, Sparkles } from "lucide-react";
+import { ChevronRight, RefreshCw, Circle, X, Sparkles, Workflow } from "lucide-react";
 
 type Org = { id: string; slug: string; name: string };
 type Tab = "home" | "operator" | "company" | "tasks" | "library";
@@ -324,6 +324,9 @@ function HomeTab({
                     className={`w-full flex items-center gap-2 rounded-md hover:bg-canvas px-1 py-1.5 text-base text-ink ${selected?.id === t.id ? "bg-canvas" : ""}`}
                   >
                     <span className={`size-3 rounded-full shrink-0 ${DEPT_DOT[deptById.get(t.department_id ?? "") ?? ""] ?? "bg-mustard"}`} />
+                    <span className="size-4 rounded border border-line/70 bg-paper inline-flex items-center justify-center shrink-0">
+                      <Workflow className="size-2.5 text-ink-soft" />
+                    </span>
                     <span className="truncate flex-1 text-left">{t.title}</span>
                     <ChevronRight className="size-3.5 text-ink-soft shrink-0" />
                   </button>

@@ -5,10 +5,10 @@
 ## Day 1 — pixel-match the home + onboarding (today)
 
 - [ ] Compare every screen against `/screenshots/01-onboarding/` and `/screenshots/05-main-workspace/02-home-dashboard.png`
-- [ ] Fix dept icons on the org chart (colored emoji-style dots, not grey)
-- [ ] Add "+1" badge to Marketing dept node
-- [ ] Recent-cards row in the bottom toolbar
-- [ ] Active task chevron + icon match
+- [x] Fix dept icons on the org chart (colored emoji-style dots, not grey)
+- [x] Add "+1" badge to Marketing dept node
+- [x] Recent-cards row in the bottom toolbar
+- [x] Active task chevron + icon match
 
 ## Day 2 — engineering dept + new task flow
 
