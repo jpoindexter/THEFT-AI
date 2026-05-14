@@ -34,8 +34,9 @@ Run status:
 - 2026-05-14: Added and ran `paperclip/scripts/smoke/theft-department-runtime-smoke.mjs`; it seeded a throwaway company and completed adapter-backed wakeup runs for Engineering, Design, Marketing, Sales, Operations, Finance, Legal, and Support using the deterministic `process` adapter. Result company: `79bea8a1-1726-4f3b-9494-bfce8738163b`; all 8 runs reached `succeeded` with `adapter.invoke` events.
 - 2026-05-14: Ran the 8-department smoke through `codex_local` with `THEFT_SMOKE_CODEX_MODEL=gpt-5.3-codex-spark`; all 8 departments succeeded. Result company: `afa239ed-1b8c-45da-8d2c-b4f4c6e05fbf`; issues `THEAAA-1` through `THEAAA-8`; run ids captured in terminal output.
 - 2026-05-14: Created the UX source docs for the next product pass: `BUILD-FROM-THIS/UX-DIRECTION.md`, `BUILD-FROM-THIS/UX-SCREEN-PROMPTS.md`, and `BUILD-FROM-THIS/UX-BUILD-TASKS.md`. The xhigh synthesis gate is complete; next model lane is `gpt-5.5 high` starting at `UX010`.
+- 2026-05-14: Completed `UX010`-`UX015` onboarding UX pass in `paperclip/`: Step 2 is now Company Assembly Preview, model/adapter controls are behind Advanced runtime, Codex local is the default runtime, the launch summary includes 8 departments, and onboarding e2e now covers mobile assembly preview. Also fixed concurrent Codex managed-home auth symlink setup exposed by department wakeups.
 
-Next blocking work: reshape onboarding UX so it stops feeling like Paperclip/Cofounder wizard inheritance, verify saved Library outputs from real LLM runs, then continue subtracting dead `app/` surface. Avoid building new runtime features in `app/`.
+Next blocking work: continue `UX020` Command Center / Canvas implementation, verify saved Library outputs from real LLM runs, then continue subtracting dead `app/` surface. Avoid building new runtime features in `app/`.
 
 Verification coverage:
 

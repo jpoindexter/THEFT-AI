@@ -5,9 +5,9 @@ import { test, expect } from "@playwright/test";
  *
  * Walks through the 4-step OnboardingWizard:
  *   Step 1 — Name your company
- *   Step 2 — Create your Operator (adapter selection + config)
- *   Step 3 — Give it something to do (task creation)
- *   Step 4 — Ready to launch (summary + company canvas)
+ *   Step 2 — Assemble your company (Operator + department preview)
+ *   Step 3 — Set the first company task
+ *   Step 4 — Launch your company OS (summary + company canvas)
  *
  * By default this runs in skip_llm mode: we do NOT assert that an LLM
  * heartbeat fires. Set PAPERCLIP_E2E_SKIP_LLM=false to enable LLM-dependent
@@ -31,6 +31,21 @@ const REQUIRED_DEPARTMENTS = [
 ];
 
 test.describe("Onboarding wizard", () => {
+  test("renders company assembly preview on mobile", async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.goto("/onboarding");
+
+    await expect(page.locator("h3", { hasText: "Name your company" })).toBeVisible({ timeout: 5_000 });
+    await page.locator('input[placeholder="Acme Corp"]').fill(`E2E-Mobile-${Date.now()}`);
+    await page.getByRole("button", { name: "Validating" }).click();
+    await page.getByRole("button", { name: "Next" }).click();
+
+    await expect(page.locator("h3", { hasText: "Assemble your company" })).toBeVisible({ timeout: 30_000 });
+    await expect(page.getByText("Company assembly preview")).toBeVisible();
+    await expect(page.getByText("8 business lanes")).toBeVisible();
+    await expect(page.getByText("Advanced runtime")).toBeVisible();
+  });
+
   test("completes full wizard flow", async ({ page }) => {
     await page.goto("/onboarding");
 
@@ -49,23 +64,28 @@ test.describe("Onboarding wizard", () => {
     await nextButton.click();
 
     await expect(
-      page.locator("h3", { hasText: "Create your Operator" })
+      page.locator("h3", { hasText: "Assemble your company" })
     ).toBeVisible({ timeout: 30_000 });
 
     const agentNameInput = page.locator('input[placeholder="Operator"]');
     await expect(agentNameInput).toHaveValue(AGENT_NAME);
 
-    await expect(
-      page.locator("button", { hasText: "Claude Code" }).locator("..")
-    ).toBeVisible();
+    await expect(page.getByText("Company assembly preview")).toBeVisible();
+    await expect(page.getByText("8 business lanes")).toBeVisible();
+    for (const department of REQUIRED_DEPARTMENTS) {
+      await expect(page.getByText(department, { exact: true })).toBeVisible();
+    }
 
+    await expect(page.getByText("Advanced runtime")).toBeVisible();
+    await expect(page.getByRole("button", { name: "More Agent Adapter Types" })).toHaveCount(0);
+    await page.getByText("Advanced runtime").click();
     await page.getByRole("button", { name: "More Agent Adapter Types" }).click();
     await expect(page.getByRole("button", { name: "Process" })).toHaveCount(0);
 
     await page.getByRole("button", { name: "Next" }).click();
 
     await expect(
-      page.locator("h3", { hasText: "Give it something to do" })
+      page.locator("h3", { hasText: "Set the first company task" })
     ).toBeVisible({ timeout: 30_000 });
 
     const baseUrl = page.url().split("/").slice(0, 3).join("/");
@@ -116,12 +136,13 @@ test.describe("Onboarding wizard", () => {
     await page.getByRole("button", { name: "Next" }).click();
 
     await expect(
-      page.locator("h3", { hasText: "Ready to launch" })
+      page.locator("h3", { hasText: "Launch your company OS" })
     ).toBeVisible({ timeout: 30_000 });
 
     await expect(page.locator("text=" + COMPANY_NAME)).toBeVisible();
-    await expect(page.getByRole("button", { name: AGENT_NAME })).toBeVisible();
+    await expect(page.getByText(AGENT_NAME, { exact: true })).toBeVisible();
     await expect(page.locator("text=" + TASK_TITLE)).toBeVisible();
+    await expect(page.getByText("8 departments", { exact: true })).toBeVisible();
 
     await page.getByRole("button", { name: "Launch Company" }).click();
 

@@ -33,12 +33,12 @@
 
 Goal: a founder can create a company, see THEFT assemble it, land in Command Center, route work, review a task, and see output in Library.
 
-- [ ] UX010 [HIGH] [US1] Reshape the first-run flow in `paperclip/ui/src/components/OnboardingWizard.tsx` so the first screen is company creation and stage selection, not adapter/model setup.
-- [ ] UX011 [HIGH] [US1] Move model/adapter selection in `paperclip/ui/src/components/OnboardingWizard.tsx` behind an Advanced section with a sane local default.
-- [ ] UX012 [HIGH] [US1] Add a Company Assembly Preview in `paperclip/ui/src/components/OnboardingWizard.tsx` using `paperclip/ui/src/lib/onboarding-seed.ts` so the user sees Operator, 8 departments, starter tasks, and default skills before launch.
-- [ ] UX013 [HIGH] [US1] Persist any new assembly-preview metadata through `paperclip/ui/src/lib/onboarding-context.ts` and `paperclip/ui/src/lib/onboarding-launch.ts`.
-- [ ] UX014 [HIGH] [US1] Update focused onboarding tests in `paperclip/ui/src/lib/onboarding-context.test.ts`, `paperclip/ui/src/lib/onboarding-launch.test.ts`, and `paperclip/tests/e2e/onboarding.spec.ts`.
-- [ ] UX015 [HIGH] [US1] Verify `/onboarding` desktop and mobile rendering with the Browser plugin or Playwright screenshots.
+- [x] UX010 [HIGH] [US1] Reshape the first-run flow in `paperclip/ui/src/components/OnboardingWizard.tsx` so the first screen is company creation and stage selection, not adapter/model setup.
+- [x] UX011 [HIGH] [US1] Move model/adapter selection in `paperclip/ui/src/components/OnboardingWizard.tsx` behind an Advanced section with a sane local default.
+- [x] UX012 [HIGH] [US1] Add a Company Assembly Preview in `paperclip/ui/src/components/OnboardingWizard.tsx` using `paperclip/ui/src/lib/onboarding-seed.ts` so the user sees Operator, 8 departments, starter tasks, and default skills before launch.
+- [x] UX013 [HIGH] [US1] Persist any new assembly-preview metadata through `paperclip/ui/src/lib/onboarding-context.ts` and `paperclip/ui/src/lib/onboarding-launch.ts`.
+- [x] UX014 [HIGH] [US1] Update focused onboarding tests in `paperclip/ui/src/lib/onboarding-context.test.ts`, `paperclip/ui/src/lib/onboarding-launch.test.ts`, and `paperclip/tests/e2e/onboarding.spec.ts`.
+- [x] UX015 [HIGH] [US1] Verify `/onboarding` desktop and mobile rendering with the Browser plugin or Playwright screenshots.
 
 - [ ] UX020 [HIGH] [US2] Reframe `paperclip/ui/src/pages/Dashboard.tsx` as THEFT Command Center / Canvas using `paperclip/ui/src/lib/theft-canvas.ts`.
 - [ ] UX021 [HIGH] [US2] Add Command Center sections in `paperclip/ui/src/pages/Dashboard.tsx`: company stage, current bottleneck, Operator tray, department status grid, attention queue, Tech Tree next steps, and latest Library outputs.

@@ -65,7 +65,9 @@ import {
   Check,
   Loader2,
   ChevronDown,
-  X
+  X,
+  Settings2,
+  Users
 } from "lucide-react";
 
 
@@ -162,8 +164,8 @@ export function OnboardingWizard() {
 
   // Step 2
   const [agentName, setAgentName] = useState("Operator");
-  const [adapterType, setAdapterType] = useState<AdapterType>("claude_local");
-  const [model, setModel] = useState("");
+  const [adapterType, setAdapterType] = useState<AdapterType>("codex_local");
+  const [model, setModel] = useState(DEFAULT_CODEX_LOCAL_MODEL);
   const [command, setCommand] = useState("");
   const [args, setArgs] = useState("");
   const [url, setUrl] = useState("");
@@ -175,6 +177,7 @@ export function OnboardingWizard() {
     useState(false);
   const [unsetAnthropicLoading, setUnsetAnthropicLoading] = useState(false);
   const [showMoreAdapters, setShowMoreAdapters] = useState(false);
+  const [showAdvancedRuntime, setShowAdvancedRuntime] = useState(false);
 
   // Step 3
   const [taskTitle, setTaskTitle] = useState(
@@ -366,8 +369,8 @@ export function OnboardingWizard() {
     setSetupOfferStatus("todo");
     setSetupOfferNote("");
     setAgentName("Operator");
-    setAdapterType("claude_local");
-    setModel("");
+    setAdapterType("codex_local");
+    setModel(DEFAULT_CODEX_LOCAL_MODEL);
     setCommand("");
     setArgs("");
     setUrl("");
@@ -376,6 +379,7 @@ export function OnboardingWizard() {
     setAdapterEnvLoading(false);
     setForceUnsetAnthropicApiKey(false);
     setUnsetAnthropicLoading(false);
+    setShowAdvancedRuntime(false);
     setTaskTitle("Hire your first engineer and create a hiring plan");
     setTaskDescription(DEFAULT_TASK_DESCRIPTION);
     setTaskTemplateCustomized(false);
@@ -802,13 +806,18 @@ export function OnboardingWizard() {
               step === 1 ? "md:w-1/2" : "md:w-full"
             )}
           >
-            <div className="w-full max-w-md mx-auto my-auto px-8 py-12 shrink-0">
+            <div
+              className={cn(
+                "w-full mx-auto my-auto px-8 py-12 shrink-0",
+                step === 2 ? "max-w-2xl" : "max-w-md"
+              )}
+            >
               {/* Progress tabs */}
               <div className="flex items-center gap-0 mb-8 border-b border-border">
                 {(
                   [
                     { step: 1 as Step, label: "Company", icon: Building2 },
-                    { step: 2 as Step, label: "Operator", icon: Bot },
+                    { step: 2 as Step, label: "Assembly", icon: Users },
                     { step: 3 as Step, label: "Task", icon: ListTodo },
                     { step: 4 as Step, label: "Launch", icon: Rocket }
                   ] as const
@@ -840,7 +849,7 @@ export function OnboardingWizard() {
                     <div>
                       <h3 className="font-medium">Name your company</h3>
                       <p className="text-xs text-muted-foreground">
-                        This is the organization your agents will work for.
+                        This is the operating company THEFT will assemble.
                       </p>
                     </div>
                   </div>
@@ -990,9 +999,10 @@ export function OnboardingWizard() {
                       <Bot className="h-5 w-5 text-muted-foreground" />
                     </div>
                     <div>
-                      <h3 className="font-medium">Create your Operator</h3>
+                      <h3 className="font-medium">Assemble your company</h3>
                       <p className="text-xs text-muted-foreground">
-                        Choose how the root company agent will run tasks.
+                        THEFT will create an Operator, departments, starter work,
+                        and Library-ready outputs.
                       </p>
                     </div>
                   </div>
@@ -1009,8 +1019,85 @@ export function OnboardingWizard() {
                     />
                   </div>
 
+                  <div className="rounded-md border border-border bg-muted/15 p-3">
+                    <div className="flex items-start justify-between gap-3">
+                      <div>
+                        <p className="text-sm font-medium">Company assembly preview</p>
+                        <p className="mt-0.5 text-xs text-muted-foreground">
+                          Launch creates one company workspace with Operator-led
+                          departments and starter tasks.
+                        </p>
+                      </div>
+                      <span className="rounded border border-border px-2 py-1 text-[11px] text-muted-foreground">
+                        {ONBOARDING_STAGE_LABELS[companyStage]}
+                      </span>
+                    </div>
+
+                    <div className="mt-3 grid gap-2">
+                      <div className="flex items-center gap-2 rounded border border-border bg-background/60 px-2.5 py-2">
+                        <Bot className="h-4 w-4 text-muted-foreground" />
+                        <div className="min-w-0 flex-1">
+                          <p className="truncate text-xs font-medium">{agentName || "Operator"}</p>
+                          <p className="text-[11px] text-muted-foreground">
+                            Routes work, keeps the founder oriented, and owns the first task.
+                          </p>
+                        </div>
+                      </div>
+
+                      <div>
+                        <div className="mb-1.5 flex items-center justify-between">
+                          <p className="text-xs font-medium">Departments</p>
+                          <p className="text-[11px] text-muted-foreground">
+                            {DEPARTMENT_SEED_SPECS.length} business lanes
+                          </p>
+                        </div>
+                        <div className="grid grid-cols-2 gap-1.5">
+                          {DEPARTMENT_SEED_SPECS.map((department) => (
+                            <div
+                              key={department.key}
+                              className="rounded border border-border bg-background/60 px-2 py-1.5"
+                            >
+                              <p className="truncate text-[11px] font-medium">
+                                {department.title}
+                              </p>
+                              <p className="truncate text-[10px] text-muted-foreground">
+                                {department.taskTitleByStage[companyStage]}
+                              </p>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="rounded-md border border-border p-3">
+                    <button
+                      type="button"
+                      className="flex w-full items-center justify-between gap-3 text-left"
+                      onClick={() => setShowAdvancedRuntime((value) => !value)}
+                    >
+                      <span className="flex min-w-0 items-center gap-2">
+                        <Settings2 className="h-4 w-4 text-muted-foreground" />
+                        <span className="min-w-0">
+                          <span className="block text-xs font-medium">
+                            Advanced runtime
+                          </span>
+                          <span className="block truncate text-[11px] text-muted-foreground">
+                            Using {getUIAdapter(adapterType).label}
+                            {model ? ` / ${model}` : ""}
+                          </span>
+                        </span>
+                      </span>
+                      <ChevronDown
+                        className={cn(
+                          "h-3.5 w-3.5 text-muted-foreground transition-transform",
+                          showAdvancedRuntime ? "rotate-0" : "-rotate-90"
+                        )}
+                      />
+                    </button>
+
                   {/* Adapter type radio cards */}
-                  <div>
+                  {showAdvancedRuntime && <div className="mt-4">
                     <label className="text-xs text-muted-foreground mb-2 block">
                       Adapter type
                     </label>
@@ -1111,10 +1198,10 @@ export function OnboardingWizard() {
                         ))}
                       </div>
                     )}
-                  </div>
+                  </div>}
 
                   {/* Conditional adapter fields */}
-                  {isLocalAdapter && (
+                  {showAdvancedRuntime && isLocalAdapter && (
                     <div className="space-y-3">
                       <div>
                         <label className="text-xs text-muted-foreground mb-1 block">
@@ -1216,7 +1303,7 @@ export function OnboardingWizard() {
                     </div>
                   )}
 
-                  {isLocalAdapter && (
+                  {showAdvancedRuntime && isLocalAdapter && (
                     <div className="space-y-2 rounded-md border border-border p-3">
                       <div className="flex items-center justify-between gap-2">
                         <div>
@@ -1334,7 +1421,7 @@ export function OnboardingWizard() {
                     </div>
                   )}
 
-                  {(adapterType === "http" ||
+                  {showAdvancedRuntime && (adapterType === "http" ||
                     adapterType === "openclaw_gateway") && (
                     <div>
                       <label className="text-xs text-muted-foreground mb-1 block">
@@ -1354,6 +1441,7 @@ export function OnboardingWizard() {
                       />
                     </div>
                   )}
+                  </div>
                 </div>
               )}
 
@@ -1364,10 +1452,10 @@ export function OnboardingWizard() {
                       <ListTodo className="h-5 w-5 text-muted-foreground" />
                     </div>
                     <div>
-                      <h3 className="font-medium">Give it something to do</h3>
+                      <h3 className="font-medium">Set the first company task</h3>
                       <p className="text-xs text-muted-foreground">
-                        Give your agent a small task to start with — a bug fix,
-                        a research question, writing a script.
+                        Give the Operator a concrete business task to route,
+                        review, and turn into Library output.
                       </p>
                     </div>
                   </div>
@@ -1422,10 +1510,10 @@ export function OnboardingWizard() {
                       <Rocket className="h-5 w-5 text-muted-foreground" />
                     </div>
                     <div>
-                      <h3 className="font-medium">Ready to launch</h3>
+                      <h3 className="font-medium">Launch your company OS</h3>
                       <p className="text-xs text-muted-foreground">
-                        Everything is set up. Launching now will create the
-                        starter task, wake the agent, and open the issue.
+                        Launch creates the Operator, 8 departments, starter
+                        tasks, and a Command Center backed by Paperclip.
                       </p>
                     </div>
                   </div>
@@ -1447,7 +1535,7 @@ export function OnboardingWizard() {
                           {agentName}
                         </p>
                         <p className="text-xs text-muted-foreground">
-                          {getUIAdapter(adapterType).label}
+                          Operator / {getUIAdapter(adapterType).label}
                         </p>
                       </div>
                       <Check className="h-4 w-4 text-green-500 shrink-0" />
@@ -1459,6 +1547,19 @@ export function OnboardingWizard() {
                           {taskTitle}
                         </p>
                         <p className="text-xs text-muted-foreground">Task</p>
+                      </div>
+                      <Check className="h-4 w-4 text-green-500 shrink-0" />
+                    </div>
+                    <div className="flex items-center gap-3 px-3 py-2.5">
+                      <Users className="h-4 w-4 text-muted-foreground shrink-0" />
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium truncate">
+                          {DEPARTMENT_SEED_SPECS.length} departments
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          Engineering, Design, Marketing, Sales, Operations,
+                          Finance, Legal, Support
+                        </p>
                       </div>
                       <Check className="h-4 w-4 text-green-500 shrink-0" />
                     </div>

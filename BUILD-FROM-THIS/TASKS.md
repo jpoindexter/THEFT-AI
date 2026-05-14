@@ -104,4 +104,5 @@
 | T081 | Create reusable UX screen prompts for onboarding, assembly, Command Center, departments, task review, Library, Tech Tree, critique, and implementation translation | ✅ done |
 | T082 | Create model-lane UX build task list in `BUILD-FROM-THIS/UX-BUILD-TASKS.md` | ✅ done |
 | T083 | Execute xhigh synthesis gate and prepare handoff to `gpt-5.5 high` | ✅ done |
-| T084 | Switch to `gpt-5.5 high` and begin `UX010` from `BUILD-FROM-THIS/UX-BUILD-TASKS.md` | ☐ todo |
+| T084 | Switch to `gpt-5.5 high` and complete `UX010`-`UX015` onboarding happy path in `paperclip/` | ✅ done |
+| T085 | Continue `UX020` Command Center / Canvas implementation from `BUILD-FROM-THIS/UX-BUILD-TASKS.md` | ☐ todo |

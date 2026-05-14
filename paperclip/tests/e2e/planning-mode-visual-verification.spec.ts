@@ -2,7 +2,7 @@ import { expect, test } from "@playwright/test";
 
 const SKIP_LLM = process.env.PAPERCLIP_E2E_SKIP_LLM !== "false";
 
-const AGENT_NAME = "CEO";
+const AGENT_NAME = "Operator";
 const TASK_TITLE = "PAP-3413 planning mode evidence";
 
 test("captures planning mode UI for desktop and mobile", async ({ page }) => {
@@ -16,11 +16,11 @@ test("captures planning mode UI for desktop and mobile", async ({ page }) => {
   await page.locator('input[placeholder="Acme Corp"]').fill(companyName);
   await page.getByRole("button", { name: "Next" }).click();
 
-  await expect(page.locator("h3", { hasText: "Create your first agent" })).toBeVisible({ timeout: 30_000 });
-  await expect(page.locator('input[placeholder="CEO"]')).toHaveValue(AGENT_NAME);
+  await expect(page.locator("h3", { hasText: "Assemble your company" })).toBeVisible({ timeout: 30_000 });
+  await expect(page.locator('input[placeholder="Operator"]')).toHaveValue(AGENT_NAME);
   await page.getByRole("button", { name: "Next" }).click();
 
-  await expect(page.locator("h3", { hasText: "Give it something to do" })).toBeVisible({ timeout: 30_000 });
+  await expect(page.locator("h3", { hasText: "Set the first company task" })).toBeVisible({ timeout: 30_000 });
   const baseUrl = page.url().split("/").slice(0, 3).join("/");
 
   if (SKIP_LLM) {
@@ -60,13 +60,11 @@ test("captures planning mode UI for desktop and mobile", async ({ page }) => {
   await taskTitleInput.fill(TASK_TITLE);
   await page.getByRole("button", { name: "Next" }).click();
 
-  await expect(page.locator("h3", { hasText: "Ready to launch" })).toBeVisible({ timeout: 30_000 });
-  await page.getByRole("button", { name: "Create & Open Issue" }).click();
-  await expect(page).toHaveURL(/\/issues\//, { timeout: 30_000 });
+  await expect(page.locator("h3", { hasText: "Launch your company OS" })).toBeVisible({ timeout: 30_000 });
+  await page.getByRole("button", { name: "Launch Company" }).click();
+  await expect(page).toHaveURL(/\/dashboard$/, { timeout: 30_000 });
 
-  const openedIssueUrl = page.url();
-  const openedIssueIdentifier = openedIssueUrl.split("/").filter(Boolean).pop();
-  const baseOrigin = new URL(openedIssueUrl).origin;
+  const baseOrigin = page.url().split("/").slice(0, 3).join("/");
   const companyRes = await page.request.get(`${baseOrigin}/api/companies`);
   expect(companyRes.ok()).toBe(true);
   const companies = await companyRes.json();
@@ -77,7 +75,7 @@ test("captures planning mode UI for desktop and mobile", async ({ page }) => {
   const issues = await issueRes.json();
   const planningSeedIssue = issues.find(
     (candidate: { id: string; identifier?: string; title: string }) =>
-      candidate.identifier === openedIssueIdentifier || candidate.id === openedIssueIdentifier || candidate.title === TASK_TITLE,
+      candidate.title === TASK_TITLE,
   );
   expect(planningSeedIssue).toBeTruthy();
 

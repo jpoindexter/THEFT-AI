@@ -42,26 +42,58 @@ async function ensureParentDir(target: string): Promise<void> {
   await fs.mkdir(path.dirname(target), { recursive: true });
 }
 
-async function ensureSymlink(target: string, source: string): Promise<void> {
-  const existing = await fs.lstat(target).catch(() => null);
-  if (!existing) {
-    await ensureParentDir(target);
-    await fs.symlink(source, target);
-    return;
-  }
+function hasErrorCode(err: unknown, code: string): boolean {
+  return (
+    typeof err === "object" &&
+    err !== null &&
+    "code" in err &&
+    (err as { code?: unknown }).code === code
+  );
+}
 
-  if (!existing.isSymbolicLink()) {
-    return;
-  }
+async function symlinkPointsAt(target: string, source: string): Promise<boolean> {
+  const existing = await fs.lstat(target).catch(() => null);
+  if (!existing?.isSymbolicLink()) return false;
 
   const linkedPath = await fs.readlink(target).catch(() => null);
-  if (!linkedPath) return;
+  if (!linkedPath) return false;
 
   const resolvedLinkedPath = path.resolve(path.dirname(target), linkedPath);
-  if (resolvedLinkedPath === source) return;
+  return resolvedLinkedPath === path.resolve(source);
+}
 
-  await fs.unlink(target);
-  await fs.symlink(source, target);
+async function ensureSymlink(target: string, source: string): Promise<void> {
+  await ensureParentDir(target);
+
+  for (let attempt = 0; attempt < 2; attempt += 1) {
+    const existing = await fs.lstat(target).catch(() => null);
+    if (!existing) {
+      try {
+        await fs.symlink(source, target);
+        return;
+      } catch (err) {
+        if (hasErrorCode(err, "EEXIST") && (await symlinkPointsAt(target, source))) {
+          return;
+        }
+        if (hasErrorCode(err, "EEXIST")) continue;
+        throw err;
+      }
+    }
+
+    if (!existing.isSymbolicLink()) {
+      return;
+    }
+
+    if (await symlinkPointsAt(target, source)) return;
+
+    await fs.unlink(target).catch((err) => {
+      if (!hasErrorCode(err, "ENOENT")) throw err;
+    });
+  }
+
+  if (!(await symlinkPointsAt(target, source))) {
+    await fs.symlink(source, target);
+  }
 }
 
 async function ensureCopiedFile(target: string, source: string): Promise<void> {
