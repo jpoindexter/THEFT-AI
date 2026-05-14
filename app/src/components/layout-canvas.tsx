@@ -370,14 +370,14 @@ function MenuItem({
     <button
       type="button"
       onClick={onClick}
-      className="w-full text-left flex items-center gap-3 px-4 py-3 hover:bg-paper/5 transition-colors"
+      className="w-full text-left flex items-center gap-3 px-4 py-3 hover:bg-paper/10 transition-colors"
     >
-      <span className="size-9 rounded-md bg-paper/10 inline-flex items-center justify-center text-paper shrink-0">
+      <span className="size-9 rounded-md border border-paper/10 bg-paper/10 inline-flex items-center justify-center text-paper shrink-0">
         {icon}
       </span>
       <span className="flex-1 min-w-0">
-        <span className="block text-sm font-medium text-paper">{label}</span>
-        <span className="block text-xs text-paper/60 mt-0.5">{sub}</span>
+        <span className="block text-base font-medium text-paper tracking-tight">{label}</span>
+        <span className="block text-sm text-paper/60 mt-1 leading-none">{sub}</span>
       </span>
     </button>
   );

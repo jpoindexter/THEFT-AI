@@ -17,8 +17,8 @@
   - Two device-frame mockups (Landing Page + Application)
   - "Engineering Roadmap" horizontal scroller with status cards
   - "0/7 Setup" progress label
-- [ ] New Agent / New Task popover from `04-engineering-new-task-menu.png`
-- [ ] Task creation modal pixel-match (`/screenshots/06-agent-tasks/04-new-task-dialog.png`)
+- [x] New Agent / New Task popover from `04-engineering-new-task-menu.png`
+- [x] Task creation modal pixel-match (`/screenshots/06-agent-tasks/04-new-task-dialog.png`)
 
 ## Day 3 — tech tree + business brief polish
 

@@ -7,7 +7,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Link2, ChevronDown, Check } from "lucide-react";
+import { Link2, ChevronDown, Check, Bot, AppWindow } from "lucide-react";
 
 type Agent = {
   id: string;
@@ -87,11 +87,11 @@ export default function NewTaskDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-xl p-0 bg-paper">
+      <DialogContent className="sm:max-w-[920px] p-0 bg-paper border border-line/80">
         <DialogHeader className="sr-only">
           <DialogTitle>Create a task</DialogTitle>
         </DialogHeader>
-        <div className="p-4">
+        <div className="p-4 pb-2">
           <textarea
             autoFocus
             value={description}
@@ -103,11 +103,11 @@ export default function NewTaskDialog({
               }
             }}
             placeholder="Describe a task for your agent…"
-            rows={5}
-            className="w-full resize-none text-base focus:outline-none placeholder:text-ink-soft"
+            rows={7}
+            className="w-full resize-none text-[34px] leading-tight focus:outline-none placeholder:text-ink-soft"
           />
         </div>
-        <div className="flex items-center gap-1.5 border-t border-line/80 px-2 py-2 text-xs flex-wrap">
+        <div className="flex items-center gap-2 border-t border-line/80 px-4 py-3 text-xs flex-wrap">
           <PillBtn
             icon={<Link2 className="size-3" />}
             label="Add files"
@@ -126,7 +126,7 @@ export default function NewTaskDialog({
             type="button"
             onClick={() => void submit()}
             disabled={!description.trim() || submitting}
-            className="rounded-md bg-ink text-paper px-3 py-1 text-xs disabled:opacity-30 hover:opacity-90"
+            className="rounded-md bg-ink text-paper px-5 py-2 text-sm disabled:opacity-30 hover:opacity-90"
           >
             {submitting ? "Creating…" : "Create Task"}
           </button>
@@ -149,7 +149,7 @@ function PillBtn({
     <button
       type="button"
       onClick={onClick}
-      className="inline-flex items-center gap-1 rounded-md border border-line/80 bg-paper px-2 py-1 hover:border-line-strong transition-colors text-ink"
+      className="inline-flex items-center gap-1.5 rounded-md border border-line/80 bg-paper px-3 py-2 hover:border-line-strong transition-colors text-sm text-ink"
     >
       {icon}
       {label}
@@ -181,13 +181,14 @@ function ModeDropdown({
       <button
         type="button"
         onClick={() => setOpen((o) => !o)}
-        className="inline-flex items-center gap-1 rounded-md border border-line/80 bg-paper px-2 py-1 hover:border-line-strong transition-colors text-ink"
+        className="inline-flex items-center gap-1.5 rounded-md border border-line/80 bg-paper px-3 py-2 hover:border-line-strong transition-colors text-sm text-ink"
       >
+        <Bot className="size-3.5 text-ink-soft" />
         {mode === "execute" ? "Execute" : "Plan"}
         <ChevronDown className="size-3 text-ink-muted" />
       </button>
       {open && (
-        <div className="absolute bottom-full mb-1 left-0 z-50 w-44 rounded-lg border border-line/80 bg-paper shadow-md overflow-hidden">
+        <div className="absolute bottom-full mb-1 left-0 z-50 w-56 rounded-lg border border-line/80 bg-paper shadow-md overflow-hidden">
           <div className="px-3 py-1.5 text-2xs text-ink-soft border-b border-line/70">
             Agent will execute your request immediately
           </div>
@@ -238,22 +239,28 @@ function AgentDropdown({
       <button
         type="button"
         onClick={() => setOpen((o) => !o)}
-        className="inline-flex items-center gap-1 rounded-md border border-line/80 bg-paper px-2 py-1 hover:border-line-strong transition-colors text-ink"
+        className="inline-flex items-center gap-1.5 rounded-md border border-line/80 bg-paper px-3 py-2 hover:border-line-strong transition-colors text-sm text-ink"
       >
+        <span className="size-4 rounded-full bg-line inline-flex items-center justify-center text-[9px] text-ink-soft">
+          {label.charAt(0).toUpperCase()}
+        </span>
         {label}
         <ChevronDown className="size-3 text-ink-muted" />
       </button>
       {open && (
-        <div className="absolute bottom-full mb-1 left-0 z-50 w-44 rounded-lg border border-line/80 bg-paper shadow-md overflow-hidden">
+        <div className="absolute bottom-full mb-1 left-0 z-50 w-72 rounded-lg border border-line/80 bg-paper shadow-md overflow-hidden">
           <div className="px-3 py-1.5 text-2xs text-ink-soft border-b border-line/70">
             Your Agents
           </div>
           <button
             type="button"
             onClick={() => { onChange("auto"); setOpen(false); }}
-            className="w-full flex items-center justify-between px-3 py-2 hover:bg-canvas text-sm"
+            className="w-full flex items-center justify-between px-3 py-2 hover:bg-canvas text-sm bg-canvas/40"
           >
-            Auto-assign
+            <span className="flex items-center gap-2">
+              <span className="size-4 rounded-full bg-line inline-flex items-center justify-center text-[9px] text-ink-soft">•</span>
+              Auto-assign
+            </span>
             {value === "auto" && <Check className="size-3 text-ink" />}
           </button>
           {agents.map((a) => {
@@ -267,7 +274,7 @@ function AgentDropdown({
                 className="w-full flex items-center justify-between px-3 py-2 hover:bg-canvas text-sm"
               >
                 <span className="flex items-center gap-2">
-                  <span className={`size-2 rounded-full inline-block ${dotColor}`} />
+                  <span className={`size-4 rounded-full inline-flex items-center justify-center text-[9px] text-ink ${dotColor}`}>{a.name.charAt(0).toUpperCase()}</span>
                   {a.name}
                 </span>
                 {value === a.id && <Check className="size-3 text-ink" />}
@@ -301,13 +308,14 @@ function AppDropdown() {
       <button
         type="button"
         onClick={() => setOpen((o) => !o)}
-        className="inline-flex items-center gap-1 rounded-md border border-line/80 bg-paper px-2 py-1 hover:border-line-strong transition-colors text-ink"
+        className="inline-flex items-center gap-1.5 rounded-md border border-line/80 bg-paper px-3 py-2 hover:border-line-strong transition-colors text-sm text-ink"
       >
+        <AppWindow className="size-3.5 text-ink-soft" />
         {selected}
         <ChevronDown className="size-3 text-ink-muted" />
       </button>
       {open && (
-        <div className="absolute bottom-full mb-1 left-0 z-50 w-44 rounded-lg border border-line/80 bg-paper shadow-md overflow-hidden">
+        <div className="absolute bottom-full mb-1 left-0 z-50 w-72 rounded-lg border border-line/80 bg-paper shadow-md overflow-hidden">
           {options.map((opt) => (
             <button
               key={opt}
