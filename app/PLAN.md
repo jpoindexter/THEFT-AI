@@ -36,7 +36,7 @@
 
 ## Day 5 — settings polish
 
-- [ ] All 10 settings pages match `/screenshots/09-settings/settings*.png`
+- [x] All 10 settings pages match `/screenshots/09-settings/settings*.png`
 - [x] Window-blind shadow effect on settings background
 - [x] Delete account modal (misc/01)
 - [x] Company Context tabs with copy-prompt buttons working

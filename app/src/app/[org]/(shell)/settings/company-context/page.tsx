@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Copy, Check, Upload } from "lucide-react";
+import { SectionHeader, SettingsCard } from "@/components/settings/section";
 
 const SOURCES = [
   { id: "chatgpt", label: "ChatGPT", note: "Memory + chats" },
@@ -45,20 +46,15 @@ export default function CompanyContextPage() {
   }
 
   return (
-    <div className="absolute inset-0 overflow-y-auto p-6">
-      <div className="max-w-3xl mx-auto space-y-5">
-        <header>
-          <h1 className="text-xl tracking-tight">Company Context</h1>
-          <p className="text-sm text-ink-muted">
-            Import durable company knowledge from another AI tool. Run the
-            prompt there, paste the report here, preview, then import to Company
-            Memory.
-          </p>
-        </header>
+    <>
+      <SectionHeader
+        title="Company Context"
+        description="Import durable company knowledge from another AI tool. Run the prompt there, paste the report here, preview, then import to Company Memory."
+      />
 
-        <section className="rounded-lg border border-line/70 bg-paper p-4 space-y-3">
+      <SettingsCard title="1. Pick the Source">
           <div className="text-md font-medium tracking-tight">
-            1. Pick the source
+            Source tool
           </div>
           <div className="grid grid-cols-5 gap-1.5">
             {SOURCES.map((s) => {
@@ -80,9 +76,9 @@ export default function CompanyContextPage() {
               );
             })}
           </div>
-        </section>
+      </SettingsCard>
 
-        <section className="rounded-lg border border-line/70 bg-paper p-4 space-y-2">
+      <SettingsCard title="2. Copy Prompt">
           <div className="flex items-center justify-between">
             <div className="text-md font-medium tracking-tight">
               2. Copy this prompt into {SOURCES.find((s) => s.id === source)?.label}
@@ -106,9 +102,9 @@ export default function CompanyContextPage() {
           <pre className="text-xs font-mono whitespace-pre-wrap leading-relaxed bg-canvas rounded-md p-3 max-h-64 overflow-y-auto text-ink">
             {PROMPT}
           </pre>
-        </section>
+      </SettingsCard>
 
-        <section className="rounded-lg border border-line/70 bg-paper p-4 space-y-2">
+      <SettingsCard title="3. Paste Report">
           <div className="text-md font-medium tracking-tight">
             3. Paste the report
           </div>
@@ -136,10 +132,10 @@ export default function CompanyContextPage() {
               <Upload className="size-3" /> Import to Company Memory
             </button>
           </div>
-        </section>
+      </SettingsCard>
 
-        {previewing && (
-          <section className="rounded-lg border border-line/70 bg-paper p-4 space-y-2">
+      {previewing && (
+          <SettingsCard title="Preview">
             <div className="text-md font-medium tracking-tight">
               Preview
             </div>
@@ -163,10 +159,9 @@ export default function CompanyContextPage() {
                 </li>
               ))}
             </ul>
-          </section>
-        )}
-      </div>
-    </div>
+          </SettingsCard>
+      )}
+    </>
   );
 }
 
