@@ -28,11 +28,11 @@
 
 ## Day 4 — design / brand kit flow
 
-- [ ] Match `/screenshots/07-design-brand-kit/`:
+- [x] Match `/screenshots/07-design-brand-kit/`:
   - Intro card centered with skip / choose-vibe CTAs
   - "Painting your brand kit" progress with rotating sub-labels
   - Final brand board grid (logo / palette / type / paper / components / UI kit)
-- [ ] Wire huashu-design skill into the brand kit generation prompt
+- [x] Wire huashu-design skill into the brand kit generation prompt
 
 ## Day 5 — settings polish
 

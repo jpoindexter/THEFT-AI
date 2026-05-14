@@ -317,7 +317,7 @@ const TOTAL_STEPS = 5;
 
 function BrandDesignCanvas({ orgSlug, onSkip }: { orgSlug: string; onSkip: () => void }) {
   const router = useRouter();
-  const [kitPhase, setKitPhase] = useState<BrandKitPhase>("vibes");
+  const [kitPhase, setKitPhase] = useState<BrandKitPhase>("intro");
   const step = KIT_PHASE_STEP[kitPhase] ?? 2;
 
   useEffect(() => {
@@ -329,11 +329,7 @@ function BrandDesignCanvas({ orgSlug, onSkip }: { orgSlug: string; onSkip: () =>
   return (
     <div className="absolute inset-0 flex flex-col" style={{ background: "radial-gradient(circle, rgba(0,0,0,0.055) 1px, transparent 1px)", backgroundSize: "18px 18px", backgroundColor: "#f3f1ec" }}>
       <div className="absolute inset-x-4 top-4 bottom-12 rounded-2xl overflow-hidden border border-line/60 shadow-sm bg-paper">
-        <button type="button" onClick={onSkip}
-          className="absolute top-3 right-3 z-10 text-xs text-ink-muted hover:text-ink border border-line/70 rounded-md px-2.5 py-1.5 bg-paper/90">
-          Skip onboarding →
-        </button>
-        <BrandKitFlow orgSlug={orgSlug} vibes={[]} initialPhase="vibes" onPhaseChange={setKitPhase} />
+        <BrandKitFlow orgSlug={orgSlug} vibes={[]} initialPhase="intro" onPhaseChange={setKitPhase} onSkipAll={onSkip} />
       </div>
       <div className="absolute bottom-0 inset-x-0 h-12 flex items-center justify-center gap-3">
         <span className="text-xs text-ink-muted">{step}/{TOTAL_STEPS}</span>

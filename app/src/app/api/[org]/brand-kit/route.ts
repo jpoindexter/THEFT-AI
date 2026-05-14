@@ -56,6 +56,7 @@ ${planText ? `Business plan:\n${planText}\n` : ""}
 Vibe direction: ${parsed.data.vibe_name} — ${parsed.data.vibe_description ?? ""}
 ${parsed.data.custom_brief ? `Founder's custom brief: ${parsed.data.custom_brief}\n` : ""}
 Use your design judgement and the skills available to you. Treat the vibe as a starting direction, not a paint-by-number — adapt every choice to the company.
+Explicitly apply the huashu-design skill heuristics for visual hierarchy, spacing rhythm, color contrast, and component consistency.
 
 Output JSON only — no prose, no code fences. Schema:
 {

@@ -26,11 +26,13 @@ export default function BrandKitFlow({
   vibes: loadedVibes,
   initialPhase = "intro",
   onPhaseChange,
+  onSkipAll,
 }: {
   orgSlug: string;
   vibes: Vibe[];
   initialPhase?: BrandKitPhase;
   onPhaseChange?: (p: BrandKitPhase) => void;
+  onSkipAll?: () => void;
 }) {
   const vibes = loadedVibes.length > 0 ? loadedVibes : BUILTIN_VIBES;
   const [phase, setPhase] = useState<BrandKitPhase>(initialPhase);
@@ -88,7 +90,14 @@ export default function BrandKitFlow({
       ) : (
         <div className="max-w-4xl mx-auto p-8 space-y-6">
           {phase === "intro" && (
-            <IntroPhase orgSlug={orgSlug} onChooseVibe={() => changePhase("vibes")} onSkip={() => changePhase("complete")} />
+            <IntroPhase
+              orgSlug={orgSlug}
+              onChooseVibe={() => changePhase("vibes")}
+              onSkip={() => {
+                if (onSkipAll) onSkipAll();
+                else changePhase("complete");
+              }}
+            />
           )}
           {phase === "vibes" && (
             <>
