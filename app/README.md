@@ -11,6 +11,12 @@ pnpm dev
 
 Open http://localhost:3000 — no database, no auth, no env required for the UI.
 
+Release gate (tests + build + route smoke + onboarding checks):
+
+```sh
+pnpm gate
+```
+
 For real Cofounder chat replies, use a local OAuth CLI or local model harness.
 The default backend is Codex CLI, matching the Paperclip-style local adapter
 model:
