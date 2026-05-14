@@ -39,48 +39,52 @@
 
 | ID | Title | Status |
 |---|---|---|
-| T030 | Replace Paperclip generic company creation with THEFT entry route | ☐ todo |
+| T030 | Replace Paperclip generic company creation with THEFT entry route | ✅ done |
 | T031 | Add company name step | ✅ done |
 | T032 | Add company stage picker: pre-idea, idea, validating, building, launched, revenue, scaling, existing business | ✅ done |
 | T033 | Add adaptive setup interview per stage | ✅ done |
 | T034 | Add "already done", "skip", and note/name fields for setup items | ✅ done |
 | T035 | Create Paperclip company profile metadata from onboarding | ✅ done |
-| T036 | Seed Operator, 8 departments/agents, roadmap goals/issues, and first tasks | ▶ doing |
-| T037 | Hide local credits/billing prompts during onboarding | ☐ todo |
-| T038 | Browser-test onboarding desktop/mobile | ☐ todo |
+| T036 | Seed Operator, 8 departments/agents, roadmap goals/issues, and first tasks | ✅ done |
+| T037 | Hide local credits/billing prompts during onboarding | ✅ done |
+| T038 | Browser-test onboarding desktop/mobile | ✅ done |
+| T039 | Add verification smoke helper/checklist for Paperclip host run readiness | ✅ done |
 
 ## Slice 0.4 — Canvas / Tasks / Roadmap On Paperclip
 
 | ID | Title | Status |
 |---|---|---|
-| T040 | Build THEFT company canvas using Paperclip company/goals/agents/issues | ☐ todo |
-| T041 | Build department workspace view over Paperclip agents/issues | ☐ todo |
-| T042 | Build task list/detail over Paperclip issues/comments/documents/runs | ☐ todo |
-| T043 | Build attention queue from Paperclip approvals/interactions/reviewable work | ☐ todo |
-| T044 | Build Operator tray that writes Paperclip issues/comments | ☐ todo |
-| T045 | Map Tech Tree to Paperclip goals/projects/issues | ☐ todo |
+| T040 | Build THEFT company canvas using Paperclip company/goals/agents/issues | ✅ done |
+| T041 | Build department workspace view over Paperclip agents/issues | ✅ done |
+| T042 | Build task list/detail over Paperclip issues/comments/documents/runs | ✅ done |
+| T043 | Build attention queue from Paperclip approvals/interactions/reviewable work | ✅ done |
+| T044 | Build Operator tray that writes Paperclip issues/comments | ✅ done |
+| T045 | Map Tech Tree to Paperclip goals/projects/issues | ✅ done |
 
 ## Slice 0.5 — Library
 
 | ID | Title | Status |
 |---|---|---|
-| T050 | Map issue documents/attachments/work products to Library items | ☐ todo |
-| T051 | Add department folders and pinned files | ☐ todo |
-| T052 | Add safe markdown/text edit flow | ☐ todo |
-| T053 | Ensure agent outputs land in Library by default | ☐ todo |
+| T050 | Map issue documents/attachments/work products to Library items | ✅ done |
+| T051 | Add department folders and pinned files | ✅ done |
+| T052 | Add safe markdown/text edit flow | ✅ done |
+| T053 | Ensure agent outputs land in Library by default | ✅ done |
 
 ## Slice 0.6 — Department Runtime Smoke
 
 | ID | Title | Status |
 |---|---|---|
-| T060 | Engineering smoke through Paperclip adapter | ☐ todo |
-| T061 | Design smoke through Paperclip adapter | ☐ todo |
-| T062 | Marketing smoke through Paperclip adapter | ☐ todo |
-| T063 | Sales smoke through Paperclip adapter | ☐ todo |
-| T064 | Operations smoke through Paperclip adapter | ☐ todo |
-| T065 | Finance smoke through Paperclip adapter | ☐ todo |
-| T066 | Legal smoke through Paperclip adapter | ☐ todo |
-| T067 | Support smoke through Paperclip adapter | ☐ todo |
+| T060 | Engineering smoke through Paperclip adapter | ✅ done |
+| T061 | Design smoke through Paperclip adapter | ✅ done |
+| T062 | Marketing smoke through Paperclip adapter | ✅ done |
+| T063 | Sales smoke through Paperclip adapter | ✅ done |
+| T064 | Operations smoke through Paperclip adapter | ✅ done |
+| T065 | Finance smoke through Paperclip adapter | ✅ done |
+| T066 | Legal smoke through Paperclip adapter | ✅ done |
+| T067 | Support smoke through Paperclip adapter | ✅ done |
+| T068 | Convert 8-department smoke checklist into automated Playwright/API coverage | ✅ done |
+| T069 | Run 8-department smoke with an LLM adapter | ✅ done |
+| T069A | Verify LLM smoke outputs become Library artifacts | ☐ todo |
 
 ## Slice 0.7 — Subtract Dead Surface
 
@@ -91,3 +95,13 @@
 | T072 | Remove user-facing Cofounder copy from active product | ☐ todo |
 | T073 | Remove LLC/service-company assumptions from setup | ☐ todo |
 | T074 | Verify one app/server happy path | ☐ todo |
+
+## Slice 0.8 — UX Execution Gate
+
+| ID | Title | Status |
+|---|---|---|
+| T080 | Create UX direction doc tying Paperclip, Cofounder, Hyperagent, THEFT skills, and happy path together | ✅ done |
+| T081 | Create reusable UX screen prompts for onboarding, assembly, Command Center, departments, task review, Library, Tech Tree, critique, and implementation translation | ✅ done |
+| T082 | Create model-lane UX build task list in `BUILD-FROM-THIS/UX-BUILD-TASKS.md` | ✅ done |
+| T083 | Execute xhigh synthesis gate and prepare handoff to `gpt-5.5 high` | ✅ done |
+| T084 | Switch to `gpt-5.5 high` and begin `UX010` from `BUILD-FROM-THIS/UX-BUILD-TASKS.md` | ☐ todo |

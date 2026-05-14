@@ -1,6 +1,8 @@
 import type { Goal } from "@paperclipai/shared";
 
 export const ONBOARDING_PROJECT_NAME = "Onboarding";
+export const ONBOARDING_LIBRARY_OUTPUT_INSTRUCTION =
+  "Default output: create or update a Paperclip issue document or work product so the result appears in the THEFT Library.";
 
 function goalCreatedAt(goal: Goal) {
   const createdAt = goal.createdAt instanceof Date ? goal.createdAt : new Date(goal.createdAt);
@@ -41,10 +43,14 @@ export function buildOnboardingIssuePayload(input: {
 }) {
   const title = input.title.trim();
   const description = input.description.trim();
+  const descriptionWithLibraryInstruction = [
+    description,
+    ONBOARDING_LIBRARY_OUTPUT_INSTRUCTION,
+  ].filter(Boolean).join("\n\n");
 
   return {
     title,
-    ...(description ? { description } : {}),
+    ...(descriptionWithLibraryInstruction ? { description: descriptionWithLibraryInstruction } : {}),
     assigneeAgentId: input.assigneeAgentId,
     projectId: input.projectId,
     ...(input.goalId ? { goalId: input.goalId } : {}),

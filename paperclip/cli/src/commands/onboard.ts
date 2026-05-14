@@ -62,6 +62,7 @@ const TAILNET_BIND_WARNING =
 const ONBOARD_ENV_KEYS = [
   "PAPERCLIP_PUBLIC_URL",
   "DATABASE_URL",
+  "PAPERCLIP_EMBEDDED_POSTGRES_PORT",
   "PAPERCLIP_DB_BACKUP_ENABLED",
   "PAPERCLIP_DB_BACKUP_INTERVAL_MINUTES",
   "PAPERCLIP_DB_BACKUP_RETENTION_DAYS",
@@ -208,12 +209,15 @@ function quickstartDefaultsFromEnv(opts?: { preferTrustedLocal?: boolean }): {
     1,
     parseNumberFromEnv(process.env.PAPERCLIP_DB_BACKUP_RETENTION_DAYS) ?? 30,
   );
+  const embeddedPostgresPort = Math.trunc(
+    parseNumberFromEnv(process.env.PAPERCLIP_EMBEDDED_POSTGRES_PORT) ?? 54329,
+  );
   const defaults: OnboardDefaults = {
     database: {
       mode: databaseUrl ? "postgres" : "embedded-postgres",
       ...(databaseUrl ? { connectionString: databaseUrl } : {}),
       embeddedPostgresDataDir: resolveDefaultEmbeddedPostgresDir(instanceId),
-      embeddedPostgresPort: 54329,
+      embeddedPostgresPort,
       backup: {
         enabled: databaseBackupEnabled,
         intervalMinutes: databaseBackupIntervalMinutes,

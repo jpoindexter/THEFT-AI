@@ -13,11 +13,31 @@ export type OnboardingStage = (typeof ONBOARDING_STAGES)[number];
 
 export type OnboardingSetupStatus = "todo" | "done" | "skipped";
 
+export const ONBOARDING_STAGE_LABELS: Record<OnboardingStage, string> = {
+  "pre-idea": "Pre-idea",
+  idea: "Idea",
+  validating: "Validating",
+  building: "Building",
+  launched: "Launched",
+  revenue: "Revenue",
+  scaling: "Scaling",
+  "existing-business": "Existing business",
+};
+
 export interface OnboardingSetupItemInput {
   key: string;
   label: string;
   status: OnboardingSetupStatus;
   note?: string;
+}
+
+export interface OnboardingContextProfile {
+  version: 1;
+  source: "theft-onboarding";
+  stage: OnboardingStage;
+  initialBrief: string;
+  operatorName: string;
+  setupItems: OnboardingSetupItemInput[];
 }
 
 export interface OnboardingStageTaskTemplate {
@@ -86,39 +106,121 @@ const ONBOARDING_STAGE_TASK_TEMPLATES: Record<OnboardingStage, OnboardingStageTa
   },
 };
 
-function sanitizeInline(value: string) {
-  return value.replace(/\r?\n/g, " ").trim();
+function isOnboardingStage(value: unknown): value is OnboardingStage {
+  return typeof value === "string" && ONBOARDING_STAGES.includes(value as OnboardingStage);
+}
+
+function isSetupStatus(value: unknown): value is OnboardingSetupStatus {
+  return value === "todo" || value === "done" || value === "skipped";
+}
+
+function normalizeSetupItems(items: OnboardingSetupItemInput[]): OnboardingSetupItemInput[] {
+  return items.map((item) => ({
+    key: item.key.trim(),
+    label: item.label.trim(),
+    status: item.status,
+    ...(item.note?.trim() ? { note: item.note.trim() } : {}),
+  })).filter((item) => item.key && item.label);
 }
 
 export function buildOnboardingContextBlock(input: {
   stage: OnboardingStage;
+  initialBrief?: string;
+  operatorName?: string;
   setupItems: OnboardingSetupItemInput[];
 }) {
-  const lines = [
+  const profile: OnboardingContextProfile = {
+    version: 1,
+    source: "theft-onboarding",
+    stage: input.stage,
+    initialBrief: input.initialBrief?.trim() ?? "",
+    operatorName: input.operatorName?.trim() || "Operator",
+    setupItems: normalizeSetupItems(input.setupItems),
+  };
+
+  return [
     "[theft-onboarding]",
-    `stage=${input.stage}`,
-    "setup=",
-  ];
-  for (const item of input.setupItems) {
-    const note = sanitizeInline(item.note ?? "");
-    const suffix = note ? ` (${note})` : "";
-    lines.push(`- ${item.key}:${item.status}${suffix}`);
-  }
-  return lines.join("\n");
+    JSON.stringify(profile, null, 2),
+    "[/theft-onboarding]",
+  ].join("\n");
 }
 
 export function mergeDescriptionWithOnboardingContext(input: {
   description: string;
   stage: OnboardingStage;
+  operatorName?: string;
   setupItems: OnboardingSetupItemInput[];
 }) {
   const body = input.description.trim();
   const context = buildOnboardingContextBlock({
     stage: input.stage,
+    initialBrief: body,
+    operatorName: input.operatorName,
     setupItems: input.setupItems,
   });
   if (!body) return context;
   return `${body}\n\n${context}`;
+}
+
+export function parseOnboardingContextBlock(description: string): OnboardingContextProfile | null {
+  const match = description.match(/\[theft-onboarding\]\s*([\s\S]*?)\s*\[\/theft-onboarding\]/);
+  if (!match) return null;
+
+  try {
+    const parsed = JSON.parse(match[1] ?? "") as Partial<OnboardingContextProfile>;
+    if (
+      parsed.version !== 1 ||
+      parsed.source !== "theft-onboarding" ||
+      !isOnboardingStage(parsed.stage) ||
+      !Array.isArray(parsed.setupItems)
+    ) {
+      return null;
+    }
+
+    const setupItems = parsed.setupItems
+      .map((item) => {
+        if (
+          typeof item?.key !== "string" ||
+          typeof item.label !== "string" ||
+          !isSetupStatus(item.status)
+        ) {
+          return null;
+        }
+
+        return {
+          key: item.key,
+          label: item.label,
+          status: item.status,
+          ...(typeof item.note === "string" && item.note.trim()
+            ? { note: item.note }
+            : {}),
+        };
+      })
+      .filter((item): item is OnboardingSetupItemInput => item !== null);
+
+    return {
+      version: 1,
+      source: "theft-onboarding",
+      stage: parsed.stage,
+      initialBrief: typeof parsed.initialBrief === "string" ? parsed.initialBrief : "",
+      operatorName: typeof parsed.operatorName === "string" && parsed.operatorName.trim()
+        ? parsed.operatorName
+        : "Operator",
+      setupItems,
+    };
+  } catch {
+    return null;
+  }
+}
+
+export function getOnboardingStageGoalTemplate(stage: OnboardingStage, companyName: string) {
+  const label = ONBOARDING_STAGE_LABELS[stage].toLowerCase();
+  const name = companyName.trim() || "the company";
+  return {
+    title: `Move ${name} through the next ${label} milestone`,
+    description:
+      "Use onboarding context to turn the company stage into coordinated roadmap work across Operator and departments.",
+  };
 }
 
 export function getOnboardingStageTaskTemplate(stage: OnboardingStage): OnboardingStageTaskTemplate {

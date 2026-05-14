@@ -7,7 +7,17 @@ import { defineConfig } from "@playwright/test";
 // even when the dev server is running on :3100 in authenticated mode.
 const PORT = Number(process.env.PAPERCLIP_E2E_PORT ?? 3199);
 const BASE_URL = `http://127.0.0.1:${PORT}`;
+const EMBEDDED_POSTGRES_PORT = Number(process.env.PAPERCLIP_E2E_DB_PORT ?? PORT + 29000);
 const PAPERCLIP_HOME = fs.mkdtempSync(path.join(os.tmpdir(), "paperclip-e2e-home-"));
+const LOCAL_CHROME_PATH =
+  process.env.PAPERCLIP_E2E_CHROME_PATH ??
+  (process.platform === "darwin"
+    ? "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
+    : undefined);
+const CHROMIUM_LAUNCH_OPTIONS =
+  LOCAL_CHROME_PATH && fs.existsSync(LOCAL_CHROME_PATH)
+    ? { executablePath: LOCAL_CHROME_PATH }
+    : undefined;
 
 export default defineConfig({
   testDir: ".",
@@ -26,7 +36,7 @@ export default defineConfig({
   projects: [
     {
       name: "chromium",
-      use: { browserName: "chromium" },
+      use: { browserName: "chromium", launchOptions: CHROMIUM_LAUNCH_OPTIONS },
     },
   ],
   // The webServer directive bootstraps a throwaway instance and then starts it.
@@ -43,6 +53,7 @@ export default defineConfig({
     env: {
       ...process.env,
       PORT: String(PORT),
+      PAPERCLIP_EMBEDDED_POSTGRES_PORT: String(EMBEDDED_POSTGRES_PORT),
       PAPERCLIP_HOME,
       PAPERCLIP_INSTANCE_ID: "playwright-e2e",
       PAPERCLIP_BIND: "loopback",

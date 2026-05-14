@@ -38,7 +38,9 @@ import {
 } from "../lib/onboarding-launch";
 import {
   ONBOARDING_STAGES,
+  ONBOARDING_STAGE_LABELS,
   type OnboardingStage,
+  getOnboardingStageGoalTemplate,
   getOnboardingStageTaskTemplate,
   mergeDescriptionWithOnboardingContext,
 } from "../lib/onboarding-context";
@@ -70,11 +72,31 @@ import {
 type Step = 1 | 2 | 3 | 4;
 type AdapterType = string;
 
-const DEFAULT_TASK_DESCRIPTION = `You are the CEO. You set the direction for the company.
+const OPERATOR_TASK_CONTEXT = "You are the Operator. You set the direction for the company.";
+
+const DEFAULT_TASK_DESCRIPTION = `${OPERATOR_TASK_CONTEXT}
 
 - hire a founding engineer
 - write a hiring plan
 - break the roadmap into concrete tasks and start delegating work`;
+
+function buildOperatorLaunchIssueDescription(input: {
+  taskDescription: string;
+  stage: OnboardingStage;
+  prompt: string;
+  answer: string;
+}) {
+  const taskDescription = input.taskDescription.trim();
+  const withOperatorContext = taskDescription.includes(OPERATOR_TASK_CONTEXT)
+    ? taskDescription
+    : [OPERATOR_TASK_CONTEXT, taskDescription].filter(Boolean).join("\n\n");
+
+  return `${withOperatorContext}${buildInterviewContextSection({
+    stage: input.stage,
+    prompt: input.prompt,
+    answer: input.answer,
+  })}`.trim();
+}
 
 function buildInterviewContextSection(input: {
   stage: OnboardingStage;
@@ -139,7 +161,7 @@ export function OnboardingWizard() {
   const [setupOfferNote, setSetupOfferNote] = useState("");
 
   // Step 2
-  const [agentName, setAgentName] = useState("CEO");
+  const [agentName, setAgentName] = useState("Operator");
   const [adapterType, setAdapterType] = useState<AdapterType>("claude_local");
   const [model, setModel] = useState("");
   const [command, setCommand] = useState("");
@@ -187,6 +209,7 @@ export function OnboardingWizard() {
   const [createdProjectId, setCreatedProjectId] = useState<string | null>(null);
   const [createdIssueRef, setCreatedIssueRef] = useState<string | null>(null);
   const [seededDepartmentAgentIds, setSeededDepartmentAgentIds] = useState<Record<string, string>>({});
+  const [seededDepartmentIssueKeys, setSeededDepartmentIssueKeys] = useState<Record<string, true>>({});
 
   useEffect(() => {
     setRouteDismissed(false);
@@ -206,6 +229,7 @@ export function OnboardingWizard() {
     setCreatedAgentId(null);
     setCreatedIssueRef(null);
     setSeededDepartmentAgentIds({});
+    setSeededDepartmentIssueKeys({});
   }, [
     effectiveOnboardingOpen,
     effectiveOnboardingOptions.companyId,
@@ -341,7 +365,7 @@ export function OnboardingWizard() {
     setSetupLegalNote("");
     setSetupOfferStatus("todo");
     setSetupOfferNote("");
-    setAgentName("CEO");
+    setAgentName("Operator");
     setAdapterType("claude_local");
     setModel("");
     setCommand("");
@@ -363,6 +387,7 @@ export function OnboardingWizard() {
     setCreatedProjectId(null);
     setCreatedIssueRef(null);
     setSeededDepartmentAgentIds({});
+    setSeededDepartmentIssueKeys({});
   }
 
   function handleClose() {
@@ -447,6 +472,7 @@ export function OnboardingWizard() {
       const companyDescription = mergeDescriptionWithOnboardingContext({
         description: companyGoal.trim(),
         stage: companyStage,
+        operatorName: agentName,
         setupItems: [
           {
             key: "company_name",
@@ -493,7 +519,17 @@ export function OnboardingWizard() {
           queryKey: queryKeys.goals.list(company.id)
         });
       } else {
-        setCreatedCompanyGoalId(null);
+        const goalTemplate = getOnboardingStageGoalTemplate(companyStage, trimmedName);
+        const goal = await goalsApi.create(company.id, {
+          title: goalTemplate.title,
+          description: goalTemplate.description,
+          level: "company",
+          status: "active"
+        });
+        setCreatedCompanyGoalId(goal.id);
+        queryClient.invalidateQueries({
+          queryKey: queryKeys.goals.list(company.id)
+        });
       }
 
       setStep(2);
@@ -638,11 +674,12 @@ export function OnboardingWizard() {
           createdCompanyId,
           buildOnboardingIssuePayload({
             title: taskTitle,
-            description: `${taskDescription.trim()}${buildInterviewContextSection({
+            description: buildOperatorLaunchIssueDescription({
+              taskDescription,
               stage: companyStage,
               prompt: stageTaskTemplate.interviewPrompt,
               answer: stageInterviewAnswer,
-            })}`.trim(),
+            }),
             assigneeAgentId: createdAgentId,
             projectId,
             goalId
@@ -680,8 +717,13 @@ export function OnboardingWizard() {
       queryClient.invalidateQueries({
         queryKey: queryKeys.agents.list(createdCompanyId),
       });
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.approvals.list(createdCompanyId),
+      });
 
+      const nextSeededDepartmentIssueKeys = { ...seededDepartmentIssueKeys };
       for (const spec of DEPARTMENT_SEED_SPECS) {
+        if (nextSeededDepartmentIssueKeys[spec.key]) continue;
         const assigneeAgentId = nextSeededDepartmentAgentIds[spec.key];
         if (!assigneeAgentId) continue;
         await issuesApi.create(
@@ -694,7 +736,9 @@ export function OnboardingWizard() {
             goalId,
           })
         );
+        nextSeededDepartmentIssueKeys[spec.key] = true;
       }
+      setSeededDepartmentIssueKeys(nextSeededDepartmentIssueKeys);
       queryClient.invalidateQueries({
         queryKey: queryKeys.issues.list(createdCompanyId),
       });
@@ -704,8 +748,8 @@ export function OnboardingWizard() {
       closeOnboarding();
       navigate(
         createdCompanyPrefix
-          ? `/${createdCompanyPrefix}/issues/${issueRef}`
-          : `/issues/${issueRef}`
+          ? `/${createdCompanyPrefix}/dashboard`
+          : "/"
       );
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to create task");
@@ -764,7 +808,7 @@ export function OnboardingWizard() {
                 {(
                   [
                     { step: 1 as Step, label: "Company", icon: Building2 },
-                    { step: 2 as Step, label: "Agent", icon: Bot },
+                    { step: 2 as Step, label: "Operator", icon: Bot },
                     { step: 3 as Step, label: "Task", icon: ListTodo },
                     { step: 4 as Step, label: "Launch", icon: Rocket }
                   ] as const
@@ -836,7 +880,7 @@ export function OnboardingWizard() {
                               : "border-border text-muted-foreground hover:text-foreground hover:bg-accent/40"
                           )}
                         >
-                          {stage}
+                          {ONBOARDING_STAGE_LABELS[stage]}
                         </button>
                       ))}
                     </div>
@@ -869,7 +913,7 @@ export function OnboardingWizard() {
                         />
                       </div>
                       <div className="rounded-md border border-border p-2">
-                        <div className="text-xs mb-1">Legal entity</div>
+                        <div className="text-xs mb-1">Legal entity / operating setup</div>
                         <div className="flex gap-2 mb-2">
                           {(["todo", "done", "skipped"] as const).map((status) => (
                             <button
@@ -893,7 +937,7 @@ export function OnboardingWizard() {
                         />
                       </div>
                       <div className="rounded-md border border-border p-2">
-                        <div className="text-xs mb-1">Offer / service</div>
+                        <div className="text-xs mb-1">Offer / product</div>
                         <div className="flex gap-2 mb-2">
                           {(["todo", "done", "skipped"] as const).map((status) => (
                             <button
@@ -946,19 +990,19 @@ export function OnboardingWizard() {
                       <Bot className="h-5 w-5 text-muted-foreground" />
                     </div>
                     <div>
-                      <h3 className="font-medium">Create your first agent</h3>
+                      <h3 className="font-medium">Create your Operator</h3>
                       <p className="text-xs text-muted-foreground">
-                        Choose how this agent will run tasks.
+                        Choose how the root company agent will run tasks.
                       </p>
                     </div>
                   </div>
                   <div>
                     <label className="text-xs text-muted-foreground mb-1 block">
-                      Agent name
+                      Operator name
                     </label>
                     <input
                       className="w-full rounded-md border border-border bg-transparent px-3 py-2 text-sm outline-none focus:ring-1 focus:ring-ring placeholder:text-muted-foreground/50"
-                      placeholder="CEO"
+                      placeholder="Operator"
                       value={agentName}
                       onChange={(e) => setAgentName(e.target.value)}
                       autoFocus
@@ -1216,7 +1260,7 @@ export function OnboardingWizard() {
                           <p className="text-[11px] text-amber-900/90 leading-relaxed">
                             Claude failed while{" "}
                             <span className="font-mono">ANTHROPIC_API_KEY</span>{" "}
-                            is set. You can clear it in this CEO adapter config
+                            is set. You can clear it in this Operator adapter config
                             and retry the probe.
                           </p>
                           <Button
@@ -1496,7 +1540,7 @@ export function OnboardingWizard() {
                       ) : (
                         <ArrowRight className="h-3.5 w-3.5 mr-1" />
                       )}
-                      {loading ? "Creating..." : "Create & Open Issue"}
+                      {loading ? "Creating..." : "Launch Company"}
                     </Button>
                   )}
                 </div>

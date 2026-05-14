@@ -10,6 +10,52 @@ diff --git a/dist/index.js b/dist/index.js
  // The default configuration options for the class
  const defaults = {
      databaseDir: path.join(process.cwd(), 'data', 'db'),
+@@ -52,6 +52,31 @@
+         yield fs.chmod(filePath, stat.mode | BIN_PERMISSIONS);
+     }
+ });
++const repairBundledPostgresFiles = (postgresBin, onLog) => __awaiter(void 0, void 0, void 0, function* () {
++    const sqlFeaturesFile = path.resolve(path.dirname(postgresBin), '..', 'share', 'postgresql', 'sql_features.txt');
++    try {
++        const current = yield fs.readFile(sqlFeaturesFile, 'utf8');
++        const repaired = current
++            .split('\n')
++            .map((line) => {
++            if (!line)
++                return line;
++            const fieldCount = line.split('\t').length;
++            return fieldCount === 5 ? `${line}\t` : line;
++        })
++            .join('\n');
++        if (repaired !== current) {
++            yield fs.writeFile(sqlFeaturesFile, repaired, 'utf8');
++            onLog(`Repaired embedded PostgreSQL sql_features metadata at ${sqlFeaturesFile}\n`);
++        }
++    }
++    catch (err) {
++        onLog(`Could not inspect embedded PostgreSQL sql_features metadata at ${sqlFeaturesFile}: ${err instanceof Error ? err.message : String(err)}\n`);
++    }
++});
+ /**
+  * This will track instances of all current initialised clusters. We need this
+  * because we want to be able to shutdown any clusters when the script is exited.
+@@ -96,6 +121,7 @@
+     initialise() {
+         return __awaiter(this, void 0, void 0, function* () {
+             const { postgres, initdb } = yield bin;
++            yield repairBundledPostgresFiles(postgres, this.options.onLog);
+             // GUARD: Check that a postgres user is available
+             yield this.checkForRootUser();
+             // Optionally retrieve the uid and gid
+@@ -127,7 +127,7 @@
+             ensureBinIsExecutable(initdb);
+             // Initialize the database
+             yield new Promise((resolve, reject) => {
+-                var _a;
++                var _a, _b;
+                 const process = spawn(initdb, [
+                     `--pgdata=${this.options.databaseDir}`,
+                     `--auth=${this.options.authMethod}`,
 @@ -133,7 +133,7 @@
                      `--pwfile=${passwordFile}`,
                      `--lc-messages=${LC_MESSAGES_LOCALE}`,
@@ -19,6 +65,18 @@ diff --git a/dist/index.js b/dist/index.js
                  // Connect to stderr, as that is where the messages get sent
                  (_a = process.stdout) === null || _a === void 0 ? void 0 : _a.on('data', (chunk) => {
                      // Parse the data as a string and log it
+@@ -142,6 +142,12 @@
+                     const message = chunk.toString('utf-8');
+                     this.options.onLog(message);
+                 });
++                (_b = process.stderr) === null || _b === void 0 ? void 0 : _b.on('data', (chunk) => {
++                    // Parse the data as a string and log it
++                    const message = chunk.toString('utf-8');
++                    this.options.onLog(message);
++                });
+                 process.on('exit', (code) => {
+                     if (code === 0) {
+                         resolve();
 @@ -177,7 +177,7 @@
                      '-p',
                      this.options.port.toString(),

@@ -1,13 +1,13 @@
 import { test, expect } from "@playwright/test";
 
 /**
- * E2E: Onboarding wizard flow (skip_llm mode).
+ * E2E: THEFT onboarding wizard flow (skip_llm mode).
  *
  * Walks through the 4-step OnboardingWizard:
  *   Step 1 — Name your company
- *   Step 2 — Create your first agent (adapter selection + config)
+ *   Step 2 — Create your Operator (adapter selection + config)
  *   Step 3 — Give it something to do (task creation)
- *   Step 4 — Ready to launch (summary + open issue)
+ *   Step 4 — Ready to launch (summary + company canvas)
  *
  * By default this runs in skip_llm mode: we do NOT assert that an LLM
  * heartbeat fires. Set PAPERCLIP_E2E_SKIP_LLM=false to enable LLM-dependent
@@ -17,8 +17,18 @@ import { test, expect } from "@playwright/test";
 const SKIP_LLM = process.env.PAPERCLIP_E2E_SKIP_LLM !== "false";
 
 const COMPANY_NAME = `E2E-Test-${Date.now()}`;
-const AGENT_NAME = "CEO";
+const AGENT_NAME = "Operator";
 const TASK_TITLE = "E2E test task";
+const REQUIRED_DEPARTMENTS = [
+  "Engineering",
+  "Design",
+  "Marketing",
+  "Sales",
+  "Operations",
+  "Finance",
+  "Legal",
+  "Support",
+];
 
 test.describe("Onboarding wizard", () => {
   test("completes full wizard flow", async ({ page }) => {
@@ -32,13 +42,17 @@ test.describe("Onboarding wizard", () => {
     await companyNameInput.fill(COMPANY_NAME);
 
     const nextButton = page.getByRole("button", { name: "Next" });
+    await page.getByRole("button", { name: "Building" }).click();
+    await page.locator('input[placeholder="Legal note (optional)"]').fill("Already operating locally");
+    await page.locator('input[placeholder="Offer note (optional)"]').fill("Initial offer exists");
+
     await nextButton.click();
 
     await expect(
-      page.locator("h3", { hasText: "Create your first agent" })
+      page.locator("h3", { hasText: "Create your Operator" })
     ).toBeVisible({ timeout: 30_000 });
 
-    const agentNameInput = page.locator('input[placeholder="CEO"]');
+    const agentNameInput = page.locator('input[placeholder="Operator"]');
     await expect(agentNameInput).toHaveValue(AGENT_NAME);
 
     await expect(
@@ -106,12 +120,15 @@ test.describe("Onboarding wizard", () => {
     ).toBeVisible({ timeout: 30_000 });
 
     await expect(page.locator("text=" + COMPANY_NAME)).toBeVisible();
-    await expect(page.locator("text=" + AGENT_NAME)).toBeVisible();
+    await expect(page.getByRole("button", { name: AGENT_NAME })).toBeVisible();
     await expect(page.locator("text=" + TASK_TITLE)).toBeVisible();
 
-    await page.getByRole("button", { name: "Create & Open Issue" }).click();
+    await page.getByRole("button", { name: "Launch Company" }).click();
 
-    await expect(page).toHaveURL(/\/issues\//, { timeout: 30_000 });
+    await expect(page).toHaveURL(/\/dashboard$/, { timeout: 30_000 });
+    await expect(page.getByRole("heading", { name: COMPANY_NAME })).toBeVisible();
+    await expect(page.getByText("Tech tree")).toBeVisible();
+    await expect(page.getByText("Operator tray")).toBeVisible();
 
     const companiesRes = await page.request.get(`${baseUrl}/api/companies`);
     expect(companiesRes.ok()).toBe(true);
@@ -120,6 +137,8 @@ test.describe("Onboarding wizard", () => {
       (c: { name: string }) => c.name === COMPANY_NAME
     );
     expect(company).toBeTruthy();
+    expect(company.description).toContain("[theft-onboarding]");
+    expect(company.description).toContain('"stage": "building"');
 
     const agentsRes = await page.request.get(
       `${baseUrl}/api/companies/${company.id}/agents`
@@ -132,6 +151,13 @@ test.describe("Onboarding wizard", () => {
     expect(ceoAgent).toBeTruthy();
     expect(ceoAgent.role).toBe("ceo");
     expect(ceoAgent.adapterType).not.toBe("process");
+    for (const department of REQUIRED_DEPARTMENTS) {
+      expect(
+        agents.some((agent: { title?: string | null; name: string }) =>
+          (agent.title ?? agent.name).includes(department)
+        )
+      ).toBe(true);
+    }
 
     const instructionsBundleRes = await page.request.get(
       `${baseUrl}/api/agents/${ceoAgent.id}/instructions-bundle?companyId=${company.id}`
@@ -152,10 +178,16 @@ test.describe("Onboarding wizard", () => {
     );
     expect(task).toBeTruthy();
     expect(task.assigneeAgentId).toBe(ceoAgent.id);
-    expect(task.description).toContain(
-      "You are the CEO. You set the direction for the company."
-    );
+    expect(task.description).toContain("You are the Operator. You set the direction for the company.");
+    expect(task.description).toContain("THEFT Library");
     expect(task.description).not.toContain("github.com/paperclipai/companies");
+    for (const department of REQUIRED_DEPARTMENTS) {
+      expect(
+        issues.some((issue: { title: string; description?: string | null }) =>
+          issue.description?.includes(`Department seed: ${department}`)
+        )
+      ).toBe(true);
+    }
 
     if (!SKIP_LLM) {
       await expect(async () => {

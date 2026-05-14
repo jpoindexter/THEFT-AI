@@ -1,6 +1,6 @@
 # STATUS — What actually exists
 
-> Audit-derived, not assumed. Last updated 2026-05-13 by Codex session.
+> Audit-derived, not assumed. Last updated 2026-05-14 by Codex session.
 > Update when something changes status. Don't fabricate.
 
 ## Current Direction — Paperclip-Host Merge
@@ -19,7 +19,30 @@ Current repo reality:
 | `BUILD-FROM-THIS/` | **SOURCE OF TRUTH** | Read `SOURCE-OF-TRUTH.md`, then `PARITY-DELTA.md`, then roadmap/tasks. |
 | `skills/` | **PRODUCT DATA** | Must be imported/registered into Paperclip company skills before agents can depend on THEFT skill slugs. |
 
-Next blocking work: finish onboarding route parity (node completion and happy-path transitions), then browser-test end-to-end from onboarding into active department/task routes in the Paperclip host. Avoid building new runtime features in `app/`.
+Run status:
+
+- 2026-05-14: `pnpm -C paperclip dev:once` starts the Paperclip host in `local_trusted` mode at `http://127.0.0.1:3100` with embedded PostgreSQL at `~/.paperclip/instances/default/db`.
+- 2026-05-14: `curl http://127.0.0.1:3100/api/health` returned `status: ok`; `curl http://127.0.0.1:3100/` returned `root-ok` when run with the same elevated local-network context as the server.
+- 2026-05-14: Finish sequence captured in `BUILD-FROM-THIS/FINISH-AND-RUN-PLAN.md`.
+- 2026-05-14: Worker D added `paperclip/scripts/smoke/theft-local-health.mjs` for an already-running host smoke: health endpoint, root route, and companies API.
+- 2026-05-14: Worker D added `paperclip/tests/e2e/theft-smoke-checklist.md` to make the current verification gap explicit until THEFT-specific Playwright coverage lands.
+- 2026-05-14: Worker D verification run passed `git diff --check`, targeted onboarding utility Vitest, `pnpm -C paperclip build`, `curl /api/health`, `curl /`, and the new localhost smoke helper. The smoke helper needs localhost permission in sandboxed Codex runs.
+- 2026-05-14: Follow-up implementation pass fixed the canvas onboarding-profile parser for the new JSON `[theft-onboarding]` block, changed onboarding launch to land on the company canvas, mapped the dashboard roadmap panel to Tech Tree language, and added default Library-output instructions to seeded Paperclip tasks.
+- 2026-05-14: Follow-up verification passed focused Vitest (`onboarding-context`, `onboarding-launch`, `onboarding-route`, `onboarding-seed`, `theft-canvas`, `library-items`), `git diff --check`, `pnpm -C paperclip build`, and `node paperclip/scripts/smoke/theft-local-health.mjs`.
+- 2026-05-14: Browser rendering check against the live host passed for `/onboarding` at desktop `1440x900` and mobile `390x844`, and `/library` loaded in headless Google Chrome.
+- 2026-05-14: Fixed dedicated Playwright webServer boot by isolating the embedded Postgres port and patching `embedded-postgres` to repair the bundled `sql_features.txt` metadata plus capture `initdb` stderr. `pnpm -C paperclip exec playwright test tests/e2e/onboarding.spec.ts --config tests/e2e/playwright.config.ts` now passes the full THEFT onboarding flow against a throwaway embedded Postgres instance.
+- 2026-05-14: Added and ran `paperclip/scripts/smoke/theft-department-runtime-smoke.mjs`; it seeded a throwaway company and completed adapter-backed wakeup runs for Engineering, Design, Marketing, Sales, Operations, Finance, Legal, and Support using the deterministic `process` adapter. Result company: `79bea8a1-1726-4f3b-9494-bfce8738163b`; all 8 runs reached `succeeded` with `adapter.invoke` events.
+- 2026-05-14: Ran the 8-department smoke through `codex_local` with `THEFT_SMOKE_CODEX_MODEL=gpt-5.3-codex-spark`; all 8 departments succeeded. Result company: `afa239ed-1b8c-45da-8d2c-b4f4c6e05fbf`; issues `THEAAA-1` through `THEAAA-8`; run ids captured in terminal output.
+- 2026-05-14: Created the UX source docs for the next product pass: `BUILD-FROM-THIS/UX-DIRECTION.md`, `BUILD-FROM-THIS/UX-SCREEN-PROMPTS.md`, and `BUILD-FROM-THIS/UX-BUILD-TASKS.md`. The xhigh synthesis gate is complete; next model lane is `gpt-5.5 high` starting at `UX010`.
+
+Next blocking work: reshape onboarding UX so it stops feeling like Paperclip/Cofounder wizard inheritance, verify saved Library outputs from real LLM runs, then continue subtracting dead `app/` surface. Avoid building new runtime features in `app/`.
+
+Verification coverage:
+
+- `paperclip/tests/e2e/onboarding.spec.ts` now covers the THEFT happy path: stage/setup persistence, Operator naming, 8 department agents, seeded department issues, hidden billing/credits, Library output instruction, and company-canvas landing.
+- Use `node paperclip/scripts/smoke/theft-local-health.mjs` after `pnpm -C paperclip dev:once` for the fastest run-readiness check.
+- Use `node paperclip/scripts/smoke/theft-department-runtime-smoke.mjs` against a running local host for deterministic 8-department adapter runtime smoke. Override with `THEFT_SMOKE_ADAPTER=codex_local THEFT_SMOKE_CODEX_MODEL=gpt-5.3-codex-spark` when an authenticated Codex local run is desired.
+- Build currently passes with existing Vite warnings about large chunks and `MarkdownEditor.tsx` being both statically and dynamically imported.
 
 ## Legacy THEFT App Engine (`app/src/lib/`)
 

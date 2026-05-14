@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   buildOnboardingIssuePayload,
   buildOnboardingProjectPayload,
+  ONBOARDING_LIBRARY_OUTPUT_INSTRUCTION,
   selectDefaultCompanyGoalId,
 } from "./onboarding-launch";
 
@@ -99,7 +100,7 @@ describe("onboarding launch payloads", () => {
       }),
     ).toEqual({
       title: "Hire your first engineer",
-      description: "Kick off the hiring plan",
+      description: `Kick off the hiring plan\n\n${ONBOARDING_LIBRARY_OUTPUT_INSTRUCTION}`,
       assigneeAgentId: "agent-1",
       projectId: "project-1",
       goalId: "goal-1",
@@ -123,6 +124,7 @@ describe("onboarding launch payloads", () => {
       }),
     ).toEqual({
       title: "Task",
+      description: ONBOARDING_LIBRARY_OUTPUT_INSTRUCTION,
       assigneeAgentId: "agent-1",
       projectId: "project-1",
       status: "todo",

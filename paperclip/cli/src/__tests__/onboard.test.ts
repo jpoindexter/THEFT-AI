@@ -163,4 +163,15 @@ describe("onboard", () => {
     expect(raw.server.bind).toBe("loopback");
     expect(raw.server.host).toBe("127.0.0.1");
   });
+
+  it("allows quickstart embedded PostgreSQL port override for isolated e2e instances", async () => {
+    const configPath = createFreshConfigPath();
+    process.env.PAPERCLIP_EMBEDDED_POSTGRES_PORT = "62001";
+
+    await onboard({ config: configPath, yes: true, invokedByRun: true });
+
+    const raw = JSON.parse(fs.readFileSync(configPath, "utf8")) as PaperclipConfig;
+    expect(raw.database.mode).toBe("embedded-postgres");
+    expect(raw.database.embeddedPostgresPort).toBe(62001);
+  });
 });

@@ -1,396 +1,484 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link } from "@/lib/router";
-import { useQuery } from "@tanstack/react-query";
-import { dashboardApi } from "../api/dashboard";
-import { activityApi } from "../api/activity";
-import { accessApi } from "../api/access";
-import { issuesApi } from "../api/issues";
+import { useMutation, useQueries, useQuery, useQueryClient } from "@tanstack/react-query";
+import type { Agent, Issue, IssueThreadInteraction } from "@paperclipai/shared";
+import {
+  AlertCircle,
+  ArrowRight,
+  Bot,
+  Building2,
+  CheckCircle2,
+  GitBranch,
+  Inbox,
+  MessageSquarePlus,
+  Route,
+  Sparkles,
+  type LucideIcon,
+} from "lucide-react";
 import { agentsApi } from "../api/agents";
-import { projectsApi } from "../api/projects";
-import { buildCompanyUserProfileMap } from "../lib/company-members";
+import { approvalsApi } from "../api/approvals";
+import { goalsApi } from "../api/goals";
+import { issuesApi } from "../api/issues";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Textarea } from "@/components/ui/textarea";
+import { EmptyState } from "../components/EmptyState";
+import { PageSkeleton } from "../components/PageSkeleton";
+import { StatusIcon } from "../components/StatusIcon";
+import { useBreadcrumbs } from "../context/BreadcrumbContext";
 import { useCompany } from "../context/CompanyContext";
 import { useDialogActions } from "../context/DialogContext";
-import { useBreadcrumbs } from "../context/BreadcrumbContext";
 import { queryKeys } from "../lib/queryKeys";
-import { MetricCard } from "../components/MetricCard";
-import { EmptyState } from "../components/EmptyState";
-import { StatusIcon } from "../components/StatusIcon";
-
-import { ActivityRow } from "../components/ActivityRow";
-import { Identity } from "../components/Identity";
 import { timeAgo } from "../lib/timeAgo";
-import { cn, formatCents } from "../lib/utils";
-import { Bot, CircleDot, DollarSign, ShieldCheck, LayoutDashboard, PauseCircle } from "lucide-react";
-import { ActiveAgentsPanel } from "../components/ActiveAgentsPanel";
-import { ChartCard, RunActivityChart, PriorityChart, IssueStatusChart, SuccessRateChart } from "../components/ActivityCharts";
-import { PageSkeleton } from "../components/PageSkeleton";
-import type { Agent, Issue } from "@paperclipai/shared";
-import { PluginSlotOutlet } from "@/plugins/slots";
+import { cn } from "../lib/utils";
+import {
+  THEFT_STAGE_LABELS,
+  buildDepartmentCanvasRows,
+  findOperatorAgent,
+  getAttentionIssues,
+  getPendingInteractionsByIssue,
+  getRoadmapGoals,
+  parseCompanyProfileSummary,
+} from "../lib/theft-canvas";
 
-const DASHBOARD_ACTIVITY_LIMIT = 10;
+const ATTENTION_INTERACTION_ISSUE_LIMIT = 12;
 
-function getRecentIssues(issues: Issue[]): Issue[] {
-  return [...issues]
-    .sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime());
+function issuePath(issue: Issue) {
+  return `/issues/${issue.identifier ?? issue.id}`;
+}
+
+function formatStatusLabel(status: string) {
+  return status.replace(/_/g, " ");
+}
+
+function summarizeAgent(agent: Agent | null) {
+  if (!agent) return "No agent assigned";
+  const title = agent.title ? `${agent.title} · ` : "";
+  return `${title}${agent.status}`;
 }
 
 export function Dashboard() {
-  const { selectedCompanyId, companies } = useCompany();
+  const { selectedCompanyId, selectedCompany, companies } = useCompany();
   const { openOnboarding } = useDialogActions();
   const { setBreadcrumbs } = useBreadcrumbs();
-  const [animatedActivityIds, setAnimatedActivityIds] = useState<Set<string>>(new Set());
-  const seenActivityIdsRef = useRef<Set<string>>(new Set());
-  const hydratedActivityRef = useRef(false);
-  const activityAnimationTimersRef = useRef<number[]>([]);
+  const queryClient = useQueryClient();
+  const [operatorDraft, setOperatorDraft] = useState("");
+  const [selectedDepartmentKey, setSelectedDepartmentKey] = useState("engineering");
 
-  const { data: agents } = useQuery({
+  useEffect(() => {
+    setBreadcrumbs([{ label: "Company canvas" }]);
+  }, [setBreadcrumbs]);
+
+  const { data: agents, isLoading: agentsLoading } = useQuery({
     queryKey: queryKeys.agents.list(selectedCompanyId!),
     queryFn: () => agentsApi.list(selectedCompanyId!),
     enabled: !!selectedCompanyId,
   });
 
-  useEffect(() => {
-    setBreadcrumbs([{ label: "Dashboard" }]);
-  }, [setBreadcrumbs]);
-
-  const { data, isLoading, error } = useQuery({
-    queryKey: queryKeys.dashboard(selectedCompanyId!),
-    queryFn: () => dashboardApi.summary(selectedCompanyId!),
-    enabled: !!selectedCompanyId,
-  });
-
-  const { data: activity } = useQuery({
-    queryKey: [...queryKeys.activity(selectedCompanyId!), { limit: DASHBOARD_ACTIVITY_LIMIT }],
-    queryFn: () => activityApi.list(selectedCompanyId!, { limit: DASHBOARD_ACTIVITY_LIMIT }),
-    enabled: !!selectedCompanyId,
-  });
-
-  const { data: issues } = useQuery({
+  const { data: issues, isLoading: issuesLoading } = useQuery({
     queryKey: queryKeys.issues.list(selectedCompanyId!),
-    queryFn: () => issuesApi.list(selectedCompanyId!),
+    queryFn: () => issuesApi.list(selectedCompanyId!, { includeBlockedBy: true }),
     enabled: !!selectedCompanyId,
   });
 
-  const { data: projects } = useQuery({
-    queryKey: queryKeys.projects.list(selectedCompanyId!),
-    queryFn: () => projectsApi.list(selectedCompanyId!),
+  const { data: goals } = useQuery({
+    queryKey: queryKeys.goals.list(selectedCompanyId!),
+    queryFn: () => goalsApi.list(selectedCompanyId!),
     enabled: !!selectedCompanyId,
   });
 
-  const { data: companyMembers } = useQuery({
-    queryKey: queryKeys.access.companyUserDirectory(selectedCompanyId!),
-    queryFn: () => accessApi.listUserDirectory(selectedCompanyId!),
+  const { data: approvals } = useQuery({
+    queryKey: queryKeys.approvals.list(selectedCompanyId!, "pending"),
+    queryFn: () => approvalsApi.list(selectedCompanyId!, "pending"),
     enabled: !!selectedCompanyId,
   });
 
-  const userProfileMap = useMemo(
-    () => buildCompanyUserProfileMap(companyMembers?.users),
-    [companyMembers?.users],
+  const profile = selectedCompany
+    ? parseCompanyProfileSummary(selectedCompany)
+    : { stage: null, setupItems: [], brief: null };
+  const departmentRows = useMemo(
+    () => buildDepartmentCanvasRows(agents ?? [], issues ?? []),
+    [agents, issues],
   );
+  const operator = useMemo(() => findOperatorAgent(agents ?? []), [agents]);
+  const selectedDepartment =
+    departmentRows.find((department) => department.key === selectedDepartmentKey) ?? departmentRows[0] ?? null;
+  const attentionIssues = useMemo(() => getAttentionIssues(issues ?? []), [issues]);
+  const roadmapGoals = useMemo(() => getRoadmapGoals(goals ?? []), [goals]);
+  const openIssues = (issues ?? []).filter((issue) => !["done", "cancelled"].includes(issue.status));
+  const nextTasks = [...openIssues]
+    .sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime())
+    .slice(0, 5);
 
-  const recentIssues = issues ? getRecentIssues(issues) : [];
-  const recentActivity = useMemo(() => (activity ?? []).slice(0, 10), [activity]);
+  const interactionIssueIds = attentionIssues
+    .slice(0, ATTENTION_INTERACTION_ISSUE_LIMIT)
+    .map((issue) => issue.id);
+  const interactionQueries = useQueries({
+    queries: interactionIssueIds.map((issueId) => ({
+      queryKey: queryKeys.issues.interactions(issueId),
+      queryFn: () => issuesApi.listInteractions(issueId),
+      enabled: !!selectedCompanyId,
+    })),
+  });
+  const interactionsByIssueId = interactionIssueIds.reduce<Record<string, IssueThreadInteraction[] | undefined>>(
+    (acc, issueId, index) => {
+      acc[issueId] = interactionQueries[index]?.data;
+      return acc;
+    },
+    {},
+  );
+  const pendingInteractions = getPendingInteractionsByIssue(interactionsByIssueId);
 
-  useEffect(() => {
-    for (const timer of activityAnimationTimersRef.current) {
-      window.clearTimeout(timer);
-    }
-    activityAnimationTimersRef.current = [];
-    seenActivityIdsRef.current = new Set();
-    hydratedActivityRef.current = false;
-    setAnimatedActivityIds(new Set());
-  }, [selectedCompanyId]);
-
-  useEffect(() => {
-    if (recentActivity.length === 0) return;
-
-    const seen = seenActivityIdsRef.current;
-    const currentIds = recentActivity.map((event) => event.id);
-
-    if (!hydratedActivityRef.current) {
-      for (const id of currentIds) seen.add(id);
-      hydratedActivityRef.current = true;
-      return;
-    }
-
-    const newIds = currentIds.filter((id) => !seen.has(id));
-    if (newIds.length === 0) {
-      for (const id of currentIds) seen.add(id);
-      return;
-    }
-
-    setAnimatedActivityIds((prev) => {
-      const next = new Set(prev);
-      for (const id of newIds) next.add(id);
-      return next;
-    });
-
-    for (const id of newIds) seen.add(id);
-
-    const timer = window.setTimeout(() => {
-      setAnimatedActivityIds((prev) => {
-        const next = new Set(prev);
-        for (const id of newIds) next.delete(id);
-        return next;
-      });
-      activityAnimationTimersRef.current = activityAnimationTimersRef.current.filter((t) => t !== timer);
-    }, 980);
-    activityAnimationTimersRef.current.push(timer);
-  }, [recentActivity]);
-
-  useEffect(() => {
-    return () => {
-      for (const timer of activityAnimationTimersRef.current) {
-        window.clearTimeout(timer);
+  const createTaskMutation = useMutation({
+    mutationFn: async () => {
+      if (!selectedCompanyId || !selectedDepartment) {
+        throw new Error("Select a company and department first.");
       }
-    };
-  }, []);
-
-  const agentMap = useMemo(() => {
-    const map = new Map<string, Agent>();
-    for (const a of agents ?? []) map.set(a.id, a);
-    return map;
-  }, [agents]);
-
-  const entityNameMap = useMemo(() => {
-    const map = new Map<string, string>();
-    for (const i of issues ?? []) map.set(`issue:${i.id}`, i.identifier ?? i.id.slice(0, 8));
-    for (const a of agents ?? []) map.set(`agent:${a.id}`, a.name);
-    for (const p of projects ?? []) map.set(`project:${p.id}`, p.name);
-    return map;
-  }, [issues, agents, projects]);
-
-  const entityTitleMap = useMemo(() => {
-    const map = new Map<string, string>();
-    for (const i of issues ?? []) map.set(`issue:${i.id}`, i.title);
-    return map;
-  }, [issues]);
-
-  const agentName = (id: string | null) => {
-    if (!id || !agents) return null;
-    return agents.find((a) => a.id === id)?.name ?? null;
-  };
+      const title = operatorDraft.trim();
+      if (!title) {
+        throw new Error("Describe the task first.");
+      }
+      return issuesApi.create(selectedCompanyId, {
+        title,
+        description: [
+          `Created from THEFT Operator tray for ${selectedDepartment.title}.`,
+          operator ? `Operator: ${operator.name}` : null,
+        ].filter(Boolean).join("\n"),
+        status: "todo",
+        priority: "medium",
+        assigneeAgentId: selectedDepartment.agent?.id ?? null,
+      });
+    },
+    onSuccess: async () => {
+      setOperatorDraft("");
+      if (!selectedCompanyId) return;
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: queryKeys.issues.list(selectedCompanyId) }),
+        queryClient.invalidateQueries({ queryKey: queryKeys.dashboard(selectedCompanyId) }),
+        queryClient.invalidateQueries({ queryKey: queryKeys.activity(selectedCompanyId) }),
+      ]);
+    },
+  });
 
   if (!selectedCompanyId) {
     if (companies.length === 0) {
       return (
         <EmptyState
-          icon={LayoutDashboard}
-          message="Welcome to Paperclip. Set up your first company and agent to get started."
-          action="Get Started"
+          icon={Building2}
+          message="Create your first company to open the operator canvas."
+          action="Start Onboarding"
           onAction={openOnboarding}
         />
       );
     }
-    return (
-      <EmptyState icon={LayoutDashboard} message="Create or select a company to view the dashboard." />
-    );
+    return <EmptyState icon={Building2} message="Select a company to open the operator canvas." />;
   }
 
-  if (isLoading) {
+  if (agentsLoading || issuesLoading || !selectedCompany) {
     return <PageSkeleton variant="dashboard" />;
   }
 
-  const hasNoAgents = agents !== undefined && agents.length === 0;
+  const setupDoneCount = profile.setupItems.filter((item) => item.status === "done").length;
+  const setupTodoCount = profile.setupItems.filter((item) => item.status === "todo").length;
 
   return (
-    <div className="space-y-6">
-      {error && <p className="text-sm text-destructive">{error.message}</p>}
-
-      {hasNoAgents && (
-        <div className="flex items-center justify-between gap-3 rounded-md border border-amber-300 bg-amber-50 px-4 py-3 dark:border-amber-500/25 dark:bg-amber-950/60">
-          <div className="flex items-center gap-2.5">
-            <Bot className="h-4 w-4 text-amber-600 dark:text-amber-400 shrink-0" />
-            <p className="text-sm text-amber-900 dark:text-amber-100">
-              You have no agents.
+    <div className="space-y-5">
+      <section className="border border-border bg-card p-4 sm:p-5">
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+          <div className="min-w-0">
+            <div className="flex flex-wrap items-center gap-2">
+              <Badge variant="outline" className="rounded-md">
+                THEFT company
+              </Badge>
+              {profile.stage ? (
+                <Badge variant="secondary" className="rounded-md">
+                  {THEFT_STAGE_LABELS[profile.stage]}
+                </Badge>
+              ) : null}
+            </div>
+            <h1 className="mt-3 text-2xl font-semibold tracking-normal text-foreground">
+              {selectedCompany.name}
+            </h1>
+            <p className="mt-2 max-w-3xl text-sm leading-6 text-muted-foreground">
+              {profile.brief ?? "Company profile is ready for onboarding notes, operating context, and roadmap decisions."}
             </p>
           </div>
-          <button
-            onClick={() => openOnboarding({ initialStep: 2, companyId: selectedCompanyId! })}
-            className="text-sm font-medium text-amber-700 hover:text-amber-900 dark:text-amber-300 dark:hover:text-amber-100 underline underline-offset-2 shrink-0"
-          >
-            Create one here
-          </button>
+          <div className="grid min-w-[220px] grid-cols-3 gap-2 text-center">
+            <CanvasStat value={departmentRows.filter((department) => department.agent).length} label="departments" />
+            <CanvasStat value={openIssues.length} label="open tasks" />
+            <CanvasStat value={(approvals?.length ?? 0) + pendingInteractions.length} label="reviews" />
+          </div>
         </div>
-      )}
+        <div className="mt-4 grid gap-3 md:grid-cols-3">
+          <SummaryPill icon={Bot} label="Operator" value={operator ? `${operator.name} · ${operator.status}` : "Not seeded"} />
+          <SummaryPill
+            icon={CheckCircle2}
+            label="Setup"
+            value={profile.setupItems.length ? `${setupDoneCount} done · ${setupTodoCount} open` : "No setup profile"}
+          />
+          <SummaryPill icon={GitBranch} label="Roadmap" value={`${roadmapGoals.length} active goals`} />
+        </div>
+      </section>
 
-      <ActiveAgentsPanel companyId={selectedCompanyId!} />
-
-      {data && (
-        <>
-          {data.budgets.activeIncidents > 0 ? (
-            <div className="flex items-start justify-between gap-3 rounded-xl border border-red-500/20 bg-[linear-gradient(180deg,rgba(255,80,80,0.12),rgba(255,255,255,0.02))] px-4 py-3">
-              <div className="flex items-start gap-2.5">
-                <PauseCircle className="mt-0.5 h-4 w-4 shrink-0 text-red-300" />
-                <div>
-                  <p className="text-sm font-medium text-red-50">
-                    {data.budgets.activeIncidents} active budget incident{data.budgets.activeIncidents === 1 ? "" : "s"}
-                  </p>
-                  <p className="text-xs text-red-100/70">
-                    {data.budgets.pausedAgents} agents paused · {data.budgets.pausedProjects} projects paused · {data.budgets.pendingApprovals} pending budget approvals
-                  </p>
-                </div>
+      <section className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_360px]">
+        <div className="space-y-5">
+          <div className="border border-border bg-card p-4">
+            <div className="mb-3 flex items-center justify-between gap-3">
+              <div>
+                <h2 className="text-base font-semibold">Department work queues</h2>
+                <p className="text-sm text-muted-foreground">Paperclip agents and assigned issues grouped as THEFT departments.</p>
               </div>
-              <Link to="/costs" className="text-sm underline underline-offset-2 text-red-100">
-                Open budgets
+              <Link to="/agents/all" className="hidden text-sm text-muted-foreground hover:text-foreground sm:inline">
+                Agents
               </Link>
             </div>
-          ) : null}
-
-          <div className="grid grid-cols-2 xl:grid-cols-4 gap-1 sm:gap-2">
-            <MetricCard
-              icon={Bot}
-              value={data.agents.active + data.agents.running + data.agents.paused + data.agents.error}
-              label="Agents Enabled"
-              to="/agents"
-              description={
-                <span>
-                  {data.agents.running} running{", "}
-                  {data.agents.paused} paused{", "}
-                  {data.agents.error} errors
-                </span>
-              }
-            />
-            <MetricCard
-              icon={CircleDot}
-              value={data.tasks.inProgress}
-              label="Tasks In Progress"
-              to="/issues"
-              description={
-                <span>
-                  {data.tasks.open} open{", "}
-                  {data.tasks.blocked} blocked
-                </span>
-              }
-            />
-            <MetricCard
-              icon={DollarSign}
-              value={formatCents(data.costs.monthSpendCents)}
-              label="Month Spend"
-              to="/costs"
-              description={
-                <span>
-                  {data.costs.monthBudgetCents > 0
-                    ? `${data.costs.monthUtilizationPercent}% of ${formatCents(data.costs.monthBudgetCents)} budget`
-                    : "Unlimited budget"}
-                </span>
-              }
-            />
-            <MetricCard
-              icon={ShieldCheck}
-              value={data.pendingApprovals + data.budgets.pendingApprovals}
-              label="Pending Approvals"
-              to="/approvals"
-              description={
-                <span>
-                  {data.budgets.pendingApprovals > 0
-                    ? `${data.budgets.pendingApprovals} budget overrides awaiting board review`
-                    : "Awaiting board review"}
-                </span>
-              }
-            />
-          </div>
-
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-            <ChartCard title="Run Activity" subtitle="Last 14 days">
-              <RunActivityChart activity={data.runActivity} />
-            </ChartCard>
-            <ChartCard title="Issues by Priority" subtitle="Last 14 days">
-              <PriorityChart issues={issues ?? []} />
-            </ChartCard>
-            <ChartCard title="Issues by Status" subtitle="Last 14 days">
-              <IssueStatusChart issues={issues ?? []} />
-            </ChartCard>
-            <ChartCard title="Success Rate" subtitle="Last 14 days">
-              <SuccessRateChart activity={data.runActivity} />
-            </ChartCard>
-          </div>
-
-          <PluginSlotOutlet
-            slotTypes={["dashboardWidget"]}
-            context={{ companyId: selectedCompanyId }}
-            className="grid gap-4 md:grid-cols-2"
-            itemClassName="rounded-lg border bg-card p-4 shadow-sm"
-          />
-
-          <div className="grid md:grid-cols-2 gap-4">
-            {/* Recent Activity */}
-            {recentActivity.length > 0 && (
-              <div className="min-w-0">
-                <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-3">
-                  Recent Activity
-                </h3>
-                <div className="border border-border divide-y divide-border overflow-hidden">
-                  {recentActivity.map((event) => (
-                    <ActivityRow
-                      key={event.id}
-                      event={event}
-                      agentMap={agentMap}
-                      userProfileMap={userProfileMap}
-                      entityNameMap={entityNameMap}
-                      entityTitleMap={entityTitleMap}
-                      className={animatedActivityIds.has(event.id) ? "activity-row-enter" : undefined}
-                    />
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Recent Tasks */}
-            <div className="min-w-0">
-              <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-3">
-                Recent Tasks
-              </h3>
-              {recentIssues.length === 0 ? (
-                <div className="border border-border p-4">
-                  <p className="text-sm text-muted-foreground">No tasks yet.</p>
-                </div>
-              ) : (
-                <div className="border border-border divide-y divide-border overflow-hidden">
-                  {recentIssues.slice(0, 10).map((issue) => (
-                    <Link
-                      key={issue.id}
-                      to={`/issues/${issue.identifier ?? issue.id}`}
-                      className="px-4 py-3 text-sm cursor-pointer hover:bg-accent/50 transition-colors no-underline text-inherit block"
-                    >
-                      <div className="flex items-start gap-2 sm:items-center sm:gap-3">
-                        {/* Status icon - left column on mobile */}
-                        <span className="shrink-0 sm:hidden">
-                          <StatusIcon status={issue.status} blockerAttention={issue.blockerAttention} />
-                        </span>
-
-                        {/* Right column on mobile: title + metadata stacked */}
-                        <span className="flex min-w-0 flex-1 flex-col gap-1 sm:contents">
-                          <span className="line-clamp-2 text-sm sm:order-2 sm:flex-1 sm:min-w-0 sm:line-clamp-none sm:truncate">
-                            {issue.title}
-                          </span>
-                          <span className="flex items-center gap-2 sm:order-1 sm:shrink-0">
-                            <span className="hidden sm:inline-flex"><StatusIcon status={issue.status} blockerAttention={issue.blockerAttention} /></span>
-                            <span className="text-xs font-mono text-muted-foreground">
-                              {issue.identifier ?? issue.id.slice(0, 8)}
-                            </span>
-                            {issue.assigneeAgentId && (() => {
-                              const name = agentName(issue.assigneeAgentId);
-                              return name
-                                ? <span className="hidden sm:inline-flex"><Identity name={name} size="sm" /></span>
-                                : null;
-                            })()}
-                            <span className="text-xs text-muted-foreground sm:hidden">&middot;</span>
-                            <span className="text-xs text-muted-foreground shrink-0 sm:order-last">
-                              {timeAgo(issue.updatedAt)}
-                            </span>
-                          </span>
-                        </span>
+            <div className="grid gap-3 md:grid-cols-2">
+              {departmentRows.map((department) => (
+                <Link
+                  key={department.key}
+                  to={department.agent ? `/agents/${department.agent.urlKey || department.agent.id}` : "/agents/all"}
+                  className="block border border-border p-3 text-inherit no-underline transition-colors hover:bg-accent/40"
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <h3 className="truncate text-sm font-medium">{department.title}</h3>
+                      <p className="mt-1 truncate text-xs text-muted-foreground">
+                        {summarizeAgent(department.agent)}
+                      </p>
+                    </div>
+                    <Badge variant={department.activeCount > 0 ? "default" : "outline"} className="rounded-md">
+                      {department.activeCount} open
+                    </Badge>
+                  </div>
+                  <div className="mt-3 grid grid-cols-3 gap-2 text-xs text-muted-foreground">
+                    <span>{department.reviewCount} review</span>
+                    <span>{department.doneCount} done</span>
+                    <span>{department.issues.length} total</span>
+                  </div>
+                  <div className="mt-3 space-y-2">
+                    {department.issues.slice(0, 2).map((issue) => (
+                      <div key={issue.id} className="flex min-w-0 items-center gap-2 text-xs">
+                        <StatusIcon status={issue.status} blockerAttention={issue.blockerAttention} />
+                        <span className="truncate">{issue.title}</span>
                       </div>
-                    </Link>
-                  ))}
-                </div>
+                    ))}
+                    {department.issues.length === 0 ? (
+                      <p className="text-xs text-muted-foreground">No assigned tasks yet.</p>
+                    ) : null}
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </div>
+
+          <div className="grid gap-5 lg:grid-cols-2">
+            <TechTreePanel goals={roadmapGoals} nextTasks={nextTasks} />
+            <AttentionPanel
+              issues={attentionIssues}
+              approvalsCount={approvals?.length ?? 0}
+              interactionsCount={pendingInteractions.length}
+            />
+          </div>
+        </div>
+
+        <aside className="space-y-5">
+          <div className="border border-border bg-card p-4">
+            <div className="flex items-start gap-3">
+              <div className="mt-0.5 rounded-md bg-primary/10 p-2 text-primary">
+                <MessageSquarePlus className="h-4 w-4" />
+              </div>
+              <div>
+                <h2 className="text-base font-semibold">Operator tray</h2>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  Create a real Paperclip task for a department agent.
+                </p>
+              </div>
+            </div>
+            <div className="mt-4 space-y-3">
+              <div className="grid grid-cols-2 gap-2">
+                {departmentRows.map((department) => (
+                  <button
+                    key={department.key}
+                    type="button"
+                    onClick={() => setSelectedDepartmentKey(department.key)}
+                    className={cn(
+                      "rounded-md border px-3 py-2 text-left text-xs transition-colors",
+                      selectedDepartmentKey === department.key
+                        ? "border-primary bg-primary/10 text-primary"
+                        : "border-border hover:bg-accent/50",
+                    )}
+                  >
+                    <span className="block truncate font-medium">{department.title}</span>
+                    <span className="mt-0.5 block truncate text-muted-foreground">
+                      {department.agent?.name ?? "No agent"}
+                    </span>
+                  </button>
+                ))}
+              </div>
+              <Textarea
+                value={operatorDraft}
+                onChange={(event) => setOperatorDraft(event.target.value)}
+                placeholder="Ask Operator to create the next concrete task..."
+                className="min-h-28 resize-none"
+              />
+              {createTaskMutation.error ? (
+                <p className="text-sm text-destructive">{createTaskMutation.error.message}</p>
+              ) : null}
+              <Button
+                className="w-full"
+                disabled={!operatorDraft.trim() || createTaskMutation.isPending}
+                onClick={() => createTaskMutation.mutate()}
+              >
+                <Sparkles className="h-4 w-4" />
+                {createTaskMutation.isPending ? "Creating task..." : "Create Paperclip task"}
+              </Button>
+            </div>
+          </div>
+
+          <div className="border border-border bg-card p-4">
+            <h2 className="text-base font-semibold">Next task area</h2>
+            <div className="mt-3 divide-y divide-border border border-border">
+              {nextTasks.length === 0 ? (
+                <p className="p-3 text-sm text-muted-foreground">No active tasks yet.</p>
+              ) : (
+                nextTasks.map((issue) => (
+                  <Link
+                    key={issue.id}
+                    to={issuePath(issue)}
+                    className="flex items-start gap-2 p-3 text-inherit no-underline transition-colors hover:bg-accent/40"
+                  >
+                    <StatusIcon status={issue.status} blockerAttention={issue.blockerAttention} className="mt-0.5" />
+                    <span className="min-w-0 flex-1">
+                      <span className="line-clamp-2 text-sm">{issue.title}</span>
+                      <span className="mt-1 block text-xs text-muted-foreground">
+                        {issue.identifier ?? issue.id.slice(0, 8)} · {formatStatusLabel(issue.status)} · {timeAgo(issue.updatedAt)}
+                      </span>
+                    </span>
+                  </Link>
+                ))
               )}
             </div>
           </div>
+        </aside>
+      </section>
+    </div>
+  );
+}
 
-        </>
-      )}
+function CanvasStat({ value, label }: { value: number; label: string }) {
+  return (
+    <div className="border border-border px-3 py-2">
+      <p className="text-lg font-semibold tabular-nums">{value}</p>
+      <p className="text-xs text-muted-foreground">{label}</p>
+    </div>
+  );
+}
+
+function SummaryPill({ icon: Icon, label, value }: { icon: LucideIcon; label: string; value: string }) {
+  return (
+    <div className="flex min-w-0 items-center gap-3 border border-border px-3 py-2">
+      <Icon className="h-4 w-4 shrink-0 text-muted-foreground" />
+      <span className="min-w-0">
+        <span className="block text-xs text-muted-foreground">{label}</span>
+        <span className="block truncate text-sm">{value}</span>
+      </span>
+    </div>
+  );
+}
+
+function TechTreePanel({ goals, nextTasks }: { goals: ReturnType<typeof getRoadmapGoals>; nextTasks: Issue[] }) {
+  return (
+    <div className="border border-border bg-card p-4">
+      <div className="mb-3 flex items-center justify-between gap-3">
+        <div>
+          <h2 className="text-base font-semibold">Tech tree</h2>
+          <p className="text-sm text-muted-foreground">Paperclip goals/projects/issues rendered as the next unlock path.</p>
+        </div>
+        <Route className="h-4 w-4 text-muted-foreground" />
+      </div>
+      <div className="space-y-3">
+        {goals.slice(0, 4).map((goal) => (
+          <Link key={goal.id} to={`/goals/${goal.id}`} className="block border border-border p-3 text-inherit no-underline hover:bg-accent/40">
+            <div className="flex items-center justify-between gap-3">
+              <span className="truncate text-sm font-medium">{goal.title}</span>
+              <Badge variant="outline" className="rounded-md">{goal.status}</Badge>
+            </div>
+            <p className="mt-1 text-[11px] uppercase tracking-normal text-muted-foreground">
+              {goal.level} node{goal.parentId ? " · dependent" : " · root"}
+            </p>
+            {goal.description ? (
+              <p className="mt-1 line-clamp-2 text-xs text-muted-foreground">{goal.description}</p>
+            ) : null}
+          </Link>
+        ))}
+        {goals.length === 0 ? (
+          <div className="border border-dashed border-border p-3 text-sm text-muted-foreground">
+            No roadmap goals yet. Starter onboarding should seed the first goal.
+          </div>
+        ) : null}
+        {nextTasks[0] ? (
+          <Link to={issuePath(nextTasks[0])} className="flex items-center justify-between gap-3 text-sm text-primary no-underline hover:underline">
+            Open next task <ArrowRight className="h-4 w-4" />
+          </Link>
+        ) : null}
+      </div>
+    </div>
+  );
+}
+
+function AttentionPanel({
+  issues,
+  approvalsCount,
+  interactionsCount,
+}: {
+  issues: Issue[];
+  approvalsCount: number;
+  interactionsCount: number;
+}) {
+  const hasAttention = issues.length > 0 || approvalsCount > 0 || interactionsCount > 0;
+
+  return (
+    <div className="border border-border bg-card p-4">
+      <div className="mb-3 flex items-center justify-between gap-3">
+        <div>
+          <h2 className="text-base font-semibold">Attention queue</h2>
+          <p className="text-sm text-muted-foreground">Reviews, approvals, blocked tasks, and pending interactions.</p>
+        </div>
+        <AlertCircle className={cn("h-4 w-4", hasAttention ? "text-amber-500" : "text-muted-foreground")} />
+      </div>
+      <div className="mb-3 grid grid-cols-2 gap-2 text-sm">
+        <Link to="/approvals/pending" className="border border-border p-3 text-inherit no-underline hover:bg-accent/40">
+          <span className="block font-medium">{approvalsCount}</span>
+          <span className="text-xs text-muted-foreground">pending approvals</span>
+        </Link>
+        <Link to="/inbox/mine" className="border border-border p-3 text-inherit no-underline hover:bg-accent/40">
+          <span className="block font-medium">{interactionsCount}</span>
+          <span className="text-xs text-muted-foreground">agent questions</span>
+        </Link>
+      </div>
+      <div className="divide-y divide-border border border-border">
+        {issues.slice(0, 5).map((issue) => (
+          <Link
+            key={issue.id}
+            to={issuePath(issue)}
+            className="flex items-start gap-2 p-3 text-inherit no-underline transition-colors hover:bg-accent/40"
+          >
+            <StatusIcon status={issue.status} blockerAttention={issue.blockerAttention} className="mt-0.5" />
+            <span className="min-w-0 flex-1">
+              <span className="line-clamp-2 text-sm">{issue.title}</span>
+              <span className="mt-1 block text-xs text-muted-foreground">
+                {issue.status === "blocked" ? "Blocked" : issue.status === "in_review" ? "Needs review" : "Needs attention"}
+              </span>
+            </span>
+          </Link>
+        ))}
+        {issues.length === 0 ? (
+          <div className="flex items-center gap-2 p-3 text-sm text-muted-foreground">
+            <Inbox className="h-4 w-4" />
+            Nothing needs review right now.
+          </div>
+        ) : null}
+      </div>
     </div>
   );
 }

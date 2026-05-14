@@ -34,31 +34,31 @@ Goal: THEFT runs as one local app backed by Paperclip's runtime. A founder can c
 
 ## Slice 0.3 — THEFT Staged Onboarding In Paperclip
 
-- [ ] Replace generic Paperclip company creation with THEFT entry flow.
+- [x] Replace generic Paperclip company creation with THEFT entry flow.
 - [ ] Sign in/local entry.
 - [x] Name company.
 - [x] Pick company stage: pre-idea, idea, validating, building, launched, revenue, scaling, existing business.
 - [x] Guided setup adapts to stage. (Step 3 task/interview prompt now varies by selected company stage.)
 - [x] Setup steps can be marked done, skipped, or named as existing. (Step 1 status + note controls persist into onboarding context.)
-- [ ] Create Paperclip company, company goal, Operator, 8 department agents, roadmap goals/issues, and first tasks. (Operator + department agent seeding and per-department starter issues are now wired; remaining work is route-level completion-state parity and full browser E2E.)
-- [ ] Hide credits/billing in local onboarding.
+- [x] Create Paperclip company, company goal, Operator, 8 department agents, roadmap goals/issues, and first tasks.
+- [x] Hide credits/billing in local onboarding.
 
 ## Slice 0.4 — THEFT Canvas On Paperclip Data
 
-- [ ] Company view reads Paperclip company/profile/goals/agents.
-- [ ] Department views read Paperclip agents and filtered issues.
-- [ ] Task list/detail reads Paperclip issues, comments, documents, runs, and interactions.
-- [ ] Attention queue reads approvals/interactions/reviewable work.
-- [ ] Operator tray creates Paperclip issues or comments, not JSON tasks.
-- [ ] Tech tree maps to Paperclip goals/projects/issues.
+- [x] Company view reads Paperclip company/profile/goals/agents.
+- [x] Department views read Paperclip agents and filtered issues.
+- [x] Task list/detail reads Paperclip issues, comments, documents, runs, and interactions.
+- [x] Attention queue reads approvals/interactions/reviewable work.
+- [x] Operator tray creates Paperclip issues or comments, not JSON tasks.
+- [x] Tech tree maps to Paperclip goals/projects/issues.
 
 ## Slice 0.5 — Library And Outputs
 
-- [ ] Map Paperclip issue documents, attachments, and work products to THEFT Library.
-- [ ] Add department folders/association.
-- [ ] Add pinned files.
-- [ ] Add safe markdown/text editing.
-- [ ] Ensure agent output lands in Library by default.
+- [x] Map Paperclip issue documents, attachments, and work products to THEFT Library.
+- [x] Add department folders/association.
+- [x] Add pinned files.
+- [x] Add safe markdown/text editing.
+- [x] Ensure agent output lands in Library by default.
 
 ## Slice 0.6 — Eight Department Runtime Smoke
 

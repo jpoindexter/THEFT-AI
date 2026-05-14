@@ -7,12 +7,15 @@
 1. **`HANDOFF.md`** — resume state, pushed commits, current implementation status, next exact tasks
 2. **`SOURCE-OF-TRUTH.md`** — canonical merge decision: THEFT product layer on a Paperclip runtime host
 3. **`PARITY-DELTA.md`** — feature parity, product deltas, gaps, and build order
-4. **`ROADMAP.md`** — ordered slices. Sequential, not parallel.
-5. **`TASKS.md`** — concrete task list. Working file.
-6. **`STATUS.md`** — what actually exists vs is stubbed/broken (audit-derived)
-7. **`DECISIONS.md`** — locked choices, append-only, no re-litigating
-8. **`PAPERCLIP-HOST-PROMOTION.md`** — how Paperclip became tracked source in this repo
-9. **`SKILL-AUDIT.md`** — THEFT skill packs and default department mappings
+4. **`UX-DIRECTION.md`** — product UX direction tying Paperclip, Cofounder, Hyperagent, skills, and THEFT happy path together
+5. **`UX-SCREEN-PROMPTS.md`** — reusable prompts for generating and critiquing screen flows before implementation
+6. **`UX-BUILD-TASKS.md`** — model-lane task list for the UX build and smoke handoff
+7. **`ROADMAP.md`** — ordered slices. Sequential, not parallel.
+8. **`TASKS.md`** — concrete task list. Working file.
+9. **`STATUS.md`** — what actually exists vs is stubbed/broken (audit-derived)
+10. **`DECISIONS.md`** — locked choices, append-only, no re-litigating
+11. **`PAPERCLIP-HOST-PROMOTION.md`** — how Paperclip became tracked source in this repo
+12. **`SKILL-AUDIT.md`** — THEFT skill packs and default department mappings
 
 ## How to use this folder
 
