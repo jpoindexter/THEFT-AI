@@ -672,12 +672,12 @@ function PlanSection({
     lime: "text-sage-ink bg-sage/15",
   };
   return (
-    <div>
-      <span
+    <div className="rounded-md border border-line/70 bg-canvas/40 p-2.5">
+      <div
         className={`inline-block text-2xs uppercase tracking-wider px-1.5 py-0.5 rounded ${palette[tone]}`}
       >
         {label}
-      </span>
+      </div>
       <div className="text-sm text-ink mt-1.5 leading-snug">
         {children}
       </div>

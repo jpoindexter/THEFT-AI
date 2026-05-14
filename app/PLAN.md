@@ -22,9 +22,9 @@
 
 ## Day 3 — tech tree + business brief polish
 
-- [ ] Sample 10 different node-detail panels from `/screenshots/04-roadmap-board/` and verify each section variant works
-- [ ] Brief widget: pixel-match question card, "Decide all" / "Decide this one" / "Submit" CTA flow, "1/4" pagination
-- [ ] BusinessPlan card: match field labels and styling
+- [x] Sample 10 different node-detail panels from `/screenshots/04-roadmap-board/` and verify each section variant works
+- [x] Brief widget: pixel-match question card, "Decide all" / "Decide this one" / "Submit" CTA flow, "1/4" pagination
+- [x] BusinessPlan card: match field labels and styling
 
 ## Day 4 — design / brand kit flow
 

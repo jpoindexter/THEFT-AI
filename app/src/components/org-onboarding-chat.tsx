@@ -223,7 +223,7 @@ function QuestionPhase({ transcript, questions, qIndex, answers, customTexts, on
                 </button>
               )}
               <span style={{ fontSize: 11, color: "var(--t-ink-muted)", letterSpacing: "0.02em" }}>
-                {qIndex + 1} / {questions.length}
+                {qIndex + 1}/{questions.length}
               </span>
               <span style={{ fontSize: 12, color: "var(--t-ink-soft)" }}>›</span>
             </div>
@@ -317,7 +317,7 @@ function QuestionPhase({ transcript, questions, qIndex, answers, customTexts, on
                 transition: "opacity 120ms ease",
               }}
             >
-              {canAdvance ? (isLast ? "Submit" : "Next →") : "Decide this one"}
+              {canAdvance ? (isLast ? "Submit" : "Decide this one") : "Decide this one"}
             </button>
           </div>
         </div>

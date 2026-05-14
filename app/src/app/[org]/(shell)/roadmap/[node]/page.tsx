@@ -17,7 +17,7 @@ const STATUS_TONE: Record<string, string> = {
   locked: "bg-cream text-ink-muted",
   available: "bg-mustard/30 text-mustard-ink",
   in_progress: "bg-cream text-ink",
-  done: "bg-sage/30 text-sage-ink",
+  complete: "bg-sage/30 text-sage-ink",
 };
 
 export default async function TechTreeNodePage({
@@ -98,6 +98,33 @@ export default async function TechTreeNodePage({
             <p className="text-base text-ink leading-relaxed">
               {node.how_to_move_forward}
             </p>
+          </section>
+        )}
+
+        {node.checklist_item && (
+          <section className="rounded-lg border border-line/70 bg-paper p-4 space-y-1">
+            <div className="text-2xs uppercase tracking-wider text-ink-soft">
+              Checklist item
+            </div>
+            <p className="text-base text-ink leading-relaxed">
+              {node.checklist_item}
+            </p>
+          </section>
+        )}
+
+        {node.external_cta?.url && (
+          <section className="rounded-lg border border-line/70 bg-paper p-4 space-y-2">
+            <div className="text-2xs uppercase tracking-wider text-ink-soft">
+              Suggested external action
+            </div>
+            <a
+              href={node.external_cta.url}
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex items-center gap-2 text-sm text-ink-muted border border-line/70 rounded px-2.5 py-1 hover:text-ink hover:border-line-strong"
+            >
+              {node.external_cta.label || "Open link"}
+            </a>
           </section>
         )}
 

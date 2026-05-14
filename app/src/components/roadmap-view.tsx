@@ -14,6 +14,8 @@ type RNode = {
   title: string;
   description: string | null;
   how_to_move_forward: string | null;
+  checklist_item?: string | null;
+  external_cta?: { label: string; url: string } | null;
   dependencies: string[];
   department?: string;
   status: NodeStatus;
@@ -356,6 +358,45 @@ function NodeDrawer({
             >
               {node.how_to_move_forward}
             </p>
+          </DrawerSection>
+        )}
+
+        {node.checklist_item && (
+          <DrawerSection label="Checklist item">
+            <p
+              style={{
+                margin: 0,
+                color: "var(--t-ink)",
+                lineHeight: 1.5,
+                fontSize: 13,
+              }}
+            >
+              {node.checklist_item}
+            </p>
+          </DrawerSection>
+        )}
+
+        {node.external_cta?.url && (
+          <DrawerSection label="Suggested external action">
+            <a
+              href={node.external_cta.url}
+              target="_blank"
+              rel="noreferrer"
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 6,
+                fontSize: 12,
+                color: "var(--t-ink-muted)",
+                border: "1px solid var(--t-line-strong)",
+                borderRadius: 4,
+                padding: "6px 10px",
+                textDecoration: "none",
+              }}
+            >
+              {node.external_cta.label || "Open link"}
+              <ExternalLink size={12} />
+            </a>
           </DrawerSection>
         )}
 
