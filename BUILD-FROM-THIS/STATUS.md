@@ -36,8 +36,9 @@ Run status:
 - 2026-05-14: Created the UX source docs for the next product pass: `BUILD-FROM-THIS/UX-DIRECTION.md`, `BUILD-FROM-THIS/UX-SCREEN-PROMPTS.md`, and `BUILD-FROM-THIS/UX-BUILD-TASKS.md`. The xhigh synthesis gate is complete; next model lane is `gpt-5.5 high` starting at `UX010`.
 - 2026-05-14: Completed `UX010`-`UX015` onboarding UX pass in `paperclip/`: Step 2 is now Company Assembly Preview, model/adapter controls are behind Advanced runtime, Codex local is the default runtime, the launch summary includes 8 departments, and onboarding e2e now covers mobile assembly preview. Also fixed concurrent Codex managed-home auth symlink setup exposed by department wakeups.
 - 2026-05-14: Completed `UX020`-`UX023` Command Center UX pass in `paperclip/`: dashboard breadcrumb/nav now says Command Center, primary copy leads with THEFT company objects instead of Paperclip runtime language, the first viewport includes current bottleneck, departments, Operator tray, attention queue, Tech Tree, and latest Library outputs, and sidebar labels move agent/admin surfaces out of the main happy path.
+- 2026-05-14: Completed `UX030`-`UX032` Task Review UX pass in `paperclip/`: issue detail now starts with a THEFT Task Review summary covering owner department, run timeline, Library output count, decisions, comments, and subtasks while keeping chat/activity/runtime diagnostics lower in the page.
 
-Next blocking work: continue `UX030` Task Review implementation, verify saved Library outputs from real LLM runs, then continue subtracting dead `app/` surface. Avoid building new runtime features in `app/`.
+Next blocking work: continue `UX040` Library implementation, verify saved Library outputs from real LLM runs, then continue subtracting dead `app/` surface. Avoid building new runtime features in `app/`.
 
 Verification coverage:
 
@@ -46,6 +47,7 @@ Verification coverage:
 - Use `node paperclip/scripts/smoke/theft-department-runtime-smoke.mjs` against a running local host for deterministic 8-department adapter runtime smoke. Override with `THEFT_SMOKE_ADAPTER=codex_local THEFT_SMOKE_CODEX_MODEL=gpt-5.3-codex-spark` when an authenticated Codex local run is desired.
 - Build currently passes with existing Vite warnings about large chunks and `MarkdownEditor.tsx` being both statically and dynamically imported.
 - `UX020`-`UX023` verification passed focused Vitest (`theft-canvas`, `Dashboard`), `git diff --check`, and `pnpm -C paperclip build`.
+- `UX030`-`UX032` verification passed focused Vitest (`IssueDetail`), `git diff --check`, and `pnpm -C paperclip build`.
 
 ## Legacy THEFT App Engine (`app/src/lib/`)
 

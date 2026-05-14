@@ -11,6 +11,7 @@ const mockIssuesApi = vi.hoisted(() => ({
   get: vi.fn(),
   list: vi.fn(),
   listComments: vi.fn(),
+  listInteractions: vi.fn(),
   listAttachments: vi.fn(),
   listFeedbackVotes: vi.fn(),
   markRead: vi.fn(),
@@ -779,6 +780,7 @@ describe("IssueDetail", () => {
 
     mockIssuesApi.list.mockResolvedValue([]);
     mockIssuesApi.listComments.mockResolvedValue([]);
+    mockIssuesApi.listInteractions.mockResolvedValue([]);
     mockIssuesApi.listAttachments.mockResolvedValue([]);
     mockIssuesApi.listFeedbackVotes.mockResolvedValue([]);
     mockIssuesApi.markRead.mockResolvedValue({ id: "issue-1", lastReadAt: new Date().toISOString() });
@@ -837,6 +839,58 @@ describe("IssueDetail", () => {
     expect(container.textContent).toContain("Issue detail smoke");
     expect(container.textContent).toContain("Chat thread");
     expect(consoleErrorSpy).not.toHaveBeenCalled();
+  });
+
+  it("frames the issue detail header as a THEFT task review", async () => {
+    mockIssuesApi.get.mockResolvedValue(createIssue({
+      assigneeAgentId: "agent-1",
+      executionRunId: "run-1",
+      documentSummaries: [
+        {
+          id: "doc-1",
+          companyId: "company-1",
+          issueId: "issue-1",
+          key: "launch-brief",
+          title: "Launch brief",
+          format: "markdown",
+          latestRevisionId: null,
+          latestRevisionNumber: 1,
+          createdByAgentId: "agent-1",
+          createdByUserId: null,
+          updatedByAgentId: "agent-1",
+          updatedByUserId: null,
+          createdAt: new Date("2026-04-21T00:00:00.000Z"),
+          updatedAt: new Date("2026-04-21T00:00:00.000Z"),
+        },
+      ],
+    }));
+    mockAgentsApi.list.mockResolvedValue([
+      createAgent({ id: "agent-1", name: "Engineering Lead", title: "Engineering" }),
+    ]);
+
+    await act(async () => {
+      root.render(
+        <QueryClientProvider client={queryClient}>
+          <IssueDetail />
+        </QueryClientProvider>,
+      );
+    });
+    await flushReact();
+
+    const text = container.textContent ?? "";
+    expect(mockSetBreadcrumbs).toHaveBeenCalledWith([
+      { label: "Tasks", href: "/issues" },
+      { label: "Issue detail smoke" },
+    ]);
+    expect(text).toContain("Task review");
+    expect(text).toContain("Owner department");
+    expect(text).toContain("Engineering · Engineering Lead");
+    expect(text).toContain("Run timeline");
+    expect(text).toContain("Run attached");
+    expect(text).toContain("Library output");
+    expect(text).toContain("1 Library artifact");
+    expect(text).toContain("Decisions");
+    expect(text).not.toContain("Hide this Issue");
   });
 
   it("passes blocker attention to the issue detail header status icon", async () => {

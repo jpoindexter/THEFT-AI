@@ -52,6 +52,7 @@ Goal: THEFT runs as one local app backed by Paperclip's runtime. A founder can c
 - [x] Operator tray creates Paperclip issues or comments, not JSON tasks.
 - [x] Tech tree maps to Paperclip goals/projects/issues.
 - [x] Command Center first viewport frames current bottleneck, departments, Operator tray, attention queue, Tech Tree, and latest Library outputs without leading with agent admin surfaces.
+- [x] Task detail first viewport frames THEFT Task Review: owner department, run state, Library output, decisions, comments, and subtasks before runtime diagnostics.
 
 ## Slice 0.5 — Library And Outputs
 

@@ -120,6 +120,7 @@ import {
   Eye,
   EyeOff,
   Hexagon,
+  Library,
   ListTree,
   MessageSquare,
   MoreHorizontal,
@@ -131,6 +132,7 @@ import {
   Repeat,
   SlidersHorizontal,
   Trash2,
+  UserRound,
   XCircle,
 } from "lucide-react";
 import {
@@ -206,6 +208,10 @@ function treeControlPreviewErrorCopy(error: unknown): string {
     if (error.status === 422) return "This subtree action is currently invalid for the selected issues.";
   }
   return error instanceof Error ? error.message : "Unable to load preview.";
+}
+
+function formatTaskStatus(status: string) {
+  return status.replace(/_/g, " ");
 }
 
 function resolveRunningIssueRun(
@@ -580,6 +586,98 @@ function InboxMobileToolbar({
             )}
           </PopoverContent>
         </Popover>
+      </div>
+    </div>
+  );
+}
+
+function TaskReviewSummary({
+  issue,
+  owner,
+  outputCount,
+  decisionCount,
+  commentCount,
+  childTaskCount,
+  hasLiveRuns,
+}: {
+  issue: Issue;
+  owner: Agent | null;
+  outputCount: number;
+  decisionCount: number;
+  commentCount: number;
+  childTaskCount: number;
+  hasLiveRuns: boolean;
+}) {
+  const ownerLabel = owner
+    ? `${owner.title ?? "Department lead"} · ${owner.name}`
+    : "Operator has not assigned a department lead yet";
+  const outputLabel = outputCount > 0
+    ? `${outputCount} Library artifact${outputCount === 1 ? "" : "s"}`
+    : "No Library artifact yet";
+  const runLabel = hasLiveRuns
+    ? "Live run active"
+    : issue.executionRunId
+      ? "Run attached"
+      : "No active run";
+
+  return (
+    <section className="space-y-3">
+      <div>
+        <h3 className="text-sm font-medium">Task review</h3>
+        <p className="mt-1 text-xs text-muted-foreground">
+          Objective, owner, run state, decisions, and saved company output.
+        </p>
+      </div>
+      <div className="grid gap-3 sm:grid-cols-2">
+        <TaskReviewCard
+          icon={UserRound}
+          label="Owner department"
+          value={ownerLabel}
+          detail={childTaskCount > 0 ? `${childTaskCount} subtask${childTaskCount === 1 ? "" : "s"} in scope` : "Single task"}
+        />
+        <TaskReviewCard
+          icon={ActivityIcon}
+          label="Run timeline"
+          value={runLabel}
+          detail={`${formatTaskStatus(issue.status)} · ${issue.priority} priority`}
+        />
+        <TaskReviewCard
+          icon={Library}
+          label="Library output"
+          value={outputLabel}
+          detail={issue.completedAt ? `Completed ${relativeTime(issue.completedAt)}` : "Saved docs appear below"}
+        />
+        <TaskReviewCard
+          icon={AlertTriangle}
+          label="Decisions"
+          value={decisionCount > 0 ? `${decisionCount} pending` : "No founder decision pending"}
+          detail={`${commentCount} comment${commentCount === 1 ? "" : "s"} in the task thread`}
+        />
+      </div>
+    </section>
+  );
+}
+
+function TaskReviewCard({
+  icon: Icon,
+  label,
+  value,
+  detail,
+}: {
+  icon: typeof UserRound;
+  label: string;
+  value: string;
+  detail: string;
+}) {
+  return (
+    <div className="flex min-w-0 gap-3 border border-border bg-card p-3">
+      <div className="mt-0.5 rounded-md bg-muted p-2 text-muted-foreground">
+        <Icon className="h-4 w-4" />
+      </div>
+      <div className="min-w-0">
+        <p className="text-xs text-muted-foreground">{label}</p>
+        <p className="mt-1 truncate text-sm font-medium">{value}</p>
+        <p className="mt-1 line-clamp-2 text-xs text-muted-foreground">{detail}</p>
       </div>
     </div>
   );
@@ -1308,7 +1406,7 @@ export function IssueDetail() {
     }
   }, [hasLiveRuns, locallyQueuedCommentRunIds.size]);
   const sourceBreadcrumb = useMemo(
-    () => readIssueDetailBreadcrumb(issueId, location.state, location.search) ?? { label: "Issues", href: "/issues" },
+    () => readIssueDetailBreadcrumb(issueId, location.state, location.search) ?? { label: "Tasks", href: "/issues" },
     [issueId, location.state, location.search],
   );
 
@@ -3446,7 +3544,7 @@ export function IssueDetail() {
                 }}
               >
                 <EyeOff className="h-3 w-3" />
-                Hide this Issue
+                Hide this task
               </button>
             </PopoverContent>
             </Popover>
@@ -3476,6 +3574,16 @@ export function IssueDetail() {
           onDropFile={async (file) => {
             await uploadAttachment.mutateAsync(file);
           }}
+        />
+
+        <TaskReviewSummary
+          issue={issue}
+          owner={issue.assigneeAgentId ? agentMap.get(issue.assigneeAgentId) ?? null : null}
+          outputCount={(issue.documentSummaries?.length ?? 0) + (issue.planDocument ? 1 : 0)}
+          decisionCount={interactions.filter((interaction) => interaction.status === "pending").length}
+          commentCount={threadComments.length}
+          childTaskCount={childIssues.length}
+          hasLiveRuns={hasLiveRuns}
         />
       </div>
 
@@ -3523,7 +3631,7 @@ export function IssueDetail() {
       {showRichSubIssuesSection ? (
         <div className="space-y-3">
           <div className="flex items-center justify-between gap-2">
-            <h3 className="text-sm font-medium text-muted-foreground">Sub-issues</h3>
+            <h3 className="text-sm font-medium text-muted-foreground">Subtasks</h3>
           </div>
           <IssuesList
             issues={childIssues}
@@ -3539,7 +3647,7 @@ export function IssueDetail() {
             searchFilters={{ descendantOf: issue.id, includeBlockedBy: true }}
             searchWithinLoadedIssues
             baseCreateIssueDefaults={buildSubIssueDefaultsForViewer(issue, currentUserId)}
-            createIssueLabel="Sub-issue"
+            createIssueLabel="Subtask"
             defaultSortField="workflow"
             showProgressSummary
             parentIssueIdForCostSummary={issue.id}
@@ -3550,7 +3658,7 @@ export function IssueDetail() {
         <div className="flex flex-wrap items-center justify-end gap-2 min-w-0">
           <Button variant="outline" size="sm" onClick={openNewSubIssue} className="shrink-0 shadow-none">
             <Plus className="mr-1.5 h-3.5 w-3.5" />
-            New Sub-issue
+            New subtask
           </Button>
         </div>
       )}

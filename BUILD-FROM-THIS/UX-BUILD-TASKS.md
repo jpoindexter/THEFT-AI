@@ -45,9 +45,9 @@ Goal: a founder can create a company, see THEFT assemble it, land in Command Cen
 - [x] UX022 [HIGH] [US2] Keep agent roster, cost charts, model config, invocations, tools, and skills out of the primary Command Center by adjusting `paperclip/ui/src/components/Sidebar.tsx` and `paperclip/ui/src/App.tsx` only where needed.
 - [x] UX023 [HIGH] [US2] Add or update tests for Command Center helpers in `paperclip/ui/src/lib/theft-canvas.test.ts` and page behavior in the nearest existing dashboard test file.
 
-- [ ] UX030 [HIGH] [US3] Reframe `paperclip/ui/src/pages/IssueDetail.tsx` as a THEFT Task Review surface: objective, owner department, run timeline, output, decisions, Library artifacts, and comments.
-- [ ] UX031 [HIGH] [US3] Keep diagnostics available but secondary in `paperclip/ui/src/components/IssueRunLedger.tsx`, `paperclip/ui/src/components/IssueDocumentsSection.tsx`, and `paperclip/ui/src/components/IssueRelatedWorkPanel.tsx`.
-- [ ] UX032 [HIGH] [US3] Add task-review coverage in `paperclip/ui/src/pages/IssueDetail.test.tsx`.
+- [x] UX030 [HIGH] [US3] Reframe `paperclip/ui/src/pages/IssueDetail.tsx` as a THEFT Task Review surface: objective, owner department, run timeline, output, decisions, Library artifacts, and comments.
+- [x] UX031 [HIGH] [US3] Keep diagnostics available but secondary in `paperclip/ui/src/components/IssueRunLedger.tsx`, `paperclip/ui/src/components/IssueDocumentsSection.tsx`, and `paperclip/ui/src/components/IssueRelatedWorkPanel.tsx`.
+- [x] UX032 [HIGH] [US3] Add task-review coverage in `paperclip/ui/src/pages/IssueDetail.test.tsx`.
 
 - [ ] UX040 [HIGH] [US4] Reframe `paperclip/ui/src/pages/Library.tsx` as the durable company memory and output shelf, grouped by department and pinned work.
 - [ ] UX041 [HIGH] [US4] Ensure Library item mapping in `paperclip/ui/src/lib/library-items.ts` identifies generated work products from issue documents, attachments, and run outputs.
