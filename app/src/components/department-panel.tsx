@@ -242,6 +242,10 @@ export default function DepartmentPanel({
       {/* Description */}
       <p className="text-sm text-ink-muted leading-snug pt-1">{description}</p>
 
+      {deptSlug === "engineering" && (
+        <EngineeringShowcase orgSlug={organization.slug} />
+      )}
+
       {/* Divider */}
       <div className="border-t border-line/70 pt-2 space-y-0">
 
@@ -440,6 +444,74 @@ export default function DepartmentPanel({
         open={taskDialogOpen}
         onOpenChange={setTaskDialogOpen}
       />
+    </div>
+  );
+}
+
+function EngineeringShowcase({ orgSlug }: { orgSlug: string }) {
+  return (
+    <section className="mt-3 rounded-lg border border-line/70 bg-paper p-4 space-y-4">
+      <h3 className="text-[32px] leading-tight tracking-tight text-ink text-center mt-1">
+        Let&apos;s build <Link href={`/${orgSlug}/roadmap`} className="text-[#3b82f6] hover:underline">your app</Link> from the ground up
+      </h3>
+      <div className="grid grid-cols-2 gap-3">
+        <MockupCard title="Landing Page" />
+        <MockupCard title="Application" />
+      </div>
+      <div className="pt-1">
+        <div className="flex items-center justify-between mb-2">
+          <div className="text-sm text-ink-muted">Engineering Roadmap</div>
+          <div className="text-sm text-ink-muted">0/7 Setup</div>
+        </div>
+        <div className="overflow-x-auto">
+          <div className="min-w-[560px] flex items-stretch gap-2 pb-1">
+            <RoadmapCard title="App is built" subtitle="Complete task" active />
+            <RoadmapCard title="Build marketing website" subtitle="Complete task" />
+            <RoadmapCard title="Production product deployment exists" subtitle="Needs earlier steps first" />
+            <RoadmapCard title="Buy domain" subtitle="Provision resource" />
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function MockupCard({ title }: { title: string }) {
+  return (
+    <div className="rounded-xl border border-line/70 bg-canvas p-3">
+      <div className="h-28 rounded-lg border border-line/60 bg-paper relative overflow-hidden">
+        <div className="absolute top-0 left-0 right-0 h-5 bg-[#dbe7f8]" />
+        <div className="absolute top-2 left-2 flex gap-1">
+          <span className="size-1.5 rounded-full bg-[#e0907a]" />
+          <span className="size-1.5 rounded-full bg-[#e0a050]" />
+          <span className="size-1.5 rounded-full bg-[#7ac87a]" />
+        </div>
+        <div className="absolute left-3 right-3 top-8 space-y-2">
+          <div className="h-1.5 rounded bg-line" />
+          <div className="h-1.5 w-4/5 rounded bg-line" />
+          <div className="h-1.5 w-2/3 rounded bg-line" />
+        </div>
+      </div>
+      <div className="mt-2 flex justify-center">
+        <span className="text-xs text-ink-muted rounded border border-line/70 px-2 py-0.5 bg-paper">{title}</span>
+      </div>
+    </div>
+  );
+}
+
+function RoadmapCard({
+  title,
+  subtitle,
+  active = false,
+}: {
+  title: string;
+  subtitle: string;
+  active?: boolean;
+}) {
+  return (
+    <div className={`w-44 rounded-lg border ${active ? "border-[#9bb7dd]" : "border-line/70"} bg-paper p-2.5 shrink-0`}>
+      <div className="text-sm leading-tight text-ink">{title}</div>
+      <div className="text-xs text-ink-soft mt-1">{subtitle}</div>
     </div>
   );
 }

@@ -12,7 +12,7 @@
 
 ## Day 2 — engineering dept + new task flow
 
-- [ ] Match `/screenshots/05-main-workspace/03-engineering-dept-panel.png`:
+- [x] Match `/screenshots/05-main-workspace/03-engineering-dept-panel.png`:
   - "Let's build [your app] from the ground up" (blue link)
   - Two device-frame mockups (Landing Page + Application)
   - "Engineering Roadmap" horizontal scroller with status cards
