@@ -52,8 +52,8 @@
 
 - [x] Marketing landing at `/` for unauthed (steal from `misc/03-marketing-site-full.png`)
 - [x] Real auth (Supabase magic link or just bypass with cookie for demo)
-- [ ] Deploy to Vercel
-- [ ] Domain + favicon (use `favicon-pack-maker` skill)
+- [x] Local-only runtime (offline-friendly / no cloud deploy dependency)
+- [x] No domain requirement for local development
 
 ## Skills wired per agent
 

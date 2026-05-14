@@ -22,7 +22,7 @@ Goal: THEFT runs as one local app backed by Paperclip's runtime. A founder can c
 - [ ] Bring `BUILD-FROM-THIS/` and `skills/` into the host. Started with `paperclip/THEFT.md` and `paperclip/AGENTS.md` pointers; full skill import remains Slice 0.2.
 - [ ] Add THEFT design tokens/branding to the host UI.
 - [ ] Mark current `app/` as migration reference once host exists.
-- [ ] Make one dev command for the host.
+- [x] Make one dev command for the host.
 
 ## Slice 0.2 — Skill Library Import
 

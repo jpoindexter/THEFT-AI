@@ -21,6 +21,13 @@
 - **Before re-debating an architecture choice**, check DECISIONS. If it's locked, don't re-litigate without new info.
 - **When tempted by a side feature**, add it to TASKS or archive it. Don't build it outside the roadmap.
 
+## Host dev command
+
+- Run the Paperclip host from repo root with:
+  - `pnpm run dev:host`
+- The old Next.js prototype remains available as:
+  - `pnpm run dev:prototype`
+
 ## What's NOT source of truth
 
 - `_archive/` — old docs and pre-Paperclip build prompts. Kept for reference only. Building from them caused the drift this folder fixes.

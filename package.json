@@ -4,6 +4,9 @@
   "private": true,
   "scripts": {
     "dev": "pnpm -C app dev",
+    "dev:host": "pnpm -C paperclip dev",
+    "dev:host:once": "pnpm -C paperclip dev:once",
+    "dev:prototype": "pnpm -C app dev",
     "build": "pnpm -C app build",
     "start": "pnpm -C app start",
     "lint": "pnpm -C app lint",

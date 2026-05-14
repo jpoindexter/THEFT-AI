@@ -22,7 +22,7 @@
 | T011 | Promote Paperclip into tracked source or move work to Paperclip fork | ✅ done |
 | T012 | Copy/port `BUILD-FROM-THIS/` and `skills/` into the host | ▶ doing |
 | T013 | Add THEFT design tokens/brand shell to Paperclip UI | ☐ todo |
-| T014 | Add one host dev command and document it | ☐ todo |
+| T014 | Add one host dev command and document it | ✅ done |
 | T015 | Mark current `app/` as migration reference after host boots | ☐ todo |
 
 ## Slice 0.2 — Skill Library Import
