@@ -5,6 +5,7 @@ import {
   buildDepartmentCanvasRows,
   findOperatorAgent,
   getAttentionIssues,
+  getCurrentBottleneck,
   getPendingInteractionsByIssue,
   getRoadmapGoals,
   parseCompanyProfileSummary,
@@ -142,6 +143,67 @@ describe("THEFT canvas attention helpers", () => {
     expect(getPendingInteractionsByIssue({ "issue-1": [pending, answered] })).toEqual([
       { issueId: "issue-1", interaction: pending },
     ]);
+  });
+
+  it("summarizes the current company bottleneck from decisions before task state", () => {
+    expect(
+      getCurrentBottleneck({
+        attentionIssues: [issue({ id: "blocked", status: "blocked", title: "Fix checkout" })],
+        openIssues: [],
+        setupItems: [],
+        approvalsCount: 1,
+        interactionsCount: 2,
+      }),
+    ).toMatchObject({
+      label: "Founder decision required",
+      detail: "1 approvals · 2 questions",
+      issue: null,
+      tone: "review",
+    });
+  });
+
+  it("falls back through blocked work, setup gaps, active work, and clear state", () => {
+    const blocked = issue({ id: "blocked", status: "blocked", title: "Unblock launch" });
+    expect(
+      getCurrentBottleneck({
+        attentionIssues: [blocked],
+        openIssues: [],
+        setupItems: [],
+        approvalsCount: 0,
+        interactionsCount: 0,
+      }),
+    ).toMatchObject({ label: "Blocked task", issue: blocked, tone: "attention" });
+
+    expect(
+      getCurrentBottleneck({
+        attentionIssues: [],
+        openIssues: [],
+        setupItems: [{ key: "customer", label: "First customer", status: "todo", note: null }],
+        approvalsCount: 0,
+        interactionsCount: 0,
+      }),
+    ).toMatchObject({ label: "Company setup gap", detail: "First customer", tone: "setup" });
+
+    const active = issue({ id: "active", status: "todo", title: "Write landing page" });
+    expect(
+      getCurrentBottleneck({
+        attentionIssues: [],
+        openIssues: [active],
+        setupItems: [],
+        approvalsCount: 0,
+        interactionsCount: 0,
+      }),
+    ).toMatchObject({ label: "Next task ready", issue: active, tone: "work" });
+
+    expect(
+      getCurrentBottleneck({
+        attentionIssues: [],
+        openIssues: [],
+        setupItems: [],
+        approvalsCount: 0,
+        interactionsCount: 0,
+      }),
+    ).toMatchObject({ label: "No bottleneck", tone: "clear" });
   });
 
   it("orders active roadmap goals before completed work", () => {

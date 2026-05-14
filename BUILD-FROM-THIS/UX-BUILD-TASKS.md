@@ -40,10 +40,10 @@ Goal: a founder can create a company, see THEFT assemble it, land in Command Cen
 - [x] UX014 [HIGH] [US1] Update focused onboarding tests in `paperclip/ui/src/lib/onboarding-context.test.ts`, `paperclip/ui/src/lib/onboarding-launch.test.ts`, and `paperclip/tests/e2e/onboarding.spec.ts`.
 - [x] UX015 [HIGH] [US1] Verify `/onboarding` desktop and mobile rendering with the Browser plugin or Playwright screenshots.
 
-- [ ] UX020 [HIGH] [US2] Reframe `paperclip/ui/src/pages/Dashboard.tsx` as THEFT Command Center / Canvas using `paperclip/ui/src/lib/theft-canvas.ts`.
-- [ ] UX021 [HIGH] [US2] Add Command Center sections in `paperclip/ui/src/pages/Dashboard.tsx`: company stage, current bottleneck, Operator tray, department status grid, attention queue, Tech Tree next steps, and latest Library outputs.
-- [ ] UX022 [HIGH] [US2] Keep agent roster, cost charts, model config, invocations, tools, and skills out of the primary Command Center by adjusting `paperclip/ui/src/components/Sidebar.tsx` and `paperclip/ui/src/App.tsx` only where needed.
-- [ ] UX023 [HIGH] [US2] Add or update tests for Command Center helpers in `paperclip/ui/src/lib/theft-canvas.test.ts` and page behavior in the nearest existing dashboard test file.
+- [x] UX020 [HIGH] [US2] Reframe `paperclip/ui/src/pages/Dashboard.tsx` as THEFT Command Center / Canvas using `paperclip/ui/src/lib/theft-canvas.ts`.
+- [x] UX021 [HIGH] [US2] Add Command Center sections in `paperclip/ui/src/pages/Dashboard.tsx`: company stage, current bottleneck, Operator tray, department status grid, attention queue, Tech Tree next steps, and latest Library outputs.
+- [x] UX022 [HIGH] [US2] Keep agent roster, cost charts, model config, invocations, tools, and skills out of the primary Command Center by adjusting `paperclip/ui/src/components/Sidebar.tsx` and `paperclip/ui/src/App.tsx` only where needed.
+- [x] UX023 [HIGH] [US2] Add or update tests for Command Center helpers in `paperclip/ui/src/lib/theft-canvas.test.ts` and page behavior in the nearest existing dashboard test file.
 
 - [ ] UX030 [HIGH] [US3] Reframe `paperclip/ui/src/pages/IssueDetail.tsx` as a THEFT Task Review surface: objective, owner department, run timeline, output, decisions, Library artifacts, and comments.
 - [ ] UX031 [HIGH] [US3] Keep diagnostics available but secondary in `paperclip/ui/src/components/IssueRunLedger.tsx`, `paperclip/ui/src/components/IssueDocumentsSection.tsx`, and `paperclip/ui/src/components/IssueRelatedWorkPanel.tsx`.

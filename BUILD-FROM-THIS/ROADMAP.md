@@ -51,6 +51,7 @@ Goal: THEFT runs as one local app backed by Paperclip's runtime. A founder can c
 - [x] Attention queue reads approvals/interactions/reviewable work.
 - [x] Operator tray creates Paperclip issues or comments, not JSON tasks.
 - [x] Tech tree maps to Paperclip goals/projects/issues.
+- [x] Command Center first viewport frames current bottleneck, departments, Operator tray, attention queue, Tech Tree, and latest Library outputs without leading with agent admin surfaces.
 
 ## Slice 0.5 — Library And Outputs
 

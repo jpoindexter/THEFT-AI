@@ -105,4 +105,5 @@
 | T082 | Create model-lane UX build task list in `BUILD-FROM-THIS/UX-BUILD-TASKS.md` | ✅ done |
 | T083 | Execute xhigh synthesis gate and prepare handoff to `gpt-5.5 high` | ✅ done |
 | T084 | Switch to `gpt-5.5 high` and complete `UX010`-`UX015` onboarding happy path in `paperclip/` | ✅ done |
-| T085 | Continue `UX020` Command Center / Canvas implementation from `BUILD-FROM-THIS/UX-BUILD-TASKS.md` | ☐ todo |
+| T085 | Continue `UX020` Command Center / Canvas implementation from `BUILD-FROM-THIS/UX-BUILD-TASKS.md` | ✅ done |
+| T086 | Continue `UX030` Task Review implementation from `BUILD-FROM-THIS/UX-BUILD-TASKS.md` | ☐ todo |

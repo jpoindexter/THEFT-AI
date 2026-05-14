@@ -24,6 +24,15 @@ export interface DepartmentCanvasRow {
   doneCount: number;
 }
 
+export type CompanyBottleneckTone = "attention" | "review" | "work" | "setup" | "clear";
+
+export interface CompanyBottleneck {
+  label: string;
+  detail: string;
+  issue: Issue | null;
+  tone: CompanyBottleneckTone;
+}
+
 const DEPARTMENT_BY_KEY = new Map(DEPARTMENT_SEED_SPECS.map((department) => [department.key, department]));
 
 export const THEFT_STAGE_LABELS: Record<OnboardingStage, string> = {
@@ -157,6 +166,67 @@ export function getPendingInteractionsByIssue(
       .filter((interaction) => interaction.status === "pending")
       .map((interaction) => ({ issueId, interaction })),
   );
+}
+
+export function getCurrentBottleneck({
+  attentionIssues,
+  openIssues,
+  setupItems,
+  approvalsCount,
+  interactionsCount,
+}: {
+  attentionIssues: Issue[];
+  openIssues: Issue[];
+  setupItems: CompanyProfileSummary["setupItems"];
+  approvalsCount: number;
+  interactionsCount: number;
+}): CompanyBottleneck {
+  if (approvalsCount > 0 || interactionsCount > 0) {
+    return {
+      label: "Founder decision required",
+      detail: `${approvalsCount} approvals · ${interactionsCount} questions`,
+      issue: null,
+      tone: "review",
+    };
+  }
+
+  const attentionIssue = attentionIssues[0];
+  if (attentionIssue) {
+    const isBlocked = attentionIssue.status === "blocked" || attentionIssue.successfulRunHandoff?.required;
+    return {
+      label: isBlocked ? "Blocked task" : "Review needed",
+      detail: attentionIssue.title,
+      issue: attentionIssue,
+      tone: isBlocked ? "attention" : "review",
+    };
+  }
+
+  const setupItem = setupItems.find((item) => item.status === "todo");
+  if (setupItem) {
+    return {
+      label: "Company setup gap",
+      detail: setupItem.note ? `${setupItem.label}: ${setupItem.note}` : setupItem.label,
+      issue: null,
+      tone: "setup",
+    };
+  }
+
+  const nextIssue = [...openIssues].sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime())[0];
+  if (nextIssue) {
+    return {
+      label: "Next task ready",
+      detail: nextIssue.title,
+      issue: nextIssue,
+      tone: "work",
+    };
+  }
+
+  return {
+    label: "No bottleneck",
+    detail: "The company is clear for the next founder prompt.",
+    issue: null,
+    tone: "clear",
+  };
 }
 
 export function getRoadmapGoals(goals: Goal[]): Goal[] {

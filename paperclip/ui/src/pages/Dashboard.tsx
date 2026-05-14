@@ -1,15 +1,17 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "@/lib/router";
 import { useMutation, useQueries, useQuery, useQueryClient } from "@tanstack/react-query";
-import type { Agent, Issue, IssueThreadInteraction } from "@paperclipai/shared";
+import type { Agent, Issue, IssueDocument, IssueThreadInteraction } from "@paperclipai/shared";
 import {
   AlertCircle,
   ArrowRight,
   Bot,
   Building2,
   CheckCircle2,
+  FileText,
   GitBranch,
   Inbox,
+  Library,
   MessageSquarePlus,
   Route,
   Sparkles,
@@ -36,12 +38,14 @@ import {
   buildDepartmentCanvasRows,
   findOperatorAgent,
   getAttentionIssues,
+  getCurrentBottleneck,
   getPendingInteractionsByIssue,
   getRoadmapGoals,
   parseCompanyProfileSummary,
 } from "../lib/theft-canvas";
 
 const ATTENTION_INTERACTION_ISSUE_LIMIT = 12;
+const LIBRARY_ISSUE_LIMIT = 8;
 
 function issuePath(issue: Issue) {
   return `/issues/${issue.identifier ?? issue.id}`;
@@ -66,7 +70,7 @@ export function Dashboard() {
   const [selectedDepartmentKey, setSelectedDepartmentKey] = useState("engineering");
 
   useEffect(() => {
-    setBreadcrumbs([{ label: "Company canvas" }]);
+    setBreadcrumbs([{ label: "Command Center" }]);
   }, [setBreadcrumbs]);
 
   const { data: agents, isLoading: agentsLoading } = useQuery({
@@ -109,6 +113,13 @@ export function Dashboard() {
   const nextTasks = [...openIssues]
     .sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime())
     .slice(0, 5);
+  const libraryIssueCandidates = useMemo(
+    () =>
+      [...(issues ?? [])]
+        .sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime())
+        .slice(0, LIBRARY_ISSUE_LIMIT),
+    [issues],
+  );
 
   const interactionIssueIds = attentionIssues
     .slice(0, ATTENTION_INTERACTION_ISSUE_LIMIT)
@@ -128,6 +139,34 @@ export function Dashboard() {
     {},
   );
   const pendingInteractions = getPendingInteractionsByIssue(interactionsByIssueId);
+  const bottleneck = useMemo(
+    () =>
+      getCurrentBottleneck({
+        attentionIssues,
+        openIssues,
+        setupItems: profile.setupItems,
+        approvalsCount: approvals?.length ?? 0,
+        interactionsCount: pendingInteractions.length,
+      }),
+    [attentionIssues, approvals?.length, openIssues, pendingInteractions.length, profile.setupItems],
+  );
+  const libraryDocumentQueries = useQueries({
+    queries: libraryIssueCandidates.map((issue) => ({
+      queryKey: queryKeys.issues.documents(issue.id),
+      queryFn: () => issuesApi.listDocuments(issue.id),
+      enabled: !!selectedCompanyId,
+    })),
+  });
+  const latestLibraryDocuments = useMemo(
+    () =>
+      libraryIssueCandidates
+        .flatMap((issue, index) =>
+          (libraryDocumentQueries[index]?.data ?? []).map((document) => ({ issue, document })),
+        )
+        .sort((a, b) => new Date(b.document.updatedAt).getTime() - new Date(a.document.updatedAt).getTime())
+        .slice(0, 4),
+    [libraryDocumentQueries, libraryIssueCandidates],
+  );
 
   const createTaskMutation = useMutation({
     mutationFn: async () => {
@@ -218,6 +257,7 @@ export function Dashboard() {
           />
           <SummaryPill icon={GitBranch} label="Roadmap" value={`${roadmapGoals.length} active goals`} />
         </div>
+        <BottleneckPanel bottleneck={bottleneck} />
       </section>
 
       <section className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_360px]">
@@ -225,12 +265,9 @@ export function Dashboard() {
           <div className="border border-border bg-card p-4">
             <div className="mb-3 flex items-center justify-between gap-3">
               <div>
-                <h2 className="text-base font-semibold">Department work queues</h2>
-                <p className="text-sm text-muted-foreground">Paperclip agents and assigned issues grouped as THEFT departments.</p>
+                <h2 className="text-base font-semibold">Departments</h2>
+                <p className="text-sm text-muted-foreground">Each department owns a queue, a lead, and the next outcomes to ship.</p>
               </div>
-              <Link to="/agents/all" className="hidden text-sm text-muted-foreground hover:text-foreground sm:inline">
-                Agents
-              </Link>
             </div>
             <div className="grid gap-3 md:grid-cols-2">
               {departmentRows.map((department) => (
@@ -290,7 +327,7 @@ export function Dashboard() {
               <div>
                 <h2 className="text-base font-semibold">Operator tray</h2>
                 <p className="mt-1 text-sm text-muted-foreground">
-                  Create a real Paperclip task for a department agent.
+                  Ask the Operator to route work to the right department.
                 </p>
               </div>
             </div>
@@ -310,7 +347,7 @@ export function Dashboard() {
                   >
                     <span className="block truncate font-medium">{department.title}</span>
                     <span className="mt-0.5 block truncate text-muted-foreground">
-                      {department.agent?.name ?? "No agent"}
+                      {department.agent?.name ?? "No lead"}
                     </span>
                   </button>
                 ))}
@@ -330,10 +367,12 @@ export function Dashboard() {
                 onClick={() => createTaskMutation.mutate()}
               >
                 <Sparkles className="h-4 w-4" />
-                {createTaskMutation.isPending ? "Creating task..." : "Create Paperclip task"}
+                {createTaskMutation.isPending ? "Routing task..." : "Route task"}
               </Button>
             </div>
           </div>
+
+          <LibraryOutputsPanel documents={latestLibraryDocuments} />
 
           <div className="border border-border bg-card p-4">
             <h2 className="text-base font-semibold">Next task area</h2>
@@ -365,6 +404,35 @@ export function Dashboard() {
   );
 }
 
+function BottleneckPanel({ bottleneck }: { bottleneck: ReturnType<typeof getCurrentBottleneck> }) {
+  const toneClass =
+    bottleneck.tone === "attention"
+      ? "border-amber-500/40 bg-amber-500/10 text-amber-700 dark:text-amber-300"
+      : bottleneck.tone === "review"
+        ? "border-primary/30 bg-primary/10 text-primary"
+        : "border-border bg-background text-foreground";
+  const content = (
+    <div className={cn("mt-4 flex items-start justify-between gap-3 border px-3 py-3", toneClass)}>
+      <span className="min-w-0">
+        <span className="block text-xs font-medium uppercase tracking-normal">Current bottleneck</span>
+        <span className="mt-1 block text-sm font-medium">{bottleneck.label}</span>
+        <span className="mt-1 block line-clamp-2 text-xs opacity-80">{bottleneck.detail}</span>
+      </span>
+      {bottleneck.issue ? <ArrowRight className="mt-1 h-4 w-4 shrink-0" /> : null}
+    </div>
+  );
+
+  if (bottleneck.issue) {
+    return (
+      <Link to={issuePath(bottleneck.issue)} className="block text-inherit no-underline">
+        {content}
+      </Link>
+    );
+  }
+
+  return content;
+}
+
 function CanvasStat({ value, label }: { value: number; label: string }) {
   return (
     <div className="border border-border px-3 py-2">
@@ -392,7 +460,7 @@ function TechTreePanel({ goals, nextTasks }: { goals: ReturnType<typeof getRoadm
       <div className="mb-3 flex items-center justify-between gap-3">
         <div>
           <h2 className="text-base font-semibold">Tech tree</h2>
-          <p className="text-sm text-muted-foreground">Paperclip goals/projects/issues rendered as the next unlock path.</p>
+          <p className="text-sm text-muted-foreground">Company roadmap, dependencies, and next unlocks.</p>
         </div>
         <Route className="h-4 w-4 text-muted-foreground" />
       </div>
@@ -413,13 +481,56 @@ function TechTreePanel({ goals, nextTasks }: { goals: ReturnType<typeof getRoadm
         ))}
         {goals.length === 0 ? (
           <div className="border border-dashed border-border p-3 text-sm text-muted-foreground">
-            No roadmap goals yet. Starter onboarding should seed the first goal.
+            No roadmap goals yet. Launch the first outcome to create the opening path.
           </div>
         ) : null}
         {nextTasks[0] ? (
           <Link to={issuePath(nextTasks[0])} className="flex items-center justify-between gap-3 text-sm text-primary no-underline hover:underline">
             Open next task <ArrowRight className="h-4 w-4" />
           </Link>
+        ) : null}
+      </div>
+    </div>
+  );
+}
+
+function LibraryOutputsPanel({
+  documents,
+}: {
+  documents: Array<{ issue: Issue; document: IssueDocument }>;
+}) {
+  return (
+    <div className="border border-border bg-card p-4">
+      <div className="mb-3 flex items-center justify-between gap-3">
+        <div>
+          <h2 className="text-base font-semibold">Latest Library outputs</h2>
+          <p className="text-sm text-muted-foreground">Recent docs created by the company.</p>
+        </div>
+        <Link to="/library" className="text-sm text-muted-foreground hover:text-foreground">
+          Library
+        </Link>
+      </div>
+      <div className="divide-y divide-border border border-border">
+        {documents.map(({ issue, document }) => (
+          <Link
+            key={`${issue.id}:${document.key}`}
+            to={`/library?issue=${encodeURIComponent(issue.id)}&document=${encodeURIComponent(document.key)}`}
+            className="flex items-start gap-2 p-3 text-inherit no-underline transition-colors hover:bg-accent/40"
+          >
+            <FileText className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" />
+            <span className="min-w-0 flex-1">
+              <span className="line-clamp-1 text-sm">{document.title ?? document.key}</span>
+              <span className="mt-1 block line-clamp-1 text-xs text-muted-foreground">
+                {issue.identifier ?? issue.id.slice(0, 8)} · {timeAgo(document.updatedAt)}
+              </span>
+            </span>
+          </Link>
+        ))}
+        {documents.length === 0 ? (
+          <div className="flex items-center gap-2 p-3 text-sm text-muted-foreground">
+            <Library className="h-4 w-4" />
+            Outputs will appear here as departments publish work.
+          </div>
         ) : null}
       </div>
     </div>
