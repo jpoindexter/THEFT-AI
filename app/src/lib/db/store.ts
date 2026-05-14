@@ -46,9 +46,9 @@ export type Org = {
   budget_hard_limit: boolean | null;
   budget_warn_pct: number | null;
   budget_per_agent: Record<string, number> | null;
-  paperclip_company_id: string | null;
-  paperclip_goal_id: string | null;
-  paperclip_operator_agent_id: string | null;
+  workspace_sync_company_id: string | null;
+  workspace_sync_goal_id: string | null;
+  workspace_sync_operator_agent_id: string | null;
 };
 
 export type Department = {
@@ -301,9 +301,9 @@ export const db = {
       budget_hard_limit: null,
       budget_warn_pct: null,
       budget_per_agent: null,
-      paperclip_company_id: null,
-      paperclip_goal_id: null,
-      paperclip_operator_agent_id: null,
+      workspace_sync_company_id: null,
+      workspace_sync_goal_id: null,
+      workspace_sync_operator_agent_id: null,
     };
     await writeTable("organizations", [...all, org]);
     return org;
@@ -325,7 +325,7 @@ export const db = {
       "departments",
       "agents",
       "tasks",
-      "cofounder_messages",
+      "operator_messages",
       "artifacts",
       "tech_tree_status",
     ];
@@ -411,22 +411,22 @@ export const db = {
     );
   },
 
-  // --- cofounder messages ---
+  // --- operator messages ---
   async listMessages(orgId: string, limit = 100): Promise<Message[]> {
-    const all = await readTable<Message>("cofounder_messages");
+    const all = await readTable<Message>("operator_messages");
     return all
       .filter((m) => m.organization_id === orgId)
       .sort((a, b) => a.created_at.localeCompare(b.created_at))
       .slice(-limit);
   },
   async appendMessage(input: Omit<Message, "id" | "created_at">): Promise<Message> {
-    const all = await readTable<Message>("cofounder_messages");
+    const all = await readTable<Message>("operator_messages");
     const msg: Message = {
       ...input,
       id: randomUUID(),
       created_at: new Date().toISOString(),
     };
-    await writeTable("cofounder_messages", [...all, msg]);
+    await writeTable("operator_messages", [...all, msg]);
     return msg;
   },
 

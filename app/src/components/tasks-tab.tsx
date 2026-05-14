@@ -442,7 +442,7 @@ export default function TasksTab({
               disabled={!composerText.trim()}
               onClick={async () => {
                 if (!composerText.trim()) return;
-                await fetch(`/api/${organization.slug}/cofounder`, {
+                await fetch(`/api/${organization.slug}/operator`, {
                   method: "POST",
                   headers: { "Content-Type": "application/json" },
                   body: JSON.stringify({ text: composerText }),

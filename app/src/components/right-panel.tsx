@@ -12,11 +12,11 @@ import AgentPanel from "./agent-panel";
 import { ChevronRight, RefreshCw, Circle, X, Sparkles } from "lucide-react";
 
 type Org = { id: string; slug: string; name: string };
-type Tab = "home" | "cofounder" | "company" | "tasks" | "library";
+type Tab = "home" | "operator" | "company" | "tasks" | "library";
 
 const TABS: { key: Tab; label: string }[] = [
   { key: "home", label: "Home" },
-  { key: "cofounder", label: "Operator" },
+  { key: "operator", label: "Operator" },
   { key: "company", label: "Company" },
   { key: "tasks", label: "Tasks" },
   { key: "library", label: "Library" },
@@ -181,7 +181,7 @@ export default function RightPanel({
               onClearSuggested={() => setSelectedSuggested(null)}
             />
           ))}
-        {tab === "cofounder" && <AgentChat organization={organization} />}
+        {tab === "operator" && <AgentChat organization={organization} />}
         {tab === "company" && <CompanyTab organization={organization} />}
         {tab === "tasks" && (
           <TasksTab
@@ -489,7 +489,7 @@ function OperatorInlineComposer({
             disabled={!text.trim()}
             onClick={async () => {
               if (!text.trim()) return;
-              await fetch(`/api/${organization.slug}/cofounder`, {
+              await fetch(`/api/${organization.slug}/operator`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ text }),

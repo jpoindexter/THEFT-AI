@@ -1,4 +1,4 @@
-export type PaperclipHealth = {
+export type WorkspaceSyncHealth = {
   status: "ok" | string;
   version?: string;
   deploymentMode?: string;
@@ -9,14 +9,14 @@ export type PaperclipHealth = {
   };
 };
 
-export type PaperclipCompany = {
+export type WorkspaceSyncCompany = {
   id: string;
   name: string;
   description: string | null;
   status: "active" | "paused" | "archived";
 };
 
-export type PaperclipGoal = {
+export type WorkspaceSyncGoal = {
   id: string;
   companyId: string;
   title: string;
@@ -25,7 +25,7 @@ export type PaperclipGoal = {
   status: "planned" | "active" | "done" | string;
 };
 
-export type PaperclipAgent = {
+export type WorkspaceSyncAgent = {
   id: string;
   companyId: string;
   name: string;
@@ -35,7 +35,7 @@ export type PaperclipAgent = {
   status: string;
 };
 
-export type PaperclipIssue = {
+export type WorkspaceSyncIssue = {
   id: string;
   companyId: string;
   goalId: string | null;
@@ -52,18 +52,18 @@ type RequestOptions = {
   headers?: Record<string, string>;
 };
 
-export class PaperclipRequestError extends Error {
+export class WorkspaceSyncRequestError extends Error {
   constructor(
     message: string,
     public readonly status?: number,
     public readonly body?: string,
   ) {
     super(message);
-    this.name = "PaperclipRequestError";
+    this.name = "WorkspaceSyncRequestError";
   }
 }
 
-export function paperclipApiBaseUrl(): string {
+export function workspace_syncApiBaseUrl(): string {
   const raw =
     process.env.THEFT_PAPERCLIP_API_URL ??
     process.env.PAPERCLIP_API_URL ??
@@ -71,13 +71,13 @@ export function paperclipApiBaseUrl(): string {
   return raw.replace(/\/+$/, "");
 }
 
-export function paperclipSyncEnabled(): boolean {
+export function workspace_syncSyncEnabled(): boolean {
   const raw = process.env.THEFT_PAPERCLIP_SYNC;
   if (raw) return !["0", "false", "off", "no"].includes(raw.toLowerCase());
   return process.env.NODE_ENV !== "test";
 }
 
-export function createPaperclipClient(baseUrl = paperclipApiBaseUrl()) {
+export function createWorkspaceSyncClient(baseUrl = workspace_syncApiBaseUrl()) {
   async function request<T>(path: string, options: RequestOptions = {}): Promise<T> {
     const res = await fetch(`${baseUrl}${path}`, {
       method: options.method ?? "GET",
@@ -91,8 +91,8 @@ export function createPaperclipClient(baseUrl = paperclipApiBaseUrl()) {
     });
     const text = await res.text();
     if (!res.ok) {
-      throw new PaperclipRequestError(
-        `Paperclip ${options.method ?? "GET"} ${path} failed with ${res.status}`,
+      throw new WorkspaceSyncRequestError(
+        `WorkspaceSync ${options.method ?? "GET"} ${path} failed with ${res.status}`,
         res.status,
         text,
       );
@@ -102,23 +102,23 @@ export function createPaperclipClient(baseUrl = paperclipApiBaseUrl()) {
 
   return {
     baseUrl,
-    health: () => request<PaperclipHealth>("/health", { timeoutMs: 700 }),
-    listCompanies: () => request<PaperclipCompany[]>("/companies"),
-    getCompany: (companyId: string) => request<PaperclipCompany>(`/companies/${companyId}`),
+    health: () => request<WorkspaceSyncHealth>("/health", { timeoutMs: 700 }),
+    listCompanies: () => request<WorkspaceSyncCompany[]>("/companies"),
+    getCompany: (companyId: string) => request<WorkspaceSyncCompany>(`/companies/${companyId}`),
     createCompany: (input: { name: string; description?: string | null }) =>
-      request<PaperclipCompany>("/companies", { method: "POST", body: input }),
+      request<WorkspaceSyncCompany>("/companies", { method: "POST", body: input }),
     createGoal: (
       companyId: string,
       input: {
         title: string;
         description?: string | null;
-        level?: PaperclipGoal["level"];
+        level?: WorkspaceSyncGoal["level"];
         status?: string;
         ownerAgentId?: string | null;
       },
-    ) => request<PaperclipGoal>(`/companies/${companyId}/goals`, { method: "POST", body: input }),
-    listGoals: (companyId: string) => request<PaperclipGoal[]>(`/companies/${companyId}/goals`),
-    listAgents: (companyId: string) => request<PaperclipAgent[]>(`/companies/${companyId}/agents`),
+    ) => request<WorkspaceSyncGoal>(`/companies/${companyId}/goals`, { method: "POST", body: input }),
+    listGoals: (companyId: string) => request<WorkspaceSyncGoal[]>(`/companies/${companyId}/goals`),
+    listAgents: (companyId: string) => request<WorkspaceSyncAgent[]>(`/companies/${companyId}/agents`),
     createAgent: (
       companyId: string,
       input: {
@@ -134,8 +134,8 @@ export function createPaperclipClient(baseUrl = paperclipApiBaseUrl()) {
         permissions?: Record<string, unknown>;
         metadata?: Record<string, unknown>;
       },
-    ) => request<PaperclipAgent>(`/companies/${companyId}/agents`, { method: "POST", body: input }),
-    listIssues: (companyId: string) => request<PaperclipIssue[]>(`/companies/${companyId}/issues`),
+    ) => request<WorkspaceSyncAgent>(`/companies/${companyId}/agents`, { method: "POST", body: input }),
+    listIssues: (companyId: string) => request<WorkspaceSyncIssue[]>(`/companies/${companyId}/issues`),
     createIssue: (
       companyId: string,
       input: {
@@ -146,6 +146,6 @@ export function createPaperclipClient(baseUrl = paperclipApiBaseUrl()) {
         goalId?: string | null;
         assigneeAgentId?: string | null;
       },
-    ) => request<PaperclipIssue>(`/companies/${companyId}/issues`, { method: "POST", body: input }),
+    ) => request<WorkspaceSyncIssue>(`/companies/${companyId}/issues`, { method: "POST", body: input }),
   };
 }

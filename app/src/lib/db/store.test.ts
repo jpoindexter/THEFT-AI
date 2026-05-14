@@ -212,7 +212,7 @@ describe("completeWorkspaceSetup", () => {
   });
 });
 
-describe("Paperclip-style engine boundary", () => {
+describe("WorkspaceSync-style engine boundary", () => {
   it("builds an Agent Company package with departments, agents, tasks, and skills", async () => {
     const { bootstrapOrganization } = await import("@/lib/orgs/bootstrap");
     const { completeWorkspaceSetup, fallbackSetupQuestions } = await import("@/lib/onboarding/engine");

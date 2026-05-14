@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
-import { ArrowLeft, Paperclip, Play } from "lucide-react";
+import { ArrowLeft, Link2, Play } from "lucide-react";
 import {
   Card,
   CardBody,
@@ -114,7 +114,7 @@ export default function NewTaskPage() {
                 className="inline-flex items-center gap-1 rounded-md border border-line bg-paper px-2 py-1 hover:border-line-strong"
                 title="Attach files (coming soon)"
               >
-                <Paperclip className="size-3" /> Add files
+                <Link2 className="size-3" /> Add files
               </button>
               <button
                 type="button"

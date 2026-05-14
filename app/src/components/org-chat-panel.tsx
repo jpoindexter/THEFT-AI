@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 import {
   ChevronLeft,
   MoreHorizontal,
-  Paperclip,
+  Link2,
   Sparkles,
   ArrowUp,
   RefreshCw,
@@ -196,7 +196,7 @@ function OperatorMessages({ organization }: { organization: Org }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    void fetch(`/api/${organization.slug}/cofounder/messages`)
+    void fetch(`/api/${organization.slug}/operator/messages`)
       .then((r) => r.json())
       .then((j) => {
         setMessages(j.messages ?? []);
@@ -328,11 +328,11 @@ function ChatInputBox({
     try {
       const endpoint = deptSlug
         ? `/api/${orgSlug}/departments/${deptSlug}/run`
-        : `/api/${orgSlug}/cofounder/chat`;
+        : `/api/${orgSlug}/operator`;
       await fetch(endpoint, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: msg }),
+        body: JSON.stringify({ text: msg }),
       });
     } finally {
       setBusy(false);
@@ -399,7 +399,7 @@ function ChatInputBox({
             }}
             type="button"
           >
-            <Paperclip size={14} />
+            <Link2 size={14} />
           </button>
           <button
             className="flex items-center gap-1 rounded hover:bg-canvas transition-colors"

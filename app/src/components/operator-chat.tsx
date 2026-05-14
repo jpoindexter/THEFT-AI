@@ -51,7 +51,7 @@ export default function OperatorChat({
   const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    void fetch(`/api/${organization.slug}/cofounder/messages`)
+    void fetch(`/api/${organization.slug}/operator/messages`)
       .then((r) => r.json())
       .then((j) => setMessages(j.messages ?? []));
   }, [organization.slug]);
@@ -78,7 +78,7 @@ export default function OperatorChat({
       },
     ]);
     try {
-      const res = await fetch(`/api/${organization.slug}/cofounder`, {
+      const res = await fetch(`/api/${organization.slug}/operator`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ text }),

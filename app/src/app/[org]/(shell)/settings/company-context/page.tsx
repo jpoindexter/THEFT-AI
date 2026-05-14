@@ -7,7 +7,7 @@ const SOURCES = [
   { id: "chatgpt", label: "ChatGPT", note: "Memory + chats" },
   { id: "claude", label: "Claude", note: "Projects + memory" },
   { id: "openclaw", label: "OpenClaw", note: "Workspace memory" },
-  { id: "paperclip", label: "Paperclip", note: "Notes + clips" },
+  { id: "workspace_sync", label: "WorkspaceSync", note: "Notes + clips" },
   { id: "other", label: "Other", note: "Generic exporter" },
 ];
 

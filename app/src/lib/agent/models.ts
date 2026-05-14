@@ -14,7 +14,7 @@ export type ModelProvider = {
 };
 
 export const LLM_BACKENDS = [
-  { id: "codex-cli", name: "Codex CLI", description: "Uses local Codex OAuth/session auth, Paperclip-style." },
+  { id: "codex-cli", name: "Codex CLI", description: "Uses local Codex OAuth/session auth, WorkspaceSync-style." },
   { id: "gemini-cli", name: "Gemini CLI", description: "Uses local Gemini CLI auth and model config." },
   { id: "opencode-cli", name: "OpenCode CLI", description: "Uses OpenCode's provider/model registry and local credentials." },
   { id: "claude-cli", name: "Claude CLI", description: "Uses Claude Code OAuth/session auth." },

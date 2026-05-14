@@ -53,7 +53,7 @@ export default function EnvFiles() {
               <option>Marketing Website</option>
             </select>
           </div>
-          <div className="text-2xs text-ink-muted">Managed project: cofounder-3-21559</div>
+          <div className="text-2xs text-ink-muted">Managed project: operator-3-21559</div>
           <button className="inline-flex items-center gap-1 text-sm rounded-md border border-line px-2.5 py-1.5 hover:border-line-strong">
             <Download className="size-3" />
             Download Staging .env
@@ -69,8 +69,8 @@ export default function EnvFiles() {
           </p>
         </div>
         <div className="space-y-1.5">
-          <SecretRow label="App" project="cofounder-3-21559" />
-          <SecretRow label="Marketing Website" project="cofounder-3-21559-marketing" />
+          <SecretRow label="App" project="operator-3-21559" />
+          <SecretRow label="Marketing Website" project="operator-3-21559-marketing" />
         </div>
         <div className="text-xs text-ink-muted">No secrets added yet.</div>
         <button className="text-sm rounded-md border border-line px-2 py-1 hover:border-line-strong">

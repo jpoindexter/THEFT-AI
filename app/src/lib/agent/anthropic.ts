@@ -1,5 +1,5 @@
 // LLM backends.
-//   1. codex-cli -> local Codex OAuth/session auth, Paperclip-style
+//   1. codex-cli -> local Codex OAuth/session auth, WorkspaceSync-style
 //   2. gemini-cli -> local Gemini CLI auth/config
 //   3. opencode-cli -> OpenCode provider/model registry and local credentials
 //   4. claude-cli -> local Claude Code OAuth/session auth

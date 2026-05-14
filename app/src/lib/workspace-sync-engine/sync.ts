@@ -2,14 +2,14 @@ import { promises as fs } from "node:fs";
 import path from "node:path";
 import { db, type Agent, type Department, type Org, type Task } from "@/lib/db/store";
 import {
-  createPaperclipClient,
-  paperclipSyncEnabled,
-  type PaperclipAgent,
-  type PaperclipCompany,
-  type PaperclipGoal,
-} from "@/lib/paperclip-engine/client";
+  createWorkspaceSyncClient,
+  workspace_syncSyncEnabled,
+  type WorkspaceSyncAgent,
+  type WorkspaceSyncCompany,
+  type WorkspaceSyncGoal,
+} from "@/lib/workspace-sync-engine/client";
 
-export type PaperclipSyncResult = {
+export type WorkspaceSyncSyncResult = {
   enabled: boolean;
   synced: boolean;
   companyId: string | null;
@@ -21,7 +21,7 @@ export type PaperclipSyncResult = {
   error: string | null;
 };
 
-const EMPTY_RESULT: PaperclipSyncResult = {
+const EMPTY_RESULT: WorkspaceSyncSyncResult = {
   enabled: false,
   synced: false,
   companyId: null,
@@ -41,17 +41,17 @@ const ROLE_MAP: Record<string, string> = {
   researcher: "researcher",
 };
 
-export async function syncWorkspaceToPaperclip(
+export async function syncWorkspaceToWorkspaceSync(
   org: Org,
   plan: Record<string, unknown>,
-): Promise<PaperclipSyncResult> {
-  if (!paperclipSyncEnabled()) return EMPTY_RESULT;
+): Promise<WorkspaceSyncSyncResult> {
+  if (!workspace_syncSyncEnabled()) return EMPTY_RESULT;
 
-  const client = createPaperclipClient();
+  const client = createWorkspaceSyncClient();
   try {
     const health = await client.health();
     if (health.status !== "ok") {
-      return unavailable(`Paperclip health returned ${health.status}`);
+      return unavailable(`WorkspaceSync health returned ${health.status}`);
     }
 
     const company = await ensureCompany(org, plan);
@@ -67,9 +67,9 @@ export async function syncWorkspaceToPaperclip(
     const issueResult = await ensureStarterIssues(company, goal, departments, tasks);
 
     await db.updateOrg(org.id, {
-      paperclip_company_id: company.id,
-      paperclip_goal_id: goal.id,
-      paperclip_operator_agent_id: operator.id,
+      workspace_sync_company_id: company.id,
+      workspace_sync_goal_id: goal.id,
+      workspace_sync_operator_agent_id: operator.id,
     });
 
     return {
@@ -84,18 +84,18 @@ export async function syncWorkspaceToPaperclip(
       error: null,
     };
   } catch (error) {
-    return unavailable(error instanceof Error ? error.message : "Paperclip sync failed");
+    return unavailable(error instanceof Error ? error.message : "WorkspaceSync sync failed");
   }
 
   async function ensureCompany(
     currentOrg: Org,
     businessPlan: Record<string, unknown>,
-  ): Promise<PaperclipCompany> {
-    if (currentOrg.paperclip_company_id) {
+  ): Promise<WorkspaceSyncCompany> {
+    if (currentOrg.workspace_sync_company_id) {
       try {
-        return await client.getCompany(currentOrg.paperclip_company_id);
+        return await client.getCompany(currentOrg.workspace_sync_company_id);
       } catch {
-        // Fall through and recreate when the stored link points at a missing Paperclip company.
+        // Fall through and recreate when the stored link points at a missing WorkspaceSync company.
       }
     }
 
@@ -106,12 +106,12 @@ export async function syncWorkspaceToPaperclip(
   }
 
   async function ensureCompanyGoal(
-    company: PaperclipCompany,
+    company: WorkspaceSyncCompany,
     currentOrg: Org,
     businessPlan: Record<string, unknown>,
-  ): Promise<PaperclipGoal> {
-    if (currentOrg.paperclip_goal_id) {
-      const existing = (await client.listGoals(company.id)).find((g) => g.id === currentOrg.paperclip_goal_id);
+  ): Promise<WorkspaceSyncGoal> {
+    if (currentOrg.workspace_sync_goal_id) {
+      const existing = (await client.listGoals(company.id)).find((g) => g.id === currentOrg.workspace_sync_goal_id);
       if (existing) return existing;
     }
 
@@ -127,9 +127,9 @@ export async function syncWorkspaceToPaperclip(
     });
   }
 
-  async function ensureOperator(company: PaperclipCompany, currentOrg: Org): Promise<PaperclipAgent> {
-    if (currentOrg.paperclip_operator_agent_id) {
-      const existing = (await client.listAgents(company.id)).find((a) => a.id === currentOrg.paperclip_operator_agent_id);
+  async function ensureOperator(company: WorkspaceSyncCompany, currentOrg: Org): Promise<WorkspaceSyncAgent> {
+    if (currentOrg.workspace_sync_operator_agent_id) {
+      const existing = (await client.listAgents(company.id)).find((a) => a.id === currentOrg.workspace_sync_operator_agent_id);
       if (existing) return existing;
     }
 
@@ -156,8 +156,8 @@ export async function syncWorkspaceToPaperclip(
   }
 
   async function ensureDepartmentAgents(
-    company: PaperclipCompany,
-    operator: PaperclipAgent,
+    company: WorkspaceSyncCompany,
+    operator: WorkspaceSyncAgent,
     departments: Department[],
     localAgents: Agent[],
   ): Promise<{ created: number }> {
@@ -192,8 +192,8 @@ export async function syncWorkspaceToPaperclip(
   }
 
   async function ensureStarterIssues(
-    company: PaperclipCompany,
-    goal: PaperclipGoal,
+    company: WorkspaceSyncCompany,
+    goal: WorkspaceSyncGoal,
     departments: Department[],
     localTasks: Task[],
   ): Promise<{ created: number }> {
@@ -221,7 +221,7 @@ export async function syncWorkspaceToPaperclip(
   }
 }
 
-function unavailable(error: string): PaperclipSyncResult {
+function unavailable(error: string): WorkspaceSyncSyncResult {
   return {
     ...EMPTY_RESULT,
     enabled: true,

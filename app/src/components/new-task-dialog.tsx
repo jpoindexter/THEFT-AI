@@ -7,7 +7,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Paperclip, ChevronDown, Check } from "lucide-react";
+import { Link2, ChevronDown, Check } from "lucide-react";
 
 type Agent = {
   id: string;
@@ -109,7 +109,7 @@ export default function NewTaskDialog({
         </div>
         <div className="flex items-center gap-1.5 border-t border-line/80 px-2 py-2 text-xs flex-wrap">
           <PillBtn
-            icon={<Paperclip className="size-3" />}
+            icon={<Link2 className="size-3" />}
             label="Add files"
           />
           <ModeDropdown mode={mode} onChange={setMode} />
