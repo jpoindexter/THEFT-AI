@@ -37,7 +37,17 @@ function Verify() {
 
   useEffect(() => {
     if (status === "ok") {
-      const t = window.setTimeout(() => router.replace("/"), 800);
+      const t = window.setTimeout(() => {
+        void (async () => {
+          try {
+            const res = await fetch("/api/dev-login", { method: "POST" });
+            const j = (await res.json()) as { redirect?: string };
+            router.replace(j.redirect ?? "/");
+          } catch {
+            router.replace("/");
+          }
+        })();
+      }, 300);
       return () => window.clearTimeout(t);
     }
   }, [status, router]);

@@ -1,6 +1,7 @@
 import { notFound, redirect } from "next/navigation";
 import { db } from "@/lib/db/store";
 import OrgOnboardingFlow from "@/components/org-onboarding-flow";
+import { hasLocalSession } from "@/lib/auth/session";
 
 export default async function OrgOnboardingPage({
   params,
@@ -8,6 +9,8 @@ export default async function OrgOnboardingPage({
   params: Promise<{ org: string }>;
 }) {
   const { org: orgSlug } = await params;
+  const authed = await hasLocalSession();
+  if (!authed) redirect("/signin");
   const organization = await db.getOrgBySlug(orgSlug);
   if (!organization) notFound();
 

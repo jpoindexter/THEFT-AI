@@ -50,8 +50,8 @@
 
 ## Day 7 — polish + ship
 
-- [ ] Marketing landing at `/` for unauthed (steal from `misc/03-marketing-site-full.png`)
-- [ ] Real auth (Supabase magic link or just bypass with cookie for demo)
+- [x] Marketing landing at `/` for unauthed (steal from `misc/03-marketing-site-full.png`)
+- [x] Real auth (Supabase magic link or just bypass with cookie for demo)
 - [ ] Deploy to Vercel
 - [ ] Domain + favicon (use `favicon-pack-maker` skill)
 

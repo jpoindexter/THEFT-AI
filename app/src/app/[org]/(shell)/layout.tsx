@@ -1,6 +1,7 @@
 import { notFound, redirect } from "next/navigation";
 import { db } from "@/lib/db/store";
 import OrgShell from "@/components/org-shell";
+import { hasLocalSession } from "@/lib/auth/session";
 
 export default async function ShellLayout({
   children,
@@ -10,6 +11,8 @@ export default async function ShellLayout({
   params: Promise<{ org: string }>;
 }) {
   const { org: orgSlug } = await params;
+  const authed = await hasLocalSession();
+  if (!authed) redirect("/signin");
   const organization = await db.getOrgBySlug(orgSlug);
   if (!organization) notFound();
 
