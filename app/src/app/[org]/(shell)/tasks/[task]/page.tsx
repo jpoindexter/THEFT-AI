@@ -133,7 +133,7 @@ export default async function TaskDetailPage({
                 </span>
               </div>
               <div className="flex items-center justify-between gap-3 pt-1 border-t border-line/50">
-                <TaskCloseControls taskId={task.id} status={task.status} />
+                <TaskCloseControls taskId={task.id} orgSlug={organization.slug} status={task.status} />
                 <TaskHandoff
                   org={orgSlug}
                   taskId={task.id}

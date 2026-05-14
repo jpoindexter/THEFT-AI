@@ -1,6 +1,6 @@
 # HANDOFF — THEFT x Paperclip Merge
 
-> Last updated: 2026-05-14 (disable non-functional settings CTAs).
+> Last updated: 2026-05-14 (task close/reopen actions wired to API).
 > Branch: `codex-current-design-migration`.
 > Read this first if continuing in Claude, Codex, Gemini, or another local agent.
 
@@ -106,6 +106,11 @@ In progress:
   - changed modal CTA link from missing `/release-notes` route to existing `/status`.
 - `app/src/app/[org]/(shell)/settings/organization/page.tsx`
   - converted non-functional CTAs (`Preview report`, `+ Invite`, `Join or Create Organization`) to disabled local-mode placeholders to avoid broken click paths.
+- `app/src/components/task-close-controls.tsx`
+  - replaced mock close/reopen behavior with real `PATCH /api/:org/tasks/:task` calls for `done` and `todo` states.
+  - `Report issue` is now explicitly disabled as a local-mode placeholder.
+- `app/src/app/[org]/(shell)/tasks/[task]/page.tsx`
+  - passes `orgSlug` into task close controls so API mutations can execute.
 
 Not started yet:
 
