@@ -16,6 +16,15 @@ describe("resolveTheftDefaultDesiredSkillsForRole", () => {
     expect(resolveTheftDefaultDesiredSkillsForRole("engineer")).toContain("theft/skills/supabase");
   });
 
+  it("maps department-style roles used by onboarding seeding", () => {
+    expect(resolveTheftDefaultDesiredSkillsForRole("operator")).toContain("theft/skills/ai-cost-routing");
+    expect(resolveTheftDefaultDesiredSkillsForRole("marketer")).toContain("theft/skills/content-engine");
+    expect(resolveTheftDefaultDesiredSkillsForRole("sales")).toContain("theft/skills/stripe-app-builder");
+    expect(resolveTheftDefaultDesiredSkillsForRole("ops")).toContain("theft/skills/ops-agent-skills");
+    expect(resolveTheftDefaultDesiredSkillsForRole("legal")).toEqual(["theft/skills/gic-skills"]);
+    expect(resolveTheftDefaultDesiredSkillsForRole("support")).toContain("theft/skills/gic-skills");
+  });
+
   it("returns an empty list for unknown roles", () => {
     expect(resolveTheftDefaultDesiredSkillsForRole("unknown-role")).toEqual([]);
   });

@@ -1,6 +1,14 @@
 const THEFT_SKILL_KEY_PREFIX = "theft/skills/";
 
 const THEFT_DEFAULT_SKILL_KEYS_BY_ROLE: Record<string, string[]> = {
+  operator: [
+    "company-naming",
+    "gic-skills",
+    "last30days-research",
+    "dev-workflow",
+    "ai-cost-routing",
+    "ops-agent-skills",
+  ],
   ceo: [
     "company-naming",
     "gic-skills",
@@ -40,6 +48,13 @@ const THEFT_DEFAULT_SKILL_KEYS_BY_ROLE: Record<string, string[]> = {
     "gic-skills",
     "hyperframes",
   ],
+  marketer: [
+    "content-engine",
+    "last30days-research",
+    "company-naming",
+    "gic-skills",
+    "hyperframes",
+  ],
   cfo: [
     "finance-agent-skills",
     "ops-agent-skills",
@@ -52,7 +67,17 @@ const THEFT_DEFAULT_SKILL_KEYS_BY_ROLE: Record<string, string[]> = {
     "debugging-vercel-builds",
     "supabase",
   ],
+  ops: [
+    "ops-agent-skills",
+    "debugging-vercel-builds",
+    "supabase",
+  ],
   pm: [
+    "last30days-research",
+    "content-engine",
+    "stripe-app-builder",
+  ],
+  sales: [
     "last30days-research",
     "content-engine",
     "stripe-app-builder",
@@ -60,6 +85,28 @@ const THEFT_DEFAULT_SKILL_KEYS_BY_ROLE: Record<string, string[]> = {
   qa: [
     "gic-skills",
     "content-engine",
+  ],
+  legal: [
+    "gic-skills",
+  ],
+  support: [
+    "gic-skills",
+    "content-engine",
+  ],
+  finance: [
+    "finance-agent-skills",
+    "ops-agent-skills",
+    "stripe-app-builder",
+    "stripe-payment-debugging",
+    "supabase-postgres-best-practices",
+  ],
+  design: [
+    "web-design-guidelines",
+    "huashu-design",
+    "favicon-pack-maker",
+    "shader-authoring",
+    "hyperframes",
+    "hyperframes-cli",
   ],
   researcher: [
     "last30days-research",
