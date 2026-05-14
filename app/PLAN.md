@@ -43,10 +43,10 @@
 
 ## Day 6 — agent execution loop
 
-- [ ] Tasks created actually run (Anthropic call with the task description + agent skills)
-- [ ] Streaming output to the task detail panel
-- [ ] Library populated with results
-- [ ] Tech tree node "Launch Agent" CTA fires a task
+- [x] Tasks created actually run (Anthropic call with the task description + agent skills)
+- [x] Streaming output to the task detail panel
+- [x] Library populated with results
+- [x] Tech tree node "Launch Agent" CTA fires a task
 
 ## Day 7 — polish + ship
 

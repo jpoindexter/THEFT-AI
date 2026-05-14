@@ -144,7 +144,31 @@ Keep responses concise and action-oriented.`;
         state.history = result.history;
         state.turns.push(...result.turns);
         const isDone = result.turns.some((t) => t.kind === "done");
-        if (isDone) await db.updateTask(taskId, { status: "done" });
+        if (isDone) {
+          await db.updateTask(taskId, { status: "done" });
+          const wroteArtifact = result.turns.some(
+            (t) => t.kind === "tool_result" && t.name === "write_artifact",
+          );
+          if (!wroteArtifact) {
+            const textTurns = result.turns.filter(
+              (t): t is Extract<AgentTurn, { kind: "text" }> => t.kind === "text",
+            );
+            const summary =
+              textTurns.length > 0
+                ? textTurns.slice(-4).map((t) => t.text).join("\n\n")
+                : `Task completed: ${task.title}`;
+            await db.createArtifact({
+              organization_id: org.id,
+              department_id: task.department_id,
+              task_id: task.id,
+              name: `${task.title} — run summary`,
+              kind: "markdown",
+              content: summary,
+              metadata: { auto_generated: true, source: "task_run_summary" },
+              pinned: false,
+            });
+          }
+        }
         const paused = result.turns.findLast?.((t) => t.kind === "pause") ?? null;
         state.paused = paused
           ? {

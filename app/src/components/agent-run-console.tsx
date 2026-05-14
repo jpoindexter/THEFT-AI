@@ -138,6 +138,9 @@ export default function AgentRunConsole({
           });
           setLiveTurns(adapted);
           setLiveStatus(d.paused ? "paused" : "done");
+        } else if (!d.paused) {
+          // Fresh task: kick off automatically so "create task" actually runs.
+          void startRun();
         }
         // No existing turns → show empty state; user clicks "Run agent" to start
       })
