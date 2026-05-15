@@ -83,11 +83,11 @@ Goal: a founder can create a company, see THEFT assemble it, land in Command Cen
 
 ## Phase 4 - LOW Copy And Mechanical Cleanup
 
-- [ ] UX090 [LOW] Remove user-facing raw Paperclip language from primary UX copy in `paperclip/ui/src/components/OnboardingWizard.tsx`, `paperclip/ui/src/pages/Dashboard.tsx`, `paperclip/ui/src/pages/IssueDetail.tsx`, and `paperclip/ui/src/pages/Library.tsx`.
-- [ ] UX091 [LOW] Remove active user-facing Cofounder copy from the Paperclip host UI files.
-- [ ] UX092 [LOW] Move fake credits, billing, and cost-first labels out of the local v0 primary path in `paperclip/ui/src/components/Sidebar.tsx` and related pages.
-- [ ] UX093 [LOW] Keep route names and document titles aligned with THEFT language: Command Center, Departments, Tasks, Library, Tech Tree, Admin, Diagnostics.
-- [ ] UX094 [LOW] Update `BUILD-FROM-THIS/STATUS.md`, `BUILD-FROM-THIS/TASKS.md`, and `BUILD-FROM-THIS/ROADMAP.md` after each implemented slice.
+- [x] UX090 [LOW] Remove user-facing raw Paperclip language from primary UX copy in `paperclip/ui/src/components/OnboardingWizard.tsx`, `paperclip/ui/src/pages/Dashboard.tsx`, `paperclip/ui/src/pages/IssueDetail.tsx`, and `paperclip/ui/src/pages/Library.tsx`.
+- [x] UX091 [LOW] Remove active user-facing Cofounder copy from the Paperclip host UI files.
+- [x] UX092 [LOW] Move fake credits, billing, and cost-first labels out of the local v0 primary path in `paperclip/ui/src/components/Sidebar.tsx` and related pages.
+- [x] UX093 [LOW] Keep route names and document titles aligned with THEFT language: Command Center, Departments, Tasks, Library, Tech Tree, Admin, Diagnostics.
+- [x] UX094 [LOW] Update `BUILD-FROM-THIS/STATUS.md`, `BUILD-FROM-THIS/TASKS.md`, and `BUILD-FROM-THIS/ROADMAP.md` after each implemented slice.
 
 ## Phase 5 - 5.3 Runtime Smoke
 

@@ -91,8 +91,8 @@
 | ID | Title | Status |
 |---|---|---|
 | T070 | Archive duplicated JSON runtime routes | ☐ todo |
-| T071 | Remove or hide fake credits/billing | ☐ todo |
-| T072 | Remove user-facing Cofounder copy from active product | ☐ todo |
+| T071 | Remove or hide fake credits/billing | ✅ done |
+| T072 | Remove user-facing Cofounder copy from active product | ✅ done |
 | T073 | Remove LLC/service-company assumptions from setup | ☐ todo |
 | T074 | Verify one app/server happy path | ☐ todo |
 

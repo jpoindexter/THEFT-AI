@@ -1335,16 +1335,16 @@ function AgentOverview({
         )}
       </div>
 
-      {/* Costs */}
+      {/* Runtime usage */}
       <div className="space-y-3">
-        <h3 className="text-sm font-medium">Costs</h3>
+        <h3 className="text-sm font-medium">Runtime usage</h3>
         <CostsSection runtimeState={runtimeState} runs={runs} />
       </div>
     </div>
   );
 }
 
-/* ---- Costs Section (inline) ---- */
+/* ---- Runtime usage section (inline) ---- */
 
 function CostsSection({
   runtimeState,

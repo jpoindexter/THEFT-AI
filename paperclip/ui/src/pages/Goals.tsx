@@ -178,7 +178,7 @@ export function Goals() {
                   Tech Tree
                 </h1>
                 <p className="mt-2 text-sm leading-6 text-muted-foreground">
-                  A company-building roadmap backed by Paperclip goals. Each node shows owner, dependencies,
+                  A company-building roadmap backed by local company data. Each node shows owner, dependencies,
                   linked evidence, and the next action needed to keep the company moving.
                 </p>
               </div>

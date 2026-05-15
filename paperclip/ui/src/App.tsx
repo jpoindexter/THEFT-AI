@@ -39,7 +39,7 @@ const Goals = lazyPage(() => import("./pages/Goals"), "Goals");
 const GoalDetail = lazyPage(() => import("./pages/GoalDetail"), "GoalDetail");
 const Approvals = lazyPage(() => import("./pages/Approvals"), "Approvals");
 const ApprovalDetail = lazyPage(() => import("./pages/ApprovalDetail"), "ApprovalDetail");
-const Costs = lazyPage(() => import("./pages/Costs"), "Costs");
+const RuntimeUsage = lazyPage(() => import("./pages/Costs"), "RuntimeUsage");
 const Activity = lazyPage(() => import("./pages/Activity"), "Activity");
 const Inbox = lazyPage(() => import("./pages/Inbox"), "Inbox");
 const CompanySettings = lazyPage(() => import("./pages/CompanySettings"), "CompanySettings");
@@ -134,7 +134,7 @@ function boardRoutes() {
       <Route path="approvals/pending" element={<Approvals />} />
       <Route path="approvals/all" element={<Approvals />} />
       <Route path="approvals/:approvalId" element={<ApprovalDetail />} />
-      <Route path="costs" element={<Costs />} />
+      <Route path="costs" element={<RuntimeUsage />} />
       <Route path="activity" element={<Activity />} />
       <Route path="inbox" element={<InboxRootRedirect />} />
       <Route path="inbox/mine" element={<Inbox />} />

@@ -1513,7 +1513,7 @@ export function OnboardingWizard() {
                       <h3 className="font-medium">Launch your company OS</h3>
                       <p className="text-xs text-muted-foreground">
                         Launch creates the Operator, 8 departments, starter
-                        tasks, and a Command Center backed by Paperclip.
+                        tasks, and a Command Center backed by the local runtime.
                       </p>
                     </div>
                   </div>
