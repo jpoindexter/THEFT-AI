@@ -110,8 +110,47 @@ describe("buildDepartmentCanvasRows", () => {
 
     expect(engineeringRow?.agent?.id).toBe("eng-agent");
     expect(engineeringRow?.activeCount).toBe(1);
+    expect(engineeringRow?.activeIssues.map((item) => item.id)).toEqual(["eng-open"]);
     expect(engineeringRow?.reviewCount).toBe(1);
+    expect(engineeringRow?.reviewIssues.map((item) => item.id)).toEqual(["eng-review"]);
+    expect(engineeringRow?.nextIssue?.id).toBe("eng-open");
     expect(designRow?.doneCount).toBe(1);
+  });
+
+  it("keeps department ownership and status buckets in one shared summary", () => {
+    const engineering = agent({ id: "eng-agent", name: "Engineering Lead", role: "cto" });
+
+    const rows = buildDepartmentCanvasRows(
+      [engineering],
+      [
+        issue({
+          id: "eng-blocked",
+          assigneeAgentId: "eng-agent",
+          status: "blocked",
+          updatedAt: new Date("2026-05-14T12:00:00Z"),
+        }),
+        issue({
+          id: "eng-done",
+          assigneeAgentId: "eng-agent",
+          status: "done",
+          updatedAt: new Date("2026-05-14T13:00:00Z"),
+        }),
+        issue({
+          id: "unassigned",
+          assigneeAgentId: "other-agent",
+          status: "todo",
+          updatedAt: new Date("2026-05-14T14:00:00Z"),
+        }),
+      ],
+    );
+
+    const engineeringRow = rows.find((row) => row.key === "engineering");
+
+    expect(engineeringRow?.issues.map((item) => item.id)).toEqual(["eng-done", "eng-blocked"]);
+    expect(engineeringRow?.blockedCount).toBe(1);
+    expect(engineeringRow?.blockedIssues.map((item) => item.id)).toEqual(["eng-blocked"]);
+    expect(engineeringRow?.doneIssues.map((item) => item.id)).toEqual(["eng-done"]);
+    expect(engineeringRow?.nextIssue?.id).toBe("eng-blocked");
   });
 });
 

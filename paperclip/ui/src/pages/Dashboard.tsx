@@ -273,7 +273,7 @@ export function Dashboard() {
               {departmentRows.map((department) => (
                 <Link
                   key={department.key}
-                  to={department.agent ? `/agents/${department.agent.urlKey || department.agent.id}` : "/agents/all"}
+                  to={`/departments/${department.key}`}
                   className="block border border-border p-3 text-inherit no-underline transition-colors hover:bg-accent/40"
                 >
                   <div className="flex items-start justify-between gap-3">

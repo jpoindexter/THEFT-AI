@@ -18,6 +18,7 @@ function lazyPage<TModule extends Record<string, unknown>, TExport extends keyof
 
 const Dashboard = lazyPage(() => import("./pages/Dashboard"), "Dashboard");
 const DashboardLive = lazyPage(() => import("./pages/DashboardLive"), "DashboardLive");
+const DepartmentWorkspace = lazyPage(() => import("./pages/DepartmentWorkspace"), "DepartmentWorkspace");
 const Companies = lazyPage(() => import("./pages/Companies"), "Companies");
 const Agents = lazyPage(() => import("./pages/Agents"), "Agents");
 const AgentDetail = lazyPage(() => import("./pages/AgentDetail"), "AgentDetail");
@@ -73,6 +74,8 @@ function boardRoutes() {
       <Route index element={<Navigate to="dashboard" replace />} />
       <Route path="dashboard" element={<Dashboard />} />
       <Route path="dashboard/live" element={<DashboardLive />} />
+      <Route path="departments" element={<Navigate to="/departments/engineering" replace />} />
+      <Route path="departments/:departmentKey" element={<DepartmentWorkspace />} />
       <Route path="onboarding" element={<OnboardingRoutePage />} />
       <Route path="companies" element={<Companies />} />
       <Route path="company/settings" element={<CompanySettings />} />

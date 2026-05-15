@@ -19,9 +19,15 @@ export interface DepartmentCanvasRow {
   title: string;
   agent: Agent | null;
   issues: Issue[];
+  activeIssues: Issue[];
+  blockedIssues: Issue[];
+  reviewIssues: Issue[];
+  doneIssues: Issue[];
   activeCount: number;
+  blockedCount: number;
   reviewCount: number;
   doneCount: number;
+  nextIssue: Issue | null;
 }
 
 export type CompanyBottleneckTone = "attention" | "review" | "work" | "setup" | "clear";
@@ -127,14 +133,27 @@ export function buildDepartmentCanvasRows(agents: Agent[], issues: Issue[]): Dep
     const departmentIssues = agent
       ? issues.filter((issue) => issue.assigneeAgentId === agent.id)
       : [];
+    const sortedIssues = [...departmentIssues].sort(
+      (a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime(),
+    );
+    const activeIssues = sortedIssues.filter((issue) => ACTIVE_ISSUE_STATUSES.has(issue.status));
+    const blockedIssues = sortedIssues.filter((issue) => issue.status === "blocked");
+    const reviewIssues = sortedIssues.filter((issue) => issue.status === "in_review");
+    const doneIssues = sortedIssues.filter((issue) => issue.status === "done");
     return {
       key: department.key,
       title: department.title,
       agent,
-      issues: departmentIssues,
-      activeCount: departmentIssues.filter((issue) => ACTIVE_ISSUE_STATUSES.has(issue.status)).length,
-      reviewCount: departmentIssues.filter((issue) => issue.status === "in_review").length,
-      doneCount: departmentIssues.filter((issue) => issue.status === "done").length,
+      issues: sortedIssues,
+      activeIssues,
+      blockedIssues,
+      reviewIssues,
+      doneIssues,
+      activeCount: activeIssues.length,
+      blockedCount: blockedIssues.length,
+      reviewCount: reviewIssues.length,
+      doneCount: doneIssues.length,
+      nextIssue: activeIssues[0] ?? reviewIssues[0] ?? sortedIssues[0] ?? null,
     };
   });
 }

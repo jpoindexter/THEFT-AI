@@ -3,6 +3,7 @@ import {
   CircleDot,
   Target,
   LayoutDashboard,
+  Building2,
   DollarSign,
   History,
   Search,
@@ -99,6 +100,7 @@ export function Sidebar() {
         </div>
 
         <SidebarSection label="Work">
+          <SidebarNavItem to="/departments/engineering" label="Departments" icon={Building2} />
           <SidebarNavItem to="/issues" label="Tasks" icon={CircleDot} />
           <SidebarNavItem to="/library" label="Library" icon={Library} />
           <SidebarNavItem to="/search" label="Search" icon={Search} />
