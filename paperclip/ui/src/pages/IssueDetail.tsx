@@ -599,6 +599,7 @@ function TaskReviewSummary({
   commentCount,
   childTaskCount,
   hasLiveRuns,
+  hasBlocker,
 }: {
   issue: Issue;
   owner: Agent | null;
@@ -607,6 +608,7 @@ function TaskReviewSummary({
   commentCount: number;
   childTaskCount: number;
   hasLiveRuns: boolean;
+  hasBlocker: boolean;
 }) {
   const ownerLabel = owner
     ? `${owner.title ?? "Department lead"} · ${owner.name}`
@@ -619,13 +621,34 @@ function TaskReviewSummary({
     : issue.executionRunId
       ? "Run attached"
       : "No active run";
+  const taskStateLabel = hasBlocker
+    ? "Blocked until next action"
+    : issue.status === "done"
+      ? "Ready in company memory"
+      : "Ready for Operator review";
 
   return (
     <section className="space-y-3 rounded-md border border-border bg-card p-4 text-foreground  ">
-      <div>
-        <h3 className="text-sm font-medium">Task review</h3>
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+        <div>
+          <h3 className="text-sm font-medium">Task Review</h3>
+          <p className="mt-1 text-xs text-muted-foreground">
+            Outcome, owner, blocker, and saved company output. Runtime messages are below as an execution log.
+          </p>
+        </div>
+        <div className={cn(
+          "border px-2 py-1 text-xs font-medium",
+          hasBlocker
+            ? "border-amber-500/50 bg-amber-500/10 text-amber-200"
+            : "border-primary/40 bg-primary/10 text-primary",
+        )}>
+          {taskStateLabel}
+        </div>
+      </div>
+      <div className="border border-border bg-background/45 p-3">
+        <p className="text-[11px] uppercase tracking-[0.14em] text-muted-foreground">Current objective</p>
         <p className="mt-1 text-xs text-muted-foreground">
-          Objective, owner, run state, decisions, and saved company output.
+          {issue.description?.trim() || "No objective has been written for this task yet."}
         </p>
       </div>
       <div className="grid gap-3 sm:grid-cols-2">
@@ -637,7 +660,7 @@ function TaskReviewSummary({
         />
         <TaskReviewCard
           icon={ActivityIcon}
-          label="Run timeline"
+          label="Runtime state"
           value={runLabel}
           detail={`${formatTaskStatus(issue.status)} · ${issue.priority} priority`}
         />
@@ -1281,7 +1304,7 @@ export function IssueDetail() {
   const [moreOpen, setMoreOpen] = useState(false);
   const [copied, setCopied] = useState(false);
   const [mobilePropsOpen, setMobilePropsOpen] = useState(false);
-  const [detailTab, setDetailTab] = useState("chat");
+  const [detailTab, setDetailTab] = useState("related-work");
   const [handoffFocusSignal, setHandoffFocusSignal] = useState(0);
   const [pendingApprovalAction, setPendingApprovalAction] = useState<{
     approvalId: string;
@@ -3584,6 +3607,7 @@ export function IssueDetail() {
           commentCount={threadComments.length}
           childTaskCount={childIssues.length}
           hasLiveRuns={hasLiveRuns}
+          hasBlocker={issue.status === "blocked" || (issue.blockedBy?.length ?? 0) > 0}
         />
       </div>
 
@@ -3836,17 +3860,17 @@ export function IssueDetail() {
 
       <Tabs value={detailTab} onValueChange={setDetailTab} className="space-y-3">
         <TabsList variant="line" className="w-full justify-start gap-1">
+          <TabsTrigger value="related-work" className="gap-1.5">
+            <ListTree className="h-3.5 w-3.5" />
+            Context
+          </TabsTrigger>
           <TabsTrigger value="chat" className="gap-1.5">
             <MessageSquare className="h-3.5 w-3.5" />
-            Chat
+            Execution log
           </TabsTrigger>
           <TabsTrigger value="activity" className="gap-1.5">
             <ActivityIcon className="h-3.5 w-3.5" />
-            Activity
-          </TabsTrigger>
-          <TabsTrigger value="related-work" className="gap-1.5">
-            <ListTree className="h-3.5 w-3.5" />
-            Related work
+            Audit
           </TabsTrigger>
           {issuePluginTabItems.map((item) => (
             <TabsTrigger key={item.value} value={item.value}>
@@ -3856,63 +3880,61 @@ export function IssueDetail() {
         </TabsList>
 
         <TabsContent value="chat">
-          {detailTab === "chat" ? (
-            <IssueDetailChatTab
-              issueId={issue.id}
-              companyId={issue.companyId}
-              projectId={issue.projectId ?? null}
-              issueStatus={issue.status}
-              issueWorkMode={issue.workMode ?? "standard"}
-              executionRunId={issue.executionRunId ?? null}
-              blockedBy={issue.blockedBy ?? []}
-              blockerAttention={issue.blockerAttention ?? null}
-              successfulRunHandoff={issue.successfulRunHandoff ?? null}
-              comments={threadComments}
-              locallyQueuedCommentRunIds={locallyQueuedCommentRunIds}
-              interactions={interactions}
-              hasOlderComments={hasOlderComments}
-              commentsLoadingOlder={commentsLoadingOlder}
-              onLoadOlderComments={loadOlderComments}
-              onRefreshLatestComments={refetchLatestComments}
-              composerRef={commentComposerRef}
-              feedbackVotes={feedbackVotes}
-              feedbackDataSharingPreference={feedbackDataSharingPreference}
-              feedbackTermsUrl={FEEDBACK_TERMS_URL}
-              agentMap={agentMap}
-              currentUserId={currentUserId}
-              userLabelMap={userLabelMap}
-              userProfileMap={userProfileMap}
-              draftKey={`paperclip:issue-comment-draft:${issue.id}`}
-              reassignOptions={commentReassignOptions}
-              currentAssigneeValue={actualAssigneeValue}
-              suggestedAssigneeValue={suggestedAssigneeValue}
-              mentions={mentionOptions}
-              composerDisabledReason={commentComposerDisabledReason}
-              composerHint={composerHint}
-              queuedCommentReason={queuedCommentReason}
-              onVote={handleCommentVote}
-              onAdd={handleChatAdd}
-              onImageUpload={handleCommentImageUpload}
-              onAttachImage={handleCommentAttachImage}
-              onInterruptQueued={handleInterruptQueuedRun}
-              onPauseWorkRun={canManageTreeControl
-                ? (runId) => pauseIssueWorkRun.mutateAsync({ runId, scope: treeControlScope }).then(() => undefined)
-                : undefined}
-              onWorkModeChange={(nextMode) => {
-                const currentMode: IssueWorkMode = issue.workMode ?? "standard";
-                if (currentMode === nextMode) return;
-                return updateIssue.mutateAsync({ workMode: nextMode }).then(() => undefined);
-              }}
-              onCancelQueued={handleCancelQueuedComment}
-              interruptingQueuedRunId={interruptQueuedComment.isPending ? interruptQueuedComment.variables ?? null : null}
-              pausingWorkRunId={pauseIssueWorkRun.isPending ? pauseIssueWorkRun.variables?.runId ?? null : null}
-              onImageClick={handleChatImageClick}
-              onAcceptInteraction={handleAcceptInteraction}
-              onRejectInteraction={handleRejectInteraction}
-              onSubmitInteractionAnswers={handleSubmitInteractionAnswers}
-              onCancelInteraction={handleCancelInteraction}
-            />
-          ) : null}
+          <IssueDetailChatTab
+            issueId={issue.id}
+            companyId={issue.companyId}
+            projectId={issue.projectId ?? null}
+            issueStatus={issue.status}
+            issueWorkMode={issue.workMode ?? "standard"}
+            executionRunId={issue.executionRunId ?? null}
+            blockedBy={issue.blockedBy ?? []}
+            blockerAttention={issue.blockerAttention ?? null}
+            successfulRunHandoff={issue.successfulRunHandoff ?? null}
+            comments={threadComments}
+            locallyQueuedCommentRunIds={locallyQueuedCommentRunIds}
+            interactions={interactions}
+            hasOlderComments={hasOlderComments}
+            commentsLoadingOlder={commentsLoadingOlder}
+            onLoadOlderComments={loadOlderComments}
+            onRefreshLatestComments={refetchLatestComments}
+            composerRef={commentComposerRef}
+            feedbackVotes={feedbackVotes}
+            feedbackDataSharingPreference={feedbackDataSharingPreference}
+            feedbackTermsUrl={FEEDBACK_TERMS_URL}
+            agentMap={agentMap}
+            currentUserId={currentUserId}
+            userLabelMap={userLabelMap}
+            userProfileMap={userProfileMap}
+            draftKey={`paperclip:issue-comment-draft:${issue.id}`}
+            reassignOptions={commentReassignOptions}
+            currentAssigneeValue={actualAssigneeValue}
+            suggestedAssigneeValue={suggestedAssigneeValue}
+            mentions={mentionOptions}
+            composerDisabledReason={commentComposerDisabledReason}
+            composerHint={composerHint}
+            queuedCommentReason={queuedCommentReason}
+            onVote={handleCommentVote}
+            onAdd={handleChatAdd}
+            onImageUpload={handleCommentImageUpload}
+            onAttachImage={handleCommentAttachImage}
+            onInterruptQueued={handleInterruptQueuedRun}
+            onPauseWorkRun={canManageTreeControl
+              ? (runId) => pauseIssueWorkRun.mutateAsync({ runId, scope: treeControlScope }).then(() => undefined)
+              : undefined}
+            onWorkModeChange={(nextMode) => {
+              const currentMode: IssueWorkMode = issue.workMode ?? "standard";
+              if (currentMode === nextMode) return;
+              return updateIssue.mutateAsync({ workMode: nextMode }).then(() => undefined);
+            }}
+            onCancelQueued={handleCancelQueuedComment}
+            interruptingQueuedRunId={interruptQueuedComment.isPending ? interruptQueuedComment.variables ?? null : null}
+            pausingWorkRunId={pauseIssueWorkRun.isPending ? pauseIssueWorkRun.variables?.runId ?? null : null}
+            onImageClick={handleChatImageClick}
+            onAcceptInteraction={handleAcceptInteraction}
+            onRejectInteraction={handleRejectInteraction}
+            onSubmitInteractionAnswers={handleSubmitInteractionAnswers}
+            onCancelInteraction={handleCancelInteraction}
+          />
         </TabsContent>
 
         <TabsContent value="activity">

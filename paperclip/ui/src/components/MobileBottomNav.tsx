@@ -4,7 +4,7 @@ import {
   House,
   CircleDot,
   SquarePen,
-  Users,
+  Library,
   Inbox,
 } from "lucide-react";
 import { useCompany } from "../context/CompanyContext";
@@ -43,13 +43,13 @@ export function MobileBottomNav({ visible }: MobileBottomNavProps) {
   const items = useMemo<MobileNavItem[]>(
     () => [
       { type: "link", to: "/dashboard", label: "Home", icon: House },
-      { type: "link", to: "/issues", label: "Issues", icon: CircleDot },
-      { type: "action", label: "Create", icon: SquarePen, onClick: () => openNewIssue() },
-      { type: "link", to: "/agents/all", label: "Agents", icon: Users },
+      { type: "link", to: "/issues", label: "Review", icon: CircleDot },
+      { type: "action", label: "Ask", icon: SquarePen, onClick: () => openNewIssue() },
+      { type: "link", to: "/library", label: "Memory", icon: Library },
       {
         type: "link",
         to: "/inbox",
-        label: "Inbox",
+        label: "Attention",
         icon: Inbox,
         badge: inboxBadge.inbox,
       },

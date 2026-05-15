@@ -108,7 +108,7 @@ export function buildTechTreeNodeViews({
           : "Root roadmap node",
       evidence:
         linkedProjects.length || linkedIssues.length
-          ? `${doneProjects}/${linkedProjects.length} projects · ${doneIssues}/${linkedIssues.length} tasks done`
+          ? `${doneProjects}/${linkedProjects.length} workstreams · ${doneIssues}/${linkedIssues.length} tasks done`
           : "No evidence linked yet",
       nextAction,
       childCount: childGoals.length,
@@ -167,11 +167,11 @@ export function Goals() {
 
       {goals && goals.length > 0 && (
         <>
-          <section className="overflow-hidden border border-border bg-[#fbfaf7]">
+          <section className="overflow-hidden border border-border bg-card">
             <div className="flex flex-col gap-4 border-b border-border bg-card/75 p-4 sm:flex-row sm:items-start sm:justify-between">
               <div className="max-w-3xl">
                 <div className="flex flex-wrap items-center gap-2 text-xs font-medium uppercase tracking-[0.16em] text-muted-foreground">
-                  <Sparkles className="h-3.5 w-3.5 text-emerald-700" />
+                  <Sparkles className="h-3.5 w-3.5 text-primary" />
                   THEFT roadmap
                 </div>
                 <h1 className="mt-2 text-2xl font-semibold tracking-normal text-foreground">
@@ -188,7 +188,7 @@ export function Goals() {
                 <TechTreeStat value={goals.filter((goal) => goal.status === "achieved").length} label="done" />
               </div>
             </div>
-            <div className="grid gap-3 p-3 lg:grid-cols-[minmax(0,1fr)_280px]">
+            <div className="grid gap-3 bg-background/40 p-3 lg:grid-cols-[minmax(0,1fr)_280px]">
               <div className="space-y-2">
                 {buildTechTreeNodeViews({
                   goals,
@@ -201,7 +201,7 @@ export function Goals() {
               </div>
               <aside className="border border-border bg-card p-3">
                 <div className="flex items-center gap-2 text-sm font-medium">
-                  <Route className="h-4 w-4 text-emerald-700" />
+                  <Route className="h-4 w-4 text-primary" />
                   Roadmap rule
                 </div>
                 <p className="mt-2 text-sm leading-6 text-muted-foreground">
@@ -239,12 +239,12 @@ function TechTreeStat({ value, label }: { value: number; label: string }) {
 
 function RoadmapRule({ icon: Icon, label, value }: { icon: typeof Users; label: string; value: string }) {
   return (
-    <div className="flex items-center justify-between gap-3 border border-border bg-[#fbfaf7] px-2 py-2">
+    <div className="flex items-center justify-between gap-3 border border-border bg-background/50 px-2 py-2">
       <span className="flex items-center gap-2 text-foreground">
         <Icon className="h-3.5 w-3.5 text-muted-foreground" />
         {label}
       </span>
-      <span>{value}</span>
+      <span className="text-right">{value}</span>
     </div>
   );
 }
@@ -255,12 +255,12 @@ function TechTreeNodeCard({ node }: { node: TechTreeNodeView }) {
       to={`/goals/${node.goal.id}`}
       className={cn(
         "group grid gap-3 border border-border bg-card p-3 text-sm text-inherit no-underline transition-colors hover:border-primary/70 hover:bg-accent/40 md:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)_minmax(0,1fr)]",
-        node.depth > 0 && "ml-4 border-l-4 border-l-emerald-700/20",
+        node.depth > 0 && "ml-4 border-l-4 border-l-primary/30",
       )}
     >
       <div className="min-w-0">
         <div className="flex items-center gap-2">
-          <Layers3 className="h-4 w-4 text-emerald-700" />
+          <Layers3 className="h-4 w-4 text-primary" />
           <span className="text-xs uppercase tracking-[0.14em] text-muted-foreground">{node.goal.level}</span>
           <StatusBadge status={node.goal.status} />
         </div>
@@ -276,7 +276,7 @@ function TechTreeNodeCard({ node }: { node: TechTreeNodeView }) {
           <div className="text-[11px] uppercase tracking-[0.12em] text-muted-foreground">Next action</div>
           <div className="mt-1 truncate text-sm">{node.nextAction}</div>
         </div>
-        <ArrowRight className="h-4 w-4 shrink-0 text-muted-foreground transition-transform group-hover:translate-x-0.5 group-hover:text-emerald-700" />
+        <ArrowRight className="h-4 w-4 shrink-0 text-muted-foreground transition-transform group-hover:translate-x-0.5 group-hover:text-primary" />
       </div>
     </Link>
   );

@@ -52,6 +52,7 @@ Run status:
 - 2026-05-15: THEFT token-shell verification passed `pnpm -C paperclip --filter @paperclipai/ui typecheck`, focused Layout Vitest, `pnpm -C paperclip build`, and the UX079 Playwright visual suite across onboarding, Command Center, Library, and Task Review breakpoints.
 - 2026-05-15: Reconciled Roadmap and UX smoke ledgers with completed verification. Slice 0.3 local entry, Slice 0.6 eight-department smoke, UX101 onboarding Playwright, and UX103 Codex local signoff are marked complete based on the recorded successful runs above.
 - 2026-05-15: Unified the visible THEFT product shell against the cthdrl reference in `/Users/jasonpoindexter/Desktop/cthdrl`. The default app now uses a black/slate operating canvas, sand/ash text, lime selected/live accents, and restrained purple/cyan signals instead of the previous warm-white cards inside a dark runtime shell. The dogfood Command Center, department workspace, Library, Task Review, Tech Tree, invite, sidebar, account menu, and top bar now share the same dark token system.
+- 2026-05-15: Started the confusion cleanup after live screenshot review. Primary sidebar and mobile nav now lead with THEFT surfaces only: Command Center, Attention, Departments, Task Review, Company Memory, Search, Tech Tree, and small System links. Project/agent runtime lists no longer appear as primary navigation. Tech Tree no longer uses a leftover light canvas, and Task Review defaults to Context instead of raw chat/execution logs.
 
 Next blocking work: subtract dead `app/` surface and plan the deeper Paperclip package/API naming migration after the UI/UX happy path is stable. Avoid running full 8-department live Codex smoke during iteration; reserve it for pre-release/signoff.
 
@@ -71,6 +72,7 @@ Verification coverage:
 - 2026-05-15 one-server happy path verification passed `PAPERCLIP_E2E_PORT=3299 PAPERCLIP_E2E_DB_PORT=32399 pnpm -C paperclip exec playwright test tests/e2e/onboarding.spec.ts --config tests/e2e/playwright.config.ts`; the flow boots a throwaway Paperclip host, completes onboarding, seeds Operator plus departments/tasks, and lands on Command Center.
 - `UX060`-`UX063` verification passed focused Vitest (`GoalDetail`), `git diff --check`, and `pnpm -C paperclip build`.
 - 2026-05-15 cthdrl dark-shell verification passed `git diff --check`, `pnpm -C paperclip --filter @paperclipai/ui typecheck`, focused Vitest for Layout, Dashboard, IssueDetail, canvas, and Library helpers, `pnpm -C paperclip build`, plus a live Chromium screenshot check at `http://127.0.0.1:3100/THEAAAAAAAAAAA/dashboard` saved to `/private/tmp/theft-dashboard-cthdrl.png`.
+- 2026-05-15 confusion-cleanup verification passed `git diff --check`, `pnpm -C paperclip --filter @paperclipai/ui typecheck`, focused Vitest for Sidebar and IssueDetail, and `pnpm -C paperclip build`.
 
 ## Legacy THEFT App Engine (`app/src/lib/`)
 

@@ -4,13 +4,10 @@ import {
   Target,
   LayoutDashboard,
   Building2,
-  DollarSign,
-  History,
   Search,
   SquarePen,
   Network,
   Boxes,
-  Repeat,
   GitBranch,
   Settings,
   Library,
@@ -18,8 +15,6 @@ import {
 import { useQuery } from "@tanstack/react-query";
 import { SidebarSection } from "./SidebarSection";
 import { SidebarNavItem } from "./SidebarNavItem";
-import { SidebarProjects } from "./SidebarProjects";
-import { SidebarAgents } from "./SidebarAgents";
 import { useDialogActions } from "../context/DialogContext";
 import { useCompany } from "../context/CompanyContext";
 import { heartbeatsApi } from "../api/heartbeats";
@@ -79,12 +74,12 @@ export function Sidebar() {
             className="flex items-center gap-2.5 px-3 py-2 text-[13px] font-medium text-muted-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition-colors"
           >
             <SquarePen className="h-4 w-4 shrink-0" />
-            <span className="truncate">New task</span>
+            <span className="truncate">Ask Operator</span>
           </button>
           <SidebarNavItem to="/dashboard" label="Command Center" icon={LayoutDashboard} liveCount={liveRunCount} />
           <SidebarNavItem
             to="/inbox"
-            label="Inbox"
+            label="Attention"
             icon={Inbox}
             badge={inboxBadge.inbox}
             badgeTone={inboxBadge.failedRuns > 0 ? "danger" : "default"}
@@ -101,25 +96,18 @@ export function Sidebar() {
 
         <SidebarSection label="Work">
           <SidebarNavItem to="/departments/engineering" label="Departments" icon={Building2} />
-          <SidebarNavItem to="/issues" label="Tasks" icon={CircleDot} />
-          <SidebarNavItem to="/library" label="Library" icon={Library} />
+          <SidebarNavItem to="/issues" label="Task Review" icon={CircleDot} />
+          <SidebarNavItem to="/library" label="Company Memory" icon={Library} />
           <SidebarNavItem to="/search" label="Search" icon={Search} />
-          <SidebarNavItem to="/routines" label="Routines" icon={Repeat} />
           <SidebarNavItem to="/goals" label="Tech Tree" icon={Target} />
           {showWorkspacesLink ? (
             <SidebarNavItem to="/workspaces" label="Workspaces" icon={GitBranch} />
           ) : null}
         </SidebarSection>
 
-        <SidebarProjects />
-
-        <SidebarAgents />
-
-        <SidebarSection label="Admin">
-          <SidebarNavItem to="/org" label="Org chart" icon={Network} />
-          <SidebarNavItem to="/skills" label="Skills" icon={Boxes} />
-          <SidebarNavItem to="/costs" label="Runtime usage" icon={DollarSign} />
-          <SidebarNavItem to="/activity" label="Activity" icon={History} />
+        <SidebarSection label="System">
+          <SidebarNavItem to="/org" label="Company Map" icon={Network} />
+          <SidebarNavItem to="/skills" label="Skill Library" icon={Boxes} />
           <SidebarNavItem to="/company/settings" label="Settings" icon={Settings} />
         </SidebarSection>
 

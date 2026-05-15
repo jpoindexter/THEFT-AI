@@ -837,7 +837,8 @@ describe("IssueDetail", () => {
     await flushReact();
 
     expect(container.textContent).toContain("Issue detail smoke");
-    expect(container.textContent).toContain("Chat thread");
+    expect(container.textContent).toContain("Context");
+    expect(container.textContent).toContain("Execution log");
     expect(consoleErrorSpy).not.toHaveBeenCalled();
   });
 
@@ -882,10 +883,10 @@ describe("IssueDetail", () => {
       { label: "Tasks", href: "/issues" },
       { label: "Issue detail smoke" },
     ]);
-    expect(text).toContain("Task review");
+    expect(text).toContain("Task Review");
     expect(text).toContain("Owner department");
     expect(text).toContain("Engineering · Engineering Lead");
-    expect(text).toContain("Run timeline");
+    expect(text).toContain("Runtime state");
     expect(text).toContain("Run attached");
     expect(text).toContain("Library output");
     expect(text).toContain("1 Library artifact");
@@ -1152,6 +1153,14 @@ describe("IssueDetail", () => {
     await flushReact();
     await flushReact();
 
+    const executionLogButton = Array.from(container.querySelectorAll("button"))
+      .find((button) => button.textContent?.trim() === "Execution log");
+    expect(executionLogButton).toBeTruthy();
+    await act(async () => {
+      executionLogButton!.click();
+    });
+    await flushReact();
+
     expect(mockIssueChatThreadRender.mock.calls.at(-1)?.[0]).toMatchObject({
       stopRunLabel: "Pause work",
       stoppingRunLabel: "Pausing...",
@@ -1197,6 +1206,14 @@ describe("IssueDetail", () => {
     });
     await flushReact();
 
+    const executionLogButton = Array.from(container.querySelectorAll("button"))
+      .find((button) => button.textContent?.trim() === "Execution log");
+    expect(executionLogButton).toBeTruthy();
+    await act(async () => {
+      executionLogButton!.click();
+    });
+    await flushReact();
+
     expect(mockIssueChatThreadRender.mock.calls.at(-1)?.[0]).toMatchObject({
       issueWorkMode: "planning",
     });
@@ -1230,6 +1247,14 @@ describe("IssueDetail", () => {
       );
     });
     await flushReact();
+    await flushReact();
+
+    const executionLogButton = Array.from(container.querySelectorAll("button"))
+      .find((button) => button.textContent?.trim() === "Execution log");
+    expect(executionLogButton).toBeTruthy();
+    await act(async () => {
+      executionLogButton!.click();
+    });
     await flushReact();
 
     const lastChatThreadProps = mockIssueChatThreadRender.mock.calls.at(-1)?.[0];
