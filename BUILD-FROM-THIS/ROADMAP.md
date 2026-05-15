@@ -78,8 +78,8 @@ For each department, create one real Paperclip issue, invoke the assigned agent 
 
 ## Slice 0.7 — Subtract Dead Surface
 
-- [ ] Remove duplicated JSON runtime paths from active product.
-- [ ] Archive old THEFT app routes not ported to Paperclip host.
+- [x] Remove duplicated JSON runtime paths from active product.
+- [x] Archive old THEFT app routes not ported to Paperclip host.
 - [x] Remove/hide fake credits and unimplemented billing.
 - [x] Remove LLC/service-company assumptions from active setup.
 - [x] Remove active user-facing Cofounder branding.

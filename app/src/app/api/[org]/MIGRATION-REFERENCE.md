@@ -4,15 +4,14 @@
 `paperclip/`, backed by Paperclip companies, agents, issues, goals, documents,
 approvals, and runtime adapters.
 
-The routes in this folder are legacy prototype routes over
-`app/src/lib/db/store.ts` and `.theft-data/*.json`. Do not extend them for the
-Paperclip-host product path. Archive or delete them once any remaining reference
-value has been ported.
+The original duplicated runtime routes in this folder were legacy prototype
+routes over `app/src/lib/db/store.ts` and `.theft-data/*.json`. Do not extend
+that surface for the Paperclip-host product path.
 
 ## Duplicated Paperclip Runtime Surface
 
-These route groups duplicate active Paperclip host concepts and are the primary
-T070 archive candidates:
+These route groups duplicate active Paperclip host concepts and were archived
+for T070 into `app/_archive/api-json-routes/[org]/...`:
 
 - `agent/run`, `operator`, `operator/messages`, `departments/[slug]/run`
 - `agents`, `agents/[id]`, `skills`
@@ -35,4 +34,3 @@ against Paperclip services or a real managed-service integration:
 - `costs/export`, `invoices/[invoice]`
 - `deployments`, `evals`, `search`
 - `webhooks`, `webhooks/[id]`, `webhooks/[id]/ping`
-

@@ -117,9 +117,9 @@ Status: render with seeded data. None are wired to engine. Likely most should mo
 - `/[org]/routines` — scheduled tasks UI, no real cron yet
 - `/[org]/skills` — list/new pages exist, doesn't sync to filesystem
 
-### Legacy JSON API — ARCHIVE CANDIDATES
-- `app/src/app/api/[org]/MIGRATION-REFERENCE.md` now identifies the duplicated prototype routes backed by `.theft-data/*.json`.
-- Primary T070 candidates: `agent/run`, `operator`, `departments/[slug]/run`, `agents`, `skills`, `tasks`, `artifacts`, `memory`, `roadmap`, `approvals`, `routines`, `company`, `departments`, `team`, and `export`.
+### Legacy JSON API — ARCHIVED
+- T070 archived duplicated prototype route files backed by `.theft-data/*.json` from `app/src/app/api/[org]/...` into `app/_archive/api-json-routes/[org]/...`.
+- Archived route groups: `agent/run`, `operator`, `operator/messages`, `departments/[slug]/run`, `agents`, `skills`, `tasks`, `artifacts`, `memory`, `roadmap`, `approvals`, `routines`, `company`, `departments`, `team`, and `export`.
 - Future/stub route groups to rebuild only against Paperclip or real managed services: `api-keys`, `brand-kit`, `brief`, `onboarding/complete`, `costs/export`, `invoices`, `deployments`, `evals`, `search`, and `webhooks`.
 
 ### Settings — OVERBUILT (16 sub-pages, most stubbed)
