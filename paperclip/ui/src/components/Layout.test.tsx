@@ -133,8 +133,26 @@ vi.mock("../plugins/slots", async () => {
 
 vi.mock("../context/DialogContext", () => ({
   useDialog: () => ({
+    newIssueOpen: false,
+    newIssueDefaults: {},
+    newProjectOpen: false,
+    newGoalOpen: false,
+    newGoalDefaults: {},
+    newAgentOpen: false,
+    onboardingOpen: false,
+    onboardingOptions: {},
     openNewIssue: vi.fn(),
     openOnboarding: vi.fn(),
+  }),
+  useDialogState: () => ({
+    newIssueOpen: false,
+    newIssueDefaults: {},
+    newProjectOpen: false,
+    newGoalOpen: false,
+    newGoalDefaults: {},
+    newAgentOpen: false,
+    onboardingOpen: false,
+    onboardingOptions: {},
   }),
   useDialogActions: () => ({
     openNewIssue: vi.fn(),

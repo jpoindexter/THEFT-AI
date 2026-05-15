@@ -38,6 +38,7 @@ Run status:
 - 2026-05-14: Completed `UX020`-`UX023` Command Center UX pass in `paperclip/`: dashboard breadcrumb/nav now says Command Center, primary copy leads with THEFT company objects instead of Paperclip runtime language, the first viewport includes current bottleneck, departments, Operator tray, attention queue, Tech Tree, and latest Library outputs, and sidebar labels move agent/admin surfaces out of the main happy path.
 - 2026-05-14: Completed `UX030`-`UX032` Task Review UX pass in `paperclip/`: issue detail now starts with a THEFT Task Review summary covering owner department, run timeline, Library output count, decisions, comments, and subtasks while keeping chat/activity/runtime diagnostics lower in the page.
 - 2026-05-14: Completed `UX040`-`UX041` Library UX pass in `paperclip/`: Library copy now frames company memory and shipped output, shows shelf summary stats, uses task/department language in the detail pane, and the mapping helper now summarizes department coverage/important outputs.
+- 2026-05-15: Cleaned up the UI build warning surface in `paperclip/`: route pages, onboarding, closed create dialogs, and the plugin bridge now load lazily enough that `pnpm -C paperclip build` finishes without Vite mixed-import, circular chunk, or chunk-size warnings.
 
 Next blocking work: run `UX042` to verify saved Library outputs from real LLM runs, then continue subtracting dead `app/` surface. Avoid building new runtime features in `app/`.
 
@@ -46,10 +47,11 @@ Verification coverage:
 - `paperclip/tests/e2e/onboarding.spec.ts` now covers the THEFT happy path: stage/setup persistence, Operator naming, 8 department agents, seeded department issues, hidden billing/credits, Library output instruction, and company-canvas landing.
 - Use `node paperclip/scripts/smoke/theft-local-health.mjs` after `pnpm -C paperclip dev:once` for the fastest run-readiness check.
 - Use `node paperclip/scripts/smoke/theft-department-runtime-smoke.mjs` against a running local host for deterministic 8-department adapter runtime smoke. Override with `THEFT_SMOKE_ADAPTER=codex_local THEFT_SMOKE_CODEX_MODEL=gpt-5.3-codex-spark` when an authenticated Codex local run is desired.
-- Build currently passes with existing Vite warnings about large chunks and `MarkdownEditor.tsx` being both statically and dynamically imported.
+- Build currently passes without Vite mixed-import, circular chunk, or chunk-size warnings.
 - `UX020`-`UX023` verification passed focused Vitest (`theft-canvas`, `Dashboard`), `git diff --check`, and `pnpm -C paperclip build`.
 - `UX030`-`UX032` verification passed focused Vitest (`IssueDetail`), `git diff --check`, and `pnpm -C paperclip build`.
 - `UX040`-`UX041` verification passed focused Vitest (`library-items`), `git diff --check`, and `pnpm -C paperclip build`.
+- 2026-05-15 warning cleanup verification passed `git diff --check`, focused Vitest (`App`, `Layout`), and `pnpm -C paperclip build`.
 
 ## Legacy THEFT App Engine (`app/src/lib/`)
 
