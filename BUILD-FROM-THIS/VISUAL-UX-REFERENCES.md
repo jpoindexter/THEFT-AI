@@ -1,18 +1,19 @@
 # VISUAL UX REFERENCES - THEFT
 
-> Created 2026-05-15. This documents the MagicPath frame review, the local visual references in `/Users/jasonpoindexter/Desktop/theft ai`, and the Sana visual direction. Treat this as product direction, not a pixel spec.
+> Created 2026-05-15. Updated 2026-05-15 after reviewing `/Users/jasonpoindexter/Desktop/099`. Treat this as product direction, not a pixel spec.
 
 ## Core Visual Decision
 
-THEFT should be dark, premium, operational, and artifact-first.
+THEFT should be dark, premium, operational, artifact-first, and visually restrained.
 
-The 2026-05-15 cthdrl pass supersedes the earlier warm-white default. The target is a black/slate company operating canvas with sand text, sharp panels, dense work surfaces, and saturated signal accents. It should feel like a controlled execution room, not a generic agent admin dashboard and not a half-light/half-dark hybrid.
+The 2026-05-15 099 pass supersedes the earlier warm-white and cthdrl visual skins. The target is a black/white/gray digital workbench: mono type, explicit borders, 10px interactive radii, no neon, no glow, no chromatic department palette. It should feel like a serious local software workbench, not a generic agent admin dashboard and not a sci-fi HUD.
 
 ## Reference Inputs
 
 | Reference | What It Contributes | What To Use In THEFT | What To Avoid |
 |---|---|---|---|
-| cthdrl references in `/Users/jasonpoindexter/Desktop/cthdrl` | Black full-bleed shell, Ghost Sand typography, sharp panels, mono operational rhythm, electric lime/purple/cyan signal colors | Default shell palette, canvas mood, panel discipline, sparse saturated accents, no soft SaaS card pileup | Copying decorative brand-kit layouts directly, negative letter spacing, illegible low-contrast labels |
+| 099 tokens in `/Users/jasonpoindexter/Desktop/099` | Black/white/gray terminal workbench, mono type, 10px interactive radii, explicit borders, no shadows, no chromatic decoration | Final visual skin: black page, white primary text, steel-gray panels, muted gray borders, dim-gray secondary text, serious local workbench tone | Neon lime/purple/cyan accents, sci-fi HUD styling, glow, gradients, decorative command-center effects |
+| cthdrl references in `/Users/jasonpoindexter/Desktop/cthdrl` | Black full-bleed shell, sharp panels, mono operational rhythm, dense operating-canvas mood | IA mood only: dark shell, canvas discipline, compact operations layout | Electric lime/purple/cyan palette, decorative brand-kit layouts, negative letter spacing, illegible low-contrast labels |
 | MagicPath frames in `magic patch frames/` | Prompt-to-canvas creation, persistent left thread, parallel generation, artifact selection, libraries, share/publish | Interaction model: ask, route, generate, review, artifact appears on canvas/Library | Copying green brand, Figma-like design-tool framing, empty canvas with no business affordances |
 | Desktop references in `/Users/jasonpoindexter/Desktop/theft ai` | Light map/canvas systems, dense SaaS panels, premium dashboard cards, flow graphs, black diagnostic maps | Spatial canvas structure, high-density cards, graph relationships, polished operating surfaces | Letting warm-white cards fight the dark cthdrl shell |
 | Strategy-interface reference image | Mission control, strategy games, executive cockpit, OSINT maps, decision panels, constraints, next move | Information architecture: Objective -> Constraints -> Options -> Decisions -> Execution -> Outcomes -> Next Move | Treating it as decoration or turning the app into static KPI reporting |
@@ -69,18 +70,34 @@ What to reject:
 - Decorative sci-fi visuals that hide the work.
 - Generic agent admin tabs as the main product.
 
+## 099 Visual Direction
+
+The 099 folder is now the strongest visual reference for the application skin:
+
+- Black page background.
+- White primary text.
+- Steel-gray panels and inputs.
+- Muted gray borders and dividers.
+- Dim-gray secondary text.
+- Mono typography across the interface.
+- 10px radius for interactive components.
+- No shadows, gradients, glow, or chromatic brand accents.
+
+For THEFT, translate this as:
+
+> "A local company operating workbench where the founder routes work and departments produce visible artifacts."
+
 ## cthdrl Visual Direction
 
-The cthdrl folder is now the strongest visual reference for the application shell:
+The cthdrl folder is still useful for layout mood, but it is no longer the visual skin:
 
 - Black or near-black full-bleed base.
-- Slate panels with sand/ash foreground text.
+- Dark stacked panels, but not the final sand/ash token set.
 - Sharp rectangular panels and precise borders.
 - Mono navigation/body rhythm with large stark headings used only where scale is earned.
-- Electric lime for selected/live/primary states.
-- Purple and cyan as secondary signal accents.
+- Electric lime/purple/cyan signal accents are now rejected for the final style.
 - Minimal shadows and no floating-card softness.
-- Background grids and glows only as operating-canvas atmosphere.
+- Background grids are allowed only when they clarify relationships; glows are rejected for the final style.
 
 For THEFT, translate this as:
 
@@ -116,15 +133,16 @@ Use Sana's clean credibility, not its marketing page structure or default light 
 
 ### Color
 
-Primary direction:
+Primary direction from 099:
 
-- Black / near-black base.
-- Slate raised panels.
-- Thin sand/ash borders.
-- Sand and ash text.
-- Acid-lime accent used sparingly for selected, live, and primary action states.
-- Purple/cyan accents used only for secondary system signal.
-- Department colors only as small ownership markers, not broad panel backgrounds.
+- Black base: `#000000`.
+- White primary text: `#ffffff`.
+- Steel-gray raised panels and inputs: `#1d1d1d`.
+- Muted gray borders/dividers: `#383838`.
+- Dim-gray secondary text: `#888888`.
+- White filled buttons for primary actions, black text.
+- Gray outlined buttons for secondary actions.
+- Department ownership uses text/icon/provenance first, not color.
 
 Avoid:
 
@@ -132,7 +150,9 @@ Avoid:
 - Purple/blue AI gradients.
 - Beige-only palette.
 - Heavy shadows.
-- Neon everywhere.
+- Neon lime.
+- Purple/cyan department palettes.
+- Glow or sci-fi HUD effects.
 
 ### Density
 

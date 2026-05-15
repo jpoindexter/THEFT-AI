@@ -26,7 +26,7 @@ Core mental model:
 Objective -> Constraints -> Options -> Decisions -> Execution -> Outcomes -> Next Move.
 
 Visual style:
-dark premium operational interface, black/near-black canvas, slate panels, sharp rectangular panel edges, thin sand/ash borders, sand and ash text, acid-lime accent for selected/live/primary states, subtle purple/cyan signal accents, compact dense UI, no soft SaaS card pileup, no marketing hero layout, no purple AI gradient, no decorative blobs, no cartoon graphics.
+099-style dark digital workbench, strict black/white/gray palette, black page background, white primary text, dark gray panels and inputs, muted gray borders, secondary gray metadata, Soehne Mono-style monospace typography throughout, 10px radius on interactive elements, compact dense UI with generous spacing, no neon, no glow, no chromatic department palette, no sci-fi HUD effects, no soft SaaS card pileup, no marketing hero layout, no purple AI gradient, no decorative blobs, no cartoon graphics.
 
 Information architecture:
 drive action, show hierarchy, surface constraints, guide decisions, tell context/state, scale complexity without chaos. Inspired by mission control UI, strategy execution platforms, executive cockpit UI, real-time strategy tech trees, OSINT relationship maps, build-order interfaces, Cofounder-style Canvas flow, and MagicPath-style prompt-to-canvas workflow. Do not copy any product branding.
@@ -189,7 +189,7 @@ small compact input: "Ask Operator..."
 icons for create task, explain, route, review
 
 Visual:
-dark mission-control canvas, thin grid/map lines, sharp panels, acid-lime next move highlight, no generic KPI dashboard.
+dark 099 digital-workbench canvas, thin gray/white grid or map lines, sharp organized panels, white/gray hierarchy for the next move, no neon highlight, no generic KPI dashboard.
 ```
 
 ## Screen 06 - Mission Control Home, Operator Expanded
@@ -365,7 +365,7 @@ Work lane:
 tasks grouped by Needs Action, Ongoing, Todo, Done.
 
 Visual:
-department color marker only as small accent, no full-color blocks. Keep Mission Control shell.
+department marker only as a monochrome icon/label or very restrained status indicator, no saturated department colors and no full-color blocks. Keep Mission Control shell.
 
 Do not make agent config, model settings, skills tabs, or invocation history the main content.
 ```
@@ -589,10 +589,11 @@ After GPT Image creates a screen, reject it if:
 - Library artifacts are not visible as outcomes/evidence;
 - Tech Tree is just a goals list instead of a build-order strategy map;
 - it uses purple/blue AI gradients, decorative blobs, or marketing hero layout.
+- it uses neon lime, purple/cyan department colors, glow, or sci-fi HUD styling.
 
 Accept it only if:
 
 - Mission Control is clearly the product center;
 - the Objective -> Constraints -> Options -> Decisions -> Execution -> Outcomes -> Next Move chain is visible;
-- the UI feels dense, operational, and calm;
+- the UI feels like a 099-style terminal workbench: black/white/gray, mono, dense, operational, and calm;
 - the image gives enough structure to translate into implementation tasks in `paperclip/`.
