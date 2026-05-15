@@ -11,6 +11,10 @@ screenshots/
 # Reference clones (not project code)
 _reference/
 
+# Extracted third-party app references. Keep only our inventory notes tracked.
+reference-binaries/*/extracted/
+reference-binaries/*/original/
+
 # Paperclip is the tracked runtime host. Keep local clone metadata,
 # dependencies, build outputs, and runtime data out of parent git.
 paperclip/.git-upstream/
