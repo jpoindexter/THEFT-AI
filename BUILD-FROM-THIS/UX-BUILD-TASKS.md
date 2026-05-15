@@ -94,9 +94,9 @@ Goal: a founder can create a company, see THEFT assemble it, land in Command Cen
 Run this only after the `gpt-5.5 high` build pass has a working happy path.
 
 - [x] UX100 [SMOKE] Run `node paperclip/scripts/smoke/theft-local-health.mjs` against the local host.
-- [ ] UX101 [SMOKE] Run `pnpm -C paperclip exec playwright test tests/e2e/onboarding.spec.ts --config tests/e2e/playwright.config.ts`.
+- [x] UX101 [SMOKE] Run `pnpm -C paperclip exec playwright test tests/e2e/onboarding.spec.ts --config tests/e2e/playwright.config.ts`.
 - [x] UX102 [SMOKE] Run deterministic 8-department smoke with `node paperclip/scripts/smoke/theft-department-runtime-smoke.mjs`.
-- [ ] UX103 [SMOKE] Run Codex local 8-department smoke with `THEFT_SMOKE_ADAPTER=codex_local THEFT_SMOKE_CODEX_MODEL=gpt-5.3-codex-spark` as a pre-release/signoff check only.
+- [x] UX103 [SMOKE] Run Codex local 8-department smoke with `THEFT_SMOKE_ADAPTER=codex_local THEFT_SMOKE_CODEX_MODEL=gpt-5.3-codex-spark` as a pre-release/signoff check only.
 - [x] UX104 [SMOKE] Verify Engineering, Design, Marketing, Sales, Operations, Finance, Legal, and Support each produce a Library-visible artifact through the deterministic process artifact contract.
 - [x] UX105 [SMOKE] Update `BUILD-FROM-THIS/STATUS.md` with company id, issue ids, run ids, and Library artifact ids from the smoke.
 

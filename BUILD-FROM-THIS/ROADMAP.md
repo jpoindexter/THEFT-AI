@@ -35,7 +35,7 @@ Goal: THEFT runs as one local app backed by Paperclip's runtime. A founder can c
 ## Slice 0.3 — THEFT Staged Onboarding In Paperclip
 
 - [x] Replace generic Paperclip company creation with THEFT entry flow.
-- [ ] Sign in/local entry.
+- [x] Sign in/local entry. (Local trusted Paperclip entry is the v0 path.)
 - [x] Name company.
 - [x] Pick company stage: pre-idea, idea, validating, building, launched, revenue, scaling, existing business.
 - [x] Guided setup adapts to stage. (Step 3 task/interview prompt now varies by selected company stage.)
@@ -67,14 +67,14 @@ Goal: THEFT runs as one local app backed by Paperclip's runtime. A founder can c
 
 For each department, create one real Paperclip issue, invoke the assigned agent through a local adapter, and verify an output.
 
-- [ ] Engineering: code/repo task.
-- [ ] Design: brand/design artifact.
-- [ ] Marketing: positioning/content artifact.
-- [ ] Sales: ICP/outreach artifact.
-- [ ] Operations: status/process artifact.
-- [ ] Finance: finance/reporting artifact.
-- [ ] Legal: legal document artifact.
-- [ ] Support: support/knowledge artifact.
+- [x] Engineering: code/repo task.
+- [x] Design: brand/design artifact.
+- [x] Marketing: positioning/content artifact.
+- [x] Sales: ICP/outreach artifact.
+- [x] Operations: status/process artifact.
+- [x] Finance: finance/reporting artifact.
+- [x] Legal: legal document artifact.
+- [x] Support: support/knowledge artifact.
 
 ## Slice 0.7 — Subtract Dead Surface
 
