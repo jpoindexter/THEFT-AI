@@ -148,7 +148,7 @@ test.describe("Onboarding wizard", () => {
 
     await expect(page).toHaveURL(/\/dashboard$/, { timeout: 30_000 });
     await expect(page.getByRole("heading", { name: COMPANY_NAME })).toBeVisible();
-    await expect(page.getByText("Tech tree")).toBeVisible();
+    await expect(page.getByRole("heading", { name: /Tech tree/i })).toBeVisible();
     await expect(page.getByText("Operator tray")).toBeVisible();
 
     const companiesRes = await page.request.get(`${baseUrl}/api/companies`);

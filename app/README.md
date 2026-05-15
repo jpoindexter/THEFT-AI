@@ -2,6 +2,10 @@
 
 AI workspace platform — run a company with agents.
 
+> ⚠️ Migration note: this `app/` is historical/reference implementation only.
+> The active tracked Paperclip-host runtime now lives in `paperclip/`.
+> Do not add new product features here unless explicitly routing through Paperclip host.
+
 ## Run it (zero setup)
 
 ```sh
