@@ -119,9 +119,9 @@
 | ID | Title | Status |
 |---|---|---|
 | T093 | Document Mission Control target and "streamline, not remove" rule | ✅ done |
-| T094 | Rebuild `/dashboard` as Mission Control using existing Paperclip company/goals/issues/agents/documents | ☐ todo |
-| T095 | Convert Operator tray into collapsible dock/drawer with pin-open behavior | ☐ todo |
-| T096 | Add Objective, Constraints, Strategy Map, Decisions, Execution State, Outcomes, and Next Move panels | ☐ todo |
-| T097 | Preserve access to departments, tasks, Library, Tech Tree, runtime/admin routes, and diagnostics | ☐ todo |
-| T098 | Add tests proving streamlining did not remove core runtime/product capabilities | ☐ todo |
+| T094 | Rebuild `/dashboard` as Mission Control using existing Paperclip company/goals/issues/agents/documents | ✅ done |
+| T095 | Convert Operator tray into collapsible dock/drawer with pin-open behavior | ✅ done |
+| T096 | Add Objective, Constraints, Strategy Map, Decisions, Execution State, Outcomes, and Next Move panels | ✅ done |
+| T097 | Preserve access to departments, tasks, Library, Tech Tree, runtime/admin routes, and diagnostics | ✅ done |
+| T098 | Add tests proving streamlining did not remove core runtime/product capabilities | ▶ doing |
 | T099 | Verify Mission Control desktop/tablet/mobile screenshots | ☐ todo |

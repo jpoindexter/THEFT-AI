@@ -66,7 +66,7 @@ Acceptance:
 
 ### M3 - Tasks / Needs Action
 
-Status: **next**
+Status: **implementation pass complete, visual review pending**
 
 Rework task list into founder review queue:
 
@@ -170,13 +170,14 @@ Reserve heavy checks for pre-release signoff.
 Current active slice:
 
 ```text
-M3 - Tasks / Needs Action
+M4 - Tech Tree
 ```
 
 Last completed slices:
 
 - M1 Mission Control Home
 - M2 Task Review
+- M3 Tasks / Needs Action
 
 M1 files:
 
@@ -188,6 +189,11 @@ M2 files:
 
 - `paperclip/ui/src/pages/IssueDetail.tsx`
 - `paperclip/ui/src/pages/IssueDetail.test.tsx`
+
+M3 files:
+
+- `paperclip/ui/src/pages/Issues.tsx`
+- `paperclip/ui/src/pages/Issues.test.tsx`
 
 Verified for M1:
 
@@ -201,8 +207,14 @@ Verified for M2:
 2. `pnpm exec vitest run src/pages/IssueDetail.test.tsx --config vitest.config.ts` from `paperclip/ui`
 3. `pnpm -C paperclip --filter @paperclipai/ui typecheck`
 
+Verified for M3:
+
+1. `git diff --check`
+2. `pnpm exec vitest run src/pages/Issues.test.tsx --config vitest.config.ts` from `paperclip/ui`
+3. `pnpm -C paperclip --filter @paperclipai/ui typecheck`
+
 Next exact steps:
 
-1. commit, tag, push M2 checkpoint;
-2. start M3 Tasks / Needs Action;
+1. commit, tag, push M3 checkpoint;
+2. start M4 Tech Tree;
 3. keep verification focused to changed files until the MVP screen set is coherent.
