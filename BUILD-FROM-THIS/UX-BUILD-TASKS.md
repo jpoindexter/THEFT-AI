@@ -61,11 +61,11 @@ Goal: a founder can create a company, see THEFT assemble it, land in Command Cen
 - [x] UX051 [HIGH] [US5] Use `buildDepartmentCanvasRows` from `paperclip/ui/src/lib/theft-canvas.ts` as the source for department summaries instead of duplicating issue filters.
 - [x] UX052 [HIGH] [US5] Add tests for department row ownership and issue grouping in `paperclip/ui/src/lib/theft-canvas.test.ts`.
 
-- [ ] UX060 [HIGH] [US6] Reframe `paperclip/ui/src/pages/Goals.tsx` and `paperclip/ui/src/pages/GoalDetail.tsx` as Tech Tree / roadmap surfaces without breaking Paperclip goal data.
-- [ ] UX061 [HIGH] [US6] Make roadmap nodes show department owner, dependencies, state, evidence, and next action.
-- [ ] UX062 [HIGH] [US6] Add focused tests in `paperclip/ui/src/pages/GoalDetail.test.tsx` or helper tests for roadmap ordering.
+- [x] UX060 [HIGH] [US6] Reframe `paperclip/ui/src/pages/Goals.tsx` and `paperclip/ui/src/pages/GoalDetail.tsx` as Tech Tree / roadmap surfaces without breaking Paperclip goal data.
+- [x] UX061 [HIGH] [US6] Make roadmap nodes show department owner, dependencies, state, evidence, and next action.
+- [x] UX062 [HIGH] [US6] Add focused tests in `paperclip/ui/src/pages/GoalDetail.test.tsx` or helper tests for roadmap ordering.
 
-- [ ] UX063 [HIGH] [US6] Apply the visual reference decision to Tech Tree: warm-white canvas, left Operator/task context, selected-node inspector, and evidence-first roadmap nodes.
+- [x] UX063 [HIGH] [US6] Apply the visual reference decision to Tech Tree: warm-white canvas, left Operator/task context, selected-node inspector, and evidence-first roadmap nodes.
 
 ## Phase 3 - MEDIUM Screen Generation And Polish
 

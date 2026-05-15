@@ -110,3 +110,4 @@
 | T087 | Continue `UX040` Library implementation from `BUILD-FROM-THIS/UX-BUILD-TASKS.md` | ✅ done |
 | T088 | Verify `UX042` deterministic artifact smoke outputs become Library artifacts | ✅ done |
 | T089 | Complete `UX050`-`UX052` department workspace routing and shared department summaries | ✅ done |
+| T090 | Complete `UX060`-`UX063` Tech Tree roadmap surfaces with owner/dependency/evidence/next-action mapping | ✅ done |
