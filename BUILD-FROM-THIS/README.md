@@ -10,15 +10,16 @@
 4. **`UX-DIRECTION.md`** — product UX direction tying Paperclip, Cofounder, Hyperagent, skills, and THEFT happy path together
 5. **`MISSION-CONTROL-UX.md`** — current interface target: streamlining into Mission Control without removing Paperclip/runtime features
 6. **`VISUAL-UX-REFERENCES.md`** — MagicPath, local reference board, cthdrl, Sana, and strategy-interface visual direction
-7. **`UX-SCREEN-PROMPTS.md`** — reusable prompts for generating and critiquing screen flows before implementation
-8. **`UX-POLISH-DECISIONS.md`** — accepted Phase 3 prompt outcomes and implementation deltas
-9. **`UX-BUILD-TASKS.md`** — model-lane task list for the UX build and smoke handoff
-10. **`ROADMAP.md`** — ordered slices. Sequential, not parallel.
-11. **`TASKS.md`** — concrete task list. Working file.
-12. **`STATUS.md`** — what actually exists vs is stubbed/broken (audit-derived)
-13. **`DECISIONS.md`** — locked choices, append-only, no re-litigating
-14. **`PAPERCLIP-HOST-PROMOTION.md`** — how Paperclip became tracked source in this repo
-15. **`SKILL-AUDIT.md`** — THEFT skill packs and default department mappings
+7. **`GPT-IMAGE-SCREEN-PROMPTS.md`** — exact GPT Image prompts for Mission Control screens and visual acceptance criteria
+8. **`UX-SCREEN-PROMPTS.md`** — reusable prompts for generating and critiquing screen flows before implementation
+9. **`UX-POLISH-DECISIONS.md`** — accepted Phase 3 prompt outcomes and implementation deltas
+10. **`UX-BUILD-TASKS.md`** — model-lane task list for the UX build and smoke handoff
+11. **`ROADMAP.md`** — ordered slices. Sequential, not parallel.
+12. **`TASKS.md`** — concrete task list. Working file.
+13. **`STATUS.md`** — what actually exists vs is stubbed/broken (audit-derived)
+14. **`DECISIONS.md`** — locked choices, append-only, no re-litigating
+15. **`PAPERCLIP-HOST-PROMOTION.md`** — how Paperclip became tracked source in this repo
+16. **`SKILL-AUDIT.md`** — THEFT skill packs and default department mappings
 
 ## How to use this folder
 
