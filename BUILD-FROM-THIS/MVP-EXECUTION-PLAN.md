@@ -81,7 +81,7 @@ Acceptance:
 
 ### M4 - Tech Tree
 
-Status: **next**
+Status: **implementation pass complete, visual review pending**
 
 Rework goals into build-order strategy map:
 
@@ -170,7 +170,7 @@ Reserve heavy checks for pre-release signoff.
 Current active slice:
 
 ```text
-M4 - Tech Tree
+M5 - Library / Outcomes
 ```
 
 Last completed slices:
@@ -178,6 +178,7 @@ Last completed slices:
 - M1 Mission Control Home
 - M2 Task Review
 - M3 Tasks / Needs Action
+- M4 Tech Tree
 
 M1 files:
 
@@ -194,6 +195,12 @@ M3 files:
 
 - `paperclip/ui/src/pages/Issues.tsx`
 - `paperclip/ui/src/pages/Issues.test.tsx`
+
+M4 files:
+
+- `paperclip/ui/src/pages/Goals.tsx`
+- `paperclip/ui/src/pages/GoalDetail.tsx`
+- `paperclip/ui/src/pages/GoalDetail.test.tsx`
 
 Verified for M1:
 
@@ -213,8 +220,14 @@ Verified for M3:
 2. `pnpm exec vitest run src/pages/Issues.test.tsx --config vitest.config.ts` from `paperclip/ui`
 3. `pnpm -C paperclip --filter @paperclipai/ui typecheck`
 
+Verified for M4:
+
+1. `git diff --check`
+2. `pnpm exec vitest run src/pages/GoalDetail.test.tsx --config vitest.config.ts` from `paperclip/ui`
+3. `pnpm -C paperclip --filter @paperclipai/ui typecheck`
+
 Next exact steps:
 
-1. commit, tag, push M3 checkpoint;
-2. start M4 Tech Tree;
+1. commit, tag, push M4 checkpoint;
+2. start M5 Library / Outcomes;
 3. keep verification focused to changed files until the MVP screen set is coherent.

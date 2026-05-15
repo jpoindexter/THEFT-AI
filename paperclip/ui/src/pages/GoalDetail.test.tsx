@@ -2,7 +2,7 @@
 
 import { describe, expect, it } from "vitest";
 import { renderToStaticMarkup } from "react-dom/server";
-import { buildTechTreeNodeViews } from "./Goals";
+import { buildTechTreeNodeViews, buildTechTreeStageViews, getNextTechTreeNode } from "./Goals";
 import { GoalPropertiesToggleButton, getGoalLinkedIssues, getGoalLinkedProjects } from "./GoalDetail";
 import type { Agent, Goal, Issue, Project } from "@paperclipai/shared";
 
@@ -168,16 +168,42 @@ describe("Tech Tree helpers", () => {
 
     expect(rows[0]).toMatchObject({
       depth: 0,
+      stage: "foundation",
+      stageLabel: "Foundation",
       owner: "Marketing · Growth",
       dependency: "1 downstream node",
-      evidence: "1/1 projects · 1/2 tasks done",
+      evidence: "1/1 workstreams · 1/2 tasks done",
       nextAction: "Advance task: Write launch memo",
+      startWorkTitle: "Write launch memo",
+      openIssueCount: 1,
       childCount: 1,
     });
     expect(rows[1]).toMatchObject({
       depth: 1,
+      stage: "build",
       dependency: "Depends on parent node",
     });
+  });
+
+  it("groups nodes into build-order stages and selects the next actionable node", () => {
+    const foundation = goal({ id: "foundation", title: "Validate objective", status: "achieved" });
+    const build = goal({ id: "build", title: "Ship first loop", parentId: "foundation", status: "active" });
+    const scale = goal({ id: "scale", title: "Systemize growth", parentId: "build", status: "planned" });
+    const rows = buildTechTreeNodeViews({
+      goals: [foundation, build, scale],
+      agents: [],
+      projects: [],
+      issues: [issue({ id: "build-open", goalId: "build", status: "todo", title: "Build operator flow" })],
+    });
+
+    const stages = buildTechTreeStageViews(rows);
+
+    expect(stages.map((stage) => [stage.key, stage.nodes.map((node) => node.goal.id)])).toEqual([
+      ["foundation", ["foundation"]],
+      ["build", ["build"]],
+      ["scale", ["scale"]],
+    ]);
+    expect(getNextTechTreeNode(rows)?.goal.id).toBe("build");
   });
 
   it("links roadmap evidence through project and issue goal ids", () => {

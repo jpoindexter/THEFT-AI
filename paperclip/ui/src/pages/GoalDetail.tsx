@@ -21,7 +21,7 @@ import { buildTechTreeNodeViews } from "./Goals";
 import { cn, projectUrl } from "../lib/utils";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ArrowRight, CheckCircle2, FileText, GitBranch, Layers3, Plus, Route, SlidersHorizontal, Sparkles, Users } from "lucide-react";
+import { ArrowRight, CheckCircle2, FileText, GitBranch, Layers3, Plus, Route, SlidersHorizontal, Users } from "lucide-react";
 import type { Goal, Issue, Project } from "@paperclipai/shared";
 
 interface GoalPropertiesToggleButtonProps {
@@ -64,7 +64,7 @@ export function GoalPropertiesToggleButton({
 export function GoalDetail() {
   const { goalId } = useParams<{ goalId: string }>();
   const { selectedCompanyId, setSelectedCompanyId } = useCompany();
-  const { openNewGoal } = useDialogActions();
+  const { openNewGoal, openNewIssue } = useDialogActions();
   const { openPanel, closePanel, panelVisible, setPanelVisible } = usePanel();
   const { setBreadcrumbs } = useBreadcrumbs();
   const queryClient = useQueryClient();
@@ -172,12 +172,11 @@ export function GoalDetail() {
 
   return (
     <div className="space-y-6">
-      <section className="overflow-hidden border border-border bg-[#fbfaf7]">
+      <section className="theft-panel overflow-hidden">
         <div className="flex flex-col gap-4 border-b border-border bg-card/75 p-4 lg:flex-row lg:items-start lg:justify-between">
           <div className="min-w-0 max-w-4xl">
             <div className="flex flex-wrap items-center gap-2">
               <span className="inline-flex items-center gap-1 text-xs font-medium uppercase tracking-[0.16em] text-muted-foreground">
-                <Sparkles className="h-3.5 w-3.5 text-emerald-700" />
                 Tech Tree node
               </span>
               <span className="text-xs uppercase text-muted-foreground">{goal.level}</span>
@@ -205,6 +204,17 @@ export function GoalDetail() {
             />
           </div>
           <div className="flex items-start gap-2">
+            <Button
+              size="sm"
+              onClick={() => openNewIssue({
+                goalId: goal.id,
+                title: nodeView?.startWorkTitle ?? `Advance ${goal.title}`,
+                description: `Advance Tech Tree node: ${goal.title}`,
+              })}
+            >
+              <Plus className="mr-1.5 h-3.5 w-3.5" />
+              Start work
+            </Button>
             <GoalPropertiesToggleButton
               panelVisible={panelVisible}
               onShowProperties={() => setPanelVisible(true)}
@@ -221,7 +231,7 @@ export function GoalDetail() {
           </div>
           <aside className="border border-border bg-card p-3">
             <div className="flex items-center gap-2 text-sm font-medium">
-              <Layers3 className="h-4 w-4 text-emerald-700" />
+              <Layers3 className="h-4 w-4 text-foreground" />
               Evidence gate
             </div>
             <p className="mt-2 text-sm leading-6 text-muted-foreground">
@@ -325,7 +335,7 @@ function RoadmapMetric({ icon: Icon, label, value }: { icon: typeof Users; label
   return (
     <div className="min-w-0 border border-border bg-card p-3">
       <div className="flex items-center gap-2 text-[11px] font-medium uppercase tracking-[0.12em] text-muted-foreground">
-        <Icon className="h-3.5 w-3.5 text-emerald-700" />
+        <Icon className="h-3.5 w-3.5 text-foreground" />
         {label}
       </div>
       <div className="mt-2 truncate text-sm font-medium text-foreground">{value}</div>
@@ -364,7 +374,7 @@ function RoadmapLinkRow({
       </span>
       <span className="flex shrink-0 items-center gap-2">
         {children}
-        <ArrowRight className="h-4 w-4 text-muted-foreground transition-transform group-hover:translate-x-0.5 group-hover:text-emerald-700" />
+        <ArrowRight className="h-4 w-4 text-muted-foreground transition-transform group-hover:translate-x-0.5 group-hover:text-foreground" />
       </span>
     </Link>
   );
