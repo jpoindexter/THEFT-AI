@@ -19,16 +19,16 @@ Goal: THEFT runs as one local app backed by Paperclip's runtime. A founder can c
 
 - [x] Stop treating the bridge as final architecture.
 - [x] Create a tracked Paperclip-host branch or repo.
-- [ ] Bring `BUILD-FROM-THIS/` and `skills/` into the host. Started with `paperclip/THEFT.md` and `paperclip/AGENTS.md` pointers; full skill import remains Slice 0.2.
-- [ ] Add THEFT design tokens/branding to the host UI.
-- [ ] Mark current `app/` as migration reference once host exists.
+- [x] Bring `BUILD-FROM-THIS/` and `skills/` into the host. `paperclip/THEFT.md` and `paperclip/AGENTS.md` point to the canonical docs, and root `skills/` are imported as THEFT bundled company skills.
+- [x] Add THEFT design tokens/branding to the host UI.
+- [x] Mark current `app/` as migration reference once host exists.
 - [x] Make one dev command for the host.
 
 ## Slice 0.2 — Skill Library Import
 
 - [x] Add a local skill import path for `skills/*/SKILL.md`.
 - [x] Register THEFT skills as Paperclip company skills.
-- [ ] Preserve read-only/custom skill distinction.
+- [x] Preserve read-only/custom skill distinction.
 - [x] Map skills to default department agents.
 - [x] Verify Paperclip agents can use imported skill selections without `desiredSkills` validation errors.
 
