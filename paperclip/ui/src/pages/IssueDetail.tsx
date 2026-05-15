@@ -119,6 +119,7 @@ import {
   Copy,
   Eye,
   EyeOff,
+  FileText,
   Hexagon,
   Library,
   ListTree,
@@ -595,6 +596,7 @@ function TaskReviewSummary({
   issue,
   owner,
   outputCount,
+  outputTitles,
   decisionCount,
   commentCount,
   childTaskCount,
@@ -604,6 +606,7 @@ function TaskReviewSummary({
   issue: Issue;
   owner: Agent | null;
   outputCount: number;
+  outputTitles: string[];
   decisionCount: number;
   commentCount: number;
   childTaskCount: number;
@@ -616,65 +619,111 @@ function TaskReviewSummary({
   const outputLabel = outputCount > 0
     ? `${outputCount} Library artifact${outputCount === 1 ? "" : "s"}`
     : "No Library artifact yet";
-  const runLabel = hasLiveRuns
-    ? "Live run active"
-    : issue.executionRunId
-      ? "Run attached"
-      : "No active run";
+  const runLabel = hasLiveRuns ? "Live run active" : issue.executionRunId ? "Run attached" : "No active run";
   const taskStateLabel = hasBlocker
     ? "Blocked until next action"
     : issue.status === "done"
       ? "Ready in company memory"
       : "Ready for Operator review";
+  const decisionLabel = decisionCount > 0
+    ? `${decisionCount} founder decision${decisionCount === 1 ? "" : "s"} pending`
+    : issue.status === "done"
+      ? "Completed"
+      : outputCount > 0
+        ? "Review output"
+        : "Await output";
 
   return (
-    <section className="space-y-3 rounded-md border border-border bg-card p-4 text-foreground  ">
-      <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+    <section className="space-y-4 rounded-[10px] border border-border bg-card p-4 text-foreground md:p-5">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <h3 className="text-sm font-medium">Task Review</h3>
+          <p className="text-xs uppercase tracking-normal text-muted-foreground">Task Review</p>
+          <h3 className="mt-1 text-lg font-normal">Output and decision</h3>
           <p className="mt-1 text-xs text-muted-foreground">
-            Outcome, owner, blocker, and saved company output. Runtime messages are below as an execution log.
+            Review the delivered work first. Runtime diagnostics stay collapsed below the decision workflow.
           </p>
         </div>
         <div className={cn(
-          "border px-2 py-1 text-xs font-medium",
+          "rounded-[10px] border px-3 py-2 text-xs",
           hasBlocker
-            ? "border-amber-500/50 bg-amber-500/10 text-amber-200"
-            : "border-primary/40 bg-primary/10 text-primary",
+            ? "border-border bg-secondary text-foreground"
+            : "border-foreground bg-secondary text-foreground",
         )}>
           {taskStateLabel}
         </div>
       </div>
-      <div className="border border-border bg-background/45 p-3">
-        <p className="text-[11px] uppercase tracking-[0.14em] text-muted-foreground">Current objective</p>
-        <p className="mt-1 text-xs text-muted-foreground">
-          {issue.description?.trim() || "No objective has been written for this task yet."}
-        </p>
+
+      <div className="grid gap-3 lg:grid-cols-[minmax(0,1fr)_320px]">
+        <div className="rounded-[10px] border border-border bg-background p-3">
+          <p className="text-xs uppercase tracking-normal text-muted-foreground">Output & Evidence</p>
+          <p className="mt-2 text-sm">{outputLabel}</p>
+          {outputTitles.length > 0 ? (
+            <div className="mt-3 space-y-2">
+              {outputTitles.slice(0, 3).map((title) => (
+                <div key={title} className="flex items-start gap-2 rounded-[10px] border border-border bg-secondary p-2 text-sm">
+                  <FileText className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" />
+                  <span className="line-clamp-2">{title}</span>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="mt-3 text-xs leading-5 text-muted-foreground">
+              Saved documents and work products appear here as soon as the department publishes output.
+            </p>
+          )}
+          <div className="mt-3 rounded-[10px] border border-border bg-secondary p-3">
+            <p className="text-xs uppercase tracking-normal text-muted-foreground">Objective</p>
+            <p className="mt-2 line-clamp-4 text-xs leading-5 text-muted-foreground">
+              {issue.description?.trim() || "No objective has been written for this task yet."}
+            </p>
+          </div>
+        </div>
+
+        <div className="rounded-[10px] border border-border bg-secondary p-3">
+          <p className="text-xs uppercase tracking-normal text-muted-foreground">Decision</p>
+          <p className="mt-2 text-sm">{decisionLabel}</p>
+          <p className="mt-2 text-xs leading-5 text-muted-foreground">
+            {hasBlocker
+              ? "Unblock this task before approving output."
+              : outputCount > 0
+                ? "Approve the result, ask for revision, or complete the task."
+                : "Wait for department output or ask Operator to adjust the task."}
+          </p>
+          <div className="mt-4 grid gap-2">
+            <Button size="sm" disabled={hasBlocker || outputCount === 0}>
+              <Check className="h-4 w-4" />
+              Approve
+            </Button>
+            <Button variant="outline" size="sm">
+              <Repeat className="h-4 w-4" />
+              Ask for revision
+            </Button>
+            <Button variant="outline" size="sm">
+              <MessageSquare className="h-4 w-4" />
+              Ask Operator
+            </Button>
+          </div>
+        </div>
       </div>
-      <div className="grid gap-3 sm:grid-cols-2">
+
+      <div className="grid gap-3 sm:grid-cols-3">
         <TaskReviewCard
           icon={UserRound}
-          label="Owner department"
+          label="Owner"
           value={ownerLabel}
           detail={childTaskCount > 0 ? `${childTaskCount} subtask${childTaskCount === 1 ? "" : "s"} in scope` : "Single task"}
         />
         <TaskReviewCard
-          icon={ActivityIcon}
-          label="Runtime state"
-          value={runLabel}
-          detail={`${formatTaskStatus(issue.status)} · ${issue.priority} priority`}
-        />
-        <TaskReviewCard
-          icon={Library}
-          label="Library output"
-          value={outputLabel}
-          detail={issue.completedAt ? `Completed ${relativeTime(issue.completedAt)}` : "Saved docs appear below"}
-        />
-        <TaskReviewCard
           icon={AlertTriangle}
-          label="Decisions"
+          label="Review state"
           value={decisionCount > 0 ? `${decisionCount} pending` : "No founder decision pending"}
           detail={`${commentCount} comment${commentCount === 1 ? "" : "s"} in the task thread`}
+        />
+        <TaskReviewCard
+          icon={ActivityIcon}
+          label="Runtime diagnostics"
+          value={runLabel}
+          detail={`${formatTaskStatus(issue.status)} · ${issue.priority} priority`}
         />
       </div>
     </section>
@@ -693,13 +742,13 @@ function TaskReviewCard({
   detail: string;
 }) {
   return (
-    <div className="flex min-w-0 gap-3 border border-border bg-card/80 p-3">
-      <div className="mt-0.5 rounded-md bg-primary/15 p-2 text-primary">
+    <div className="flex min-w-0 gap-3 rounded-[10px] border border-border bg-secondary p-3">
+      <div className="mt-0.5 rounded-[10px] border border-border bg-card p-2 text-foreground">
         <Icon className="h-4 w-4" />
       </div>
       <div className="min-w-0">
         <p className="text-xs text-muted-foreground">{label}</p>
-        <p className="mt-1 truncate text-sm font-medium">{value}</p>
+        <p className="mt-1 truncate text-sm font-normal">{value}</p>
         <p className="mt-1 line-clamp-2 text-xs text-muted-foreground">{detail}</p>
       </div>
     </div>
@@ -3603,6 +3652,10 @@ export function IssueDetail() {
           issue={issue}
           owner={issue.assigneeAgentId ? agentMap.get(issue.assigneeAgentId) ?? null : null}
           outputCount={(issue.documentSummaries?.length ?? 0) + (issue.planDocument ? 1 : 0)}
+          outputTitles={[
+            ...(issue.documentSummaries ?? []).map((document) => document.title ?? document.key),
+            ...(issue.planDocument ? [issue.planDocument.title ?? "Plan document"] : []),
+          ]}
           decisionCount={interactions.filter((interaction) => interaction.status === "pending").length}
           commentCount={threadComments.length}
           childTaskCount={childIssues.length}
@@ -3866,7 +3919,7 @@ export function IssueDetail() {
           </TabsTrigger>
           <TabsTrigger value="chat" className="gap-1.5">
             <MessageSquare className="h-3.5 w-3.5" />
-            Execution log
+            Runtime diagnostics
           </TabsTrigger>
           <TabsTrigger value="activity" className="gap-1.5">
             <ActivityIcon className="h-3.5 w-3.5" />

@@ -838,7 +838,7 @@ describe("IssueDetail", () => {
 
     expect(container.textContent).toContain("Issue detail smoke");
     expect(container.textContent).toContain("Context");
-    expect(container.textContent).toContain("Execution log");
+    expect(container.textContent).toContain("Runtime diagnostics");
     expect(consoleErrorSpy).not.toHaveBeenCalled();
   });
 
@@ -884,13 +884,18 @@ describe("IssueDetail", () => {
       { label: "Issue detail smoke" },
     ]);
     expect(text).toContain("Task Review");
-    expect(text).toContain("Owner department");
+    expect(text).toContain("Output and decision");
+    expect(text).toContain("Output & Evidence");
+    expect(text).toContain("Launch brief");
+    expect(text).toContain("Decision");
+    expect(text).toContain("Approve");
+    expect(text).toContain("Ask for revision");
+    expect(text).toContain("Owner");
     expect(text).toContain("Engineering · Engineering Lead");
-    expect(text).toContain("Runtime state");
+    expect(text).toContain("Runtime diagnostics");
     expect(text).toContain("Run attached");
-    expect(text).toContain("Library output");
     expect(text).toContain("1 Library artifact");
-    expect(text).toContain("Decisions");
+    expect(text).toContain("Review state");
     expect(text).not.toContain("Hide this Issue");
   });
 
@@ -1154,7 +1159,7 @@ describe("IssueDetail", () => {
     await flushReact();
 
     const executionLogButton = Array.from(container.querySelectorAll("button"))
-      .find((button) => button.textContent?.trim() === "Execution log");
+      .find((button) => button.textContent?.trim() === "Runtime diagnostics");
     expect(executionLogButton).toBeTruthy();
     await act(async () => {
       executionLogButton!.click();
@@ -1207,7 +1212,7 @@ describe("IssueDetail", () => {
     await flushReact();
 
     const executionLogButton = Array.from(container.querySelectorAll("button"))
-      .find((button) => button.textContent?.trim() === "Execution log");
+      .find((button) => button.textContent?.trim() === "Runtime diagnostics");
     expect(executionLogButton).toBeTruthy();
     await act(async () => {
       executionLogButton!.click();
@@ -1250,7 +1255,7 @@ describe("IssueDetail", () => {
     await flushReact();
 
     const executionLogButton = Array.from(container.querySelectorAll("button"))
-      .find((button) => button.textContent?.trim() === "Execution log");
+      .find((button) => button.textContent?.trim() === "Runtime diagnostics");
     expect(executionLogButton).toBeTruthy();
     await act(async () => {
       executionLogButton!.click();
