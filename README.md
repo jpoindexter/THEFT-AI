@@ -27,7 +27,7 @@ Read these first for architecture work:
 ## Run
 
 ```sh
-pnpm -C paperclip dev:once
+pnpm dev:once
 ```
 
 Open `http://127.0.0.1:3100`.
@@ -35,21 +35,21 @@ Open `http://127.0.0.1:3100`.
 Fast local health check against a running host:
 
 ```sh
-node paperclip/scripts/smoke/theft-local-health.mjs
+pnpm smoke:health
 ```
 
 Deterministic no-quota department/runtime artifact smoke:
 
 ```sh
-node paperclip/scripts/smoke/theft-department-runtime-smoke.mjs --adapter process --require-library-artifacts
+pnpm smoke:departments
 ```
 
 ## Build And Verify
 
 ```sh
 git diff --check
-pnpm -C paperclip --filter @paperclipai/ui typecheck
-pnpm -C paperclip build
+pnpm typecheck
+pnpm build
 ```
 
 Full live LLM department smoke is reserved for release signoff, not normal iteration.

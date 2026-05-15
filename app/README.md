@@ -22,7 +22,7 @@ Those concepts have been promoted into the Paperclip host. The JSON store and du
 From the repo root:
 
 ```sh
-pnpm -C paperclip dev:once
+pnpm dev:once
 ```
 
 Then open `http://127.0.0.1:3100`.

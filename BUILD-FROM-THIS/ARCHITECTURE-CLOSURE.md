@@ -83,6 +83,7 @@ Release checks:
 ## Done Means
 
 - The repo root README points to `paperclip/`, not `app/`.
+- Root `pnpm dev`, `pnpm build`, `pnpm test`, and smoke scripts point to the Paperclip host.
 - `app/README.md` explicitly marks the old app as archived.
 - Code has an explicit product-vs-runtime route split.
 - New product work can be scoped to THEFT surfaces without touching runtime/admin routes.

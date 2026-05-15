@@ -1,17 +1,26 @@
 {
-  "name": "app",
+  "name": "theft-ai",
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "pnpm -C app dev",
+    "dev": "pnpm -C paperclip dev",
+    "dev:once": "pnpm -C paperclip dev:once",
     "dev:host": "pnpm -C paperclip dev",
     "dev:host:once": "pnpm -C paperclip dev:once",
+    "dev:list": "pnpm -C paperclip dev:list",
+    "dev:stop": "pnpm -C paperclip dev:stop",
+    "build": "pnpm -C paperclip build",
+    "typecheck": "pnpm -C paperclip --filter @paperclipai/ui typecheck",
+    "test": "pnpm -C paperclip test:run",
+    "test:e2e": "pnpm -C paperclip test:e2e",
+    "smoke:health": "node paperclip/scripts/smoke/theft-local-health.mjs",
+    "smoke:departments": "node paperclip/scripts/smoke/theft-department-runtime-smoke.mjs --adapter process --require-library-artifacts",
     "dev:prototype": "pnpm -C app dev",
-    "build": "pnpm -C app build",
-    "start": "pnpm -C app start",
-    "lint": "pnpm -C app lint",
-    "test": "pnpm -C app test",
-    "test:watch": "pnpm -C app test:watch"
+    "build:prototype": "pnpm -C app build",
+    "start:prototype": "pnpm -C app start",
+    "lint:prototype": "pnpm -C app lint",
+    "test:prototype": "pnpm -C app test",
+    "test:prototype:watch": "pnpm -C app test:watch"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.94.0",
