@@ -94,7 +94,7 @@ Goal: streamline the interface around Mission Control without removing Paperclip
 - [x] Make Operator persistent as a collapsible dock/drawer instead of an always-dominant panel.
 - [x] Surface constraints, decisions, execution state, outcomes, and recommended next move in the first viewport.
 - [x] Keep departments, tasks, Library, Tech Tree, runtime/admin routes, and diagnostics reachable.
-- [ ] Verify desktop/tablet/mobile screenshots after the Mission Control pass.
+- [x] Verify desktop/tablet/mobile screenshots after the Mission Control pass.
 
 ## v1 — Managed Services After Local v0 Works
 

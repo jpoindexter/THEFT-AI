@@ -429,8 +429,8 @@ export function Layout() {
               ref={mainContentRef}
               tabIndex={-1}
               className={cn(
-                "theft-main-surface flex-1 p-4 outline-none md:p-6",
-                isMobile ? "overflow-visible pb-[calc(5rem+env(safe-area-inset-bottom))]" : "overflow-auto",
+                "theft-main-surface min-w-0 flex-1 p-4 outline-none md:p-6",
+                isMobile ? "w-full max-w-full overflow-x-hidden pb-[calc(5rem+env(safe-area-inset-bottom))]" : "overflow-auto",
               )}
             >
               {hasUnknownCompanyPrefix ? (

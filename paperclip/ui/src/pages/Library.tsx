@@ -495,26 +495,26 @@ function LibraryDetail({
         </div>
       </div>
 
-      <dl className="mt-5 grid gap-3 border-y border-border py-4 text-sm sm:grid-cols-2 lg:grid-cols-4">
-        <div>
+      <dl className="mt-5 grid min-w-0 gap-3 border-y border-border py-4 text-sm sm:grid-cols-2 lg:grid-cols-4">
+        <div className="min-w-0">
           <dt className="text-xs uppercase text-muted-foreground">Source task</dt>
-          <dd className="mt-1 font-medium">
+          <dd className="mt-1 break-words font-medium [overflow-wrap:anywhere]">
             <Link className="hover:underline" to={`/issues/${item.issueId}`}>
               {item.sourceTaskLabel}
             </Link>
           </dd>
         </div>
-        <div>
+        <div className="min-w-0">
           <dt className="text-xs uppercase text-muted-foreground">Owner department</dt>
-          <dd className="mt-1 font-medium">{item.department}</dd>
+          <dd className="mt-1 break-words font-medium">{item.department}</dd>
         </div>
-        <div>
+        <div className="min-w-0">
           <dt className="text-xs uppercase text-muted-foreground">Provenance</dt>
-          <dd className="mt-1 font-medium">{item.provenance}</dd>
+          <dd className="mt-1 break-words font-medium [overflow-wrap:anywhere]">{item.provenance}</dd>
         </div>
-        <div>
+        <div className="min-w-0">
           <dt className="text-xs uppercase text-muted-foreground">Updated</dt>
-          <dd className="mt-1 font-medium">{formatDateTime(item.updatedAt)}</dd>
+          <dd className="mt-1 break-words font-medium">{formatDateTime(item.updatedAt)}</dd>
         </div>
       </dl>
 

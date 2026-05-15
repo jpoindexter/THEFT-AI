@@ -243,9 +243,9 @@ export function Dashboard() {
   const reviewCount = (approvals?.length ?? 0) + pendingInteractions.length + reviewIssues.length;
 
   return (
-    <div className="mx-auto max-w-[1600px] space-y-4 pb-24 text-foreground">
-      <section className={cn("grid gap-4", operatorOpen && "xl:grid-cols-[minmax(0,1fr)_380px]")}>
-        <div className="space-y-4">
+    <div className="mx-auto max-w-[1600px] min-w-0 space-y-4 overflow-x-hidden pb-24 text-foreground">
+      <section className={cn("grid min-w-0 gap-4", operatorOpen && "xl:grid-cols-[minmax(0,1fr)_380px]")}>
+        <div className="min-w-0 space-y-4">
           <ObjectiveHeader
             companyName={selectedCompany.name}
             stage={profile.stage ? THEFT_STAGE_LABELS[profile.stage] : null}
@@ -256,7 +256,7 @@ export function Dashboard() {
             outcomeCount={latestLibraryDocuments.length}
           />
 
-          <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_380px]">
+          <div className="grid min-w-0 gap-4 xl:grid-cols-[minmax(0,1fr)_380px]">
             <StrategyMapPanel
               objective={objectiveTitle}
               goals={roadmapGoals}
@@ -264,7 +264,7 @@ export function Dashboard() {
               nextTasks={nextTasks}
             />
 
-            <aside className="space-y-4">
+            <aside className="min-w-0 space-y-4">
               <NextMovePanel bottleneck={bottleneck} />
               <ConstraintsPanel
                 approvalsCount={approvals?.length ?? 0}
@@ -323,7 +323,7 @@ function Panel({
   className?: string;
 }) {
   return (
-    <section className={cn("rounded-[10px] border border-border bg-card p-4 md:p-5", className)}>
+    <section className={cn("min-w-0 rounded-[10px] border border-border bg-card p-4 md:p-5", className)}>
       {children}
     </section>
   );
@@ -370,7 +370,7 @@ function ObjectiveHeader({
             </div>
           </div>
         </div>
-        <div className="grid min-w-[250px] grid-cols-3 gap-2">
+        <div className="grid w-full min-w-0 grid-cols-3 gap-2 sm:min-w-[250px] lg:w-auto">
           <MissionStat value={activeDepartments} label="departments" />
           <MissionStat value={reviewCount} label="review" />
           <MissionStat value={outcomeCount} label="outcomes" />
@@ -405,7 +405,7 @@ function StrategyMapPanel({
   const visibleTracks = tracks.length > 0 ? tracks.map((goal) => goal.title) : fallbackTracks;
 
   return (
-    <Panel className="min-h-[560px]">
+    <Panel className="min-h-[560px] max-w-full overflow-hidden">
       <div className="mb-5 flex items-center justify-between gap-3">
         <div>
           <h2 className="text-base font-normal">Strategy map</h2>
@@ -418,8 +418,8 @@ function StrategyMapPanel({
         </Link>
       </div>
 
-      <div className="rounded-[10px] border border-border bg-background p-4">
-        <div className="mx-auto max-w-xl rounded-[10px] border border-foreground bg-secondary px-4 py-3 text-center">
+      <div className="min-w-0 max-w-full overflow-hidden rounded-[10px] border border-border bg-background p-4">
+        <div className="mx-auto max-w-xl min-w-0 rounded-[10px] border border-foreground bg-secondary px-4 py-3 text-center">
           <p className="text-xs uppercase tracking-normal text-muted-foreground">Current objective</p>
           <p className="mt-1 text-sm text-foreground">{objective}</p>
         </div>
@@ -441,7 +441,7 @@ function StrategyMapPanel({
             <Link
               key={department.key}
               to={`/departments/${department.key}`}
-              className="group rounded-[10px] border border-border bg-card p-3 text-inherit no-underline transition-colors hover:border-foreground"
+              className="group min-w-0 max-w-full overflow-hidden rounded-[10px] border border-border bg-card p-3 text-inherit no-underline transition-colors hover:border-foreground"
             >
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0">
@@ -452,16 +452,25 @@ function StrategyMapPanel({
                   {department.activeCount} open
                 </Badge>
               </div>
-              <div className="mt-3 grid grid-cols-3 gap-2 text-xs text-muted-foreground">
-                <span>{department.reviewCount} review</span>
-                <span>{department.doneCount} outputs</span>
-                <span>{department.issues.length} tasks</span>
+              <div className="mt-3 grid grid-cols-3 gap-2 text-center text-xs text-muted-foreground">
+                <span className="min-w-0">
+                  <span className="block tabular-nums text-foreground">{department.reviewCount}</span>
+                  <span className="block truncate">rev</span>
+                </span>
+                <span className="min-w-0">
+                  <span className="block tabular-nums text-foreground">{department.doneCount}</span>
+                  <span className="block truncate">out</span>
+                </span>
+                <span className="min-w-0">
+                  <span className="block tabular-nums text-foreground">{department.issues.length}</span>
+                  <span className="block truncate">tasks</span>
+                </span>
               </div>
-              <div className="mt-3 min-h-10">
+              <div className="mt-3 min-h-10 min-w-0">
                 {department.nextIssue ? (
                   <div className="flex min-w-0 items-start gap-2 text-xs">
                     <StatusIcon status={department.nextIssue.status} blockerAttention={department.nextIssue.blockerAttention} className="mt-0.5" />
-                    <span className="line-clamp-2">{department.nextIssue.title}</span>
+                    <span className="min-w-0 break-words line-clamp-2 [overflow-wrap:anywhere]">{department.nextIssue.title}</span>
                   </div>
                 ) : (
                   <p className="text-xs text-muted-foreground">No assigned tasks yet.</p>
@@ -481,9 +490,9 @@ function StrategyMapPanel({
               <Link
                 key={issue.id}
                 to={issuePath(issue)}
-                className="rounded-[10px] border border-border bg-card px-3 py-2 text-inherit no-underline hover:border-foreground"
-              >
-                <p className="line-clamp-1 text-sm">{issue.title}</p>
+              className="min-w-0 max-w-full overflow-hidden rounded-[10px] border border-border bg-card px-3 py-2 text-inherit no-underline hover:border-foreground"
+            >
+                <p className="min-w-0 break-words line-clamp-1 text-sm [overflow-wrap:anywhere]">{issue.title}</p>
                 <p className="mt-1 text-xs text-muted-foreground">{formatStatusLabel(issue.status)}</p>
               </Link>
             ))}
@@ -641,7 +650,7 @@ function OutcomesPanel({
           <Link
             key={`${issue.id}:${document.key}`}
             to={`/library?issue=${encodeURIComponent(issue.id)}&document=${encodeURIComponent(document.key)}`}
-            className="flex items-start gap-2 rounded-[10px] border border-border bg-secondary p-3 text-inherit no-underline hover:border-foreground"
+            className="flex min-w-0 max-w-full items-start gap-2 overflow-hidden rounded-[10px] border border-border bg-secondary p-3 text-inherit no-underline hover:border-foreground"
           >
             <FileText className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" />
             <span className="min-w-0 flex-1">
@@ -671,7 +680,7 @@ function NextMovePanel({ bottleneck }: { bottleneck: CompanyBottleneck }) {
         <CircleDot className="mt-0.5 h-5 w-5 shrink-0 text-foreground" />
         <span className="min-w-0">
           <span className="block text-lg leading-tight">{bottleneck.label}</span>
-          <span className="mt-2 block text-sm leading-5 text-muted-foreground">{bottleneck.detail}</span>
+          <span className="mt-2 block break-words text-sm leading-5 text-muted-foreground [overflow-wrap:anywhere]">{bottleneck.detail}</span>
         </span>
       </div>
       <div className="mt-4 flex items-center justify-between gap-3 text-xs text-muted-foreground">

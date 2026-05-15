@@ -280,8 +280,8 @@ export function Goals() {
                           <StatusBadge status={nextNode.goal.status} />
                           <span className="text-xs text-muted-foreground">{nextNode.stageLabel}</span>
                         </div>
-                        <h2 className="mt-2 text-base font-medium text-foreground">{nextNode.goal.title}</h2>
-                        <p className="mt-1 text-sm text-muted-foreground">{nextNode.nextAction}</p>
+                        <h2 className="mt-2 break-words text-base font-medium text-foreground [overflow-wrap:anywhere]">{nextNode.goal.title}</h2>
+                        <p className="mt-1 break-words text-sm text-muted-foreground [overflow-wrap:anywhere]">{nextNode.nextAction}</p>
                       </div>
                       <div className="grid grid-cols-2 gap-2 text-xs">
                         <InspectorMetric label="Evidence" value={nextNode.evidence} />
@@ -382,7 +382,7 @@ function RoadmapRule({ icon: Icon, label, value }: { icon: typeof Users; label: 
         <Icon className="h-3.5 w-3.5 text-muted-foreground" />
         {label}
       </span>
-      <span className="text-right">{value}</span>
+      <span className="min-w-0 truncate text-right">{value}</span>
     </div>
   );
 }
@@ -403,7 +403,7 @@ function TechTreeNodeCard({ node }: { node: TechTreeNodeView }) {
           <StatusBadge status={node.goal.status} />
         </div>
         <div className="mt-2 truncate text-base font-medium">{node.goal.title}</div>
-        <div className="mt-1 text-xs text-muted-foreground">{node.dependency}</div>
+        <div className="mt-1 truncate text-xs text-muted-foreground">{node.dependency}</div>
       </div>
       <div className="min-w-0 space-y-1 text-xs">
         <MetaLine label="Owner" value={node.owner} />

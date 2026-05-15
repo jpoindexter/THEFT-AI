@@ -170,7 +170,7 @@ Reserve heavy checks for pre-release signoff.
 Current active slice:
 
 ```text
-Visual review / browser pass
+MVP dogfood / pre-release checks
 ```
 
 Last completed slices:
@@ -221,6 +221,14 @@ M7 files:
 - `paperclip/ui/src/components/Sidebar.tsx`
 - `paperclip/ui/src/components/Sidebar.test.tsx`
 
+Visual pass files:
+
+- `paperclip/ui/src/components/Layout.tsx`
+- `paperclip/ui/src/pages/Dashboard.tsx`
+- `paperclip/ui/src/pages/DepartmentWorkspace.tsx`
+- `paperclip/ui/src/pages/Goals.tsx`
+- `paperclip/ui/src/pages/Library.tsx`
+
 Verified for M1:
 
 1. `git diff --check`
@@ -263,8 +271,16 @@ Verified for M7:
 2. `pnpm exec vitest run src/components/Sidebar.test.tsx --config vitest.config.ts` from `paperclip/ui`
 3. `pnpm -C paperclip --filter @paperclipai/ui typecheck`
 
+Verified for visual pass:
+
+1. `git diff --check`
+2. Focused Vitest for Dashboard, GoalDetail, library-items, theft-canvas, and Layout from `paperclip/ui`
+3. `pnpm -C paperclip --filter @paperclipai/ui typecheck`
+4. Headless Chrome screenshots against the live host for Dashboard, Tasks, Tech Tree, Library, Department Workspace, System, mobile Dashboard, and tablet Dashboard
+5. Mobile Dashboard overflow diagnostic: `documentElement.scrollWidth === clientWidth` and no right-edge offenders
+
 Next exact steps:
 
-1. commit, tag, push M7 checkpoint;
-2. run a browser visual pass across the MVP screens against the live host;
-3. fix obvious layout/contrast/navigation issues only, then defer deeper art direction.
+1. commit, tag, push visual checkpoint;
+2. dogfood the MVP happy path manually in the live app;
+3. reserve heavier Playwright/live model smoke for pre-release signoff.

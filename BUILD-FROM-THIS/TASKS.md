@@ -123,5 +123,5 @@
 | T095 | Convert Operator tray into collapsible dock/drawer with pin-open behavior | ✅ done |
 | T096 | Add Objective, Constraints, Strategy Map, Decisions, Execution State, Outcomes, and Next Move panels | ✅ done |
 | T097 | Preserve access to departments, tasks, Library, Tech Tree, runtime/admin routes, and diagnostics | ✅ done |
-| T098 | Add tests proving streamlining did not remove core runtime/product capabilities | ▶ doing |
-| T099 | Verify Mission Control desktop/tablet/mobile screenshots | ☐ todo |
+| T098 | Add tests proving streamlining did not remove core runtime/product capabilities | ✅ done |
+| T099 | Verify Mission Control desktop/tablet/mobile screenshots | ✅ done |

@@ -267,9 +267,9 @@ export function DepartmentWorkspace() {
 
 function DepartmentFocusCard({ label, value }: { label: string; value: string }) {
   return (
-    <div className="border border-border bg-card/70 p-3">
+    <div className="min-w-0 border border-border bg-card/70 p-3">
       <p className="text-xs font-medium uppercase tracking-[0.12em] text-muted-foreground">{label}</p>
-      <p className="mt-2 text-sm leading-6 text-foreground">{value}</p>
+      <p className="mt-2 break-words text-sm leading-6 text-foreground [overflow-wrap:anywhere]">{value}</p>
     </div>
   );
 }
