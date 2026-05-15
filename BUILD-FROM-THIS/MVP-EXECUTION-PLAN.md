@@ -113,7 +113,7 @@ Acceptance:
 
 ### M6 - Department Workspace
 
-Status: **next**
+Status: **implementation pass complete, visual review pending**
 
 Rework department pages as business lanes:
 
@@ -170,7 +170,7 @@ Reserve heavy checks for pre-release signoff.
 Current active slice:
 
 ```text
-M6 - Department Workspace
+M7 - System / Diagnostics
 ```
 
 Last completed slices:
@@ -180,6 +180,7 @@ Last completed slices:
 - M3 Tasks / Needs Action
 - M4 Tech Tree
 - M5 Library / Outcomes
+- M6 Department Workspace
 
 M1 files:
 
@@ -208,6 +209,11 @@ M5 files:
 - `paperclip/ui/src/pages/Library.tsx`
 - `paperclip/ui/src/lib/library-items.ts`
 - `paperclip/ui/src/lib/library-items.test.ts`
+
+M6 files:
+
+- `paperclip/ui/src/pages/DepartmentWorkspace.tsx`
+- `paperclip/ui/src/lib/theft-canvas.test.ts`
 
 Verified for M1:
 
@@ -239,8 +245,14 @@ Verified for M5:
 2. `pnpm exec vitest run src/lib/library-items.test.ts --config vitest.config.ts` from `paperclip/ui`
 3. `pnpm -C paperclip --filter @paperclipai/ui typecheck`
 
+Verified for M6:
+
+1. `git diff --check`
+2. `pnpm exec vitest run src/lib/theft-canvas.test.ts --config vitest.config.ts` from `paperclip/ui`
+3. `pnpm -C paperclip --filter @paperclipai/ui typecheck`
+
 Next exact steps:
 
-1. commit, tag, push M5 checkpoint;
-2. start M6 Department Workspace;
+1. commit, tag, push M6 checkpoint;
+2. start M7 System / Diagnostics;
 3. keep verification focused to changed files until the MVP screen set is coherent.

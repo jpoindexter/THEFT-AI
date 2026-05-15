@@ -9,8 +9,8 @@ import {
   FileText,
   Inbox,
   Library,
+  ListChecks,
   ShieldCheck,
-  Sparkles,
   UserRoundCog,
   type LucideIcon,
 } from "lucide-react";
@@ -71,6 +71,16 @@ export function DepartmentWorkspace() {
   const blockedWork = department?.blockedIssues ?? [];
   const recentOutputs = department?.doneIssues.slice(0, 5) ?? [];
   const libraryCandidates = department?.issues.slice(0, 8) ?? [];
+  const objectiveContribution = department?.nextIssue
+    ? `Move ${department.nextIssue.title}`
+    : `Keep ${selectedSpec?.title ?? "department"} ready for the next company objective`;
+  const currentConstraint = department?.blockedCount
+    ? `${department.blockedCount} blocked item${department.blockedCount === 1 ? "" : "s"} need attention`
+    : department?.reviewCount
+      ? `${department.reviewCount} output${department.reviewCount === 1 ? "" : "s"} waiting for review`
+      : department?.activeCount
+        ? "No major constraint; active work is moving"
+        : "No active constraint";
 
   const libraryQueries = useQueries({
     queries: libraryCandidates.map((issue) => ({
@@ -111,7 +121,7 @@ export function DepartmentWorkspace() {
 
   return (
     <div className="mx-auto max-w-7xl space-y-5">
-      <section className="border border-border bg-card p-5  ">
+      <section className="theft-panel p-5">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
           <div>
             <div className="flex flex-wrap items-center gap-2">
@@ -123,9 +133,9 @@ export function DepartmentWorkspace() {
                 <Badge variant="destructive" className="rounded-md">{department.blockedCount} blocked</Badge>
               ) : null}
             </div>
-            <h1 className="mt-2 text-2xl font-semibold tracking-normal">{department.title}</h1>
+            <h1 className="theft-heading mt-2 text-2xl md:text-3xl">{department.title}</h1>
             <p className="mt-2 max-w-3xl text-sm leading-6 text-muted-foreground">
-              {selectedSpec.taskDescriptionByStage.building} Mission, work lanes, blockers, review-ready outputs, and Library files stay in one department-owned surface.
+              Department-owned execution lane for mission, current contribution, blockers, review-ready outputs, and Library evidence.
             </p>
           </div>
           <div className="grid min-w-[260px] grid-cols-3 gap-2 text-center">
@@ -133,6 +143,11 @@ export function DepartmentWorkspace() {
             <DepartmentStat label="done" value={department.doneCount} />
             <DepartmentStat label="Library" value={libraryDocuments.length} />
           </div>
+        </div>
+        <div className="mt-5 grid gap-3 lg:grid-cols-3">
+          <DepartmentFocusCard label="Mission" value={selectedSpec.taskDescriptionByStage.building} />
+          <DepartmentFocusCard label="Objective contribution" value={objectiveContribution} />
+          <DepartmentFocusCard label="Current constraint" value={currentConstraint} />
         </div>
       </section>
 
@@ -174,11 +189,11 @@ export function DepartmentWorkspace() {
         <aside className="space-y-5">
           <div className="border border-border bg-card p-4  ">
             <div className="flex items-start gap-3">
-              <div className="mt-0.5 rounded-md bg-primary/10 p-2 text-primary">
+              <div className="mt-0.5 rounded-md bg-muted p-2 text-foreground">
                 <UserRoundCog className="h-4 w-4" />
               </div>
               <div className="min-w-0">
-                <h2 className="text-base font-semibold">Lead</h2>
+                <h2 className="text-base font-semibold">Runtime context</h2>
                 <p className="mt-1 truncate text-sm text-muted-foreground">
                   {department.agent ? `${department.agent.name} - ${department.agent.status}` : "No lead assigned"}
                 </p>
@@ -197,7 +212,7 @@ export function DepartmentWorkspace() {
 
           <div className="border border-border bg-card p-4  ">
             <div className="flex items-start gap-3">
-              <div className="mt-0.5 rounded-md bg-primary/10 p-2 text-primary">
+              <div className="mt-0.5 rounded-md bg-muted p-2 text-foreground">
                 <Library className="h-4 w-4" />
               </div>
               <div>
@@ -228,8 +243,8 @@ export function DepartmentWorkspace() {
 
           <div className="border border-border bg-card p-4  ">
             <div className="flex items-start gap-3">
-              <div className="mt-0.5 rounded-md bg-primary/10 p-2 text-primary">
-                <Sparkles className="h-4 w-4" />
+              <div className="mt-0.5 rounded-md bg-muted p-2 text-foreground">
+                <ListChecks className="h-4 w-4" />
               </div>
               <div>
                 <h2 className="text-base font-semibold">Skills</h2>
@@ -246,6 +261,15 @@ export function DepartmentWorkspace() {
           </div>
         </aside>
       </section>
+    </div>
+  );
+}
+
+function DepartmentFocusCard({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="border border-border bg-card/70 p-3">
+      <p className="text-xs font-medium uppercase tracking-[0.12em] text-muted-foreground">{label}</p>
+      <p className="mt-2 text-sm leading-6 text-foreground">{value}</p>
     </div>
   );
 }
@@ -287,7 +311,7 @@ function WorkPanel({
     <div className="border border-border bg-card p-4">
       <div className="flex items-start justify-between gap-3">
         <div className="flex items-start gap-3">
-          <div className={cn("mt-0.5 rounded-md p-2", tone === "attention" ? "bg-destructive/10 text-destructive" : "bg-primary/10 text-primary")}>
+          <div className={cn("mt-0.5 rounded-md p-2", tone === "attention" ? "bg-destructive/10 text-destructive" : "bg-muted text-foreground")}>
             <Icon className="h-4 w-4" />
           </div>
           <div>
