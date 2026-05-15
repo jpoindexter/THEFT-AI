@@ -266,7 +266,7 @@ function InlineAuthPreview({
           className={cn(
             "flex-1 border px-3 py-2 text-sm transition-colors",
             mode === "sign_up"
-              ? "border-zinc-100 bg-zinc-100 text-zinc-950"
+              ? "border-border bg-card text-foreground"
               : "border-zinc-800 text-zinc-300 hover:border-zinc-600",
           )}
         >
@@ -277,7 +277,7 @@ function InlineAuthPreview({
           className={cn(
             "flex-1 border px-3 py-2 text-sm transition-colors",
             mode === "sign_in"
-              ? "border-zinc-100 bg-zinc-100 text-zinc-950"
+              ? "border-border bg-card text-foreground"
               : "border-zinc-800 text-zinc-300 hover:border-zinc-600",
           )}
         >

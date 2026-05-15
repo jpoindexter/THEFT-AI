@@ -221,21 +221,21 @@ export function Dashboard() {
   const setupTodoCount = profile.setupItems.filter((item) => item.status === "todo").length;
 
   return (
-    <div className="mx-auto max-w-[1500px] space-y-5 text-zinc-950">
-      <section className="border border-[#e6decf] bg-[#fffdf8] p-4 shadow-sm shadow-black/[0.03] sm:p-5">
+    <div className="mx-auto max-w-[1500px] space-y-5 text-foreground">
+      <section className="border border-border bg-card p-4  sm:p-5">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
           <div className="min-w-0">
             <div className="flex flex-wrap items-center gap-2">
-              <Badge variant="outline" className="rounded-md border-[#d8cfbd] bg-white/70">
+              <Badge variant="outline" className="rounded-md border-border bg-card/70">
                 THEFT company
               </Badge>
               {profile.stage ? (
-                <Badge variant="secondary" className="rounded-md bg-lime-100 text-lime-950">
+                <Badge variant="secondary" className="rounded-md bg-primary/15 text-primary">
                   {THEFT_STAGE_LABELS[profile.stage]}
                 </Badge>
               ) : null}
             </div>
-            <h1 className="mt-3 break-words text-2xl font-semibold tracking-normal text-zinc-950">
+            <h1 className="mt-3 break-words text-2xl font-semibold tracking-normal text-foreground">
               {selectedCompany.name}
             </h1>
             <p className="mt-2 max-w-3xl text-sm leading-6 text-muted-foreground">
@@ -262,23 +262,23 @@ export function Dashboard() {
 
       <section className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_360px]">
         <div className="space-y-5">
-          <div className="border border-[#e6decf] bg-[#fffdf8] p-4 shadow-sm shadow-black/[0.03]">
+          <div className="border border-border bg-card p-4  ">
             <div className="mb-3 flex items-center justify-between gap-3">
               <div>
                 <h2 className="text-base font-semibold">Departments</h2>
                 <p className="text-sm text-muted-foreground">Parallel work lanes turning Operator intent into company artifacts.</p>
               </div>
             </div>
-            <div className="grid gap-3 bg-[linear-gradient(rgba(24,24,27,0.035)_1px,transparent_1px),linear-gradient(90deg,rgba(24,24,27,0.035)_1px,transparent_1px)] bg-[size:24px_24px] p-2 md:grid-cols-2">
+            <div className="grid gap-3 bg-[linear-gradient(color-mix(in_oklab,var(--theft-sand)_8%,transparent)_1px,transparent_1px),linear-gradient(90deg,color-mix(in_oklab,var(--theft-sand)_8%,transparent)_1px,transparent_1px)] bg-[size:24px_24px] p-2 md:grid-cols-2">
               {departmentRows.map((department) => (
                 <Link
                   key={department.key}
                   to={`/departments/${department.key}`}
-                  className="group block border border-[#e6decf] bg-white/90 p-3 text-inherit no-underline shadow-sm shadow-black/[0.02] transition-colors hover:border-lime-300 hover:bg-lime-50/40"
+                  className="group block border border-border bg-card/90 p-3 text-inherit no-underline  transition-colors hover:border-primary/70 hover:bg-accent/40"
                 >
                   <div className="flex items-start justify-between gap-3">
-                    <div className="min-w-0 border-l-2 border-lime-300 pl-3">
-                      <h3 className="truncate text-sm font-medium group-hover:text-lime-950">{department.title}</h3>
+                    <div className="min-w-0 border-l-2 border-primary/70 pl-3">
+                      <h3 className="truncate text-sm font-medium group-hover:text-primary">{department.title}</h3>
                       <p className="mt-1 truncate text-xs text-muted-foreground">
                         {summarizeAgent(department.agent)}
                       </p>
@@ -319,7 +319,7 @@ export function Dashboard() {
         </div>
 
         <aside className="space-y-5">
-          <div className="border border-[#e6decf] bg-[#fffdf8] p-4 shadow-sm shadow-black/[0.03]">
+          <div className="border border-border bg-card p-4  ">
             <div className="flex items-start gap-3">
               <div className="mt-0.5 rounded-md bg-primary/10 p-2 text-primary">
                 <MessageSquarePlus className="h-4 w-4" />
@@ -341,8 +341,8 @@ export function Dashboard() {
                     className={cn(
                       "rounded-md border px-3 py-2 text-left text-xs transition-colors",
                       selectedDepartmentKey === department.key
-                        ? "border-lime-400 bg-lime-100 text-lime-950"
-                        : "border-[#e6decf] bg-white/70 hover:bg-lime-50",
+                        ? "border-primary bg-primary/15 text-primary"
+                        : "border-border bg-card/70 hover:bg-accent/40",
                     )}
                   >
                     <span className="block truncate font-medium">{department.title}</span>
@@ -374,7 +374,7 @@ export function Dashboard() {
 
           <LibraryOutputsPanel documents={latestLibraryDocuments} />
 
-          <div className="border border-[#e6decf] bg-[#fffdf8] p-4 shadow-sm shadow-black/[0.03]">
+          <div className="border border-border bg-card p-4  ">
             <h2 className="text-base font-semibold">Next task area</h2>
             <div className="mt-3 divide-y divide-border border border-border">
               {nextTasks.length === 0 ? (
@@ -412,7 +412,7 @@ function BottleneckPanel({ bottleneck }: { bottleneck: ReturnType<typeof getCurr
         ? "border-primary/30 bg-primary/10 text-primary"
         : "border-border bg-background text-foreground";
   const content = (
-    <div className={cn("mt-4 flex items-start justify-between gap-3 border px-3 py-3 shadow-sm shadow-black/[0.02]", toneClass)}>
+    <div className={cn("mt-4 flex items-start justify-between gap-3 border px-3 py-3  ", toneClass)}>
       <span className="min-w-0">
         <span className="block text-xs font-medium uppercase tracking-normal">Current bottleneck</span>
         <span className="mt-1 block text-sm font-medium">{bottleneck.label}</span>
@@ -435,7 +435,7 @@ function BottleneckPanel({ bottleneck }: { bottleneck: ReturnType<typeof getCurr
 
 function CanvasStat({ value, label }: { value: number; label: string }) {
   return (
-    <div className="border border-[#e6decf] bg-white/70 px-3 py-2">
+    <div className="border border-border bg-card/70 px-3 py-2">
       <p className="text-lg font-semibold tabular-nums">{value}</p>
       <p className="text-xs text-muted-foreground">{label}</p>
     </div>
@@ -444,7 +444,7 @@ function CanvasStat({ value, label }: { value: number; label: string }) {
 
 function SummaryPill({ icon: Icon, label, value }: { icon: LucideIcon; label: string; value: string }) {
   return (
-    <div className="flex min-w-0 items-center gap-3 border border-[#e6decf] bg-white/70 px-3 py-2">
+    <div className="flex min-w-0 items-center gap-3 border border-border bg-card/70 px-3 py-2">
       <Icon className="h-4 w-4 shrink-0 text-muted-foreground" />
       <span className="min-w-0">
         <span className="block text-xs text-muted-foreground">{label}</span>
@@ -456,7 +456,7 @@ function SummaryPill({ icon: Icon, label, value }: { icon: LucideIcon; label: st
 
 function TechTreePanel({ goals, nextTasks }: { goals: ReturnType<typeof getRoadmapGoals>; nextTasks: Issue[] }) {
   return (
-    <div className="border border-[#e6decf] bg-[#fffdf8] p-4 shadow-sm shadow-black/[0.03]">
+    <div className="border border-border bg-card p-4  ">
       <div className="mb-3 flex items-center justify-between gap-3">
         <div>
           <h2 className="text-base font-semibold">Tech tree</h2>
@@ -466,7 +466,7 @@ function TechTreePanel({ goals, nextTasks }: { goals: ReturnType<typeof getRoadm
       </div>
       <div className="space-y-3">
         {goals.slice(0, 4).map((goal) => (
-          <Link key={goal.id} to={`/goals/${goal.id}`} className="block border border-[#e6decf] bg-white/80 p-3 text-inherit no-underline hover:border-lime-300 hover:bg-lime-50/40">
+          <Link key={goal.id} to={`/goals/${goal.id}`} className="block border border-border bg-card/80 p-3 text-inherit no-underline hover:border-primary/70 hover:bg-accent/40">
             <div className="flex items-center justify-between gap-3">
               <span className="truncate text-sm font-medium">{goal.title}</span>
               <Badge variant="outline" className="rounded-md">{goal.status}</Badge>
@@ -500,7 +500,7 @@ function LibraryOutputsPanel({
   documents: Array<{ issue: Issue; document: IssueDocument }>;
 }) {
   return (
-    <div className="border border-[#e6decf] bg-[#fffdf8] p-4 shadow-sm shadow-black/[0.03]">
+    <div className="border border-border bg-card p-4  ">
       <div className="mb-3 flex items-center justify-between gap-3">
         <div>
           <h2 className="text-base font-semibold">Latest Library outputs</h2>
@@ -549,7 +549,7 @@ function AttentionPanel({
   const hasAttention = issues.length > 0 || approvalsCount > 0 || interactionsCount > 0;
 
   return (
-    <div className="border border-[#e6decf] bg-[#fffdf8] p-4 shadow-sm shadow-black/[0.03]">
+    <div className="border border-border bg-card p-4  ">
       <div className="mb-3 flex items-center justify-between gap-3">
         <div>
           <h2 className="text-base font-semibold">Attention queue</h2>

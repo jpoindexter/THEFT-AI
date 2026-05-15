@@ -4,16 +4,17 @@
 
 ## Core Visual Decision
 
-THEFT should be light, premium, operational, and artifact-first.
+THEFT should be dark, premium, operational, and artifact-first.
 
-The target is closer to a warm-white enterprise creation workspace than a dark agent console. Dark/black treatments can appear in diagnostics, graph maps, or presentation artifacts, but the primary product shell should stay bright, calm, and usable for repeated daily work.
+The 2026-05-15 cthdrl pass supersedes the earlier warm-white default. The target is a black/slate company operating canvas with sand text, sharp panels, dense work surfaces, and saturated signal accents. It should feel like a controlled execution room, not a generic agent admin dashboard and not a half-light/half-dark hybrid.
 
 ## Reference Inputs
 
 | Reference | What It Contributes | What To Use In THEFT | What To Avoid |
 |---|---|---|---|
+| cthdrl references in `/Users/jasonpoindexter/Desktop/cthdrl` | Black full-bleed shell, Ghost Sand typography, sharp panels, mono operational rhythm, electric lime/purple/cyan signal colors | Default shell palette, canvas mood, panel discipline, sparse saturated accents, no soft SaaS card pileup | Copying decorative brand-kit layouts directly, negative letter spacing, illegible low-contrast labels |
 | MagicPath frames in `magic patch frames/` | Prompt-to-canvas creation, persistent left thread, parallel generation, artifact selection, libraries, share/publish | Interaction model: ask, route, generate, review, artifact appears on canvas/Library | Copying green brand, Figma-like design-tool framing, empty canvas with no business affordances |
-| Desktop references in `/Users/jasonpoindexter/Desktop/theft ai` | Light map/canvas systems, dense SaaS panels, premium dashboard cards, flow graphs, black diagnostic maps | Visual vocabulary: white/cream surfaces, thin borders, high-density cards, graph/canvas structure, polished operating surfaces | Overly futuristic dark UI as default, decorative mockups that do not help users act |
+| Desktop references in `/Users/jasonpoindexter/Desktop/theft ai` | Light map/canvas systems, dense SaaS panels, premium dashboard cards, flow graphs, black diagnostic maps | Spatial canvas structure, high-density cards, graph relationships, polished operating surfaces | Letting warm-white cards fight the dark cthdrl shell |
 | Sana product page | Bright enterprise AI positioning, all-in-one work platform, agents for real work, broad team use cases | Tone: clean, credible, company-wide AI operating layer | Marketing page layout as app UI, generic "AI agents for every team" copy |
 
 Sana source inspected: `https://sanalabs.com/products/sana/`
@@ -67,6 +68,23 @@ What to reject:
 - Decorative sci-fi visuals that hide the work.
 - Generic agent admin tabs as the main product.
 
+## cthdrl Visual Direction
+
+The cthdrl folder is now the strongest visual reference for the application shell:
+
+- Black or near-black full-bleed base.
+- Slate panels with sand/ash foreground text.
+- Sharp rectangular panels and precise borders.
+- Mono navigation/body rhythm with large stark headings used only where scale is earned.
+- Electric lime for selected/live/primary states.
+- Purple and cyan as secondary signal accents.
+- Minimal shadows and no floating-card softness.
+- Background grids and glows only as operating-canvas atmosphere.
+
+For THEFT, translate this as:
+
+> "A dark company execution room where the founder routes work and departments produce visible artifacts."
+
 ## Sana Visual Direction
 
 Sana is useful as a tone reference:
@@ -81,7 +99,7 @@ For THEFT, the equivalent tone should be:
 
 > "A local-first company operating system where the founder commands work and departments turn it into durable artifacts."
 
-Use Sana's clean credibility, not its marketing page structure.
+Use Sana's clean credibility, not its marketing page structure or default light styling.
 
 ## Target Product Shell
 
@@ -97,16 +115,17 @@ Use Sana's clean credibility, not its marketing page structure.
 
 Primary direction:
 
-- Warm white / soft cream base.
-- Off-white panels.
-- Thin neutral borders.
-- Charcoal text.
-- Muted green or acid-lime accent used sparingly for primary action and live status.
+- Black / near-black base.
+- Slate raised panels.
+- Thin sand/ash borders.
+- Sand and ash text.
+- Acid-lime accent used sparingly for selected, live, and primary action states.
+- Purple/cyan accents used only for secondary system signal.
 - Department colors only as small ownership markers, not broad panel backgrounds.
 
 Avoid:
 
-- Full dark app shell as default.
+- Warm-white cards inside a dark runtime shell.
 - Purple/blue AI gradients.
 - Beige-only palette.
 - Heavy shadows.
@@ -155,4 +174,3 @@ Immediate UI work should shift from "make each Paperclip page nicer" to "make TH
 - Start the next polish pass by making Command Center more canvas-like and less page-like.
 - Build artifact previews and selected-object inspection into Library/Task Review.
 - Use departments as parallel work lanes, not agent cards.
-

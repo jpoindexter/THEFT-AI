@@ -668,7 +668,7 @@ export function InviteLandingPage() {
                     type="button"
                     className={`${modeButtonBaseClassName} ${
                       authMode === "sign_up"
-                        ? "border-zinc-100 bg-zinc-100 text-zinc-950"
+                        ? "border-border bg-card text-foreground"
                         : "border-zinc-800 text-zinc-300 hover:border-zinc-600"
                     }`}
                     onClick={() => {
@@ -682,7 +682,7 @@ export function InviteLandingPage() {
                     type="button"
                     className={`${modeButtonBaseClassName} ${
                       authMode === "sign_in"
-                        ? "border-zinc-100 bg-zinc-100 text-zinc-950"
+                        ? "border-border bg-card text-foreground"
                         : "border-zinc-800 text-zinc-300 hover:border-zinc-600"
                     }`}
                     onClick={() => {

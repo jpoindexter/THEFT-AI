@@ -173,7 +173,7 @@ export function GoalDetail() {
   return (
     <div className="space-y-6">
       <section className="overflow-hidden border border-border bg-[#fbfaf7]">
-        <div className="flex flex-col gap-4 border-b border-border bg-white/75 p-4 lg:flex-row lg:items-start lg:justify-between">
+        <div className="flex flex-col gap-4 border-b border-border bg-card/75 p-4 lg:flex-row lg:items-start lg:justify-between">
           <div className="min-w-0 max-w-4xl">
             <div className="flex flex-wrap items-center gap-2">
               <span className="inline-flex items-center gap-1 text-xs font-medium uppercase tracking-[0.16em] text-muted-foreground">
@@ -219,7 +219,7 @@ export function GoalDetail() {
             <RoadmapMetric icon={FileText} label="Evidence" value={nodeView?.evidence ?? "No evidence linked yet"} />
             <RoadmapMetric icon={Route} label="Next action" value={nodeView?.nextAction ?? "Create first department task"} />
           </div>
-          <aside className="border border-border bg-white p-3">
+          <aside className="border border-border bg-card p-3">
             <div className="flex items-center gap-2 text-sm font-medium">
               <Layers3 className="h-4 w-4 text-emerald-700" />
               Evidence gate
@@ -323,7 +323,7 @@ export function GoalDetail() {
 
 function RoadmapMetric({ icon: Icon, label, value }: { icon: typeof Users; label: string; value: string }) {
   return (
-    <div className="min-w-0 border border-border bg-white p-3">
+    <div className="min-w-0 border border-border bg-card p-3">
       <div className="flex items-center gap-2 text-[11px] font-medium uppercase tracking-[0.12em] text-muted-foreground">
         <Icon className="h-3.5 w-3.5 text-emerald-700" />
         {label}
@@ -356,7 +356,7 @@ function RoadmapLinkRow({
   return (
     <Link
       to={to}
-      className="group flex items-center justify-between gap-3 border border-border bg-white px-3 py-2 text-sm text-inherit no-underline hover:border-emerald-700/40 hover:bg-emerald-50/20"
+      className="group flex items-center justify-between gap-3 border border-border bg-card px-3 py-2 text-sm text-inherit no-underline hover:border-primary/70 hover:bg-accent/40"
     >
       <span className="min-w-0">
         <span className="block truncate font-medium">{title}</span>

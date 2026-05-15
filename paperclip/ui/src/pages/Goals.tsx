@@ -168,7 +168,7 @@ export function Goals() {
       {goals && goals.length > 0 && (
         <>
           <section className="overflow-hidden border border-border bg-[#fbfaf7]">
-            <div className="flex flex-col gap-4 border-b border-border bg-white/75 p-4 sm:flex-row sm:items-start sm:justify-between">
+            <div className="flex flex-col gap-4 border-b border-border bg-card/75 p-4 sm:flex-row sm:items-start sm:justify-between">
               <div className="max-w-3xl">
                 <div className="flex flex-wrap items-center gap-2 text-xs font-medium uppercase tracking-[0.16em] text-muted-foreground">
                   <Sparkles className="h-3.5 w-3.5 text-emerald-700" />
@@ -182,7 +182,7 @@ export function Goals() {
                   linked evidence, and the next action needed to keep the company moving.
                 </p>
               </div>
-              <div className="grid min-w-[260px] grid-cols-3 border border-border bg-white text-center">
+              <div className="grid min-w-[260px] grid-cols-3 border border-border bg-card text-center">
                 <TechTreeStat value={goals.length} label="nodes" />
                 <TechTreeStat value={goals.filter((goal) => goal.status === "active").length} label="active" />
                 <TechTreeStat value={goals.filter((goal) => goal.status === "achieved").length} label="done" />
@@ -199,7 +199,7 @@ export function Goals() {
                   <TechTreeNodeCard key={node.goal.id} node={node} />
                 ))}
               </div>
-              <aside className="border border-border bg-white p-3">
+              <aside className="border border-border bg-card p-3">
                 <div className="flex items-center gap-2 text-sm font-medium">
                   <Route className="h-4 w-4 text-emerald-700" />
                   Roadmap rule
@@ -254,7 +254,7 @@ function TechTreeNodeCard({ node }: { node: TechTreeNodeView }) {
     <Link
       to={`/goals/${node.goal.id}`}
       className={cn(
-        "group grid gap-3 border border-border bg-white p-3 text-sm text-inherit no-underline transition-colors hover:border-emerald-700/40 hover:bg-emerald-50/20 md:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)_minmax(0,1fr)]",
+        "group grid gap-3 border border-border bg-card p-3 text-sm text-inherit no-underline transition-colors hover:border-primary/70 hover:bg-accent/40 md:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)_minmax(0,1fr)]",
         node.depth > 0 && "ml-4 border-l-4 border-l-emerald-700/20",
       )}
     >
