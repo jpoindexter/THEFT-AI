@@ -222,7 +222,7 @@ export function Library() {
   }
 
   return (
-    <div className="h-full min-h-0 bg-[#fbfaf6]">
+    <div className="h-full min-h-0 bg-[#fbfaf6] text-zinc-950">
       <div className="border-b border-[#e6decf] bg-[#fffdf8] px-5 py-4 shadow-sm shadow-black/[0.03]">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
@@ -254,7 +254,7 @@ export function Library() {
           <select
             value={departmentFilter}
             onChange={(event) => setDepartmentFilter(event.target.value)}
-            className="h-10 rounded-md border border-input bg-background px-3 text-sm"
+            className="h-10 rounded-md border border-[#d8cfbd] bg-white px-3 text-sm text-zinc-950"
             aria-label="Filter by department"
           >
             <option value="all">All departments</option>
@@ -558,13 +558,13 @@ function LibraryDetail({
                 </div>
               </div>
             ) : (
-              <div className="rounded-md border border-border bg-card p-4">
+              <div className="rounded-md border border-border bg-card p-4 text-foreground">
                 <MarkdownBody>{document.body || "_Empty document_"}</MarkdownBody>
               </div>
             )}
           </div>
         ) : (
-          <div className="rounded-md border border-border bg-card p-4">
+          <div className="rounded-md border border-border bg-card p-4 text-foreground">
             <h3 className="text-sm font-semibold">Details</h3>
             <p className="mt-2 text-sm text-muted-foreground">{item.subtitle}</p>
             {item.contentType || item.byteSize ? (

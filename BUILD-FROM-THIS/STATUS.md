@@ -45,9 +45,11 @@ Run status:
 - 2026-05-15: Added `BUILD-FROM-THIS/VISUAL-UX-REFERENCES.md` after reviewing MagicPath frames, `/Users/jasonpoindexter/Desktop/theft ai` references, and Sana's product page. Current visual direction is a warm-white enterprise creation workspace: persistent Operator thread, canvas-first work surface, visible department workstreams, Library artifacts, thin borders, restrained green/lime accents, and dark graph/diagnostic styling only as secondary treatment.
 - 2026-05-15: Completed `UX060`-`UX063` Tech Tree UX pass in `paperclip/`: `/goals` now presents Paperclip goals as a warm-white THEFT roadmap surface with owner, dependency, state, evidence, and next-action rows; `/goals/:goalId` now leads with selected-node context, evidence gate, linked projects, linked tasks, and child nodes while keeping the Paperclip properties panel secondary.
 - 2026-05-15: Completed the first product-facing THEFT naming cleanup pass (`UX090`-`UX094`): onboarding, invite, account menu, Tech Tree copy, feedback sharing, command palette, and runtime usage surfaces no longer lead with Paperclip/Cofounder/cost-first language. Internal package imports, API paths, storage keys, and route slugs remain intentionally unchanged until the deeper runtime/package rename.
-- 2026-05-15: Completed Phase 3 prompt critique and first visual polish pass (`UX070`-`UX078`, `UX080`): added `BUILD-FROM-THIS/UX-POLISH-DECISIONS.md`, then applied warm-white workspace styling, canvas-like department cards, Library artifact shelf treatment, and Task Review card polish in `paperclip/`. `UX079` remains open for explicit desktop/tablet/mobile visual verification.
+- 2026-05-15: Completed Phase 3 prompt critique and first visual polish pass (`UX070`-`UX078`, `UX080`): added `BUILD-FROM-THIS/UX-POLISH-DECISIONS.md`, then applied warm-white workspace styling, canvas-like department cards, Library artifact shelf treatment, and Task Review card polish in `paperclip/`.
+- 2026-05-15: Completed `UX079` visual verification across onboarding, Command Center, Library, and Task Review at desktop `1440x900`, tablet `1024x768`, and mobile `390x844` with focused Playwright screenshots. Fixed observed mobile horizontal overflow from the mobile shell and corrected low-contrast warm-white panels in Command Center, Library, and Task Review under dark-theme runtime defaults.
+- 2026-05-15: Slice 0.7 cleanup audit started. Active Paperclip onboarding no longer uses the `Acme Corp` placeholder or stores setup context as `Legal entity`; it now frames that setup item as legal/operating readiness and keeps it skippable. Added `app/src/app/api/[org]/MIGRATION-REFERENCE.md` to mark duplicated legacy JSON runtime routes as T070 archive candidates. Legacy `app/` still contains the old `incorporate-llc` tech-tree node and service/agency examples as migration reference only.
 
-Next blocking work: run `UX079` visual verification across desktop/tablet/mobile, then subtract dead `app/` surface and plan the deeper Paperclip package/API naming migration after the UI/UX happy path is stable. Avoid running full 8-department live Codex smoke during iteration; reserve it for pre-release/signoff.
+Next blocking work: subtract dead `app/` surface and plan the deeper Paperclip package/API naming migration after the UI/UX happy path is stable. Avoid running full 8-department live Codex smoke during iteration; reserve it for pre-release/signoff.
 
 Verification coverage:
 
@@ -60,6 +62,8 @@ Verification coverage:
 - `UX040`-`UX041` verification passed focused Vitest (`library-items`), `git diff --check`, and `pnpm -C paperclip build`.
 - 2026-05-15 warning cleanup verification passed `git diff --check`, focused Vitest (`App`, `Layout`), and `pnpm -C paperclip build`.
 - `UX050`-`UX052` verification passed focused Vitest (`theft-canvas`, `Dashboard`), `git diff --check`, and `pnpm -C paperclip build`.
+- 2026-05-15 UX079 verification passed `PAPERCLIP_E2E_PORT=3399 PAPERCLIP_E2E_DB_PORT=33399 pnpm -C paperclip exec playwright test tests/e2e/ux079-visual-verification.spec.ts --config tests/e2e/playwright.config.ts`; it captures onboarding, Command Center, Library, and Task Review across desktop `1440x900`, tablet `1024x768`, and mobile `390x844`.
+- 2026-05-15 one-server happy path verification passed `PAPERCLIP_E2E_PORT=3299 PAPERCLIP_E2E_DB_PORT=32399 pnpm -C paperclip exec playwright test tests/e2e/onboarding.spec.ts --config tests/e2e/playwright.config.ts`; the flow boots a throwaway Paperclip host, completes onboarding, seeds Operator plus departments/tasks, and lands on Command Center.
 - `UX060`-`UX063` verification passed focused Vitest (`GoalDetail`), `git diff --check`, and `pnpm -C paperclip build`.
 
 ## Legacy THEFT App Engine (`app/src/lib/`)
@@ -112,6 +116,11 @@ Status: render with seeded data. None are wired to engine. Likely most should mo
 - `/[org]/approvals` — exists, wiring unknown
 - `/[org]/routines` — scheduled tasks UI, no real cron yet
 - `/[org]/skills` — list/new pages exist, doesn't sync to filesystem
+
+### Legacy JSON API — ARCHIVE CANDIDATES
+- `app/src/app/api/[org]/MIGRATION-REFERENCE.md` now identifies the duplicated prototype routes backed by `.theft-data/*.json`.
+- Primary T070 candidates: `agent/run`, `operator`, `departments/[slug]/run`, `agents`, `skills`, `tasks`, `artifacts`, `memory`, `roadmap`, `approvals`, `routines`, `company`, `departments`, `team`, and `export`.
+- Future/stub route groups to rebuild only against Paperclip or real managed services: `api-keys`, `brand-kit`, `brief`, `onboarding/complete`, `costs/export`, `invoices`, `deployments`, `evals`, `search`, and `webhooks`.
 
 ### Settings — OVERBUILT (16 sub-pages, most stubbed)
 Routes exist for: organization, ai-settings, billing, billing/usage, payments, stripe, env, domains, domains/[domain], inbox, notifications, notifications/routing, security, sso, support, audit, advanced, advanced/agent-rules, advanced/import-repo, advanced/import-supabase, company-context, import, preferences

@@ -81,9 +81,9 @@ For each department, create one real Paperclip issue, invoke the assigned agent 
 - [ ] Remove duplicated JSON runtime paths from active product.
 - [ ] Archive old THEFT app routes not ported to Paperclip host.
 - [x] Remove/hide fake credits and unimplemented billing.
-- [ ] Remove LLC/service-company assumptions.
+- [x] Remove LLC/service-company assumptions from active setup.
 - [x] Remove active user-facing Cofounder branding.
-- [ ] Ensure only one app/server is required for the product path.
+- [x] Ensure only one app/server is required for the product path.
 
 ## v1 — Managed Services After Local v0 Works
 

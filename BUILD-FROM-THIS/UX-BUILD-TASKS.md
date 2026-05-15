@@ -78,7 +78,7 @@ Goal: a founder can create a company, see THEFT assemble it, land in Command Cen
 - [x] UX076 [MEDIUM] Run Prompt 8 for Tech Tree / roadmap variants.
 - [x] UX077 [MEDIUM] Run Prompt 9 against every accepted screen and reject anything that reads like a Paperclip, Cofounder, or Hyperagent clone.
 - [x] UX078 [MEDIUM] Convert accepted screens into implementation deltas with Prompt 10 and save decisions back into `BUILD-FROM-THIS/UX-DIRECTION.md` or this file.
-- [ ] UX079 [MEDIUM] Verify desktop, tablet, and mobile layouts for onboarding, Command Center, Library, and task review.
+- [x] UX079 [MEDIUM] Verify desktop, tablet, and mobile layouts for onboarding, Command Center, Library, and task review.
 - [x] UX080 [MEDIUM] Run a visual pass on Command Center, Department Workspace, Library, and Tech Tree against `VISUAL-UX-REFERENCES.md`: light/cream shell, canvas-first structure, artifact previews, restrained accents.
 
 ## Phase 4 - LOW Copy And Mechanical Cleanup

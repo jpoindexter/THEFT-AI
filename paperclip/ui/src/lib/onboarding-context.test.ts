@@ -15,7 +15,7 @@ describe("onboarding context", () => {
       operatorName: "Operator",
       setupItems: [
         { key: "company_name", label: "Company name", status: "done", note: "Acme" },
-        { key: "legal_entity", label: "Legal entity", status: "skipped", note: "Already incorporated" },
+        { key: "legal_entity", label: "Legal / operating readiness", status: "skipped", note: "Handled externally" },
       ],
     });
 
@@ -30,7 +30,7 @@ describe("onboarding context", () => {
       operatorName: "Operator",
       setupItems: [
         { key: "company_name", label: "Company name", status: "done", note: "Acme" },
-        { key: "legal_entity", label: "Legal entity", status: "skipped", note: "Already incorporated" },
+        { key: "legal_entity", label: "Legal / operating readiness", status: "skipped", note: "Handled externally" },
       ],
     });
   });

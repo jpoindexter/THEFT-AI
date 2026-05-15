@@ -93,8 +93,8 @@
 | T070 | Archive duplicated JSON runtime routes | ☐ todo |
 | T071 | Remove or hide fake credits/billing | ✅ done |
 | T072 | Remove user-facing Cofounder copy from active product | ✅ done |
-| T073 | Remove LLC/service-company assumptions from setup | ☐ todo |
-| T074 | Verify one app/server happy path | ☐ todo |
+| T073 | Remove LLC/service-company assumptions from setup | ✅ done |
+| T074 | Verify one app/server happy path | ✅ done |
 
 ## Slice 0.8 — UX Execution Gate
 
@@ -112,4 +112,4 @@
 | T089 | Complete `UX050`-`UX052` department workspace routing and shared department summaries | ✅ done |
 | T090 | Complete `UX060`-`UX063` Tech Tree roadmap surfaces with owner/dependency/evidence/next-action mapping | ✅ done |
 | T091 | Complete `UX070`-`UX078` prompt critique and `UX080` warm-white visual pass | ✅ done |
-| T092 | Verify desktop/tablet/mobile layouts for onboarding, Command Center, Library, and task review | ☐ todo |
+| T092 | Verify desktop/tablet/mobile layouts for onboarding, Command Center, Library, and task review | ✅ done |

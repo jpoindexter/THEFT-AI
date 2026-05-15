@@ -221,7 +221,7 @@ export function Dashboard() {
   const setupTodoCount = profile.setupItems.filter((item) => item.status === "todo").length;
 
   return (
-    <div className="mx-auto max-w-[1500px] space-y-5">
+    <div className="mx-auto max-w-[1500px] space-y-5 text-zinc-950">
       <section className="border border-[#e6decf] bg-[#fffdf8] p-4 shadow-sm shadow-black/[0.03] sm:p-5">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
           <div className="min-w-0">
@@ -235,7 +235,7 @@ export function Dashboard() {
                 </Badge>
               ) : null}
             </div>
-            <h1 className="mt-3 text-2xl font-semibold tracking-normal text-foreground">
+            <h1 className="mt-3 break-words text-2xl font-semibold tracking-normal text-zinc-950">
               {selectedCompany.name}
             </h1>
             <p className="mt-2 max-w-3xl text-sm leading-6 text-muted-foreground">

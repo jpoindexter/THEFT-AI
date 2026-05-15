@@ -36,7 +36,7 @@ test.describe("Onboarding wizard", () => {
     await page.goto("/onboarding");
 
     await expect(page.locator("h3", { hasText: "Name your company" })).toBeVisible({ timeout: 5_000 });
-    await page.locator('input[placeholder="Acme Corp"]').fill(`E2E-Mobile-${Date.now()}`);
+    await page.locator('input[placeholder="Company name"]').fill(`E2E-Mobile-${Date.now()}`);
     await page.getByRole("button", { name: "Validating" }).click();
     await page.getByRole("button", { name: "Next" }).click();
 
@@ -53,12 +53,12 @@ test.describe("Onboarding wizard", () => {
 
     await expect(wizardHeading).toBeVisible({ timeout: 5_000 });
 
-    const companyNameInput = page.locator('input[placeholder="Acme Corp"]');
+    const companyNameInput = page.locator('input[placeholder="Company name"]');
     await companyNameInput.fill(COMPANY_NAME);
 
     const nextButton = page.getByRole("button", { name: "Next" });
     await page.getByRole("button", { name: "Building" }).click();
-    await page.locator('input[placeholder="Legal note (optional)"]').fill("Already operating locally");
+    await page.locator('input[placeholder="Legal, compliance, or operating note (optional)"]').fill("Already operating locally");
     await page.locator('input[placeholder="Offer note (optional)"]').fill("Initial offer exists");
 
     await nextButton.click();

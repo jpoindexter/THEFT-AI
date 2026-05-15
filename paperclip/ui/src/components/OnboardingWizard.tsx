@@ -486,7 +486,7 @@ export function OnboardingWizard() {
           },
           {
             key: "legal_entity",
-            label: "Legal entity",
+            label: "Legal / operating readiness",
             status: setupLegalStatus,
             note: setupLegalNote,
           },
@@ -866,7 +866,7 @@ export function OnboardingWizard() {
                     </label>
                     <input
                       className="w-full rounded-md border border-border bg-transparent px-3 py-2 text-sm outline-none focus:ring-1 focus:ring-ring placeholder:text-muted-foreground/50"
-                      placeholder="Acme Corp"
+                      placeholder="Company name"
                       value={companyName}
                       onChange={(e) => setCompanyName(e.target.value)}
                       autoFocus
@@ -922,7 +922,7 @@ export function OnboardingWizard() {
                         />
                       </div>
                       <div className="rounded-md border border-border p-2">
-                        <div className="text-xs mb-1">Legal entity / operating setup</div>
+                        <div className="text-xs mb-1">Legal / operating readiness</div>
                         <div className="flex gap-2 mb-2">
                           {(["todo", "done", "skipped"] as const).map((status) => (
                             <button
@@ -940,7 +940,7 @@ export function OnboardingWizard() {
                         </div>
                         <input
                           className="w-full rounded-md border border-border bg-transparent px-2 py-1.5 text-xs outline-none focus:ring-1 focus:ring-ring"
-                          placeholder="Legal note (optional)"
+                          placeholder="Legal, compliance, or operating note (optional)"
                           value={setupLegalNote}
                           onChange={(e) => setSetupLegalNote(e.target.value)}
                         />

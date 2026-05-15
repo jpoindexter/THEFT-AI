@@ -40,6 +40,8 @@ paperclip/tests/e2e/test-results/
 paperclip/tests/e2e/playwright-report/
 paperclip/tests/release-smoke/test-results/
 paperclip/tests/release-smoke/playwright-report/
+paperclip/test-results/
+paperclip/playwright-report/
 paperclip/.superset/
 
 # Claude Code local config
