@@ -140,11 +140,14 @@ describe("library item mapping", () => {
     expect(items[0]).toMatchObject({
       title: "Launch memo",
       department: "Marketing",
+      sourceTaskLabel: "THF-7",
+      provenance: "Work product from THF-7",
       isImportant: true,
     });
     expect(items[1]).toMatchObject({
       title: "Campaign brief",
       key: "campaign_brief",
+      provenance: "Saved document from THF-7",
       isImportant: true,
     });
   });
@@ -158,6 +161,8 @@ describe("library item mapping", () => {
       issueId: "issue",
       issueIdentifier: null,
       issueTitle: "Issue",
+      sourceTaskLabel: "Issue",
+      provenance: "Saved document from Issue",
       updatedAt: now,
       createdAt: now,
       href: null,
@@ -180,6 +185,8 @@ describe("library item mapping", () => {
       issueId: "issue",
       issueIdentifier: null,
       issueTitle: "Issue",
+      sourceTaskLabel: "Issue",
+      provenance: "Saved document from Issue",
       createdAt: now,
       href: null,
     } satisfies Omit<LibraryItem, "department" | "departmentKey" | "updatedAt" | "isImportant">;

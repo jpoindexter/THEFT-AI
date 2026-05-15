@@ -228,7 +228,7 @@ export function Library() {
           <div>
             <h1 className="text-xl font-semibold tracking-normal">Library</h1>
             <p className="mt-1 text-sm text-muted-foreground">
-              Company memory, decisions, and shipped outputs grouped by department.
+              Durable company output, provenance, and source tasks grouped by department.
             </p>
           </div>
           <Button
@@ -403,7 +403,7 @@ function LibraryRow({
       <span className="min-w-0 flex-1">
         <span className="block truncate text-sm font-medium">{item.title}</span>
         <span className="mt-0.5 block truncate text-xs text-muted-foreground">
-          {itemKindLabel(item)} · {item.issueIdentifier ?? item.issueTitle}
+          {itemKindLabel(item)} · {item.sourceTaskLabel}
         </span>
       </span>
       <span
@@ -475,7 +475,7 @@ function LibraryDetail({
               ) : null}
             </div>
             <p className="mt-1 text-sm text-muted-foreground">
-              {itemKindLabel(item)} · {item.department} · Updated {relativeTime(item.updatedAt)}
+              {itemKindLabel(item)} · {item.department} · {item.provenance}
             </p>
           </div>
         </div>
@@ -497,20 +497,20 @@ function LibraryDetail({
 
       <dl className="mt-5 grid gap-3 border-y border-border py-4 text-sm sm:grid-cols-2 lg:grid-cols-4">
         <div>
-          <dt className="text-xs uppercase text-muted-foreground">Task</dt>
+          <dt className="text-xs uppercase text-muted-foreground">Source task</dt>
           <dd className="mt-1 font-medium">
             <Link className="hover:underline" to={`/issues/${item.issueId}`}>
-              {item.issueIdentifier ?? item.issueTitle}
+              {item.sourceTaskLabel}
             </Link>
           </dd>
         </div>
         <div>
-          <dt className="text-xs uppercase text-muted-foreground">Department</dt>
+          <dt className="text-xs uppercase text-muted-foreground">Owner department</dt>
           <dd className="mt-1 font-medium">{item.department}</dd>
         </div>
         <div>
-          <dt className="text-xs uppercase text-muted-foreground">State</dt>
-          <dd className="mt-1 font-medium">{item.reviewState ?? item.status ?? itemKindLabel(item)}</dd>
+          <dt className="text-xs uppercase text-muted-foreground">Provenance</dt>
+          <dd className="mt-1 font-medium">{item.provenance}</dd>
         </div>
         <div>
           <dt className="text-xs uppercase text-muted-foreground">Updated</dt>
@@ -522,7 +522,7 @@ function LibraryDetail({
         {item.kind === "document" ? (
           <div>
             <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
-              <h3 className="text-sm font-semibold">Library document</h3>
+              <h3 className="text-sm font-semibold">Selected artifact preview</h3>
               {document && !editingDocument ? (
                 <Button variant="outline" size="sm" onClick={onEditDocument}>
                   <FileText className="h-4 w-4" />
@@ -565,8 +565,9 @@ function LibraryDetail({
           </div>
         ) : (
           <div className="rounded-md border border-border bg-card p-4 text-foreground">
-            <h3 className="text-sm font-semibold">Details</h3>
+            <h3 className="text-sm font-semibold">Selected artifact preview</h3>
             <p className="mt-2 text-sm text-muted-foreground">{item.subtitle}</p>
+            <p className="mt-2 text-xs text-muted-foreground">{item.reviewState ?? item.status ?? itemKindLabel(item)}</p>
             {item.contentType || item.byteSize ? (
               <p className="mt-3 text-sm text-muted-foreground">
                 {[item.contentType, formatBytes(item.byteSize)].filter(Boolean).join(" · ")}

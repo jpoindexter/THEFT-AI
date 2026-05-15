@@ -97,7 +97,7 @@ Acceptance:
 
 ### M5 - Library / Outcomes
 
-Status: **next**
+Status: **implementation pass complete, visual review pending**
 
 Rework Library around durable company output:
 
@@ -170,7 +170,7 @@ Reserve heavy checks for pre-release signoff.
 Current active slice:
 
 ```text
-M5 - Library / Outcomes
+M6 - Department Workspace
 ```
 
 Last completed slices:
@@ -179,6 +179,7 @@ Last completed slices:
 - M2 Task Review
 - M3 Tasks / Needs Action
 - M4 Tech Tree
+- M5 Library / Outcomes
 
 M1 files:
 
@@ -201,6 +202,12 @@ M4 files:
 - `paperclip/ui/src/pages/Goals.tsx`
 - `paperclip/ui/src/pages/GoalDetail.tsx`
 - `paperclip/ui/src/pages/GoalDetail.test.tsx`
+
+M5 files:
+
+- `paperclip/ui/src/pages/Library.tsx`
+- `paperclip/ui/src/lib/library-items.ts`
+- `paperclip/ui/src/lib/library-items.test.ts`
 
 Verified for M1:
 
@@ -226,8 +233,14 @@ Verified for M4:
 2. `pnpm exec vitest run src/pages/GoalDetail.test.tsx --config vitest.config.ts` from `paperclip/ui`
 3. `pnpm -C paperclip --filter @paperclipai/ui typecheck`
 
+Verified for M5:
+
+1. `git diff --check`
+2. `pnpm exec vitest run src/lib/library-items.test.ts --config vitest.config.ts` from `paperclip/ui`
+3. `pnpm -C paperclip --filter @paperclipai/ui typecheck`
+
 Next exact steps:
 
-1. commit, tag, push M4 checkpoint;
-2. start M5 Library / Outcomes;
+1. commit, tag, push M5 checkpoint;
+2. start M6 Department Workspace;
 3. keep verification focused to changed files until the MVP screen set is coherent.

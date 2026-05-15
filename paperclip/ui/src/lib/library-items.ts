@@ -17,8 +17,10 @@ export interface LibraryItem {
   issueId: string;
   issueIdentifier: string | null;
   issueTitle: string;
+  sourceTaskLabel: string;
   department: string;
   departmentKey: string;
+  provenance: string;
   updatedAt: Date | string;
   createdAt: Date | string;
   href: string | null;
@@ -104,6 +106,7 @@ export function buildLibraryItems(bundles: LibraryIssueBundle[], agents: Agent[]
       issueId: bundle.issue.id,
       issueIdentifier: bundle.issue.identifier ?? null,
       issueTitle: bundle.issue.title,
+      sourceTaskLabel: bundle.issue.identifier ?? bundle.issue.title,
       department,
       departmentKey: departmentKey(department),
     };
@@ -116,6 +119,7 @@ export function buildLibraryItems(bundles: LibraryIssueBundle[], agents: Agent[]
         kind: "document",
         title,
         subtitle: `Markdown document from ${bundle.issue.identifier ?? bundle.issue.title}`,
+        provenance: `Saved document from ${bundle.issue.identifier ?? bundle.issue.title}`,
         key: document.key,
         createdAt: document.createdAt,
         updatedAt: document.updatedAt,
@@ -132,6 +136,7 @@ export function buildLibraryItems(bundles: LibraryIssueBundle[], agents: Agent[]
         kind: "attachment",
         title: attachment.originalFilename?.trim() || "Attachment",
         subtitle: attachment.contentType || "File attachment",
+        provenance: `Attached file from ${bundle.issue.identifier ?? bundle.issue.title}`,
         contentType: attachment.contentType,
         byteSize: attachment.byteSize,
         createdAt: attachment.createdAt,
@@ -148,6 +153,7 @@ export function buildLibraryItems(bundles: LibraryIssueBundle[], agents: Agent[]
         kind: "work_product",
         title: product.title,
         subtitle: product.summary || product.type.replace(/_/g, " "),
+        provenance: `Work product from ${bundle.issue.identifier ?? bundle.issue.title}`,
         createdAt: product.createdAt,
         updatedAt: product.updatedAt,
         href: product.url,
