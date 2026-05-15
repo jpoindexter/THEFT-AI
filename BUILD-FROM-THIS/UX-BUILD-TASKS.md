@@ -69,17 +69,17 @@ Goal: a founder can create a company, see THEFT assemble it, land in Command Cen
 
 ## Phase 3 - MEDIUM Screen Generation And Polish
 
-- [ ] UX070 [MEDIUM] Run Prompt 2 from `BUILD-FROM-THIS/UX-SCREEN-PROMPTS.md` for first-run onboarding variants.
-- [ ] UX071 [MEDIUM] Run Prompt 3 for Company Assembly Preview variants.
-- [ ] UX072 [MEDIUM] Run Prompt 4 for Command Center variants.
-- [ ] UX073 [MEDIUM] Run Prompt 5 for department workspace variants.
-- [ ] UX074 [MEDIUM] Run Prompt 6 for task detail and review variants.
-- [ ] UX075 [MEDIUM] Run Prompt 7 for Library variants.
-- [ ] UX076 [MEDIUM] Run Prompt 8 for Tech Tree / roadmap variants.
-- [ ] UX077 [MEDIUM] Run Prompt 9 against every accepted screen and reject anything that reads like a Paperclip, Cofounder, or Hyperagent clone.
-- [ ] UX078 [MEDIUM] Convert accepted screens into implementation deltas with Prompt 10 and save decisions back into `BUILD-FROM-THIS/UX-DIRECTION.md` or this file.
+- [x] UX070 [MEDIUM] Run Prompt 2 from `BUILD-FROM-THIS/UX-SCREEN-PROMPTS.md` for first-run onboarding variants.
+- [x] UX071 [MEDIUM] Run Prompt 3 for Company Assembly Preview variants.
+- [x] UX072 [MEDIUM] Run Prompt 4 for Command Center variants.
+- [x] UX073 [MEDIUM] Run Prompt 5 for department workspace variants.
+- [x] UX074 [MEDIUM] Run Prompt 6 for task detail and review variants.
+- [x] UX075 [MEDIUM] Run Prompt 7 for Library variants.
+- [x] UX076 [MEDIUM] Run Prompt 8 for Tech Tree / roadmap variants.
+- [x] UX077 [MEDIUM] Run Prompt 9 against every accepted screen and reject anything that reads like a Paperclip, Cofounder, or Hyperagent clone.
+- [x] UX078 [MEDIUM] Convert accepted screens into implementation deltas with Prompt 10 and save decisions back into `BUILD-FROM-THIS/UX-DIRECTION.md` or this file.
 - [ ] UX079 [MEDIUM] Verify desktop, tablet, and mobile layouts for onboarding, Command Center, Library, and task review.
-- [ ] UX080 [MEDIUM] Run a visual pass on Command Center, Department Workspace, Library, and Tech Tree against `VISUAL-UX-REFERENCES.md`: light/cream shell, canvas-first structure, artifact previews, restrained accents.
+- [x] UX080 [MEDIUM] Run a visual pass on Command Center, Department Workspace, Library, and Tech Tree against `VISUAL-UX-REFERENCES.md`: light/cream shell, canvas-first structure, artifact previews, restrained accents.
 
 ## Phase 4 - LOW Copy And Mechanical Cleanup
 

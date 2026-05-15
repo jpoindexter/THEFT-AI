@@ -621,7 +621,7 @@ function TaskReviewSummary({
       : "No active run";
 
   return (
-    <section className="space-y-3">
+    <section className="space-y-3 rounded-md border border-[#e6decf] bg-[#fffdf8] p-4 shadow-sm shadow-black/[0.03]">
       <div>
         <h3 className="text-sm font-medium">Task review</h3>
         <p className="mt-1 text-xs text-muted-foreground">
@@ -670,8 +670,8 @@ function TaskReviewCard({
   detail: string;
 }) {
   return (
-    <div className="flex min-w-0 gap-3 border border-border bg-card p-3">
-      <div className="mt-0.5 rounded-md bg-muted p-2 text-muted-foreground">
+    <div className="flex min-w-0 gap-3 border border-[#e6decf] bg-white/80 p-3">
+      <div className="mt-0.5 rounded-md bg-lime-100 p-2 text-lime-950">
         <Icon className="h-4 w-4" />
       </div>
       <div className="min-w-0">

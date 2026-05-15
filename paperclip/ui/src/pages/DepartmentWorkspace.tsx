@@ -111,7 +111,7 @@ export function DepartmentWorkspace() {
 
   return (
     <div className="mx-auto max-w-7xl space-y-5">
-      <section className="border border-border bg-card p-5">
+      <section className="border border-[#e6decf] bg-[#fffdf8] p-5 shadow-sm shadow-black/[0.03]">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
           <div>
             <div className="flex flex-wrap items-center gap-2">
@@ -125,7 +125,7 @@ export function DepartmentWorkspace() {
             </div>
             <h1 className="mt-2 text-2xl font-semibold tracking-normal">{department.title}</h1>
             <p className="mt-2 max-w-3xl text-sm leading-6 text-muted-foreground">
-              {selectedSpec.taskDescriptionByStage.building} This view keeps mission, active work, outputs, and skills in one department-owned surface.
+              {selectedSpec.taskDescriptionByStage.building} Mission, work lanes, blockers, review-ready outputs, and Library files stay in one department-owned surface.
             </p>
           </div>
           <div className="grid min-w-[260px] grid-cols-3 gap-2 text-center">
@@ -172,7 +172,7 @@ export function DepartmentWorkspace() {
         </div>
 
         <aside className="space-y-5">
-          <div className="border border-border bg-card p-4">
+          <div className="border border-[#e6decf] bg-[#fffdf8] p-4 shadow-sm shadow-black/[0.03]">
             <div className="flex items-start gap-3">
               <div className="mt-0.5 rounded-md bg-primary/10 p-2 text-primary">
                 <UserRoundCog className="h-4 w-4" />
@@ -195,7 +195,7 @@ export function DepartmentWorkspace() {
             </div>
           </div>
 
-          <div className="border border-border bg-card p-4">
+          <div className="border border-[#e6decf] bg-[#fffdf8] p-4 shadow-sm shadow-black/[0.03]">
             <div className="flex items-start gap-3">
               <div className="mt-0.5 rounded-md bg-primary/10 p-2 text-primary">
                 <Library className="h-4 w-4" />
@@ -213,7 +213,7 @@ export function DepartmentWorkspace() {
                   <Link
                     key={`${issue.id}:${document.key}`}
                     to={`/library?issue=${encodeURIComponent(issue.id)}`}
-                    className="block border border-border p-3 text-inherit no-underline transition-colors hover:bg-accent/40"
+                    className="block border border-[#e6decf] bg-white/80 p-3 text-inherit no-underline transition-colors hover:border-lime-300 hover:bg-lime-50/40"
                   >
                     <div className="flex items-center gap-2 text-sm font-medium">
                       <FileText className="h-4 w-4 shrink-0 text-muted-foreground" />
@@ -226,7 +226,7 @@ export function DepartmentWorkspace() {
             </div>
           </div>
 
-          <div className="border border-border bg-card p-4">
+          <div className="border border-[#e6decf] bg-[#fffdf8] p-4 shadow-sm shadow-black/[0.03]">
             <div className="flex items-start gap-3">
               <div className="mt-0.5 rounded-md bg-primary/10 p-2 text-primary">
                 <Sparkles className="h-4 w-4" />
@@ -252,7 +252,7 @@ export function DepartmentWorkspace() {
 
 function DepartmentStat({ label, value }: { label: string; value: number }) {
   return (
-    <div className="border border-border bg-background p-3">
+    <div className="border border-[#e6decf] bg-white/70 p-3">
       <p className="text-lg font-semibold">{value}</p>
       <p className="mt-1 text-xs text-muted-foreground">{label}</p>
     </div>

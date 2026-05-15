@@ -10,13 +10,14 @@
 4. **`UX-DIRECTION.md`** — product UX direction tying Paperclip, Cofounder, Hyperagent, skills, and THEFT happy path together
 5. **`VISUAL-UX-REFERENCES.md`** — MagicPath, local reference board, and Sana visual direction for the UI/UX pass
 6. **`UX-SCREEN-PROMPTS.md`** — reusable prompts for generating and critiquing screen flows before implementation
-7. **`UX-BUILD-TASKS.md`** — model-lane task list for the UX build and smoke handoff
-8. **`ROADMAP.md`** — ordered slices. Sequential, not parallel.
-9. **`TASKS.md`** — concrete task list. Working file.
-10. **`STATUS.md`** — what actually exists vs is stubbed/broken (audit-derived)
-11. **`DECISIONS.md`** — locked choices, append-only, no re-litigating
-12. **`PAPERCLIP-HOST-PROMOTION.md`** — how Paperclip became tracked source in this repo
-13. **`SKILL-AUDIT.md`** — THEFT skill packs and default department mappings
+7. **`UX-POLISH-DECISIONS.md`** — accepted Phase 3 prompt outcomes and implementation deltas
+8. **`UX-BUILD-TASKS.md`** — model-lane task list for the UX build and smoke handoff
+9. **`ROADMAP.md`** — ordered slices. Sequential, not parallel.
+10. **`TASKS.md`** — concrete task list. Working file.
+11. **`STATUS.md`** — what actually exists vs is stubbed/broken (audit-derived)
+12. **`DECISIONS.md`** — locked choices, append-only, no re-litigating
+13. **`PAPERCLIP-HOST-PROMOTION.md`** — how Paperclip became tracked source in this repo
+14. **`SKILL-AUDIT.md`** — THEFT skill packs and default department mappings
 
 ## How to use this folder
 

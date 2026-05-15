@@ -111,3 +111,5 @@
 | T088 | Verify `UX042` deterministic artifact smoke outputs become Library artifacts | ✅ done |
 | T089 | Complete `UX050`-`UX052` department workspace routing and shared department summaries | ✅ done |
 | T090 | Complete `UX060`-`UX063` Tech Tree roadmap surfaces with owner/dependency/evidence/next-action mapping | ✅ done |
+| T091 | Complete `UX070`-`UX078` prompt critique and `UX080` warm-white visual pass | ✅ done |
+| T092 | Verify desktop/tablet/mobile layouts for onboarding, Command Center, Library, and task review | ☐ todo |

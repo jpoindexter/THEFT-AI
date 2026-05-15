@@ -222,8 +222,8 @@ export function Library() {
   }
 
   return (
-    <div className="h-full min-h-0 bg-background">
-      <div className="border-b border-border px-5 py-4">
+    <div className="h-full min-h-0 bg-[#fbfaf6]">
+      <div className="border-b border-[#e6decf] bg-[#fffdf8] px-5 py-4 shadow-sm shadow-black/[0.03]">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
             <h1 className="text-xl font-semibold tracking-normal">Library</h1>
@@ -267,8 +267,8 @@ export function Library() {
         </div>
         <div className="mt-4 grid gap-2 text-sm sm:grid-cols-4">
           <LibraryStat label="Outputs" value={librarySummary.totalItems} />
-          <LibraryStat label="Important" value={librarySummary.importantItems} />
-          <LibraryStat label="Departments" value={librarySummary.departmentCount} />
+          <LibraryStat label="Pinned / important" value={librarySummary.importantItems} />
+          <LibraryStat label="Department shelves" value={librarySummary.departmentCount} />
           <LibraryStat
             label="Latest"
             value={librarySummary.latestUpdatedAt ? relativeTime(librarySummary.latestUpdatedAt) : "None"}
@@ -284,12 +284,12 @@ export function Library() {
         <EmptyState icon={LibraryIcon} message="No Library items yet. Route a task or save a department document to create company memory." />
       ) : (
         <div className="grid h-[calc(100vh-14rem)] min-h-[640px] grid-cols-1 lg:grid-cols-[minmax(360px,0.9fr)_minmax(0,1.1fr)]">
-          <section className="min-h-0 overflow-y-auto border-r border-border p-4">
+          <section className="min-h-0 overflow-y-auto border-r border-[#e6decf] bg-white/50 p-4">
             {pinnedItems.length > 0 ? (
               <div className="mb-5">
                 <div className="mb-2 flex items-center gap-2 text-xs font-semibold uppercase text-muted-foreground">
                   <Pin className="h-3.5 w-3.5" />
-                  Pinned company memory
+                      Pinned company memory
                 </div>
                 <div className="space-y-2">
                   {pinnedItems.slice(0, 6).map((item) => (
@@ -335,7 +335,7 @@ export function Library() {
             )}
           </section>
 
-          <section className="min-h-0 overflow-y-auto p-5">
+          <section className="min-h-0 overflow-y-auto bg-[#fffdf8] p-5">
             {selectedItem ? (
               <LibraryDetail
                 item={selectedItem}
@@ -369,7 +369,7 @@ export function Library() {
 
 function LibraryStat({ label, value }: { label: string; value: number | string }) {
   return (
-    <div className="border border-border bg-card px-3 py-2">
+    <div className="border border-[#e6decf] bg-white/70 px-3 py-2">
       <p className="text-sm font-medium tabular-nums">{value}</p>
       <p className="mt-0.5 text-xs text-muted-foreground">{label}</p>
     </div>
@@ -396,7 +396,7 @@ function LibraryRow({
       onClick={onSelect}
       className={cn(
         "group flex w-full items-start gap-3 rounded-md border px-3 py-2 text-left transition-colors",
-        selected ? "border-primary/50 bg-accent" : "border-border bg-card hover:bg-accent/50",
+        selected ? "border-lime-400 bg-lime-50" : "border-[#e6decf] bg-white/90 hover:bg-lime-50/50",
       )}
     >
       <Icon className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" />
@@ -462,7 +462,7 @@ function LibraryDetail({
     <div className="mx-auto max-w-4xl">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="flex min-w-0 items-start gap-3">
-          <div className="rounded-md border border-border bg-card p-2">
+          <div className="rounded-md border border-[#e6decf] bg-white p-2">
             <Icon className="h-5 w-5 text-muted-foreground" />
           </div>
           <div className="min-w-0">
@@ -495,7 +495,7 @@ function LibraryDetail({
         </div>
       </div>
 
-      <dl className="mt-5 grid gap-3 border-y border-border py-4 text-sm sm:grid-cols-2 lg:grid-cols-4">
+      <dl className="mt-5 grid gap-3 border-y border-[#e6decf] py-4 text-sm sm:grid-cols-2 lg:grid-cols-4">
         <div>
           <dt className="text-xs uppercase text-muted-foreground">Task</dt>
           <dd className="mt-1 font-medium">
