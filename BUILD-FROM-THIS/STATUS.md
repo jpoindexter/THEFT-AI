@@ -54,6 +54,7 @@ Run status:
 - 2026-05-15: Unified the visible THEFT product shell against the cthdrl reference in `/Users/jasonpoindexter/Desktop/cthdrl`. The default app now uses a black/slate operating canvas, sand/ash text, lime selected/live accents, and restrained purple/cyan signals instead of the previous warm-white cards inside a dark runtime shell. The dogfood Command Center, department workspace, Library, Task Review, Tech Tree, invite, sidebar, account menu, and top bar now share the same dark token system.
 - 2026-05-15: Started the confusion cleanup after live screenshot review. Primary sidebar and mobile nav now lead with THEFT surfaces only: Command Center, Attention, Departments, Task Review, Company Memory, Search, Tech Tree, and small System links. Project/agent runtime lists no longer appear as primary navigation. Tech Tree no longer uses a leftover light canvas, and Task Review defaults to Context instead of raw chat/execution logs.
 - 2026-05-15: Started architecture closure before further design work. Added `BUILD-FROM-THIS/ARCHITECTURE-CLOSURE.md`, replaced the root README so `paperclip/` is the only active run path, hardened `app/README.md` as archived prototype guidance, and split Paperclip UI route roots into explicit THEFT product routes versus runtime/admin routes in `paperclip/ui/src/lib/company-routes.ts`.
+- 2026-05-15: Continued architecture closure in the command palette. Product routes now lead as Command Center, Attention, Departments, Task Review, Company Memory, and Tech Tree; direct Projects/Agents/Costs/Activity shortcuts were removed from the primary Pages group, and remaining agent/project entries are explicitly labeled runtime diagnostics.
 
 Next blocking work: subtract dead `app/` surface and plan the deeper Paperclip package/API naming migration after the UI/UX happy path is stable. Avoid running full 8-department live Codex smoke during iteration; reserve it for pre-release/signoff.
 
@@ -74,7 +75,7 @@ Verification coverage:
 - `UX060`-`UX063` verification passed focused Vitest (`GoalDetail`), `git diff --check`, and `pnpm -C paperclip build`.
 - 2026-05-15 cthdrl dark-shell verification passed `git diff --check`, `pnpm -C paperclip --filter @paperclipai/ui typecheck`, focused Vitest for Layout, Dashboard, IssueDetail, canvas, and Library helpers, `pnpm -C paperclip build`, plus a live Chromium screenshot check at `http://127.0.0.1:3100/THEAAAAAAAAAAA/dashboard` saved to `/private/tmp/theft-dashboard-cthdrl.png`.
 - 2026-05-15 confusion-cleanup verification passed `git diff --check`, `pnpm -C paperclip --filter @paperclipai/ui typecheck`, focused Vitest for Sidebar and IssueDetail, and `pnpm -C paperclip build`.
-- 2026-05-15 architecture-closure verification added focused company route boundary coverage for product versus runtime/admin routes.
+- 2026-05-15 architecture-closure verification passed `git diff --check`, focused company route boundary coverage for product versus runtime/admin routes, focused Command Palette Vitest, `pnpm -C paperclip --filter @paperclipai/ui typecheck`, and `pnpm -C paperclip build`.
 
 ## Legacy THEFT App Engine (`app/src/lib/`)
 

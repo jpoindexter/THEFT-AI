@@ -24,11 +24,10 @@ import {
   Target,
   LayoutDashboard,
   Inbox,
-  DollarSign,
-  History,
   SquarePen,
-  Plus,
   Search,
+  Library,
+  Building2,
 } from "lucide-react";
 import { Identity } from "./Identity";
 import { agentUrl, projectUrl } from "../lib/utils";
@@ -45,7 +44,7 @@ export function CommandPalette() {
   const [query, setQuery] = useState("");
   const navigate = useNavigate();
   const { selectedCompanyId } = useCompany();
-  const { openNewIssue, openNewAgent } = useDialogActions();
+  const { openNewIssue } = useDialogActions();
   const { isMobile, setSidebarOpen } = useSidebar();
   const searchQuery = query.trim();
 
@@ -121,7 +120,7 @@ export function CommandPalette() {
         if (v && isMobile) setSidebarOpen(false);
       }}>
       <CommandInput
-        placeholder="Search issues, agents, projects..."
+        placeholder="Search tasks, departments, memory..."
         value={query}
         onValueChange={setQuery}
         onKeyDown={(event) => {
@@ -174,21 +173,8 @@ export function CommandPalette() {
             }}
           >
             <SquarePen className="mr-2 h-4 w-4" />
-            Create new issue
+            Ask Operator
             <span className="ml-auto text-xs text-muted-foreground">C</span>
-          </CommandItem>
-          <CommandItem
-            onSelect={() => {
-              setOpen(false);
-              openNewAgent();
-            }}
-          >
-            <Plus className="mr-2 h-4 w-4" />
-            Create new agent
-          </CommandItem>
-          <CommandItem onSelect={() => go("/projects")}>
-            <Plus className="mr-2 h-4 w-4" />
-            Create new project
           </CommandItem>
         </CommandGroup>
 
@@ -197,35 +183,27 @@ export function CommandPalette() {
         <CommandGroup heading="Pages">
           <CommandItem onSelect={() => go("/dashboard")}>
             <LayoutDashboard className="mr-2 h-4 w-4" />
-            Dashboard
+            Command Center
           </CommandItem>
           <CommandItem onSelect={() => go("/inbox")}>
             <Inbox className="mr-2 h-4 w-4" />
-            Inbox
+            Attention
+          </CommandItem>
+          <CommandItem onSelect={() => go("/departments/engineering")}>
+            <Building2 className="mr-2 h-4 w-4" />
+            Departments
           </CommandItem>
           <CommandItem onSelect={() => go("/issues")}>
             <CircleDot className="mr-2 h-4 w-4" />
-            Issues
+            Task Review
           </CommandItem>
-          <CommandItem onSelect={() => go("/projects")}>
-            <Hexagon className="mr-2 h-4 w-4" />
-            Projects
+          <CommandItem onSelect={() => go("/library")}>
+            <Library className="mr-2 h-4 w-4" />
+            Company Memory
           </CommandItem>
           <CommandItem onSelect={() => go("/goals")}>
             <Target className="mr-2 h-4 w-4" />
-            Goals
-          </CommandItem>
-          <CommandItem onSelect={() => go("/agents")}>
-            <Bot className="mr-2 h-4 w-4" />
-            Agents
-          </CommandItem>
-          <CommandItem onSelect={() => go("/costs")}>
-            <DollarSign className="mr-2 h-4 w-4" />
-            Runtime usage
-          </CommandItem>
-          <CommandItem onSelect={() => go("/activity")}>
-            <History className="mr-2 h-4 w-4" />
-            Activity
+            Tech Tree
           </CommandItem>
         </CommandGroup>
 
@@ -261,7 +239,7 @@ export function CommandPalette() {
         {agents.length > 0 && (
           <>
             <CommandSeparator />
-            <CommandGroup heading="Agents">
+            <CommandGroup heading="Runtime diagnostics: agents">
               {agents.slice(0, 10).map((agent) => (
                 <CommandItem key={agent.id} onSelect={() => go(agentUrl(agent))}>
                   <Bot className="mr-2 h-4 w-4" />
@@ -276,7 +254,7 @@ export function CommandPalette() {
         {projects.length > 0 && (
           <>
             <CommandSeparator />
-            <CommandGroup heading="Projects">
+            <CommandGroup heading="Runtime diagnostics: workstreams">
               {projects.slice(0, 10).map((project) => (
                 <CommandItem key={project.id} onSelect={() => go(projectUrl(project))}>
                   <Hexagon className="mr-2 h-4 w-4" />
