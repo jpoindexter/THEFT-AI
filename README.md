@@ -1,72 +1,67 @@
 # THEFT AI
 
-AI workspace platform — run a company with agents.
+Local-first company operating system built on the tracked Paperclip runtime host.
 
-## Run it (zero setup)
+## Current Architecture
+
+THEFT is one product:
+
+```text
+THEFT product layer
+  onboarding, Operator, departments, Tech Tree, Company Memory, skills
+on top of
+Paperclip runtime/control plane
+  companies, agents, issues, goals, documents, adapters, heartbeats, approvals
+```
+
+The active app lives in `paperclip/`. The old `app/` Next.js prototype is migration/reference material only and must not receive new product features.
+
+Read these first for architecture work:
+
+1. `BUILD-FROM-THIS/SOURCE-OF-TRUTH.md`
+2. `BUILD-FROM-THIS/PARITY-DELTA.md`
+3. `BUILD-FROM-THIS/ROADMAP.md`
+4. `BUILD-FROM-THIS/TASKS.md`
+5. `BUILD-FROM-THIS/ARCHITECTURE-CLOSURE.md`
+
+## Run
 
 ```sh
-pnpm install
-pnpm dev
+pnpm -C paperclip dev:once
 ```
 
-Open http://localhost:3000 — no database, no auth, no env required for the UI.
+Open `http://127.0.0.1:3100`.
 
-For real Cofounder chat replies, use a local OAuth CLI or local model harness.
-The default backend is Codex CLI, matching the Paperclip-style local adapter
-model:
+Fast local health check against a running host:
 
 ```sh
-cp .env.local.example .env.local
-# then choose one:
-# LLM_BACKEND=codex-cli       # uses your local Codex login
-# LLM_BACKEND=opencode-cli    # uses OpenCode provider/model config
-# LLM_BACKEND=claude-cli      # uses your local Claude Code login
-# LLM_BACKEND=ollama          # uses OLLAMA_URL and OLLAMA_MODEL
-# LLM_BACKEND=lmstudio        # uses LMSTUDIO_URL and OPENAI_COMPAT_MODEL
+node paperclip/scripts/smoke/theft-local-health.mjs
 ```
 
-You can also choose the runtime and `provider/model` IDs from
-`Settings > AI Settings`. Ollama models can be pulled from that screen.
+Deterministic no-quota department/runtime artifact smoke:
 
-All app data is written to `.theft-data/*.json` files (gitignored). Delete the
-folder to reset everything.
-
-## What's in the box
-
-- **Onboarding** — 3-question wizard → company create
-- **Org chart** — radial layout, 8 departments
-- **Department pages** — agent list with attached skills + tasks
-- **Tech tree / roadmap** — 27 nodes across 7 stages, dependency-aware
-- **Cofounder chat** — local CLI or provider-backed agent chat
-
-## Where the data lives
-
-```
-.theft-data/
-├── organizations.json
-├── departments.json
-├── agents.json
-├── tasks.json
-├── cofounder_messages.json
-├── artifacts.json
-└── tech_tree_status.json
+```sh
+node paperclip/scripts/smoke/theft-department-runtime-smoke.mjs --adapter process --require-library-artifacts
 ```
 
-When ready for real persistence, replace `src/lib/db/store.ts` with a Supabase
-or Postgres adapter. Same shape, swap the implementation.
+## Build And Verify
 
-## Next
+```sh
+git diff --check
+pnpm -C paperclip --filter @paperclipai/ui typecheck
+pnpm -C paperclip build
+```
 
-- [ ] Business brief 4-question flow → BusinessPlan artifact
-- [ ] Task creation + agent execution loop
-- [ ] Library file browser
-- [ ] Settings pages
-- [ ] Brand kit agent (using `web-design-guidelines` annotation templates)
+Full live LLM department smoke is reserved for release signoff, not normal iteration.
 
-## Stack
+## Active Product Surfaces
 
-- Next.js 16 + App Router + Turbopack
-- Codex/OpenCode/Claude CLI, Ollama, LM Studio, Anthropic, OpenAI-compatible runtimes
-- shadcn/ui + Tailwind v4
-- Zod validation
-- File-backed JSON store (no DB needed for v0)
+- Command Center
+- Operator setup and routing
+- Departments
+- Task Review
+- Company Memory
+- Tech Tree
+- Attention queue
+
+Runtime/admin surfaces may still exist under the Paperclip host for diagnostics, but they are not the primary THEFT product model.

@@ -1,24 +1,34 @@
-const BOARD_ROUTE_ROOTS = new Set([
+export const THEFT_PRODUCT_ROUTE_ROOTS = new Set([
   "dashboard",
-  "companies",
-  "company",
-  "skills",
-  "org",
+  "issues",
+  "goals",
+  "approvals",
+  "inbox",
+  "search",
+  "library",
+  "departments",
+]);
+
+export const THEFT_RUNTIME_ROUTE_ROOTS = new Set([
   "agents",
   "projects",
   "workspaces",
   "execution-workspaces",
-  "issues",
   "routines",
-  "goals",
-  "approvals",
   "costs",
   "usage",
   "activity",
-  "inbox",
+  "companies",
+  "company",
+  "skills",
+  "org",
   "u",
   "design-guide",
-  "search",
+]);
+
+const BOARD_ROUTE_ROOTS = new Set([
+  ...THEFT_PRODUCT_ROUTE_ROOTS,
+  ...THEFT_RUNTIME_ROUTE_ROOTS,
 ]);
 
 const GLOBAL_ROUTE_ROOTS = new Set(["auth", "invite", "board-claim", "cli-auth", "docs", "instance"]);
@@ -52,6 +62,18 @@ export function isBoardPathWithoutPrefix(pathname: string): boolean {
   const root = getRootSegment(pathname);
   if (!root) return false;
   return BOARD_ROUTE_ROOTS.has(root.toLowerCase());
+}
+
+export function isTheftProductBoardPath(pathname: string): boolean {
+  const root = getRootSegment(toCompanyRelativePath(pathname));
+  if (!root) return false;
+  return THEFT_PRODUCT_ROUTE_ROOTS.has(root.toLowerCase());
+}
+
+export function isTheftRuntimeBoardPath(pathname: string): boolean {
+  const root = getRootSegment(toCompanyRelativePath(pathname));
+  if (!root) return false;
+  return THEFT_RUNTIME_ROUTE_ROOTS.has(root.toLowerCase());
 }
 
 export function extractCompanyPrefixFromPath(pathname: string): string | null {

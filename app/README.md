@@ -1,82 +1,30 @@
-# THEFT AI
+# Archived THEFT Prototype
 
-AI workspace platform — run a company with agents.
+This directory is historical migration/reference material.
 
-> ⚠️ Migration note: this `app/` is historical/reference implementation only.
-> The active tracked Paperclip-host runtime now lives in `paperclip/`.
-> Do not add new product features here unless explicitly routing through Paperclip host.
+The active product runtime is `../paperclip/`. Do not add new product features, routes, API handlers, or runtime state here. If a useful prototype pattern remains in this folder, port it into `paperclip/` and document the port in `BUILD-FROM-THIS/STATUS.md`.
 
-## Run it (zero setup)
+## Why This Exists
 
-```sh
-pnpm install
-pnpm dev
-```
+The old Next.js app proved early THEFT concepts:
 
-Open http://localhost:3000 — no database, no auth, no env required for the UI.
+- company onboarding;
+- 8 department layout;
+- Operator/chat language;
+- Tech Tree/roadmap sketches;
+- local JSON task/artifact state;
+- visual references for later Paperclip-hosted surfaces.
 
-Release gate (tests + build + route smoke + onboarding checks):
+Those concepts have been promoted into the Paperclip host. The JSON store and duplicated app routes are no longer the architecture.
 
-```sh
-pnpm gate
-```
+## Current Run Path
 
-For real Operator chat replies, use a local OAuth CLI or local model harness.
-The default backend is Codex CLI, matching the Workspace Sync-style local adapter
-model:
+From the repo root:
 
 ```sh
-cp .env.local.example .env.local
-# then choose one:
-# LLM_BACKEND=codex-cli       # uses your local Codex login
-# LLM_BACKEND=opencode-cli    # uses OpenCode provider/model config
-# LLM_BACKEND=claude-cli      # uses your local Claude Code login
-# LLM_BACKEND=ollama          # uses OLLAMA_URL and OLLAMA_MODEL
-# LLM_BACKEND=lmstudio        # uses LMSTUDIO_URL and OPENAI_COMPAT_MODEL
+pnpm -C paperclip dev:once
 ```
 
-You can also choose the runtime and `provider/model` IDs from
-`Settings > AI Settings`. Ollama models can be pulled from that screen.
+Then open `http://127.0.0.1:3100`.
 
-All app data is written to `.theft-data/*.json` files (gitignored). Delete the
-folder to reset everything.
-
-## What's in the box
-
-- **Onboarding** — 3-question wizard → company create
-- **Org chart** — radial layout, 8 departments
-- **Department pages** — agent list with attached skills + tasks
-- **Tech tree / roadmap** — 27 nodes across 7 stages, dependency-aware
-- **Operator chat** — local CLI or provider-backed agent chat
-
-## Where the data lives
-
-```
-.theft-data/
-├── organizations.json
-├── departments.json
-├── agents.json
-├── tasks.json
-├── operator_messages.json
-├── artifacts.json
-└── tech_tree_status.json
-```
-
-When ready for real persistence, replace `src/lib/db/store.ts` with a Supabase
-or Postgres adapter. Same shape, swap the implementation.
-
-## Next
-
-- [ ] Business brief 4-question flow → BusinessPlan artifact
-- [ ] Task creation + agent execution loop
-- [ ] Library file browser
-- [ ] Settings pages
-- [ ] Brand kit agent (using `web-design-guidelines` annotation templates)
-
-## Stack
-
-- Next.js 16 + App Router + Turbopack
-- Codex/OpenCode/Claude CLI, Ollama, LM Studio, Anthropic, OpenAI-compatible runtimes
-- shadcn/ui + Tailwind v4
-- Zod validation
-- File-backed JSON store (no DB needed for v0)
+Do not use `pnpm -C app dev` for active product verification.

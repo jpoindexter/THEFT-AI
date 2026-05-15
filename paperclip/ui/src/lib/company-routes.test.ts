@@ -3,6 +3,8 @@ import {
   applyCompanyPrefix,
   extractCompanyPrefixFromPath,
   isBoardPathWithoutPrefix,
+  isTheftProductBoardPath,
+  isTheftRuntimeBoardPath,
   toCompanyRelativePath,
 } from "./company-routes";
 
@@ -34,5 +36,18 @@ describe("company routes", () => {
     expect(applyCompanyPrefix("/search", "PAP")).toBe("/PAP/search");
     expect(applyCompanyPrefix("/search?q=hello%20world", "PAP")).toBe("/PAP/search?q=hello%20world");
     expect(toCompanyRelativePath("/PAP/search?q=foo")).toBe("/search?q=foo");
+  });
+
+  it("separates THEFT product routes from runtime/admin routes", () => {
+    expect(isTheftProductBoardPath("/dashboard")).toBe(true);
+    expect(isTheftProductBoardPath("/PAP/departments/engineering")).toBe(true);
+    expect(isTheftProductBoardPath("/PAP/library")).toBe(true);
+    expect(isTheftProductBoardPath("/agents/all")).toBe(false);
+    expect(isTheftProductBoardPath("/PAP/costs")).toBe(false);
+
+    expect(isTheftRuntimeBoardPath("/agents/all")).toBe(true);
+    expect(isTheftRuntimeBoardPath("/PAP/execution-workspaces/workspace-123")).toBe(true);
+    expect(isTheftRuntimeBoardPath("/PAP/company/settings")).toBe(true);
+    expect(isTheftRuntimeBoardPath("/PAP/dashboard")).toBe(false);
   });
 });
