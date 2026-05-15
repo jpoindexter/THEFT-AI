@@ -5,7 +5,7 @@ import type { ReactNode } from "react";
 import { createRoot } from "react-dom/client";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { Sidebar } from "./Sidebar";
+import { Sidebar, THEFT_SYSTEM_NAV_ITEMS } from "./Sidebar";
 
 const mockHeartbeatsApi = vi.hoisted(() => ({
   liveRunsForCompany: vi.fn(),
@@ -148,6 +148,39 @@ describe("Sidebar", () => {
 
     const link = [...container.querySelectorAll("a")].find((anchor) => anchor.textContent === "Workspaces");
     expect(link?.getAttribute("href")).toBe("/workspaces");
+
+    await act(async () => {
+      root.unmount();
+    });
+  });
+
+  it("keeps runtime/admin capability contained in the System section", async () => {
+    mockInstanceSettingsApi.getExperimental.mockResolvedValue({ enableIsolatedWorkspaces: false });
+    const root = createRoot(container);
+    const queryClient = new QueryClient({
+      defaultOptions: { queries: { retry: false } },
+    });
+
+    await act(async () => {
+      root.render(
+        <QueryClientProvider client={queryClient}>
+          <Sidebar />
+        </QueryClientProvider>,
+      );
+    });
+    await flushReact();
+
+    const links = [...container.querySelectorAll("a")].map((anchor) => ({
+      label: anchor.textContent,
+      href: anchor.getAttribute("href"),
+    }));
+
+    for (const item of THEFT_SYSTEM_NAV_ITEMS) {
+      expect(links).toContainEqual({ label: item.label, href: item.to });
+    }
+    expect(links.findIndex((link) => link.label === "Command Center")).toBeLessThan(
+      links.findIndex((link) => link.label === "Agent Runtime"),
+    );
 
     await act(async () => {
       root.unmount();

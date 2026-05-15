@@ -1,5 +1,7 @@
 import {
   Inbox,
+  Activity,
+  Bot,
   CircleDot,
   Target,
   LayoutDashboard,
@@ -11,6 +13,10 @@ import {
   GitBranch,
   Settings,
   Library,
+  Cpu,
+  Repeat2,
+  WalletCards,
+  type LucideIcon,
 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { SidebarSection } from "./SidebarSection";
@@ -24,6 +30,18 @@ import { useInboxBadge } from "../hooks/useInboxBadge";
 import { Button } from "@/components/ui/button";
 import { PluginSlotOutlet } from "@/plugins/slots";
 import { SidebarCompanyMenu } from "./SidebarCompanyMenu";
+
+export const THEFT_SYSTEM_NAV_ITEMS: Array<{ to: string; label: string; icon: LucideIcon }> = [
+  { to: "/org", label: "Company Map", icon: Network },
+  { to: "/agents/all", label: "Agent Runtime", icon: Bot },
+  { to: "/projects", label: "Workstreams", icon: GitBranch },
+  { to: "/skills", label: "Skill Library", icon: Boxes },
+  { to: "/instance/settings/adapters", label: "Model Adapters", icon: Cpu },
+  { to: "/routines", label: "Routines", icon: Repeat2 },
+  { to: "/costs", label: "Runtime Usage", icon: WalletCards },
+  { to: "/activity", label: "Activity", icon: Activity },
+  { to: "/company/settings", label: "Settings", icon: Settings },
+];
 
 export function Sidebar() {
   const { openNewIssue } = useDialogActions();
@@ -106,9 +124,9 @@ export function Sidebar() {
         </SidebarSection>
 
         <SidebarSection label="System">
-          <SidebarNavItem to="/org" label="Company Map" icon={Network} />
-          <SidebarNavItem to="/skills" label="Skill Library" icon={Boxes} />
-          <SidebarNavItem to="/company/settings" label="Settings" icon={Settings} />
+          {THEFT_SYSTEM_NAV_ITEMS.map((item) => (
+            <SidebarNavItem key={item.to} to={item.to} label={item.label} icon={item.icon} />
+          ))}
         </SidebarSection>
 
         <PluginSlotOutlet

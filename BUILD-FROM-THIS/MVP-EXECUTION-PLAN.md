@@ -130,7 +130,7 @@ Acceptance:
 
 ### M7 - System / Diagnostics
 
-Status: **next**
+Status: **implementation pass complete, visual review pending**
 
 Contain advanced runtime features:
 
@@ -170,7 +170,7 @@ Reserve heavy checks for pre-release signoff.
 Current active slice:
 
 ```text
-M7 - System / Diagnostics
+Visual review / browser pass
 ```
 
 Last completed slices:
@@ -181,6 +181,7 @@ Last completed slices:
 - M4 Tech Tree
 - M5 Library / Outcomes
 - M6 Department Workspace
+- M7 System / Diagnostics
 
 M1 files:
 
@@ -214,6 +215,11 @@ M6 files:
 
 - `paperclip/ui/src/pages/DepartmentWorkspace.tsx`
 - `paperclip/ui/src/lib/theft-canvas.test.ts`
+
+M7 files:
+
+- `paperclip/ui/src/components/Sidebar.tsx`
+- `paperclip/ui/src/components/Sidebar.test.tsx`
 
 Verified for M1:
 
@@ -251,8 +257,14 @@ Verified for M6:
 2. `pnpm exec vitest run src/lib/theft-canvas.test.ts --config vitest.config.ts` from `paperclip/ui`
 3. `pnpm -C paperclip --filter @paperclipai/ui typecheck`
 
+Verified for M7:
+
+1. `git diff --check`
+2. `pnpm exec vitest run src/components/Sidebar.test.tsx --config vitest.config.ts` from `paperclip/ui`
+3. `pnpm -C paperclip --filter @paperclipai/ui typecheck`
+
 Next exact steps:
 
-1. commit, tag, push M6 checkpoint;
-2. start M7 System / Diagnostics;
-3. keep verification focused to changed files until the MVP screen set is coherent.
+1. commit, tag, push M7 checkpoint;
+2. run a browser visual pass across the MVP screens against the live host;
+3. fix obvious layout/contrast/navigation issues only, then defer deeper art direction.
