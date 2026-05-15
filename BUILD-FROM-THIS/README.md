@@ -8,14 +8,15 @@
 2. **`SOURCE-OF-TRUTH.md`** — canonical merge decision: THEFT product layer on a Paperclip runtime host
 3. **`PARITY-DELTA.md`** — feature parity, product deltas, gaps, and build order
 4. **`UX-DIRECTION.md`** — product UX direction tying Paperclip, Cofounder, Hyperagent, skills, and THEFT happy path together
-5. **`UX-SCREEN-PROMPTS.md`** — reusable prompts for generating and critiquing screen flows before implementation
-6. **`UX-BUILD-TASKS.md`** — model-lane task list for the UX build and smoke handoff
-7. **`ROADMAP.md`** — ordered slices. Sequential, not parallel.
-8. **`TASKS.md`** — concrete task list. Working file.
-9. **`STATUS.md`** — what actually exists vs is stubbed/broken (audit-derived)
-10. **`DECISIONS.md`** — locked choices, append-only, no re-litigating
-11. **`PAPERCLIP-HOST-PROMOTION.md`** — how Paperclip became tracked source in this repo
-12. **`SKILL-AUDIT.md`** — THEFT skill packs and default department mappings
+5. **`VISUAL-UX-REFERENCES.md`** — MagicPath, local reference board, and Sana visual direction for the UI/UX pass
+6. **`UX-SCREEN-PROMPTS.md`** — reusable prompts for generating and critiquing screen flows before implementation
+7. **`UX-BUILD-TASKS.md`** — model-lane task list for the UX build and smoke handoff
+8. **`ROADMAP.md`** — ordered slices. Sequential, not parallel.
+9. **`TASKS.md`** — concrete task list. Working file.
+10. **`STATUS.md`** — what actually exists vs is stubbed/broken (audit-derived)
+11. **`DECISIONS.md`** — locked choices, append-only, no re-litigating
+12. **`PAPERCLIP-HOST-PROMOTION.md`** — how Paperclip became tracked source in this repo
+13. **`SKILL-AUDIT.md`** — THEFT skill packs and default department mappings
 
 ## How to use this folder
 
@@ -35,6 +36,7 @@
 
 - `_archive/` — old docs and pre-Paperclip build prompts. Kept for reference only. Building from them caused the drift this folder fixes.
 - `frames2/` and `screenshots/` — visual reference only. NOT a pixel spec.
+- `magic patch frames/` and `/Users/jasonpoindexter/Desktop/theft ai` — visual reference only. The synthesis is in `VISUAL-UX-REFERENCES.md`.
 - Pre-existing UI shell at `app/src/app/[org]/...` — most pages are decorative, not wired. STATUS.md flags which ones are real.
 
 ## What IS source of truth (besides this folder)

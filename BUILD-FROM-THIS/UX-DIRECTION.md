@@ -17,6 +17,9 @@ Paperclip is the runtime. THEFT is the product experience.
 | Paperclip | Companies, agents, issues, goals, projects, runs, approvals, skills, tools, adapters, documents, attachments, local Postgres | Use it as the execution/control plane. Do not expose all of its internals as the primary UX. |
 | Cofounder docs | Canvas, departments, Tech Tree, task review, Library, company memory, managed services, department agents | Use this as the product-flow reference: company workspace first, agent admin second. |
 | Hyperagent screens | Polished agent admin, agent detail tabs, skills modal, invocation surfaces, Slack interaction, score/cost dashboards | Useful polish reference, but too close to generic agent-dashboard territory for THEFT's main surface. |
+| MagicPath frames | Prompt-to-canvas flow, persistent thread, parallel generation, selectable artifacts, libraries, share/publish | Use this as the interaction loop: Operator command -> department plan -> artifacts appear on canvas/Library. |
+| Local visual references | Light map/canvas layouts, dense SaaS panels, graph systems, premium white/cream workspaces | Use as visual direction for an operational company OS, not a decorative dashboard. |
+| Sana | Bright enterprise AI tone, agents for real work, company-wide platform credibility | Use the clean, warm-white enterprise feel. Do not copy marketing-page structure. |
 | THEFT skills | Department-specific execution guidance and local skill packs | Skills are product data that make departments useful; surface them as department capabilities, not as a generic skills marketplace. |
 | Existing THEFT prototype | Staged onboarding, 8 departments, roadmap/Tech Tree, Library concept | Port the product shape onto Paperclip data only. |
 
@@ -95,6 +98,27 @@ THEFT should feel like:
 It should not feel like:
 
 > "I am configuring a fleet of generic AI agents."
+
+## Visual Product Direction
+
+Use `BUILD-FROM-THIS/VISUAL-UX-REFERENCES.md` as the visual synthesis.
+
+Primary direction:
+
+- light, warm-white, premium, operational
+- persistent Operator thread beside a large work canvas
+- visible artifacts, tasks, departments, and decisions in the first viewport
+- dense but calm panels with thin borders and restrained depth
+- green/lime accents used sparingly for primary action and live status
+- dark graph/diagnostic visuals only as secondary or presentation moments
+
+Avoid:
+
+- default dark AI command center
+- generic dashboard/KPI home screen
+- Figma clone/tool chrome as the core identity
+- Paperclip runtime/admin tabs as the primary product
+- purple/blue AI gradients and decorative sci-fi styling
 
 ## Primary UX Objects
 
@@ -423,4 +447,3 @@ Avoid:
    - run/review
    - Library output
    - Tech Tree next step
-

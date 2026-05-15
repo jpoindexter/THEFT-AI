@@ -19,6 +19,7 @@
 - Keep all runtime data in `paperclip/`; do not build new final product surface in `app/`.
 - Any new UI must make Paperclip feel like THEFT: company, Operator, departments, tasks, Library, Tech Tree, decisions.
 - Agent roster, invocations, adapters, costs, tools, and skills belong in Admin, Advanced, or Diagnostics surfaces unless needed for the immediate task.
+- Use `BUILD-FROM-THIS/VISUAL-UX-REFERENCES.md` for the current visual target: warm-white enterprise creation workspace, MagicPath-style command-to-canvas flow, Sana-like product restraint.
 
 ## Phase 0 - XHIGH Synthesis Gate
 
@@ -28,6 +29,7 @@
 - [x] UX004 [XHIGH] Link UX direction, prompts, and task list from `BUILD-FROM-THIS/README.md`.
 - [x] UX005 [XHIGH] Define anti-clone gates in `BUILD-FROM-THIS/UX-BUILD-TASKS.md` so the product does not drift into Paperclip, Cofounder, or Hyperagent mimicry.
 - [x] UX006 [XHIGH] Add the UX execution gate to `BUILD-FROM-THIS/TASKS.md`.
+- [x] UX007 [XHIGH] Document MagicPath frames, local Desktop refs, and Sana visual direction in `BUILD-FROM-THIS/VISUAL-UX-REFERENCES.md`.
 
 ## Phase 1 - HIGH Happy Path Implementation
 
@@ -63,6 +65,8 @@ Goal: a founder can create a company, see THEFT assemble it, land in Command Cen
 - [ ] UX061 [HIGH] [US6] Make roadmap nodes show department owner, dependencies, state, evidence, and next action.
 - [ ] UX062 [HIGH] [US6] Add focused tests in `paperclip/ui/src/pages/GoalDetail.test.tsx` or helper tests for roadmap ordering.
 
+- [ ] UX063 [HIGH] [US6] Apply the visual reference decision to Tech Tree: warm-white canvas, left Operator/task context, selected-node inspector, and evidence-first roadmap nodes.
+
 ## Phase 3 - MEDIUM Screen Generation And Polish
 
 - [ ] UX070 [MEDIUM] Run Prompt 2 from `BUILD-FROM-THIS/UX-SCREEN-PROMPTS.md` for first-run onboarding variants.
@@ -75,6 +79,7 @@ Goal: a founder can create a company, see THEFT assemble it, land in Command Cen
 - [ ] UX077 [MEDIUM] Run Prompt 9 against every accepted screen and reject anything that reads like a Paperclip, Cofounder, or Hyperagent clone.
 - [ ] UX078 [MEDIUM] Convert accepted screens into implementation deltas with Prompt 10 and save decisions back into `BUILD-FROM-THIS/UX-DIRECTION.md` or this file.
 - [ ] UX079 [MEDIUM] Verify desktop, tablet, and mobile layouts for onboarding, Command Center, Library, and task review.
+- [ ] UX080 [MEDIUM] Run a visual pass on Command Center, Department Workspace, Library, and Tech Tree against `VISUAL-UX-REFERENCES.md`: light/cream shell, canvas-first structure, artifact previews, restrained accents.
 
 ## Phase 4 - LOW Copy And Mechanical Cleanup
 
