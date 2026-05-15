@@ -194,7 +194,7 @@ describe("Dashboard", () => {
     document.body.innerHTML = "";
   });
 
-  it("renders the THEFT Command Center with bottleneck, departments, Operator, Tech Tree, and Library outputs", async () => {
+  it("renders THEFT Mission Control with objective, constraints, strategy map, decisions, outcomes, and Operator dock", async () => {
     const rendered = renderDashboard();
     root = rendered.root;
 
@@ -204,14 +204,19 @@ describe("Dashboard", () => {
     });
 
     const text = rendered.container.textContent ?? "";
-    expect(mockSetBreadcrumbs).toHaveBeenCalledWith([{ label: "Command Center" }]);
-    expect(text).toContain("Current bottleneck");
+    expect(mockSetBreadcrumbs).toHaveBeenCalledWith([{ label: "Mission Control" }]);
+    expect(text).toContain("Objective");
+    expect(text).toContain("Launch first offer");
+    expect(text).toContain("Next Move");
     expect(text).toContain("Blocked task");
     expect(text).toContain("Unblock launch page");
-    expect(text).toContain("Departments");
-    expect(text).toContain("Operator tray");
-    expect(text).toContain("Tech tree");
-    expect(text).toContain("Latest Library outputs");
+    expect(text).toContain("Strategy map");
+    expect(text).toContain("Constraints");
+    expect(text).toContain("Decisions");
+    expect(text).toContain("Execution state");
+    expect(text).toContain("Outcomes");
+    expect(text).toContain("Operator dock");
+    expect(text).toContain("Tech Tree");
     expect(text).not.toContain("Paperclip agents and assigned issues");
     expect(text).not.toContain("Create Paperclip task");
   });

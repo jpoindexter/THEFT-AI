@@ -1,21 +1,22 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { Link } from "@/lib/router";
 import { useMutation, useQueries, useQuery, useQueryClient } from "@tanstack/react-query";
-import type { Agent, Issue, IssueDocument, IssueThreadInteraction } from "@paperclipai/shared";
+import type { Agent, Goal, Issue, IssueDocument, IssueThreadInteraction } from "@paperclipai/shared";
 import {
-  AlertCircle,
   ArrowRight,
   Bot,
   Building2,
   CheckCircle2,
+  CircleDot,
   FileText,
-  GitBranch,
-  Inbox,
   Library,
-  MessageSquarePlus,
+  PanelRightClose,
+  PanelRightOpen,
   Route,
+  Send,
   Sparkles,
-  type LucideIcon,
+  Target,
+  X,
 } from "lucide-react";
 import { agentsApi } from "../api/agents";
 import { approvalsApi } from "../api/approvals";
@@ -42,6 +43,8 @@ import {
   getPendingInteractionsByIssue,
   getRoadmapGoals,
   parseCompanyProfileSummary,
+  type CompanyBottleneck,
+  type DepartmentCanvasRow,
 } from "../lib/theft-canvas";
 
 const ATTENTION_INTERACTION_ISSUE_LIMIT = 12;
@@ -56,9 +59,13 @@ function formatStatusLabel(status: string) {
 }
 
 function summarizeAgent(agent: Agent | null) {
-  if (!agent) return "No agent assigned";
+  if (!agent) return "No lead assigned";
   const title = agent.title ? `${agent.title} · ` : "";
   return `${title}${agent.status}`;
+}
+
+function issuePriority(issue: Issue) {
+  return (issue.priority ?? "medium").replace(/_/g, " ");
 }
 
 export function Dashboard() {
@@ -67,10 +74,11 @@ export function Dashboard() {
   const { setBreadcrumbs } = useBreadcrumbs();
   const queryClient = useQueryClient();
   const [operatorDraft, setOperatorDraft] = useState("");
+  const [operatorOpen, setOperatorOpen] = useState(false);
   const [selectedDepartmentKey, setSelectedDepartmentKey] = useState("engineering");
 
   useEffect(() => {
-    setBreadcrumbs([{ label: "Command Center" }]);
+    setBreadcrumbs([{ label: "Mission Control" }]);
   }, [setBreadcrumbs]);
 
   const { data: agents, isLoading: agentsLoading } = useQuery({
@@ -110,6 +118,21 @@ export function Dashboard() {
   const attentionIssues = useMemo(() => getAttentionIssues(issues ?? []), [issues]);
   const roadmapGoals = useMemo(() => getRoadmapGoals(goals ?? []), [goals]);
   const openIssues = (issues ?? []).filter((issue) => !["done", "cancelled"].includes(issue.status));
+  const reviewIssues = attentionIssues.filter(
+    (issue) => issue.status === "in_review" || issue.productivityReview,
+  );
+  const blockedIssues = attentionIssues.filter(
+    (issue) => issue.status === "blocked" || issue.successfulRunHandoff?.required,
+  );
+  const setupTodoCount = profile.setupItems.filter((item) => item.status === "todo").length;
+  const objectiveTitle =
+    roadmapGoals.find((goal) => goal.level === "company")?.title ??
+    roadmapGoals[0]?.title ??
+    "Choose the first company outcome";
+  const objectiveDetail =
+    roadmapGoals.find((goal) => goal.level === "company")?.description ??
+    profile.brief ??
+    "Turn strategy into department work, reviewable outputs, and durable company memory.";
   const nextTasks = [...openIssues]
     .sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime())
     .slice(0, 5);
@@ -180,7 +203,7 @@ export function Dashboard() {
       return issuesApi.create(selectedCompanyId, {
         title,
         description: [
-          `Created from THEFT Operator tray for ${selectedDepartment.title}.`,
+          `Created from THEFT Operator dock for ${selectedDepartment.title}.`,
           operator ? `Operator: ${operator.name}` : null,
         ].filter(Boolean).join("\n"),
         status: "todo",
@@ -204,221 +227,457 @@ export function Dashboard() {
       return (
         <EmptyState
           icon={Building2}
-          message="Create your first company to open the operator canvas."
+          message="Create your first company to open Mission Control."
           action="Start Onboarding"
           onAction={openOnboarding}
         />
       );
     }
-    return <EmptyState icon={Building2} message="Select a company to open the operator canvas." />;
+    return <EmptyState icon={Building2} message="Select a company to open Mission Control." />;
   }
 
   if (agentsLoading || issuesLoading || !selectedCompany) {
     return <PageSkeleton variant="dashboard" />;
   }
 
-  const setupDoneCount = profile.setupItems.filter((item) => item.status === "done").length;
-  const setupTodoCount = profile.setupItems.filter((item) => item.status === "todo").length;
+  const reviewCount = (approvals?.length ?? 0) + pendingInteractions.length + reviewIssues.length;
 
   return (
-    <div className="mx-auto max-w-[1500px] space-y-5 text-foreground">
-      <section className="border border-border bg-card p-4  sm:p-5">
-        <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-          <div className="min-w-0">
-            <div className="flex flex-wrap items-center gap-2">
-              <Badge variant="outline" className="rounded-md border-border bg-card/70">
-                THEFT company
-              </Badge>
-              {profile.stage ? (
-                <Badge variant="secondary" className="rounded-md bg-primary/15 text-primary">
-                  {THEFT_STAGE_LABELS[profile.stage]}
-                </Badge>
-              ) : null}
-            </div>
-            <h1 className="mt-3 break-words text-2xl font-semibold tracking-normal text-foreground">
-              {selectedCompany.name}
-            </h1>
-            <p className="mt-2 max-w-3xl text-sm leading-6 text-muted-foreground">
-              {profile.brief ?? "Company profile is ready for onboarding notes, operating context, and roadmap decisions."}
-            </p>
-          </div>
-          <div className="grid min-w-[220px] grid-cols-3 gap-2 text-center">
-            <CanvasStat value={departmentRows.filter((department) => department.agent).length} label="departments" />
-            <CanvasStat value={openIssues.length} label="open tasks" />
-            <CanvasStat value={(approvals?.length ?? 0) + pendingInteractions.length} label="reviews" />
-          </div>
-        </div>
-        <div className="mt-4 grid gap-3 md:grid-cols-3">
-          <SummaryPill icon={Bot} label="Operator" value={operator ? `${operator.name} · ${operator.status}` : "Not seeded"} />
-          <SummaryPill
-            icon={CheckCircle2}
-            label="Setup"
-            value={profile.setupItems.length ? `${setupDoneCount} done · ${setupTodoCount} open` : "No setup profile"}
+    <div className="mx-auto max-w-[1600px] space-y-4 pb-24 text-foreground">
+      <section className={cn("grid gap-4", operatorOpen && "xl:grid-cols-[minmax(0,1fr)_380px]")}>
+        <div className="space-y-4">
+          <ObjectiveHeader
+            companyName={selectedCompany.name}
+            stage={profile.stage ? THEFT_STAGE_LABELS[profile.stage] : null}
+            objective={objectiveTitle}
+            detail={objectiveDetail}
+            departments={departmentRows}
+            reviewCount={reviewCount}
+            outcomeCount={latestLibraryDocuments.length}
           />
-          <SummaryPill icon={GitBranch} label="Roadmap" value={`${roadmapGoals.length} active goals`} />
-        </div>
-        <BottleneckPanel bottleneck={bottleneck} />
-      </section>
 
-      <section className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_360px]">
-        <div className="space-y-5">
-          <div className="border border-border bg-card p-4  ">
-            <div className="mb-3 flex items-center justify-between gap-3">
-              <div>
-                <h2 className="text-base font-semibold">Departments</h2>
-                <p className="text-sm text-muted-foreground">Parallel work lanes turning Operator intent into company artifacts.</p>
-              </div>
-            </div>
-            <div className="grid gap-3 bg-[linear-gradient(color-mix(in_oklab,var(--theft-sand)_8%,transparent)_1px,transparent_1px),linear-gradient(90deg,color-mix(in_oklab,var(--theft-sand)_8%,transparent)_1px,transparent_1px)] bg-[size:24px_24px] p-2 md:grid-cols-2">
-              {departmentRows.map((department) => (
-                <Link
-                  key={department.key}
-                  to={`/departments/${department.key}`}
-                  className="group block border border-border bg-card/90 p-3 text-inherit no-underline  transition-colors hover:border-primary/70 hover:bg-accent/40"
-                >
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="min-w-0 border-l-2 border-primary/70 pl-3">
-                      <h3 className="truncate text-sm font-medium group-hover:text-primary">{department.title}</h3>
-                      <p className="mt-1 truncate text-xs text-muted-foreground">
-                        {summarizeAgent(department.agent)}
-                      </p>
-                    </div>
-                    <Badge variant={department.activeCount > 0 ? "default" : "outline"} className="rounded-md">
-                      {department.activeCount} open
-                    </Badge>
-                  </div>
-                  <div className="mt-3 grid grid-cols-3 gap-2 text-xs text-muted-foreground">
-                    <span>{department.reviewCount} review</span>
-                    <span>{department.doneCount} outputs</span>
-                    <span>{department.issues.length} tasks</span>
-                  </div>
-                  <div className="mt-3 space-y-2">
-                    {department.issues.slice(0, 2).map((issue) => (
-                      <div key={issue.id} className="flex min-w-0 items-center gap-2 text-xs">
-                        <StatusIcon status={issue.status} blockerAttention={issue.blockerAttention} />
-                        <span className="truncate">{issue.title}</span>
-                      </div>
-                    ))}
-                    {department.issues.length === 0 ? (
-                      <p className="text-xs text-muted-foreground">No assigned tasks yet.</p>
-                    ) : null}
-                  </div>
-                </Link>
-              ))}
-            </div>
-          </div>
-
-          <div className="grid gap-5 lg:grid-cols-2">
-            <TechTreePanel goals={roadmapGoals} nextTasks={nextTasks} />
-            <AttentionPanel
-              issues={attentionIssues}
-              approvalsCount={approvals?.length ?? 0}
-              interactionsCount={pendingInteractions.length}
+          <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_380px]">
+            <StrategyMapPanel
+              objective={objectiveTitle}
+              goals={roadmapGoals}
+              departments={departmentRows}
+              nextTasks={nextTasks}
             />
+
+            <aside className="space-y-4">
+              <NextMovePanel bottleneck={bottleneck} />
+              <ConstraintsPanel
+                approvalsCount={approvals?.length ?? 0}
+                interactionsCount={pendingInteractions.length}
+                blockedCount={blockedIssues.length}
+                setupTodoCount={setupTodoCount}
+                outcomeCount={latestLibraryDocuments.length}
+              />
+              <DecisionsPanel
+                reviewIssues={reviewIssues}
+                approvalsCount={approvals?.length ?? 0}
+                interactionsCount={pendingInteractions.length}
+              />
+              <ExecutionStatePanel departments={departmentRows} />
+              <OutcomesPanel documents={latestLibraryDocuments} />
+            </aside>
           </div>
         </div>
 
-        <aside className="space-y-5">
-          <div className="border border-border bg-card p-4  ">
-            <div className="flex items-start gap-3">
-              <div className="mt-0.5 rounded-md bg-primary/10 p-2 text-primary">
-                <MessageSquarePlus className="h-4 w-4" />
-              </div>
-              <div>
-                <h2 className="text-base font-semibold">Operator tray</h2>
-                <p className="mt-1 text-sm text-muted-foreground">
-                  Ask the Operator to route work to the right department.
-                </p>
-              </div>
-            </div>
-            <div className="mt-4 space-y-3">
-              <div className="grid grid-cols-2 gap-2">
-                {departmentRows.map((department) => (
-                  <button
-                    key={department.key}
-                    type="button"
-                    onClick={() => setSelectedDepartmentKey(department.key)}
-                    className={cn(
-                      "rounded-md border px-3 py-2 text-left text-xs transition-colors",
-                      selectedDepartmentKey === department.key
-                        ? "border-primary bg-primary/15 text-primary"
-                        : "border-border bg-card/70 hover:bg-accent/40",
-                    )}
-                  >
-                    <span className="block truncate font-medium">{department.title}</span>
-                    <span className="mt-0.5 block truncate text-muted-foreground">
-                      {department.agent?.name ?? "No lead"}
-                    </span>
-                  </button>
-                ))}
-              </div>
-              <Textarea
-                value={operatorDraft}
-                onChange={(event) => setOperatorDraft(event.target.value)}
-                placeholder="Ask Operator to create the next concrete task..."
-                className="min-h-28 resize-none"
-              />
-              {createTaskMutation.error ? (
-                <p className="text-sm text-destructive">{createTaskMutation.error.message}</p>
-              ) : null}
-              <Button
-                className="w-full"
-                disabled={!operatorDraft.trim() || createTaskMutation.isPending}
-                onClick={() => createTaskMutation.mutate()}
-              >
-                <Sparkles className="h-4 w-4" />
-                {createTaskMutation.isPending ? "Routing task..." : "Route task"}
-              </Button>
-            </div>
-          </div>
-
-          <LibraryOutputsPanel documents={latestLibraryDocuments} />
-
-          <div className="border border-border bg-card p-4  ">
-            <h2 className="text-base font-semibold">Next task area</h2>
-            <div className="mt-3 divide-y divide-border border border-border">
-              {nextTasks.length === 0 ? (
-                <p className="p-3 text-sm text-muted-foreground">No active tasks yet.</p>
-              ) : (
-                nextTasks.map((issue) => (
-                  <Link
-                    key={issue.id}
-                    to={issuePath(issue)}
-                    className="flex items-start gap-2 p-3 text-inherit no-underline transition-colors hover:bg-accent/40"
-                  >
-                    <StatusIcon status={issue.status} blockerAttention={issue.blockerAttention} className="mt-0.5" />
-                    <span className="min-w-0 flex-1">
-                      <span className="line-clamp-2 text-sm">{issue.title}</span>
-                      <span className="mt-1 block text-xs text-muted-foreground">
-                        {issue.identifier ?? issue.id.slice(0, 8)} · {formatStatusLabel(issue.status)} · {timeAgo(issue.updatedAt)}
-                      </span>
-                    </span>
-                  </Link>
-                ))
-              )}
-            </div>
-          </div>
-        </aside>
+        {operatorOpen ? (
+          <OperatorDrawer
+            operator={operator}
+            departments={departmentRows}
+            selectedDepartmentKey={selectedDepartmentKey}
+            setSelectedDepartmentKey={setSelectedDepartmentKey}
+            operatorDraft={operatorDraft}
+            setOperatorDraft={setOperatorDraft}
+            createTask={() => createTaskMutation.mutate()}
+            error={createTaskMutation.error?.message}
+            isPending={createTaskMutation.isPending}
+            canSubmit={!!operatorDraft.trim()}
+            nextMove={bottleneck}
+            onClose={() => setOperatorOpen(false)}
+          />
+        ) : null}
       </section>
+
+      <OperatorDock
+        open={operatorOpen}
+        onToggle={() => setOperatorOpen((value) => !value)}
+        operatorDraft={operatorDraft}
+        setOperatorDraft={setOperatorDraft}
+        createTask={() => createTaskMutation.mutate()}
+        isPending={createTaskMutation.isPending}
+        canSubmit={!!operatorDraft.trim()}
+      />
     </div>
   );
 }
 
-function BottleneckPanel({ bottleneck }: { bottleneck: ReturnType<typeof getCurrentBottleneck> }) {
-  const toneClass =
-    bottleneck.tone === "attention"
-      ? "border-amber-500/40 bg-amber-500/10 text-amber-700 dark:text-amber-300"
-      : bottleneck.tone === "review"
-        ? "border-primary/30 bg-primary/10 text-primary"
-        : "border-border bg-background text-foreground";
+function Panel({
+  children,
+  className,
+}: {
+  children: ReactNode;
+  className?: string;
+}) {
+  return (
+    <section className={cn("rounded-[10px] border border-border bg-card p-4 md:p-5", className)}>
+      {children}
+    </section>
+  );
+}
+
+function ObjectiveHeader({
+  companyName,
+  stage,
+  objective,
+  detail,
+  departments,
+  reviewCount,
+  outcomeCount,
+}: {
+  companyName: string;
+  stage: string | null;
+  objective: string;
+  detail: string;
+  departments: DepartmentCanvasRow[];
+  reviewCount: number;
+  outcomeCount: number;
+}) {
+  const activeDepartments = departments.filter((department) => department.agent).length;
+
+  return (
+    <Panel className="space-y-5">
+      <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+        <div className="min-w-0">
+          <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+            <Badge variant="outline" className="rounded-[10px] border-border bg-card text-foreground">
+              Mission Control
+            </Badge>
+            <span>{companyName}</span>
+            {stage ? <span>{stage}</span> : null}
+          </div>
+          <div className="mt-4 flex items-start gap-4">
+            <Target className="mt-1 h-5 w-5 shrink-0 text-foreground" />
+            <div className="min-w-0">
+              <p className="text-xs uppercase tracking-normal text-muted-foreground">Objective</p>
+              <h1 className="mt-1 max-w-5xl break-words text-2xl font-normal leading-tight text-foreground md:text-3xl">
+                {objective}
+              </h1>
+              <p className="mt-3 max-w-3xl text-sm leading-6 text-muted-foreground">{detail}</p>
+            </div>
+          </div>
+        </div>
+        <div className="grid min-w-[250px] grid-cols-3 gap-2">
+          <MissionStat value={activeDepartments} label="departments" />
+          <MissionStat value={reviewCount} label="review" />
+          <MissionStat value={outcomeCount} label="outcomes" />
+        </div>
+      </div>
+    </Panel>
+  );
+}
+
+function MissionStat({ value, label }: { value: number; label: string }) {
+  return (
+    <div className="rounded-[10px] border border-border bg-secondary px-3 py-3 text-center">
+      <p className="text-xl font-normal tabular-nums">{value}</p>
+      <p className="mt-1 text-xs text-muted-foreground">{label}</p>
+    </div>
+  );
+}
+
+function StrategyMapPanel({
+  objective,
+  goals,
+  departments,
+  nextTasks,
+}: {
+  objective: string;
+  goals: Goal[];
+  departments: DepartmentCanvasRow[];
+  nextTasks: Issue[];
+}) {
+  const tracks = goals.slice(0, 3);
+  const fallbackTracks = ["Define and de-risk offer", "Build proof", "Acquire first users"];
+  const visibleTracks = tracks.length > 0 ? tracks.map((goal) => goal.title) : fallbackTracks;
+
+  return (
+    <Panel className="min-h-[560px]">
+      <div className="mb-5 flex items-center justify-between gap-3">
+        <div>
+          <h2 className="text-base font-normal">Strategy map</h2>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Objective to departments, tasks, and Library artifacts.
+          </p>
+        </div>
+        <Link to="/goals" className="text-sm text-muted-foreground no-underline hover:text-foreground">
+          Tech Tree
+        </Link>
+      </div>
+
+      <div className="rounded-[10px] border border-border bg-background p-4">
+        <div className="mx-auto max-w-xl rounded-[10px] border border-foreground bg-secondary px-4 py-3 text-center">
+          <p className="text-xs uppercase tracking-normal text-muted-foreground">Current objective</p>
+          <p className="mt-1 text-sm text-foreground">{objective}</p>
+        </div>
+
+        <div className="mx-auto my-4 h-6 w-px bg-border" />
+
+        <div className="grid gap-3 md:grid-cols-3">
+          {visibleTracks.map((track) => (
+            <div key={track} className="rounded-[10px] border border-border bg-card px-3 py-3 text-center">
+              <p className="line-clamp-2 text-sm">{track}</p>
+            </div>
+          ))}
+        </div>
+
+        <div className="my-4 h-px bg-border" />
+
+        <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+          {departments.map((department) => (
+            <Link
+              key={department.key}
+              to={`/departments/${department.key}`}
+              className="group rounded-[10px] border border-border bg-card p-3 text-inherit no-underline transition-colors hover:border-foreground"
+            >
+              <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0">
+                  <h3 className="truncate text-sm font-normal group-hover:text-foreground">{department.title}</h3>
+                  <p className="mt-1 truncate text-xs text-muted-foreground">{summarizeAgent(department.agent)}</p>
+                </div>
+                <Badge variant={department.activeCount > 0 ? "default" : "outline"} className="rounded-[10px]">
+                  {department.activeCount} open
+                </Badge>
+              </div>
+              <div className="mt-3 grid grid-cols-3 gap-2 text-xs text-muted-foreground">
+                <span>{department.reviewCount} review</span>
+                <span>{department.doneCount} outputs</span>
+                <span>{department.issues.length} tasks</span>
+              </div>
+              <div className="mt-3 min-h-10">
+                {department.nextIssue ? (
+                  <div className="flex min-w-0 items-start gap-2 text-xs">
+                    <StatusIcon status={department.nextIssue.status} blockerAttention={department.nextIssue.blockerAttention} className="mt-0.5" />
+                    <span className="line-clamp-2">{department.nextIssue.title}</span>
+                  </div>
+                ) : (
+                  <p className="text-xs text-muted-foreground">No assigned tasks yet.</p>
+                )}
+              </div>
+            </Link>
+          ))}
+        </div>
+
+        <div className="mt-4 rounded-[10px] border border-border bg-secondary p-3">
+          <div className="flex items-center justify-between gap-3">
+            <p className="text-xs uppercase tracking-normal text-muted-foreground">Available next work</p>
+            <Route className="h-4 w-4 text-muted-foreground" />
+          </div>
+          <div className="mt-3 grid gap-2 md:grid-cols-3">
+            {(nextTasks.length > 0 ? nextTasks.slice(0, 3) : []).map((issue) => (
+              <Link
+                key={issue.id}
+                to={issuePath(issue)}
+                className="rounded-[10px] border border-border bg-card px-3 py-2 text-inherit no-underline hover:border-foreground"
+              >
+                <p className="line-clamp-1 text-sm">{issue.title}</p>
+                <p className="mt-1 text-xs text-muted-foreground">{formatStatusLabel(issue.status)}</p>
+              </Link>
+            ))}
+            {nextTasks.length === 0 ? (
+              <p className="text-sm text-muted-foreground">No active tasks yet. Ask Operator for the first move.</p>
+            ) : null}
+          </div>
+        </div>
+      </div>
+    </Panel>
+  );
+}
+
+function ConstraintsPanel({
+  approvalsCount,
+  interactionsCount,
+  blockedCount,
+  setupTodoCount,
+  outcomeCount,
+}: {
+  approvalsCount: number;
+  interactionsCount: number;
+  blockedCount: number;
+  setupTodoCount: number;
+  outcomeCount: number;
+}) {
+  const constraints = [
+    { label: "Founder review", value: approvalsCount + interactionsCount, detail: "Decisions and questions" },
+    { label: "Blocked work", value: blockedCount, detail: "Tasks unable to move" },
+    { label: "Setup gaps", value: setupTodoCount, detail: "Company context missing" },
+    { label: "Proof", value: outcomeCount, detail: "Recent Library outputs" },
+  ];
+
+  return (
+    <Panel>
+      <h2 className="text-base font-normal">Constraints</h2>
+      <div className="mt-3 grid grid-cols-2 gap-2">
+        {constraints.map((constraint) => (
+          <div key={constraint.label} className="rounded-[10px] border border-border bg-secondary p-3">
+            <p className="text-xs text-muted-foreground">{constraint.label}</p>
+            <p className="mt-2 text-2xl font-normal tabular-nums">{constraint.value}</p>
+            <p className="mt-1 text-xs text-muted-foreground">{constraint.detail}</p>
+          </div>
+        ))}
+      </div>
+    </Panel>
+  );
+}
+
+function DecisionsPanel({
+  reviewIssues,
+  approvalsCount,
+  interactionsCount,
+}: {
+  reviewIssues: Issue[];
+  approvalsCount: number;
+  interactionsCount: number;
+}) {
+  const hasDecisions = approvalsCount > 0 || interactionsCount > 0 || reviewIssues.length > 0;
+
+  return (
+    <Panel>
+      <div className="flex items-center justify-between gap-3">
+        <h2 className="text-base font-normal">Decisions</h2>
+        <Link to="/inbox" className="text-sm text-muted-foreground no-underline hover:text-foreground">
+          View all
+        </Link>
+      </div>
+      <div className="mt-3 divide-y divide-border rounded-[10px] border border-border">
+        {approvalsCount > 0 ? (
+          <Link to="/approvals/pending" className="flex items-center justify-between gap-3 p-3 text-inherit no-underline hover:bg-accent">
+            <span>
+              <span className="block text-sm">Pending approvals</span>
+              <span className="text-xs text-muted-foreground">Founder decision required</span>
+            </span>
+            <Badge variant="outline" className="rounded-[10px]">{approvalsCount}</Badge>
+          </Link>
+        ) : null}
+        {interactionsCount > 0 ? (
+          <Link to="/inbox/mine" className="flex items-center justify-between gap-3 p-3 text-inherit no-underline hover:bg-accent">
+            <span>
+              <span className="block text-sm">Agent questions</span>
+              <span className="text-xs text-muted-foreground">Clarifications waiting</span>
+            </span>
+            <Badge variant="outline" className="rounded-[10px]">{interactionsCount}</Badge>
+          </Link>
+        ) : null}
+        {reviewIssues.slice(0, 3).map((issue) => (
+          <Link key={issue.id} to={issuePath(issue)} className="flex items-start gap-2 p-3 text-inherit no-underline hover:bg-accent">
+            <StatusIcon status={issue.status} blockerAttention={issue.blockerAttention} className="mt-0.5" />
+            <span className="min-w-0">
+              <span className="line-clamp-1 text-sm">{issue.title}</span>
+              <span className="mt-1 block text-xs text-muted-foreground">Review output · {issuePriority(issue)}</span>
+            </span>
+          </Link>
+        ))}
+        {!hasDecisions ? (
+          <div className="flex items-center gap-2 p-3 text-sm text-muted-foreground">
+            <CheckCircle2 className="h-4 w-4" />
+            No founder decision pending.
+          </div>
+        ) : null}
+      </div>
+    </Panel>
+  );
+}
+
+function ExecutionStatePanel({ departments }: { departments: DepartmentCanvasRow[] }) {
+  return (
+    <Panel>
+      <h2 className="text-base font-normal">Execution state</h2>
+      <div className="mt-3 space-y-3">
+        {departments.map((department) => {
+          const total = Math.max(department.issues.length, 1);
+          const score = Math.round(((department.doneCount + department.reviewCount * 0.7 + department.activeCount * 0.35) / total) * 100);
+          return (
+            <Link
+              key={department.key}
+              to={`/departments/${department.key}`}
+              className="block text-inherit no-underline"
+            >
+              <div className="flex items-center justify-between gap-3 text-sm">
+                <span className="truncate">{department.title}</span>
+                <span className="text-muted-foreground tabular-nums">{score}%</span>
+              </div>
+              <div className="mt-2 h-1.5 rounded-full bg-secondary">
+                <div className="h-full rounded-full bg-foreground" style={{ width: `${Math.min(score, 100)}%` }} />
+              </div>
+            </Link>
+          );
+        })}
+      </div>
+    </Panel>
+  );
+}
+
+function OutcomesPanel({
+  documents,
+}: {
+  documents: Array<{ issue: Issue; document: IssueDocument }>;
+}) {
+  return (
+    <Panel>
+      <div className="flex items-center justify-between gap-3">
+        <div>
+          <h2 className="text-base font-normal">Outcomes</h2>
+          <p className="mt-1 text-sm text-muted-foreground">Latest Library artifacts and evidence.</p>
+        </div>
+        <Link to="/library" className="text-sm text-muted-foreground no-underline hover:text-foreground">
+          Library
+        </Link>
+      </div>
+      <div className="mt-3 grid gap-2">
+        {documents.map(({ issue, document }) => (
+          <Link
+            key={`${issue.id}:${document.key}`}
+            to={`/library?issue=${encodeURIComponent(issue.id)}&document=${encodeURIComponent(document.key)}`}
+            className="flex items-start gap-2 rounded-[10px] border border-border bg-secondary p-3 text-inherit no-underline hover:border-foreground"
+          >
+            <FileText className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" />
+            <span className="min-w-0 flex-1">
+              <span className="line-clamp-1 text-sm">{document.title ?? document.key}</span>
+              <span className="mt-1 block line-clamp-1 text-xs text-muted-foreground">
+                {issue.identifier ?? issue.id.slice(0, 8)} · {timeAgo(document.updatedAt)}
+              </span>
+            </span>
+          </Link>
+        ))}
+        {documents.length === 0 ? (
+          <div className="flex items-center gap-2 rounded-[10px] border border-border bg-secondary p-3 text-sm text-muted-foreground">
+            <Library className="h-4 w-4" />
+            Outcomes will appear as departments publish work.
+          </div>
+        ) : null}
+      </div>
+    </Panel>
+  );
+}
+
+function NextMovePanel({ bottleneck }: { bottleneck: CompanyBottleneck }) {
   const content = (
-    <div className={cn("mt-4 flex items-start justify-between gap-3 border px-3 py-3  ", toneClass)}>
-      <span className="min-w-0">
-        <span className="block text-xs font-medium uppercase tracking-normal">Current bottleneck</span>
-        <span className="mt-1 block text-sm font-medium">{bottleneck.label}</span>
-        <span className="mt-1 block line-clamp-2 text-xs opacity-80">{bottleneck.detail}</span>
-      </span>
-      {bottleneck.issue ? <ArrowRight className="mt-1 h-4 w-4 shrink-0" /> : null}
+    <div className="rounded-[10px] border border-foreground bg-secondary p-4">
+      <p className="text-xs uppercase tracking-normal text-muted-foreground">Next Move</p>
+      <div className="mt-3 flex items-start gap-3">
+        <CircleDot className="mt-0.5 h-5 w-5 shrink-0 text-foreground" />
+        <span className="min-w-0">
+          <span className="block text-lg leading-tight">{bottleneck.label}</span>
+          <span className="mt-2 block text-sm leading-5 text-muted-foreground">{bottleneck.detail}</span>
+        </span>
+      </div>
+      <div className="mt-4 flex items-center justify-between gap-3 text-xs text-muted-foreground">
+        <span>{bottleneck.tone === "clear" ? "Ready for founder prompt" : "Recommended by current constraints"}</span>
+        <ArrowRight className="h-4 w-4" />
+      </div>
     </div>
   );
 
@@ -433,163 +692,140 @@ function BottleneckPanel({ bottleneck }: { bottleneck: ReturnType<typeof getCurr
   return content;
 }
 
-function CanvasStat({ value, label }: { value: number; label: string }) {
-  return (
-    <div className="border border-border bg-card/70 px-3 py-2">
-      <p className="text-lg font-semibold tabular-nums">{value}</p>
-      <p className="text-xs text-muted-foreground">{label}</p>
-    </div>
-  );
-}
-
-function SummaryPill({ icon: Icon, label, value }: { icon: LucideIcon; label: string; value: string }) {
-  return (
-    <div className="flex min-w-0 items-center gap-3 border border-border bg-card/70 px-3 py-2">
-      <Icon className="h-4 w-4 shrink-0 text-muted-foreground" />
-      <span className="min-w-0">
-        <span className="block text-xs text-muted-foreground">{label}</span>
-        <span className="block truncate text-sm">{value}</span>
-      </span>
-    </div>
-  );
-}
-
-function TechTreePanel({ goals, nextTasks }: { goals: ReturnType<typeof getRoadmapGoals>; nextTasks: Issue[] }) {
-  return (
-    <div className="border border-border bg-card p-4  ">
-      <div className="mb-3 flex items-center justify-between gap-3">
-        <div>
-          <h2 className="text-base font-semibold">Tech tree</h2>
-          <p className="text-sm text-muted-foreground">Company roadmap, dependencies, and next unlocks.</p>
-        </div>
-        <Route className="h-4 w-4 text-muted-foreground" />
-      </div>
-      <div className="space-y-3">
-        {goals.slice(0, 4).map((goal) => (
-          <Link key={goal.id} to={`/goals/${goal.id}`} className="block border border-border bg-card/80 p-3 text-inherit no-underline hover:border-primary/70 hover:bg-accent/40">
-            <div className="flex items-center justify-between gap-3">
-              <span className="truncate text-sm font-medium">{goal.title}</span>
-              <Badge variant="outline" className="rounded-md">{goal.status}</Badge>
-            </div>
-            <p className="mt-1 text-[11px] uppercase tracking-normal text-muted-foreground">
-              {goal.level} node{goal.parentId ? " · dependent" : " · root"}
-            </p>
-            {goal.description ? (
-              <p className="mt-1 line-clamp-2 text-xs text-muted-foreground">{goal.description}</p>
-            ) : null}
-          </Link>
-        ))}
-        {goals.length === 0 ? (
-          <div className="border border-dashed border-border p-3 text-sm text-muted-foreground">
-            No roadmap goals yet. Launch the first outcome to create the opening path.
-          </div>
-        ) : null}
-        {nextTasks[0] ? (
-          <Link to={issuePath(nextTasks[0])} className="flex items-center justify-between gap-3 text-sm text-primary no-underline hover:underline">
-            Open next task <ArrowRight className="h-4 w-4" />
-          </Link>
-        ) : null}
-      </div>
-    </div>
-  );
-}
-
-function LibraryOutputsPanel({
-  documents,
+function OperatorDrawer({
+  operator,
+  departments,
+  selectedDepartmentKey,
+  setSelectedDepartmentKey,
+  operatorDraft,
+  setOperatorDraft,
+  createTask,
+  error,
+  isPending,
+  canSubmit,
+  nextMove,
+  onClose,
 }: {
-  documents: Array<{ issue: Issue; document: IssueDocument }>;
+  operator: Agent | null;
+  departments: DepartmentCanvasRow[];
+  selectedDepartmentKey: string;
+  setSelectedDepartmentKey: (key: string) => void;
+  operatorDraft: string;
+  setOperatorDraft: (value: string) => void;
+  createTask: () => void;
+  error: string | undefined;
+  isPending: boolean;
+  canSubmit: boolean;
+  nextMove: CompanyBottleneck;
+  onClose: () => void;
 }) {
   return (
-    <div className="border border-border bg-card p-4  ">
-      <div className="mb-3 flex items-center justify-between gap-3">
+    <aside className="rounded-[10px] border border-border bg-card p-4 md:p-5">
+      <div className="flex items-start justify-between gap-3">
         <div>
-          <h2 className="text-base font-semibold">Latest Library outputs</h2>
-          <p className="text-sm text-muted-foreground">Recent docs created by the company.</p>
+          <p className="text-xs uppercase tracking-normal text-muted-foreground">Operator</p>
+          <h2 className="mt-1 text-lg font-normal">{operator?.name ?? "Operator"}</h2>
+          <p className="mt-1 text-sm text-muted-foreground">Context-aware routing and recommendations.</p>
         </div>
-        <Link to="/library" className="text-sm text-muted-foreground hover:text-foreground">
-          Library
-        </Link>
+        <Button variant="ghost" size="icon-sm" onClick={onClose} aria-label="Collapse Operator">
+          <X className="h-4 w-4" />
+        </Button>
       </div>
-      <div className="divide-y divide-border border border-border">
-        {documents.map(({ issue, document }) => (
-          <Link
-            key={`${issue.id}:${document.key}`}
-            to={`/library?issue=${encodeURIComponent(issue.id)}&document=${encodeURIComponent(document.key)}`}
-            className="flex items-start gap-2 p-3 text-inherit no-underline transition-colors hover:bg-accent/40"
-          >
-            <FileText className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" />
-            <span className="min-w-0 flex-1">
-              <span className="line-clamp-1 text-sm">{document.title ?? document.key}</span>
-              <span className="mt-1 block line-clamp-1 text-xs text-muted-foreground">
-                {issue.identifier ?? issue.id.slice(0, 8)} · {timeAgo(document.updatedAt)}
-              </span>
-            </span>
-          </Link>
-        ))}
-        {documents.length === 0 ? (
-          <div className="flex items-center gap-2 p-3 text-sm text-muted-foreground">
-            <Library className="h-4 w-4" />
-            Outputs will appear here as departments publish work.
-          </div>
-        ) : null}
+
+      <div className="mt-5 rounded-[10px] border border-border bg-secondary p-3">
+        <p className="text-xs uppercase tracking-normal text-muted-foreground">Recommended next move</p>
+        <p className="mt-2 text-sm">{nextMove.label}</p>
+        <p className="mt-2 text-xs leading-5 text-muted-foreground">{nextMove.detail}</p>
       </div>
-    </div>
+
+      <div className="mt-5">
+        <p className="text-xs uppercase tracking-normal text-muted-foreground">Route to department</p>
+        <div className="mt-2 grid grid-cols-2 gap-2">
+          {departments.map((department) => (
+            <button
+              key={department.key}
+              type="button"
+              onClick={() => setSelectedDepartmentKey(department.key)}
+              className={cn(
+                "rounded-[10px] border px-3 py-2 text-left text-xs transition-colors",
+                selectedDepartmentKey === department.key
+                  ? "border-foreground bg-secondary text-foreground"
+                  : "border-border bg-card text-muted-foreground hover:text-foreground",
+              )}
+            >
+              <span className="block truncate">{department.title}</span>
+              <span className="mt-0.5 block truncate">{department.agent?.name ?? "No lead"}</span>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div className="mt-5 space-y-3">
+        <Textarea
+          value={operatorDraft}
+          onChange={(event) => setOperatorDraft(event.target.value)}
+          placeholder="Ask Operator to create the next concrete task..."
+          className="min-h-32 resize-none rounded-[10px] border-border bg-secondary"
+        />
+        {error ? <p className="text-sm text-destructive">{error}</p> : null}
+        <Button className="w-full" disabled={!canSubmit || isPending} onClick={createTask}>
+          <Send className="h-4 w-4" />
+          {isPending ? "Routing..." : "Create task"}
+        </Button>
+        <div className="grid grid-cols-3 gap-2">
+          <Button variant="outline" size="sm">Explain</Button>
+          <Button variant="outline" size="sm">Compare</Button>
+          <Button variant="outline" size="sm">Review</Button>
+        </div>
+      </div>
+    </aside>
   );
 }
 
-function AttentionPanel({
-  issues,
-  approvalsCount,
-  interactionsCount,
+function OperatorDock({
+  open,
+  onToggle,
+  operatorDraft,
+  setOperatorDraft,
+  createTask,
+  isPending,
+  canSubmit,
 }: {
-  issues: Issue[];
-  approvalsCount: number;
-  interactionsCount: number;
+  open: boolean;
+  onToggle: () => void;
+  operatorDraft: string;
+  setOperatorDraft: (value: string) => void;
+  createTask: () => void;
+  isPending: boolean;
+  canSubmit: boolean;
 }) {
-  const hasAttention = issues.length > 0 || approvalsCount > 0 || interactionsCount > 0;
-
   return (
-    <div className="border border-border bg-card p-4  ">
-      <div className="mb-3 flex items-center justify-between gap-3">
-        <div>
-          <h2 className="text-base font-semibold">Attention queue</h2>
-          <p className="text-sm text-muted-foreground">Reviews, approvals, blocked tasks, and pending interactions.</p>
-        </div>
-        <AlertCircle className={cn("h-4 w-4", hasAttention ? "text-amber-500" : "text-muted-foreground")} />
-      </div>
-      <div className="mb-3 grid grid-cols-2 gap-2 text-sm">
-        <Link to="/approvals/pending" className="border border-border p-3 text-inherit no-underline hover:bg-accent/40">
-          <span className="block font-medium">{approvalsCount}</span>
-          <span className="text-xs text-muted-foreground">pending approvals</span>
-        </Link>
-        <Link to="/inbox/mine" className="border border-border p-3 text-inherit no-underline hover:bg-accent/40">
-          <span className="block font-medium">{interactionsCount}</span>
-          <span className="text-xs text-muted-foreground">agent questions</span>
-        </Link>
-      </div>
-      <div className="divide-y divide-border border border-border">
-        {issues.slice(0, 5).map((issue) => (
-          <Link
-            key={issue.id}
-            to={issuePath(issue)}
-            className="flex items-start gap-2 p-3 text-inherit no-underline transition-colors hover:bg-accent/40"
-          >
-            <StatusIcon status={issue.status} blockerAttention={issue.blockerAttention} className="mt-0.5" />
-            <span className="min-w-0 flex-1">
-              <span className="line-clamp-2 text-sm">{issue.title}</span>
-              <span className="mt-1 block text-xs text-muted-foreground">
-                {issue.status === "blocked" ? "Blocked" : issue.status === "in_review" ? "Needs review" : "Needs attention"}
-              </span>
-            </span>
-          </Link>
-        ))}
-        {issues.length === 0 ? (
-          <div className="flex items-center gap-2 p-3 text-sm text-muted-foreground">
-            <Inbox className="h-4 w-4" />
-            Nothing needs review right now.
-          </div>
-        ) : null}
-      </div>
+    <div className="fixed bottom-4 right-4 z-30 hidden w-[min(760px,calc(100vw-2rem))] items-center gap-2 rounded-[10px] border border-border bg-background p-2 md:flex">
+      <button
+        type="button"
+        onClick={onToggle}
+        className="flex shrink-0 items-center gap-2 rounded-[10px] border border-border bg-secondary px-3 py-2 text-left text-sm"
+      >
+        <Bot className="h-4 w-4" />
+        <span>
+          <span className="block text-xs text-muted-foreground">Operator dock</span>
+          <span className="block">{open ? "Expanded" : "Collapsed"}</span>
+        </span>
+        {open ? <PanelRightClose className="h-4 w-4" /> : <PanelRightOpen className="h-4 w-4" />}
+      </button>
+      <input
+        value={operatorDraft}
+        onChange={(event) => setOperatorDraft(event.target.value)}
+        placeholder="Ask Operator..."
+        className="min-w-0 flex-1 rounded-[10px] border border-border bg-secondary px-3 py-2 text-sm outline-none placeholder:text-muted-foreground focus:border-foreground"
+      />
+      <Button variant="outline" size="sm" onClick={onToggle}>
+        <Sparkles className="h-4 w-4" />
+        Explain
+      </Button>
+      <Button size="sm" disabled={!canSubmit || isPending} onClick={createTask}>
+        {isPending ? "Routing" : "Task"}
+      </Button>
     </div>
   );
 }

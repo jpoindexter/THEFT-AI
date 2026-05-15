@@ -13,15 +13,16 @@
 7. **`STYLE-TARGET-099.md`** — final visual style target: 099 terminal workbench, black/white/gray, mono, no neon/HUD skin
 8. **`GPT-IMAGE-SCREEN-PROMPTS.md`** — exact GPT Image prompts for Mission Control screens and visual acceptance criteria
 9. **`GPT-IMAGE-RENDER-DECISIONS.md`** — reviewed render set, structure references, drift warnings, and implementation order
-10. **`UX-SCREEN-PROMPTS.md`** — reusable prompts for generating and critiquing screen flows before implementation
-11. **`UX-POLISH-DECISIONS.md`** — accepted Phase 3 prompt outcomes and implementation deltas
-12. **`UX-BUILD-TASKS.md`** — model-lane task list for the UX build and smoke handoff
-13. **`ROADMAP.md`** — ordered slices. Sequential, not parallel.
-14. **`TASKS.md`** — concrete task list. Working file.
-15. **`STATUS.md`** — what actually exists vs is stubbed/broken (audit-derived)
-16. **`DECISIONS.md`** — locked choices, append-only, no re-litigating
-17. **`PAPERCLIP-HOST-PROMOTION.md`** — how Paperclip became tracked source in this repo
-18. **`SKILL-AUDIT.md`** — THEFT skill packs and default department mappings
+10. **`MVP-EXECUTION-PLAN.md`** — fastest path to a usable MVP, screen order, acceptance gates, and lightweight verification policy
+11. **`UX-SCREEN-PROMPTS.md`** — reusable prompts for generating and critiquing screen flows before implementation
+12. **`UX-POLISH-DECISIONS.md`** — accepted Phase 3 prompt outcomes and implementation deltas
+13. **`UX-BUILD-TASKS.md`** — model-lane task list for the UX build and smoke handoff
+14. **`ROADMAP.md`** — ordered slices. Sequential, not parallel.
+15. **`TASKS.md`** — concrete task list. Working file.
+16. **`STATUS.md`** — what actually exists vs is stubbed/broken (audit-derived)
+17. **`DECISIONS.md`** — locked choices, append-only, no re-litigating
+18. **`PAPERCLIP-HOST-PROMOTION.md`** — how Paperclip became tracked source in this repo
+19. **`SKILL-AUDIT.md`** — THEFT skill packs and default department mappings
 
 ## How to use this folder
 

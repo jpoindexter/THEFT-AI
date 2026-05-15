@@ -36,60 +36,60 @@
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
-  --radius-sm: 0.375rem;
-  --radius-md: 0.5rem;
-  --radius-lg: 0px;
-  --radius-xl: 0px;
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 10px;
+  --radius-xl: 10px;
 }
 
 :root {
   color-scheme: dark;
-  --radius: 0;
+  --radius: 10px;
   --theft-void: #000000;
-  --theft-slate: #12161e;
-  --theft-ash: #e6e8eb;
-  --theft-sand: #e7ded1;
-  --theft-purple: #785cff;
-  --theft-lime: #c6ff00;
-  --theft-cyan: #00d1c7;
-  --theft-line: color-mix(in oklab, var(--theft-sand) 18%, transparent);
-  --theft-line-strong: color-mix(in oklab, var(--theft-sand) 42%, transparent);
-  --theft-canvas: #080d11;
-  --theft-panel: #0b1016;
-  --theft-panel-raised: #101720;
+  --theft-slate: #1d1d1d;
+  --theft-ash: #ffffff;
+  --theft-sand: #ffffff;
+  --theft-purple: #888888;
+  --theft-lime: #ffffff;
+  --theft-cyan: #888888;
+  --theft-line: #383838;
+  --theft-line-strong: #383838;
+  --theft-canvas: #000000;
+  --theft-panel: #000000;
+  --theft-panel-raised: #1d1d1d;
   --font-nb-akademie: "NB Akademie", Montserrat, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   --font-nb-akademie-mono: "NB Akademie Mono", "Space Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
   --background: var(--theft-canvas);
-  --foreground: var(--theft-sand);
+  --foreground: var(--theft-ash);
   --card: var(--theft-panel);
-  --card-foreground: var(--theft-sand);
+  --card-foreground: var(--theft-ash);
   --popover: var(--theft-panel-raised);
-  --popover-foreground: var(--theft-sand);
-  --primary: var(--theft-lime);
-  --primary-foreground: #050807;
-  --secondary: #12161e;
-  --secondary-foreground: var(--theft-sand);
-  --muted: #151b24;
-  --muted-foreground: color-mix(in oklab, var(--theft-sand) 62%, transparent);
-  --accent: color-mix(in oklab, var(--theft-purple) 22%, transparent);
-  --accent-foreground: var(--theft-sand);
+  --popover-foreground: var(--theft-ash);
+  --primary: #ffffff;
+  --primary-foreground: #000000;
+  --secondary: #1d1d1d;
+  --secondary-foreground: #ffffff;
+  --muted: #1d1d1d;
+  --muted-foreground: #888888;
+  --accent: #1d1d1d;
+  --accent-foreground: #ffffff;
   --destructive: var(--theft-red);
   --theft-red: #ff5d5d;
   --destructive-foreground: var(--theft-ash);
   --border: var(--theft-line);
   --input: var(--theft-line-strong);
-  --ring: var(--theft-lime);
-  --chart-1: var(--theft-lime);
-  --chart-2: var(--theft-purple);
-  --chart-3: var(--theft-cyan);
-  --chart-4: var(--theft-ash);
-  --chart-5: var(--theft-red);
-  --sidebar: #050709;
-  --sidebar-foreground: var(--theft-sand);
-  --sidebar-primary: var(--theft-lime);
-  --sidebar-primary-foreground: #050807;
-  --sidebar-accent: color-mix(in oklab, var(--theft-purple) 20%, transparent);
-  --sidebar-accent-foreground: var(--theft-sand);
+  --ring: #ffffff;
+  --chart-1: #ffffff;
+  --chart-2: #cfcfcf;
+  --chart-3: #888888;
+  --chart-4: #555555;
+  --chart-5: #383838;
+  --sidebar: #000000;
+  --sidebar-foreground: #ffffff;
+  --sidebar-primary: #ffffff;
+  --sidebar-primary-foreground: #000000;
+  --sidebar-accent: #1d1d1d;
+  --sidebar-accent-foreground: #ffffff;
   --sidebar-border: var(--theft-line);
   --sidebar-ring: var(--ring);
   --chip-match-title-bg: oklch(0.97 0.02 265);
@@ -108,35 +108,35 @@
 
 .dark {
   --background: var(--theft-canvas);
-  --foreground: var(--theft-sand);
+  --foreground: var(--theft-ash);
   --card: var(--theft-panel);
-  --card-foreground: var(--theft-sand);
+  --card-foreground: var(--theft-ash);
   --popover: var(--theft-panel-raised);
-  --popover-foreground: var(--theft-sand);
-  --primary: var(--theft-lime);
-  --primary-foreground: #050807;
-  --secondary: #12161e;
-  --secondary-foreground: var(--theft-sand);
-  --muted: #151b24;
-  --muted-foreground: color-mix(in oklab, var(--theft-sand) 62%, transparent);
-  --accent: color-mix(in oklab, var(--theft-purple) 22%, transparent);
-  --accent-foreground: var(--theft-sand);
+  --popover-foreground: var(--theft-ash);
+  --primary: #ffffff;
+  --primary-foreground: #000000;
+  --secondary: #1d1d1d;
+  --secondary-foreground: #ffffff;
+  --muted: #1d1d1d;
+  --muted-foreground: #888888;
+  --accent: #1d1d1d;
+  --accent-foreground: #ffffff;
   --destructive: var(--theft-red);
   --destructive-foreground: var(--theft-ash);
   --border: var(--theft-line);
   --input: var(--theft-line-strong);
-  --ring: var(--theft-lime);
-  --chart-1: var(--theft-lime);
-  --chart-2: var(--theft-purple);
-  --chart-3: var(--theft-cyan);
-  --chart-4: var(--theft-ash);
-  --chart-5: var(--theft-red);
-  --sidebar: #050709;
-  --sidebar-foreground: var(--theft-sand);
-  --sidebar-primary: var(--theft-lime);
-  --sidebar-primary-foreground: #050807;
-  --sidebar-accent: color-mix(in oklab, var(--theft-purple) 20%, transparent);
-  --sidebar-accent-foreground: var(--theft-sand);
+  --ring: #ffffff;
+  --chart-1: #ffffff;
+  --chart-2: #cfcfcf;
+  --chart-3: #888888;
+  --chart-4: #555555;
+  --chart-5: #383838;
+  --sidebar: #000000;
+  --sidebar-foreground: #ffffff;
+  --sidebar-primary: #ffffff;
+  --sidebar-primary-foreground: #000000;
+  --sidebar-accent: #1d1d1d;
+  --sidebar-accent-foreground: #ffffff;
   --sidebar-border: var(--theft-line);
   --sidebar-ring: var(--ring);
   --chip-match-title-bg: oklch(0.27 0.04 265 / 0.5);
@@ -206,26 +206,22 @@
 
 .theft-shell {
   background:
-    radial-gradient(circle at 72% 12%, color-mix(in oklab, var(--theft-purple) 18%, transparent) 0, transparent 26rem),
-    radial-gradient(circle at 90% 40%, color-mix(in oklab, var(--theft-cyan) 10%, transparent) 0, transparent 22rem),
-    linear-gradient(180deg, #06090d 0%, var(--background) 100%);
+    linear-gradient(180deg, #000000 0%, var(--background) 100%);
 }
 
 .theft-main-surface {
   background:
-    linear-gradient(180deg, color-mix(in oklab, var(--theft-slate) 36%, transparent) 0%, transparent 18rem);
+    linear-gradient(180deg, color-mix(in oklab, var(--theft-slate) 28%, transparent) 0%, transparent 18rem);
 }
 
 .dark .theft-shell {
   background:
-    radial-gradient(circle at 72% 12%, color-mix(in oklab, var(--theft-purple) 18%, transparent) 0, transparent 26rem),
-    radial-gradient(circle at 90% 40%, color-mix(in oklab, var(--theft-cyan) 10%, transparent) 0, transparent 22rem),
-    linear-gradient(180deg, #06090d 0%, var(--background) 100%);
+    linear-gradient(180deg, #000000 0%, var(--background) 100%);
 }
 
 .dark .theft-main-surface {
   background:
-    linear-gradient(180deg, color-mix(in oklab, var(--theft-slate) 36%, transparent) 0%, transparent 18rem);
+    linear-gradient(180deg, color-mix(in oklab, var(--theft-slate) 28%, transparent) 0%, transparent 18rem);
 }
 
 /* Dark mode scrollbars */
