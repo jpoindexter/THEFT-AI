@@ -6,9 +6,11 @@
 
 THEFT is not an agent admin dashboard.
 
-THEFT is a local-first company operating system where a founder uses an Operator, departments, tasks, roadmap steps, approvals, and Library outputs to build and run a company.
+THEFT is a local-first company operating system where a founder uses Mission Control, an Operator, departments, tasks, roadmap steps, approvals, and Library outputs to build and run a company.
 
 Paperclip is the runtime. THEFT is the product experience.
+
+The current interface target is `MISSION-CONTROL-UX.md`: streamline the interface without deleting Paperclip/runtime capability.
 
 ## Source Inputs
 
@@ -19,7 +21,8 @@ Paperclip is the runtime. THEFT is the product experience.
 | Hyperagent screens | Polished agent admin, agent detail tabs, skills modal, invocation surfaces, Slack interaction, score/cost dashboards | Useful polish reference, but too close to generic agent-dashboard territory for THEFT's main surface. |
 | MagicPath frames | Prompt-to-canvas flow, persistent thread, parallel generation, selectable artifacts, libraries, share/publish | Use this as the interaction loop: Operator command -> department plan -> artifacts appear on canvas/Library. |
 | Local visual references | Light map/canvas layouts, dense SaaS panels, graph systems, premium white/cream workspaces | Use as visual direction for an operational company OS, not a decorative dashboard. |
-| Sana | Bright enterprise AI tone, agents for real work, company-wide platform credibility | Use the clean, warm-white enterprise feel. Do not copy marketing-page structure. |
+| Strategy-interface reference image | Mission-control, strategy execution, hierarchy, constraints, decisions, execution state, next move | Use as the information architecture for Mission Control. The UI must drive action, show tradeoffs, and answer what to do next. |
+| Sana | Bright enterprise AI tone, agents for real work, company-wide platform credibility | Use the restraint, clarity, and company-wide platform credibility. Do not copy marketing-page structure or light styling directly. |
 | THEFT skills | Department-specific execution guidance and local skill packs | Skills are product data that make departments useful; surface them as department capabilities, not as a generic skills marketplace. |
 | Existing THEFT prototype | Staged onboarding, 8 departments, roadmap/Tech Tree, Library concept | Port the product shape onto Paperclip data only. |
 
@@ -77,11 +80,12 @@ This is useful as polish inspiration, but it is also a warning. If THEFT leads w
 
 THEFT must lead with:
 
+- objective and next move
+- constraints, bottlenecks, risks, and tradeoffs
 - company stage
 - Operator
 - departments
 - active business work
-- current bottleneck
 - decisions/approvals
 - roadmap/Tech Tree
 - Library outputs
@@ -105,16 +109,16 @@ Use `BUILD-FROM-THIS/VISUAL-UX-REFERENCES.md` as the visual synthesis.
 
 Primary direction:
 
-- light, warm-white, premium, operational
-- persistent Operator thread beside a large work canvas
+- dark, premium, operational, and artifact-first
+- Mission Control canvas as the primary surface
+- Operator available persistently as a collapsed dock/drawer, not necessarily an always-open panel
 - visible artifacts, tasks, departments, and decisions in the first viewport
-- dense but calm panels with thin borders and restrained depth
-- green/lime accents used sparingly for primary action and live status
-- dark graph/diagnostic visuals only as secondary or presentation moments
+- dense but calm panels with sharp borders and restrained depth
+- lime/green accents used sparingly for selected, live, and primary action states
+- graph/map/tech-tree visuals used to show hierarchy, constraints, and dependencies
 
 Avoid:
 
-- default dark AI command center
 - generic dashboard/KPI home screen
 - Figma clone/tool chrome as the core identity
 - Paperclip runtime/admin tabs as the primary product
@@ -215,20 +219,22 @@ What Paperclip creates:
 - skill assignments
 - Library-output instructions in starter tasks
 
-### 5. Command Center
+### 5. Mission Control
 
-User lands on Command Center / Canvas.
+User lands on Mission Control / Canvas.
 
 Must show:
 
+- objective
+- constraints, bottlenecks, risks, and tradeoffs
+- strategy map from objective to departments/tasks/artifacts
+- pending decisions and approvals
+- execution state by department
+- outcomes and Library evidence
+- recommended next move
 - company stage
-- current bottleneck
-- Operator tray
-- 8 department status grid
-- active work
-- attention queue
 - Tech Tree next steps
-- latest Library outputs
+- collapsible Operator dock/drawer
 
 Must not lead with:
 
@@ -315,7 +321,7 @@ Tech Tree suggests next available work based on evidence:
 The loop becomes:
 
 ```text
-Command Center -> Operator/Department -> Task -> Run -> Review -> Library -> Tech Tree -> next work
+Mission Control -> Operator/Department -> Task -> Run -> Review -> Library -> Tech Tree -> next move
 ```
 
 ## Screen System To Build
@@ -324,7 +330,7 @@ Command Center -> Operator/Department -> Task -> Run -> Review -> Library -> Tec
 
 1. First-run onboarding
 2. Company assembly preview
-3. Command Center
+3. Mission Control / Canvas
 4. Department workspace
 5. Task detail/review
 6. Library
@@ -427,22 +433,22 @@ Avoid:
 ## Open UX Questions
 
 - How much of model/adapter setup should be shown during first run in local trusted mode?
-- Should Operator be represented as an always-visible side panel, a docked tray, or both?
-- Should Tech Tree be a full page, a Command Center module, or both?
+- How should the collapsed Operator dock behave across desktop, tablet, and mobile?
+- Should Tech Tree be a full page, a Mission Control module, or both?
 - How should Library artifact provenance be displayed without cluttering the file view?
 - How should cost/eval data be shown without turning the main UX into Hyperagent-style agent analytics?
 
 ## Implementation Order
 
 1. Write screen prompts from `UX-SCREEN-PROMPTS.md`.
-2. Generate first-pass designs for onboarding, Command Center, department, task review, Library, and Tech Tree.
+2. Generate first-pass designs for onboarding, Mission Control, department, task review, Library, and Tech Tree.
 3. Run every generated screen through the anti-clone critique prompt.
 4. Update this doc with accepted screen decisions.
 5. Implement screens in `paperclip/` only.
 6. Verify the happy path with Playwright:
    - onboarding
    - company assembly
-   - Command Center landing
+   - Mission Control landing
    - department task
    - run/review
    - Library output

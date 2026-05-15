@@ -113,3 +113,15 @@
 | T090 | Complete `UX060`-`UX063` Tech Tree roadmap surfaces with owner/dependency/evidence/next-action mapping | ✅ done |
 | T091 | Complete `UX070`-`UX078` prompt critique and `UX080` warm-white visual pass | ✅ done |
 | T092 | Verify desktop/tablet/mobile layouts for onboarding, Command Center, Library, and task review | ✅ done |
+
+## Slice 0.9 — Mission Control Streamlining
+
+| ID | Title | Status |
+|---|---|---|
+| T093 | Document Mission Control target and "streamline, not remove" rule | ✅ done |
+| T094 | Rebuild `/dashboard` as Mission Control using existing Paperclip company/goals/issues/agents/documents | ☐ todo |
+| T095 | Convert Operator tray into collapsible dock/drawer with pin-open behavior | ☐ todo |
+| T096 | Add Objective, Constraints, Strategy Map, Decisions, Execution State, Outcomes, and Next Move panels | ☐ todo |
+| T097 | Preserve access to departments, tasks, Library, Tech Tree, runtime/admin routes, and diagnostics | ☐ todo |
+| T098 | Add tests proving streamlining did not remove core runtime/product capabilities | ☐ todo |
+| T099 | Verify Mission Control desktop/tablet/mobile screenshots | ☐ todo |

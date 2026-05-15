@@ -13,7 +13,7 @@ The old `app/` tree is an archived prototype. It is not a second runtime, not a 
 | Layer | Owns | User-Facing Name |
 |---|---|---|
 | Paperclip runtime | companies, agents, goals, issues, heartbeats, approvals, documents, adapters, embedded Postgres | implementation detail |
-| THEFT product | Operator, departments, Command Center, Task Review, Company Memory, Tech Tree, Attention | product model |
+| THEFT product | Operator, Mission Control, departments, Task Review, Company Memory, Tech Tree, Attention | product model |
 | Root `skills/` | curated company-building skill packets imported into Paperclip company skills | Skill Library / department context |
 | `app/` | old JSON prototype and visual migration reference | archived |
 
@@ -21,7 +21,7 @@ The old `app/` tree is an archived prototype. It is not a second runtime, not a 
 
 Primary THEFT surfaces:
 
-- `/dashboard`
+- `/dashboard` (Mission Control / Canvas)
 - `/departments/*`
 - `/issues/*`
 - `/library`
@@ -93,5 +93,6 @@ Release checks:
 
 1. Add a small route-boundary test for every primary THEFT surface.
 2. Continue moving direct links from `/agents/*` and `/projects/*` to product surfaces where possible.
-3. Keep package/API renaming deferred until the product loop is stable; it is a high-risk mechanical migration.
-4. Before release, decide whether runtime/admin surfaces should move under a visible `/system/*` namespace or remain hidden-but-reachable aliases.
+3. Rebuild `/dashboard` as Mission Control without deleting runtime/admin features.
+4. Keep package/API renaming deferred until the product loop is stable; it is a high-risk mechanical migration.
+5. Before release, decide whether runtime/admin surfaces should move under a visible `/system/*` namespace or remain hidden-but-reachable aliases.

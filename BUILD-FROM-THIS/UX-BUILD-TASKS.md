@@ -19,7 +19,8 @@
 - Keep all runtime data in `paperclip/`; do not build new final product surface in `app/`.
 - Any new UI must make Paperclip feel like THEFT: company, Operator, departments, tasks, Library, Tech Tree, decisions.
 - Agent roster, invocations, adapters, costs, tools, and skills belong in Admin, Advanced, or Diagnostics surfaces unless needed for the immediate task.
-- Use `BUILD-FROM-THIS/VISUAL-UX-REFERENCES.md` for the current visual target: warm-white enterprise creation workspace, MagicPath-style command-to-canvas flow, Sana-like product restraint.
+- Use `BUILD-FROM-THIS/MISSION-CONTROL-UX.md` and `BUILD-FROM-THIS/VISUAL-UX-REFERENCES.md` for the current visual target: Mission Control, strategy execution, collapsible Operator, dark operational canvas, MagicPath command-to-canvas flow, and Sana-like product restraint.
+- Streamline the interface without removing features. Runtime/admin capability remains available through System, Diagnostics, command palette, direct routes, and contextual advanced panels.
 
 ## Phase 0 - XHIGH Synthesis Gate
 
@@ -100,13 +101,28 @@ Run this only after the `gpt-5.5 high` build pass has a working happy path.
 - [x] UX104 [SMOKE] Verify Engineering, Design, Marketing, Sales, Operations, Finance, Legal, and Support each produce a Library-visible artifact through the deterministic process artifact contract.
 - [x] UX105 [SMOKE] Update `BUILD-FROM-THIS/STATUS.md` with company id, issue ids, run ids, and Library artifact ids from the smoke.
 
+## Phase 6 - Mission Control Streamlining
+
+Goal: turn the current Command Center/dashboard into the Mission Control interface from `MISSION-CONTROL-UX.md` without deleting Paperclip runtime capability.
+
+- [x] UX110 [XHIGH] Lock Mission Control requirements in docs: Objective -> Constraints -> Options -> Decisions -> Execution -> Outcomes -> Next Move.
+- [ ] UX111 [HIGH] Rebuild `paperclip/ui/src/pages/Dashboard.tsx` around Mission Control panels: Objective, Constraints, Strategy Map, Decisions, Execution State, Outcomes, Next Move.
+- [ ] UX112 [HIGH] Convert the current Operator tray into a collapsible Operator dock/drawer that can be pinned open but defaults to canvas-first.
+- [ ] UX113 [HIGH] Replace the department grid emphasis with strategy/dependency hierarchy plus department execution lanes backed by existing Paperclip agents/issues/goals/documents.
+- [ ] UX114 [HIGH] Keep all existing runtime/admin routes functional and reachable, but prevent them from defining the default product path.
+- [ ] UX115 [HIGH] Add tests that prove Mission Control still exposes the same work capabilities through streamlined panels instead of removing features.
+- [ ] UX116 [MEDIUM] Verify desktop/tablet/mobile screenshots for Mission Control, collapsed Operator, expanded Operator, and selected-object inspector.
+- [ ] UX117 [LOW] Update labels from "Command Center" to "Mission Control" where user-facing, leaving route compatibility intact.
+
 ## Anti-Clone Acceptance Gates
 
 Before any screen is accepted, it must pass these gates:
 
 - The first viewport answers "what should this company do next?"
+- The screen follows Objective -> Constraints -> Options -> Decisions -> Execution -> Outcomes -> Next Move.
 - The screen uses THEFT product objects: company, Operator, departments, tasks, decisions, Library, Tech Tree.
 - Agent runtime objects are present only when they help the user act.
+- Streamlining does not remove access to runtime/admin features.
 - It does not lead with Config, Invocations, Tools, Skills, Knowledge, cost charts, or agent rosters.
 - It does not reuse Cofounder naming, branding, or paid-service assumptions.
 - It does not look like Hyperagent's agent detail/admin pattern as the main product surface.

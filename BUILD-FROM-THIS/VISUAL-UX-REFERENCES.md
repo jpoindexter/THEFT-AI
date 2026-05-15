@@ -15,6 +15,7 @@ The 2026-05-15 cthdrl pass supersedes the earlier warm-white default. The target
 | cthdrl references in `/Users/jasonpoindexter/Desktop/cthdrl` | Black full-bleed shell, Ghost Sand typography, sharp panels, mono operational rhythm, electric lime/purple/cyan signal colors | Default shell palette, canvas mood, panel discipline, sparse saturated accents, no soft SaaS card pileup | Copying decorative brand-kit layouts directly, negative letter spacing, illegible low-contrast labels |
 | MagicPath frames in `magic patch frames/` | Prompt-to-canvas creation, persistent left thread, parallel generation, artifact selection, libraries, share/publish | Interaction model: ask, route, generate, review, artifact appears on canvas/Library | Copying green brand, Figma-like design-tool framing, empty canvas with no business affordances |
 | Desktop references in `/Users/jasonpoindexter/Desktop/theft ai` | Light map/canvas systems, dense SaaS panels, premium dashboard cards, flow graphs, black diagnostic maps | Spatial canvas structure, high-density cards, graph relationships, polished operating surfaces | Letting warm-white cards fight the dark cthdrl shell |
+| Strategy-interface reference image | Mission control, strategy games, executive cockpit, OSINT maps, decision panels, constraints, next move | Information architecture: Objective -> Constraints -> Options -> Decisions -> Execution -> Outcomes -> Next Move | Treating it as decoration or turning the app into static KPI reporting |
 | Sana product page | Bright enterprise AI positioning, all-in-one work platform, agents for real work, broad team use cases | Tone: clean, credible, company-wide AI operating layer | Marketing page layout as app UI, generic "AI agents for every team" copy |
 
 Sana source inspected: `https://sanalabs.com/products/sana/`
@@ -105,8 +106,10 @@ Use Sana's clean credibility, not its marketing page structure or default light 
 
 ### Layout
 
-- Left persistent Operator thread.
-- Center canvas/workspace for current company work.
+- Mission Control canvas is the primary surface.
+- Operator is persistent as a capability but can be collapsed to a dock/input/icon by default.
+- Operator expands into a side panel/drawer when the user asks, routes work, reviews recommendations, or explains a decision.
+- Center canvas/workspace shows current company work, hierarchy, dependencies, constraints, and outcomes.
 - Right contextual inspector only when an artifact, department, task, or roadmap node is selected.
 - Top bar with company, stage, environment, share/export, and local runtime health.
 - Library and Tech Tree as first-class surfaces, not buried admin tabs.
@@ -161,7 +164,8 @@ The ideal happy path:
 5. Department workstreams appear on the canvas.
 6. Library artifacts materialize as each department finishes.
 7. User reviews, approves, exports, or asks for a revision.
-8. Tech Tree updates with evidence from completed work.
+8. Mission Control surfaces the next move with constraints and rationale.
+9. Tech Tree updates with evidence from completed work.
 
 This is the MagicPath loop applied to a company operating system.
 
@@ -170,7 +174,9 @@ This is the MagicPath loop applied to a company operating system.
 Immediate UI work should shift from "make each Paperclip page nicer" to "make THEFT feel like one creation workspace":
 
 - Keep Paperclip runtime surfaces behind Admin/Diagnostics.
+- Rebuild Command Center as Mission Control: objective, constraints, strategy map, decisions, execution state, outcomes, and next move.
+- Streamline the interface without removing runtime features.
 - Reframe Goals/GoalDetail as Tech Tree nodes with evidence and next action.
-- Start the next polish pass by making Command Center more canvas-like and less page-like.
+- Start the next pass by making Mission Control more strategy-map-like and less dashboard-like.
 - Build artifact previews and selected-object inspection into Library/Task Review.
 - Use departments as parallel work lanes, not agent cards.

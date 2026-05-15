@@ -188,25 +188,28 @@ Produce:
 - error state if a department fails to seed
 ```
 
-## Prompt 4 - Command Center / Canvas
+## Prompt 4 - Mission Control / Canvas
 
 ```text
-Design THEFT's main Command Center screen.
+Design THEFT's main Mission Control screen.
 
 This is the default landing page after onboarding.
 
 It should answer:
-"What is happening in the company, what needs my decision, and what should we do next?"
+"What should we do next, and why?"
+
+Use this mental model:
+Objective -> Constraints -> Options -> Decisions -> Execution -> Outcomes -> Next Move
 
 Primary sections:
-- Company stage and current bottleneck
-- Operator panel
-- 8 department status grid
-- Active work
-- Needs decision / attention queue
-- Tech Tree next steps
-- Latest Library outputs
-- Recent runs summarized as business progress, not raw logs
+- Objective and why it matters
+- Constraints: bottlenecks, risks, blockers, tradeoffs
+- Strategy map: objective to Tech Tree nodes, departments, tasks, dependencies, and artifacts
+- Decisions: approvals, recommendations, pending choices
+- Execution state by department
+- Outcomes and Library evidence
+- Recommended next move
+- Collapsible Operator dock/drawer
 
 Departments:
 Engineering, Design, Marketing, Sales, Operations, Finance, Legal, Support.
@@ -214,15 +217,18 @@ Engineering, Design, Marketing, Sales, Operations, Finance, Legal, Support.
 Do not make this an agent roster dashboard.
 Do not lead with cost, average score, total runs, or agent admin metrics.
 Those can be small diagnostics elsewhere.
+Do not remove access to runtime/admin features; streamline them behind System, Diagnostics, command palette, direct routes, or contextual advanced panels.
 
-Operator panel should:
+Operator dock should:
 - accept a natural language instruction
 - suggest next tasks
 - route work to departments
 - surface blockers
 - summarize company state
+- stay collapsed by default when the canvas needs priority
+- expand into a side panel/drawer and support pin-open behavior
 
-Department cards should show:
+Department execution lanes should show:
 - mission
 - owner agent
 - active task count
@@ -230,7 +236,7 @@ Department cards should show:
 - latest output
 - recommended next action
 
-Attention queue should show:
+Decision/attention queue should show:
 - approvals
 - clarification questions
 - failed/stopped runs
@@ -583,4 +589,3 @@ Produce:
 
 The storyboard must prove THEFT feels like a company OS, not an agent admin console.
 ```
-

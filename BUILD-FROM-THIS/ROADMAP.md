@@ -85,6 +85,17 @@ For each department, create one real Paperclip issue, invoke the assigned agent 
 - [x] Remove active user-facing Cofounder branding.
 - [x] Ensure only one app/server is required for the product path.
 
+## Slice 0.8 — Mission Control Streamlining
+
+Goal: streamline the interface around Mission Control without removing Paperclip runtime capability. The primary mental model is `Objective -> Constraints -> Options -> Decisions -> Execution -> Outcomes -> Next Move`.
+
+- [x] Document Mission Control target and "streamline, not remove" rule.
+- [ ] Rebuild `/dashboard` as Mission Control / Canvas.
+- [ ] Make Operator persistent as a collapsible dock/drawer instead of an always-dominant panel.
+- [ ] Surface constraints, decisions, execution state, outcomes, and recommended next move in the first viewport.
+- [ ] Keep departments, tasks, Library, Tech Tree, runtime/admin routes, and diagnostics reachable.
+- [ ] Verify desktop/tablet/mobile screenshots after the Mission Control pass.
+
 ## v1 — Managed Services After Local v0 Works
 
 Only after v0 is dogfooded locally:
