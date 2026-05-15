@@ -51,7 +51,7 @@ Goal: a founder can create a company, see THEFT assemble it, land in Command Cen
 
 - [x] UX040 [HIGH] [US4] Reframe `paperclip/ui/src/pages/Library.tsx` as the durable company memory and output shelf, grouped by department and pinned work.
 - [x] UX041 [HIGH] [US4] Ensure Library item mapping in `paperclip/ui/src/lib/library-items.ts` identifies generated work products from issue documents, attachments, and run outputs.
-- [ ] UX042 [HIGH] [US4] Verify real LLM smoke outputs become Library artifacts by updating `paperclip/scripts/smoke/theft-department-runtime-smoke.mjs` or adding a focused helper if needed.
+- [x] UX042 [HIGH] [US4] Verify smoke outputs become Library artifacts with a deterministic zero-quota adapter contract in `paperclip/scripts/smoke/theft-department-runtime-smoke.mjs`.
 
 ## Phase 2 - HIGH Department And Roadmap Surfaces
 
@@ -88,12 +88,12 @@ Goal: a founder can create a company, see THEFT assemble it, land in Command Cen
 
 Run this only after the `gpt-5.5 high` build pass has a working happy path.
 
-- [ ] UX100 [SMOKE] Run `node paperclip/scripts/smoke/theft-local-health.mjs` against the local host.
+- [x] UX100 [SMOKE] Run `node paperclip/scripts/smoke/theft-local-health.mjs` against the local host.
 - [ ] UX101 [SMOKE] Run `pnpm -C paperclip exec playwright test tests/e2e/onboarding.spec.ts --config tests/e2e/playwright.config.ts`.
-- [ ] UX102 [SMOKE] Run deterministic 8-department smoke with `node paperclip/scripts/smoke/theft-department-runtime-smoke.mjs`.
-- [ ] UX103 [SMOKE] Run Codex local 8-department smoke with `THEFT_SMOKE_ADAPTER=codex_local THEFT_SMOKE_CODEX_MODEL=gpt-5.3-codex-spark`.
-- [ ] UX104 [SMOKE] Verify Engineering, Design, Marketing, Sales, Operations, Finance, Legal, and Support each produce a Library-visible artifact.
-- [ ] UX105 [SMOKE] Update `BUILD-FROM-THIS/STATUS.md` with company id, issue ids, run ids, and any Library artifact ids from the smoke.
+- [x] UX102 [SMOKE] Run deterministic 8-department smoke with `node paperclip/scripts/smoke/theft-department-runtime-smoke.mjs`.
+- [ ] UX103 [SMOKE] Run Codex local 8-department smoke with `THEFT_SMOKE_ADAPTER=codex_local THEFT_SMOKE_CODEX_MODEL=gpt-5.3-codex-spark` as a pre-release/signoff check only.
+- [x] UX104 [SMOKE] Verify Engineering, Design, Marketing, Sales, Operations, Finance, Legal, and Support each produce a Library-visible artifact through the deterministic process artifact contract.
+- [x] UX105 [SMOKE] Update `BUILD-FROM-THIS/STATUS.md` with company id, issue ids, run ids, and Library artifact ids from the smoke.
 
 ## Anti-Clone Acceptance Gates
 

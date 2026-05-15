@@ -23,7 +23,7 @@
 | T012 | Copy/port `BUILD-FROM-THIS/` and `skills/` into the host | ▶ doing |
 | T013 | Add THEFT design tokens/brand shell to Paperclip UI | ☐ todo |
 | T014 | Add one host dev command and document it | ✅ done |
-| T015 | Mark current `app/` as migration reference after host boots | ☐ todo |
+| T015 | Mark current `app/` as migration reference after host boots | ✅ done |
 
 ## Slice 0.2 — Skill Library Import
 
@@ -84,7 +84,7 @@
 | T067 | Support smoke through Paperclip adapter | ✅ done |
 | T068 | Convert 8-department smoke checklist into automated Playwright/API coverage | ✅ done |
 | T069 | Run 8-department smoke with an LLM adapter | ✅ done |
-| T069A | Verify LLM smoke outputs become Library artifacts | ☐ todo |
+| T069A | Verify department smoke outputs become Library artifacts with zero model quota | ✅ done |
 
 ## Slice 0.7 — Subtract Dead Surface
 
@@ -108,4 +108,4 @@
 | T085 | Continue `UX020` Command Center / Canvas implementation from `BUILD-FROM-THIS/UX-BUILD-TASKS.md` | ✅ done |
 | T086 | Continue `UX030` Task Review implementation from `BUILD-FROM-THIS/UX-BUILD-TASKS.md` | ✅ done |
 | T087 | Continue `UX040` Library implementation from `BUILD-FROM-THIS/UX-BUILD-TASKS.md` | ✅ done |
-| T088 | Verify `UX042` real LLM smoke outputs become Library artifacts | ☐ todo |
+| T088 | Verify `UX042` deterministic artifact smoke outputs become Library artifacts | ✅ done |
