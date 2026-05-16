@@ -8,6 +8,7 @@ import {
 } from "../../components/agent-config-primitives";
 import { ChoosePathButton } from "../../components/PathInstructionsModal";
 import { LocalWorkspaceRuntimeFields } from "../local-workspace-runtime-fields";
+import { Input } from "../../components/ui/input";
 
 const inputClass =
   "w-full rounded-md border border-border px-2.5 py-1.5 bg-transparent outline-none text-sm font-mono placeholder:text-muted-foreground/40";
@@ -114,7 +115,7 @@ export function ClaudeLocalAdvancedFields({
       />
       <Field label="Max turns per run" hint={help.maxTurnsPerRun}>
         {isCreate ? (
-          <input
+          <Input
             type="number"
             className={inputClass}
             value={values!.maxTurnsPerRun}

@@ -10,6 +10,14 @@ import {
   PayloadTemplateJsonField,
   RuntimeServicesJsonField,
 } from "../runtime-json-fields";
+import { Button } from "../../components/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "../../components/ui/select";
 
 const inputClass =
   "w-full rounded-md border border-border px-2.5 py-1.5 bg-transparent outline-none text-sm font-mono placeholder:text-muted-foreground/40";
@@ -29,13 +37,15 @@ function SecretField({
   return (
     <Field label={label}>
       <div className="relative">
-        <button
+        <Button
           type="button"
           onClick={() => setVisible((v) => !v)}
-          className="absolute left-2 top-1/2 -translate-y-1/2 text-muted-foreground/50 hover:text-muted-foreground transition-colors"
+          variant="ghost"
+          size="icon-xs"
+          className="absolute left-1.5 top-1/2 -translate-y-1/2 text-muted-foreground/50 hover:text-muted-foreground"
         >
           {visible ? <Eye className="h-3.5 w-3.5" /> : <EyeOff className="h-3.5 w-3.5" />}
-        </button>
+        </Button>
         <DraftInput
           value={value}
           onCommit={onCommit}
@@ -161,15 +171,19 @@ export function OpenClawGatewayConfigFields({
           </Field>
 
           <Field label="Session strategy">
-            <select
+            <Select
               value={sessionStrategy}
-              onChange={(e) => mark("adapterConfig", "sessionKeyStrategy", e.target.value)}
-              className={inputClass}
+              onValueChange={(value) => mark("adapterConfig", "sessionKeyStrategy", value)}
             >
-              <option value="fixed">Fixed</option>
-              <option value="issue">Per issue</option>
-              <option value="run">Per run</option>
-            </select>
+              <SelectTrigger className="w-full font-mono" size="sm">
+                <SelectValue placeholder="Select session strategy" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="fixed">Fixed</SelectItem>
+                <SelectItem value="issue">Per issue</SelectItem>
+                <SelectItem value="run">Per run</SelectItem>
+              </SelectContent>
+            </Select>
           </Field>
 
           {sessionStrategy === "fixed" && (

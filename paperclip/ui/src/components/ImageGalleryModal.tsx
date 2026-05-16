@@ -2,6 +2,8 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { Dialog as DialogPrimitive } from "radix-ui";
 import { ChevronLeft, ChevronRight, Download, X } from "lucide-react";
 import type { IssueAttachment } from "@paperclipai/shared";
+import { Button } from "@/components/ui/button";
+import { Dialog, DialogOverlay, DialogPortal } from "@/components/ui/dialog";
 
 interface ImageGalleryModalProps {
   images: IssueAttachment[];
@@ -63,40 +65,50 @@ export function ImageGalleryModal({
   if (!current) return null;
 
   return (
-    <DialogPrimitive.Root open={open} onOpenChange={onOpenChange}>
-      <DialogPrimitive.Portal>
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogPortal>
         {/* Full-screen curtain */}
-        <DialogPrimitive.Overlay className="fixed inset-0 z-50 bg-black/90 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 duration-200" />
+        <DialogOverlay className="bg-black/90 duration-200" />
         <DialogPrimitive.Content
           className="fixed inset-0 z-50 flex flex-col outline-none data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 duration-200"
           onClick={handleBackdropClick}
         >
           {/* Top bar */}
           <div className="flex items-center justify-between px-5 py-3 text-white/80 text-sm shrink-0">
-            <span className="truncate max-w-[50%] font-medium" title={current.originalFilename ?? undefined}>
+            <span className="min-w-0 flex-1 truncate font-medium" title={current.originalFilename ?? undefined}>
               {current.originalFilename ?? "Image"}
             </span>
             <div className="flex items-center gap-4">
               <span className="text-white/40 tabular-nums text-xs">
                 {currentIndex + 1} / {images.length}
               </span>
-              <a
-                href={current.contentPath}
-                download={current.originalFilename ?? "image"}
-                className="text-white/50 hover:text-white transition-colors"
+              <Button
+                asChild
+                variant="ghost"
+                size="icon-sm"
+                className="text-white/50 hover:bg-white/10 hover:text-white"
                 title="Download"
-                onClick={(e) => e.stopPropagation()}
+                aria-label="Download"
               >
-                <Download className="h-4.5 w-4.5" />
-              </a>
-              <button
+                <a
+                  href={current.contentPath}
+                  download={current.originalFilename ?? "image"}
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <Download className="size-4" />
+                </a>
+              </Button>
+              <Button
                 type="button"
                 onClick={() => onOpenChange(false)}
-                className="text-white/50 hover:text-white transition-colors"
+                variant="ghost"
+                size="icon-sm"
+                className="text-white/50 hover:bg-white/10 hover:text-white"
                 title="Close"
+                aria-label="Close"
               >
-                <X className="h-5 w-5" />
-              </button>
+                <X className="size-5" />
+              </Button>
             </div>
           </div>
 
@@ -105,14 +117,17 @@ export function ImageGalleryModal({
             {/* Left nav zone */}
             <div className="w-16 md:w-24 shrink-0 flex items-center justify-center h-full">
               {images.length > 1 && (
-                <button
+                <Button
                   type="button"
                   onClick={goPrev}
-                  className="rounded-full bg-white/10 p-3 text-white/60 hover:text-white hover:bg-white/20 transition-colors"
+                  variant="ghost"
+                  size="icon-lg"
+                  className="size-12 rounded-full bg-white/10 text-white/60 hover:bg-white/20 hover:text-white"
                   title="Previous"
+                  aria-label="Previous image"
                 >
-                  <ChevronLeft className="h-7 w-7" />
-                </button>
+                  <ChevronLeft className="size-7" />
+                </Button>
               )}
             </div>
 
@@ -130,14 +145,17 @@ export function ImageGalleryModal({
             {/* Right nav zone */}
             <div className="w-16 md:w-24 shrink-0 flex items-center justify-center h-full">
               {images.length > 1 && (
-                <button
+                <Button
                   type="button"
                   onClick={goNext}
-                  className="rounded-full bg-white/10 p-3 text-white/60 hover:text-white hover:bg-white/20 transition-colors"
+                  variant="ghost"
+                  size="icon-lg"
+                  className="size-12 rounded-full bg-white/10 text-white/60 hover:bg-white/20 hover:text-white"
                   title="Next"
+                  aria-label="Next image"
                 >
-                  <ChevronRight className="h-7 w-7" />
-                </button>
+                  <ChevronRight className="size-7" />
+                </Button>
               )}
             </div>
           </div>
@@ -145,7 +163,7 @@ export function ImageGalleryModal({
           {/* Bottom padding for balance */}
           <div className="h-6 shrink-0" />
         </DialogPrimitive.Content>
-      </DialogPrimitive.Portal>
-    </DialogPrimitive.Root>
+      </DialogPortal>
+    </Dialog>
   );
 }

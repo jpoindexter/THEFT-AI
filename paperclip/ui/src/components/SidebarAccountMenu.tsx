@@ -18,6 +18,8 @@ import { useSidebar } from "../context/SidebarContext";
 import { useTheme } from "../context/ThemeContext";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { cn } from "../lib/utils";
 
 const PROFILE_SETTINGS_PATH = "/instance/settings/profile";
@@ -64,7 +66,7 @@ function deriveUserSlug(name: string | null | undefined, email: string | null | 
 
 function MenuAction({ label, description, icon: Icon, onClick, href, external = false }: MenuActionProps) {
   const className =
-    "flex w-full items-start gap-3 rounded-xl px-3 py-3 text-left transition-colors hover:bg-accent/60";
+    "h-auto w-full items-start justify-start gap-3 whitespace-normal rounded-lg px-3 py-3 text-left transition-colors hover:bg-accent/60";
 
   const content = (
     <>
@@ -81,23 +83,27 @@ function MenuAction({ label, description, icon: Icon, onClick, href, external = 
   if (href) {
     if (external) {
       return (
-        <a href={href} target="_blank" rel="noreferrer" className={className} onClick={onClick}>
-          {content}
-        </a>
+        <Button asChild variant="ghost" className={className}>
+          <a href={href} target="_blank" rel="noreferrer" onClick={onClick}>
+            {content}
+          </a>
+        </Button>
       );
     }
 
     return (
-      <Link to={href} className={className} onClick={onClick}>
-        {content}
-      </Link>
+      <Button asChild variant="ghost" className={className}>
+        <Link to={href} onClick={onClick}>
+          {content}
+        </Link>
+      </Button>
     );
   }
 
   return (
-    <button type="button" className={className} onClick={onClick}>
+    <Button type="button" variant="ghost" className={className} onClick={onClick}>
       {content}
-    </button>
+    </Button>
   );
 }
 
@@ -147,11 +153,12 @@ export function SidebarAccountMenu({
     )}>
       <Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger asChild>
-          <button
+          <Button
             type="button"
+            variant="ghost"
             title={displayName}
             className={cn(
-              "flex items-center gap-2.5 text-left text-[13px] font-medium text-sidebar-foreground/80 transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
+              "items-center gap-2.5 text-left text-sm font-medium text-sidebar-foreground/80 transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
               isMobile ? "w-full px-3 py-2" : "h-10 w-10 justify-center rounded-full px-0 py-0",
             )}
             aria-label="Open account menu"
@@ -161,15 +168,15 @@ export function SidebarAccountMenu({
               <AvatarFallback>{initials}</AvatarFallback>
             </Avatar>
             <span className={cn("min-w-0 flex-1 truncate", !isMobile && "sr-only")}>{displayName}</span>
-          </button>
+          </Button>
         </PopoverTrigger>
         <PopoverContent
           side="top"
           align="start"
           sideOffset={10}
-          className="w-80 max-w-[calc(100vw-1rem)] overflow-hidden rounded-t-2xl rounded-b-none border-border p-0 shadow-2xl"
+          className="w-72 overflow-hidden rounded-t-lg rounded-b-none border-border p-0 shadow-2xl sm:w-80"
         >
-          <div className="h-24 bg-[linear-gradient(135deg,hsl(var(--primary))_0%,hsl(var(--accent))_55%,hsl(var(--muted))_100%)]" />
+          <div className="h-24 bg-primary" />
           <div className="-mt-8 px-4 pb-4">
             <div className="flex items-start gap-3">
               <div className="rounded-2xl border-4 border-popover bg-popover p-0.5 shadow-sm">
@@ -181,9 +188,9 @@ export function SidebarAccountMenu({
               <div className="min-w-0 flex-1 pt-1">
                 <div className="flex items-center gap-2">
                   <h2 className="truncate text-base font-semibold text-foreground">{displayName}</h2>
-                  <span className="rounded-full bg-accent px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
+                  <Badge variant="secondary" className="text-nano font-semibold uppercase tracking-wide text-muted-foreground">
                     {accountBadge}
-                  </span>
+                  </Badge>
                 </div>
                 <p className="truncate text-sm text-muted-foreground">{secondaryLabel}</p>
                 {version ? (
@@ -232,10 +239,11 @@ export function SidebarAccountMenu({
                 }}
               />
               {deploymentMode === "authenticated" ? (
-                <button
+                <Button
                   type="button"
+                  variant="ghost"
                   className={cn(
-                    "flex w-full items-start gap-3 rounded-xl px-3 py-3 text-left transition-colors hover:bg-destructive/10",
+                    "h-auto w-full items-start justify-start gap-3 whitespace-normal rounded-lg px-3 py-3 text-left transition-colors hover:bg-destructive/10",
                     signOutMutation.isPending && "cursor-not-allowed opacity-60",
                   )}
                   onClick={() => signOutMutation.mutate()}
@@ -252,7 +260,7 @@ export function SidebarAccountMenu({
                       End this browser session.
                     </span>
                   </span>
-                </button>
+                </Button>
               ) : null}
             </div>
           </div>

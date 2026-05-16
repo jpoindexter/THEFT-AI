@@ -5,6 +5,7 @@ import { issuesApi } from "../api/issues";
 import { queryKeys } from "../lib/queryKeys";
 import { buildLineDiff, type DiffRow } from "../lib/line-diff";
 import { relativeTime } from "../lib/utils";
+import { Badge } from "@/components/ui/badge";
 import {
   Dialog,
   DialogContent,
@@ -73,8 +74,8 @@ export function DocumentDiffModal({
 
   const lineClassesByKind: Record<DiffRow["kind"], string> = {
     context: "bg-transparent",
-    removed: "bg-red-500/10 text-red-100",
-    added: "bg-green-500/10 text-green-100",
+    removed: "bg-destructive/10 text-destructive",
+    added: "bg-chart-2/10 text-chart-2",
   };
 
   const markerByKind: Record<DiffRow["kind"], string> = {
@@ -85,7 +86,7 @@ export function DocumentDiffModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="!max-w-[90%] w-full max-h-[85vh] overflow-hidden flex flex-col">
+      <DialogContent className="flex max-h-screen w-full max-w-screen-2xl flex-col overflow-hidden sm:max-w-screen-2xl">
         <div className="flex items-center justify-between gap-4">
           <DialogHeader className="shrink-0">
             <DialogTitle>
@@ -95,7 +96,12 @@ export function DocumentDiffModal({
 
           <div className="flex items-center gap-4 shrink-0">
             <div className="flex items-center gap-2">
-              <span className="rounded-full border border-red-500/30 bg-red-500/10 px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider text-red-400">Old</span>
+              <Badge
+                variant="outline"
+                className="theft-label-compact border-destructive/30 bg-destructive/10 text-destructive"
+              >
+                Old
+              </Badge>
               <Select
                 value={effectiveLeftId ?? ""}
                 onValueChange={(value) => setLeftRevisionId(value)}
@@ -113,7 +119,12 @@ export function DocumentDiffModal({
               </Select>
             </div>
             <div className="flex items-center gap-2">
-              <span className="rounded-full border border-green-500/30 bg-green-500/10 px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider text-green-400">New</span>
+              <Badge
+                variant="outline"
+                className="theft-label-compact border-chart-2/30 bg-chart-2/10 text-chart-2"
+              >
+                New
+              </Badge>
               <Select
                 value={effectiveRightId ?? ""}
                 onValueChange={(value) => setRightRevisionId(value)}
@@ -141,28 +152,28 @@ export function DocumentDiffModal({
           ) : leftRevision.id === rightRevision.id ? (
             <div className="p-6 text-center text-muted-foreground text-sm">Both sides are the same revision.</div>
           ) : (
-            <div className="font-mono text-[12px] leading-6">
-              <div className="grid grid-cols-[56px_56px_24px_minmax(0,1fr)] border-b border-border/60 bg-muted/30 px-3 py-2 text-[11px] uppercase tracking-wide text-muted-foreground">
-                <span>Old</span>
-                <span>New</span>
-                <span />
-                <span>Content</span>
+            <div className="font-mono text-xs leading-6">
+              <div className="flex min-w-full border-b border-border/60 bg-muted/30 px-3 py-2 text-micro uppercase tracking-wide text-muted-foreground">
+                <span className="w-14 shrink-0">Old</span>
+                <span className="w-14 shrink-0">New</span>
+                <span className="w-6 shrink-0" />
+                <span className="min-w-0 flex-1">Content</span>
               </div>
               {diffRows.map((row, index) => (
                 <div
                   key={`${row.kind}-${index}-${row.oldLineNumber ?? "x"}-${row.newLineNumber ?? "x"}`}
-                  className={`grid grid-cols-[56px_56px_24px_minmax(0,1fr)] gap-0 border-b border-border/30 px-3 ${lineClassesByKind[row.kind]}`}
+                  className={`flex min-w-full border-b border-border/30 px-3 ${lineClassesByKind[row.kind]}`}
                 >
-                  <span className="select-none border-r border-border/30 pr-3 text-right text-muted-foreground">
+                  <span className="w-14 shrink-0 select-none border-r border-border/30 pr-3 text-right text-muted-foreground">
                     {row.oldLineNumber ?? ""}
                   </span>
-                  <span className="select-none border-r border-border/30 px-3 text-right text-muted-foreground">
+                  <span className="w-14 shrink-0 select-none border-r border-border/30 px-3 text-right text-muted-foreground">
                     {row.newLineNumber ?? ""}
                   </span>
-                  <span className="select-none px-3 text-center text-muted-foreground">
+                  <span className="w-6 shrink-0 select-none text-center text-muted-foreground">
                     {markerByKind[row.kind]}
                   </span>
-                  <pre className="overflow-x-auto whitespace-pre-wrap break-words px-3 py-0 text-inherit">
+                  <pre className="min-w-0 flex-1 overflow-x-auto whitespace-pre-wrap break-words px-3 py-0 text-inherit">
                     {row.text.length > 0 ? row.text : " "}
                   </pre>
                 </div>

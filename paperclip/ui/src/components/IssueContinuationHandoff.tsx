@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { IssueDocument } from "@paperclipai/shared";
 import { ISSUE_CONTINUATION_SUMMARY_DOCUMENT_KEY } from "@paperclipai/shared";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { cn, relativeTime } from "../lib/utils";
 import { MarkdownBody } from "./MarkdownBody";
@@ -62,24 +63,26 @@ export function IssueContinuationHandoff({
       )}
     >
       <div className="flex flex-wrap items-center gap-2">
-        <button
+        <Button
           type="button"
-          className="inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-sm text-muted-foreground transition-colors hover:bg-accent/60 hover:text-foreground"
+          variant="ghost"
+          size="icon-xs"
+          className="text-muted-foreground hover:bg-accent/60 hover:text-foreground"
           onClick={() => setExpanded((current) => !current)}
           aria-label={expanded ? "Collapse continuation handoff" : "Expand continuation handoff"}
           aria-expanded={expanded}
         >
           {expanded ? <ChevronDown className="h-3.5 w-3.5" /> : <ChevronRight className="h-3.5 w-3.5" />}
-        </button>
+        </Button>
         <History className="h-4 w-4 text-muted-foreground" />
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2">
             <span className="text-sm font-medium text-foreground">{title}</span>
-            <span className="rounded-full border border-border px-2 py-0.5 font-mono text-[10px] uppercase text-muted-foreground">
+            <Badge variant="outline" className="font-mono text-nano uppercase text-muted-foreground">
               handoff
-            </span>
+            </Badge>
           </div>
-          <div className="text-[11px] text-muted-foreground">
+          <div className="text-micro text-muted-foreground">
             Updated {relativeTime(document.updatedAt)}
             {document.latestRevisionNumber > 0 ? ` - revision ${document.latestRevisionNumber}` : ""}
           </div>

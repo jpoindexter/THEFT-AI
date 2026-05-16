@@ -1,13 +1,11 @@
 import { useState, useMemo } from "react";
-import {
-  type LucideIcon,
-} from "lucide-react";
 import { AGENT_ICON_NAMES, type AgentIconName } from "@paperclipai/shared";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import { AGENT_ICONS, getAgentIcon } from "../lib/agent-icons";
@@ -54,21 +52,25 @@ export function AgentIconPicker({ value, onChange, children }: AgentIconPickerPr
         />
         <div className="grid grid-cols-7 gap-1 max-h-48 overflow-y-auto">
           {filtered.map(([name, Icon]) => (
-            <button
+            <Button
               key={name}
+              type="button"
+              variant="ghost"
+              size="icon-sm"
               onClick={() => {
                 onChange(name);
                 setOpen(false);
                 setSearch("");
               }}
               className={cn(
-                "flex items-center justify-center h-8 w-8 rounded hover:bg-accent transition-colors",
+                "size-8 rounded-md hover:bg-accent",
                 (value ?? DEFAULT_ICON) === name && "bg-accent ring-1 ring-primary"
               )}
               title={name}
+              aria-label={`Choose ${name} icon`}
             >
-              <Icon className="h-4 w-4" />
-            </button>
+              <Icon className="size-4" />
+            </Button>
           ))}
           {filtered.length === 0 && (
             <p className="col-span-7 text-xs text-muted-foreground text-center py-2">No icons match</p>

@@ -10,6 +10,8 @@ import {
   DraftTextarea,
   ToggleField,
 } from "../components/agent-config-primitives";
+import { Button } from "../components/ui/button";
+import { Input } from "../components/ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "../components/ui/popover";
 import { ChevronDown } from "lucide-react";
 
@@ -28,18 +30,28 @@ function SelectField({
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
-        <button className="inline-flex items-center gap-1.5 rounded-md border border-border px-2.5 py-1.5 text-sm hover:bg-accent/50 transition-colors w-full justify-between">
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          className="w-full justify-between font-normal"
+        >
           <span className={!value ? "text-muted-foreground" : ""}>
             {selectedOpt?.label ?? value ?? "Select..."}
           </span>
           <ChevronDown className="h-3 w-3 text-muted-foreground" />
-        </button>
+        </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-1" align="start">
+      <PopoverContent className="w-(--radix-popover-trigger-width) p-1" align="start">
         {options.map((opt) => (
-          <button
+          <Button
             key={opt.value}
-            className={`flex items-center w-full px-2 py-1.5 text-sm rounded hover:bg-accent/50 ${opt.value === value ? "bg-accent" : ""}`}
+            type="button"
+            variant="ghost"
+            size="sm"
+            className={`h-auto w-full justify-start px-2 py-1.5 font-normal ${
+              opt.value === value ? "bg-accent" : ""
+            }`}
             onMouseDown={(e) => {
               e.preventDefault();
               onChange(opt.value);
@@ -47,7 +59,7 @@ function SelectField({
             }}
           >
             <span>{opt.label}</span>
-          </button>
+          </Button>
         ))}
       </PopoverContent>
     </Popover>
@@ -133,10 +145,10 @@ function ComboboxField({
   return (
     <div className="relative">
       <div className="flex items-center gap-0">
-        <input
+        <Input
           ref={inputRef}
           type="text"
-          className="flex-1 rounded-l-md border border-r-0 border-border px-2.5 py-1.5 bg-transparent outline-none text-sm font-mono placeholder:text-muted-foreground/40 focus:z-10"
+          className="flex-1 rounded-r-none border-r-0 font-mono placeholder:text-muted-foreground/40 focus:z-10"
           value={displayValue}
           placeholder={placeholder ?? "Type or select..."}
           onChange={(e) => {
@@ -154,13 +166,17 @@ function ComboboxField({
         />
         <Popover open={open && filtered.length > 0} onOpenChange={setOpen}>
           <PopoverTrigger asChild>
-            <button className="rounded-r-md border border-border px-2 py-1.5 hover:bg-accent/50 transition-colors">
+            <Button
+              type="button"
+              variant="outline"
+              size="icon-sm"
+              className="rounded-l-none"
+            >
               <ChevronDown className="h-3 w-3 text-muted-foreground" />
-            </button>
+            </Button>
           </PopoverTrigger>
           <PopoverContent
-            className="p-1 max-h-60 overflow-y-auto"
-            style={{ minWidth: 280 }}
+            className="max-h-60 min-w-72 overflow-y-auto p-1"
             align="start"
             onOpenAutoFocus={(e) => e.preventDefault()}
           >
@@ -172,9 +188,12 @@ function ComboboxField({
                   </div>
                 )}
                 {opts.map((opt) => (
-                  <button
+                  <Button
                     key={opt.value}
-                    className={`flex items-center w-full px-2 py-1.5 text-sm rounded hover:bg-accent/50 ${
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    className={`h-auto w-full justify-start px-2 py-1.5 font-normal ${
                       opt.value === value ? "bg-accent" : ""
                     }`}
                     onMouseDown={(e) => {
@@ -183,7 +202,7 @@ function ComboboxField({
                     }}
                   >
                     <span className="truncate">{opt.label}</span>
-                  </button>
+                  </Button>
                 ))}
               </div>
             ))}

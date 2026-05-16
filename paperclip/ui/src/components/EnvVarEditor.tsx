@@ -1,10 +1,19 @@
 import { useEffect, useRef, useState } from "react";
 import type { CompanySecret, EnvBinding } from "@paperclipai/shared";
 import { X } from "lucide-react";
-import { cn } from "../lib/utils";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 const inputClass =
-  "w-full rounded-md border border-border px-2.5 py-1.5 bg-transparent outline-none text-sm font-mono placeholder:text-muted-foreground/40";
+  "h-8 w-full font-mono text-sm shadow-none placeholder:text-muted-foreground/40";
+const NO_SECRET_VALUE = "__paperclip_no_secret__";
 
 type Row = {
   key: string;
@@ -166,85 +175,104 @@ export function EnvVarEditor({
           !row.plainValue &&
           !row.secretId;
         return (
-          <div key={index} className="flex items-center gap-1.5">
-            <input
-              className={cn(inputClass, "flex-[2]")}
+          <div key={index} className="grid grid-cols-12 items-center gap-2">
+            <Input
+              className={`${inputClass} col-span-3 min-w-0`}
               placeholder="KEY"
               value={row.key}
               onChange={(event) => updateRow(index, { key: event.target.value })}
             />
-            <select
-              className={cn(inputClass, "flex-[1] bg-background")}
+            <Select
               value={row.source}
-              onChange={(event) =>
+              onValueChange={(value) =>
                 updateRow(index, {
-                  source: event.target.value === "secret" ? "secret" : "plain",
-                  ...(event.target.value === "plain" ? { secretId: "" } : {}),
+                  source: value === "secret" ? "secret" : "plain",
+                  ...(value === "plain" ? { secretId: "" } : {}),
                 })
               }
             >
-              <option value="plain">Plain</option>
-              <option value="secret">Secret</option>
-            </select>
+              <SelectTrigger className={`${inputClass} col-span-2 min-w-0 bg-background`}>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="plain">Plain</SelectItem>
+                <SelectItem value="secret">Secret</SelectItem>
+              </SelectContent>
+            </Select>
             {row.source === "secret" ? (
               <>
-                <select
-                  className={cn(inputClass, "flex-[3] bg-background")}
-                  value={row.secretId}
-                  onChange={(event) => updateRow(index, { secretId: event.target.value })}
+                <Select
+                  value={row.secretId || NO_SECRET_VALUE}
+                  onValueChange={(value) =>
+                    updateRow(index, {
+                      secretId: value === NO_SECRET_VALUE ? "" : value,
+                    })
+                  }
                 >
-                  <option value="">Select secret...</option>
-                  {secrets.map((secret) => (
-                    <option key={secret.id} value={secret.id}>
-                      {secret.name}
-                    </option>
-                  ))}
-                </select>
-                <button
+                  <SelectTrigger className={`${inputClass} col-span-5 min-w-0 bg-background`}>
+                    <SelectValue placeholder="Select secret..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value={NO_SECRET_VALUE}>Select secret...</SelectItem>
+                    {secrets.map((secret) => (
+                      <SelectItem key={secret.id} value={secret.id}>
+                        {secret.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <Button
                   type="button"
-                  className="inline-flex items-center rounded-md border border-border px-2 py-0.5 text-xs text-muted-foreground hover:bg-accent/50 transition-colors shrink-0"
+                  variant="outline"
+                  size="xs"
+                  className="col-span-1 text-muted-foreground"
                   onClick={() => sealRow(index)}
                   disabled={!row.key.trim() || !row.plainValue}
                   title="Create secret from current plain value"
                 >
                   New
-                </button>
+                </Button>
               </>
             ) : (
               <>
-                <input
-                  className={cn(inputClass, "flex-[3]")}
+                <Input
+                  className={`${inputClass} col-span-5 min-w-0`}
                   placeholder="value"
                   value={row.plainValue}
                   onChange={(event) => updateRow(index, { plainValue: event.target.value })}
                 />
-                <button
+                <Button
                   type="button"
-                  className="inline-flex items-center rounded-md border border-border px-2 py-0.5 text-xs text-muted-foreground hover:bg-accent/50 transition-colors shrink-0"
+                  variant="outline"
+                  size="xs"
+                  className="col-span-1 text-muted-foreground"
                   onClick={() => sealRow(index)}
                   disabled={!row.key.trim() || !row.plainValue}
                   title="Store value as secret and replace with reference"
                 >
                   Seal
-                </button>
+                </Button>
               </>
             )}
             {!isTrailing ? (
-              <button
+              <Button
                 type="button"
-                className="shrink-0 p-1 rounded hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-colors"
+                variant="ghost"
+                size="icon-xs"
+                className="col-span-1 justify-self-end text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
                 onClick={() => removeRow(index)}
+                aria-label={`Remove ${row.key || "environment variable"}`}
               >
                 <X className="h-3.5 w-3.5" />
-              </button>
+              </Button>
             ) : (
-              <div className="w-[26px] shrink-0" />
+              <div className="col-span-1 size-6 justify-self-end" />
             )}
           </div>
         );
       })}
-      {sealError && <p className="text-[11px] text-destructive">{sealError}</p>}
-      <p className="text-[11px] text-muted-foreground/60">
+      {sealError && <p className="text-micro text-destructive">{sealError}</p>}
+      <p className="text-micro text-muted-foreground/60">
         PAPERCLIP_* variables are injected automatically at runtime.
       </p>
     </div>
