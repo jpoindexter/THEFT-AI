@@ -14,6 +14,7 @@ import { PageSkeleton } from "../components/PageSkeleton";
 import { StatusBadge } from "../components/StatusBadge";
 import { Link } from "@/lib/router";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { ArrowRight, CheckCircle2, GitBranch, Layers3, Plus, Route, Target, Users } from "lucide-react";
 import { cn } from "../lib/utils";
 
@@ -222,7 +223,6 @@ export function Goals() {
     projects: projects ?? [],
     issues: issues ?? [],
   });
-  const techTreeStages = buildTechTreeStageViews(techTreeNodes);
   const nextNode = getNextTechTreeNode(techTreeNodes);
 
   if (!selectedCompanyId) {
@@ -244,82 +244,56 @@ export function Goals() {
       {goals && goals.length > 0 && (
         <>
           <section className="theft-panel overflow-hidden">
-            <div className="flex flex-col gap-4 border-b border-border bg-card/75 p-5 sm:flex-row sm:items-start sm:justify-between">
-              <div className="max-w-3xl">
-                <div className="flex flex-wrap items-center gap-2 text-xs font-medium uppercase tracking-[0.16em] text-muted-foreground">
-                  THEFT build order
-                </div>
-                <h1 className="theft-heading mt-2 text-2xl md:text-3xl">
-                  Tech Tree
-                </h1>
-                <p className="mt-2 text-sm leading-6 text-muted-foreground">
-                  Company strategy sequenced into dependencies, evidence gates, and department-owned execution.
-                </p>
-              </div>
-              <div className="grid min-w-[260px] grid-cols-3 border border-border bg-card text-center">
-                <TechTreeStat value={goals.length} label="nodes" />
-                <TechTreeStat value={goals.filter((goal) => goal.status === "active").length} label="active" />
-                <TechTreeStat value={goals.filter((goal) => goal.status === "achieved").length} label="done" />
-              </div>
-            </div>
-            <div className="grid min-w-0 grid-cols-[minmax(0,1fr)] gap-4 bg-background/40 p-4 lg:grid-cols-[minmax(0,1fr)_320px]">
-              <div className="min-w-0 space-y-2">
-                {techTreeStages.map((stage) => (
-                  <TechTreeStageSection key={stage.key} stage={stage} />
-                ))}
-              </div>
-              <aside className="min-w-0 space-y-3">
-                <div className="border border-border bg-card p-4">
-                  <div className="text-xs font-medium uppercase tracking-[0.14em] text-muted-foreground">
-                    Selected node
-                  </div>
-                  {nextNode ? (
-                    <div className="mt-3 space-y-3">
-                      <div>
-                        <div className="flex items-center gap-2">
-                          <StatusBadge status={nextNode.goal.status} />
-                          <span className="text-xs text-muted-foreground">{nextNode.stageLabel}</span>
-                        </div>
-                        <h2 className="mt-2 break-words text-base font-medium text-foreground [overflow-wrap:anywhere]">{nextNode.goal.title}</h2>
-                        <p className="mt-1 break-words text-sm text-muted-foreground [overflow-wrap:anywhere]">{nextNode.nextAction}</p>
-                      </div>
-                      <div className="grid grid-cols-2 gap-2 text-xs">
-                        <InspectorMetric label="Evidence" value={nextNode.evidence} />
-                        <InspectorMetric label="Open tasks" value={`${nextNode.openIssueCount}`} />
-                      </div>
-                      <Button
-                        size="sm"
-                        className="w-full"
-                        onClick={() => openNewIssue({
-                          goalId: nextNode.goal.id,
-                          title: nextNode.startWorkTitle,
-                          description: `Advance Tech Tree node: ${nextNode.goal.title}`,
-                        })}
-                      >
-                        <Plus className="mr-1.5 h-3.5 w-3.5" />
-                        Start work
-                      </Button>
+            <div className="grid min-w-0 gap-4 p-4 xl:grid-cols-[170px_minmax(0,1fr)_320px]">
+              <TechTreeFilterRail />
+              <main className="min-w-0">
+                <div className="mb-5 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                  <div>
+                    <div className="text-xs font-medium uppercase tracking-[0.16em] text-muted-foreground">
+                      Strategy map / Tech Tree
                     </div>
-                  ) : (
-                    <p className="mt-3 text-sm text-muted-foreground">Add the first node to create a build order.</p>
-                  )}
-                </div>
-                <div className="border border-border bg-card p-4">
-                  <div className="flex items-center gap-2 text-sm font-medium">
-                  <Route className="h-4 w-4 text-primary" />
-                  Roadmap rule
+                    <h1 className="mt-2 text-2xl font-medium">Tech Tree</h1>
+                    <p className="mt-2 max-w-3xl text-sm leading-6 text-muted-foreground">
+                      Company build order, dependencies, evidence, and next unlocks.
+                    </p>
                   </div>
-                  <p className="mt-2 text-sm leading-6 text-muted-foreground">
-                    Nodes are accepted only when they point to evidence: department tasks, projects,
-                    Library outputs, or a clear next action.
-                  </p>
-                  <div className="mt-4 space-y-2 text-xs text-muted-foreground">
-                    <RoadmapRule icon={Users} label="Owner" value="Department or Operator" />
-                    <RoadmapRule icon={GitBranch} label="Dependency" value="Parent and child nodes" />
-                    <RoadmapRule icon={CheckCircle2} label="Evidence" value="Completed work" />
+                  <div className="grid min-w-[260px] grid-cols-3 border border-border bg-card text-center">
+                    <TechTreeStat value={goals.length} label="nodes" />
+                    <TechTreeStat value={goals.filter((goal) => goal.status === "active").length} label="active" />
+                    <TechTreeStat value={goals.filter((goal) => goal.status === "achieved").length} label="done" />
                   </div>
                 </div>
-              </aside>
+
+                <TechTreeBuildOrder nodes={techTreeNodes} selectedNode={nextNode} />
+
+                <div className="mt-4 border border-border bg-card p-4">
+                  <div className="flex flex-wrap items-center justify-between gap-3">
+                    <div>
+                      <p className="text-xs font-medium uppercase tracking-[0.12em] text-muted-foreground">
+                        Recommended next move
+                      </p>
+                      <h2 className="mt-2 text-lg font-medium">{nextNode?.goal.title ?? "Create first build-order node"}</h2>
+                    </div>
+                    <Badge variant="outline" className="rounded-none">High impact</Badge>
+                  </div>
+                  <div className="mt-4 grid gap-3 text-sm md:grid-cols-3">
+                    <InspectorMetric label="Rationale" value={nextNode?.nextAction ?? "Start the company roadmap"} />
+                    <InspectorMetric label="Impact" value="Unlocks downstream work" />
+                    <InspectorMetric label="Alternative" value="Route through Operator" />
+                  </div>
+                </div>
+              </main>
+              <TechTreeInspector
+                node={nextNode}
+                onStartWork={() => {
+                  if (!nextNode) return;
+                  openNewIssue({
+                    goalId: nextNode.goal.id,
+                    title: nextNode.startWorkTitle,
+                    description: `Advance Tech Tree node: ${nextNode.goal.title}`,
+                  });
+                }}
+              />
             </div>
           </section>
           <div className="flex items-center justify-start">
@@ -372,6 +346,171 @@ function TechTreeStat({ value, label }: { value: number; label: string }) {
       <div className="text-lg font-semibold tabular-nums">{value}</div>
       <div className="text-[11px] uppercase tracking-[0.12em] text-muted-foreground">{label}</div>
     </div>
+  );
+}
+
+const BUILD_ORDER_COLUMNS = ["Idea", "Validation", "Build", "Go-to-market", "Launch", "Scale"];
+const FALLBACK_BUILD_NODES = [
+  "Identify market opportunity",
+  "Define paid offer",
+  "Build landing page",
+  "Create sales script",
+  "Ship first artifact",
+  "Systematize acquisition",
+];
+
+function TechTreeFilterRail() {
+  return (
+    <aside className="hidden min-w-0 space-y-5 border-r border-border pr-4 xl:block">
+      <div>
+        <p className="text-xs font-medium uppercase tracking-[0.12em] text-muted-foreground">View</p>
+        <div className="mt-3 grid gap-2 text-sm">
+          <button className="border border-foreground bg-secondary px-3 py-2 text-left">Strategy Map</button>
+          <button className="border border-border px-3 py-2 text-left text-muted-foreground">Build Order</button>
+        </div>
+      </div>
+      <div className="border-t border-border pt-4">
+        <p className="text-xs font-medium uppercase tracking-[0.12em] text-muted-foreground">Filters</p>
+        <div className="mt-3 space-y-2 text-sm text-muted-foreground">
+          {["All", "Idea", "Validation", "Build", "Go-to-market", "Launch", "Scale"].map((item) => (
+            <div key={item} className="flex items-center gap-2">
+              <CircleMarker complete={item === "All"} />
+              {item}
+            </div>
+          ))}
+        </div>
+      </div>
+      <div className="border-t border-border pt-4">
+        <p className="text-xs font-medium uppercase tracking-[0.12em] text-muted-foreground">Legend</p>
+        <div className="mt-3 space-y-2 text-sm text-muted-foreground">
+          <p>-- Dependency</p>
+          <p>{"->"} Unlocks</p>
+          <p>Lock Locked</p>
+        </div>
+      </div>
+      <Button variant="outline" size="sm" className="w-full rounded-none">Show critical path</Button>
+    </aside>
+  );
+}
+
+function TechTreeBuildOrder({
+  nodes,
+  selectedNode,
+}: {
+  nodes: TechTreeNodeView[];
+  selectedNode: TechTreeNodeView | null;
+}) {
+  const visibleNodes = BUILD_ORDER_COLUMNS.map((label, index) => nodes[index] ?? null);
+
+  return (
+    <div className="overflow-x-auto border border-border bg-secondary p-4">
+      <div className="grid min-w-[920px] grid-cols-6 gap-3">
+        {BUILD_ORDER_COLUMNS.map((column, index) => {
+          const node = visibleNodes[index];
+          const title = node?.goal.title ?? FALLBACK_BUILD_NODES[index]!;
+          const complete = node?.goal.status === "achieved" || index === 0;
+          const active = node?.goal.id === selectedNode?.goal.id || (!node && index === 1);
+          const locked = !node && index > 2;
+          return (
+            <div key={column} className="min-w-0">
+              <div className="border border-border bg-card px-3 py-3 text-center">
+                <p className="text-sm font-medium">{column}</p>
+                <p className="mt-1 text-xs text-muted-foreground">{index + 1}</p>
+              </div>
+              <div className="mt-4 space-y-3">
+                {[0, 1, 2].map((row) => {
+                  const rowTitle = row === 0 ? title : row === 1 ? `${column} support task` : `${column} evidence gate`;
+                  return (
+                    <div
+                      key={`${column}:${row}`}
+                      className={cn(
+                        "min-h-20 border bg-card p-3 text-sm",
+                        active && row === 0 ? "border-foreground" : "border-border",
+                        locked && "opacity-50",
+                      )}
+                    >
+                      <div className="flex items-start justify-between gap-2">
+                        <p className="line-clamp-2">{rowTitle}</p>
+                        {locked ? <span className="text-xs">Lock</span> : <CircleMarker complete={complete && row === 0} />}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+      <div className="mt-5 grid min-w-[920px] grid-cols-6 gap-3 border border-dashed border-border p-3">
+        {BUILD_ORDER_COLUMNS.map((column, index) => (
+          <div key={`${column}:artifact`} className="border border-border bg-card px-3 py-3 text-xs text-muted-foreground">
+            {index === 0 ? "Customer interview notes" : index === 1 ? "Offer summary doc" : `${column} artifact`}
+          </div>
+        ))}
+      </div>
+      <p className="mt-3 text-center text-xs font-medium uppercase tracking-[0.12em] text-muted-foreground">
+        Evidence & artifacts (Library)
+      </p>
+    </div>
+  );
+}
+
+function TechTreeInspector({
+  node,
+  onStartWork,
+}: {
+  node: TechTreeNodeView | null;
+  onStartWork: () => void;
+}) {
+  return (
+    <aside className="min-w-0 border-t border-border pt-4 xl:border-l xl:border-t-0 xl:pl-4 xl:pt-0">
+      <div className="border border-border bg-card p-4">
+        <p className="text-xs font-medium uppercase tracking-[0.12em] text-muted-foreground">Selected node</p>
+        {node ? (
+          <div className="mt-4 space-y-4">
+            <div>
+              <div className="flex items-center gap-2">
+                <CircleMarker />
+                <h2 className="text-lg font-medium">{node.goal.title}</h2>
+              </div>
+              <div className="mt-2 flex items-center gap-2">
+                <StatusBadge status={node.goal.status} />
+                <span className="text-xs text-muted-foreground">{node.stageLabel}</span>
+              </div>
+            </div>
+            <InspectorSection title="Why it matters" rows={[node.nextAction]} />
+            <InspectorSection title="Prerequisites" rows={[node.dependency, node.evidence]} />
+            <InspectorSection title="Evidence required" rows={["Owner decision", "Linked task output", "Library artifact"]} />
+            <InspectorSection title="Owner" rows={[node.owner]} />
+            <Button className="w-full rounded-none" onClick={onStartWork}>
+              <Plus className="mr-1.5 h-3.5 w-3.5" />
+              Start this work
+            </Button>
+          </div>
+        ) : (
+          <p className="mt-3 text-sm text-muted-foreground">Add a node to create the company build order.</p>
+        )}
+      </div>
+    </aside>
+  );
+}
+
+function InspectorSection({ title, rows }: { title: string; rows: string[] }) {
+  return (
+    <div className="border-t border-border pt-3">
+      <p className="text-xs font-medium uppercase tracking-[0.12em] text-muted-foreground">{title}</p>
+      <ul className="mt-2 space-y-1.5 text-sm leading-5 text-muted-foreground">
+        {rows.map((row) => (
+          <li key={row}>{row}</li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
+function CircleMarker({ complete = false }: { complete?: boolean }) {
+  return (
+    <span className={cn("inline-flex size-3 shrink-0 rounded-full border", complete ? "border-foreground bg-foreground" : "border-muted-foreground")} />
   );
 }
 
