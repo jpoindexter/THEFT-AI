@@ -35,6 +35,7 @@ Use this skill to turn a messy UI codebase into one governed design system. The 
      ```
 
    - Also inspect key design files manually: global CSS, shadcn primitives, route shells, component directories, and active MVP routes.
+   - Use `--drift-only` when you need an active product gate that excludes the token source and shadcn primitive implementations from product-drift counts.
    - Classify findings by atomic layer and by severity:
      - `blocker`: visible inconsistency on active product routes or no single source of truth.
      - `high`: hardcoded color/radius/layout in reusable components or product pages.
@@ -71,6 +72,7 @@ Use this skill to turn a messy UI codebase into one governed design system. The 
      ```bash
      node .agents/skills/atomic-design-system/scripts/audit-design-system.mjs --active-routes --write-baseline /private/tmp/theft-design-baseline.json
      node .agents/skills/atomic-design-system/scripts/audit-design-system.mjs --active-routes --baseline /private/tmp/theft-design-baseline.json
+     node .agents/skills/atomic-design-system/scripts/audit-design-system.mjs --active-routes --drift-only
      ```
 
 ## Deliverables
@@ -101,6 +103,7 @@ Useful flags:
 
 - `--active-routes`: focus on THEFT MVP route files plus local static imports.
 - `--json`: produce machine-readable output for agents or CI.
+- `--drift-only`: exclude source-of-truth token files and shadcn primitive implementations from product-drift counts.
 - `--max-findings <n>`: keep text output readable.
 - `--write-baseline <file>`: save current counts for no-new-drift gating.
 - `--baseline <file>`: fail if current counts exceed the baseline.

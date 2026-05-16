@@ -122,6 +122,7 @@ Usage:
 
 Options:
   --active-routes          Scan THEFT MVP active route seeds plus local static imports.
+  --drift-only             Count product drift only, excluding token source and shadcn primitive findings.
   --json                   Print machine-readable JSON.
   --max-findings <n>       Limit printed findings in text mode. Default: ${DEFAULT_MAX_FINDINGS}.
   --baseline <file>        Fail when current counts exceed a previously written baseline.
@@ -134,6 +135,7 @@ Examples:
   node .agents/skills/atomic-design-system/scripts/audit-design-system.mjs
   node .agents/skills/atomic-design-system/scripts/audit-design-system.mjs . --max-findings 40
   node .agents/skills/atomic-design-system/scripts/audit-design-system.mjs --active-routes --json
+  node .agents/skills/atomic-design-system/scripts/audit-design-system.mjs --active-routes --drift-only
   node .agents/skills/atomic-design-system/scripts/audit-design-system.mjs --active-routes --write-baseline /private/tmp/theft-design-baseline.json
   node .agents/skills/atomic-design-system/scripts/audit-design-system.mjs --active-routes --baseline /private/tmp/theft-design-baseline.json
 `);
@@ -143,6 +145,7 @@ function parseArgs(argv) {
   const options = {
     activeRoutes: false,
     baselinePath: null,
+    driftOnly: false,
     failOn: null,
     json: false,
     maxFindings: DEFAULT_MAX_FINDINGS,
@@ -159,6 +162,10 @@ function parseArgs(argv) {
     }
     if (arg === "--active-routes") {
       options.activeRoutes = true;
+      continue;
+    }
+    if (arg === "--drift-only") {
+      options.driftOnly = true;
       continue;
     }
     if (arg === "--json") {
@@ -331,6 +338,10 @@ function isPrimitiveLayer(file) {
   return file.includes("/components/ui/");
 }
 
+function isDesignSystemSource(file) {
+  return isTokenSource(file) || isPrimitiveLayer(file);
+}
+
 function findingSeverity(check, file) {
   if (check.tokenSeverity && isTokenSource(file)) return check.tokenSeverity;
   if (check.id === "native-control" && isPrimitiveLayer(file)) return "info";
@@ -367,7 +378,9 @@ function scanFile(file) {
 }
 
 function summarize(scannedFiles, options) {
-  const findings = scannedFiles.flatMap((file) => file.findings);
+  const findings = scannedFiles
+    .flatMap((file) => file.findings)
+    .filter((finding) => !options.driftOnly || !isDesignSystemSource(finding.file));
   const byCheck = countBy(findings, (finding) => finding.check);
   const byLayer = countBy(findings, (finding) => finding.layer);
   const bySeverity = countBy(findings, (finding) => finding.severity);
@@ -392,6 +405,7 @@ function summarize(scannedFiles, options) {
   return {
     generatedAt: new Date().toISOString(),
     mode: options.activeRoutes ? "active-routes" : "repo",
+    driftOnly: options.driftOnly,
     targets: options.targets,
     activeRouteSeeds: options.activeRoutes ? ACTIVE_ROUTE_SEEDS : [],
     counts,
