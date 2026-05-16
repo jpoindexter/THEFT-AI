@@ -223,13 +223,19 @@ export function Library() {
 
   return (
     <div className="h-full min-h-0 bg-background text-foreground">
-      <div className="border-b border-border bg-card px-5 py-4  ">
+      <div className="border-b border-border bg-card px-5 py-4">
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <div>
-            <h1 className="text-xl font-semibold tracking-normal">Library</h1>
-            <p className="mt-1 text-sm text-muted-foreground">
-              Durable company output, provenance, and source tasks grouped by department.
-            </p>
+          <div className="flex min-w-0 items-start gap-3">
+            <div className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-border bg-background">
+              <LibraryIcon className="h-4 w-4" />
+            </div>
+            <div className="min-w-0">
+              <p className="text-xs font-medium uppercase tracking-[0.08em] text-muted-foreground">Company memory</p>
+              <h1 className="mt-1 text-xl font-semibold tracking-normal">Outcomes Library</h1>
+              <p className="mt-1 text-sm text-muted-foreground">
+                Durable company output, provenance, and source tasks grouped by department.
+              </p>
+            </div>
           </div>
           <Button
             variant="outline"
@@ -283,13 +289,13 @@ export function Library() {
       ) : allItems.length === 0 ? (
         <EmptyState icon={LibraryIcon} message="No Library items yet. Route a task or save a department document to create company memory." />
       ) : (
-        <div className="grid h-[calc(100vh-14rem)] min-h-[640px] grid-cols-1 lg:grid-cols-[minmax(360px,0.9fr)_minmax(0,1.1fr)]">
+        <div className="grid h-[calc(100vh-14rem)] min-h-[620px] grid-cols-1 lg:grid-cols-[minmax(360px,0.9fr)_minmax(0,1.1fr)]">
           <section className="min-h-0 overflow-y-auto border-r border-border bg-card/50 p-4">
             {pinnedItems.length > 0 ? (
               <div className="mb-5">
                 <div className="mb-2 flex items-center gap-2 text-xs font-semibold uppercase text-muted-foreground">
                   <Pin className="h-3.5 w-3.5" />
-                      Pinned company memory
+                  Pinned company memory
                 </div>
                 <div className="space-y-2">
                   {pinnedItems.slice(0, 6).map((item) => (
