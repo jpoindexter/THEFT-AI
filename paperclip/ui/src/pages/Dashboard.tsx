@@ -258,10 +258,16 @@ export function Dashboard() {
 
           <div className={cn(
             "grid min-w-0 gap-6",
-            operatorOpen ? "grid-cols-[minmax(0,1fr)]" : "xl:grid-cols-[minmax(380px,0.72fr)_minmax(0,1.28fr)]",
+            operatorOpen ? "grid-cols-[minmax(0,1fr)]" : "xl:grid-cols-[minmax(0,1fr)_390px]",
           )}>
+            <StrategyMapPanel
+              objective={objectiveTitle}
+              goals={roadmapGoals}
+              departments={departmentRows}
+              nextTasks={nextTasks}
+            />
+
             <aside className="min-w-0 space-y-6">
-              <NextMovePanel bottleneck={bottleneck} />
               <ConstraintsPanel
                 approvalsCount={approvals?.length ?? 0}
                 interactionsCount={pendingInteractions.length}
@@ -276,14 +282,8 @@ export function Dashboard() {
               />
               <ExecutionStatePanel departments={departmentRows} />
               <OutcomesPanel documents={latestLibraryDocuments} />
+              <NextMovePanel bottleneck={bottleneck} />
             </aside>
-
-            <StrategyMapPanel
-              objective={objectiveTitle}
-              goals={roadmapGoals}
-              departments={departmentRows}
-              nextTasks={nextTasks}
-            />
           </div>
         </div>
 
@@ -352,24 +352,24 @@ function ObjectiveHeader({
   const activeDepartments = departments.filter((department) => department.agent).length;
 
   return (
-    <Panel className="space-y-8">
-      <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-        <div className="min-w-0">
-          <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
-            <Badge variant="outline" className="rounded-[10px] border-border bg-secondary px-3 py-1 text-foreground">
-              Mission Control
-            </Badge>
-            <span>{companyName}</span>
-            {stage ? <span>{stage}</span> : null}
+    <Panel className="space-y-0 p-4 md:p-5">
+      <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
+        <div className="flex min-w-0 items-start gap-4">
+          <div className="hidden size-12 shrink-0 items-center justify-center bg-secondary md:flex">
+            <Target className="size-5 text-muted-foreground" />
           </div>
-          <div className="mt-7 flex items-start gap-4">
-            <div className="min-w-0">
-              <p className="text-sm text-muted-foreground">Current objective</p>
-              <h1 className="mt-3 max-w-5xl break-words text-4xl font-semibold leading-[1.04] tracking-normal text-foreground md:text-6xl">
-                {objective}
-              </h1>
-              <p className="mt-5 max-w-3xl text-lg leading-8 text-muted-foreground">{detail}</p>
+          <div className="min-w-0">
+            <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
+              <Badge variant="outline" className="rounded-[10px] border-border bg-secondary px-3 py-1 text-foreground">
+                Objective
+              </Badge>
+              <span className="truncate">{companyName}</span>
+              {stage ? <span>{stage}</span> : null}
             </div>
+            <h1 className="mt-3 max-w-5xl break-words text-2xl font-medium leading-tight tracking-normal text-foreground md:text-3xl">
+              {objective}
+            </h1>
+            <p className="mt-2 max-w-3xl text-sm leading-6 text-muted-foreground">{detail}</p>
           </div>
         </div>
         <div className="grid w-full min-w-0 grid-cols-3 gap-2 sm:min-w-[280px] lg:w-auto">
@@ -384,8 +384,8 @@ function ObjectiveHeader({
 
 function MissionStat({ value, label }: { value: number; label: string }) {
   return (
-    <div className="rounded-[14px] bg-secondary px-4 py-4 text-center">
-      <p className="text-2xl font-semibold tabular-nums">{value}</p>
+    <div className="bg-secondary px-4 py-3 text-center">
+      <p className="text-xl font-medium tabular-nums">{value}</p>
       <p className="mt-1 text-xs text-muted-foreground">{label}</p>
     </div>
   );
@@ -407,21 +407,21 @@ function StrategyMapPanel({
   const visibleTracks = tracks.length > 0 ? tracks.map((goal) => goal.title) : fallbackTracks;
 
   return (
-    <Panel className="min-h-[660px] max-w-full overflow-hidden">
+    <Panel className="min-h-[660px] max-w-full overflow-hidden p-4 md:p-5">
       <div className="mb-5 flex items-center justify-between gap-3">
         <div>
-          <h2 className="text-2xl font-semibold">Workspace</h2>
-          <p className="mt-2 text-base text-muted-foreground">
+          <h2 className="text-lg font-medium">Workspace / Strategy map</h2>
+          <p className="mt-1 text-sm text-muted-foreground">
             Objective to departments, tasks, and Library artifacts
           </p>
         </div>
-        <Link to="/goals" className="rounded-[12px] bg-secondary px-4 py-2 text-sm text-muted-foreground no-underline hover:text-foreground">
+        <Link to="/goals" className="bg-secondary px-4 py-2 text-sm text-muted-foreground no-underline hover:text-foreground">
           Tech Tree
         </Link>
       </div>
 
-      <div className="min-w-0 max-w-full overflow-hidden rounded-[18px] bg-secondary p-5 md:p-7">
-        <div className="mx-auto max-w-2xl min-w-0 rounded-[16px] bg-card px-6 py-5 text-center shadow-[0_16px_48px_rgb(20_24_20/0.05)]">
+      <div className="min-w-0 max-w-full overflow-hidden bg-secondary p-4 md:p-5">
+        <div className="mx-auto max-w-2xl min-w-0 bg-card px-6 py-5 text-center shadow-[0_16px_48px_rgb(20_24_20/0.05)]">
           <p className="text-sm text-muted-foreground">Current objective</p>
           <p className="mt-2 text-lg font-semibold text-foreground">{objective}</p>
         </div>
@@ -430,7 +430,7 @@ function StrategyMapPanel({
 
         <div className="grid gap-3 md:grid-cols-3">
           {visibleTracks.map((track) => (
-            <div key={track} className="rounded-[14px] bg-card px-5 py-4 text-center shadow-sm">
+            <div key={track} className="bg-card px-5 py-4 text-center shadow-sm">
               <p className="line-clamp-2 text-sm font-medium">{track}</p>
             </div>
           ))}
@@ -443,7 +443,7 @@ function StrategyMapPanel({
             <Link
               key={department.key}
               to={`/departments/${department.key}`}
-              className="group min-w-0 max-w-full overflow-hidden rounded-[14px] bg-card p-4 text-inherit no-underline shadow-sm transition-transform hover:-translate-y-0.5"
+              className="group min-w-0 max-w-full overflow-hidden bg-card p-4 text-inherit no-underline shadow-sm transition-transform hover:-translate-y-0.5"
             >
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0">
@@ -482,7 +482,7 @@ function StrategyMapPanel({
           ))}
         </div>
 
-        <div className="mt-6 rounded-[14px] bg-card p-4 shadow-sm">
+        <div className="mt-6 bg-card p-4 shadow-sm">
           <div className="flex items-center justify-between gap-3">
             <p className="text-sm font-medium text-muted-foreground">Available next work</p>
             <Route className="h-4 w-4 text-muted-foreground" />
@@ -490,9 +490,9 @@ function StrategyMapPanel({
           <div className="mt-3 grid gap-2 md:grid-cols-3">
             {(nextTasks.length > 0 ? nextTasks.slice(0, 3) : []).map((issue) => (
               <Link
-                key={issue.id}
-                to={issuePath(issue)}
-              className="min-w-0 max-w-full overflow-hidden rounded-[12px] bg-secondary px-4 py-3 text-inherit no-underline hover:text-foreground"
+              key={issue.id}
+              to={issuePath(issue)}
+              className="min-w-0 max-w-full overflow-hidden bg-secondary px-4 py-3 text-inherit no-underline hover:text-foreground"
             >
                 <p className="min-w-0 break-words line-clamp-1 text-sm [overflow-wrap:anywhere]">{issue.title}</p>
                 <p className="mt-1 text-xs text-muted-foreground">{formatStatusLabel(issue.status)}</p>
