@@ -156,7 +156,7 @@
 | T113 | Create reusable Atomic Design System skill and scanner for repo-wide design-system work | ✅ done |
 | T114 | Record baseline audit of hardcoded styles, inline styles, arbitrary Tailwind, radius drift, and oversized UI modules | ✅ done |
 | T115 | Define one source-of-truth contract across DESIGN.md, Tailwind v4, CSS variables, and design-token views | ✅ done |
-| T116 | Create active-route no-new-drift gate from the atomic design-system scanner | ☐ todo |
+| T116 | Create active-route no-new-drift gate from the atomic design-system scanner | ✅ done |
 | T117 | Promote repeated atoms/molecules/organisms into shared design-system modules | ☐ todo |
 | T118 | Convert active MVP routes to template-only page composition | ☐ todo |
 | T119 | Pay down runtime/admin/lab design drift after active product routes pass the launch gate | ☐ todo |

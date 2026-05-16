@@ -22,10 +22,16 @@ Use this skill to turn a messy UI codebase into one governed design system. The 
    - If substantial architecture changes are needed, use `improve-codebase-architecture` too.
 
 2. **Audit First**
-   - Run the scanner:
+   - Run a repo/product inventory scanner:
 
      ```bash
      node .agents/skills/atomic-design-system/scripts/audit-design-system.mjs paperclip/ui/src
+     ```
+
+   - For the active THEFT MVP route gate, scan only active route seeds and their local static imports:
+
+     ```bash
+     node .agents/skills/atomic-design-system/scripts/audit-design-system.mjs --active-routes
      ```
 
    - Also inspect key design files manually: global CSS, shadcn primitives, route shells, component directories, and active MVP routes.
@@ -60,6 +66,12 @@ Use this skill to turn a messy UI codebase into one governed design system. The 
    - No page-specific scroll contract when a template can own it.
    - New UI follows the 300 / 150 / 50 guardrail where practical.
    - Typecheck passes, route smoke passes, and screenshots show no overflow or obvious visual drift.
+   - Use the active-route scanner as a no-new-drift gate during migration. Create a baseline before cleanup, then fail only when counts increase:
+
+     ```bash
+     node .agents/skills/atomic-design-system/scripts/audit-design-system.mjs --active-routes --write-baseline /private/tmp/theft-design-baseline.json
+     node .agents/skills/atomic-design-system/scripts/audit-design-system.mjs --active-routes --baseline /private/tmp/theft-design-baseline.json
+     ```
 
 ## Deliverables
 
@@ -84,3 +96,14 @@ For an implementation request, produce:
 ## Scanner Notes
 
 The bundled scanner is intentionally conservative. It finds likely issues, not final truth. Always review matches before editing. Treat user/project-defined colors, tests, fixtures, generated code, and lab routes as lower priority unless they leak into active product UI.
+
+Useful flags:
+
+- `--active-routes`: focus on THEFT MVP route files plus local static imports.
+- `--json`: produce machine-readable output for agents or CI.
+- `--max-findings <n>`: keep text output readable.
+- `--write-baseline <file>`: save current counts for no-new-drift gating.
+- `--baseline <file>`: fail if current counts exceed the baseline.
+- `--fail-on <severity>`: fail if any finding exists at or above `info`, `low`, `medium`, `high`, or `blocker`.
+
+The active-route mode is a focused gate, not a substitute for periodic repo-wide audits. Use both: active-route gate for every design-system migration slice, repo-wide audit for planning and debt tracking.
