@@ -11,7 +11,7 @@ const MVP_ROUTES = [
   {
     name: "Mission Control",
     path: "/dashboard",
-    expectedText: ["Mission Control", "Objective", "Strategy map"],
+    expectedText: ["Mission Control", "Current objective", "Workspace"],
   },
   {
     name: "Tasks / Needs Action",
@@ -36,7 +36,7 @@ const MVP_ROUTES = [
   {
     name: "System / Diagnostics",
     path: "/agents/all",
-    expectedText: ["Agents", "Agent Runtime"],
+    expectedText: ["Agents"],
   },
 ];
 

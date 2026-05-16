@@ -15,29 +15,39 @@ const MIN_SIDEBAR_WIDTH = 208;
 const MAX_SIDEBAR_WIDTH = 420;
 const SIDEBAR_WIDTH_STEP = 16;
 
-function clampSidebarWidth(width: number) {
-  return Math.min(MAX_SIDEBAR_WIDTH, Math.max(MIN_SIDEBAR_WIDTH, width));
+function clampSidebarWidth(width: number, minWidth = MIN_SIDEBAR_WIDTH, maxWidth = MAX_SIDEBAR_WIDTH) {
+  return Math.min(maxWidth, Math.max(minWidth, width));
 }
 
-function readStoredSidebarWidth(storageKey: string) {
-  if (typeof window === "undefined") return DEFAULT_SIDEBAR_WIDTH;
+function readStoredSidebarWidth(
+  storageKey: string,
+  defaultWidth = DEFAULT_SIDEBAR_WIDTH,
+  minWidth = MIN_SIDEBAR_WIDTH,
+  maxWidth = MAX_SIDEBAR_WIDTH,
+) {
+  if (typeof window === "undefined") return defaultWidth;
 
   try {
     const stored = window.localStorage.getItem(storageKey);
-    if (!stored) return DEFAULT_SIDEBAR_WIDTH;
+    if (!stored) return defaultWidth;
     const parsed = Number.parseInt(stored, 10);
-    if (!Number.isFinite(parsed)) return DEFAULT_SIDEBAR_WIDTH;
-    return clampSidebarWidth(parsed);
+    if (!Number.isFinite(parsed)) return defaultWidth;
+    return clampSidebarWidth(parsed, minWidth, maxWidth);
   } catch {
-    return DEFAULT_SIDEBAR_WIDTH;
+    return defaultWidth;
   }
 }
 
-function writeStoredSidebarWidth(storageKey: string, width: number) {
+function writeStoredSidebarWidth(
+  storageKey: string,
+  width: number,
+  minWidth = MIN_SIDEBAR_WIDTH,
+  maxWidth = MAX_SIDEBAR_WIDTH,
+) {
   if (typeof window === "undefined") return;
 
   try {
-    window.localStorage.setItem(storageKey, String(clampSidebarWidth(width)));
+    window.localStorage.setItem(storageKey, String(clampSidebarWidth(width, minWidth, maxWidth)));
   } catch {
     // Storage can be unavailable in private contexts; resizing should still work.
   }
@@ -49,6 +59,9 @@ type ResizableSidebarPaneProps = {
   resizable?: boolean;
   storageKey?: string;
   className?: string;
+  defaultWidth?: number;
+  minWidth?: number;
+  maxWidth?: number;
 };
 
 export function ResizableSidebarPane({
@@ -57,17 +70,20 @@ export function ResizableSidebarPane({
   resizable = false,
   storageKey = "paperclip.sidebar.width",
   className,
+  defaultWidth = DEFAULT_SIDEBAR_WIDTH,
+  minWidth = MIN_SIDEBAR_WIDTH,
+  maxWidth = MAX_SIDEBAR_WIDTH,
 }: ResizableSidebarPaneProps) {
-  const [width, setWidth] = useState(() => readStoredSidebarWidth(storageKey));
+  const [width, setWidth] = useState(() => readStoredSidebarWidth(storageKey, defaultWidth, minWidth, maxWidth));
   const [isResizing, setIsResizing] = useState(false);
   const widthRef = useRef(width);
   const dragState = useRef<{ startX: number; startWidth: number } | null>(null);
 
   useEffect(() => {
-    const storedWidth = readStoredSidebarWidth(storageKey);
+    const storedWidth = readStoredSidebarWidth(storageKey, defaultWidth, minWidth, maxWidth);
     widthRef.current = storedWidth;
     setWidth(storedWidth);
-  }, [storageKey]);
+  }, [defaultWidth, maxWidth, minWidth, storageKey]);
 
   const visibleWidth = open ? width : 0;
   const paneStyle = useMemo(
@@ -77,12 +93,12 @@ export function ResizableSidebarPane({
 
   const commitWidth = useCallback(
     (nextWidth: number) => {
-      const clamped = clampSidebarWidth(nextWidth);
+      const clamped = clampSidebarWidth(nextWidth, minWidth, maxWidth);
       widthRef.current = clamped;
       setWidth(clamped);
-      writeStoredSidebarWidth(storageKey, clamped);
+      writeStoredSidebarWidth(storageKey, clamped, minWidth, maxWidth);
     },
-    [storageKey],
+    [maxWidth, minWidth, storageKey],
   );
 
   const handlePointerDown = useCallback(
@@ -102,11 +118,11 @@ export function ResizableSidebarPane({
       if (!dragState.current) return;
 
       const nextWidth = dragState.current.startWidth + event.clientX - dragState.current.startX;
-      const clamped = clampSidebarWidth(nextWidth);
+      const clamped = clampSidebarWidth(nextWidth, minWidth, maxWidth);
       widthRef.current = clamped;
       setWidth(clamped);
     },
-    [],
+    [maxWidth, minWidth],
   );
 
   const endResize = useCallback(() => {
@@ -114,8 +130,8 @@ export function ResizableSidebarPane({
 
     dragState.current = null;
     setIsResizing(false);
-    writeStoredSidebarWidth(storageKey, widthRef.current);
-  }, [storageKey]);
+    writeStoredSidebarWidth(storageKey, widthRef.current, minWidth, maxWidth);
+  }, [maxWidth, minWidth, storageKey]);
 
   const handleKeyDown = useCallback(
     (event: KeyboardEvent<HTMLDivElement>) => {
@@ -129,13 +145,13 @@ export function ResizableSidebarPane({
         commitWidth(width + SIDEBAR_WIDTH_STEP);
       } else if (event.key === "Home") {
         event.preventDefault();
-        commitWidth(MIN_SIDEBAR_WIDTH);
+        commitWidth(minWidth);
       } else if (event.key === "End") {
         event.preventDefault();
-        commitWidth(MAX_SIDEBAR_WIDTH);
+        commitWidth(maxWidth);
       }
     },
-    [commitWidth, open, resizable, width],
+    [commitWidth, maxWidth, minWidth, open, resizable, width],
   );
 
   return (
@@ -153,8 +169,8 @@ export function ResizableSidebarPane({
           role="separator"
           aria-label="Resize sidebar"
           aria-orientation="vertical"
-          aria-valuemin={MIN_SIDEBAR_WIDTH}
-          aria-valuemax={MAX_SIDEBAR_WIDTH}
+          aria-valuemin={minWidth}
+          aria-valuemax={maxWidth}
           aria-valuenow={width}
           tabIndex={0}
           className={cn(

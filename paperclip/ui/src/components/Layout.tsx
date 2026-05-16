@@ -397,7 +397,15 @@ export function Layout() {
         ) : (
           <div className="flex h-full flex-col shrink-0">
             <div className="flex flex-1 min-h-0">
-              <ResizableSidebarPane open={sidebarOpen} resizable className="h-full shrink-0">
+              <ResizableSidebarPane
+                open={sidebarOpen}
+                resizable={false}
+                storageKey="theft.sana.sidebar.width"
+                defaultWidth={96}
+                minWidth={88}
+                maxWidth={120}
+                className="h-full shrink-0"
+              >
                 {isInstanceSettingsRoute ? (
                   <InstanceSidebar />
                 ) : isCompanySettingsRoute ? (

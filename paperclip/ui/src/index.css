@@ -43,53 +43,53 @@
 }
 
 :root {
-  color-scheme: dark;
-  --radius: 10px;
-  --theft-void: #000000;
-  --theft-slate: #1d1d1d;
-  --theft-ash: #ffffff;
-  --theft-sand: #cfc6b6;
-  --theft-purple: #a778ff;
-  --theft-lime: #a8ff00;
-  --theft-cyan: #52f6ff;
-  --theft-line: #383838;
-  --theft-line-strong: #4a4a4a;
-  --theft-canvas: #000000;
-  --theft-panel: #080808;
-  --theft-panel-raised: #101010;
-  --font-nb-akademie: "NB Akademie", Montserrat, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  --font-nb-akademie-mono: "NB Akademie Mono", "Space Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  color-scheme: light;
+  --radius: 20px;
+  --theft-ink: #0b0d0c;
+  --theft-graphite: #565a57;
+  --theft-stone: #f4f5f1;
+  --theft-canvas: #fbfcf8;
+  --theft-panel: #ffffff;
+  --theft-panel-soft: #f2f4ef;
+  --theft-line: #e5e7e1;
+  --theft-line-strong: #d6d9d1;
+  --theft-brand: #0b0d0c;
+  --theft-blue: #2f7df6;
+  --theft-green: #26b36b;
+  --theft-amber: #d9911f;
+  --theft-red: #e85b5b;
+  --font-nb-akademie: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-nb-akademie-mono: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   --background: var(--theft-canvas);
-  --foreground: var(--theft-ash);
+  --foreground: var(--theft-ink);
   --card: var(--theft-panel);
-  --card-foreground: var(--theft-ash);
-  --popover: var(--theft-panel-raised);
-  --popover-foreground: var(--theft-ash);
-  --primary: var(--theft-lime);
-  --primary-foreground: #000000;
-  --secondary: #1d1d1d;
-  --secondary-foreground: #ffffff;
-  --muted: #1d1d1d;
-  --muted-foreground: #888888;
-  --accent: #1d1d1d;
-  --accent-foreground: #ffffff;
+  --card-foreground: var(--theft-ink);
+  --popover: #ffffff;
+  --popover-foreground: var(--theft-ink);
+  --primary: var(--theft-brand);
+  --primary-foreground: #ffffff;
+  --secondary: var(--theft-panel-soft);
+  --secondary-foreground: var(--theft-ink);
+  --muted: #eef0eb;
+  --muted-foreground: #777c78;
+  --accent: #eff1ed;
+  --accent-foreground: var(--theft-ink);
   --destructive: var(--theft-red);
-  --theft-red: #ff5d5d;
-  --destructive-foreground: var(--theft-ash);
+  --destructive-foreground: #ffffff;
   --border: var(--theft-line);
   --input: var(--theft-line-strong);
-  --ring: var(--theft-lime);
-  --chart-1: var(--theft-lime);
-  --chart-2: var(--theft-cyan);
-  --chart-3: var(--theft-purple);
-  --chart-4: #ffc16a;
-  --chart-5: #ffffff;
-  --sidebar: #000000;
-  --sidebar-foreground: #ffffff;
-  --sidebar-primary: var(--theft-lime);
-  --sidebar-primary-foreground: #000000;
-  --sidebar-accent: #1d1d1d;
-  --sidebar-accent-foreground: #ffffff;
+  --ring: var(--theft-brand);
+  --chart-1: var(--theft-blue);
+  --chart-2: var(--theft-green);
+  --chart-3: #8b6ff7;
+  --chart-4: var(--theft-amber);
+  --chart-5: #111111;
+  --sidebar: #ffffff;
+  --sidebar-foreground: var(--theft-ink);
+  --sidebar-primary: var(--theft-brand);
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #f2f3ef;
+  --sidebar-accent-foreground: var(--theft-ink);
   --sidebar-border: var(--theft-line);
   --sidebar-ring: var(--ring);
   --chip-match-title-bg: oklch(0.97 0.02 265);
@@ -107,37 +107,37 @@
 }
 
 .dark {
-  color-scheme: dark;
+  color-scheme: light;
   --background: var(--theft-canvas);
-  --foreground: var(--theft-ash);
+  --foreground: var(--theft-ink);
   --card: var(--theft-panel);
-  --card-foreground: var(--theft-ash);
-  --popover: var(--theft-panel-raised);
-  --popover-foreground: var(--theft-ash);
-  --primary: var(--theft-lime);
-  --primary-foreground: #000000;
-  --secondary: #1d1d1d;
-  --secondary-foreground: #ffffff;
-  --muted: #1d1d1d;
-  --muted-foreground: #888888;
-  --accent: #1d1d1d;
-  --accent-foreground: #ffffff;
+  --card-foreground: var(--theft-ink);
+  --popover: #ffffff;
+  --popover-foreground: var(--theft-ink);
+  --primary: var(--theft-brand);
+  --primary-foreground: #ffffff;
+  --secondary: var(--theft-panel-soft);
+  --secondary-foreground: var(--theft-ink);
+  --muted: #eef0eb;
+  --muted-foreground: #777c78;
+  --accent: #eff1ed;
+  --accent-foreground: var(--theft-ink);
   --destructive: var(--theft-red);
-  --destructive-foreground: var(--theft-ash);
+  --destructive-foreground: #ffffff;
   --border: var(--theft-line);
   --input: var(--theft-line-strong);
-  --ring: var(--theft-lime);
-  --chart-1: var(--theft-lime);
-  --chart-2: var(--theft-cyan);
-  --chart-3: var(--theft-purple);
-  --chart-4: #ffc16a;
-  --chart-5: #ffffff;
-  --sidebar: #000000;
-  --sidebar-foreground: #ffffff;
-  --sidebar-primary: var(--theft-lime);
-  --sidebar-primary-foreground: #000000;
-  --sidebar-accent: #1d1d1d;
-  --sidebar-accent-foreground: #ffffff;
+  --ring: var(--theft-brand);
+  --chart-1: var(--theft-blue);
+  --chart-2: var(--theft-green);
+  --chart-3: #8b6ff7;
+  --chart-4: var(--theft-amber);
+  --chart-5: #111111;
+  --sidebar: #ffffff;
+  --sidebar-foreground: var(--theft-ink);
+  --sidebar-primary: var(--theft-brand);
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #f2f3ef;
+  --sidebar-accent-foreground: var(--theft-ink);
   --sidebar-border: var(--theft-line);
   --sidebar-ring: var(--ring);
   --chip-match-title-bg: oklch(0.27 0.04 265 / 0.5);
@@ -160,6 +160,7 @@
   }
   html {
     height: 100%;
+    font-size: 100%;
     -webkit-tap-highlight-color: color-mix(in oklab, var(--foreground) 20%, transparent);
   }
   body {
@@ -190,6 +191,18 @@
   }
 }
 
+@media (min-width: 768px) {
+  html {
+    font-size: 87.5%;
+  }
+}
+
+@media (min-width: 1280px) {
+  html {
+    font-size: 75%;
+  }
+}
+
 @media (pointer: coarse) {
   button,
   [role="button"],
@@ -206,38 +219,26 @@
 }
 
 .theft-shell {
-  background:
-    linear-gradient(rgba(255,255,255,0.035) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255,255,255,0.035) 1px, transparent 1px),
-    var(--background);
-  background-size: 96px 96px;
+  background: var(--background);
 }
 
 .theft-main-surface {
-  background:
-    radial-gradient(circle at 78% 24%, rgba(82,246,255,0.08), transparent 28rem),
-    radial-gradient(circle at 20% 70%, rgba(168,255,0,0.06), transparent 26rem);
+  background: var(--background);
 }
 
 .dark .theft-shell {
-  background:
-    linear-gradient(rgba(255,255,255,0.035) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255,255,255,0.035) 1px, transparent 1px),
-    var(--background);
-  background-size: 96px 96px;
+  background: var(--background);
 }
 
 .dark .theft-main-surface {
-  background:
-    radial-gradient(circle at 78% 24%, rgba(82,246,255,0.08), transparent 28rem),
-    radial-gradient(circle at 20% 70%, rgba(168,255,0,0.06), transparent 26rem);
+  background: var(--background);
 }
 
 .theft-panel {
   border: 1px solid var(--border);
-  background: color-mix(in oklab, var(--card) 92%, transparent);
-  border-radius: 12px;
-  box-shadow: none;
+  background: color-mix(in oklab, var(--card) 96%, transparent);
+  border-radius: 28px;
+  box-shadow: 0 24px 80px rgb(20 24 20 / 0.07);
 }
 
 .theft-heading {

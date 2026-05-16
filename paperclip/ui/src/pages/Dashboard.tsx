@@ -74,9 +74,7 @@ export function Dashboard() {
   const { setBreadcrumbs } = useBreadcrumbs();
   const queryClient = useQueryClient();
   const [operatorDraft, setOperatorDraft] = useState("");
-  const [operatorOpen, setOperatorOpen] = useState(() =>
-    typeof window === "undefined" ? true : window.matchMedia("(min-width: 1280px)").matches,
-  );
+  const [operatorOpen, setOperatorOpen] = useState(false);
   const [selectedDepartmentKey, setSelectedDepartmentKey] = useState("engineering");
 
   useEffect(() => {
@@ -245,9 +243,9 @@ export function Dashboard() {
   const reviewCount = (approvals?.length ?? 0) + pendingInteractions.length + reviewIssues.length;
 
   return (
-    <div className="mx-auto max-w-[1600px] min-w-0 space-y-4 overflow-x-hidden pb-24 text-foreground">
-      <section className={cn("grid min-w-0 gap-4", operatorOpen && "xl:grid-cols-[minmax(0,1fr)_380px]")}>
-        <div className="min-w-0 space-y-4">
+    <div className="mx-auto max-w-[1760px] min-w-0 space-y-6 overflow-x-hidden px-1 pb-28 text-foreground md:px-3">
+      <section className={cn("grid min-w-0 gap-6", operatorOpen && "xl:grid-cols-[minmax(0,1fr)_420px]")}>
+        <div className="min-w-0 space-y-6">
           <ObjectiveHeader
             companyName={selectedCompany.name}
             stage={profile.stage ? THEFT_STAGE_LABELS[profile.stage] : null}
@@ -259,17 +257,10 @@ export function Dashboard() {
           />
 
           <div className={cn(
-            "grid min-w-0 gap-4",
-            operatorOpen ? "grid-cols-[minmax(0,1fr)]" : "xl:grid-cols-[minmax(0,1fr)_380px]",
+            "grid min-w-0 gap-6",
+            operatorOpen ? "grid-cols-[minmax(0,1fr)]" : "xl:grid-cols-[minmax(380px,0.72fr)_minmax(0,1.28fr)]",
           )}>
-            <StrategyMapPanel
-              objective={objectiveTitle}
-              goals={roadmapGoals}
-              departments={departmentRows}
-              nextTasks={nextTasks}
-            />
-
-            <aside className="min-w-0 space-y-4">
+            <aside className="min-w-0 space-y-6">
               <NextMovePanel bottleneck={bottleneck} />
               <ConstraintsPanel
                 approvalsCount={approvals?.length ?? 0}
@@ -286,6 +277,13 @@ export function Dashboard() {
               <ExecutionStatePanel departments={departmentRows} />
               <OutcomesPanel documents={latestLibraryDocuments} />
             </aside>
+
+            <StrategyMapPanel
+              objective={objectiveTitle}
+              goals={roadmapGoals}
+              departments={departmentRows}
+              nextTasks={nextTasks}
+            />
           </div>
         </div>
 
@@ -328,7 +326,7 @@ function Panel({
   className?: string;
 }) {
   return (
-    <section className={cn("min-w-0 rounded-[10px] border border-border bg-card p-4 md:p-5", className)}>
+    <section className={cn("theft-panel min-w-0 p-5 md:p-7", className)}>
       {children}
     </section>
   );
@@ -354,28 +352,27 @@ function ObjectiveHeader({
   const activeDepartments = departments.filter((department) => department.agent).length;
 
   return (
-    <Panel className="space-y-5">
+    <Panel className="space-y-8">
       <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
         <div className="min-w-0">
-          <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
-            <Badge variant="outline" className="rounded-[10px] border-border bg-card text-foreground">
+          <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
+            <Badge variant="outline" className="rounded-full border-border bg-secondary px-3 py-1 text-foreground">
               Mission Control
             </Badge>
             <span>{companyName}</span>
             {stage ? <span>{stage}</span> : null}
           </div>
-          <div className="mt-4 flex items-start gap-4">
-            <Target className="mt-1 h-5 w-5 shrink-0 text-foreground" />
+          <div className="mt-7 flex items-start gap-4">
             <div className="min-w-0">
-              <p className="text-xs uppercase tracking-normal text-muted-foreground">Objective</p>
-              <h1 className="mt-1 max-w-5xl break-words text-2xl font-normal leading-tight text-foreground md:text-3xl">
+              <p className="text-sm text-muted-foreground">Current objective</p>
+              <h1 className="mt-3 max-w-5xl break-words text-4xl font-semibold leading-[1.04] tracking-normal text-foreground md:text-6xl">
                 {objective}
               </h1>
-              <p className="mt-3 max-w-3xl text-sm leading-6 text-muted-foreground">{detail}</p>
+              <p className="mt-5 max-w-3xl text-lg leading-8 text-muted-foreground">{detail}</p>
             </div>
           </div>
         </div>
-        <div className="grid w-full min-w-0 grid-cols-3 gap-2 sm:min-w-[250px] lg:w-auto">
+        <div className="grid w-full min-w-0 grid-cols-3 gap-2 sm:min-w-[280px] lg:w-auto">
           <MissionStat value={activeDepartments} label="departments" />
           <MissionStat value={reviewCount} label="review" />
           <MissionStat value={outcomeCount} label="outcomes" />
@@ -387,8 +384,8 @@ function ObjectiveHeader({
 
 function MissionStat({ value, label }: { value: number; label: string }) {
   return (
-    <div className="rounded-[10px] border border-border bg-secondary px-3 py-3 text-center">
-      <p className="text-xl font-normal tabular-nums">{value}</p>
+    <div className="rounded-[24px] bg-secondary px-4 py-4 text-center">
+      <p className="text-2xl font-semibold tabular-nums">{value}</p>
       <p className="mt-1 text-xs text-muted-foreground">{label}</p>
     </div>
   );
@@ -410,50 +407,50 @@ function StrategyMapPanel({
   const visibleTracks = tracks.length > 0 ? tracks.map((goal) => goal.title) : fallbackTracks;
 
   return (
-    <Panel className="min-h-[560px] max-w-full overflow-hidden">
+    <Panel className="min-h-[660px] max-w-full overflow-hidden">
       <div className="mb-5 flex items-center justify-between gap-3">
         <div>
-          <h2 className="text-base font-normal">Strategy map</h2>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Objective to departments, tasks, and Library artifacts.
+          <h2 className="text-2xl font-semibold">Workspace</h2>
+          <p className="mt-2 text-base text-muted-foreground">
+            Objective to departments, tasks, and Library artifacts
           </p>
         </div>
-        <Link to="/goals" className="text-sm text-muted-foreground no-underline hover:text-foreground">
+        <Link to="/goals" className="rounded-full bg-secondary px-4 py-2 text-sm text-muted-foreground no-underline hover:text-foreground">
           Tech Tree
         </Link>
       </div>
 
-      <div className="min-w-0 max-w-full overflow-hidden rounded-[10px] border border-border bg-background p-4">
-        <div className="mx-auto max-w-xl min-w-0 rounded-[10px] border border-foreground bg-secondary px-4 py-3 text-center">
-          <p className="text-xs uppercase tracking-normal text-muted-foreground">Current objective</p>
-          <p className="mt-1 text-sm text-foreground">{objective}</p>
+      <div className="min-w-0 max-w-full overflow-hidden rounded-[36px] bg-secondary p-5 md:p-7">
+        <div className="mx-auto max-w-2xl min-w-0 rounded-[32px] bg-card px-6 py-5 text-center shadow-[0_20px_60px_rgb(20_24_20/0.06)]">
+          <p className="text-sm text-muted-foreground">Current objective</p>
+          <p className="mt-2 text-lg font-semibold text-foreground">{objective}</p>
         </div>
 
-        <div className="mx-auto my-4 h-6 w-px bg-border" />
+        <div className="mx-auto my-6 h-8 w-px bg-border" />
 
         <div className="grid gap-3 md:grid-cols-3">
           {visibleTracks.map((track) => (
-            <div key={track} className="rounded-[10px] border border-border bg-card px-3 py-3 text-center">
-              <p className="line-clamp-2 text-sm">{track}</p>
+            <div key={track} className="rounded-[28px] bg-card px-5 py-4 text-center shadow-sm">
+              <p className="line-clamp-2 text-sm font-medium">{track}</p>
             </div>
           ))}
         </div>
 
-        <div className="my-4 h-px bg-border" />
+        <div className="my-6 h-px bg-border" />
 
         <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
           {departments.map((department) => (
             <Link
               key={department.key}
               to={`/departments/${department.key}`}
-              className="group min-w-0 max-w-full overflow-hidden rounded-[10px] border border-border bg-card p-3 text-inherit no-underline transition-colors hover:border-foreground"
+              className="group min-w-0 max-w-full overflow-hidden rounded-[28px] bg-card p-4 text-inherit no-underline shadow-sm transition-transform hover:-translate-y-0.5"
             >
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0">
-                  <h3 className="truncate text-sm font-normal group-hover:text-foreground">{department.title}</h3>
+                  <h3 className="truncate text-base font-semibold group-hover:text-foreground">{department.title}</h3>
                   <p className="mt-1 truncate text-xs text-muted-foreground">{summarizeAgent(department.agent)}</p>
                 </div>
-                <Badge variant={department.activeCount > 0 ? "default" : "outline"} className="rounded-[10px]">
+                <Badge variant={department.activeCount > 0 ? "default" : "outline"} className="rounded-full">
                   {department.activeCount} open
                 </Badge>
               </div>
@@ -485,9 +482,9 @@ function StrategyMapPanel({
           ))}
         </div>
 
-        <div className="mt-4 rounded-[10px] border border-border bg-secondary p-3">
+        <div className="mt-6 rounded-[28px] bg-card p-4 shadow-sm">
           <div className="flex items-center justify-between gap-3">
-            <p className="text-xs uppercase tracking-normal text-muted-foreground">Available next work</p>
+            <p className="text-sm font-medium text-muted-foreground">Available next work</p>
             <Route className="h-4 w-4 text-muted-foreground" />
           </div>
           <div className="mt-3 grid gap-2 md:grid-cols-3">
@@ -495,7 +492,7 @@ function StrategyMapPanel({
               <Link
                 key={issue.id}
                 to={issuePath(issue)}
-              className="min-w-0 max-w-full overflow-hidden rounded-[10px] border border-border bg-card px-3 py-2 text-inherit no-underline hover:border-foreground"
+              className="min-w-0 max-w-full overflow-hidden rounded-[18px] bg-secondary px-4 py-3 text-inherit no-underline hover:text-foreground"
             >
                 <p className="min-w-0 break-words line-clamp-1 text-sm [overflow-wrap:anywhere]">{issue.title}</p>
                 <p className="mt-1 text-xs text-muted-foreground">{formatStatusLabel(issue.status)}</p>
@@ -533,12 +530,12 @@ function ConstraintsPanel({
 
   return (
     <Panel>
-      <h2 className="text-base font-normal">Constraints</h2>
+      <h2 className="text-xl font-semibold">Constraints</h2>
       <div className="mt-3 grid grid-cols-2 gap-2">
         {constraints.map((constraint) => (
-          <div key={constraint.label} className="rounded-[10px] border border-border bg-secondary p-3">
+          <div key={constraint.label} className="rounded-[24px] bg-secondary p-4">
             <p className="text-xs text-muted-foreground">{constraint.label}</p>
-            <p className="mt-2 text-2xl font-normal tabular-nums">{constraint.value}</p>
+            <p className="mt-2 text-3xl font-semibold tabular-nums">{constraint.value}</p>
             <p className="mt-1 text-xs text-muted-foreground">{constraint.detail}</p>
           </div>
         ))}
@@ -561,12 +558,12 @@ function DecisionsPanel({
   return (
     <Panel>
       <div className="flex items-center justify-between gap-3">
-        <h2 className="text-base font-normal">Decisions</h2>
+        <h2 className="text-xl font-semibold">Decisions</h2>
         <Link to="/inbox" className="text-sm text-muted-foreground no-underline hover:text-foreground">
           View all
         </Link>
       </div>
-      <div className="mt-3 divide-y divide-border rounded-[10px] border border-border">
+      <div className="mt-3 divide-y divide-border overflow-hidden rounded-[24px] bg-secondary">
         {approvalsCount > 0 ? (
           <Link to="/approvals/pending" className="flex items-center justify-between gap-3 p-3 text-inherit no-underline hover:bg-accent">
             <span>
@@ -643,7 +640,7 @@ function OutcomesPanel({
     <Panel>
       <div className="flex items-center justify-between gap-3">
         <div>
-          <h2 className="text-base font-normal">Outcomes</h2>
+        <h2 className="text-xl font-semibold">Outcomes</h2>
           <p className="mt-1 text-sm text-muted-foreground">Latest Library artifacts and evidence.</p>
         </div>
         <Link to="/library" className="text-sm text-muted-foreground no-underline hover:text-foreground">
@@ -655,7 +652,7 @@ function OutcomesPanel({
           <Link
             key={`${issue.id}:${document.key}`}
             to={`/library?issue=${encodeURIComponent(issue.id)}&document=${encodeURIComponent(document.key)}`}
-            className="flex min-w-0 max-w-full items-start gap-2 overflow-hidden rounded-[10px] border border-border bg-secondary p-3 text-inherit no-underline hover:border-foreground"
+            className="flex min-w-0 max-w-full items-start gap-2 overflow-hidden rounded-[24px] bg-secondary p-4 text-inherit no-underline hover:text-foreground"
           >
             <FileText className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" />
             <span className="min-w-0 flex-1">
@@ -667,7 +664,7 @@ function OutcomesPanel({
           </Link>
         ))}
         {documents.length === 0 ? (
-          <div className="flex items-center gap-2 rounded-[10px] border border-border bg-secondary p-3 text-sm text-muted-foreground">
+          <div className="flex items-center gap-2 rounded-[24px] bg-secondary p-4 text-sm text-muted-foreground">
             <Library className="h-4 w-4" />
             Outcomes will appear as departments publish work.
           </div>
@@ -679,16 +676,16 @@ function OutcomesPanel({
 
 function NextMovePanel({ bottleneck }: { bottleneck: CompanyBottleneck }) {
   const content = (
-    <div className="rounded-[10px] border border-foreground bg-secondary p-4">
-      <p className="text-xs uppercase tracking-normal text-muted-foreground">Next Move</p>
+    <div className="rounded-[32px] bg-primary p-6 text-primary-foreground shadow-[0_24px_80px_rgb(20_24_20/0.14)]">
+      <p className="text-sm text-primary-foreground/65">Next move</p>
       <div className="mt-3 flex items-start gap-3">
-        <CircleDot className="mt-0.5 h-5 w-5 shrink-0 text-foreground" />
+        <CircleDot className="mt-0.5 h-5 w-5 shrink-0 text-primary-foreground" />
         <span className="min-w-0">
-          <span className="block text-lg leading-tight">{bottleneck.label}</span>
-          <span className="mt-2 block break-words text-sm leading-5 text-muted-foreground [overflow-wrap:anywhere]">{bottleneck.detail}</span>
+          <span className="block text-2xl font-semibold leading-tight">{bottleneck.label}</span>
+          <span className="mt-3 block break-words text-sm leading-6 text-primary-foreground/70 [overflow-wrap:anywhere]">{bottleneck.detail}</span>
         </span>
       </div>
-      <div className="mt-4 flex items-center justify-between gap-3 text-xs text-muted-foreground">
+      <div className="mt-5 flex items-center justify-between gap-3 text-xs text-primary-foreground/60">
         <span>{bottleneck.tone === "clear" ? "Ready for founder prompt" : "Recommended by current constraints"}</span>
         <ArrowRight className="h-4 w-4" />
       </div>
@@ -734,7 +731,7 @@ function OperatorDrawer({
   onClose: () => void;
 }) {
   return (
-    <aside className="rounded-[10px] border border-border bg-card p-4 md:p-5">
+    <aside className="theft-panel p-5 md:p-7">
       <div className="flex items-start justify-between gap-3">
         <div>
           <p className="text-xs uppercase tracking-normal text-muted-foreground">Operator</p>
@@ -746,8 +743,8 @@ function OperatorDrawer({
         </Button>
       </div>
 
-      <div className="mt-5 rounded-[10px] border border-border bg-secondary p-3">
-        <p className="text-xs uppercase tracking-normal text-muted-foreground">Recommended next move</p>
+      <div className="mt-5 rounded-[28px] bg-secondary p-4">
+        <p className="text-xs text-muted-foreground">Recommended next move</p>
         <p className="mt-2 text-sm">{nextMove.label}</p>
         <p className="mt-2 text-xs leading-5 text-muted-foreground">{nextMove.detail}</p>
       </div>
@@ -761,7 +758,7 @@ function OperatorDrawer({
               type="button"
               onClick={() => setSelectedDepartmentKey(department.key)}
               className={cn(
-                "rounded-[10px] border px-3 py-2 text-left text-xs transition-colors",
+                "rounded-[20px] border px-3 py-3 text-left text-xs transition-colors",
                 selectedDepartmentKey === department.key
                   ? "border-foreground bg-secondary text-foreground"
                   : "border-border bg-card text-muted-foreground hover:text-foreground",
@@ -779,7 +776,7 @@ function OperatorDrawer({
           value={operatorDraft}
           onChange={(event) => setOperatorDraft(event.target.value)}
           placeholder="Ask Operator to create the next concrete task..."
-          className="min-h-32 resize-none rounded-[10px] border-border bg-secondary"
+          className="min-h-32 resize-none rounded-[28px] border-0 bg-secondary p-4"
         />
         {error ? <p className="text-sm text-destructive">{error}</p> : null}
         <Button className="w-full" disabled={!canSubmit || isPending} onClick={createTask}>
@@ -816,31 +813,30 @@ function OperatorDock({
   if (open) return null;
 
   return (
-    <div className="fixed bottom-4 right-4 z-30 hidden w-[min(760px,calc(100vw-2rem))] items-center gap-2 rounded-[10px] border border-border bg-background p-2 md:flex">
+    <div className="fixed bottom-6 left-1/2 z-30 hidden w-[min(820px,calc(100vw-9rem))] -translate-x-1/2 items-center gap-3 rounded-full bg-white/90 p-2 shadow-[0_24px_80px_rgb(20_24_20/0.14)] backdrop-blur md:flex">
       <button
         type="button"
         onClick={onToggle}
-        className="flex shrink-0 items-center gap-2 rounded-[10px] border border-border bg-secondary px-3 py-2 text-left text-sm"
+        title="Open Operator"
+        className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-secondary text-sm"
       >
-        <Bot className="h-4 w-4" />
-        <span>
+        <Bot className="h-5 w-5" />
+        <span className="sr-only">
           <span className="block text-xs text-muted-foreground">Operator dock</span>
           <span className="block">{open ? "Expanded" : "Collapsed"}</span>
         </span>
-        {open ? <PanelRightClose className="h-4 w-4" /> : <PanelRightOpen className="h-4 w-4" />}
       </button>
       <input
         value={operatorDraft}
         onChange={(event) => setOperatorDraft(event.target.value)}
-        placeholder="Ask Operator..."
-        className="min-w-0 flex-1 rounded-[10px] border border-border bg-secondary px-3 py-2 text-sm outline-none placeholder:text-muted-foreground focus:border-foreground"
+        placeholder="Ask anything"
+        className="min-w-0 flex-1 rounded-full bg-secondary px-5 py-3 text-base outline-none placeholder:text-muted-foreground"
       />
-      <Button variant="outline" size="sm" onClick={onToggle}>
+      <Button variant="ghost" size="icon" onClick={onToggle} className="rounded-full" aria-label="Expand Operator">
         <Sparkles className="h-4 w-4" />
-        Explain
       </Button>
-      <Button size="sm" disabled={!canSubmit || isPending} onClick={createTask}>
-        {isPending ? "Routing" : "Task"}
+      <Button size="icon" disabled={!canSubmit || isPending} onClick={createTask} className="rounded-full">
+        <Send className="h-4 w-4" />
       </Button>
     </div>
   );

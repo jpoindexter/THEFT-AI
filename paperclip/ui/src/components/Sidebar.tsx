@@ -70,21 +70,22 @@ export function Sidebar() {
   };
 
   return (
-    <aside className="w-full h-full min-h-0 border-r border-sidebar-border bg-sidebar text-sidebar-foreground flex flex-col">
-      <div className="flex h-16 shrink-0 items-center gap-2 border-b border-sidebar-border px-3">
-        <SidebarCompanyMenu />
+    <aside className="w-full h-full min-h-0 border-r border-sidebar-border bg-sidebar text-sidebar-foreground flex flex-col items-center">
+      <div className="flex h-24 shrink-0 flex-col items-center justify-center gap-3 border-b border-sidebar-border px-3">
+        <SidebarCompanyMenu compact />
         <Button
           variant="ghost"
           size="icon-sm"
-          className="text-muted-foreground hover:text-foreground shrink-0"
+          className="size-10 shrink-0 rounded-full text-muted-foreground hover:bg-sidebar-accent hover:text-foreground"
           onClick={openSearch}
+          title="Search"
         >
           <Search className="h-4 w-4" />
         </Button>
       </div>
 
-      <nav className="flex-1 min-h-0 overflow-y-auto scrollbar-auto-hide flex flex-col gap-4 px-3 py-4">
-        <div className="flex flex-col gap-1">
+      <nav className="flex min-h-0 flex-1 flex-col items-center gap-5 overflow-y-auto px-0 py-5 scrollbar-auto-hide">
+        <div className="flex flex-col items-center gap-1">
           <SidebarNavItem to="/dashboard" label="Mission Control" icon={LayoutDashboard} liveCount={liveRunCount} />
           <SidebarNavItem to="/issues" label="Tasks" icon={CircleDot} badge={inboxBadge.inbox} badgeTone={inboxBadge.failedRuns > 0 ? "danger" : "default"} alert={inboxBadge.failedRuns > 0} />
           <SidebarNavItem to="/library" label="Library" icon={Library} />
@@ -102,10 +103,11 @@ export function Sidebar() {
         <SidebarSection label="Operator">
           <button
             onClick={() => openNewIssue()}
-            className="flex items-center gap-2.5 px-3 py-2 text-[13px] font-medium text-muted-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition-colors"
+            title="New task"
+            className="flex h-12 w-12 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
           >
-            <SquarePen className="h-4 w-4 shrink-0" />
-            <span className="truncate">New task</span>
+            <SquarePen className="h-5 w-5 shrink-0" />
+            <span className="sr-only">New task</span>
           </button>
           <SidebarNavItem to="/inbox" label="Attention" icon={Inbox} />
           <SidebarNavItem to="/search" label="Search" icon={Search} />

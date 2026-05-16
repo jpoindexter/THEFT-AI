@@ -141,26 +141,33 @@ export function SidebarAccountMenu({
   }
 
   return (
-    <div className="border-t border-r border-sidebar-border bg-sidebar px-3 py-2">
+    <div className={cn(
+      "border-t border-r border-sidebar-border bg-sidebar py-2",
+      isMobile ? "px-3" : "flex w-full justify-center px-0",
+    )}>
       <Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger asChild>
           <button
             type="button"
-            className="flex w-full items-center gap-2.5 px-3 py-2 text-left text-[13px] font-medium text-sidebar-foreground/80 transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+            title={displayName}
+            className={cn(
+              "flex items-center gap-2.5 text-left text-[13px] font-medium text-sidebar-foreground/80 transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
+              isMobile ? "w-full px-3 py-2" : "h-12 w-12 justify-center rounded-full px-0 py-0",
+            )}
             aria-label="Open account menu"
           >
             <Avatar size="sm">
               {session?.user.image ? <AvatarImage src={session.user.image} alt={displayName} /> : null}
               <AvatarFallback>{initials}</AvatarFallback>
             </Avatar>
-            <span className="min-w-0 flex-1 truncate">{displayName}</span>
+            <span className={cn("min-w-0 flex-1 truncate", !isMobile && "sr-only")}>{displayName}</span>
           </button>
         </PopoverTrigger>
         <PopoverContent
           side="top"
           align="start"
           sideOffset={10}
-          className="w-[var(--radix-popover-trigger-width)] max-w-[calc(100vw-1rem)] overflow-hidden rounded-t-2xl rounded-b-none border-border p-0 shadow-2xl"
+          className="w-80 max-w-[calc(100vw-1rem)] overflow-hidden rounded-t-2xl rounded-b-none border-border p-0 shadow-2xl"
         >
           <div className="h-24 bg-[linear-gradient(135deg,hsl(var(--primary))_0%,hsl(var(--accent))_55%,hsl(var(--muted))_100%)]" />
           <div className="-mt-8 px-4 pb-4">

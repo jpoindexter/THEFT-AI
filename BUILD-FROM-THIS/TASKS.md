@@ -125,3 +125,13 @@
 | T097 | Preserve access to departments, tasks, Library, Tech Tree, runtime/admin routes, and diagnostics | ✅ done |
 | T098 | Add tests proving streamlining did not remove core runtime/product capabilities | ✅ done |
 | T099 | Verify Mission Control desktop/tablet/mobile screenshots | ✅ done |
+
+## Slice 1.0 — Sana-Style Product Shell
+
+| ID | Title | Status |
+|---|---|---|
+| T100 | Rebase visual direction from dark command center to clean Sana-style workbench | ✅ done |
+| T101 | Make desktop navigation a narrow icon rail with runtime/admin routes still reachable | ✅ done |
+| T102 | Convert Mission Control toward chat-to-artifact layout: next move, constraints, workspace, bottom Operator command | ✅ done |
+| T103 | Add desktop density scaling so the app reads like 75% browser zoom without requiring user zoom | ✅ done |
+| T104 | Verify typecheck and MVP route smoke screenshots after visual pivot | ✅ done |

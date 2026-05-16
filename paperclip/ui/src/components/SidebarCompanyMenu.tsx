@@ -43,6 +43,7 @@ import { CompanyPatternIcon } from "./CompanyPatternIcon";
 interface SidebarCompanyMenuProps {
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
+  compact?: boolean;
 }
 
 function WorkspaceIcon({ company }: { company: Company }) {
@@ -128,7 +129,7 @@ function SortableCompanyItem({
   );
 }
 
-export function SidebarCompanyMenu({ open: controlledOpen, onOpenChange }: SidebarCompanyMenuProps = {}) {
+export function SidebarCompanyMenu({ open: controlledOpen, onOpenChange, compact = false }: SidebarCompanyMenuProps = {}) {
   const [internalOpen, setInternalOpen] = useState(false);
   const [isEditingOrder, setIsEditingOrder] = useState(false);
   const queryClient = useQueryClient();
@@ -224,16 +225,19 @@ export function SidebarCompanyMenu({ open: controlledOpen, onOpenChange }: Sideb
       <DropdownMenuTrigger asChild>
         <Button
           variant="ghost"
-          className="h-9 flex-1 justify-start gap-2 px-2 text-left"
+          className={cn(
+            "h-9 justify-start gap-2 px-2 text-left",
+            compact ? "w-9 justify-center rounded-full" : "flex-1",
+          )}
           aria-label={selectedCompany ? `Open ${selectedCompany.name} workspace switcher` : "Open workspace switcher"}
         >
-          <span className="flex min-w-0 flex-1 items-center gap-2">
+          <span className={cn("flex min-w-0 items-center gap-2", compact ? "flex-none" : "flex-1")}>
             {selectedCompany ? <WorkspaceIcon company={selectedCompany} /> : null}
-            <span className="truncate text-sm font-bold text-foreground">
+            <span className={cn("truncate text-sm font-bold text-foreground", compact && "sr-only")}>
               {selectedCompany?.name ?? "Select workspace"}
             </span>
           </span>
-          <ChevronsUpDown className="size-3.5 shrink-0 text-muted-foreground" />
+          {compact ? null : <ChevronsUpDown className="size-3.5 shrink-0 text-muted-foreground" />}
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="start" sideOffset={8} className="w-64 p-1">
