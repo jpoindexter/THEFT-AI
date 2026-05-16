@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef, useCallback, useMemo } from "react";
+import { useEffect, useState, useRef, useCallback, useMemo, type ReactNode } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import type { AdapterEnvironmentTestResult } from "@paperclipai/shared";
 import { useLocation, useNavigate, useParams } from "@/lib/router";
@@ -54,7 +54,6 @@ import { DEFAULT_CURSOR_LOCAL_MODEL } from "@paperclipai/adapter-cursor-local";
 import { DEFAULT_GEMINI_LOCAL_MODEL } from "@paperclipai/adapter-gemini-local";
 import { DEFAULT_OPENCODE_LOCAL_MODEL, isValidOpenCodeModelId } from "@paperclipai/adapter-opencode-local";
 import { resolveRouteOnboardingOptions } from "../lib/onboarding-route";
-import { AsciiArtAnimation } from "./AsciiArtAnimation";
 import {
   Building2,
   Bot,
@@ -67,7 +66,14 @@ import {
   ChevronDown,
   X,
   Settings2,
-  Users
+  Users,
+  Flag,
+  Package,
+  BarChart3,
+  Database,
+  Monitor,
+  CircleDot,
+  Plus
 } from "lucide-react";
 
 
@@ -789,31 +795,64 @@ export function OnboardingWizard() {
             RemoveScroll which blocks wheel events on our custom (non-DialogContent)
             scroll container. A plain div preserves the background without scroll-locking. */}
         <div className="fixed inset-0 z-50 bg-background" />
-        <div className="fixed inset-0 z-50 flex" onKeyDown={handleKeyDown}>
-          {/* Close button */}
-          <button
-            onClick={handleClose}
-            className="absolute top-4 left-4 z-10 rounded-sm p-1.5 text-muted-foreground/60 hover:text-foreground transition-colors"
-          >
-            <X className="h-5 w-5" />
-            <span className="sr-only">Close</span>
-          </button>
+        <div
+          className="fixed inset-0 z-50 grid grid-cols-1 overflow-hidden bg-background text-foreground md:grid-cols-[56px_minmax(0,1fr)]"
+          onKeyDown={handleKeyDown}
+        >
+          <aside className="hidden min-h-0 flex-col items-center justify-between border-r border-border bg-card py-5 md:flex">
+            <div className="flex flex-col items-center gap-5">
+              <div className="flex size-9 items-center justify-center rounded-full bg-primary text-sm font-medium text-primary-foreground">
+                T
+              </div>
+              <div className="h-px w-8 bg-border" />
+              <div className="flex size-10 items-center justify-center rounded-full bg-secondary text-foreground">
+                <CircleDot className="size-5" />
+              </div>
+            </div>
+            <div className="mb-1 flex size-2 rounded-full bg-[#cdfe00]" aria-hidden />
+          </aside>
 
-          {/* Left half — form */}
-          <div
-            className={cn(
-              "w-full flex flex-col overflow-y-auto transition-[width] duration-500 ease-in-out",
-              step === 1 ? "md:w-1/2" : "md:w-full"
-            )}
-          >
-            <div
-              className={cn(
-                "w-full mx-auto my-auto px-8 py-12 shrink-0",
-                step === 2 ? "max-w-2xl" : "max-w-md"
-              )}
-            >
+          <div className="flex min-w-0 flex-col">
+            <header className="flex h-14 shrink-0 items-center justify-between border-b border-border px-4 md:px-6">
+              <div className="flex min-w-0 items-center gap-2 text-sm font-medium">
+                <span className="truncate text-muted-foreground">Mission Control</span>
+                <span className="text-muted-foreground">/</span>
+                <span className="truncate text-foreground">Onboarding</span>
+              </div>
+              <button
+                onClick={handleClose}
+                className="flex size-9 items-center justify-center rounded-full text-muted-foreground hover:bg-secondary hover:text-foreground"
+              >
+                <X className="h-4 w-4" />
+                <span className="sr-only">Close</span>
+              </button>
+            </header>
+
+            <div className="grid min-h-0 flex-1 lg:grid-cols-[minmax(0,1fr)_430px]">
+              <OnboardingCanvasPreview
+                companyName={companyName}
+                companyStage={companyStage}
+                step={step}
+                agentName={agentName}
+              />
+
+              <section className="min-h-0 overflow-y-auto border-l border-border bg-card">
+                <div className="mx-auto flex min-h-full w-full max-w-[460px] flex-col px-5 py-6 md:px-6">
+                  <div className="mb-6 flex items-start justify-between gap-4">
+                    <div className="min-w-0">
+                      <p className="text-xs font-medium uppercase tracking-[0.12em] text-muted-foreground">
+                        Onboarding
+                      </p>
+                      <h2 className="mt-2 truncate text-2xl font-medium">
+                        {companyName.trim() || "New company"}
+                      </h2>
+                    </div>
+                    <span className="shrink-0 text-sm tabular-nums text-muted-foreground">
+                      {step} / 4
+                    </span>
+                  </div>
               {/* Progress tabs */}
-              <div className="flex items-center gap-0 mb-8 border-b border-border">
+              <div className="mb-8 flex items-center gap-0 overflow-x-auto border-b border-border">
                 {(
                   [
                     { step: 1 as Step, label: "Company", icon: Building2 },
@@ -827,7 +866,7 @@ export function OnboardingWizard() {
                     type="button"
                     onClick={() => setStep(s)}
                     className={cn(
-                      "flex items-center gap-1.5 px-3 py-2 text-xs font-medium border-b-2 -mb-px transition-colors cursor-pointer",
+                      "flex shrink-0 items-center gap-1.5 px-3 py-2 text-xs font-medium border-b-2 -mb-px transition-colors cursor-pointer",
                       s === step
                         ? "border-foreground text-foreground"
                         : "border-transparent text-muted-foreground hover:text-foreground/70 hover:border-border"
@@ -1646,21 +1685,121 @@ export function OnboardingWizard() {
                   )}
                 </div>
               </div>
+                </div>
+              </section>
             </div>
-          </div>
-
-          {/* Right half — ASCII art (hidden on mobile) */}
-          <div
-            className={cn(
-              "hidden md:block overflow-hidden bg-[#1d1d1d] transition-[width,opacity] duration-500 ease-in-out",
-              step === 1 ? "w-1/2 opacity-100" : "w-0 opacity-0"
-            )}
-          >
-            <AsciiArtAnimation />
           </div>
         </div>
       </DialogPortal>
     </Dialog>
+  );
+}
+
+function OnboardingCanvasPreview({
+  companyName,
+  companyStage,
+  step,
+  agentName,
+}: {
+  companyName: string;
+  companyStage: OnboardingStage;
+  step: Step;
+  agentName: string;
+}) {
+  const displayName = companyName.trim() || "New company";
+
+  return (
+    <section className="hidden min-h-0 overflow-hidden bg-background lg:block">
+      <div className="relative h-full min-h-[640px] p-6">
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,rgb(21_23_20/0.04)_1px,transparent_1px),linear-gradient(to_bottom,rgb(21_23_20/0.04)_1px,transparent_1px)] bg-[size:72px_72px]" />
+
+        <div className="relative z-10 flex items-center justify-between">
+          <div className="border border-border bg-card px-4 py-3 shadow-[0_10px_30px_rgb(20_24_20/0.04)]">
+            <div className="flex items-center gap-2 text-xs font-medium uppercase tracking-[0.12em] text-muted-foreground">
+              <span className="size-1.5 rounded-full bg-[#cdfe00]" />
+              Canvas initializing
+            </div>
+            <p className="mt-1 text-sm text-muted-foreground">Company map forming...</p>
+          </div>
+          <div className="flex border border-border bg-card">
+            {[Monitor, CircleDot, Plus].map((Icon, index) => (
+              <button
+                key={index}
+                type="button"
+                className="flex size-11 items-center justify-center border-l border-border first:border-l-0 text-muted-foreground hover:bg-secondary hover:text-foreground"
+              >
+                <Icon className="size-4" />
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div className="absolute inset-x-8 top-1/2 h-[520px] -translate-y-1/2">
+          <div className="absolute left-1/2 top-1/2 size-[520px] -translate-x-1/2 -translate-y-1/2 rounded-full border border-border/80" />
+          <div className="absolute left-1/2 top-1/2 size-[390px] -translate-x-1/2 -translate-y-1/2 rounded-full border border-dashed border-border" />
+          <div className="absolute left-1/2 top-1/2 size-[260px] -translate-x-1/2 -translate-y-1/2 rounded-full border border-dashed border-border/80" />
+
+          <div className="absolute left-1/2 top-1/2 z-10 w-52 -translate-x-1/2 -translate-y-1/2 border border-foreground bg-card p-5 text-center shadow-[0_18px_54px_rgb(20_24_20/0.08)]">
+            <div className="mx-auto flex size-12 items-center justify-center rounded-[14px] bg-secondary">
+              <Building2 className="size-6" />
+            </div>
+            <h3 className="mt-4 truncate text-lg font-medium">{displayName}</h3>
+            <p className="mt-1 text-xs uppercase tracking-[0.12em] text-muted-foreground">
+              {ONBOARDING_STAGE_LABELS[companyStage]}
+            </p>
+          </div>
+
+          <MapNode className="left-1/2 top-0 -translate-x-1/2" icon={<Flag className="size-4" />} label="Brand" />
+          <MapNode className="left-[12%] top-[32%]" icon={<Package className="size-4" />} label="Product" />
+          <MapNode className="right-[12%] top-[32%]" icon={<BarChart3 className="size-4" />} label="Revenue" />
+          <MapNode className="bottom-[10%] left-[22%]" icon={<Settings2 className="size-4" />} label="Operations" />
+          <MapNode className="bottom-[10%] right-[22%]" icon={<Database className="size-4" />} label="Library" />
+        </div>
+
+        <div className="absolute bottom-6 left-6 z-10 w-64 border border-border bg-card px-4 py-3 shadow-[0_10px_30px_rgb(20_24_20/0.04)]">
+          <RuntimeLine label="Local runtime ready" />
+          <RuntimeLine label="Embedded Postgres" />
+          <RuntimeLine label="No cloud required" />
+        </div>
+
+        <div className="absolute bottom-6 right-6 z-10 border border-border bg-card px-4 py-3 text-sm text-muted-foreground shadow-[0_10px_30px_rgb(20_24_20/0.04)]">
+          <span className="font-medium text-foreground">{agentName || "Operator"}</span>
+          <span className="mx-2 text-border">/</span>
+          Step {step} active
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function MapNode({
+  className,
+  icon,
+  label,
+}: {
+  className: string;
+  icon: ReactNode;
+  label: string;
+}) {
+  return (
+    <div
+      className={cn(
+        "absolute z-10 flex size-24 flex-col items-center justify-center border border-border bg-card text-center shadow-[0_12px_34px_rgb(20_24_20/0.06)]",
+        className
+      )}
+    >
+      <div className="mb-2 text-muted-foreground">{icon}</div>
+      <div className="text-sm font-medium">{label}</div>
+    </div>
+  );
+}
+
+function RuntimeLine({ label }: { label: string }) {
+  return (
+    <div className="flex items-center gap-2 py-1 text-xs text-muted-foreground">
+      <span className="size-1.5 rounded-full bg-[#cdfe00]" />
+      {label}
+    </div>
   );
 }
 
