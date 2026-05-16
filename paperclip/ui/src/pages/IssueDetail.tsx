@@ -3240,9 +3240,15 @@ export function IssueDetail() {
       </Button>
     </>
   );
+  const taskReviewOutputTitles = [
+    ...(issue.documentSummaries ?? []).map((document) => document.title ?? document.key),
+    ...(issue.planDocument ? [issue.planDocument.title ?? "Plan document"] : []),
+  ];
+  const taskReviewOutputCount = taskReviewOutputTitles.length;
+  const taskReviewDecisionCount = interactions.filter((interaction) => interaction.status === "pending").length;
 
   return (
-    <div className="max-w-3xl space-y-6">
+    <div className="mx-auto w-full max-w-6xl space-y-5">
       {/* Parent chain breadcrumb */}
       {ancestors.length > 0 && (
         <nav className="flex items-center gap-1 text-xs text-muted-foreground flex-wrap">
@@ -3351,6 +3357,18 @@ export function IssueDetail() {
           )}
         </div>
       )}
+
+      <TaskReviewSummary
+        issue={issue}
+        owner={issue.assigneeAgentId ? agentMap.get(issue.assigneeAgentId) ?? null : null}
+        outputCount={taskReviewOutputCount}
+        outputTitles={taskReviewOutputTitles}
+        decisionCount={taskReviewDecisionCount}
+        commentCount={threadComments.length}
+        childTaskCount={childIssues.length}
+        hasLiveRuns={hasLiveRuns}
+        hasBlocker={issue.status === "blocked" || (issue.blockedBy?.length ?? 0) > 0}
+      />
 
       <div className="space-y-3">
         <div className="flex items-center gap-2 min-w-0 flex-wrap">
@@ -3648,20 +3666,6 @@ export function IssueDetail() {
           }}
         />
 
-        <TaskReviewSummary
-          issue={issue}
-          owner={issue.assigneeAgentId ? agentMap.get(issue.assigneeAgentId) ?? null : null}
-          outputCount={(issue.documentSummaries?.length ?? 0) + (issue.planDocument ? 1 : 0)}
-          outputTitles={[
-            ...(issue.documentSummaries ?? []).map((document) => document.title ?? document.key),
-            ...(issue.planDocument ? [issue.planDocument.title ?? "Plan document"] : []),
-          ]}
-          decisionCount={interactions.filter((interaction) => interaction.status === "pending").length}
-          commentCount={threadComments.length}
-          childTaskCount={childIssues.length}
-          hasLiveRuns={hasLiveRuns}
-          hasBlocker={issue.status === "blocked" || (issue.blockedBy?.length ?? 0) > 0}
-        />
       </div>
 
       <PluginSlotOutlet
