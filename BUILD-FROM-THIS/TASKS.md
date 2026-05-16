@@ -135,3 +135,4 @@
 | T102 | Convert Mission Control toward chat-to-artifact layout: next move, constraints, workspace, bottom Operator command | ✅ done |
 | T103 | Add desktop density scaling so the app reads like 75% browser zoom without requiring user zoom | ✅ done |
 | T104 | Verify typecheck and MVP route smoke screenshots after visual pivot | ✅ done |
+| T105 | Harden active onboarding/Tech Tree surfaces around design tokens, 8px grid constants, and bundled browser smoke | ✅ done |

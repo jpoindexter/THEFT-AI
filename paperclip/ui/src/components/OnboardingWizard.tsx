@@ -858,7 +858,7 @@ export function OnboardingWizard() {
             scroll container. A plain div preserves the background without scroll-locking. */}
         <div className="fixed inset-0 z-50 bg-background" />
         <div
-          className="fixed inset-0 z-50 grid grid-cols-1 overflow-hidden bg-background text-foreground md:grid-cols-[56px_minmax(0,1fr)]"
+          className="theft-onboarding-shell fixed inset-0 z-50 grid overflow-hidden bg-background text-foreground"
           onKeyDown={handleKeyDown}
         >
           <aside className="hidden min-h-0 flex-col items-center justify-between border-r border-border bg-card py-5 md:flex">
@@ -871,11 +871,11 @@ export function OnboardingWizard() {
                 <CircleDot className="size-5" />
               </div>
             </div>
-            <div className="mb-1 flex size-2 rounded-full bg-[#cdfe00]" aria-hidden />
+            <div className="mb-1 flex size-2 rounded-full bg-signal" aria-hidden />
           </aside>
 
-          <div className="flex min-w-0 flex-col">
-            <header className="flex h-14 shrink-0 items-center justify-between border-b border-border px-4 md:px-6">
+          <div className="flex min-h-0 min-w-0 flex-col">
+            <header className="theft-onboarding-header flex shrink-0 items-center justify-between border-b border-border">
               <div className="flex min-w-0 items-center gap-2 text-sm font-medium">
                 <span className="truncate text-muted-foreground">Mission Control</span>
                 <span className="text-muted-foreground">/</span>
@@ -905,7 +905,7 @@ export function OnboardingWizard() {
                 onLaunch={handleLaunch}
               />
             ) : (
-            <div className="grid min-h-0 flex-1 lg:grid-cols-[minmax(0,1fr)_430px]">
+            <div className="theft-onboarding-body grid min-h-0 flex-1 overflow-hidden">
               <OnboardingCanvasPreview
                 companyName={companyName}
                 companyStage={companyStage}
@@ -913,14 +913,14 @@ export function OnboardingWizard() {
                 agentName={agentName}
               />
 
-              <section className="min-h-0 overflow-y-auto border-l border-border bg-card">
-                <div className="mx-auto flex min-h-full w-full max-w-[460px] flex-col px-5 py-6 md:px-6">
-                  <div className="mb-6 flex items-start justify-between gap-4">
+              <section className="flex h-full min-h-0 flex-col overflow-hidden border-l border-border bg-card">
+                <div className="theft-onboarding-panel-inner mx-auto flex h-full min-h-0 w-full flex-col">
+                  <div className="mb-4 flex shrink-0 items-start justify-between gap-4">
                     <div className="min-w-0">
-                      <p className="text-xs font-medium uppercase tracking-[0.12em] text-muted-foreground">
+                      <p className="theft-label">
                         {step === 4 ? "Plan Review" : "Onboarding"}
                       </p>
-                      <h2 className="mt-2 truncate text-2xl font-medium">
+                      <h2 className="mt-1.5 truncate text-xl font-medium">
                         {companyName.trim() || "New company"}
                       </h2>
                     </div>
@@ -929,7 +929,7 @@ export function OnboardingWizard() {
                     </span>
                   </div>
               {/* Progress tabs */}
-              <div className="mb-8 flex items-center gap-0 overflow-x-auto border-b border-border">
+              <div className="mb-4 flex shrink-0 items-center gap-0 overflow-x-auto border-b border-border">
                 {(
                   [
                     { step: 1 as Step, label: "Company", icon: Building2 },
@@ -957,8 +957,9 @@ export function OnboardingWizard() {
               </div>
 
               {/* Step content */}
+              <div className="min-h-0 flex-1 overflow-y-auto pr-1">
               {step === 1 && (
-                <div className="space-y-5">
+                <div className="space-y-4">
                   <div className="flex items-center gap-3 mb-1">
                     <div className="bg-muted/50 p-2">
                       <Building2 className="h-5 w-5 text-muted-foreground" />
@@ -1100,7 +1101,7 @@ export function OnboardingWizard() {
                       Mission / goal (optional)
                     </label>
                     <textarea
-                      className="w-full rounded-md border border-border bg-transparent px-3 py-2 text-sm outline-none focus:ring-1 focus:ring-ring placeholder:text-muted-foreground/50 resize-none min-h-[60px]"
+                      className="w-full rounded-md border border-border bg-transparent px-4 py-2 text-sm outline-none focus:ring-1 focus:ring-ring placeholder:text-muted-foreground/50 resize-none min-h-16"
                       placeholder="What is this company trying to achieve?"
                       value={companyGoal}
                       onChange={(e) => setCompanyGoal(e.target.value)}
@@ -1110,7 +1111,7 @@ export function OnboardingWizard() {
               )}
 
               {step === 2 && (
-                <div className="space-y-5">
+                <div className="space-y-4">
                   <div className="flex items-center gap-3 mb-1">
                     <div className="bg-muted/50 p-2">
                       <Bot className="h-5 w-5 text-muted-foreground" />
@@ -1145,7 +1146,7 @@ export function OnboardingWizard() {
                           departments and starter tasks.
                         </p>
                       </div>
-                      <span className="rounded border border-border px-2 py-1 text-[11px] text-muted-foreground">
+                      <span className="rounded border border-border px-2 py-1 text-micro text-muted-foreground">
                         {ONBOARDING_STAGE_LABELS[companyStage]}
                       </span>
                     </div>
@@ -1155,7 +1156,7 @@ export function OnboardingWizard() {
                         <Bot className="h-4 w-4 text-muted-foreground" />
                         <div className="min-w-0 flex-1">
                           <p className="truncate text-xs font-medium">{agentName || "Operator"}</p>
-                          <p className="text-[11px] text-muted-foreground">
+                          <p className="text-micro text-muted-foreground">
                             Routes work, keeps the founder oriented, and owns the first task.
                           </p>
                         </div>
@@ -1164,7 +1165,7 @@ export function OnboardingWizard() {
                       <div>
                         <div className="mb-1.5 flex items-center justify-between">
                           <p className="text-xs font-medium">Departments</p>
-                          <p className="text-[11px] text-muted-foreground">
+                          <p className="text-micro text-muted-foreground">
                             {DEPARTMENT_SEED_SPECS.length} business lanes
                           </p>
                         </div>
@@ -1174,10 +1175,10 @@ export function OnboardingWizard() {
                               key={department.key}
                               className="rounded border border-border bg-background/60 px-2 py-1.5"
                             >
-                              <p className="truncate text-[11px] font-medium">
+                              <p className="truncate text-micro font-medium">
                                 {department.title}
                               </p>
-                              <p className="truncate text-[10px] text-muted-foreground">
+                              <p className="truncate text-nano text-muted-foreground">
                                 {department.taskTitleByStage[companyStage]}
                               </p>
                             </div>
@@ -1199,7 +1200,7 @@ export function OnboardingWizard() {
                           <span className="block text-xs font-medium">
                             Advanced runtime
                           </span>
-                          <span className="block truncate text-[11px] text-muted-foreground">
+                          <span className="block truncate text-micro text-muted-foreground">
                             Using {getUIAdapter(adapterType).label}
                             {model ? ` / ${model}` : ""}
                           </span>
@@ -1245,13 +1246,13 @@ export function OnboardingWizard() {
                           }}
                         >
                           {opt.recommended && (
-                            <span className="absolute -top-1.5 right-1.5 bg-green-500 text-white text-[9px] font-semibold px-1.5 py-0.5 rounded-full leading-none">
+                            <span className="absolute -top-1.5 right-1.5 bg-green-500 text-white text-badge font-semibold px-1.5 py-0.5 rounded-full leading-none">
                               Recommended
                             </span>
                           )}
                           <opt.icon className="h-4 w-4" />
                           <span className="font-medium">{opt.label}</span>
-                          <span className="text-muted-foreground text-[10px]">
+                          <span className="text-muted-foreground text-nano">
                             {opt.description}
                           </span>
                         </button>
@@ -1306,7 +1307,7 @@ export function OnboardingWizard() {
                           >
                             <opt.icon className="h-4 w-4" />
                             <span className="font-medium">{opt.label}</span>
-                            <span className="text-muted-foreground text-[10px]">
+                            <span className="text-muted-foreground text-nano">
                               {opt.comingSoon
                                 ? opt.disabledLabel ?? "Coming soon"
                                 : opt.description}
@@ -1373,14 +1374,14 @@ export function OnboardingWizard() {
                                 Default
                               </button>
                             )}
-                            <div className="max-h-[240px] overflow-y-auto">
+                            <div className="max-h-60 overflow-y-auto">
                               {groupedModels.map((group) => (
                                 <div
                                   key={group.provider}
                                   className="mb-1 last:mb-0"
                                 >
                                   {adapterType === "opencode_local" && (
-                                    <div className="px-2 py-1 text-[10px] uppercase tracking-wide text-muted-foreground">
+                                    <div className="px-2 py-1 text-nano uppercase tracking-wide text-muted-foreground">
                                       {group.provider} ({group.entries.length})
                                     </div>
                                   )}
@@ -1427,7 +1428,7 @@ export function OnboardingWizard() {
                           <p className="text-xs font-medium">
                             Adapter environment check
                           </p>
-                          <p className="text-[11px] text-muted-foreground">
+                          <p className="text-micro text-muted-foreground">
                             Runs a live probe that asks the adapter CLI to
                             respond with hello.
                           </p>
@@ -1444,7 +1445,7 @@ export function OnboardingWizard() {
                       </div>
 
                       {adapterEnvError && (
-                        <div className="rounded-md border border-destructive/30 bg-destructive/10 px-2.5 py-2 text-[11px] text-destructive">
+                        <div className="rounded-md border border-destructive/30 bg-destructive/10 px-2.5 py-2 text-micro text-destructive">
                           {adapterEnvError}
                         </div>
                       )}
@@ -1461,7 +1462,7 @@ export function OnboardingWizard() {
 
                       {shouldSuggestUnsetAnthropicApiKey && (
                         <div className="rounded-md border border-amber-300/60 bg-amber-50/40 px-2.5 py-2 space-y-2">
-                          <p className="text-[11px] text-amber-900/90 leading-relaxed">
+                          <p className="text-micro text-amber-900/90 leading-relaxed">
                             Claude failed while{" "}
                             <span className="font-mono">ANTHROPIC_API_KEY</span>{" "}
                             is set. You can clear it in this Operator adapter config
@@ -1484,7 +1485,7 @@ export function OnboardingWizard() {
                       )}
 
                       {adapterEnvResult && adapterEnvResult.status === "fail" && (
-                        <div className="rounded-md border border-border/70 bg-muted/20 px-2.5 py-2 text-[11px] space-y-1.5">
+                        <div className="rounded-md border border-border/70 bg-muted/20 px-2.5 py-2 text-micro space-y-1.5">
                           <p className="font-medium">Manual debug</p>
                           <p className="text-muted-foreground font-mono break-all">
                             {adapterType === "cursor"
@@ -1563,7 +1564,7 @@ export function OnboardingWizard() {
               )}
 
               {step === 3 && (
-                <div className="space-y-5">
+                <div className="space-y-4">
                   <div className="flex items-center gap-3 mb-1">
                     <div className="bg-muted/50 p-2">
                       <ListTodo className="h-5 w-5 text-muted-foreground" />
@@ -1597,7 +1598,7 @@ export function OnboardingWizard() {
                     </label>
                     <textarea
                       ref={textareaRef}
-                      className="w-full rounded-md border border-border bg-transparent px-3 py-2 text-sm outline-none focus:ring-1 focus:ring-ring placeholder:text-muted-foreground/50 resize-none min-h-[120px] max-h-[300px] overflow-y-auto"
+                      className="w-full rounded-md border border-border bg-transparent px-4 py-2 text-sm outline-none focus:ring-1 focus:ring-ring placeholder:text-muted-foreground/50 resize-none min-h-32 max-h-80 overflow-y-auto"
                       placeholder="Add more detail about what the agent should do..."
                       value={taskDescription}
                       onChange={(e) => {
@@ -1611,7 +1612,7 @@ export function OnboardingWizard() {
                       Stage interview: {stageTaskTemplate.interviewPrompt}
                     </label>
                     <textarea
-                      className="w-full rounded-md border border-border bg-transparent px-3 py-2 text-sm outline-none focus:ring-1 focus:ring-ring placeholder:text-muted-foreground/50 resize-none min-h-[72px]"
+                      className="w-full rounded-md border border-border bg-transparent px-4 py-2 text-sm outline-none focus:ring-1 focus:ring-ring placeholder:text-muted-foreground/50 resize-none min-h-20"
                       placeholder={stageTaskTemplate.interviewPlaceholder}
                       value={stageInterviewAnswer}
                       onChange={(e) => setStageInterviewAnswer(e.target.value)}
@@ -1621,7 +1622,7 @@ export function OnboardingWizard() {
               )}
 
               {step === 4 && (
-                <div className="space-y-5">
+                <div className="space-y-4">
                   <div className="flex items-center gap-3 mb-1">
                     <div className="bg-muted/50 p-2">
                       <ListTodo className="h-5 w-5 text-muted-foreground" />
@@ -1640,7 +1641,7 @@ export function OnboardingWizard() {
                       <div key={section.title} className="border border-border p-3">
                         <div className="flex items-center gap-2">
                           <section.icon className="h-4 w-4 text-muted-foreground" />
-                          <p className="text-xs font-medium uppercase tracking-[0.12em] text-muted-foreground">
+                          <p className="theft-label">
                             {section.title}
                           </p>
                         </div>
@@ -1688,9 +1689,10 @@ export function OnboardingWizard() {
                   <p className="text-xs text-destructive">{error}</p>
                 </div>
               )}
+              </div>
 
               {/* Footer navigation */}
-              <div className="flex items-center justify-between mt-8">
+              <div className="-mx-4 mt-4 flex shrink-0 items-center justify-between border-t border-border bg-card px-4 pt-3 md:-mx-5 md:px-5">
                 <div>
                   {step > 1 && step > (onboardingOptions.initialStep ?? 1) && (
                     <Button
@@ -1847,9 +1849,9 @@ function AssemblyPreviewScreen({
   const selectedMeta = DEPARTMENT_ASSEMBLY_META[selectedDepartment.key];
 
   return (
-    <div className="grid min-h-0 flex-1 overflow-y-auto xl:grid-cols-[190px_minmax(0,1fr)_300px]">
-      <aside className="hidden border-r border-border bg-card px-5 py-6 xl:block">
-        <p className="text-xs font-medium uppercase tracking-[0.12em] text-muted-foreground">
+    <div className="theft-assembly-grid grid min-h-0 flex-1 overflow-y-auto">
+      <aside className="hidden border-r border-border bg-card px-6 py-6 xl:block">
+        <p className="theft-label">
           THEFT will assemble
         </p>
         <div className="mt-5 space-y-5 text-sm">
@@ -1870,7 +1872,7 @@ function AssemblyPreviewScreen({
             rows={["Decision rights", "Approval flows", "Risk controls"]}
           />
         </div>
-        <div className="mt-10 border border-border p-3 text-xs leading-5 text-muted-foreground">
+        <div className="mt-10 border border-border p-4 text-xs leading-5 text-muted-foreground">
           <Check className="mb-2 size-4 text-foreground" />
           All aligned to your answers and plan.
         </div>
@@ -1879,7 +1881,7 @@ function AssemblyPreviewScreen({
       <main className="min-w-0 px-5 py-6 md:px-8">
         <div className="mb-7 flex flex-wrap items-start justify-between gap-4">
           <div>
-            <p className="text-xs font-medium uppercase tracking-[0.12em] text-muted-foreground">
+            <p className="theft-label">
               Company assembly
             </p>
             <h2 className="mt-2 text-2xl font-medium">Company Assembly Preview</h2>
@@ -1888,20 +1890,20 @@ function AssemblyPreviewScreen({
             </p>
           </div>
           <div className="flex items-center gap-2 text-xs text-muted-foreground">
-            <span className="size-1.5 rounded-full bg-[#cdfe00]" />
+            <span className="size-1.5 rounded-full bg-signal" />
             Local runtime ready
           </div>
         </div>
 
         <div className="mx-auto max-w-5xl">
-          <div className="mx-auto max-w-xl border border-border bg-card p-5 text-center shadow-[0_12px_34px_rgb(20_24_20/0.04)]">
-            <p className="text-xs font-medium uppercase tracking-[0.12em] text-muted-foreground">
+          <div className="theft-elevation-soft mx-auto max-w-xl border border-border bg-card p-6 text-center">
+            <p className="theft-label">
               Mission objective
             </p>
             <p className="mt-2 text-lg leading-7">{objective}</p>
           </div>
 
-          <div className="mt-6 grid gap-3 md:grid-cols-3">
+          <div className="mt-6 grid gap-4 md:grid-cols-3">
             {[
               ["Product Excellence", "Ship valuable, usable, delightful products."],
               ["Growth & Distribution", "Acquire, activate, and retain customers."],
@@ -1914,7 +1916,7 @@ function AssemblyPreviewScreen({
             ))}
           </div>
 
-          <div className="mt-6 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+          <div className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
             {DEPARTMENT_SEED_SPECS.map((department) => {
               const meta = DEPARTMENT_ASSEMBLY_META[department.key];
               const selected = department.key === selectedDepartment.key;
@@ -1922,7 +1924,7 @@ function AssemblyPreviewScreen({
                 <div
                   key={department.key}
                   className={cn(
-                    "border bg-card p-4 shadow-[0_10px_28px_rgb(20_24_20/0.04)]",
+                    "theft-elevation-soft border bg-card p-4",
                     selected ? "border-foreground" : "border-border"
                   )}
                 >
@@ -1936,7 +1938,7 @@ function AssemblyPreviewScreen({
                     </div>
                   </div>
                   <div className="mt-4">
-                    <p className="text-xs font-medium uppercase tracking-[0.12em] text-muted-foreground">
+                    <p className="theft-label">
                       Starter tasks
                     </p>
                     <ul className="mt-2 space-y-1 text-xs leading-5 text-muted-foreground">
@@ -1945,7 +1947,7 @@ function AssemblyPreviewScreen({
                     </ul>
                   </div>
                   <div className="mt-4">
-                    <p className="text-xs font-medium uppercase tracking-[0.12em] text-muted-foreground">
+                    <p className="theft-label">
                       Library outputs
                     </p>
                     <ul className="mt-2 space-y-1 text-xs leading-5 text-muted-foreground">
@@ -1960,14 +1962,14 @@ function AssemblyPreviewScreen({
           </div>
 
           <div className="mt-6 border border-border bg-card p-4">
-            <p className="text-xs font-medium uppercase tracking-[0.12em] text-muted-foreground">
+            <p className="theft-label">
               Tech tree initial path
             </p>
             <div className="mt-4 grid gap-2 md:grid-cols-5">
               {["Company foundation", "Core systems & tooling", "First product MVP", "Market launch & feedback", "Scale systems & team"].map((node, index) => (
-                <div key={node} className="border border-border p-3 text-center">
+                <div key={node} className="border border-border p-4 text-center">
                   <p className="text-sm font-medium">{node}</p>
-                  <p className="mt-2 text-xs uppercase tracking-[0.12em] text-muted-foreground">
+                  <p className="theft-label-compact mt-2">
                     {index === 0 ? "active" : index === 1 ? "next" : "available"}
                   </p>
                 </div>
@@ -1978,11 +1980,11 @@ function AssemblyPreviewScreen({
       </main>
 
       <aside className="border-t border-border bg-card p-5 xl:border-l xl:border-t-0">
-        <p className="text-xs font-medium uppercase tracking-[0.12em] text-muted-foreground">
+        <p className="theft-label">
           Inspector
         </p>
-        <div className="mt-5 space-y-3">
-          <div className="border border-border p-3">
+        <div className="mt-5 space-y-4">
+          <div className="border border-border p-4">
             <p className="text-xs text-muted-foreground">Selected</p>
             <div className="mt-2 flex items-center gap-2">
               <span className="flex size-9 items-center justify-center bg-secondary text-muted-foreground">
@@ -2002,7 +2004,7 @@ function AssemblyPreviewScreen({
         </div>
 
         <div className="mt-5 grid gap-2">
-          <Button className="h-11 rounded-[10px]" disabled={loading} onClick={onLaunch}>
+          <Button className="h-12" disabled={loading} onClick={onLaunch}>
             {loading ? (
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
             ) : (
@@ -2010,7 +2012,7 @@ function AssemblyPreviewScreen({
             )}
             {loading ? "Launching..." : "Launch company"}
           </Button>
-          <Button variant="outline" className="h-10 rounded-[10px]" disabled={loading} onClick={onBack}>
+          <Button variant="outline" className="h-10" disabled={loading} onClick={onBack}>
             Edit plan
           </Button>
         </div>
@@ -2022,7 +2024,7 @@ function AssemblyPreviewScreen({
 function AssemblyStatGroup({ title, rows }: { title: string; rows: string[] }) {
   return (
     <div className="border-b border-border pb-4 last:border-b-0">
-      <p className="text-xs font-medium uppercase tracking-[0.12em] text-muted-foreground">{title}</p>
+      <p className="theft-label">{title}</p>
       <div className="mt-2 space-y-1 text-muted-foreground">
         {rows.map((row) => (
           <p key={row}>{row}</p>
@@ -2034,8 +2036,8 @@ function AssemblyStatGroup({ title, rows }: { title: string; rows: string[] }) {
 
 function InspectorBlock({ title, rows }: { title: string; rows: string[] }) {
   return (
-    <div className="border border-border p-3">
-      <p className="text-xs font-medium uppercase tracking-[0.12em] text-muted-foreground">{title}</p>
+    <div className="border border-border p-4">
+      <p className="theft-label">{title}</p>
       <ul className="mt-2 space-y-1.5 text-sm leading-5 text-muted-foreground">
         {rows.map((row) => (
           <li key={row}>{row}</li>
@@ -2060,35 +2062,35 @@ function OnboardingCanvasPreview({
   const reviewMode = step === 4;
   const mapNodes = reviewMode
     ? [
-        { className: "left-1/2 top-0 -translate-x-1/2", icon: <Code2 className="size-4" />, label: "Engineering" },
-        { className: "left-[16%] top-[20%]", icon: <Palette className="size-4" />, label: "Design" },
-        { className: "right-[16%] top-[20%]", icon: <Megaphone className="size-4" />, label: "Marketing" },
-        { className: "right-[6%] top-[47%]", icon: <BarChart3 className="size-4" />, label: "Sales" },
-        { className: "bottom-[9%] right-[20%]", icon: <DollarSign className="size-4" />, label: "Finance" },
-        { className: "bottom-0 left-1/2 -translate-x-1/2", icon: <Scale className="size-4" />, label: "Legal" },
-        { className: "bottom-[9%] left-[20%]", icon: <Headphones className="size-4" />, label: "Support" },
-        { className: "left-[6%] top-[47%]", icon: <Settings2 className="size-4" />, label: "Operations" },
+        { className: "theft-map-node-top", icon: <Code2 className="size-4" />, label: "Engineering" },
+        { className: "theft-map-node-left-upper", icon: <Palette className="size-4" />, label: "Design" },
+        { className: "theft-map-node-right-upper", icon: <Megaphone className="size-4" />, label: "Marketing" },
+        { className: "theft-map-node-right-middle", icon: <BarChart3 className="size-4" />, label: "Sales" },
+        { className: "theft-map-node-right-lower", icon: <DollarSign className="size-4" />, label: "Finance" },
+        { className: "theft-map-node-bottom", icon: <Scale className="size-4" />, label: "Legal" },
+        { className: "theft-map-node-left-lower", icon: <Headphones className="size-4" />, label: "Support" },
+        { className: "theft-map-node-left-middle", icon: <Settings2 className="size-4" />, label: "Operations" },
       ]
     : [
-        { className: "left-1/2 top-0 -translate-x-1/2", icon: <Flag className="size-4" />, label: "Brand" },
-        { className: "left-[12%] top-[32%]", icon: <Package className="size-4" />, label: "Product" },
-        { className: "right-[12%] top-[32%]", icon: <BarChart3 className="size-4" />, label: "Revenue" },
-        { className: "bottom-[10%] left-[22%]", icon: <Settings2 className="size-4" />, label: "Operations" },
-        { className: "bottom-[10%] right-[22%]", icon: <Database className="size-4" />, label: "Library" },
+        { className: "theft-map-node-top", icon: <Flag className="size-4" />, label: "Brand" },
+        { className: "theft-map-node-default-left", icon: <Package className="size-4" />, label: "Product" },
+        { className: "theft-map-node-default-right", icon: <BarChart3 className="size-4" />, label: "Revenue" },
+        { className: "theft-map-node-default-left-lower", icon: <Settings2 className="size-4" />, label: "Operations" },
+        { className: "theft-map-node-default-right-lower", icon: <Database className="size-4" />, label: "Library" },
       ];
 
   return (
     <section className="hidden min-h-0 overflow-hidden bg-background lg:block">
-      <div className="relative h-full min-h-[640px] p-6">
-        <div className="absolute inset-0 bg-[linear-gradient(to_right,rgb(21_23_20/0.04)_1px,transparent_1px),linear-gradient(to_bottom,rgb(21_23_20/0.04)_1px,transparent_1px)] bg-[size:72px_72px]" />
+      <div className="theft-onboarding-canvas-frame relative h-full">
+        <div className="theft-grid-bg absolute inset-0" />
 
         <div className="relative z-10 flex items-center justify-between">
-          <div className="border border-border bg-card px-4 py-3 shadow-[0_10px_30px_rgb(20_24_20/0.04)]">
-            <div className="flex items-center gap-2 text-xs font-medium uppercase tracking-[0.12em] text-muted-foreground">
-              <span className="size-1.5 rounded-full bg-[#cdfe00]" />
+          <div className="theft-elevation-soft border border-border bg-card px-4 py-2">
+            <div className="theft-label flex items-center gap-2">
+              <span className="size-1.5 rounded-full bg-signal" />
               {reviewMode ? "Workspace assembling" : "Canvas initializing"}
             </div>
-            <p className="mt-1 text-sm text-muted-foreground">
+            <p className="mt-1 text-xs text-muted-foreground">
               {reviewMode ? "Department graph preparing..." : "Company map forming..."}
             </p>
           </div>
@@ -2097,7 +2099,7 @@ function OnboardingCanvasPreview({
               <button
                 key={index}
                 type="button"
-                className="flex size-11 items-center justify-center border-l border-border first:border-l-0 text-muted-foreground hover:bg-secondary hover:text-foreground"
+                className="flex size-9 items-center justify-center border-l border-border first:border-l-0 text-muted-foreground hover:bg-secondary hover:text-foreground"
               >
                 <Icon className="size-4" />
               </button>
@@ -2105,17 +2107,17 @@ function OnboardingCanvasPreview({
           </div>
         </div>
 
-        <div className="absolute inset-x-8 top-1/2 h-[520px] -translate-y-1/2">
-          <div className="absolute left-1/2 top-1/2 size-[520px] -translate-x-1/2 -translate-y-1/2 rounded-full border border-border/80" />
-          <div className="absolute left-1/2 top-1/2 size-[390px] -translate-x-1/2 -translate-y-1/2 rounded-full border border-dashed border-border" />
-          <div className="absolute left-1/2 top-1/2 size-[260px] -translate-x-1/2 -translate-y-1/2 rounded-full border border-dashed border-border/80" />
+        <div className="theft-onboarding-map absolute top-1/2 -translate-y-1/2">
+          <div className="theft-map-ring-outer absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full border border-border/80" />
+          <div className="theft-map-ring-middle absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full border border-dashed border-border" />
+          <div className="theft-map-ring-inner absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full border border-dashed border-border/80" />
 
-          <div className="absolute left-1/2 top-1/2 z-10 w-52 -translate-x-1/2 -translate-y-1/2 border border-foreground bg-card p-5 text-center shadow-[0_18px_54px_rgb(20_24_20/0.08)]">
-            <div className="mx-auto flex size-12 items-center justify-center rounded-[14px] bg-secondary">
-              <Building2 className="size-6" />
+          <div className="theft-elevation-soft theft-map-center-card absolute left-1/2 top-1/2 z-10 -translate-x-1/2 -translate-y-1/2 border border-foreground bg-card p-4 text-center">
+            <div className="mx-auto flex size-10 items-center justify-center rounded-md bg-secondary">
+              <Building2 className="size-5" />
             </div>
-            <h3 className="mt-4 truncate text-lg font-medium">{displayName}</h3>
-            <p className="mt-1 text-xs uppercase tracking-[0.12em] text-muted-foreground">
+            <h3 className="mt-3 truncate text-base font-medium">{displayName}</h3>
+            <p className="theft-label-compact mt-1">
               {ONBOARDING_STAGE_LABELS[companyStage]}
             </p>
           </div>
@@ -2125,13 +2127,13 @@ function OnboardingCanvasPreview({
           ))}
         </div>
 
-        <div className="absolute bottom-6 left-6 z-10 w-64 border border-border bg-card px-4 py-3 shadow-[0_10px_30px_rgb(20_24_20/0.04)]">
+        <div className="theft-elevation-soft absolute bottom-4 left-4 z-10 w-56 border border-border bg-card px-4 py-2">
           <RuntimeLine label="Local runtime ready" />
           <RuntimeLine label="Embedded Postgres" />
           <RuntimeLine label="No cloud required" />
         </div>
 
-        <div className="absolute bottom-6 right-6 z-10 border border-border bg-card px-4 py-3 text-sm text-muted-foreground shadow-[0_10px_30px_rgb(20_24_20/0.04)]">
+        <div className="theft-elevation-soft absolute bottom-4 right-4 z-10 border border-border bg-card px-4 py-2 text-xs text-muted-foreground">
           <span className="font-medium text-foreground">{agentName || "Operator"}</span>
           <span className="mx-2 text-border">/</span>
           {reviewMode ? "Plan review ready" : `Step ${step} active`}
@@ -2155,14 +2157,14 @@ function MapNode({
   return (
     <div
       className={cn(
-        "absolute z-10 flex size-24 flex-col items-center justify-center border bg-card text-center shadow-[0_12px_34px_rgb(20_24_20/0.06)]",
+        "theft-elevation-soft theft-map-node absolute z-10 flex flex-col items-center justify-center border bg-card text-center",
         active ? "border-foreground/35" : "border-border",
         className
       )}
     >
-      <div className="mb-2 text-muted-foreground">{icon}</div>
-      <div className="text-sm font-medium">{label}</div>
-      {active ? <span className="mt-2 size-1.5 rounded-full bg-[#cdfe00]" /> : null}
+      <div className="mb-1.5 text-muted-foreground">{icon}</div>
+      <div className="text-xs font-medium">{label}</div>
+      {active ? <span className="mt-2 size-1.5 rounded-full bg-signal" /> : null}
     </div>
   );
 }
@@ -2170,7 +2172,7 @@ function MapNode({
 function RuntimeLine({ label }: { label: string }) {
   return (
     <div className="flex items-center gap-2 py-1 text-xs text-muted-foreground">
-      <span className="size-1.5 rounded-full bg-[#cdfe00]" />
+      <span className="size-1.5 rounded-full bg-signal" />
       {label}
     </div>
   );
@@ -2195,7 +2197,7 @@ function AdapterEnvironmentResult({
       : "text-red-700 dark:text-red-300 border-red-300 dark:border-red-500/40 bg-red-50 dark:bg-red-500/10";
 
   return (
-    <div className={`rounded-md border px-2.5 py-2 text-[11px] ${statusClass}`}>
+    <div className={`rounded-md border px-2.5 py-2 text-micro ${statusClass}`}>
       <div className="flex items-center justify-between gap-2">
         <span className="font-medium">{statusLabel}</span>
         <span className="opacity-80">

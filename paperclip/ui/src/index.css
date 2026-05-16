@@ -28,6 +28,7 @@
   --color-chart-3: var(--chart-3);
   --color-chart-4: var(--chart-4);
   --color-chart-5: var(--chart-5);
+  --color-signal: var(--theft-signal);
   --color-sidebar: var(--sidebar);
   --color-sidebar-foreground: var(--sidebar-foreground);
   --color-sidebar-primary: var(--sidebar-primary);
@@ -36,6 +37,9 @@
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
+  --text-micro: var(--theft-text-micro);
+  --text-nano: var(--theft-text-nano);
+  --text-badge: var(--theft-text-badge);
   --radius-sm: 6px;
   --radius-md: 10px;
   --radius-lg: 10px;
@@ -45,23 +49,95 @@
 :root {
   color-scheme: light;
   --radius: 12px;
-  --theft-ink: #0b0d0c;
-  --theft-graphite: #565a57;
+
+  /* THEFT/Sana design tokens. New product UI should consume these aliases,
+     not one-off colors, spacing, radius, or layout constants. */
+  --theft-color-tarmac: #0a1217;
+  --theft-color-canvas-white: #ffffff;
+  --theft-color-limestone: #e4eff7;
+  --theft-color-jet-black: #000000;
+  --theft-color-cloud-gray: #85898b;
+  --theft-color-steel-gray: #6c7174;
+  --theft-color-signal: #cdfe00;
+  --theft-ink: var(--theft-color-tarmac);
+  --theft-graphite: var(--theft-color-steel-gray);
   --theft-stone: #f4f5f1;
   --theft-canvas: #fbfcf8;
-  --theft-panel: #ffffff;
+  --theft-panel: var(--theft-color-canvas-white);
   --theft-panel-soft: #f2f4ef;
   --theft-line: #e5e7e1;
   --theft-line-strong: #d6d9d1;
-  --theft-brand: #0b0d0c;
+  --theft-brand: var(--theft-color-tarmac);
   --theft-blue: #2f7df6;
   --theft-green: #26b36b;
   --theft-amber: #d9911f;
   --theft-red: #e85b5b;
+  --theft-signal: var(--theft-color-signal);
+  --theft-space-unit: 8px;
+  --theft-space-1: var(--theft-space-unit);
+  --theft-space-2: calc(var(--theft-space-unit) * 2);
+  --theft-space-3: calc(var(--theft-space-unit) * 3);
+  --theft-space-4: calc(var(--theft-space-unit) * 4);
+  --theft-space-5: calc(var(--theft-space-unit) * 5);
+  --theft-space-6: calc(var(--theft-space-unit) * 6);
+  --theft-space-7: calc(var(--theft-space-unit) * 7);
+  --theft-space-8: calc(var(--theft-space-unit) * 8);
+  --theft-radius-surface: var(--radius-md);
+  --theft-radius-control: var(--radius-md);
+  --theft-label-tracking: 0.12em;
+  --theft-header-height: var(--theft-space-7);
+  --theft-rail-width: calc(var(--theft-space-1) * 7);
+  --theft-grid-unit: calc(var(--theft-space-1) * 9);
+  --theft-onboarding-panel-width: calc(var(--theft-space-1) * 50);
+  --theft-onboarding-panel-width-xl: calc(var(--theft-space-1) * 52);
+  --theft-onboarding-panel-max-width: calc(var(--theft-space-1) * 52);
+  --theft-onboarding-canvas-min-height: calc(var(--theft-space-1) * 65);
+  --theft-onboarding-map-height: clamp(
+    calc(var(--theft-space-1) * 48),
+    58vh,
+    calc(var(--theft-space-1) * 62)
+  );
+  --theft-onboarding-map-outer: clamp(
+    calc(var(--theft-space-1) * 45),
+    42vw,
+    calc(var(--theft-space-1) * 62)
+  );
+  --theft-onboarding-map-middle: clamp(
+    calc(var(--theft-space-1) * 34),
+    32vw,
+    calc(var(--theft-space-1) * 47)
+  );
+  --theft-onboarding-map-inner: clamp(
+    calc(var(--theft-space-1) * 24),
+    22vw,
+    calc(var(--theft-space-1) * 31)
+  );
+  --theft-onboarding-center-width: calc(var(--theft-space-1) * 22);
+  --theft-onboarding-node-size: calc(var(--theft-space-1) * 10);
+  --theft-onboarding-node-size-xl: calc(var(--theft-space-1) * 11);
+  --theft-map-x-edge: 6%;
+  --theft-map-x-inner: 12%;
+  --theft-map-x-mid: 16%;
+  --theft-map-x-diagonal: 20%;
+  --theft-map-x-lower: 22%;
+  --theft-map-y-upper: 20%;
+  --theft-map-y-default: 32%;
+  --theft-map-y-middle: 47%;
+  --theft-map-y-lower: 9%;
+  --theft-map-y-default-lower: 10%;
+  --theft-assembly-left-width: calc(var(--theft-space-1) * 24);
+  --theft-assembly-right-width: calc(var(--theft-space-1) * 38);
+  --theft-tech-tree-filter-width: calc(var(--theft-space-1) * 21);
+  --theft-tech-tree-inspector-width: calc(var(--theft-space-1) * 40);
+  --theft-tech-tree-stat-min-width: calc(var(--theft-space-1) * 32);
+  --theft-shadow-soft: 0 var(--theft-space-1) var(--theft-space-3) rgb(20 24 20 / 0.06);
   --font-sana-serif: "Sana Serif", "Playfair Display", ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
   --font-sana-sans: "Sana Sans", "Avenir Next", Inter, "Helvetica Neue", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   --font-nb-akademie: var(--font-sana-sans);
   --font-nb-akademie-mono: var(--font-sana-sans);
+  --theft-text-micro: 11px;
+  --theft-text-nano: 10px;
+  --theft-text-badge: 9px;
   --text-caption: 13px;
   --leading-caption: 1.4;
   --text-body: 16px;
@@ -254,8 +330,231 @@
 .theft-panel {
   border: 1px solid var(--border);
   background: color-mix(in oklab, var(--card) 96%, transparent);
-  border-radius: 16px;
-  box-shadow: 0 16px 48px rgb(20 24 20 / 0.06);
+  border-radius: var(--theft-radius-surface);
+  box-shadow: var(--theft-shadow-soft);
+}
+
+.theft-elevation-soft {
+  box-shadow: var(--theft-shadow-soft);
+}
+
+.theft-label {
+  color: var(--muted-foreground);
+  font-size: var(--text-caption);
+  font-weight: 500;
+  letter-spacing: var(--theft-label-tracking);
+  line-height: var(--leading-caption);
+  text-transform: uppercase;
+}
+
+.theft-label-compact {
+  color: var(--muted-foreground);
+  font-size: var(--theft-text-micro);
+  letter-spacing: var(--theft-label-tracking);
+  line-height: var(--leading-caption);
+  text-transform: uppercase;
+}
+
+.theft-grid-bg {
+  background-image:
+    linear-gradient(
+      to right,
+      color-mix(in oklab, var(--foreground) 4%, transparent) 1px,
+      transparent 1px
+    ),
+    linear-gradient(
+      to bottom,
+      color-mix(in oklab, var(--foreground) 4%, transparent) 1px,
+      transparent 1px
+    );
+  background-size: var(--theft-grid-unit) var(--theft-grid-unit);
+}
+
+.theft-map-node-top {
+  left: 50%;
+  top: 0;
+  transform: translateX(-50%);
+}
+
+.theft-map-node-bottom {
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.theft-map-node-left-upper {
+  left: var(--theft-map-x-mid);
+  top: var(--theft-map-y-upper);
+}
+
+.theft-map-node-right-upper {
+  right: var(--theft-map-x-mid);
+  top: var(--theft-map-y-upper);
+}
+
+.theft-map-node-left-middle {
+  left: var(--theft-map-x-edge);
+  top: var(--theft-map-y-middle);
+}
+
+.theft-map-node-right-middle {
+  right: var(--theft-map-x-edge);
+  top: var(--theft-map-y-middle);
+}
+
+.theft-map-node-left-lower {
+  bottom: var(--theft-map-y-lower);
+  left: var(--theft-map-x-diagonal);
+}
+
+.theft-map-node-right-lower {
+  bottom: var(--theft-map-y-lower);
+  right: var(--theft-map-x-diagonal);
+}
+
+.theft-map-node-default-left {
+  left: var(--theft-map-x-inner);
+  top: var(--theft-map-y-default);
+}
+
+.theft-map-node-default-right {
+  right: var(--theft-map-x-inner);
+  top: var(--theft-map-y-default);
+}
+
+.theft-map-node-default-left-lower {
+  bottom: var(--theft-map-y-default-lower);
+  left: var(--theft-map-x-lower);
+}
+
+.theft-map-node-default-right-lower {
+  bottom: var(--theft-map-y-default-lower);
+  right: var(--theft-map-x-lower);
+}
+
+.theft-onboarding-canvas-frame {
+  min-height: var(--theft-onboarding-canvas-min-height);
+  padding: var(--theft-space-2);
+}
+
+.theft-onboarding-map {
+  height: var(--theft-onboarding-map-height);
+  inset-inline: var(--theft-space-3);
+}
+
+.theft-map-ring-outer,
+.theft-map-ring-middle,
+.theft-map-ring-inner {
+  height: var(--theft-map-ring-size);
+  width: var(--theft-map-ring-size);
+}
+
+.theft-map-ring-outer {
+  --theft-map-ring-size: var(--theft-onboarding-map-outer);
+}
+
+.theft-map-ring-middle {
+  --theft-map-ring-size: var(--theft-onboarding-map-middle);
+}
+
+.theft-map-ring-inner {
+  --theft-map-ring-size: var(--theft-onboarding-map-inner);
+}
+
+.theft-map-center-card {
+  width: var(--theft-onboarding-center-width);
+}
+
+.theft-map-node {
+  height: var(--theft-onboarding-node-size);
+  width: var(--theft-onboarding-node-size);
+}
+
+.theft-onboarding-shell {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.theft-onboarding-body {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.theft-onboarding-header {
+  height: var(--theft-header-height);
+  padding-inline: var(--theft-space-2);
+}
+
+.theft-onboarding-panel-inner {
+  max-width: var(--theft-onboarding-panel-max-width);
+  padding: var(--theft-space-2);
+}
+
+.theft-assembly-grid {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.theft-tech-tree-layout {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.theft-tech-tree-stats {
+  min-width: min(100%, var(--theft-tech-tree-stat-min-width));
+}
+
+.theft-tech-tree-node-card {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+@media (min-width: 768px) {
+  .theft-onboarding-shell {
+    grid-template-columns: var(--theft-rail-width) minmax(0, 1fr);
+  }
+
+  .theft-onboarding-header {
+    padding-inline: var(--theft-space-3);
+  }
+
+  .theft-onboarding-panel-inner {
+    padding-inline: var(--theft-space-3);
+  }
+}
+
+@media (min-width: 1024px) {
+  .theft-onboarding-body {
+    grid-template-columns: minmax(0, 1fr) var(--theft-onboarding-panel-width);
+  }
+
+  .theft-tech-tree-node-card {
+    grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr) minmax(0, 1fr);
+  }
+}
+
+@media (min-width: 1280px) {
+  .theft-onboarding-canvas-frame {
+    padding: var(--theft-space-3);
+  }
+
+  .theft-onboarding-body {
+    grid-template-columns: minmax(0, 1fr) var(--theft-onboarding-panel-width-xl);
+  }
+
+  .theft-map-node {
+    height: var(--theft-onboarding-node-size-xl);
+    width: var(--theft-onboarding-node-size-xl);
+  }
+
+  .theft-assembly-grid {
+    grid-template-columns:
+      var(--theft-assembly-left-width)
+      minmax(0, 1fr)
+      var(--theft-assembly-right-width);
+  }
+
+  .theft-tech-tree-layout {
+    grid-template-columns:
+      var(--theft-tech-tree-filter-width)
+      minmax(0, 1fr)
+      var(--theft-tech-tree-inspector-width);
+  }
 }
 
 .theft-heading {

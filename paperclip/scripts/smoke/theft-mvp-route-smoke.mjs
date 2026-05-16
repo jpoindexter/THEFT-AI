@@ -5,7 +5,6 @@ import path from "node:path";
 import { chromium } from "@playwright/test";
 
 const DEFAULT_BASE_URL = "http://127.0.0.1:3100";
-const DEFAULT_CHROME_PATH = "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome";
 
 const MVP_ROUTES = [
   {
@@ -16,7 +15,7 @@ const MVP_ROUTES = [
   {
     name: "Tasks / Needs Action",
     path: "/issues",
-    expectedText: ["Tasks", "Founder review queue", "Next move"],
+    expectedText: ["Tasks", "Task review queue", "Next move"],
   },
   {
     name: "Tech Tree",
@@ -31,7 +30,7 @@ const MVP_ROUTES = [
   {
     name: "Department Workspace",
     path: "/departments/engineering",
-    expectedText: ["Engineering", "Department workspace", "Objective contribution"],
+    expectedText: ["Engineering", "Execution lane", "Objective contribution"],
   },
   {
     name: "System / Diagnostics",
@@ -44,7 +43,7 @@ function parseArgs(argv) {
   const parsed = {
     baseUrl: process.env.PAPERCLIP_BASE_URL ?? DEFAULT_BASE_URL,
     companyPrefix: process.env.THEFT_MVP_COMPANY_PREFIX ?? null,
-    chromePath: process.env.THEFT_CHROME_PATH ?? DEFAULT_CHROME_PATH,
+    chromePath: process.env.THEFT_CHROME_PATH ?? null,
     screenshotDir: process.env.THEFT_MVP_SCREENSHOT_DIR ?? null,
     viewport: { width: 1440, height: 900 },
     mobile: false,
@@ -90,10 +89,12 @@ Usage:
   node paperclip/scripts/smoke/theft-mvp-route-smoke.mjs
   node paperclip/scripts/smoke/theft-mvp-route-smoke.mjs --company-prefix THE --screenshot-dir /private/tmp/theft-mvp
   node paperclip/scripts/smoke/theft-mvp-route-smoke.mjs --mobile --company-prefix THE
+  node paperclip/scripts/smoke/theft-mvp-route-smoke.mjs --chrome-path /Applications/Google\\ Chrome.app/Contents/MacOS/Google\\ Chrome
 
 Checks the already-running Paperclip host for the THEFT MVP product path:
 Mission Control, Tasks, Tech Tree, Library, Department Workspace, and System.
 This is a zero-quota browser smoke. It does not invoke agents or LLM adapters.
+Uses Playwright bundled Chromium by default. Pass --chrome-path only to force a system browser.
 `);
 }
 
@@ -173,16 +174,32 @@ async function checkRoute({ page, baseUrl, companyPrefix, route, screenshotDir }
   console.log(`ok - ${route.name} renders without horizontal overflow`);
 }
 
+async function launchBrowser(chromePath) {
+  const launchOptions = { headless: true };
+  if (!chromePath || chromePath === "bundled") {
+    return chromium.launch(launchOptions);
+  }
+
+  try {
+    return await chromium.launch({
+      ...launchOptions,
+      executablePath: chromePath,
+    });
+  } catch (error) {
+    const message = error instanceof Error ? error.message.split("\n")[0] : String(error);
+    console.warn(`warn - system Chrome launch failed: ${message}`);
+    console.warn("warn - retrying with Playwright bundled Chromium");
+    return chromium.launch(launchOptions);
+  }
+}
+
 async function main() {
   const options = parseArgs(process.argv.slice(2));
   const companyPrefix = await resolveCompanyPrefix(options.baseUrl, options.companyPrefix);
   console.log(`THEFT MVP route smoke target: ${options.baseUrl}/${companyPrefix}`);
   console.log(`Viewport: ${options.viewport.width}x${options.viewport.height}`);
 
-  const browser = await chromium.launch({
-    headless: true,
-    executablePath: options.chromePath,
-  });
+  const browser = await launchBrowser(options.chromePath);
   try {
     const page = await browser.newPage({ viewport: options.viewport });
     for (const route of MVP_ROUTES) {

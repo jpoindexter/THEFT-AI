@@ -244,12 +244,12 @@ export function Goals() {
       {goals && goals.length > 0 && (
         <>
           <section className="theft-panel overflow-hidden">
-            <div className="grid min-w-0 gap-4 p-4 xl:grid-cols-[170px_minmax(0,1fr)_320px]">
+            <div className="theft-tech-tree-layout grid min-w-0 gap-4 p-4">
               <TechTreeFilterRail />
               <main className="min-w-0">
                 <div className="mb-5 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                   <div>
-                    <div className="text-xs font-medium uppercase tracking-[0.16em] text-muted-foreground">
+                    <div className="theft-label">
                       Strategy map / Tech Tree
                     </div>
                     <h1 className="mt-2 text-2xl font-medium">Tech Tree</h1>
@@ -257,7 +257,7 @@ export function Goals() {
                       Company build order, dependencies, evidence, and next unlocks.
                     </p>
                   </div>
-                  <div className="grid min-w-[260px] grid-cols-3 border border-border bg-card text-center">
+                  <div className="theft-tech-tree-stats grid grid-cols-3 border border-border bg-card text-center">
                     <TechTreeStat value={goals.length} label="nodes" />
                     <TechTreeStat value={goals.filter((goal) => goal.status === "active").length} label="active" />
                     <TechTreeStat value={goals.filter((goal) => goal.status === "achieved").length} label="done" />
@@ -267,16 +267,16 @@ export function Goals() {
                 <TechTreeBuildOrder nodes={techTreeNodes} selectedNode={nextNode} />
 
                 <div className="mt-4 border border-border bg-card p-4">
-                  <div className="flex flex-wrap items-center justify-between gap-3">
+                  <div className="flex flex-wrap items-center justify-between gap-4">
                     <div>
-                      <p className="text-xs font-medium uppercase tracking-[0.12em] text-muted-foreground">
+                      <p className="theft-label">
                         Recommended next move
                       </p>
                       <h2 className="mt-2 text-lg font-medium">{nextNode?.goal.title ?? "Create first build-order node"}</h2>
                     </div>
                     <Badge variant="outline" className="rounded-none">High impact</Badge>
                   </div>
-                  <div className="mt-4 grid gap-3 text-sm md:grid-cols-3">
+                  <div className="mt-4 grid gap-4 text-sm md:grid-cols-3">
                     <InspectorMetric label="Rationale" value={nextNode?.nextAction ?? "Start the company roadmap"} />
                     <InspectorMetric label="Impact" value="Unlocks downstream work" />
                     <InspectorMetric label="Alternative" value="Route through Operator" />
@@ -311,7 +311,7 @@ export function Goals() {
 function TechTreeStageSection({ stage }: { stage: TechTreeStageView }) {
   return (
     <section className="min-w-0 border border-border bg-card/60">
-      <div className="flex items-start justify-between gap-4 border-b border-border px-3 py-2">
+      <div className="flex items-start justify-between gap-4 border-b border-border px-4 py-2">
         <div>
           <h2 className="text-sm font-medium text-foreground">{stage.label}</h2>
           <p className="mt-0.5 text-xs text-muted-foreground">{stage.description}</p>
@@ -320,7 +320,7 @@ function TechTreeStageSection({ stage }: { stage: TechTreeStageView }) {
       </div>
       <div className="space-y-2 p-2">
         {stage.nodes.length === 0 ? (
-          <div className="border border-dashed border-border bg-background/40 px-3 py-4 text-sm text-muted-foreground">
+          <div className="border border-dashed border-border bg-background/40 px-4 py-4 text-sm text-muted-foreground">
             No nodes in this stage yet.
           </div>
         ) : (
@@ -334,7 +334,7 @@ function TechTreeStageSection({ stage }: { stage: TechTreeStageView }) {
 function InspectorMetric({ label, value }: { label: string; value: string }) {
   return (
     <div className="min-w-0 border border-border bg-background/50 px-2 py-2">
-      <div className="text-[10px] uppercase tracking-[0.12em] text-muted-foreground">{label}</div>
+      <div className="theft-label-compact">{label}</div>
       <div className="mt-1 truncate text-xs text-foreground">{value}</div>
     </div>
   );
@@ -342,9 +342,9 @@ function InspectorMetric({ label, value }: { label: string; value: string }) {
 
 function TechTreeStat({ value, label }: { value: number; label: string }) {
   return (
-    <div className="border-r border-border px-3 py-3 last:border-r-0">
+    <div className="border-r border-border px-4 py-4 last:border-r-0">
       <div className="text-lg font-semibold tabular-nums">{value}</div>
-      <div className="text-[11px] uppercase tracking-[0.12em] text-muted-foreground">{label}</div>
+      <div className="theft-label-compact">{label}</div>
     </div>
   );
 }
@@ -363,14 +363,14 @@ function TechTreeFilterRail() {
   return (
     <aside className="hidden min-w-0 space-y-5 border-r border-border pr-4 xl:block">
       <div>
-        <p className="text-xs font-medium uppercase tracking-[0.12em] text-muted-foreground">View</p>
+        <p className="theft-label">View</p>
         <div className="mt-3 grid gap-2 text-sm">
-          <button className="border border-foreground bg-secondary px-3 py-2 text-left">Strategy Map</button>
-          <button className="border border-border px-3 py-2 text-left text-muted-foreground">Build Order</button>
+          <button className="border border-foreground bg-secondary px-4 py-2 text-left">Strategy Map</button>
+          <button className="border border-border px-4 py-2 text-left text-muted-foreground">Build Order</button>
         </div>
       </div>
       <div className="border-t border-border pt-4">
-        <p className="text-xs font-medium uppercase tracking-[0.12em] text-muted-foreground">Filters</p>
+        <p className="theft-label">Filters</p>
         <div className="mt-3 space-y-2 text-sm text-muted-foreground">
           {["All", "Idea", "Validation", "Build", "Go-to-market", "Launch", "Scale"].map((item) => (
             <div key={item} className="flex items-center gap-2">
@@ -381,7 +381,7 @@ function TechTreeFilterRail() {
         </div>
       </div>
       <div className="border-t border-border pt-4">
-        <p className="text-xs font-medium uppercase tracking-[0.12em] text-muted-foreground">Legend</p>
+        <p className="theft-label">Legend</p>
         <div className="mt-3 space-y-2 text-sm text-muted-foreground">
           <p>-- Dependency</p>
           <p>{"->"} Unlocks</p>
@@ -403,8 +403,8 @@ function TechTreeBuildOrder({
   const visibleNodes = BUILD_ORDER_COLUMNS.map((label, index) => nodes[index] ?? null);
 
   return (
-    <div className="overflow-x-auto border border-border bg-secondary p-4">
-      <div className="grid min-w-[920px] grid-cols-6 gap-3">
+    <div className="border border-border bg-secondary p-4">
+      <div className="grid gap-4 md:grid-cols-3 xl:grid-cols-6">
         {BUILD_ORDER_COLUMNS.map((column, index) => {
           const node = visibleNodes[index];
           const title = node?.goal.title ?? FALLBACK_BUILD_NODES[index]!;
@@ -413,18 +413,18 @@ function TechTreeBuildOrder({
           const locked = !node && index > 2;
           return (
             <div key={column} className="min-w-0">
-              <div className="border border-border bg-card px-3 py-3 text-center">
+              <div className="border border-border bg-card px-4 py-4 text-center">
                 <p className="text-sm font-medium">{column}</p>
                 <p className="mt-1 text-xs text-muted-foreground">{index + 1}</p>
               </div>
-              <div className="mt-4 space-y-3">
+              <div className="mt-4 space-y-4">
                 {[0, 1, 2].map((row) => {
                   const rowTitle = row === 0 ? title : row === 1 ? `${column} support task` : `${column} evidence gate`;
                   return (
                     <div
                       key={`${column}:${row}`}
                       className={cn(
-                        "min-h-20 border bg-card p-3 text-sm",
+                        "min-h-20 border bg-card p-4 text-sm",
                         active && row === 0 ? "border-foreground" : "border-border",
                         locked && "opacity-50",
                       )}
@@ -441,14 +441,14 @@ function TechTreeBuildOrder({
           );
         })}
       </div>
-      <div className="mt-5 grid min-w-[920px] grid-cols-6 gap-3 border border-dashed border-border p-3">
+      <div className="mt-5 grid gap-4 border border-dashed border-border p-4 md:grid-cols-3 xl:grid-cols-6">
         {BUILD_ORDER_COLUMNS.map((column, index) => (
-          <div key={`${column}:artifact`} className="border border-border bg-card px-3 py-3 text-xs text-muted-foreground">
+          <div key={`${column}:artifact`} className="border border-border bg-card px-4 py-4 text-xs text-muted-foreground">
             {index === 0 ? "Customer interview notes" : index === 1 ? "Offer summary doc" : `${column} artifact`}
           </div>
         ))}
       </div>
-      <p className="mt-3 text-center text-xs font-medium uppercase tracking-[0.12em] text-muted-foreground">
+      <p className="theft-label mt-3 text-center">
         Evidence & artifacts (Library)
       </p>
     </div>
@@ -465,7 +465,7 @@ function TechTreeInspector({
   return (
     <aside className="min-w-0 border-t border-border pt-4 xl:border-l xl:border-t-0 xl:pl-4 xl:pt-0">
       <div className="border border-border bg-card p-4">
-        <p className="text-xs font-medium uppercase tracking-[0.12em] text-muted-foreground">Selected node</p>
+        <p className="theft-label">Selected node</p>
         {node ? (
           <div className="mt-4 space-y-4">
             <div>
@@ -498,7 +498,7 @@ function TechTreeInspector({
 function InspectorSection({ title, rows }: { title: string; rows: string[] }) {
   return (
     <div className="border-t border-border pt-3">
-      <p className="text-xs font-medium uppercase tracking-[0.12em] text-muted-foreground">{title}</p>
+      <p className="theft-label">{title}</p>
       <ul className="mt-2 space-y-1.5 text-sm leading-5 text-muted-foreground">
         {rows.map((row) => (
           <li key={row}>{row}</li>
@@ -516,7 +516,7 @@ function CircleMarker({ complete = false }: { complete?: boolean }) {
 
 function RoadmapRule({ icon: Icon, label, value }: { icon: typeof Users; label: string; value: string }) {
   return (
-    <div className="flex items-center justify-between gap-3 border border-border bg-background/50 px-2 py-2">
+    <div className="flex items-center justify-between gap-4 border border-border bg-background/50 px-2 py-2">
       <span className="flex items-center gap-2 text-foreground">
         <Icon className="h-3.5 w-3.5 text-muted-foreground" />
         {label}
@@ -531,14 +531,14 @@ function TechTreeNodeCard({ node }: { node: TechTreeNodeView }) {
     <Link
       to={`/goals/${node.goal.id}`}
       className={cn(
-        "group grid min-w-0 grid-cols-[minmax(0,1fr)] gap-3 border border-border bg-card p-3 text-sm text-inherit no-underline transition-colors hover:border-primary/70 hover:bg-accent/40 md:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)_minmax(0,1fr)]",
+        "theft-tech-tree-node-card group grid min-w-0 gap-4 border border-border bg-card p-4 text-sm text-inherit no-underline transition-colors hover:border-primary/70 hover:bg-accent/40",
         node.depth > 0 && "ml-4 border-l-4 border-l-primary/30",
       )}
     >
       <div className="min-w-0">
         <div className="flex items-center gap-2">
           <Layers3 className="h-4 w-4 text-primary" />
-          <span className="text-xs uppercase tracking-[0.14em] text-muted-foreground">{node.goal.level}</span>
+          <span className="theft-label-compact">{node.goal.level}</span>
           <StatusBadge status={node.goal.status} />
         </div>
         <div className="mt-2 truncate text-base font-medium">{node.goal.title}</div>
@@ -548,9 +548,9 @@ function TechTreeNodeCard({ node }: { node: TechTreeNodeView }) {
         <MetaLine label="Owner" value={node.owner} />
         <MetaLine label="Evidence" value={node.evidence} />
       </div>
-      <div className="flex min-w-0 items-center justify-between gap-3 border-l border-border pl-3">
+      <div className="flex min-w-0 items-center justify-between gap-4 border-l border-border pl-4">
         <div className="min-w-0">
-          <div className="text-[11px] uppercase tracking-[0.12em] text-muted-foreground">Next action</div>
+          <div className="theft-label-compact">Next action</div>
           <div className="mt-1 truncate text-sm">{node.nextAction}</div>
         </div>
         <ArrowRight className="h-4 w-4 shrink-0 text-muted-foreground transition-transform group-hover:translate-x-0.5 group-hover:text-primary" />
@@ -561,7 +561,7 @@ function TechTreeNodeCard({ node }: { node: TechTreeNodeView }) {
 
 function MetaLine({ label, value }: { label: string; value: string }) {
   return (
-    <div className="flex min-w-0 items-center justify-between gap-3">
+    <div className="flex min-w-0 items-center justify-between gap-4">
       <span className="text-muted-foreground">{label}</span>
       <span className="truncate text-right text-foreground">{value}</span>
     </div>
