@@ -77,7 +77,7 @@ export function Sidebar() {
 
   return (
     <aside className="w-full h-full min-h-0 border-r border-sidebar-border bg-sidebar text-sidebar-foreground flex flex-col items-center">
-      <div className="flex h-[4.5rem] shrink-0 flex-col items-center justify-center gap-1.5 border-b border-sidebar-border px-2">
+      <div className="flex h-18 shrink-0 flex-col items-center justify-center gap-1.5 border-b border-sidebar-border px-2">
         <SidebarCompanyMenu compact />
         <Button
           variant="ghost"
@@ -100,14 +100,16 @@ export function Sidebar() {
         </div>
 
         <div className="flex flex-col items-center gap-1">
-          <button
+          <Button
             onClick={() => openNewIssue()}
             title="New task"
-            className="flex h-10 w-10 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+            variant="ghost"
+            size="icon"
+            className="rounded-full text-muted-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
           >
             <SquarePen className="h-5 w-5 shrink-0" />
             <span className="sr-only">New task</span>
-          </button>
+          </Button>
           <SidebarNavItem to="/inbox" label="Attention" icon={Inbox} />
           {showWorkspacesLink ? (
             <SidebarNavItem to="/workspaces" label="Workspaces" icon={GitBranch} />
@@ -117,7 +119,7 @@ export function Sidebar() {
             slotTypes={["sidebar"]}
             context={pluginContext}
             className="flex flex-col items-center gap-1"
-            itemClassName="text-[13px] font-medium"
+            itemClassName="text-sm font-medium"
             missingBehavior="placeholder"
           />
           <PluginSlotOutlet

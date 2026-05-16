@@ -9,6 +9,7 @@ import {
 } from "lucide-react";
 import { useCompany } from "../context/CompanyContext";
 import { useDialogActions } from "../context/DialogContext";
+import { Button } from "@/components/ui/button";
 import { SIDEBAR_SCROLL_RESET_STATE } from "../lib/navigation-scroll";
 import { cn } from "../lib/utils";
 import { useInboxBadge } from "../hooks/useInboxBadge";
@@ -71,20 +72,21 @@ export function MobileBottomNav({ visible }: MobileBottomNavProps) {
             const Icon = item.icon;
             const active = /\/issues\/new(?:\/|$)/.test(location.pathname);
             return (
-              <button
+              <Button
                 key={item.label}
                 type="button"
+                variant="ghost"
                 onClick={item.onClick}
                 className={cn(
-                  "relative flex min-w-0 flex-col items-center justify-center gap-1 rounded-md text-[10px] font-medium transition-colors",
+                  "relative h-full min-w-0 flex-col gap-1 rounded-md px-2 text-micro font-medium",
                   active
                     ? "text-foreground"
                     : "text-muted-foreground hover:text-foreground",
                 )}
               >
-                <Icon className="h-[18px] w-[18px]" />
+                <Icon className="size-5" />
                 <span className="truncate">{item.label}</span>
-              </button>
+              </Button>
             );
           }
 
@@ -96,7 +98,7 @@ export function MobileBottomNav({ visible }: MobileBottomNavProps) {
               state={SIDEBAR_SCROLL_RESET_STATE}
               className={({ isActive }) =>
                 cn(
-                  "relative flex min-w-0 flex-col items-center justify-center gap-1 rounded-md text-[10px] font-medium transition-colors",
+                  "relative flex min-w-0 flex-col items-center justify-center gap-1 rounded-md text-micro font-medium transition-colors",
                   isActive
                     ? "text-foreground"
                     : "text-muted-foreground hover:text-foreground",
@@ -106,9 +108,9 @@ export function MobileBottomNav({ visible }: MobileBottomNavProps) {
               {({ isActive }) => (
                 <>
                   <span className="relative">
-                    <Icon className={cn("h-[18px] w-[18px]", isActive && "stroke-[2.3]")} />
+                    <Icon className={cn("size-5", isActive && "stroke-[2.3]")} />
                     {item.badge != null && item.badge > 0 && (
-                      <span className="absolute -right-2 -top-2 rounded-full bg-primary px-1.5 py-0.5 text-[10px] leading-none text-primary-foreground">
+                      <span className="absolute -right-2 -top-2 rounded-full bg-primary px-1.5 py-0.5 text-micro leading-none text-primary-foreground">
                         {item.badge > 99 ? "99+" : item.badge}
                       </span>
                     )}
