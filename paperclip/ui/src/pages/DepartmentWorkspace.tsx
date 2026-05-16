@@ -127,15 +127,15 @@ export function DepartmentWorkspace() {
         <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
           <div>
             <div className="flex flex-wrap items-center gap-2">
-              <p className="inline-flex items-center gap-2 rounded-full border border-border bg-muted/25 px-3 py-1 text-xs font-medium uppercase tracking-[0.08em] text-muted-foreground">
+              <p className="theft-chip theft-chip-muted theft-label-compact">
                 <Sparkles className="h-3.5 w-3.5" />
                 Execution lane
               </p>
-              <Badge variant={department.activeCount > 0 ? "default" : "outline"} className="rounded-md">
+              <Badge variant={department.activeCount > 0 ? "default" : "outline"}>
                 {department.activeCount} open
               </Badge>
               {department.blockedCount > 0 ? (
-                <Badge variant="destructive" className="rounded-md">{department.blockedCount} blocked</Badge>
+                <Badge variant="destructive">{department.blockedCount} blocked</Badge>
               ) : null}
             </div>
             <h1 className="theft-heading mt-2 text-2xl md:text-3xl">{department.title}</h1>
@@ -143,7 +143,7 @@ export function DepartmentWorkspace() {
               Department-owned work lane for mission, current contribution, blockers, review-ready outputs, and Library evidence.
             </p>
           </div>
-          <div className="grid min-w-[260px] grid-cols-3 gap-2 text-center">
+          <div className="theft-department-stat-grid grid grid-cols-3 gap-2 text-center">
             <DepartmentStat label="review" value={department.reviewCount} />
             <DepartmentStat label="done" value={department.doneCount} />
             <DepartmentStat label="Library" value={libraryDocuments.length} />
@@ -156,7 +156,7 @@ export function DepartmentWorkspace() {
         </div>
       </section>
 
-      <section className="grid min-w-0 grid-cols-[minmax(0,1fr)] gap-5 xl:grid-cols-[minmax(0,1fr)_360px]">
+      <section className="theft-department-workspace-grid grid min-w-0 gap-5">
         <div className="min-w-0 space-y-5">
           <WorkPanel
             title="Now Moving"
@@ -192,7 +192,7 @@ export function DepartmentWorkspace() {
         </div>
 
         <aside className="min-w-0 space-y-5">
-          <div className="border border-border bg-card p-4 shadow-sm">
+          <div className="theft-surface p-4">
             <div className="flex items-start gap-3">
               <div className="mt-0.5 rounded-full border border-border bg-background p-2 text-foreground">
                 <Bot className="h-4 w-4" />
@@ -203,7 +203,7 @@ export function DepartmentWorkspace() {
               </div>
             </div>
             <div className="mt-4 border border-border bg-background p-3">
-              <p className="text-xs font-medium uppercase tracking-[0.08em] text-muted-foreground">Recommended action</p>
+              <p className="theft-label-compact">Recommended action</p>
               <p className="mt-2 text-sm leading-6 text-foreground">
                 {department.nextIssue?.title ?? `Route the next ${department.title} task when the company objective is ready.`}
               </p>
@@ -278,7 +278,7 @@ export function DepartmentWorkspace() {
             </div>
             <div className="mt-4 flex flex-wrap gap-2">
               {selectedSpec.desiredSkills.map((skill) => (
-                <Badge key={skill} variant="outline" className="rounded-md capitalize">
+                <Badge key={skill} variant="outline" className="capitalize">
                   {skillLabel(skill)}
                 </Badge>
               ))}
@@ -293,7 +293,7 @@ export function DepartmentWorkspace() {
 function DepartmentFocusCard({ label, value }: { label: string; value: string }) {
   return (
     <div className="min-w-0 border border-border bg-card/70 p-3">
-      <p className="text-xs font-medium uppercase tracking-[0.12em] text-muted-foreground">{label}</p>
+      <p className="theft-label-compact">{label}</p>
       <p className="mt-2 break-words text-sm leading-6 text-foreground [overflow-wrap:anywhere]">{value}</p>
     </div>
   );
@@ -344,7 +344,7 @@ function WorkPanel({
             <p className="mt-1 text-sm text-muted-foreground">{description}</p>
           </div>
         </div>
-        <Badge variant="outline" className="rounded-md">{issues.length}</Badge>
+        <Badge variant="outline">{issues.length}</Badge>
       </div>
       <div className="mt-4 divide-y divide-border border border-border">
         {issues.length === 0 ? (

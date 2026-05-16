@@ -333,7 +333,7 @@ function MissionLauncher() {
 
             <div className="mt-8">
               <div className="flex items-center justify-between gap-4">
-                <p className="text-sm font-medium uppercase tracking-[0.12em] text-muted-foreground">
+                <p className="theft-label">
                   Recent companies
                 </p>
                 {recentCompanies.length > 0 ? (

@@ -6,6 +6,26 @@
 
 THEFT should read as a clean, white, Sana-style operating workbench: low chrome, quiet hierarchy, black/gray typography, and one strong lime signal color for primary action/state. The 099 and command-center renders are structure/density references, not permission to make the active app dark, neon, or dashboard-heavy.
 
+## Single Source Of Truth
+
+THEFT has one design-system source of truth:
+
+```text
+BUILD-FROM-THIS/DESIGN-SYSTEM.md
+        defines the product design contract
+paperclip/ui/src/index.css
+        implements the contract as shadcn/Tailwind v4 CSS variables
+```
+
+Everything else is a derived view, not a competing source:
+
+- **DESIGN.md**: human-readable contract and usage rules.
+- **Tailwind v4**: consumes tokens through `@theme inline`.
+- **CSS Variables**: runtime implementation of the same tokens.
+- **Design Tokens**: machine-readable inventory if/when generated, never a fork.
+
+If those views disagree, `DESIGN-SYSTEM.md` and the `:root` token block in `index.css` win. Do not add a second theme file, duplicate palette, duplicate radius scale, or route-local visual system.
+
 ## Token Source
 
 The implementation source is `paperclip/ui/src/index.css`.
@@ -50,11 +70,24 @@ Use the `300 / 150 / 50` guardrail for maintainability:
 
 Existing Paperclip runtime files exceed this and can be paid down incrementally. New THEFT UX work should not deepen that debt.
 
+## Atomic Design Taxonomy
+
+Use Brad Frost's Atomic Design model to inventory and govern the UI:
+
+- **Atoms**: tokens, typography, icons, primitive controls, inputs, labels, badges.
+- **Molecules**: stat tile, metadata row, issue row, search/filter row, evidence chip.
+- **Organisms**: app rail, header, Operator dock, Library inspector, department work panel.
+- **Templates**: launcher, onboarding split canvas/form, workbench, detail/review, settings/admin.
+- **Pages**: real routes. Pages compose templates and organisms; they do not create a new design language.
+
+The reusable audit workflow lives in `.agents/skills/atomic-design-system/SKILL.md`.
+
 ## Verification
 
 Before committing frontend design work:
 
 ```bash
+node .agents/skills/atomic-design-system/scripts/audit-design-system.mjs paperclip/ui/src
 pnpm -C paperclip --filter @paperclipai/ui typecheck
 node paperclip/scripts/smoke/theft-mvp-route-smoke.mjs --screenshot-dir /private/tmp/theft-ui-check
 node paperclip/scripts/smoke/theft-mvp-route-smoke.mjs --mobile --screenshot-dir /private/tmp/theft-ui-check-mobile

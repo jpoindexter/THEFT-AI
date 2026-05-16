@@ -299,11 +299,11 @@ function TasksMissionHeader({
 
   return (
     <section className="theft-panel overflow-hidden p-0">
-      <div className="grid gap-0 lg:grid-cols-[minmax(0,1fr)_360px]">
+      <div className="theft-tasks-mission-grid grid gap-0">
         <div className="space-y-5 p-5 md:p-7">
           <div className="flex flex-col gap-5 xl:flex-row xl:items-start xl:justify-between">
             <div className="max-w-2xl space-y-3">
-              <div className="inline-flex items-center gap-2 rounded-full border border-border/80 bg-muted/25 px-3 py-1 text-[11px] font-medium uppercase tracking-[0.08em] text-muted-foreground">
+              <div className="theft-chip theft-chip-muted theft-label-compact">
                 <Sparkles className="h-3.5 w-3.5" />
                 Needs Action
               </div>
@@ -314,7 +314,7 @@ function TasksMissionHeader({
                 </p>
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-2 sm:grid-cols-4 xl:w-[520px]">
+            <div className="theft-tasks-stat-grid grid grid-cols-2 gap-2 sm:grid-cols-4">
               <TaskBucketStat icon={AlertTriangle} label="Needs action" value={buckets.needsAction.length} tone="attention" />
               <TaskBucketStat icon={Clock3} label="Ongoing" value={buckets.ongoing.length} />
               <TaskBucketStat icon={ListChecks} label="Todo" value={buckets.todo.length} />
@@ -322,11 +322,11 @@ function TasksMissionHeader({
             </div>
           </div>
 
-          <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_300px]">
+          <div className="theft-tasks-next-grid grid gap-4">
             <div className="min-w-0 border border-border bg-card p-4 shadow-sm">
               <div className="mb-4 flex flex-wrap items-start justify-between gap-3">
                 <div>
-                  <p className="text-xs font-medium uppercase tracking-[0.08em] text-muted-foreground">Recommended next move</p>
+                  <p className="theft-label-compact">Recommended next move</p>
                   <p className="mt-1 text-sm text-muted-foreground">
                     {isLoading ? "Loading active company tasks..." : nextIssue ? actionReason : "No active task pressure right now."}
                   </p>
@@ -374,7 +374,7 @@ function TasksMissionHeader({
 
             <div className="border border-border bg-muted/20 p-4">
               <div className="flex items-center justify-between gap-3">
-                <p className="text-xs font-medium uppercase tracking-[0.08em] text-muted-foreground">Up next</p>
+                <p className="theft-label-compact">Up next</p>
                 <span className="text-xs text-muted-foreground">{secondaryIssues.length} queued</span>
               </div>
               <div className="mt-3 space-y-2">

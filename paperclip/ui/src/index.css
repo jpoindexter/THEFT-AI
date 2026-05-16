@@ -48,7 +48,7 @@
 
 :root {
   color-scheme: light;
-  --radius: 8px;
+  --radius: 0.3rem;
 
   /* THEFT/Sana design tokens. New product UI should consume these aliases,
      not one-off colors, spacing, radius, or layout constants. */
@@ -82,9 +82,9 @@
   --theft-space-6: calc(var(--theft-space-unit) * 6);
   --theft-space-7: calc(var(--theft-space-unit) * 7);
   --theft-space-8: calc(var(--theft-space-unit) * 8);
-  --theft-radius-small: 6px;
-  --theft-radius-control: 8px;
-  --theft-radius-surface: 8px;
+  --theft-radius-small: calc(var(--radius) - 1px);
+  --theft-radius-control: var(--radius);
+  --theft-radius-surface: calc(var(--radius) + 1px);
   --theft-radius-pill: 999px;
   --theft-label-tracking: 0.12em;
   --theft-header-height: var(--theft-space-7);
@@ -133,7 +133,23 @@
   --theft-tech-tree-filter-width: calc(var(--theft-space-1) * 21);
   --theft-tech-tree-inspector-width: calc(var(--theft-space-1) * 40);
   --theft-tech-tree-stat-min-width: calc(var(--theft-space-1) * 32);
+  --theft-dashboard-side-width: calc(var(--theft-space-1) * 48.75);
+  --theft-dashboard-operator-width: calc(var(--theft-space-1) * 52.5);
+  --theft-fresh-company-action-width: calc(var(--theft-space-1) * 35);
+  --theft-department-stat-width: calc(var(--theft-space-1) * 35);
+  --theft-department-side-width: calc(var(--theft-space-1) * 45);
+  --theft-tasks-side-width: calc(var(--theft-space-1) * 45);
+  --theft-tasks-stat-width: calc(var(--theft-space-1) * 65);
+  --theft-workspace-min-height: calc(var(--theft-space-1) * 82);
+  --theft-library-workspace-height: calc(100vh - calc(var(--theft-space-1) * 28));
+  --theft-library-workspace-min-height: calc(var(--theft-space-1) * 78);
+  --theft-library-list-min-width: calc(var(--theft-space-1) * 45);
+  --theft-operator-dock-width: min(
+    calc(var(--theft-space-1) * 122),
+    calc(100vw - calc(var(--theft-space-1) * 18))
+  );
   --theft-shadow-soft: 0 var(--theft-space-1) var(--theft-space-3) rgb(20 24 20 / 0.06);
+  --theft-shadow-dock: 0 calc(var(--theft-space-1) * 2) calc(var(--theft-space-1) * 7) rgb(20 24 20 / 0.12);
   --font-sana-serif: "Sana Serif", "Playfair Display", ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
   --font-sana-sans: "Sana Sans", "Avenir Next", Inter, "Helvetica Neue", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   --font-nb-akademie: var(--font-sana-sans);
@@ -324,6 +340,45 @@
   background: color-mix(in oklab, var(--card) 96%, transparent);
   border-radius: var(--theft-radius-surface);
   box-shadow: var(--theft-shadow-soft);
+}
+
+.theft-surface {
+  border: 1px solid var(--border);
+  background: var(--card);
+  border-radius: var(--theft-radius-surface);
+  box-shadow: var(--theft-shadow-soft);
+}
+
+.theft-surface-muted {
+  border: 1px solid var(--border);
+  background: color-mix(in oklab, var(--secondary) 68%, transparent);
+  border-radius: var(--theft-radius-surface);
+}
+
+.theft-control-surface {
+  border: 1px solid var(--border);
+  background: var(--background);
+  border-radius: var(--theft-radius-control);
+}
+
+.theft-chip {
+  align-items: center;
+  border: 1px solid var(--border);
+  border-radius: var(--theft-radius-pill);
+  display: inline-flex;
+  gap: calc(var(--theft-space-1) * 0.75);
+  min-width: 0;
+  padding: calc(var(--theft-space-1) * 0.5) calc(var(--theft-space-1) * 1.5);
+}
+
+.theft-chip-muted {
+  background: color-mix(in oklab, var(--muted) 45%, transparent);
+  color: var(--muted-foreground);
+}
+
+.theft-chip-important {
+  background: color-mix(in oklab, var(--theft-amber) 16%, var(--card));
+  color: color-mix(in oklab, var(--theft-amber) 62%, var(--foreground));
 }
 
 .theft-elevation-soft {
@@ -529,6 +584,50 @@
   grid-template-columns: minmax(0, 1fr);
 }
 
+.theft-department-stat-grid {
+  min-width: min(100%, var(--theft-department-stat-width));
+}
+
+.theft-tasks-mission-grid {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.theft-tasks-next-grid {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.theft-library-workspace {
+  height: var(--theft-library-workspace-height);
+  min-height: var(--theft-library-workspace-min-height);
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.theft-operator-dock {
+  background: color-mix(in oklab, var(--card) 94%, transparent);
+  border: 1px solid var(--border);
+  border-radius: var(--theft-radius-surface);
+  box-shadow: var(--theft-shadow-dock);
+}
+
+.theft-dashboard-shell-grid,
+.theft-dashboard-content-grid,
+.theft-fresh-company-grid,
+.theft-department-workspace-grid {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.theft-objective-card {
+  background: var(--card);
+  border-radius: var(--theft-radius-surface);
+  box-shadow: var(--theft-shadow-soft);
+}
+
+.theft-next-move-card {
+  background: var(--primary);
+  border-radius: var(--theft-radius-surface);
+  box-shadow: var(--theft-shadow-dock);
+}
+
 @media (min-width: 768px) {
   .theft-onboarding-shell {
     grid-template-columns: var(--theft-rail-width) minmax(0, 1fr);
@@ -559,6 +658,24 @@
   .theft-tech-tree-node-card {
     grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr) minmax(0, 1fr);
   }
+
+  .theft-tasks-next-grid {
+    grid-template-columns: minmax(0, 1fr) calc(var(--theft-space-1) * 37.5);
+  }
+
+  .theft-fresh-company-grid {
+    grid-template-columns: minmax(0, 1fr) var(--theft-fresh-company-action-width);
+  }
+}
+
+@media (min-width: 1024px) {
+  .theft-library-workspace {
+    grid-template-columns: minmax(var(--theft-library-list-min-width), 0.9fr) minmax(0, 1.1fr);
+  }
+
+  .theft-tasks-mission-grid {
+    grid-template-columns: minmax(0, 1fr) var(--theft-tasks-side-width);
+  }
 }
 
 @media (min-width: 1280px) {
@@ -587,6 +704,26 @@
       var(--theft-tech-tree-filter-width)
       minmax(0, 1fr)
       var(--theft-tech-tree-inspector-width);
+  }
+
+  .theft-tasks-stat-grid {
+    width: var(--theft-tasks-stat-width);
+  }
+
+  .theft-operator-dock {
+    width: var(--theft-operator-dock-width);
+  }
+
+  .theft-dashboard-shell-grid[data-operator-open="true"] {
+    grid-template-columns: minmax(0, 1fr) var(--theft-dashboard-operator-width);
+  }
+
+  .theft-dashboard-content-grid[data-operator-open="false"] {
+    grid-template-columns: minmax(0, 1fr) var(--theft-dashboard-side-width);
+  }
+
+  .theft-department-workspace-grid {
+    grid-template-columns: minmax(0, 1fr) var(--theft-department-side-width);
   }
 }
 

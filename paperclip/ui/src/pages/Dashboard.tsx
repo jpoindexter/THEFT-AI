@@ -245,7 +245,7 @@ export function Dashboard() {
 
   return (
     <div className="mx-auto max-w-[1760px] min-w-0 space-y-6 overflow-x-hidden px-1 pb-28 text-foreground md:px-3">
-      <section className={cn("grid min-w-0 gap-6", operatorOpen && "xl:grid-cols-[minmax(0,1fr)_420px]")}>
+      <section className="theft-dashboard-shell-grid grid min-w-0 gap-6" data-operator-open={String(operatorOpen)}>
         <div className="min-w-0 space-y-6">
           <ObjectiveHeader
             companyName={selectedCompany.name}
@@ -261,10 +261,7 @@ export function Dashboard() {
             <FreshCompanyPanel onAskOperator={() => setOperatorOpen(true)} />
           ) : null}
 
-          <div className={cn(
-            "grid min-w-0 gap-6",
-            operatorOpen ? "grid-cols-[minmax(0,1fr)]" : "xl:grid-cols-[minmax(0,1fr)_390px]",
-          )}>
+          <div className="theft-dashboard-content-grid grid min-w-0 gap-6" data-operator-open={String(operatorOpen)}>
             <StrategyMapPanel
               objective={objectiveTitle}
               goals={roadmapGoals}
@@ -377,7 +374,7 @@ function ObjectiveHeader({
             <p className="mt-2 max-w-3xl text-sm leading-6 text-muted-foreground">{detail}</p>
           </div>
         </div>
-        <div className="grid w-full min-w-0 grid-cols-3 gap-2 sm:min-w-[280px] lg:w-auto">
+        <div className="theft-department-stat-grid grid w-full min-w-0 grid-cols-3 gap-2 lg:w-auto">
           <MissionStat value={activeDepartments} label="departments" />
           <MissionStat value={reviewCount} label="review" />
           <MissionStat value={outcomeCount} label="outcomes" />
@@ -398,9 +395,9 @@ function MissionStat({ value, label }: { value: number; label: string }) {
 
 function FreshCompanyPanel({ onAskOperator }: { onAskOperator: () => void }) {
   return (
-    <Panel className="grid gap-5 p-5 md:grid-cols-[minmax(0,1fr)_280px] md:p-6">
+    <Panel className="theft-fresh-company-grid grid gap-5 p-5 md:p-6">
       <div className="min-w-0">
-        <p className="text-xs font-medium uppercase tracking-[0.08em] text-muted-foreground">Fresh company</p>
+        <p className="theft-label-compact">Fresh company</p>
         <h2 className="mt-2 text-xl font-semibold text-foreground">No execution history yet</h2>
         <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">
           Start by asking Operator for the first concrete task. THEFT will route it to a department, capture the output, and save the result into Library.
@@ -449,7 +446,7 @@ function StrategyMapPanel({
       </div>
 
       <div className="min-w-0 max-w-full overflow-hidden bg-secondary p-4 md:p-5">
-        <div className="mx-auto max-w-2xl min-w-0 bg-card px-6 py-5 text-center shadow-[0_16px_48px_rgb(20_24_20/0.05)]">
+        <div className="theft-objective-card mx-auto max-w-2xl min-w-0 px-6 py-5 text-center">
           <p className="text-sm text-muted-foreground">Current objective</p>
           <p className="mt-2 text-lg font-semibold text-foreground">{objective}</p>
         </div>
@@ -704,7 +701,7 @@ function OutcomesPanel({
 
 function NextMovePanel({ bottleneck }: { bottleneck: CompanyBottleneck }) {
   const content = (
-    <div className="bg-primary p-6 text-primary-foreground shadow-[0_18px_54px_rgb(20_24_20/0.12)]">
+    <div className="theft-next-move-card p-6 text-primary-foreground">
       <p className="text-sm text-primary-foreground/65">Next move recommended</p>
       <div className="mt-3 flex items-start gap-3">
         <CircleDot className="mt-0.5 h-5 w-5 shrink-0 text-primary-foreground" />
@@ -780,7 +777,7 @@ function OperatorDrawer({
     <aside className="theft-panel flex max-h-[calc(100dvh-6rem)] min-h-[min(620px,calc(100dvh-7rem))] flex-col overflow-hidden p-0">
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0 p-5 pb-3 md:p-6 md:pb-3">
-          <p className="text-xs uppercase tracking-[0.12em] text-muted-foreground">Operator</p>
+          <p className="theft-label-compact">Operator</p>
           <h2 className="mt-1 truncate text-lg font-medium">{operator?.name ?? "Operator"}</h2>
           <p className="mt-1 text-sm text-muted-foreground">Mission Control context</p>
         </div>
@@ -805,7 +802,7 @@ function OperatorDrawer({
               <span>recommended</span>
             </div>
             <div className="mt-3 border border-foreground bg-card p-3">
-              <p className="text-xs uppercase tracking-[0.12em] text-muted-foreground">Next move</p>
+              <p className="theft-label-compact">Next move</p>
               <p className="mt-2 text-base font-medium">{nextMove.label}</p>
               <p className="mt-2 text-xs leading-5 text-muted-foreground">
                 {nextMove.tone === "clear" ? "Ready to advance." : "High leverage based on current constraints."}
@@ -813,7 +810,7 @@ function OperatorDrawer({
             </div>
 
             <div className="mt-4">
-              <p className="text-xs font-medium uppercase tracking-[0.12em] text-muted-foreground">Rationale</p>
+              <p className="theft-label-compact">Rationale</p>
               <ul className="mt-2 space-y-1.5 text-sm leading-5 text-muted-foreground">
                 <li>Locks the current bottleneck into one concrete action.</li>
                 <li>Uses latest execution state and Library evidence.</li>
@@ -828,7 +825,7 @@ function OperatorDrawer({
             </div>
 
             <div className="mt-4">
-              <p className="text-xs font-medium uppercase tracking-[0.12em] text-muted-foreground">Tradeoffs</p>
+              <p className="theft-label-compact">Tradeoffs</p>
               <div className="mt-2 grid gap-2 text-xs text-muted-foreground">
                 <div className="border border-border p-2">
                   <span className="font-medium text-foreground">Upside:</span> moves the company toward a durable outcome.
@@ -841,7 +838,7 @@ function OperatorDrawer({
           </div>
 
           <div className="border border-border p-4">
-            <p className="text-xs font-medium uppercase tracking-[0.12em] text-muted-foreground">Proposed tasks</p>
+            <p className="theft-label-compact">Proposed tasks</p>
             <div className="mt-3 space-y-2">
               {proposedTasks.map((task) => (
                 <div key={task.title} className="border border-border bg-secondary p-3">
@@ -855,7 +852,7 @@ function OperatorDrawer({
           </div>
 
           <div>
-            <p className="text-xs uppercase tracking-[0.12em] text-muted-foreground">Route to department</p>
+            <p className="theft-label-compact">Route to department</p>
             <div className="mt-2 grid grid-cols-2 gap-2">
               {departments.map((department) => (
                 <button
@@ -928,7 +925,7 @@ function OperatorDock({
   if (open) return null;
 
   return (
-    <div className="fixed bottom-4 left-4 right-4 z-30 flex items-center gap-2 border border-border bg-white/94 p-2 shadow-[0_18px_54px_rgb(20_24_20/0.12)] backdrop-blur md:bottom-6 md:left-1/2 md:right-auto md:w-[min(980px,calc(100vw-9rem))] md:-translate-x-1/2">
+    <div className="theft-operator-dock fixed bottom-4 left-4 right-4 z-30 flex items-center gap-2 p-2 backdrop-blur md:bottom-6 md:left-1/2 md:right-auto md:-translate-x-1/2">
       <button
         type="button"
         onClick={onToggle}
@@ -937,7 +934,7 @@ function OperatorDock({
       >
         <Bot className="h-5 w-5" />
         <span>
-          <span className="block text-[11px] uppercase tracking-[0.12em] text-muted-foreground">Operator</span>
+          <span className="theft-label-compact block">Operator</span>
           <span className="block text-xs">Collapsed</span>
         </span>
       </button>
