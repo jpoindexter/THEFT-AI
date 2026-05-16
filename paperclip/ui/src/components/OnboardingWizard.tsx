@@ -18,6 +18,7 @@ import {
   PopoverTrigger
 } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
+import { TheftSplitCanvasFormTemplate } from "@/components/theft/templates/TheftSplitCanvasFormTemplate";
 import { cn } from "../lib/utils";
 import {
   extractModelName,
@@ -905,17 +906,20 @@ export function OnboardingWizard() {
                 onLaunch={handleLaunch}
               />
             ) : (
-            <div className="theft-onboarding-body grid min-h-0 flex-1 overflow-x-hidden overflow-y-auto overscroll-contain">
-              <OnboardingCanvasPreview
-                companyName={companyName}
-                companyStage={companyStage}
-                step={step}
-                agentName={agentName}
-              />
-
-              <section className="flex min-h-full flex-col border-l border-border bg-card">
-                <div className="theft-onboarding-panel-inner mx-auto flex min-h-full w-full flex-col">
-                  <div className="mb-4 flex shrink-0 items-start justify-between gap-4">
+              <TheftSplitCanvasFormTemplate
+                className="min-h-0 flex-1"
+                header={false}
+                canvas={
+                  <OnboardingCanvasPreview
+                    companyName={companyName}
+                    companyStage={companyStage}
+                    step={step}
+                    agentName={agentName}
+                  />
+                }
+                formHeader={
+                  <div className="theft-onboarding-panel-inner mx-auto w-full space-y-4 px-0 py-0">
+                    <div className="flex shrink-0 items-start justify-between gap-4">
                     <div className="min-w-0">
                       <p className="theft-label">
                         {step === 4 ? "Plan Review" : "Onboarding"}
@@ -928,36 +932,36 @@ export function OnboardingWizard() {
                       {step} / 5
                     </span>
                   </div>
-              {/* Progress tabs */}
-              <div className="mb-4 flex shrink-0 items-center gap-0 overflow-x-auto border-b border-border">
-                {(
-                  [
-                    { step: 1 as Step, label: "Company", icon: Building2 },
-                    { step: 2 as Step, label: "Assembly", icon: Users },
-                    { step: 3 as Step, label: "Task", icon: ListTodo },
-                    { step: 4 as Step, label: "Plan", icon: Rocket },
-                    { step: 5 as Step, label: "Preview", icon: Monitor }
-                  ] as const
-                ).map(({ step: s, label, icon: Icon }) => (
-                  <button
-                    key={s}
-                    type="button"
-                    onClick={() => setStep(s)}
-                    className={cn(
-                      "flex shrink-0 items-center gap-1.5 px-3 py-2 text-xs font-medium border-b-2 -mb-px transition-colors cursor-pointer",
-                      s === step
-                        ? "border-foreground text-foreground"
-                        : "border-transparent text-muted-foreground hover:text-foreground/70 hover:border-border"
-                    )}
-                  >
-                    <Icon className="h-3.5 w-3.5" />
-                    {label}
-                  </button>
-                ))}
-              </div>
-
-              {/* Step content */}
-              <div className="flex-1 pr-1">
+                    <div className="flex shrink-0 items-center gap-0 overflow-x-auto border-b border-border">
+                      {(
+                        [
+                          { step: 1 as Step, label: "Company", icon: Building2 },
+                          { step: 2 as Step, label: "Assembly", icon: Users },
+                          { step: 3 as Step, label: "Task", icon: ListTodo },
+                          { step: 4 as Step, label: "Plan", icon: Rocket },
+                          { step: 5 as Step, label: "Preview", icon: Monitor }
+                        ] as const
+                      ).map(({ step: s, label, icon: Icon }) => (
+                        <button
+                          key={s}
+                          type="button"
+                          onClick={() => setStep(s)}
+                          className={cn(
+                            "flex shrink-0 cursor-pointer items-center gap-1.5 border-b-2 px-3 py-2 text-xs font-medium transition-colors",
+                            s === step
+                              ? "border-foreground text-foreground"
+                              : "border-transparent text-muted-foreground hover:border-border hover:text-foreground/70"
+                          )}
+                        >
+                          <Icon className="h-3.5 w-3.5" />
+                          {label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                }
+                form={
+                  <div className="theft-onboarding-panel-inner mx-auto w-full min-w-0">
               {step === 1 && (
                 <div className="space-y-4">
                   <div className="flex items-center gap-3 mb-1">
@@ -1689,10 +1693,10 @@ export function OnboardingWizard() {
                   <p className="text-xs text-destructive">{error}</p>
                 </div>
               )}
-              </div>
-
-              {/* Footer navigation */}
-              <div className="-mx-4 mt-4 flex shrink-0 items-center justify-between border-t border-border bg-card px-4 pt-3 md:-mx-5 md:px-5">
+                  </div>
+                }
+                formFooter={
+                  <div className="theft-onboarding-panel-inner mx-auto flex w-full shrink-0 items-center justify-between bg-background">
                 <div>
                   {step > 1 && step > (onboardingOptions.initialStep ?? 1) && (
                     <Button
@@ -1758,10 +1762,9 @@ export function OnboardingWizard() {
                     </Button>
                   )}
                 </div>
-              </div>
-                </div>
-              </section>
-            </div>
+                  </div>
+                }
+              />
             )}
           </div>
         </div>

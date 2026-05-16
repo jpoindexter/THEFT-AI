@@ -99,6 +99,11 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
+import { TheftChip } from "@/components/theft/atoms/TheftChip";
+import { TheftSurface } from "@/components/theft/atoms/TheftSurface";
+import { TheftSectionHeader } from "@/components/theft/molecules/TheftSectionHeader";
+import { TheftStat } from "@/components/theft/molecules/TheftStat";
+import { TheftDetailReviewTemplate } from "@/components/theft/templates/TheftDetailReviewTemplate";
 import { formatIssueActivityAction } from "@/lib/activity-format";
 import { buildIssuePropertiesPanelKey } from "../lib/issue-properties-panel-key";
 import { shouldRenderRichSubIssuesSection } from "../lib/issue-detail-subissues";
@@ -634,62 +639,60 @@ function TaskReviewSummary({
         : "Await output";
 
   return (
-    <section className="space-y-4 rounded-[10px] border border-border bg-card p-4 text-foreground md:p-5">
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-        <div>
-          <p className="text-xs uppercase tracking-normal text-muted-foreground">Task Review</p>
-          <h3 className="mt-1 text-lg font-normal">Output and decision</h3>
-          <p className="mt-1 text-xs text-muted-foreground">
-            Review the delivered work first. Runtime diagnostics stay collapsed below the decision workflow.
-          </p>
-        </div>
-        <div className={cn(
-          "rounded-[10px] border px-3 py-2 text-xs",
-          hasBlocker
-            ? "border-border bg-secondary text-foreground"
-            : "border-foreground bg-secondary text-foreground",
-        )}>
-          {taskStateLabel}
-        </div>
-      </div>
+    <TheftSurface padding="lg" className="space-y-4 text-foreground">
+      <TheftSectionHeader
+        eyebrow="Task Review"
+        title="Output and decision"
+        description="Review the delivered work first. Runtime diagnostics stay collapsed below the decision workflow."
+        actions={
+          <TheftChip tone={hasBlocker ? "warning" : "signal"}>
+            {taskStateLabel}
+          </TheftChip>
+        }
+        className="flex-col sm:flex-row"
+      />
 
-      <div className="grid gap-3 lg:grid-cols-[minmax(0,1fr)_320px]">
-        <div className="rounded-[10px] border border-border bg-background p-3">
-          <p className="text-xs uppercase tracking-normal text-muted-foreground">Output & Evidence</p>
-          <p className="mt-2 text-sm">{outputLabel}</p>
+      <div className="grid gap-3 lg:grid-cols-3">
+        <TheftSurface tone="plain" padding="md" className="space-y-3 lg:col-span-2">
+          <div>
+            <p className="theft-label-compact">Output & Evidence</p>
+            <p className="mt-2 text-sm">{outputLabel}</p>
+          </div>
           {outputTitles.length > 0 ? (
-            <div className="mt-3 space-y-2">
+            <div className="space-y-2">
               {outputTitles.slice(0, 3).map((title) => (
-                <div key={title} className="flex items-start gap-2 rounded-[10px] border border-border bg-secondary p-2 text-sm">
+                <TheftSurface key={title} tone="muted" padding="sm" className="flex items-start gap-2 text-sm">
                   <FileText className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" />
                   <span className="line-clamp-2">{title}</span>
-                </div>
+                </TheftSurface>
               ))}
             </div>
           ) : (
-            <p className="mt-3 text-xs leading-5 text-muted-foreground">
+            <p className="text-xs leading-5 text-muted-foreground">
               Saved documents and work products appear here as soon as the department publishes output.
             </p>
           )}
-          <div className="mt-3 rounded-[10px] border border-border bg-secondary p-3">
-            <p className="text-xs uppercase tracking-normal text-muted-foreground">Objective</p>
+          <TheftSurface tone="muted" padding="sm">
+            <p className="theft-label-compact">Objective</p>
             <p className="mt-2 line-clamp-4 text-xs leading-5 text-muted-foreground">
               {issue.description?.trim() || "No objective has been written for this task yet."}
             </p>
-          </div>
-        </div>
+          </TheftSurface>
+        </TheftSurface>
 
-        <div className="rounded-[10px] border border-border bg-secondary p-3">
-          <p className="text-xs uppercase tracking-normal text-muted-foreground">Decision</p>
-          <p className="mt-2 text-sm">{decisionLabel}</p>
-          <p className="mt-2 text-xs leading-5 text-muted-foreground">
-            {hasBlocker
-              ? "Unblock this task before approving output."
-              : outputCount > 0
-                ? "Approve the result, ask for revision, or complete the task."
-                : "Wait for department output or ask Operator to adjust the task."}
-          </p>
-          <div className="mt-4 grid gap-2">
+        <TheftSurface tone="muted" padding="md" className="space-y-3">
+          <div>
+            <p className="theft-label-compact">Decision</p>
+            <p className="mt-2 text-sm">{decisionLabel}</p>
+            <p className="mt-2 text-xs leading-5 text-muted-foreground">
+              {hasBlocker
+                ? "Unblock this task before approving output."
+                : outputCount > 0
+                  ? "Approve the result, ask for revision, or complete the task."
+                  : "Wait for department output or ask Operator to adjust the task."}
+            </p>
+          </div>
+          <div className="grid gap-2">
             <Button size="sm" disabled={hasBlocker || outputCount === 0}>
               <Check className="h-4 w-4" />
               Approve
@@ -703,55 +706,32 @@ function TaskReviewSummary({
               Ask Operator
             </Button>
           </div>
-        </div>
+        </TheftSurface>
       </div>
 
       <div className="grid gap-3 sm:grid-cols-3">
-        <TaskReviewCard
-          icon={UserRound}
+        <TheftStat
+          icon={<UserRound />}
           label="Owner"
           value={ownerLabel}
-          detail={childTaskCount > 0 ? `${childTaskCount} subtask${childTaskCount === 1 ? "" : "s"} in scope` : "Single task"}
+          description={childTaskCount > 0 ? `${childTaskCount} subtask${childTaskCount === 1 ? "" : "s"} in scope` : "Single task"}
         />
-        <TaskReviewCard
-          icon={AlertTriangle}
+        <TheftStat
+          icon={<AlertTriangle />}
           label="Review state"
           value={decisionCount > 0 ? `${decisionCount} pending` : "No founder decision pending"}
-          detail={`${commentCount} comment${commentCount === 1 ? "" : "s"} in the task thread`}
+          description={`${commentCount} comment${commentCount === 1 ? "" : "s"} in the task thread`}
+          tone={decisionCount > 0 ? "warning" : "default"}
         />
-        <TaskReviewCard
-          icon={ActivityIcon}
+        <TheftStat
+          icon={<ActivityIcon />}
           label="Runtime diagnostics"
           value={runLabel}
-          detail={`${formatTaskStatus(issue.status)} · ${issue.priority} priority`}
+          description={`${formatTaskStatus(issue.status)} · ${issue.priority} priority`}
+          tone={hasLiveRuns ? "signal" : "default"}
         />
       </div>
-    </section>
-  );
-}
-
-function TaskReviewCard({
-  icon: Icon,
-  label,
-  value,
-  detail,
-}: {
-  icon: typeof UserRound;
-  label: string;
-  value: string;
-  detail: string;
-}) {
-  return (
-    <div className="flex min-w-0 gap-3 rounded-[10px] border border-border bg-secondary p-3">
-      <div className="mt-0.5 rounded-[10px] border border-border bg-card p-2 text-foreground">
-        <Icon className="h-4 w-4" />
-      </div>
-      <div className="min-w-0">
-        <p className="text-xs text-muted-foreground">{label}</p>
-        <p className="mt-1 truncate text-sm font-normal">{value}</p>
-        <p className="mt-1 line-clamp-2 text-xs text-muted-foreground">{detail}</p>
-      </div>
-    </div>
+    </TheftSurface>
   );
 }
 
@@ -3248,8 +3228,9 @@ export function IssueDetail() {
   const taskReviewDecisionCount = interactions.filter((interaction) => interaction.status === "pending").length;
 
   return (
-    <div className="mx-auto w-full max-w-6xl space-y-5">
-      {/* Parent chain breadcrumb */}
+    <TheftDetailReviewTemplate className="min-h-0">
+      <div className="mx-auto w-full max-w-6xl space-y-5">
+        {/* Parent chain breadcrumb */}
       {ancestors.length > 0 && (
         <nav className="flex items-center gap-1 text-xs text-muted-foreground flex-wrap">
           {[...ancestors].reverse().map((ancestor, i) => (
@@ -4208,6 +4189,7 @@ export function IssueDetail() {
         </SheetContent>
       </Sheet>
       <ScrollToBottom />
-    </div>
+      </div>
+    </TheftDetailReviewTemplate>
   );
 }

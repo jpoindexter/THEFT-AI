@@ -1,8 +1,10 @@
 import { lazy, Suspense, type ComponentType } from "react";
-import { ArrowRight, Building2, CheckCircle2, Clock3, Database, Monitor, Plus, ShieldCheck } from "lucide-react";
+import { ArrowRight, CheckCircle2, Clock3, Database, Monitor, Plus, ShieldCheck } from "lucide-react";
 import { Navigate, Outlet, Route, Routes, useLocation, useNavigate, useParams } from "@/lib/router";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
+import { TheftChip } from "@/components/theft/atoms/TheftChip";
+import { TheftSurface } from "@/components/theft/atoms/TheftSurface";
+import { TheftLauncherTemplate } from "@/components/theft/templates/TheftLauncherTemplate";
 import { Layout } from "./components/Layout";
 import { CloudAccessGate } from "./components/CloudAccessGate";
 import { useCompany } from "./context/CompanyContext";
@@ -266,128 +268,115 @@ function MissionLauncher() {
   }
 
   return (
-    <div className="theft-launcher-shell bg-background text-foreground">
-      <div className="theft-launcher-grid">
-        <aside className="flex min-h-0 flex-col items-center justify-between border-r border-border bg-card py-6">
-          <div className="flex flex-col items-center gap-5">
-            <div className="flex size-9 items-center justify-center rounded-full bg-primary text-sm font-medium text-primary-foreground">
-              T
-            </div>
-            <div className="h-px w-8 bg-border" />
-            <div className="flex size-10 items-center justify-center rounded-full bg-secondary text-foreground">
-              <Building2 className="size-5" />
-            </div>
+    <TheftLauncherTemplate
+      title="Open Mission Control"
+      meta={
+        <div className="space-y-4">
+          <div className="mx-auto flex size-12 items-center justify-center rounded-md bg-secondary text-foreground">
+            <Monitor className="size-6" />
           </div>
-          <div className="mb-1 flex size-2 rounded-full bg-signal" aria-hidden />
-        </aside>
+          <div className="space-y-2">
+            <p className="text-sm font-medium">THEFT AI</p>
+            <p className="mx-auto max-w-xl text-base leading-7">
+              Build and operate a company from your local runtime.
+            </p>
+          </div>
+        </div>
+      }
+      actions={
+        <>
+          <Button
+            size="lg"
+            className="h-14 w-full min-w-0 justify-between gap-3 px-5 text-base font-medium"
+            onClick={() => openCompany()}
+          >
+            <span className="flex min-w-0 items-center gap-3">
+              <Monitor className="size-5" />
+              <span className="truncate">
+                {primaryCompany ? `Open ${primaryCompany.name}` : "Open local company"}
+              </span>
+            </span>
+            <ArrowRight className="size-5" />
+          </Button>
+          <Button
+            size="lg"
+            variant="outline"
+            className="h-14 w-full min-w-0 justify-between gap-3 px-5 text-base font-medium"
+            onClick={() => openOnboarding()}
+          >
+            <span className="flex min-w-0 items-center gap-3">
+              <Plus className="size-5" />
+              <span className="truncate">Start new company</span>
+            </span>
+            <ArrowRight className="size-5" />
+          </Button>
+        </>
+      }
+      footer={
+        <div className="space-y-6">
+          <div className="flex flex-wrap justify-center gap-2">
+            <RuntimeChip icon={Monitor} label="Local runtime ready" />
+            <RuntimeChip icon={Database} label="Embedded Postgres" />
+            <RuntimeChip icon={ShieldCheck} label="No cloud required" />
+          </div>
 
-        <main className="theft-launcher-main">
-          <Card className="theft-launcher-card">
-            <div className="mx-auto flex size-12 items-center justify-center rounded-md bg-secondary text-foreground">
-              <Monitor className="size-6" />
+          <section className="space-y-3">
+            <div className="flex items-center justify-between gap-4">
+              <p className="theft-label">Recent companies</p>
+              {recentCompanies.length > 0 ? (
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  className="text-muted-foreground hover:text-foreground"
+                  onClick={() => navigate("/companies")}
+                >
+                  View all
+                </Button>
+              ) : null}
             </div>
-
-            <div className="mt-7 text-center">
-              <p className="text-sm font-medium text-muted-foreground">THEFT AI</p>
-              <h1 className="mt-3 text-3xl font-medium leading-tight tracking-normal md:text-5xl">
-                Open Mission Control
-              </h1>
-              <p className="mx-auto mt-4 max-w-xl text-base leading-7 text-muted-foreground">
-                Build and operate a company from your local runtime.
-              </p>
-            </div>
-
-            <div className="mt-8 space-y-3">
-              <Button
-                size="lg"
-                className="h-14 w-full min-w-0 justify-between gap-3 bg-primary px-5 text-base font-medium text-primary-foreground"
-                onClick={() => openCompany()}
-              >
-                <span className="flex min-w-0 items-center gap-3">
-                  <Monitor className="size-5" />
-                  <span className="truncate">
-                    {primaryCompany ? `Open ${primaryCompany.name}` : "Open local company"}
-                  </span>
-                </span>
-                <ArrowRight className="size-5" />
-              </Button>
-              <Button
-                size="lg"
-                variant="outline"
-                className="h-14 w-full min-w-0 justify-between gap-3 px-5 text-base font-medium"
-                onClick={() => openOnboarding()}
-              >
-                <span className="flex min-w-0 items-center gap-3">
-                  <Plus className="size-5" />
-                  <span className="truncate">Start new company</span>
-                </span>
-                <ArrowRight className="size-5" />
-              </Button>
-            </div>
-
-            <div className="mt-5 grid divide-y divide-border border border-border text-sm text-muted-foreground md:grid-cols-3 md:divide-x md:divide-y-0">
-              <RuntimePill icon={Monitor} label="Local runtime ready" />
-              <RuntimePill icon={Database} label="Embedded Postgres" />
-              <RuntimePill icon={ShieldCheck} label="No cloud required" />
-            </div>
-
-            <div className="mt-8">
-              <div className="flex items-center justify-between gap-4">
-                <p className="theft-label">
-                  Recent companies
-                </p>
-                {recentCompanies.length > 0 ? (
-                  <button
+            <TheftSurface className="overflow-hidden" padding="none" tone="plain">
+              {recentCompanies.length > 0 ? (
+                recentCompanies.map((company) => (
+                  <Button
+                    key={company.id}
                     type="button"
-                    className="text-sm font-medium text-muted-foreground hover:text-foreground"
-                    onClick={() => navigate("/companies")}
+                    variant="ghost"
+                    onClick={() => openCompany(company)}
+                    className="h-auto w-full justify-between gap-4 rounded-sm border-b border-border px-4 py-3 text-left last:border-b-0"
                   >
-                    View all
-                  </button>
-                ) : null}
-              </div>
-              <div className="mt-3 overflow-hidden border border-border">
-                {recentCompanies.length > 0 ? (
-                  recentCompanies.map((company) => (
-                    <button
-                      key={company.id}
-                      type="button"
-                      onClick={() => openCompany(company)}
-                      className="flex w-full items-center justify-between gap-4 border-b border-border px-4 py-3 text-left last:border-b-0 hover:bg-secondary"
-                    >
-                      <span className="flex min-w-0 items-center gap-3">
-                        <span className="flex size-9 shrink-0 items-center justify-center rounded-md bg-secondary text-sm font-medium">
-                          {company.name.slice(0, 1).toUpperCase()}
-                        </span>
-                        <span className="min-w-0">
-                          <span className="block truncate text-sm font-medium text-foreground">{company.name}</span>
-                          <span className="mt-0.5 flex min-w-0 items-center gap-1.5 text-xs text-muted-foreground">
-                            <Clock3 className="size-3" />
-                            <span className="truncate">
-                              Last opened {timeAgo(company.updatedAt ?? company.createdAt)}
-                            </span>
+                    <span className="flex min-w-0 items-center gap-3">
+                      <span className="flex size-9 shrink-0 items-center justify-center rounded-md bg-secondary text-sm font-medium">
+                        {company.name.slice(0, 1).toUpperCase()}
+                      </span>
+                      <span className="min-w-0">
+                        <span className="block truncate text-sm font-medium text-foreground">{company.name}</span>
+                        <span className="mt-0.5 flex min-w-0 items-center gap-1.5 text-xs text-muted-foreground">
+                          <Clock3 className="size-3" />
+                          <span className="truncate">
+                            Last opened {timeAgo(company.updatedAt ?? company.createdAt)}
                           </span>
                         </span>
                       </span>
-                      <ArrowRight className="size-4 shrink-0 text-muted-foreground" />
-                    </button>
-                  ))
-                ) : (
-                  <div className="flex items-center gap-3 px-4 py-4 text-sm text-muted-foreground">
-                    <CheckCircle2 className="size-4" />
-                    Start setup to create your first local company.
-                  </div>
-                )}
-              </div>
-            </div>
-          </Card>
-        </main>
-      </div>
-    </div>
+                    </span>
+                    <ArrowRight className="size-4 shrink-0 text-muted-foreground" />
+                  </Button>
+                ))
+              ) : (
+                <div className="flex items-center gap-3 px-4 py-4 text-sm text-muted-foreground">
+                  <CheckCircle2 className="size-4" />
+                  Start setup to create your first local company.
+                </div>
+              )}
+            </TheftSurface>
+          </section>
+        </div>
+      }
+    />
   );
 }
 
-function RuntimePill({
+function RuntimeChip({
   icon: Icon,
   label,
 }: {
@@ -395,11 +384,11 @@ function RuntimePill({
   label: string;
 }) {
   return (
-    <div className="flex items-center justify-center gap-2 px-4 py-3">
+    <TheftChip tone="muted" className="gap-2">
       <Icon className="size-4 text-muted-foreground" />
       <span>{label}</span>
       <span className="size-1.5 rounded-full bg-signal" aria-hidden />
-    </div>
+    </TheftChip>
   );
 }
 
