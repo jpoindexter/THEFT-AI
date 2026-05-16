@@ -27,12 +27,11 @@
         try {
           const stored = window.localStorage.getItem(key);
           const theme = stored === "light" || stored === "dark" ? stored : "light";
-          const isDark = theme === "dark";
-          document.documentElement.classList.toggle("dark", isDark);
+          document.documentElement.classList.remove("dark");
           document.documentElement.style.colorScheme = "light";
           const themeColorMeta = document.querySelector('meta[name="theme-color"]');
           if (themeColorMeta) {
-            themeColorMeta.setAttribute("content", isDark ? darkThemeColor : lightThemeColor);
+            themeColorMeta.setAttribute("content", theme === "dark" ? darkThemeColor : lightThemeColor);
           }
         } catch {
           document.documentElement.classList.remove("dark");

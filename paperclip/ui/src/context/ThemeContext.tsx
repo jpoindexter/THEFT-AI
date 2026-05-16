@@ -28,13 +28,12 @@ function resolveThemeFromDocument(): Theme {
 
 function applyTheme(theme: Theme) {
   if (typeof document === "undefined") return;
-  const isDark = theme === "dark";
   const root = document.documentElement;
-  root.classList.toggle("dark", isDark);
+  root.classList.remove("dark");
   root.style.colorScheme = "light";
   const themeColorMeta = document.querySelector('meta[name="theme-color"]');
   if (themeColorMeta instanceof HTMLMetaElement) {
-    themeColorMeta.setAttribute("content", isDark ? DARK_THEME_COLOR : LIGHT_THEME_COLOR);
+    themeColorMeta.setAttribute("content", theme === "dark" ? DARK_THEME_COLOR : LIGHT_THEME_COLOR);
   }
 }
 
