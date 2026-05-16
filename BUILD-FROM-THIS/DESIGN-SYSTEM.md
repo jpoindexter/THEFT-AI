@@ -23,6 +23,7 @@ Everything else is a derived view, not a competing source:
 - **Tailwind v4**: consumes tokens through `@theme inline`.
 - **CSS Variables**: runtime implementation of the same tokens.
 - **Design Tokens**: machine-readable inventory if/when generated, never a fork.
+- **Migration Map**: `BUILD-FROM-THIS/DESIGN-SYSTEM-MIGRATION-MAP.md` defines sequencing, ownership, and gates for consolidating the implementation. It is an execution plan, not a second design contract.
 
 If those views disagree, `DESIGN-SYSTEM.md` and the `:root` token block in `index.css` win. Do not add a second theme file, duplicate palette, duplicate radius scale, or route-local visual system.
 

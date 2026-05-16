@@ -160,3 +160,4 @@
 | T117 | Promote repeated atoms/molecules/organisms into shared design-system modules | ☐ todo |
 | T118 | Convert active MVP routes to template-only page composition | ☐ todo |
 | T119 | Pay down runtime/admin/lab design drift after active product routes pass the launch gate | ☐ todo |
+| T120 | Execute the 3-pass migration sequence in `BUILD-FROM-THIS/DESIGN-SYSTEM-MIGRATION-MAP.md` with strict worker ownership | ☐ todo |
