@@ -143,6 +143,28 @@ function statusClasses(status: IssueThreadInteraction["status"]) {
   }
 }
 
+const TASK_TREE_DEPTH_PADDING_CLASSES = [
+  "pl-3",
+  "pl-9",
+  "pl-15",
+  "pl-21",
+  "pl-27",
+  "pl-33",
+  "pl-39",
+  "pl-45",
+  "pl-51",
+  "pl-57",
+  "pl-63",
+  "pl-69",
+  "pl-75",
+] as const;
+
+function taskTreeDepthPaddingClass(depth: number) {
+  return TASK_TREE_DEPTH_PADDING_CLASSES[
+    Math.min(depth, TASK_TREE_DEPTH_PADDING_CLASSES.length - 1)
+  ];
+}
+
 function TaskField({
   label,
   value,
@@ -155,7 +177,7 @@ function TaskField({
   return (
     <span
       className={cn(
-        "inline-flex items-center rounded-sm border px-2 py-0.5 text-[10px] font-medium uppercase tracking-[0.16em]",
+        "inline-flex items-center rounded-sm border px-2 py-0.5 text-nano font-medium uppercase tracking-widest",
         tone === "default"
           ? "border-border/70 bg-transparent text-foreground"
           : "border-border/60 bg-transparent text-muted-foreground",
@@ -226,8 +248,8 @@ function TaskTreeNode({
         className={cn(
           "relative border-b border-border/60 px-3 py-2.5 last:border-b-0",
           depth > 0 && "before:absolute before:left-3 before:top-0 before:h-full before:w-px before:bg-border/70",
+          taskTreeDepthPaddingClass(depth),
         )}
-        style={depth > 0 ? { paddingLeft: `${depth * 24 + 12}px` } : undefined}
       >
         <div className="flex items-start justify-between gap-2">
           <div className="min-w-0 flex-1">
@@ -253,7 +275,7 @@ function TaskTreeNode({
                   </div>
                 </div>
                 {depth > 0 ? (
-                  <div className="mt-0.5 text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground">
+                  <div className="mt-0.5 text-nano font-medium uppercase tracking-widest text-muted-foreground">
                     Child task
                   </div>
                 ) : null}
@@ -269,13 +291,13 @@ function TaskTreeNode({
           {createdTask?.issueId ? (
             <Link
               to={`/issues/${createdTask.identifier ?? createdTask.issueId}`}
-              className="inline-flex shrink-0 items-center gap-1 rounded-sm border border-emerald-500/50 bg-emerald-500/10 px-2.5 py-1 text-[11px] font-medium text-emerald-900 transition-colors hover:bg-emerald-500/15 dark:text-emerald-100"
+              className="inline-flex shrink-0 items-center gap-1 rounded-sm border border-emerald-500/50 bg-emerald-500/10 px-2.5 py-1 text-micro font-medium text-emerald-900 transition-colors hover:bg-emerald-500/15 dark:text-emerald-100"
             >
               {createdTask.identifier ?? createdTask.issueId.slice(0, 8)}
               <ChevronRight className="h-3 w-3" />
             </Link>
           ) : isSkipped ? (
-            <span className="inline-flex shrink-0 items-center rounded-sm border border-amber-500/60 bg-amber-500/10 px-2.5 py-1 text-[11px] font-medium text-amber-900 dark:text-amber-100">
+            <span className="inline-flex shrink-0 items-center rounded-sm border border-amber-500/60 bg-amber-500/10 px-2.5 py-1 text-micro font-medium text-amber-900 dark:text-amber-100">
               Skipped
             </span>
           ) : null}
@@ -477,7 +499,7 @@ function SuggestTasksCard({
 
       {interaction.status === "accepted" ? (
         <div className="rounded-sm border border-emerald-500/60 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-900 dark:text-emerald-100">
-          <div className="text-[11px] font-semibold uppercase tracking-[0.16em] text-emerald-700">
+          <div className="text-micro font-semibold uppercase tracking-widest text-emerald-700">
             Resolution summary
           </div>
           <p className="mt-1 leading-6">
@@ -490,7 +512,7 @@ function SuggestTasksCard({
 
       {interaction.status === "rejected" ? (
         <div className="rounded-sm border border-rose-500/60 bg-rose-500/10 px-4 py-3 text-sm text-rose-900 dark:text-rose-100">
-          <div className="text-[11px] font-semibold uppercase tracking-[0.16em] text-rose-700">
+          <div className="text-micro font-semibold uppercase tracking-widest text-rose-700">
             Rejection reason
           </div>
           <p className={cn(
@@ -603,12 +625,13 @@ function QuestionOptionButton({
   onClick: () => void;
 }) {
   return (
-    <button
+    <Button
       type="button"
       role={selectionMode === "single" ? "radio" : "checkbox"}
       aria-checked={selected}
+      variant="ghost"
       className={cn(
-        "w-full rounded-sm border px-4 py-3 text-left transition-colors outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50",
+        "h-auto w-full flex-col items-stretch justify-start gap-0 whitespace-normal rounded-sm border px-4 py-3 text-left transition-colors focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/50",
         selected
           ? "border-sky-500/80 bg-sky-500/10 text-sky-950 dark:border-sky-400/80 dark:bg-sky-400/15 dark:text-sky-50"
           : "border-border/70 bg-transparent text-foreground hover:border-sky-500/70 hover:bg-sky-500/10 dark:hover:border-sky-400/70 dark:hover:bg-sky-400/10",
@@ -636,7 +659,7 @@ function QuestionOptionButton({
           {description}
         </div>
       ) : null}
-    </button>
+    </Button>
   );
 }
 
@@ -724,7 +747,7 @@ function AskUserQuestionsCard({
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
-        <span className="inline-flex items-center gap-1 rounded-full border border-border/70 bg-background/70 px-2.5 py-1 font-medium uppercase tracking-[0.16em] text-foreground/70">
+        <span className="inline-flex items-center gap-1 rounded-full border border-border/70 bg-background/70 px-2.5 py-1 font-medium uppercase tracking-widest text-foreground/70">
           <MessageSquareQuote className="h-3 w-3" />
           Ask user questions
         </span>
@@ -740,11 +763,11 @@ function AskUserQuestionsCard({
           {questions.map((question, index) => (
             <div
               key={question.id}
-              className="rounded-2xl border border-border/70 bg-background/82 p-4 shadow-[0_18px_42px_rgba(15,23,42,0.06)]"
+              className="theft-elevation-soft rounded-2xl border border-border/70 bg-background/82 p-4"
             >
               <div className="flex items-start justify-between gap-3">
                 <div>
-                  <div className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+                  <div className="text-micro font-semibold uppercase tracking-widest text-muted-foreground">
                     Question {index + 1}
                   </div>
                   <div
@@ -865,7 +888,7 @@ function AskUserQuestionsCard({
 
           {interaction.result?.summaryMarkdown ? (
             <div className="rounded-2xl border border-emerald-300/60 bg-emerald-50/85 p-4">
-              <div className="mb-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-emerald-700">
+              <div className="mb-2 text-micro font-semibold uppercase tracking-widest text-emerald-700">
                 Submitted summary
               </div>
               <MarkdownBody>{interaction.result.summaryMarkdown}</MarkdownBody>
@@ -914,7 +937,7 @@ function RequestConfirmationTargetChip({
 
   const href = requestConfirmationTargetHref({ interaction, target });
   const className = cn(
-    "inline-flex max-w-full items-center gap-1.5 rounded-sm border px-2 py-0.5 text-[10px] font-medium uppercase tracking-[0.16em]",
+    "inline-flex max-w-full items-center gap-1.5 rounded-sm border px-2 py-0.5 text-nano font-medium uppercase tracking-widest",
     tone === "default"
       ? "border-border/70 bg-transparent text-foreground"
       : "border-border/60 bg-transparent text-muted-foreground",
@@ -981,7 +1004,7 @@ function RequestConfirmationResolution({
     const expiredByTargetChange = outcome === "stale_target";
     return (
       <div className="space-y-3 rounded-sm border border-amber-500/60 bg-amber-500/10 px-4 py-3 text-sm text-amber-900 dark:text-amber-100">
-        <div className="text-[11px] font-semibold uppercase tracking-[0.16em] text-amber-700">
+        <div className="text-micro font-semibold uppercase tracking-widest text-amber-700">
           {expiredByComment ? "Expired by comment" : "Expired by target change"}
         </div>
         <p className="leading-6">
@@ -1239,7 +1262,7 @@ export function IssueThreadInteractionCard({
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div className="min-w-0 flex-1 basis-64">
           <div className="flex flex-wrap items-center gap-2">
-            <span className={cn("inline-flex items-center gap-1 rounded-sm border px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.16em]", styles.badge)}>
+            <span className={cn("inline-flex items-center gap-1 rounded-sm border px-2.5 py-1 text-micro font-semibold uppercase tracking-widest", styles.badge)}>
               <StatusIcon className="h-3.5 w-3.5" />
               {interactionKindLabel(interaction.kind)}
               <span className="text-current/60">/</span>
@@ -1247,7 +1270,7 @@ export function IssueThreadInteractionCard({
             </span>
             {interaction.continuationPolicy === "wake_assignee"
               || interaction.continuationPolicy === "wake_assignee_on_accept" ? (
-              <span className="inline-flex items-center gap-1 rounded-sm border border-border/70 bg-transparent px-2.5 py-1 text-[11px] font-medium uppercase tracking-[0.16em] text-foreground/70">
+              <span className="inline-flex items-center gap-1 rounded-sm border border-border/70 bg-transparent px-2.5 py-1 text-micro font-medium uppercase tracking-widest text-foreground/70">
                 <ListChecks className="h-3.5 w-3.5" />
                 {interaction.continuationPolicy === "wake_assignee_on_accept"
                   ? "Wakes on confirm"

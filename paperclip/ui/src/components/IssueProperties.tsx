@@ -32,6 +32,7 @@ import { IssueReferencePill } from "./IssueReferencePill";
 import { formatDate, formatDateTime, cn, projectUrl } from "../lib/utils";
 import { timeAgo } from "../lib/timeAgo";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
   Dialog,
   DialogClose,
@@ -45,6 +46,31 @@ import { Separator } from "@/components/ui/separator";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { User, Hexagon, ArrowUpRight, Tag, Plus, GitBranch, FolderOpen, Check, ExternalLink, X, Clock } from "lucide-react";
 import { AgentIcon } from "./AgentIconPicker";
+
+const DEFAULT_COLOR_PREFIX = "#";
+
+function defaultNewLabelColor() {
+  if (typeof document !== "undefined") {
+    const tokenColor = getComputedStyle(document.documentElement)
+      .getPropertyValue("--theft-color-tarmac")
+      .trim();
+    if (/^#[\da-f]{6}$/i.test(tokenColor)) return tokenColor;
+  }
+  return `${DEFAULT_COLOR_PREFIX}0a1217`;
+}
+
+function ProjectSwatch({ color }: { color?: string | null }) {
+  if (color) {
+    return (
+      <span
+        className="shrink-0 h-3 w-3 rounded-sm"
+        style={{ backgroundColor: color }}
+      />
+    );
+  }
+
+  return <span className="shrink-0 h-3 w-3 rounded-sm bg-primary" />;
+}
 
 function TruncatedCopyable({ value, icon: Icon }: { value: string; icon: React.ComponentType<{ className?: string }> }) {
   const [copied, setCopied] = useState(false);
@@ -62,14 +88,16 @@ function TruncatedCopyable({ value, icon: Icon }: { value: string; icon: React.C
   return (
     <div className="flex items-start gap-1.5 min-w-0 flex-1">
       <Icon className="h-3.5 w-3.5 text-muted-foreground shrink-0 mt-0.5" />
-      <button
+      <Button
         type="button"
-        className="text-sm font-mono min-w-0 break-all text-left cursor-pointer hover:text-foreground transition-colors"
+        variant="ghost"
+        size="xs"
+        className="h-auto min-w-0 flex-1 justify-start whitespace-normal break-all rounded-sm px-0 py-0 text-left font-mono text-sm cursor-pointer transition-colors hover:bg-transparent hover:text-foreground"
         onClick={handleCopy}
         title={copied ? "Copied!" : "Click to copy"}
       >
         {value}
-      </button>
+      </Button>
       {copied && <Check className="h-3 w-3 text-green-500 shrink-0 mt-0.5" />}
     </div>
   );
@@ -189,19 +217,21 @@ function RemovableIssueReferencePill({
         title={issue.title}
         aria-label={`Issue ${issueLabel}: ${issue.title}`}
       >
-        <button
+        <Button
           type="button"
-          className="inline-flex h-4 w-4 shrink-0 items-center justify-center rounded-full text-muted-foreground opacity-0 transition-colors transition-opacity hover:bg-destructive/10 hover:text-destructive focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-[2px] focus-visible:ring-ring group-hover:opacity-100"
+          variant="ghost"
+          size="icon-xs"
+          className="inline-flex h-4 w-4 shrink-0 items-center justify-center rounded-full text-muted-foreground opacity-0 transition-colors transition-opacity hover:bg-destructive/10 hover:text-destructive focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring group-hover:opacity-100"
           aria-label={removeLabel}
           title={removeLabel}
           onClick={handleRemove}
         >
           <X className="h-3 w-3" />
-        </button>
+        </Button>
         {issue.identifier ? (
           <Link
             to={`/issues/${issueLabel}`}
-            className="inline-flex min-w-0 items-center gap-1 no-underline hover:text-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring"
+            className="inline-flex min-w-0 items-center gap-1 no-underline hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             aria-label={`Issue ${issueLabel}: ${issue.title}`}
           >
             {content}
@@ -257,7 +287,7 @@ function PropertyPicker({
   children: React.ReactNode;
 }) {
   const btnCn = cn(
-    "inline-flex items-start gap-1.5 cursor-pointer hover:bg-accent/50 rounded px-1 -mx-1 py-0.5 transition-colors min-w-0 max-w-full text-left",
+    "inline-flex h-auto shrink items-start gap-1.5 cursor-pointer hover:bg-accent/50 rounded px-1 -mx-1 py-0.5 transition-colors min-w-0 max-w-full text-left whitespace-normal",
     triggerClassName,
   );
 
@@ -265,9 +295,9 @@ function PropertyPicker({
     return (
       <div>
         <PropertyRow label={label}>
-          <button className={btnCn} onClick={() => onOpenChange(!open)}>
+          <Button type="button" variant="ghost" size="xs" className={btnCn} onClick={() => onOpenChange(!open)}>
             {triggerContent}
-          </button>
+          </Button>
           {extra}
         </PropertyRow>
         {open && (
@@ -283,7 +313,7 @@ function PropertyPicker({
     <PropertyRow label={label}>
       <Popover open={open} onOpenChange={onOpenChange}>
         <PopoverTrigger asChild>
-          <button className={btnCn}>{triggerContent}</button>
+          <Button type="button" variant="ghost" size="xs" className={btnCn}>{triggerContent}</Button>
         </PopoverTrigger>
         <PopoverContent className={cn("p-1", popoverClassName)} align={popoverAlign} collisionPadding={16}>
           {children}
@@ -320,7 +350,7 @@ export function IssueProperties({
   const [labelsOpen, setLabelsOpen] = useState(false);
   const [labelSearch, setLabelSearch] = useState("");
   const [newLabelName, setNewLabelName] = useState("");
-  const [newLabelColor, setNewLabelColor] = useState("#6366f1");
+  const [newLabelColor, setNewLabelColor] = useState(defaultNewLabelColor);
   const [monitorAtInput, setMonitorAtInput] = useState(() => toDateTimeLocalValue(issue.executionPolicy?.monitor?.nextCheckAt));
   const [monitorNotesInput, setMonitorNotesInput] = useState(issue.executionPolicy?.monitor?.notes ?? "");
   const [monitorServiceInput, setMonitorServiceInput] = useState(issue.executionPolicy?.monitor?.serviceName ?? "");
@@ -537,13 +567,15 @@ export function IssueProperties({
   })();
   const runExecutionButton = (stageType: "review" | "approval") => (
     <PropertyRow label="">
-      <button
+      <Button
         type="button"
+        variant="outline"
+        size="xs"
         className="inline-flex items-center rounded-full border border-border px-2 py-0.5 text-xs text-muted-foreground transition-colors hover:bg-accent/50 hover:text-foreground"
         onClick={() => onUpdate({ status: "in_review" })}
       >
         {stageType === "review" ? "Run review now" : "Run approval now"}
-      </button>
+      </Button>
     </PropertyRow>
   );
   const currentExecutionLabel = (() => {
@@ -654,45 +686,49 @@ export function IssueProperties({
   const monitorContent = (
     <div className="flex w-full flex-col gap-2">
       <div className="flex flex-col gap-2 md:flex-row">
-        <input
+        <Input
           type="datetime-local"
-          className="rounded-md border border-border bg-transparent px-2 py-1 text-xs"
+          className="h-8 px-2 py-1 text-xs md:text-xs"
           value={monitorAtInput}
           onChange={(e) => setMonitorAtInput(e.target.value)}
         />
-        <input
+        <Input
           type="text"
-          className="min-w-0 flex-1 rounded-md border border-border bg-transparent px-2 py-1 text-xs"
+          className="h-8 min-w-0 flex-1 px-2 py-1 text-xs md:text-xs"
           placeholder="What should the agent re-check?"
           value={monitorNotesInput}
           onChange={(e) => setMonitorNotesInput(e.target.value)}
         />
       </div>
       <div className="flex flex-col gap-2 md:flex-row">
-        <input
+        <Input
           type="text"
-          className="min-w-0 flex-1 rounded-md border border-border bg-transparent px-2 py-1 text-xs"
+          className="h-8 min-w-0 flex-1 px-2 py-1 text-xs md:text-xs"
           placeholder="External service"
           value={monitorServiceInput}
           onChange={(e) => setMonitorServiceInput(e.target.value)}
         />
         <div className="flex items-center gap-2">
-          <button
+          <Button
             type="button"
+            variant="outline"
+            size="xs"
             className="inline-flex items-center rounded-full border border-border px-2 py-0.5 text-xs text-muted-foreground transition-colors hover:bg-accent/50 hover:text-foreground disabled:opacity-50"
             disabled={!monitorAtInput}
             onClick={saveMonitor}
           >
             Schedule
-          </button>
+          </Button>
           {issue.executionPolicy?.monitor ? (
-            <button
+            <Button
               type="button"
+              variant="outline"
+              size="xs"
               className="inline-flex items-center rounded-full border border-border px-2 py-0.5 text-xs text-muted-foreground transition-colors hover:bg-accent/50 hover:text-foreground"
               onClick={clearMonitor}
             >
               Clear
-            </button>
+            </Button>
           ) : null}
         </div>
       </div>
@@ -738,21 +774,23 @@ export function IssueProperties({
     </>
   );
   const labelsExtra = (issue.labelIds ?? []).length > 0 ? (
-    <button
+    <Button
       type="button"
+      variant="ghost"
+      size="icon-xs"
       className="inline-flex items-center justify-center h-5 w-5 rounded hover:bg-accent/50 transition-colors text-muted-foreground hover:text-foreground"
       onClick={() => setLabelsOpen(true)}
       aria-label="Add label"
       title="Add label"
     >
       <Plus className="h-3 w-3" />
-    </button>
+    </Button>
   ) : undefined;
 
   const labelsContent = (
     <>
-      <input
-        className="w-full px-2 py-1.5 text-xs bg-transparent outline-none border-b border-border mb-1 placeholder:text-muted-foreground/50"
+      <Input
+        className="mb-1 h-8 px-2 py-1.5 text-xs shadow-none md:text-xs"
         placeholder="Search labels..."
         value={labelSearch}
         onChange={(e) => setLabelSearch(e.target.value)}
@@ -767,10 +805,13 @@ export function IssueProperties({
           .map((label) => {
             const selected = (issue.labelIds ?? []).includes(label.id);
             return (
-              <button
+              <Button
+                type="button"
+                variant="ghost"
+                size="xs"
                 key={label.id}
                 className={cn(
-                  "flex items-center gap-2 w-full px-2 py-1.5 text-xs rounded hover:bg-accent/50 text-left",
+                  "flex w-full items-center justify-start gap-2 px-2 py-1.5 text-left text-xs",
                   selected && "bg-accent"
                 )}
                 onClick={() => toggleLabel(label.id)}
@@ -778,27 +819,30 @@ export function IssueProperties({
                 <span className="h-2.5 w-2.5 rounded-full shrink-0" style={{ backgroundColor: label.color }} />
                 <span className="truncate flex-1">{label.name}</span>
                 {selected && <Check className="h-3.5 w-3.5 shrink-0 text-foreground" aria-hidden="true" />}
-              </button>
+              </Button>
             );
           })}
       </div>
       <div className="mt-2 border-t border-border pt-2 space-y-1">
         <div className="flex items-center gap-1">
-          <input
+          <Input
             className="h-7 w-7 p-0 rounded bg-transparent"
             type="color"
             value={newLabelColor}
             onChange={(e) => setNewLabelColor(e.target.value)}
           />
-          <input
-            className="flex-1 px-2 py-1.5 text-xs bg-transparent outline-none rounded placeholder:text-muted-foreground/50"
+          <Input
+            className="h-8 flex-1 px-2 py-1.5 text-xs shadow-none md:text-xs"
             placeholder="New label"
             value={newLabelName}
             onChange={(e) => setNewLabelName(e.target.value)}
           />
         </div>
-        <button
-          className="flex items-center justify-center gap-1.5 w-full px-2 py-1.5 text-xs rounded border border-border hover:bg-accent/50 disabled:opacity-50"
+        <Button
+          type="button"
+          variant="outline"
+          size="xs"
+          className="flex w-full items-center justify-center gap-1.5 px-2 py-1.5 text-xs disabled:opacity-50"
           disabled={!newLabelName.trim() || createLabel.isPending}
           onClick={() =>
             createLabel.mutate({
@@ -809,7 +853,7 @@ export function IssueProperties({
         >
           <Plus className="h-3 w-3" />
           {createLabel.isPending ? "Creating…" : "Create label"}
-        </button>
+        </Button>
       </div>
     </>
   );
@@ -870,8 +914,8 @@ export function IssueProperties({
 
   const assigneeContent = (
     <>
-      <input
-        className="w-full px-2 py-1.5 text-xs bg-transparent outline-none border-b border-border mb-1 placeholder:text-muted-foreground/50"
+      <Input
+        className="mb-1 h-8 px-2 py-1.5 text-xs shadow-none md:text-xs"
         placeholder="Search assignees..."
         value={assigneeSearch}
         onChange={(e) => setAssigneeSearch(e.target.value)}
@@ -885,10 +929,13 @@ export function IssueProperties({
             return `${option.label} ${option.searchText}`.toLowerCase().includes(q);
           })
           .map((option) => (
-            <button
+            <Button
+              type="button"
+              variant="ghost"
+              size="xs"
               key={option.id || "__none__"}
               className={cn(
-                "flex items-center gap-2 w-full px-2 py-1.5 text-xs rounded hover:bg-accent/50",
+                "flex w-full items-center justify-start gap-2 px-2 py-1.5 text-xs",
                 option.id === selectedAssigneeValue && "bg-accent",
               )}
               onClick={() => {
@@ -910,7 +957,7 @@ export function IssueProperties({
                 <User className="h-3 w-3 shrink-0 text-muted-foreground" />
               ) : null}
               {option.label}
-            </button>
+            </Button>
           ))}
       </div>
     </>
@@ -924,46 +971,55 @@ export function IssueProperties({
     onClear: () => void,
   ) => (
     <>
-      <input
-        className="w-full px-2 py-1.5 text-xs bg-transparent outline-none border-b border-border mb-1 placeholder:text-muted-foreground/50"
+      <Input
+        className="mb-1 h-8 px-2 py-1.5 text-xs shadow-none md:text-xs"
         placeholder={`Search ${stageType === "review" ? "reviewers" : "approvers"}...`}
         value={search}
         onChange={(e) => setSearch(e.target.value)}
         autoFocus={!inline}
       />
       <div className="max-h-48 overflow-y-auto overscroll-contain">
-        <button
+        <Button
+          type="button"
+          variant="ghost"
+          size="xs"
           className={cn(
-            "flex items-center gap-2 w-full px-2 py-1.5 text-xs rounded hover:bg-accent/50",
+            "flex w-full items-center justify-start gap-2 px-2 py-1.5 text-xs",
             values.length === 0 && "bg-accent",
           )}
           onClick={onClear}
         >
           No {stageType === "review" ? "reviewers" : "approvers"}
-        </button>
+        </Button>
         {currentUserId && (
-          <button
+          <Button
+            type="button"
+            variant="ghost"
+            size="xs"
             className={cn(
-              "flex items-center gap-2 w-full px-2 py-1.5 text-xs rounded hover:bg-accent/50",
+              "flex w-full items-center justify-start gap-2 px-2 py-1.5 text-xs",
               values.includes(`user:${currentUserId}`) && "bg-accent",
             )}
             onClick={() => toggleExecutionParticipant(stageType, `user:${currentUserId}`)}
           >
             <User className="h-3 w-3 shrink-0 text-muted-foreground" />
             Assign to me
-          </button>
+          </Button>
         )}
         {issue.createdByUserId && issue.createdByUserId !== currentUserId && (
-          <button
+          <Button
+            type="button"
+            variant="ghost"
+            size="xs"
             className={cn(
-              "flex items-center gap-2 w-full px-2 py-1.5 text-xs rounded hover:bg-accent/50",
+              "flex w-full items-center justify-start gap-2 px-2 py-1.5 text-xs",
               values.includes(`user:${issue.createdByUserId}`) && "bg-accent",
             )}
             onClick={() => toggleExecutionParticipant(stageType, `user:${issue.createdByUserId}`)}
           >
             <User className="h-3 w-3 shrink-0 text-muted-foreground" />
             {creatorUserLabel ? creatorUserLabel : "Requester"}
-          </button>
+          </Button>
         )}
         {otherUserOptions
           .filter((option) => {
@@ -971,17 +1027,20 @@ export function IssueProperties({
             return `${option.label} ${option.searchText ?? ""}`.toLowerCase().includes(search.toLowerCase());
           })
           .map((option) => (
-            <button
+            <Button
+              type="button"
+              variant="ghost"
+              size="xs"
               key={`${stageType}:${option.id}`}
               className={cn(
-                "flex items-center gap-2 w-full px-2 py-1.5 text-xs rounded hover:bg-accent/50",
+                "flex w-full items-center justify-start gap-2 px-2 py-1.5 text-xs",
                 values.includes(option.id) && "bg-accent",
               )}
               onClick={() => toggleExecutionParticipant(stageType, option.id)}
             >
               <User className="h-3 w-3 shrink-0 text-muted-foreground" />
               {option.label}
-            </button>
+            </Button>
           ))}
         {sortedAgents
           .filter((agent) => {
@@ -991,17 +1050,20 @@ export function IssueProperties({
           .map((agent) => {
             const encoded = `agent:${agent.id}`;
             return (
-              <button
+              <Button
+                type="button"
+                variant="ghost"
+                size="xs"
                 key={`${stageType}:${agent.id}`}
                 className={cn(
-                  "flex items-center gap-2 w-full px-2 py-1.5 text-xs rounded hover:bg-accent/50",
+                  "flex w-full items-center justify-start gap-2 px-2 py-1.5 text-xs",
                   values.includes(encoded) && "bg-accent",
                 )}
                 onClick={() => toggleExecutionParticipant(stageType, encoded)}
               >
                 <AgentIcon icon={agent.icon} className="shrink-0 h-3 w-3 text-muted-foreground" />
                 {agent.name}
-              </button>
+              </Button>
             );
           })}
       </div>
@@ -1010,10 +1072,7 @@ export function IssueProperties({
 
   const projectTrigger = issue.projectId ? (
     <>
-      <span
-        className="shrink-0 h-3 w-3 rounded-sm"
-        style={{ backgroundColor: orderedProjects.find((p) => p.id === issue.projectId)?.color ?? "#6366f1" }}
-      />
+      <ProjectSwatch color={orderedProjects.find((p) => p.id === issue.projectId)?.color} />
       <span className="text-sm break-words min-w-0">{projectName(issue.projectId)}</span>
     </>
   ) : (
@@ -1039,8 +1098,8 @@ export function IssueProperties({
 
   const projectContent = (
     <>
-      <input
-        className="w-full px-2 py-1.5 text-xs bg-transparent outline-none border-b border-border mb-1 placeholder:text-muted-foreground/50"
+      <Input
+        className="mb-1 h-8 px-2 py-1.5 text-xs shadow-none md:text-xs"
         placeholder="Search projects..."
         value={projectSearch}
         onChange={(e) => setProjectSearch(e.target.value)}
@@ -1054,10 +1113,13 @@ export function IssueProperties({
             return option.name.toLowerCase().includes(q);
           })
           .map((option) => (
-            <button
+            <Button
+              type="button"
+              variant="ghost"
+              size="xs"
               key={option.id || "__none__"}
               className={cn(
-                "flex items-center gap-2 w-full px-2 py-1.5 text-xs rounded hover:bg-accent/50 whitespace-nowrap",
+                "flex w-full items-center justify-start gap-2 px-2 py-1.5 text-xs whitespace-nowrap",
                 option.id === (issue.projectId ?? "") && "bg-accent",
               )}
               onClick={() => {
@@ -1085,14 +1147,9 @@ export function IssueProperties({
                 setProjectOpen(false);
               }}
             >
-              {option.kind === "project" ? (
-                <span
-                  className="shrink-0 h-3 w-3 rounded-sm"
-                  style={{ backgroundColor: option.color ?? "#6366f1" }}
-                />
-              ) : null}
+              {option.kind === "project" ? <ProjectSwatch color={option.color} /> : null}
               {option.name}
-            </button>
+            </Button>
           ))}
       </div>
     </>
@@ -1160,17 +1217,20 @@ export function IssueProperties({
     });
   const parentContent = (
     <>
-      <input
-        className="w-full px-2 py-1.5 text-xs bg-transparent outline-none border-b border-border mb-1 placeholder:text-muted-foreground/50"
+      <Input
+        className="mb-1 h-8 px-2 py-1.5 text-xs shadow-none md:text-xs"
         placeholder="Search issues..."
         value={parentSearch}
         onChange={(e) => setParentSearch(e.target.value)}
         autoFocus={!inline}
       />
       <div className="max-h-48 overflow-y-auto overscroll-contain">
-        <button
+        <Button
+          type="button"
+          variant="ghost"
+          size="xs"
           className={cn(
-            "flex items-center gap-2 w-full px-2 py-1.5 text-xs rounded hover:bg-accent/50",
+            "flex w-full items-center justify-start gap-2 px-2 py-1.5 text-xs",
             !issue.parentId && "bg-accent",
           )}
           onClick={() => {
@@ -1179,12 +1239,15 @@ export function IssueProperties({
           }}
         >
           No parent
-        </button>
+        </Button>
         {parentOptions.map((candidate) => (
-          <button
+          <Button
+            type="button"
+            variant="ghost"
+            size="xs"
             key={candidate.id}
             className={cn(
-              "flex w-full items-center gap-2 px-2 py-1.5 text-left text-xs rounded hover:bg-accent/50",
+              "flex w-full items-center justify-start gap-2 px-2 py-1.5 text-left text-xs",
               candidate.id === issue.parentId && "bg-accent",
             )}
             onClick={() => {
@@ -1197,7 +1260,7 @@ export function IssueProperties({
               {candidate.identifier ? `${candidate.identifier} ` : ""}
               {candidate.title}
             </span>
-          </button>
+          </Button>
         ))}
       </div>
     </>
@@ -1231,30 +1294,36 @@ export function IssueProperties({
 
   const blockedByContent = (
     <>
-      <input
-        className="w-full px-2 py-1.5 text-xs bg-transparent outline-none border-b border-border mb-1 placeholder:text-muted-foreground/50"
+      <Input
+        className="mb-1 h-8 px-2 py-1.5 text-xs shadow-none md:text-xs"
         placeholder="Search issues..."
         value={blockedBySearch}
         onChange={(e) => setBlockedBySearch(e.target.value)}
         autoFocus={!inline}
       />
       <div className="max-h-48 overflow-y-auto overscroll-contain">
-        <button
+        <Button
+          type="button"
+          variant="ghost"
+          size="xs"
           className={cn(
-            "flex items-center gap-2 w-full px-2 py-1.5 text-xs rounded hover:bg-accent/50",
+            "flex w-full items-center justify-start gap-2 px-2 py-1.5 text-xs",
             blockedByIds.length === 0 && "bg-accent",
           )}
           onClick={() => onUpdate({ blockedByIssueIds: [] })}
         >
           No blockers
-        </button>
+        </Button>
         {blockerOptions.map((candidate) => {
           const selected = blockedByIds.includes(candidate.id);
           return (
-            <button
+            <Button
+              type="button"
+              variant="ghost"
+              size="xs"
               key={candidate.id}
               className={cn(
-                "flex w-full items-center gap-2 px-2 py-1.5 text-left text-xs rounded hover:bg-accent/50",
+                "flex w-full items-center justify-start gap-2 px-2 py-1.5 text-left text-xs",
                 selected && "bg-accent",
               )}
               onClick={() => toggleBlockedBy(candidate.id)}
@@ -1264,21 +1333,23 @@ export function IssueProperties({
                 {candidate.identifier ? `${candidate.identifier} ` : ""}
                 {candidate.title}
               </span>
-            </button>
+            </Button>
           );
         })}
       </div>
     </>
   );
   const renderAddBlockedByButton = (onClick?: () => void) => (
-    <button
+    <Button
       type="button"
+      variant="outline"
+      size="xs"
       className="inline-flex items-center gap-1 rounded-full border border-border px-2 py-0.5 text-xs text-muted-foreground transition-colors hover:bg-accent/50 hover:text-foreground"
       onClick={onClick}
     >
       <Plus className="h-3 w-3" />
       Add blocker
-    </button>
+    </Button>
   );
 
   return (
@@ -1341,7 +1412,7 @@ export function IssueProperties({
           onOpenChange={(open) => { setProjectOpen(open); if (!open) setProjectSearch(""); }}
           triggerContent={projectTrigger}
           triggerClassName="min-w-0 max-w-full"
-          popoverClassName="w-fit min-w-[11rem]"
+          popoverClassName="w-fit min-w-44"
           extra={issue.projectId ? (
             <Link
               to={projectLink(issue.projectId)!}
@@ -1425,14 +1496,16 @@ export function IssueProperties({
               ))
               : null}
             {onAddSubIssue ? (
-              <button
+              <Button
                 type="button"
+                variant="outline"
+                size="xs"
                 className="inline-flex items-center gap-1 rounded-full border border-border px-2 py-0.5 text-xs text-muted-foreground transition-colors hover:bg-accent/50 hover:text-foreground"
                 onClick={onAddSubIssue}
               >
                 <Plus className="h-3 w-3" />
               Add sub-issue
-              </button>
+              </Button>
             ) : null}
           </div>
         </PropertyRow>
@@ -1498,7 +1571,7 @@ export function IssueProperties({
           onOpenChange={setMonitorOpen}
           triggerContent={monitorTrigger}
           triggerClassName="min-w-0 max-w-full"
-          popoverClassName={cn("max-w-full", inline ? "w-full" : "w-80 sm:w-[32rem]")}
+          popoverClassName={cn("max-w-full", inline ? "w-full" : "w-80 sm:w-lg")}
           extra={monitorAttemptBadge}
         >
           {monitorContent}

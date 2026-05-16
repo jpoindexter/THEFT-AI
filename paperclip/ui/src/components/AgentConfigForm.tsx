@@ -27,6 +27,14 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { FolderOpen, Heart, ChevronDown, X } from "lucide-react";
 import { asBoolean, asFiniteNumber, asObject, cn } from "../lib/utils";
 import { extractModelName, extractProviderId } from "../lib/model-utils";
@@ -742,7 +750,7 @@ export function AgentConfigForm(props: AgentConfigFormProps) {
                 value={eff("identity", "capabilities", props.agent.capabilities ?? "") ?? ""}
                 onChange={(v) => mark("identity", "capabilities", v || null)}
                 placeholder="Describe what this agent can do..."
-                contentClassName="min-h-[44px] text-sm font-mono"
+                contentClassName="min-h-11 text-sm font-mono"
                 imageUploadHandler={async (file) => {
                   const asset = await uploadMarkdownImage.mutateAsync({
                     file,
@@ -763,7 +771,7 @@ export function AgentConfigForm(props: AgentConfigFormProps) {
                     )}
                     onChange={(v) => mark("adapterConfig", "promptTemplate", v ?? "")}
                     placeholder="You are agent {{ agent.name }}. Your role is {{ agent.role }}..."
-                    contentClassName="min-h-[88px] text-sm font-mono"
+                    contentClassName="min-h-22 text-sm font-mono"
                     imageUploadHandler={async (file) => {
                       const namespace = `agents/${props.agent.id}/prompt-template`;
                       const asset = await uploadMarkdownImage.mutateAsync({ file, namespace });
@@ -792,25 +800,29 @@ export function AgentConfigForm(props: AgentConfigFormProps) {
               label="Default environment"
               hint="Agent-level default execution target. Project and issue settings can still override this."
             >
-              <select
-                className={inputClass}
-                value={currentDefaultEnvironmentId}
-                onChange={(event) => {
-                  const nextValue = event.target.value;
+              <Select
+                value={currentDefaultEnvironmentId || "__company_default__"}
+                onValueChange={(nextValue) => {
+                  const environmentId = nextValue === "__company_default__" ? "" : nextValue;
                   if (isCreate) {
-                    set!({ defaultEnvironmentId: nextValue });
+                    set!({ defaultEnvironmentId: environmentId });
                     return;
                   }
-                  mark("identity", "defaultEnvironmentId", nextValue || null);
+                  mark("identity", "defaultEnvironmentId", environmentId || null);
                 }}
               >
-                <option value="">Company default (Local)</option>
-                {runnableEnvironments.map((environment) => (
-                  <option key={environment.id} value={environment.id}>
-                    {environment.name} · {environment.driver}
-                  </option>
-                ))}
-              </select>
+                <SelectTrigger className={inputClass}>
+                  <SelectValue placeholder="Company default (Local)" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="__company_default__">Company default (Local)</SelectItem>
+                  {runnableEnvironments.map((environment) => (
+                    <SelectItem key={environment.id} value={environment.id}>
+                      {environment.name} · {environment.driver}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </Field>
           </div>
         </div>
@@ -981,7 +993,7 @@ export function AgentConfigForm(props: AgentConfigFormProps) {
               </Field>
 
               {supportsModelProfiles && (
-                <div className="text-[11px] uppercase tracking-wide text-muted-foreground">Primary model</div>
+                <div className="text-micro uppercase tracking-wide text-muted-foreground">Primary model</div>
               )}
               <ModelDropdown
                 models={models}
@@ -1079,7 +1091,7 @@ export function AgentConfigForm(props: AgentConfigFormProps) {
                         mark("adapterConfig", "bootstrapPromptTemplate", v || undefined)
                       }
                       placeholder="Optional initial setup prompt for the first run"
-                      contentClassName="min-h-[44px] text-sm font-mono"
+                      contentClassName="min-h-11 text-sm font-mono"
                       imageUploadHandler={async (file) => {
                         const namespace = `agents/${props.agent.id}/bootstrap-prompt`;
                         const asset = await uploadMarkdownImage.mutateAsync({ file, namespace });
@@ -1311,13 +1323,13 @@ export function AdapterEnvironmentResult({ result }: { result: AdapterEnvironmen
     <div className={`rounded-md border px-3 py-2 text-xs ${statusClass}`}>
       <div className="flex items-center justify-between gap-2">
         <span className="font-medium">{statusLabel}</span>
-        <span className="text-[11px] opacity-80">
+        <span className="text-micro opacity-80">
           {new Date(result.testedAt).toLocaleTimeString()}
         </span>
       </div>
       <div className="mt-2 space-y-1.5">
         {result.checks.map((check, idx) => (
-          <div key={`${check.code}-${idx}`} className="text-[11px] leading-relaxed break-words">
+          <div key={`${check.code}-${idx}`} className="text-micro leading-relaxed break-words">
             <span className="font-medium uppercase tracking-wide opacity-80">
               {check.level}
             </span>
@@ -1356,22 +1368,25 @@ function AdapterTypeDropdown({
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
-        <button className="inline-flex items-center gap-1.5 rounded-md border border-border px-2.5 py-1.5 text-sm hover:bg-accent/50 transition-colors w-full justify-between">
+        <Button type="button" variant="outline" className="h-auto w-full justify-between px-2.5 py-1.5 font-normal hover:bg-accent/50">
           <span className="inline-flex min-w-0 items-center gap-1.5">
             {value === "opencode_local" ? <OpenCodeLogoIcon className="h-3.5 w-3.5" /> : null}
             <span className="truncate">{adapterLabels[value] ?? getAdapterLabel(value)}</span>
             {selectedDisplay.experimental && <ExperimentalBadge />}
           </span>
           <ChevronDown className="h-3 w-3 text-muted-foreground" />
-        </button>
+        </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-1" align="start">
+      <PopoverContent className="w-(--radix-popover-trigger-width) p-1" align="start">
         {adapterList.map((item) => (
-          <button
+          <Button
             key={item.value}
+            type="button"
+            variant="ghost"
+            size="sm"
             disabled={item.comingSoon}
             className={cn(
-              "flex items-center justify-between w-full px-2 py-1.5 text-sm rounded",
+              "h-auto w-full justify-between px-2 py-1.5 font-normal",
               item.comingSoon
                 ? "opacity-40 cursor-not-allowed"
                 : "hover:bg-accent/50",
@@ -1390,9 +1405,9 @@ function AdapterTypeDropdown({
               {item.experimental && <ExperimentalBadge />}
             </span>
             {item.comingSoon && (
-              <span className="text-[10px] text-muted-foreground">Coming soon</span>
+              <span className="text-nano text-muted-foreground">Coming soon</span>
             )}
-          </button>
+          </Button>
         ))}
       </PopoverContent>
     </Popover>
@@ -1401,7 +1416,7 @@ function AdapterTypeDropdown({
 
 function ExperimentalBadge() {
   return (
-    <span className="shrink-0 rounded border border-amber-500/30 bg-amber-500/10 px-1.5 py-0.5 text-[10px] font-medium leading-none text-amber-700 dark:text-amber-200">
+    <span className="shrink-0 rounded border border-amber-500/30 bg-amber-500/10 px-1.5 py-0.5 text-nano font-medium leading-none text-amber-700 dark:text-amber-200">
       Experimental
     </span>
   );
@@ -1525,7 +1540,7 @@ function ModelDropdown({
         }}
       >
         <PopoverTrigger asChild>
-          <button type="button" className="inline-flex items-center gap-1.5 rounded-md border border-border px-2.5 py-1.5 text-sm hover:bg-accent/50 transition-colors w-full justify-between">
+          <Button type="button" variant="outline" className="h-auto w-full justify-between px-2.5 py-1.5 font-normal hover:bg-accent/50">
             <span className={cn(!value && "text-muted-foreground")}>
               {selected
                 ? selected.label
@@ -1533,34 +1548,35 @@ function ModelDropdown({
                   || (allowDefault ? (defaultLabel ?? "Default") : required ? "Select model (required)" : "Select model")}
             </span>
             <ChevronDown className="h-3 w-3 text-muted-foreground" />
-          </button>
+          </Button>
         </PopoverTrigger>
-        <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-1" align="start">
+        <PopoverContent className="w-(--radix-popover-trigger-width) p-1" align="start">
           <div className="relative mb-1">
-            <input
-              className="w-full px-2 py-1.5 pr-6 text-xs bg-transparent outline-none border-b border-border placeholder:text-muted-foreground/50"
+            <Input
+              className="h-auto rounded-sm border-x-0 border-t-0 px-2 py-1.5 pr-6 text-xs shadow-none focus-visible:ring-0"
               placeholder={creatable ? "Search models... (type to create)" : "Search models..."}
               value={modelSearch}
               onChange={(e) => setModelSearch(e.target.value)}
               autoFocus
             />
             {modelSearch && (
-              <button
+              <Button
                 type="button"
+                variant="ghost"
+                size="icon-xs"
                 className="absolute right-1.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
                 onClick={() => setModelSearch("")}
               >
-                <svg aria-hidden="true" focusable="false" className="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <line x1="18" y1="6" x2="6" y2="18" />
-                  <line x1="6" y1="6" x2="18" y2="18" />
-                </svg>
-              </button>
+                <X className="h-3 w-3" />
+              </Button>
             )}
           </div>
           {onDetectModel && !modelSearch.trim() && (
-            <button
+            <Button
               type="button"
-              className="flex items-center gap-1.5 w-full px-2 py-1.5 text-xs rounded hover:bg-accent/50 text-muted-foreground"
+              variant="ghost"
+              size="xs"
+              className="h-auto w-full justify-start px-2 py-1.5 text-muted-foreground hover:bg-accent/50"
               onClick={() => {
                 void handleDetectModel();
               }}
@@ -1571,12 +1587,14 @@ function ModelDropdown({
                 <path d="M3 3v5h5" />
               </svg>
               {detectingModel ? "Detecting..." : detectedModel ? (detectModelLabel?.replace(/^Detect\b/, "Re-detect") ?? "Re-detect from config") : (detectModelLabel ?? "Detect from config")}
-            </button>
+            </Button>
           )}
           {onRefreshModels && !modelSearch.trim() && (
-            <button
+            <Button
               type="button"
-              className="flex items-center gap-1.5 w-full px-2 py-1.5 text-xs rounded hover:bg-accent/50 text-muted-foreground"
+              variant="ghost"
+              size="xs"
+              className="h-auto w-full justify-start px-2 py-1.5 text-muted-foreground hover:bg-accent/50"
               onClick={() => {
                 void onRefreshModels();
               }}
@@ -1589,13 +1607,15 @@ function ModelDropdown({
                 <path d="M8 16H3v5" />
               </svg>
               {refreshingModels ? "Refreshing..." : "Refresh models"}
-            </button>
+            </Button>
           )}
           {value && (!models.some((m) => m.id === value) || promotedModelIds.has(value)) && (
-            <button
+            <Button
               type="button"
+              variant="ghost"
+              size="sm"
               className={cn(
-                "flex items-center w-full px-2 py-1.5 text-sm rounded bg-accent/50",
+                "h-auto w-full justify-start px-2 py-1.5 font-normal bg-accent/50",
               )}
               onClick={() => {
                 onOpenChange(false);
@@ -1604,16 +1624,18 @@ function ModelDropdown({
               <span className="block w-full text-left truncate font-mono text-xs" title={value}>
                 {models.find((m) => m.id === value)?.label ?? value}
               </span>
-              <span className="shrink-0 ml-auto text-[9px] font-medium px-1.5 py-0.5 rounded-full bg-green-500/15 text-green-400 border border-green-500/20">
+              <span className="shrink-0 ml-auto text-badge font-medium px-1.5 py-0.5 rounded-full bg-green-500/15 text-green-400 border border-green-500/20">
                 current
               </span>
-            </button>
+            </Button>
           )}
           {detectedModel && detectedModel !== value && (
-            <button
+            <Button
               type="button"
+              variant="ghost"
+              size="sm"
               className={cn(
-                "flex items-center w-full px-2 py-1.5 text-sm rounded hover:bg-accent/50",
+                "h-auto w-full justify-start px-2 py-1.5 font-normal hover:bg-accent/50",
               )}
               onClick={() => {
                 onChange(detectedModel);
@@ -1623,21 +1645,23 @@ function ModelDropdown({
               <span className="block w-full text-left truncate font-mono text-xs" title={detectedModel}>
                 {models.find((m) => m.id === detectedModel)?.label ?? detectedModel}
               </span>
-              <span className="shrink-0 ml-auto text-[9px] font-medium px-1.5 py-0.5 rounded-full bg-blue-500/15 text-blue-400 border border-blue-500/20">
+              <span className="shrink-0 ml-auto text-badge font-medium px-1.5 py-0.5 rounded-full bg-blue-500/15 text-blue-400 border border-blue-500/20">
                 detected
               </span>
-            </button>
+            </Button>
           )}
           {detectedModelCandidates
             ?.filter((candidate) => candidate && candidate !== detectedModel && candidate !== value)
             .map((candidate) => {
               const entry = models.find((m) => m.id === candidate);
               return (
-                <button
+                <Button
                   key={`detected-${candidate}`}
                   type="button"
+                  variant="ghost"
+                  size="sm"
                   className={cn(
-                    "flex items-center w-full px-2 py-1.5 text-sm rounded hover:bg-accent/50",
+                    "h-auto w-full justify-start px-2 py-1.5 font-normal hover:bg-accent/50",
                   )}
                   onClick={() => {
                     onChange(candidate);
@@ -1647,18 +1671,20 @@ function ModelDropdown({
                   <span className="block w-full text-left truncate font-mono text-xs" title={candidate}>
                     {entry?.label ?? candidate}
                   </span>
-                  <span className="shrink-0 ml-auto text-[9px] font-medium px-1.5 py-0.5 rounded-full bg-sky-500/15 text-sky-400 border border-sky-500/20">
+                  <span className="shrink-0 ml-auto text-badge font-medium px-1.5 py-0.5 rounded-full bg-sky-500/15 text-sky-400 border border-sky-500/20">
                     config
                   </span>
-                </button>
+                </Button>
               );
             })}
-          <div className="max-h-[240px] overflow-y-auto">
+          <div className="max-h-60 overflow-y-auto">
             {allowDefault && (
-              <button
+              <Button
                 type="button"
+                variant="ghost"
+                size="sm"
                 className={cn(
-                  "flex items-center gap-2 w-full px-2 py-1.5 text-sm rounded hover:bg-accent/50",
+                  "h-auto w-full justify-start px-2 py-1.5 font-normal hover:bg-accent/50",
                   !value && "bg-accent",
                 )}
                 onClick={() => {
@@ -1667,12 +1693,14 @@ function ModelDropdown({
                 }}
               >
                 Default
-              </button>
+              </Button>
             )}
             {canCreateManualModel && (
-              <button
+              <Button
                 type="button"
-                className="flex items-center justify-between gap-2 w-full px-2 py-1.5 text-sm rounded hover:bg-accent/50"
+                variant="ghost"
+                size="sm"
+                className="h-auto w-full justify-between px-2 py-1.5 font-normal hover:bg-accent/50"
                 onClick={() => {
                   onChange(manualModel);
                   onOpenChange(false);
@@ -1681,21 +1709,23 @@ function ModelDropdown({
               >
                 <span>Use manual model</span>
                 <span className="text-xs font-mono text-muted-foreground">{manualModel}</span>
-              </button>
+              </Button>
             )}
             {groupedModels.map((group) => (
               <div key={group.provider} className="mb-1 last:mb-0">
                 {groupByProvider && (
-                  <div className="px-2 py-1 text-[10px] uppercase tracking-wide text-muted-foreground">
+                  <div className="px-2 py-1 text-nano uppercase tracking-wide text-muted-foreground">
                     {group.provider} ({group.entries.length})
                   </div>
                 )}
                 {group.entries.map((m) => (
-                  <button
+                  <Button
                     type="button"
                     key={m.id}
+                    variant="ghost"
+                    size="sm"
                     className={cn(
-                      "flex items-center w-full px-2 py-1.5 text-sm rounded hover:bg-accent/50",
+                      "h-auto w-full justify-start px-2 py-1.5 font-normal hover:bg-accent/50",
                       m.id === value && "bg-accent",
                     )}
                     onClick={() => {
@@ -1706,7 +1736,7 @@ function ModelDropdown({
                     <span className="block w-full text-left truncate" title={m.id}>
                       {groupByProvider ? extractModelName(m.id) : m.label}
                     </span>
-                  </button>
+                  </Button>
                 ))}
               </div>
             ))}
@@ -1754,7 +1784,7 @@ function CheapModelSection({
     <div className="rounded-md border border-border/70 bg-muted/20 p-3 space-y-3">
       <div className="flex items-center justify-between gap-3">
         <div className="min-w-0">
-          <div className="text-[11px] uppercase tracking-wide text-muted-foreground">Cheap model</div>
+          <div className="text-micro uppercase tracking-wide text-muted-foreground">Cheap model</div>
           <p className="text-xs text-muted-foreground">
             Used when a run requests the cheap profile (e.g. routine summaries). The primary model stays unchanged.
           </p>
@@ -1779,12 +1809,12 @@ function CheapModelSection({
         />
       ) : null}
       {enabled && !model && adapterDefaultModel ? (
-        <p className="text-[11px] text-muted-foreground">
+        <p className="text-micro text-muted-foreground">
           No explicit cheap model selected — runtime falls back to <code>{adapterDefaultModel}</code>.
         </p>
       ) : null}
       {enabled && !model && !adapterDefaultModel ? (
-        <p className="text-[11px] text-amber-500">
+        <p className="text-micro text-amber-500">
           No cheap model selected and the adapter has no default. Cheap-lane runs will continue on the primary model with a fallback note.
         </p>
       ) : null}
@@ -1811,17 +1841,20 @@ function ThinkingEffortDropdown({
     <Field label="Thinking effort" hint={help.thinkingEffort}>
       <Popover open={open} onOpenChange={onOpenChange}>
         <PopoverTrigger asChild>
-          <button className="inline-flex items-center gap-1.5 rounded-md border border-border px-2.5 py-1.5 text-sm hover:bg-accent/50 transition-colors w-full justify-between">
+          <Button type="button" variant="outline" className="h-auto w-full justify-between px-2.5 py-1.5 font-normal hover:bg-accent/50">
             <span className={cn(!value && "text-muted-foreground")}>{selected?.label ?? "Auto"}</span>
             <ChevronDown className="h-3 w-3 text-muted-foreground" />
-          </button>
+          </Button>
         </PopoverTrigger>
-        <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-1" align="start">
+        <PopoverContent className="w-(--radix-popover-trigger-width) p-1" align="start">
           {options.map((option) => (
-            <button
+            <Button
               key={option.id || "auto"}
+              type="button"
+              variant="ghost"
+              size="sm"
               className={cn(
-                "flex items-center justify-between w-full px-2 py-1.5 text-sm rounded hover:bg-accent/50",
+                "h-auto w-full justify-between px-2 py-1.5 font-normal hover:bg-accent/50",
                 option.id === value && "bg-accent",
               )}
               onClick={() => {
@@ -1831,7 +1864,7 @@ function ThinkingEffortDropdown({
             >
               <span>{option.label}</span>
               {option.id ? <span className="text-xs text-muted-foreground font-mono">{option.id}</span> : null}
-            </button>
+            </Button>
           ))}
         </PopoverContent>
       </Popover>
