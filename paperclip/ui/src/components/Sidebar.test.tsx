@@ -5,7 +5,7 @@ import type { ReactNode } from "react";
 import { createRoot } from "react-dom/client";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { Sidebar, THEFT_SYSTEM_NAV_ITEMS } from "./Sidebar";
+import { Sidebar, THEFT_SYSTEM_ENTRY, THEFT_SYSTEM_NAV_ITEMS } from "./Sidebar";
 
 const mockHeartbeatsApi = vi.hoisted(() => ({
   liveRunsForCompany: vi.fn(),
@@ -18,7 +18,7 @@ const mockInstanceSettingsApi = vi.hoisted(() => ({
 vi.mock("@/lib/router", () => ({
   NavLink: ({ to, children, className, ...props }: {
     to: string;
-    children: ReactNode;
+    children: ReactNode | ((state: { isActive: boolean }) => ReactNode);
     className?: string | ((state: { isActive: boolean }) => string);
   }) => (
     <a
@@ -26,7 +26,7 @@ vi.mock("@/lib/router", () => ({
       className={typeof className === "function" ? className({ isActive: false }) : className}
       {...props}
     >
-      {children}
+      {typeof children === "function" ? children({ isActive: false }) : children}
     </a>
   ),
 }));
@@ -154,7 +154,7 @@ describe("Sidebar", () => {
     });
   });
 
-  it("keeps runtime/admin capability contained in the System section", async () => {
+  it("collapses runtime/admin capability behind one System rail entry", async () => {
     mockInstanceSettingsApi.getExperimental.mockResolvedValue({ enableIsolatedWorkspaces: false });
     const root = createRoot(container);
     const queryClient = new QueryClient({
@@ -175,12 +175,19 @@ describe("Sidebar", () => {
       href: anchor.getAttribute("href"),
     }));
 
-    for (const item of THEFT_SYSTEM_NAV_ITEMS) {
-      expect(links).toContainEqual({ label: item.label, href: item.to });
-    }
-    expect(links.findIndex((link) => link.label === "Command Center")).toBeLessThan(
-      links.findIndex((link) => link.label === "Agent Runtime"),
-    );
+    expect(THEFT_SYSTEM_NAV_ITEMS.map((item) => item.label)).toEqual([
+      "Company Map",
+      "Agent Runtime",
+      "Workstreams",
+      "Skill Library",
+      "Model Adapters",
+      "Routines",
+      "Runtime Usage",
+      "Activity",
+      "Settings",
+    ]);
+    expect(links).toContainEqual({ label: THEFT_SYSTEM_ENTRY.label, href: THEFT_SYSTEM_ENTRY.to });
+    expect(links).not.toContainEqual({ label: "Runtime Usage", href: "/costs" });
 
     await act(async () => {
       root.unmount();

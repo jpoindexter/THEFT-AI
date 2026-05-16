@@ -16,10 +16,10 @@ import {
   Cpu,
   Repeat2,
   WalletCards,
+  SlidersHorizontal,
   type LucideIcon,
 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
-import { SidebarSection } from "./SidebarSection";
 import { SidebarNavItem } from "./SidebarNavItem";
 import { useDialogActions } from "../context/DialogContext";
 import { useCompany } from "../context/CompanyContext";
@@ -42,6 +42,12 @@ export const THEFT_SYSTEM_NAV_ITEMS: Array<{ to: string; label: string; icon: Lu
   { to: "/activity", label: "Activity", icon: Activity },
   { to: "/company/settings", label: "Settings", icon: Settings },
 ];
+
+export const THEFT_SYSTEM_ENTRY = {
+  to: "/agents/all",
+  label: "System",
+  icon: SlidersHorizontal,
+};
 
 export function Sidebar() {
   const { openNewIssue } = useDialogActions();
@@ -71,12 +77,12 @@ export function Sidebar() {
 
   return (
     <aside className="w-full h-full min-h-0 border-r border-sidebar-border bg-sidebar text-sidebar-foreground flex flex-col items-center">
-      <div className="flex h-24 shrink-0 flex-col items-center justify-center gap-3 border-b border-sidebar-border px-3">
+      <div className="flex h-20 shrink-0 flex-col items-center justify-center gap-2 border-b border-sidebar-border px-2">
         <SidebarCompanyMenu compact />
         <Button
           variant="ghost"
           size="icon-sm"
-          className="size-10 shrink-0 rounded-full text-muted-foreground hover:bg-sidebar-accent hover:text-foreground"
+          className="size-9 shrink-0 rounded-full text-muted-foreground hover:bg-sidebar-accent hover:text-foreground"
           onClick={openSearch}
           title="Search"
         >
@@ -84,51 +90,44 @@ export function Sidebar() {
         </Button>
       </div>
 
-      <nav className="flex min-h-0 flex-1 flex-col items-center gap-5 overflow-y-auto px-0 py-5 scrollbar-auto-hide">
+      <nav className="flex min-h-0 flex-1 flex-col items-center justify-between gap-4 overflow-hidden px-0 py-4">
         <div className="flex flex-col items-center gap-1">
           <SidebarNavItem to="/dashboard" label="Mission Control" icon={LayoutDashboard} liveCount={liveRunCount} />
           <SidebarNavItem to="/issues" label="Tasks" icon={CircleDot} badge={inboxBadge.inbox} badgeTone={inboxBadge.failedRuns > 0 ? "danger" : "default"} alert={inboxBadge.failedRuns > 0} />
           <SidebarNavItem to="/library" label="Library" icon={Library} />
           <SidebarNavItem to="/goals" label="Tech Tree" icon={Target} />
           <SidebarNavItem to="/departments/engineering" label="Departments" icon={Building2} />
-          <PluginSlotOutlet
-            slotTypes={["sidebar"]}
-            context={pluginContext}
-            className="flex flex-col gap-0.5"
-            itemClassName="text-[13px] font-medium"
-            missingBehavior="placeholder"
-          />
         </div>
 
-        <SidebarSection label="Operator">
+        <div className="flex flex-col items-center gap-1">
           <button
             onClick={() => openNewIssue()}
             title="New task"
-            className="flex h-12 w-12 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+            className="flex h-10 w-10 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
           >
             <SquarePen className="h-5 w-5 shrink-0" />
             <span className="sr-only">New task</span>
           </button>
           <SidebarNavItem to="/inbox" label="Attention" icon={Inbox} />
-          <SidebarNavItem to="/search" label="Search" icon={Search} />
           {showWorkspacesLink ? (
             <SidebarNavItem to="/workspaces" label="Workspaces" icon={GitBranch} />
           ) : null}
-        </SidebarSection>
-
-        <SidebarSection label="System">
-          {THEFT_SYSTEM_NAV_ITEMS.map((item) => (
-            <SidebarNavItem key={item.to} to={item.to} label={item.label} icon={item.icon} />
-          ))}
-        </SidebarSection>
-
-        <PluginSlotOutlet
-          slotTypes={["sidebarPanel"]}
-          context={pluginContext}
-          className="flex flex-col gap-3"
-          itemClassName="rounded-lg border border-border p-3"
-          missingBehavior="placeholder"
-        />
+          <SidebarNavItem to={THEFT_SYSTEM_ENTRY.to} label={THEFT_SYSTEM_ENTRY.label} icon={THEFT_SYSTEM_ENTRY.icon} />
+          <PluginSlotOutlet
+            slotTypes={["sidebar"]}
+            context={pluginContext}
+            className="flex flex-col items-center gap-1"
+            itemClassName="text-[13px] font-medium"
+            missingBehavior="placeholder"
+          />
+          <PluginSlotOutlet
+            slotTypes={["sidebarPanel"]}
+            context={pluginContext}
+            className="hidden"
+            itemClassName="hidden"
+            missingBehavior="placeholder"
+          />
+        </div>
       </nav>
     </aside>
   );

@@ -152,7 +152,7 @@ export function SidebarAccountMenu({
             title={displayName}
             className={cn(
               "flex items-center gap-2.5 text-left text-[13px] font-medium text-sidebar-foreground/80 transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
-              isMobile ? "w-full px-3 py-2" : "h-12 w-12 justify-center rounded-full px-0 py-0",
+              isMobile ? "w-full px-3 py-2" : "h-10 w-10 justify-center rounded-full px-0 py-0",
             )}
             aria-label="Open account menu"
           >

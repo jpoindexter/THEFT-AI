@@ -356,7 +356,7 @@ function ObjectiveHeader({
       <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
         <div className="min-w-0">
           <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
-            <Badge variant="outline" className="rounded-full border-border bg-secondary px-3 py-1 text-foreground">
+            <Badge variant="outline" className="rounded-[10px] border-border bg-secondary px-3 py-1 text-foreground">
               Mission Control
             </Badge>
             <span>{companyName}</span>
@@ -384,7 +384,7 @@ function ObjectiveHeader({
 
 function MissionStat({ value, label }: { value: number; label: string }) {
   return (
-    <div className="rounded-[24px] bg-secondary px-4 py-4 text-center">
+    <div className="rounded-[14px] bg-secondary px-4 py-4 text-center">
       <p className="text-2xl font-semibold tabular-nums">{value}</p>
       <p className="mt-1 text-xs text-muted-foreground">{label}</p>
     </div>
@@ -415,13 +415,13 @@ function StrategyMapPanel({
             Objective to departments, tasks, and Library artifacts
           </p>
         </div>
-        <Link to="/goals" className="rounded-full bg-secondary px-4 py-2 text-sm text-muted-foreground no-underline hover:text-foreground">
+        <Link to="/goals" className="rounded-[12px] bg-secondary px-4 py-2 text-sm text-muted-foreground no-underline hover:text-foreground">
           Tech Tree
         </Link>
       </div>
 
-      <div className="min-w-0 max-w-full overflow-hidden rounded-[36px] bg-secondary p-5 md:p-7">
-        <div className="mx-auto max-w-2xl min-w-0 rounded-[32px] bg-card px-6 py-5 text-center shadow-[0_20px_60px_rgb(20_24_20/0.06)]">
+      <div className="min-w-0 max-w-full overflow-hidden rounded-[18px] bg-secondary p-5 md:p-7">
+        <div className="mx-auto max-w-2xl min-w-0 rounded-[16px] bg-card px-6 py-5 text-center shadow-[0_16px_48px_rgb(20_24_20/0.05)]">
           <p className="text-sm text-muted-foreground">Current objective</p>
           <p className="mt-2 text-lg font-semibold text-foreground">{objective}</p>
         </div>
@@ -430,7 +430,7 @@ function StrategyMapPanel({
 
         <div className="grid gap-3 md:grid-cols-3">
           {visibleTracks.map((track) => (
-            <div key={track} className="rounded-[28px] bg-card px-5 py-4 text-center shadow-sm">
+            <div key={track} className="rounded-[14px] bg-card px-5 py-4 text-center shadow-sm">
               <p className="line-clamp-2 text-sm font-medium">{track}</p>
             </div>
           ))}
@@ -443,14 +443,14 @@ function StrategyMapPanel({
             <Link
               key={department.key}
               to={`/departments/${department.key}`}
-              className="group min-w-0 max-w-full overflow-hidden rounded-[28px] bg-card p-4 text-inherit no-underline shadow-sm transition-transform hover:-translate-y-0.5"
+              className="group min-w-0 max-w-full overflow-hidden rounded-[14px] bg-card p-4 text-inherit no-underline shadow-sm transition-transform hover:-translate-y-0.5"
             >
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0">
                   <h3 className="truncate text-base font-semibold group-hover:text-foreground">{department.title}</h3>
                   <p className="mt-1 truncate text-xs text-muted-foreground">{summarizeAgent(department.agent)}</p>
                 </div>
-                <Badge variant={department.activeCount > 0 ? "default" : "outline"} className="rounded-full">
+                <Badge variant={department.activeCount > 0 ? "default" : "outline"} className="rounded-[10px]">
                   {department.activeCount} open
                 </Badge>
               </div>
@@ -482,7 +482,7 @@ function StrategyMapPanel({
           ))}
         </div>
 
-        <div className="mt-6 rounded-[28px] bg-card p-4 shadow-sm">
+        <div className="mt-6 rounded-[14px] bg-card p-4 shadow-sm">
           <div className="flex items-center justify-between gap-3">
             <p className="text-sm font-medium text-muted-foreground">Available next work</p>
             <Route className="h-4 w-4 text-muted-foreground" />
@@ -492,7 +492,7 @@ function StrategyMapPanel({
               <Link
                 key={issue.id}
                 to={issuePath(issue)}
-              className="min-w-0 max-w-full overflow-hidden rounded-[18px] bg-secondary px-4 py-3 text-inherit no-underline hover:text-foreground"
+              className="min-w-0 max-w-full overflow-hidden rounded-[12px] bg-secondary px-4 py-3 text-inherit no-underline hover:text-foreground"
             >
                 <p className="min-w-0 break-words line-clamp-1 text-sm [overflow-wrap:anywhere]">{issue.title}</p>
                 <p className="mt-1 text-xs text-muted-foreground">{formatStatusLabel(issue.status)}</p>
@@ -533,7 +533,7 @@ function ConstraintsPanel({
       <h2 className="text-xl font-semibold">Constraints</h2>
       <div className="mt-3 grid grid-cols-2 gap-2">
         {constraints.map((constraint) => (
-          <div key={constraint.label} className="rounded-[24px] bg-secondary p-4">
+          <div key={constraint.label} className="rounded-[14px] bg-secondary p-4">
             <p className="text-xs text-muted-foreground">{constraint.label}</p>
             <p className="mt-2 text-3xl font-semibold tabular-nums">{constraint.value}</p>
             <p className="mt-1 text-xs text-muted-foreground">{constraint.detail}</p>
@@ -563,7 +563,7 @@ function DecisionsPanel({
           View all
         </Link>
       </div>
-      <div className="mt-3 divide-y divide-border overflow-hidden rounded-[24px] bg-secondary">
+      <div className="mt-3 divide-y divide-border overflow-hidden rounded-[14px] bg-secondary">
         {approvalsCount > 0 ? (
           <Link to="/approvals/pending" className="flex items-center justify-between gap-3 p-3 text-inherit no-underline hover:bg-accent">
             <span>
@@ -652,7 +652,7 @@ function OutcomesPanel({
           <Link
             key={`${issue.id}:${document.key}`}
             to={`/library?issue=${encodeURIComponent(issue.id)}&document=${encodeURIComponent(document.key)}`}
-            className="flex min-w-0 max-w-full items-start gap-2 overflow-hidden rounded-[24px] bg-secondary p-4 text-inherit no-underline hover:text-foreground"
+            className="flex min-w-0 max-w-full items-start gap-2 overflow-hidden rounded-[14px] bg-secondary p-4 text-inherit no-underline hover:text-foreground"
           >
             <FileText className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" />
             <span className="min-w-0 flex-1">
@@ -664,7 +664,7 @@ function OutcomesPanel({
           </Link>
         ))}
         {documents.length === 0 ? (
-          <div className="flex items-center gap-2 rounded-[24px] bg-secondary p-4 text-sm text-muted-foreground">
+          <div className="flex items-center gap-2 rounded-[14px] bg-secondary p-4 text-sm text-muted-foreground">
             <Library className="h-4 w-4" />
             Outcomes will appear as departments publish work.
           </div>
@@ -676,7 +676,7 @@ function OutcomesPanel({
 
 function NextMovePanel({ bottleneck }: { bottleneck: CompanyBottleneck }) {
   const content = (
-    <div className="rounded-[32px] bg-primary p-6 text-primary-foreground shadow-[0_24px_80px_rgb(20_24_20/0.14)]">
+    <div className="rounded-[18px] bg-primary p-6 text-primary-foreground shadow-[0_18px_54px_rgb(20_24_20/0.12)]">
       <p className="text-sm text-primary-foreground/65">Next move</p>
       <div className="mt-3 flex items-start gap-3">
         <CircleDot className="mt-0.5 h-5 w-5 shrink-0 text-primary-foreground" />
@@ -743,7 +743,7 @@ function OperatorDrawer({
         </Button>
       </div>
 
-      <div className="mt-5 rounded-[28px] bg-secondary p-4">
+      <div className="mt-5 rounded-[14px] bg-secondary p-4">
         <p className="text-xs text-muted-foreground">Recommended next move</p>
         <p className="mt-2 text-sm">{nextMove.label}</p>
         <p className="mt-2 text-xs leading-5 text-muted-foreground">{nextMove.detail}</p>
@@ -758,7 +758,7 @@ function OperatorDrawer({
               type="button"
               onClick={() => setSelectedDepartmentKey(department.key)}
               className={cn(
-                "rounded-[20px] border px-3 py-3 text-left text-xs transition-colors",
+                "rounded-[12px] border px-3 py-3 text-left text-xs transition-colors",
                 selectedDepartmentKey === department.key
                   ? "border-foreground bg-secondary text-foreground"
                   : "border-border bg-card text-muted-foreground hover:text-foreground",
@@ -776,7 +776,7 @@ function OperatorDrawer({
           value={operatorDraft}
           onChange={(event) => setOperatorDraft(event.target.value)}
           placeholder="Ask Operator to create the next concrete task..."
-          className="min-h-32 resize-none rounded-[28px] border-0 bg-secondary p-4"
+          className="min-h-32 resize-none rounded-[14px] border-0 bg-secondary p-4"
         />
         {error ? <p className="text-sm text-destructive">{error}</p> : null}
         <Button className="w-full" disabled={!canSubmit || isPending} onClick={createTask}>
@@ -813,7 +813,7 @@ function OperatorDock({
   if (open) return null;
 
   return (
-    <div className="fixed bottom-6 left-1/2 z-30 hidden w-[min(820px,calc(100vw-9rem))] -translate-x-1/2 items-center gap-3 rounded-full bg-white/90 p-2 shadow-[0_24px_80px_rgb(20_24_20/0.14)] backdrop-blur md:flex">
+    <div className="fixed bottom-6 left-1/2 z-30 hidden w-[min(820px,calc(100vw-9rem))] -translate-x-1/2 items-center gap-3 rounded-[18px] bg-white/90 p-2 shadow-[0_18px_54px_rgb(20_24_20/0.12)] backdrop-blur md:flex">
       <button
         type="button"
         onClick={onToggle}
@@ -830,12 +830,12 @@ function OperatorDock({
         value={operatorDraft}
         onChange={(event) => setOperatorDraft(event.target.value)}
         placeholder="Ask anything"
-        className="min-w-0 flex-1 rounded-full bg-secondary px-5 py-3 text-base outline-none placeholder:text-muted-foreground"
+        className="min-w-0 flex-1 rounded-[14px] bg-secondary px-5 py-3 text-base outline-none placeholder:text-muted-foreground"
       />
-      <Button variant="ghost" size="icon" onClick={onToggle} className="rounded-full" aria-label="Expand Operator">
+      <Button variant="ghost" size="icon" onClick={onToggle} className="rounded-[12px]" aria-label="Expand Operator">
         <Sparkles className="h-4 w-4" />
       </Button>
-      <Button size="icon" disabled={!canSubmit || isPending} onClick={createTask} className="rounded-full">
+      <Button size="icon" disabled={!canSubmit || isPending} onClick={createTask} className="rounded-[12px]">
         <Send className="h-4 w-4" />
       </Button>
     </div>

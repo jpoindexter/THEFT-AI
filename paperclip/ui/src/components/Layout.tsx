@@ -401,9 +401,9 @@ export function Layout() {
                 open={sidebarOpen}
                 resizable={false}
                 storageKey="theft.sana.sidebar.width"
-                defaultWidth={96}
-                minWidth={88}
-                maxWidth={120}
+                defaultWidth={72}
+                minWidth={72}
+                maxWidth={72}
                 className="h-full shrink-0"
               >
                 {isInstanceSettingsRoute ? (

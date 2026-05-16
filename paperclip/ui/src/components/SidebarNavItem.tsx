@@ -43,7 +43,7 @@ export function SidebarNavItem({
       className={({ isActive }) =>
         cn(
           "relative flex items-center gap-2.5 rounded-full text-[13px] font-medium transition-colors",
-          isMobile ? "px-3 py-2" : "h-12 w-12 justify-center px-0 py-0",
+          isMobile ? "px-3 py-2" : "h-10 w-10 justify-center px-0 py-0",
           isActive
             ? "bg-sidebar-accent text-sidebar-accent-foreground shadow-sm"
             : "text-sidebar-foreground/55 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
