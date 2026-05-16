@@ -123,7 +123,7 @@ export function IssueRow({
             {checklistDependencyChips}
           </span>
         ) : null}
-        <span className="flex items-center gap-2 sm:order-1 sm:shrink-0">
+        <span className="flex min-w-0 max-w-full items-center gap-2 overflow-hidden sm:order-1 sm:shrink-0 sm:overflow-visible">
           {desktopLeadingSpacer ? (
             <span className="hidden w-3.5 shrink-0 sm:block" />
           ) : null}
@@ -134,7 +134,7 @@ export function IssueRow({
                 {productivityReviewIndicator}
               </span>
               {checklistStep}
-              <span className="shrink-0 font-mono text-xs text-muted-foreground">
+              <span className="min-w-0 max-w-[18ch] truncate font-mono text-xs text-muted-foreground sm:max-w-none sm:shrink-0">
                 {identifier}
               </span>
               {planningModeIndicator}
@@ -145,7 +145,7 @@ export function IssueRow({
               <span className="text-xs text-muted-foreground sm:hidden" aria-hidden="true">
                 &middot;
               </span>
-              <span className="text-xs text-muted-foreground sm:hidden">{mobileMeta}</span>
+              <span className="min-w-0 truncate text-xs text-muted-foreground sm:hidden">{mobileMeta}</span>
             </>
           ) : null}
         </span>

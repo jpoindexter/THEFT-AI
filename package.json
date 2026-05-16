@@ -14,6 +14,7 @@
     "test": "pnpm -C paperclip test:run",
     "test:e2e": "pnpm -C paperclip test:e2e",
     "smoke:health": "node paperclip/scripts/smoke/theft-local-health.mjs",
+    "smoke:mvp-routes": "node paperclip/scripts/smoke/theft-mvp-route-smoke.mjs",
     "smoke:departments": "node paperclip/scripts/smoke/theft-department-runtime-smoke.mjs --adapter process --require-library-artifacts",
     "dev:prototype": "pnpm -C app dev",
     "build:prototype": "pnpm -C app build",

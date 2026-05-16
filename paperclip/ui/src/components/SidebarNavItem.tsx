@@ -41,14 +41,17 @@ export function SidebarNavItem({
       onClick={() => { if (isMobile) setSidebarOpen(false); }}
       className={({ isActive }) =>
         cn(
-          "flex items-center gap-2.5 px-3 py-2 text-[13px] font-medium transition-colors",
+          "relative flex items-center gap-2.5 rounded-[10px] px-3 py-2 text-[13px] font-medium uppercase tracking-[0.02em] transition-colors",
           isActive
-            ? "bg-sidebar-accent text-sidebar-accent-foreground"
+            ? "bg-sidebar-accent text-primary"
             : "text-sidebar-foreground/75 hover:bg-sidebar-accent/70 hover:text-sidebar-accent-foreground",
           className,
         )
       }
     >
+      {({ isActive }) => (
+        <>
+      {isActive ? <span className="absolute left-0 top-2 bottom-2 w-px bg-primary" aria-hidden /> : null}
       <span className="relative shrink-0">
         <Icon className="h-4 w-4" />
         {alert && (
@@ -88,6 +91,8 @@ export function SidebarNavItem({
         >
           {badge}
         </span>
+      )}
+        </>
       )}
     </NavLink>
   );

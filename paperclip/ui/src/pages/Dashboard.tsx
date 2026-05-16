@@ -74,7 +74,9 @@ export function Dashboard() {
   const { setBreadcrumbs } = useBreadcrumbs();
   const queryClient = useQueryClient();
   const [operatorDraft, setOperatorDraft] = useState("");
-  const [operatorOpen, setOperatorOpen] = useState(false);
+  const [operatorOpen, setOperatorOpen] = useState(() =>
+    typeof window === "undefined" ? true : window.matchMedia("(min-width: 1280px)").matches,
+  );
   const [selectedDepartmentKey, setSelectedDepartmentKey] = useState("engineering");
 
   useEffect(() => {
@@ -256,7 +258,10 @@ export function Dashboard() {
             outcomeCount={latestLibraryDocuments.length}
           />
 
-          <div className="grid min-w-0 gap-4 xl:grid-cols-[minmax(0,1fr)_380px]">
+          <div className={cn(
+            "grid min-w-0 gap-4",
+            operatorOpen ? "grid-cols-[minmax(0,1fr)]" : "xl:grid-cols-[minmax(0,1fr)_380px]",
+          )}>
             <StrategyMapPanel
               objective={objectiveTitle}
               goals={roadmapGoals}
@@ -808,6 +813,8 @@ function OperatorDock({
   isPending: boolean;
   canSubmit: boolean;
 }) {
+  if (open) return null;
+
   return (
     <div className="fixed bottom-4 right-4 z-30 hidden w-[min(760px,calc(100vw-2rem))] items-center gap-2 rounded-[10px] border border-border bg-background p-2 md:flex">
       <button

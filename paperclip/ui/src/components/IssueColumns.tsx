@@ -161,7 +161,7 @@ export function InboxIssueMetaLeading({
         </span>
       ) : null}
       {showIdentifier ? (
-        <span className="shrink-0 font-mono text-xs text-muted-foreground">
+        <span className="min-w-0 max-w-[18ch] truncate font-mono text-xs text-muted-foreground sm:max-w-none sm:shrink-0">
           {issue.identifier ?? issue.id.slice(0, 8)}
         </span>
       ) : null}

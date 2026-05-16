@@ -48,15 +48,15 @@
   --theft-void: #000000;
   --theft-slate: #1d1d1d;
   --theft-ash: #ffffff;
-  --theft-sand: #ffffff;
-  --theft-purple: #888888;
-  --theft-lime: #ffffff;
-  --theft-cyan: #888888;
+  --theft-sand: #cfc6b6;
+  --theft-purple: #a778ff;
+  --theft-lime: #a8ff00;
+  --theft-cyan: #52f6ff;
   --theft-line: #383838;
-  --theft-line-strong: #383838;
+  --theft-line-strong: #4a4a4a;
   --theft-canvas: #000000;
-  --theft-panel: #000000;
-  --theft-panel-raised: #1d1d1d;
+  --theft-panel: #080808;
+  --theft-panel-raised: #101010;
   --font-nb-akademie: "NB Akademie", Montserrat, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   --font-nb-akademie-mono: "NB Akademie Mono", "Space Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
   --background: var(--theft-canvas);
@@ -65,7 +65,7 @@
   --card-foreground: var(--theft-ash);
   --popover: var(--theft-panel-raised);
   --popover-foreground: var(--theft-ash);
-  --primary: #ffffff;
+  --primary: var(--theft-lime);
   --primary-foreground: #000000;
   --secondary: #1d1d1d;
   --secondary-foreground: #ffffff;
@@ -78,15 +78,15 @@
   --destructive-foreground: var(--theft-ash);
   --border: var(--theft-line);
   --input: var(--theft-line-strong);
-  --ring: #ffffff;
-  --chart-1: #ffffff;
-  --chart-2: #cfcfcf;
-  --chart-3: #888888;
-  --chart-4: #555555;
-  --chart-5: #383838;
+  --ring: var(--theft-lime);
+  --chart-1: var(--theft-lime);
+  --chart-2: var(--theft-cyan);
+  --chart-3: var(--theft-purple);
+  --chart-4: #ffc16a;
+  --chart-5: #ffffff;
   --sidebar: #000000;
   --sidebar-foreground: #ffffff;
-  --sidebar-primary: #ffffff;
+  --sidebar-primary: var(--theft-lime);
   --sidebar-primary-foreground: #000000;
   --sidebar-accent: #1d1d1d;
   --sidebar-accent-foreground: #ffffff;
@@ -107,13 +107,14 @@
 }
 
 .dark {
+  color-scheme: dark;
   --background: var(--theft-canvas);
   --foreground: var(--theft-ash);
   --card: var(--theft-panel);
   --card-foreground: var(--theft-ash);
   --popover: var(--theft-panel-raised);
   --popover-foreground: var(--theft-ash);
-  --primary: #ffffff;
+  --primary: var(--theft-lime);
   --primary-foreground: #000000;
   --secondary: #1d1d1d;
   --secondary-foreground: #ffffff;
@@ -125,15 +126,15 @@
   --destructive-foreground: var(--theft-ash);
   --border: var(--theft-line);
   --input: var(--theft-line-strong);
-  --ring: #ffffff;
-  --chart-1: #ffffff;
-  --chart-2: #cfcfcf;
-  --chart-3: #888888;
-  --chart-4: #555555;
-  --chart-5: #383838;
+  --ring: var(--theft-lime);
+  --chart-1: var(--theft-lime);
+  --chart-2: var(--theft-cyan);
+  --chart-3: var(--theft-purple);
+  --chart-4: #ffc16a;
+  --chart-5: #ffffff;
   --sidebar: #000000;
   --sidebar-foreground: #ffffff;
-  --sidebar-primary: #ffffff;
+  --sidebar-primary: var(--theft-lime);
   --sidebar-primary-foreground: #000000;
   --sidebar-accent: #1d1d1d;
   --sidebar-accent-foreground: #ffffff;
@@ -206,25 +207,44 @@
 
 .theft-shell {
   background:
-    linear-gradient(180deg, #000000 0%, var(--background) 100%);
+    linear-gradient(rgba(255,255,255,0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.035) 1px, transparent 1px),
+    var(--background);
+  background-size: 96px 96px;
 }
 
 .theft-main-surface {
   background:
-    linear-gradient(180deg, color-mix(in oklab, var(--theft-slate) 28%, transparent) 0%, transparent 18rem);
+    radial-gradient(circle at 78% 24%, rgba(82,246,255,0.08), transparent 28rem),
+    radial-gradient(circle at 20% 70%, rgba(168,255,0,0.06), transparent 26rem);
 }
 
 .dark .theft-shell {
   background:
-    linear-gradient(180deg, #000000 0%, var(--background) 100%);
+    linear-gradient(rgba(255,255,255,0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.035) 1px, transparent 1px),
+    var(--background);
+  background-size: 96px 96px;
 }
 
 .dark .theft-main-surface {
   background:
-    linear-gradient(180deg, color-mix(in oklab, var(--theft-slate) 28%, transparent) 0%, transparent 18rem);
+    radial-gradient(circle at 78% 24%, rgba(82,246,255,0.08), transparent 28rem),
+    radial-gradient(circle at 20% 70%, rgba(168,255,0,0.06), transparent 26rem);
 }
 
-/* Dark mode scrollbars */
+.theft-panel {
+  border: 1px solid var(--border);
+  background: color-mix(in oklab, var(--card) 92%, transparent);
+  border-radius: 12px;
+  box-shadow: none;
+}
+
+.theft-heading {
+  font-family: var(--font-nb-akademie);
+  letter-spacing: 0;
+}
+
 .dark {
   color-scheme: dark;
 }

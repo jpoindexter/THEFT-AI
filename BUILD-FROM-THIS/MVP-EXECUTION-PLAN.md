@@ -21,7 +21,7 @@ This MVP is not a visual prototype. It must run on `paperclip/` data.
 - Build only in `paperclip/` for the active product.
 - Keep Paperclip runtime/admin capability; streamline it behind System/diagnostics.
 - Use Mission Control structure from the GPT renders.
-- Use 099 visual style: black/white/gray, mono, 10px radius, no neon/HUD skin.
+- Use the `/Users/jasonpoindexter/Desktop/theft ai_` renders plus `/Users/jasonpoindexter/Desktop/099` as visual source of truth: black digital workbench, mono type, 10px radius, restrained borders, lime only for primary action/state.
 - Avoid full live LLM smoke while iterating. Use deterministic/local checks until pre-release.
 
 ## MVP Screen Order
@@ -170,7 +170,7 @@ Reserve heavy checks for pre-release signoff.
 Current active slice:
 
 ```text
-MVP dogfood / pre-release checks
+MVP visual alignment to 099/THEFT renders, then dogfood
 ```
 
 Last completed slices:
@@ -279,8 +279,21 @@ Verified for visual pass:
 4. Headless Chrome screenshots against the live host for Dashboard, Tasks, Tech Tree, Library, Department Workspace, System, mobile Dashboard, and tablet Dashboard
 5. Mobile Dashboard overflow diagnostic: `documentElement.scrollWidth === clientWidth` and no right-edge offenders
 
+Verified for 099/THEFT render alignment pass:
+
+1. `pnpm -C paperclip --filter @paperclipai/ui typecheck`
+2. Desktop MVP route smoke: `node paperclip/scripts/smoke/theft-mvp-route-smoke.mjs --company-prefix THEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA --screenshot-dir /private/tmp/theft-mvp-route-smoke-desktop`
+3. Mobile MVP route smoke: `node paperclip/scripts/smoke/theft-mvp-route-smoke.mjs --company-prefix THEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA --mobile --screenshot-dir /private/tmp/theft-mvp-route-smoke-mobile`
+
+Local smoke helper:
+
+- `pnpm smoke:mvp-routes -- --company-prefix <prefix>`
+- Add `--mobile` for phone overflow checks.
+- This is a zero-quota browser smoke; it does not invoke agents or LLM adapters.
+
 Next exact steps:
 
-1. commit, tag, push visual checkpoint;
+1. keep iterating against the render folder until Mission Control, onboarding, tasks, Library, Tech Tree, and Department Workspace match the intended shell;
 2. dogfood the MVP happy path manually in the live app;
-3. reserve heavier Playwright/live model smoke for pre-release signoff.
+3. commit/tag locally after visual approval;
+4. reserve heavier Playwright/live model smoke for pre-release signoff.

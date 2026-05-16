@@ -262,13 +262,13 @@ export function Goals() {
                 <TechTreeStat value={goals.filter((goal) => goal.status === "achieved").length} label="done" />
               </div>
             </div>
-            <div className="grid gap-4 bg-background/40 p-4 lg:grid-cols-[minmax(0,1fr)_320px]">
-              <div className="space-y-2">
+            <div className="grid min-w-0 grid-cols-[minmax(0,1fr)] gap-4 bg-background/40 p-4 lg:grid-cols-[minmax(0,1fr)_320px]">
+              <div className="min-w-0 space-y-2">
                 {techTreeStages.map((stage) => (
                   <TechTreeStageSection key={stage.key} stage={stage} />
                 ))}
               </div>
-              <aside className="space-y-3">
+              <aside className="min-w-0 space-y-3">
                 <div className="border border-border bg-card p-4">
                   <div className="text-xs font-medium uppercase tracking-[0.14em] text-muted-foreground">
                     Selected node
@@ -336,7 +336,7 @@ export function Goals() {
 
 function TechTreeStageSection({ stage }: { stage: TechTreeStageView }) {
   return (
-    <section className="border border-border bg-card/60">
+    <section className="min-w-0 border border-border bg-card/60">
       <div className="flex items-start justify-between gap-4 border-b border-border px-3 py-2">
         <div>
           <h2 className="text-sm font-medium text-foreground">{stage.label}</h2>
@@ -392,7 +392,7 @@ function TechTreeNodeCard({ node }: { node: TechTreeNodeView }) {
     <Link
       to={`/goals/${node.goal.id}`}
       className={cn(
-        "group grid gap-3 border border-border bg-card p-3 text-sm text-inherit no-underline transition-colors hover:border-primary/70 hover:bg-accent/40 md:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)_minmax(0,1fr)]",
+        "group grid min-w-0 grid-cols-[minmax(0,1fr)] gap-3 border border-border bg-card p-3 text-sm text-inherit no-underline transition-colors hover:border-primary/70 hover:bg-accent/40 md:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)_minmax(0,1fr)]",
         node.depth > 0 && "ml-4 border-l-4 border-l-primary/30",
       )}
     >

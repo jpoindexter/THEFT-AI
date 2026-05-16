@@ -71,8 +71,7 @@ export function Sidebar() {
 
   return (
     <aside className="w-full h-full min-h-0 border-r border-sidebar-border bg-sidebar text-sidebar-foreground flex flex-col">
-      {/* Top bar: Company name (bold) + Search — aligned with top sections (no visible border) */}
-      <div className="flex items-center gap-1 px-3 h-12 shrink-0">
+      <div className="flex h-16 shrink-0 items-center gap-2 border-b border-sidebar-border px-3">
         <SidebarCompanyMenu />
         <Button
           variant="ghost"
@@ -84,25 +83,13 @@ export function Sidebar() {
         </Button>
       </div>
 
-      <nav className="flex-1 min-h-0 overflow-y-auto scrollbar-auto-hide flex flex-col gap-4 px-3 py-2">
-        <div className="flex flex-col gap-0.5">
-          {/* New task button aligned with nav items */}
-          <button
-            onClick={() => openNewIssue()}
-            className="flex items-center gap-2.5 px-3 py-2 text-[13px] font-medium text-muted-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition-colors"
-          >
-            <SquarePen className="h-4 w-4 shrink-0" />
-            <span className="truncate">Ask Operator</span>
-          </button>
-          <SidebarNavItem to="/dashboard" label="Command Center" icon={LayoutDashboard} liveCount={liveRunCount} />
-          <SidebarNavItem
-            to="/inbox"
-            label="Attention"
-            icon={Inbox}
-            badge={inboxBadge.inbox}
-            badgeTone={inboxBadge.failedRuns > 0 ? "danger" : "default"}
-            alert={inboxBadge.failedRuns > 0}
-          />
+      <nav className="flex-1 min-h-0 overflow-y-auto scrollbar-auto-hide flex flex-col gap-4 px-3 py-4">
+        <div className="flex flex-col gap-1">
+          <SidebarNavItem to="/dashboard" label="Mission Control" icon={LayoutDashboard} liveCount={liveRunCount} />
+          <SidebarNavItem to="/issues" label="Tasks" icon={CircleDot} badge={inboxBadge.inbox} badgeTone={inboxBadge.failedRuns > 0 ? "danger" : "default"} alert={inboxBadge.failedRuns > 0} />
+          <SidebarNavItem to="/library" label="Library" icon={Library} />
+          <SidebarNavItem to="/goals" label="Tech Tree" icon={Target} />
+          <SidebarNavItem to="/departments/engineering" label="Departments" icon={Building2} />
           <PluginSlotOutlet
             slotTypes={["sidebar"]}
             context={pluginContext}
@@ -112,12 +99,16 @@ export function Sidebar() {
           />
         </div>
 
-        <SidebarSection label="Work">
-          <SidebarNavItem to="/departments/engineering" label="Departments" icon={Building2} />
-          <SidebarNavItem to="/issues" label="Task Review" icon={CircleDot} />
-          <SidebarNavItem to="/library" label="Company Memory" icon={Library} />
+        <SidebarSection label="Operator">
+          <button
+            onClick={() => openNewIssue()}
+            className="flex items-center gap-2.5 px-3 py-2 text-[13px] font-medium text-muted-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition-colors"
+          >
+            <SquarePen className="h-4 w-4 shrink-0" />
+            <span className="truncate">New task</span>
+          </button>
+          <SidebarNavItem to="/inbox" label="Attention" icon={Inbox} />
           <SidebarNavItem to="/search" label="Search" icon={Search} />
-          <SidebarNavItem to="/goals" label="Tech Tree" icon={Target} />
           {showWorkspacesLink ? (
             <SidebarNavItem to="/workspaces" label="Workspaces" icon={GitBranch} />
           ) : null}

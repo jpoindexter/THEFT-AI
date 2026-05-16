@@ -151,8 +151,8 @@ export function DepartmentWorkspace() {
         </div>
       </section>
 
-      <section className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_360px]">
-        <div className="space-y-5">
+      <section className="grid min-w-0 grid-cols-[minmax(0,1fr)] gap-5 xl:grid-cols-[minmax(0,1fr)_360px]">
+        <div className="min-w-0 space-y-5">
           <WorkPanel
             title="Active Work"
             description="Work this department should move next."
@@ -186,7 +186,7 @@ export function DepartmentWorkspace() {
           />
         </div>
 
-        <aside className="space-y-5">
+        <aside className="min-w-0 space-y-5">
           <div className="border border-border bg-card p-4  ">
             <div className="flex items-start gap-3">
               <div className="mt-0.5 rounded-md bg-muted p-2 text-foreground">
@@ -308,7 +308,7 @@ function WorkPanel({
   tone?: "default" | "attention";
 }) {
   return (
-    <div className="border border-border bg-card p-4">
+    <div className="min-w-0 border border-border bg-card p-4">
       <div className="flex items-start justify-between gap-3">
         <div className="flex items-start gap-3">
           <div className={cn("mt-0.5 rounded-md p-2", tone === "attention" ? "bg-destructive/10 text-destructive" : "bg-muted text-foreground")}>
@@ -329,13 +329,13 @@ function WorkPanel({
             <Link
               key={issue.id}
               to={issuePath(issue)}
-              className="flex items-center justify-between gap-3 p-3 text-inherit no-underline transition-colors hover:bg-accent/40"
+            className="flex min-w-0 items-center justify-between gap-3 p-3 text-inherit no-underline transition-colors hover:bg-accent/40"
             >
               <div className="flex min-w-0 items-center gap-3">
                 <StatusIcon status={issue.status} blockerAttention={issue.blockerAttention} />
                 <div className="min-w-0">
                   <p className="truncate text-sm font-medium">{issue.title}</p>
-                  <p className="mt-0.5 text-xs text-muted-foreground">
+                  <p className="mt-0.5 truncate text-xs text-muted-foreground">
                     {issue.identifier ?? statusLabel(issue.status)} - Updated {timeAgo(issue.updatedAt)}
                   </p>
                 </div>
