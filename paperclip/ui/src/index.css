@@ -138,6 +138,7 @@
   --theft-text-micro: 11px;
   --theft-text-nano: 10px;
   --theft-text-badge: 9px;
+  --theft-root-font-size: 100%;
   --text-caption: 13px;
   --leading-caption: 1.4;
   --text-body: 16px;
@@ -249,7 +250,7 @@
   }
   html {
     height: 100%;
-    font-size: 100%;
+    font-size: var(--theft-root-font-size);
     -webkit-tap-highlight-color: color-mix(in oklab, var(--foreground) 20%, transparent);
   }
   body {
@@ -281,18 +282,6 @@
   .paperclip-mdxeditor [class*="_placeholder_"],
   .paperclip-mdxeditor-content {
     font-family: inherit;
-  }
-}
-
-@media (min-width: 768px) {
-  html {
-    font-size: 87.5%;
-  }
-}
-
-@media (min-width: 1280px) {
-  html {
-    font-size: 75%;
   }
 }
 

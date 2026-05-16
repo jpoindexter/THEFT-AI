@@ -22,6 +22,10 @@ Use semantic THEFT tokens first:
 
 New product surfaces should be built on the 8px grid. Use THEFT spacing tokens for layout, panel widths, rails, canvas sizes, map nodes, gutters, and major component padding. If a new value is needed, add a named semantic token in `index.css` before using it in a component.
 
+## Density Rule
+
+Keep the browser/root font size at normal readable scale. Do not simulate 75% browser zoom by shrinking `html`; it makes controls, icons, and text too small. Achieve compact desktop density through semantic layout tokens, measured column widths, shorter panels, and controlled spacing.
+
 ## Component Rules
 
 - Do not add hex colors in TSX. Add or reuse a color token.
