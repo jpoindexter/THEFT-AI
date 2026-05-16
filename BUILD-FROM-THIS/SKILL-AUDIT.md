@@ -57,6 +57,21 @@ These are the target defaults for the staged onboarding seed:
 | Legal | `gic-skills` until dedicated legal skill exists |
 | Support | `gic-skills`, `content-engine` |
 
+## Repo-Local Codex Skill Kit
+
+Added 2026-05-16 under `.agents/skills/`. These are development/operator skills for Codex sessions, not Paperclip company skills auto-imported from root `skills/`.
+
+| Skill | Source | Use |
+|---|---|---|
+| `diagnose` | `github.com/mattpocock/skills` | Reproduce, isolate, instrument, fix, and regression-test hard bugs. |
+| `tdd` | `github.com/mattpocock/skills` | Use vertical red-green-refactor loops for risky features and bug fixes. |
+| `prototype` | `github.com/mattpocock/skills` | Build throwaway logic or UI prototypes when a product question needs to be felt quickly. |
+| `improve-codebase-architecture` | `github.com/mattpocock/skills` | Find deepening opportunities and make modules more testable and AI-navigable. Adapted to Codex's subagent rules. |
+| `zoom-out` | `github.com/mattpocock/skills` | Build a higher-level map of unfamiliar code before changing it. |
+| `didit-identity-verification` | `github.com/didit-protocol/skills` | Consolidated Didit KYC, AML, document, biometric, email, phone, and database verification references. |
+
+Skipped importing the rest as top-level skills to avoid repeating the skills context budget problem. Didit remains one consolidated skill with detailed references loaded only when needed.
+
 ## Remaining Gaps
 
 - Add a dedicated Legal skill packet.
