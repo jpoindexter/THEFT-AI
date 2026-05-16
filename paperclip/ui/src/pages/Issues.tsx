@@ -14,8 +14,21 @@ import { createIssueDetailLocationState } from "../lib/issueDetailBreadcrumb";
 import { EmptyState } from "../components/EmptyState";
 import { IssuesList } from "../components/IssuesList";
 import { StatusIcon } from "../components/StatusIcon";
-import { AlertTriangle, CheckCircle2, CircleDot, Clock3, ListChecks, type LucideIcon } from "lucide-react";
-import type { Issue } from "@paperclipai/shared";
+import {
+  AlertTriangle,
+  ArrowRight,
+  Bot,
+  CheckCircle2,
+  CircleDot,
+  Clock3,
+  FileCheck2,
+  GitBranch,
+  ListChecks,
+  MessageSquare,
+  Sparkles,
+  type LucideIcon,
+} from "lucide-react";
+import type { Agent, Issue } from "@paperclipai/shared";
 
 const WORKSPACE_FILTER_ISSUE_LIMIT = 1000;
 const ISSUES_PAGE_SIZE = 500;
@@ -234,8 +247,13 @@ export function Issues() {
   }
 
   return (
-    <div className="space-y-4">
-      <TasksMissionHeader buckets={founderBuckets} isLoading={isLoading} issueLinkState={issueLinkState} />
+    <div className="space-y-5">
+      <TasksMissionHeader
+        buckets={founderBuckets}
+        isLoading={isLoading}
+        issueLinkState={issueLinkState}
+        agents={agents}
+      />
       <IssuesList
         issues={issues ?? []}
         isLoading={isLoading}
@@ -266,65 +284,152 @@ function TasksMissionHeader({
   buckets,
   isLoading,
   issueLinkState,
+  agents,
 }: {
   buckets: FounderTaskBuckets;
   isLoading: boolean;
   issueLinkState: ReturnType<typeof createIssueDetailLocationState>;
+  agents?: Agent[];
 }) {
   const nextIssue = buckets.needsAction[0] ?? buckets.ongoing[0] ?? buckets.todo[0] ?? null;
+  const secondaryIssues = buckets.needsAction.slice(1, 5);
+  const ownerName = getIssueOwnerName(nextIssue, agents);
+  const actionReason = nextIssue ? getFounderActionReason(nextIssue) : "No current blocker";
+  const decisionItems = nextIssue ? getIssueDecisionItems(nextIssue) : [];
 
   return (
-    <section className="theft-panel p-5 md:p-6">
-      <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
-        <div className="max-w-3xl space-y-3">
-          <div className="inline-flex items-center gap-2 rounded-[10px] border border-border/80 bg-muted/25 px-3 py-1 text-[11px] font-medium uppercase tracking-[0.12em] text-muted-foreground">
-            Founder review queue
+    <section className="theft-panel overflow-hidden p-0">
+      <div className="grid gap-0 lg:grid-cols-[minmax(0,1fr)_360px]">
+        <div className="space-y-5 p-5 md:p-7">
+          <div className="flex flex-col gap-5 xl:flex-row xl:items-start xl:justify-between">
+            <div className="max-w-2xl space-y-3">
+              <div className="inline-flex items-center gap-2 rounded-full border border-border/80 bg-muted/25 px-3 py-1 text-[11px] font-medium uppercase tracking-[0.08em] text-muted-foreground">
+                <Sparkles className="h-3.5 w-3.5" />
+                Needs Action
+              </div>
+              <div>
+                <h1 className="theft-heading text-2xl md:text-[2rem]">Task review queue</h1>
+                <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">
+                  The queue surfaces decisions, blocked work, and ready outputs first. Runtime detail stays available below.
+                </p>
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-2 sm:grid-cols-4 xl:w-[520px]">
+              <TaskBucketStat icon={AlertTriangle} label="Needs action" value={buckets.needsAction.length} tone="attention" />
+              <TaskBucketStat icon={Clock3} label="Ongoing" value={buckets.ongoing.length} />
+              <TaskBucketStat icon={ListChecks} label="Todo" value={buckets.todo.length} />
+              <TaskBucketStat icon={CheckCircle2} label="Done" value={buckets.done.length} />
+            </div>
           </div>
-          <div>
-            <h1 className="theft-heading text-2xl md:text-3xl">Tasks</h1>
-            <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
-              Clear approvals, blocked work, ready outputs, and next actions without dropping into runtime logs first.
-            </p>
+
+          <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_300px]">
+            <div className="min-w-0 border border-border bg-card p-4 shadow-sm">
+              <div className="mb-4 flex flex-wrap items-start justify-between gap-3">
+                <div>
+                  <p className="text-xs font-medium uppercase tracking-[0.08em] text-muted-foreground">Recommended next move</p>
+                  <p className="mt-1 text-sm text-muted-foreground">
+                    {isLoading ? "Loading active company tasks..." : nextIssue ? actionReason : "No active task pressure right now."}
+                  </p>
+                </div>
+                {nextIssue ? (
+                  <span className="rounded-full border border-border bg-background px-2.5 py-1 text-xs text-muted-foreground">
+                    {nextIssue.priority ?? "medium"} priority
+                  </span>
+                ) : null}
+              </div>
+
+              {nextIssue ? (
+                <Link
+                  to={`/issues/${nextIssue.identifier ?? nextIssue.id}`}
+                  state={issueLinkState}
+                  className="group block border border-border bg-background px-4 py-4 transition hover:border-foreground/50 hover:bg-muted/25"
+                >
+                  <div className="flex min-w-0 items-start justify-between gap-4">
+                    <div className="flex min-w-0 items-start gap-3">
+                      <StatusIcon status={nextIssue.status} blockerAttention={nextIssue.blockerAttention} className="mt-1" />
+                      <div className="min-w-0">
+                        <h2 className="break-words text-lg font-semibold leading-7 text-foreground">{nextIssue.title}</h2>
+                        <p className="mt-1 text-xs text-muted-foreground">
+                          {nextIssue.identifier ?? "Unnumbered"} · {nextIssue.status.replace(/_/g, " ")} · {ownerName}
+                        </p>
+                      </div>
+                    </div>
+                    <ArrowRight className="mt-1 h-4 w-4 shrink-0 text-muted-foreground transition group-hover:translate-x-0.5 group-hover:text-foreground" />
+                  </div>
+                  {nextIssue.description ? (
+                    <p className="mt-4 line-clamp-2 text-sm leading-6 text-muted-foreground">{nextIssue.description}</p>
+                  ) : null}
+                  <div className="mt-4 grid gap-2 sm:grid-cols-3">
+                    {decisionItems.map((item) => (
+                      <TaskSignal key={item.label} icon={item.icon} label={item.label} value={item.value} />
+                    ))}
+                  </div>
+                </Link>
+              ) : (
+                <div className="border border-dashed border-border bg-background/60 px-4 py-8 text-sm text-muted-foreground">
+                  {isLoading ? "Loading tasks..." : "Create or route the next task when you are ready to advance the company."}
+                </div>
+              )}
+            </div>
+
+            <div className="border border-border bg-muted/20 p-4">
+              <div className="flex items-center justify-between gap-3">
+                <p className="text-xs font-medium uppercase tracking-[0.08em] text-muted-foreground">Up next</p>
+                <span className="text-xs text-muted-foreground">{secondaryIssues.length} queued</span>
+              </div>
+              <div className="mt-3 space-y-2">
+                {secondaryIssues.length > 0 ? secondaryIssues.map((issue) => (
+                  <Link
+                    key={issue.id}
+                    to={`/issues/${issue.identifier ?? issue.id}`}
+                    state={issueLinkState}
+                    className="flex items-start gap-2 border border-border bg-background px-3 py-2 text-sm transition hover:border-foreground/40 hover:bg-card"
+                  >
+                    <StatusIcon status={issue.status} blockerAttention={issue.blockerAttention} className="mt-0.5" />
+                    <span className="min-w-0">
+                      <span className="block truncate font-medium text-foreground">{issue.title}</span>
+                      <span className="mt-0.5 block text-xs text-muted-foreground">{getFounderActionReason(issue)}</span>
+                    </span>
+                  </Link>
+                )) : (
+                  <div className="border border-dashed border-border bg-background/60 px-3 py-6 text-sm text-muted-foreground">
+                    No extra review items.
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
         </div>
-        <div className="grid grid-cols-2 gap-2 sm:grid-cols-4 lg:min-w-[520px]">
-          <TaskBucketStat icon={AlertTriangle} label="Needs action" value={buckets.needsAction.length} tone="attention" />
-          <TaskBucketStat icon={Clock3} label="Ongoing" value={buckets.ongoing.length} />
-          <TaskBucketStat icon={ListChecks} label="Todo" value={buckets.todo.length} />
-          <TaskBucketStat icon={CheckCircle2} label="Done" value={buckets.done.length} />
-        </div>
-      </div>
-      <div className="mt-5 border border-border bg-card/70 p-4">
-        <div className="mb-3 flex items-center justify-between gap-3">
-          <div>
-            <p className="text-xs font-medium uppercase tracking-[0.12em] text-muted-foreground">Next move</p>
-            <p className="mt-1 text-sm text-muted-foreground">
-              {isLoading ? "Loading active company tasks..." : nextIssue ? "Open the highest leverage item first." : "No active task pressure right now."}
-            </p>
-          </div>
-        </div>
-        {nextIssue ? (
-          <Link
-            to={`/issues/${nextIssue.id}`}
-            state={issueLinkState}
-            className="flex items-start justify-between gap-4 border border-border bg-background/70 px-4 py-3 text-sm transition hover:border-foreground/60 hover:bg-muted/40"
-          >
-            <span className="flex min-w-0 items-start gap-3">
-              <StatusIcon status={nextIssue.status} blockerAttention={nextIssue.blockerAttention} className="mt-0.5" />
-              <span className="min-w-0">
-                <span className="block truncate font-medium text-foreground">{nextIssue.title}</span>
-                <span className="mt-1 block text-xs text-muted-foreground">
-                  {nextIssue.identifier ?? "Unnumbered"} · {nextIssue.status.replace(/_/g, " ")}
-                </span>
-              </span>
+
+        <aside className="border-t border-border bg-muted/20 p-5 lg:border-l lg:border-t-0 md:p-6">
+          <div className="flex items-center gap-2">
+            <span className="flex h-9 w-9 items-center justify-center rounded-full border border-border bg-background">
+              <Bot className="h-4 w-4" />
             </span>
-            <span className="shrink-0 text-xs text-muted-foreground">Open</span>
-          </Link>
-        ) : (
-          <div className="border border-dashed border-border bg-background/60 px-4 py-5 text-sm text-muted-foreground">
-            {isLoading ? "Loading tasks..." : "Create or route the next task when you are ready to advance the company."}
+            <div>
+              <h2 className="text-base font-semibold text-foreground">Operator</h2>
+              <p className="text-xs text-muted-foreground">Ask what to do next.</p>
+            </div>
           </div>
-        )}
+          <div className="mt-5 space-y-3">
+            <button className="w-full border border-border bg-background px-3 py-3 text-left text-sm transition hover:border-foreground/40 hover:bg-card">
+              Summarize the bottleneck
+            </button>
+            <button className="w-full border border-border bg-background px-3 py-3 text-left text-sm transition hover:border-foreground/40 hover:bg-card">
+              Route this to a department
+            </button>
+            <button className="w-full border border-border bg-background px-3 py-3 text-left text-sm transition hover:border-foreground/40 hover:bg-card">
+              Draft the approval comment
+            </button>
+          </div>
+          <div className="mt-5 border border-border bg-background p-3">
+            <div className="flex items-center gap-2 text-xs text-muted-foreground">
+              <MessageSquare className="h-3.5 w-3.5" />
+              Persistent chat is docked here.
+            </div>
+            <p className="mt-2 text-sm text-foreground">What should move first?</p>
+          </div>
+        </aside>
       </div>
     </section>
   );
@@ -342,7 +447,7 @@ function TaskBucketStat({
   tone?: "attention" | "neutral";
 }) {
   return (
-    <div className="border border-border bg-card/70 p-3">
+    <div className="border border-border bg-card/70 p-3 shadow-sm">
       <div className="flex items-center justify-between gap-3">
         <Icon className={tone === "attention" ? "h-4 w-4 text-foreground" : "h-4 w-4 text-muted-foreground"} />
         <span className="text-2xl font-semibold tabular-nums text-foreground">{value}</span>
@@ -350,4 +455,43 @@ function TaskBucketStat({
       <p className="mt-2 text-xs text-muted-foreground">{label}</p>
     </div>
   );
+}
+
+function TaskSignal({ icon: Icon, label, value }: { icon: LucideIcon; label: string; value: string }) {
+  return (
+    <div className="border border-border bg-muted/25 px-3 py-2">
+      <div className="flex items-center gap-2 text-xs text-muted-foreground">
+        <Icon className="h-3.5 w-3.5" />
+        {label}
+      </div>
+      <p className="mt-1 truncate text-sm font-medium text-foreground">{value}</p>
+    </div>
+  );
+}
+
+function getIssueOwnerName(issue: Issue | null, agents?: Agent[]): string {
+  if (!issue) return "No owner";
+  const agent = agents?.find((candidate) => candidate.id === issue.assigneeAgentId);
+  if (agent) return agent.name;
+  if (issue.assigneeUserId) return "Founder";
+  return "Unassigned";
+}
+
+function getFounderActionReason(issue: Issue): string {
+  if (issue.status === "blocked") return "Blocked: decide, reroute, or unblock";
+  if (issue.status === "in_review") return "Review output and approve the next step";
+  if (issue.productivityReview != null) return "Review agent productivity signal";
+  if (issue.successfulRunHandoff?.required === true) return "Needs concrete handoff into the next task";
+  if (issue.blockerAttention?.state === "stalled") return "Stalled: choose a recovery path";
+  if (issue.blockerAttention?.state === "needs_attention") return "Needs founder attention";
+  if (issue.status === "in_progress") return "Monitor execution";
+  return "Ready to schedule";
+}
+
+function getIssueDecisionItems(issue: Issue): Array<{ icon: LucideIcon; label: string; value: string }> {
+  return [
+    { icon: GitBranch, label: "Execution", value: issue.status.replace(/_/g, " ") },
+    { icon: FileCheck2, label: "Output", value: issue.successfulRunHandoff?.required === true ? "Needs handoff" : "Check evidence" },
+    { icon: AlertTriangle, label: "Decision", value: getFounderActionReason(issue) },
+  ];
 }
