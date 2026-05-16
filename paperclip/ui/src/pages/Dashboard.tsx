@@ -733,66 +733,150 @@ function OperatorDrawer({
   nextMove: CompanyBottleneck;
   onClose: () => void;
 }) {
+  const selectedDepartment =
+    departments.find((department) => department.key === selectedDepartmentKey) ?? departments[0] ?? null;
+  const proposedTasks = [
+    {
+      title: nextMove.issue?.title ?? nextMove.label,
+      department: selectedDepartment?.title ?? "Operator",
+      artifact: "Decision brief",
+    },
+    {
+      title: "Collect evidence for the recommended path",
+      department: selectedDepartment?.title ?? "Operator",
+      artifact: "Evidence notes",
+    },
+  ];
+
   return (
-    <aside className="theft-panel p-5 md:p-7">
+    <aside className="theft-panel flex max-h-[calc(100dvh-8rem)] min-h-[720px] flex-col overflow-hidden p-0">
       <div className="flex items-start justify-between gap-3">
-        <div>
-          <p className="text-xs uppercase tracking-normal text-muted-foreground">Operator</p>
-          <h2 className="mt-1 text-lg font-normal">{operator?.name ?? "Operator"}</h2>
-          <p className="mt-1 text-sm text-muted-foreground">Context-aware routing and recommendations.</p>
+        <div className="min-w-0 p-5 pb-3 md:p-6 md:pb-3">
+          <p className="text-xs uppercase tracking-[0.12em] text-muted-foreground">Operator</p>
+          <h2 className="mt-1 truncate text-lg font-medium">{operator?.name ?? "Operator"}</h2>
+          <p className="mt-1 text-sm text-muted-foreground">Mission Control context</p>
         </div>
-        <Button variant="ghost" size="icon-sm" onClick={onClose} aria-label="Collapse Operator">
+        <Button variant="ghost" size="icon-sm" onClick={onClose} aria-label="Collapse Operator" className="m-4 shrink-0">
           <X className="h-4 w-4" />
         </Button>
       </div>
 
-      <div className="mt-5 rounded-[14px] bg-secondary p-4">
-        <p className="text-xs text-muted-foreground">Recommended next move</p>
-        <p className="mt-2 text-sm">{nextMove.label}</p>
-        <p className="mt-2 text-xs leading-5 text-muted-foreground">{nextMove.detail}</p>
-      </div>
+      <div className="min-h-0 flex-1 overflow-y-auto px-5 pb-5 md:px-6">
+        <div className="space-y-4">
+          <div className="border border-border bg-secondary p-4">
+            <div className="flex items-center justify-between gap-3 text-xs text-muted-foreground">
+              <span>You</span>
+              <span>now</span>
+            </div>
+            <p className="mt-2 text-sm">What should we do next?</p>
+          </div>
 
-      <div className="mt-5">
-        <p className="text-xs uppercase tracking-normal text-muted-foreground">Route to department</p>
-        <div className="mt-2 grid grid-cols-2 gap-2">
-          {departments.map((department) => (
-            <button
-              key={department.key}
-              type="button"
-              onClick={() => setSelectedDepartmentKey(department.key)}
-              className={cn(
-                "rounded-[12px] border px-3 py-3 text-left text-xs transition-colors",
-                selectedDepartmentKey === department.key
-                  ? "border-foreground bg-secondary text-foreground"
-                  : "border-border bg-card text-muted-foreground hover:text-foreground",
-              )}
-            >
-              <span className="block truncate">{department.title}</span>
-              <span className="mt-0.5 block truncate">{department.agent?.name ?? "No lead"}</span>
-            </button>
-          ))}
+          <div className="border border-border p-4">
+            <div className="flex items-center justify-between gap-3 text-xs text-muted-foreground">
+              <span>Operator</span>
+              <span>recommended</span>
+            </div>
+            <div className="mt-3 border border-foreground bg-card p-3">
+              <p className="text-xs uppercase tracking-[0.12em] text-muted-foreground">Next move</p>
+              <p className="mt-2 text-base font-medium">{nextMove.label}</p>
+              <p className="mt-2 text-xs leading-5 text-muted-foreground">
+                {nextMove.tone === "clear" ? "Ready to advance." : "High leverage based on current constraints."}
+              </p>
+            </div>
+
+            <div className="mt-4">
+              <p className="text-xs font-medium uppercase tracking-[0.12em] text-muted-foreground">Rationale</p>
+              <ul className="mt-2 space-y-1.5 text-sm leading-5 text-muted-foreground">
+                <li>Locks the current bottleneck into one concrete action.</li>
+                <li>Uses latest execution state and Library evidence.</li>
+                <li>Creates a reviewable artifact instead of more status.</li>
+              </ul>
+            </div>
+
+            <div className="mt-4 grid gap-2">
+              <EvidenceChip label="Constraint" value={nextMove.tone === "clear" ? "Clear" : "Needs action"} />
+              <EvidenceChip label="Department" value={selectedDepartment?.title ?? "Operator"} />
+              <EvidenceChip label="Artifact" value="Expected Library output" />
+            </div>
+
+            <div className="mt-4">
+              <p className="text-xs font-medium uppercase tracking-[0.12em] text-muted-foreground">Tradeoffs</p>
+              <div className="mt-2 grid gap-2 text-xs text-muted-foreground">
+                <div className="border border-border p-2">
+                  <span className="font-medium text-foreground">Upside:</span> moves the company toward a durable outcome.
+                </div>
+                <div className="border border-border p-2">
+                  <span className="font-medium text-foreground">Risk:</span> may need revision if context is incomplete.
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="border border-border p-4">
+            <p className="text-xs font-medium uppercase tracking-[0.12em] text-muted-foreground">Proposed tasks</p>
+            <div className="mt-3 space-y-2">
+              {proposedTasks.map((task) => (
+                <div key={task.title} className="border border-border bg-secondary p-3">
+                  <p className="text-sm font-medium">{task.title}</p>
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    {task.department} · {task.artifact}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div>
+            <p className="text-xs uppercase tracking-[0.12em] text-muted-foreground">Route to department</p>
+            <div className="mt-2 grid grid-cols-2 gap-2">
+              {departments.map((department) => (
+                <button
+                  key={department.key}
+                  type="button"
+                  onClick={() => setSelectedDepartmentKey(department.key)}
+                  className={cn(
+                    "border px-3 py-3 text-left text-xs transition-colors",
+                    selectedDepartmentKey === department.key
+                      ? "border-foreground bg-secondary text-foreground"
+                      : "border-border bg-card text-muted-foreground hover:text-foreground",
+                  )}
+                >
+                  <span className="block truncate">{department.title}</span>
+                  <span className="mt-0.5 block truncate">{department.agent?.name ?? "No lead"}</span>
+                </button>
+              ))}
+            </div>
+          </div>
         </div>
       </div>
 
-      <div className="mt-5 space-y-3">
+      <div className="border-t border-border p-5 md:p-6">
         <Textarea
           value={operatorDraft}
           onChange={(event) => setOperatorDraft(event.target.value)}
-          placeholder="Ask Operator to create the next concrete task..."
-          className="min-h-32 resize-none rounded-[14px] border-0 bg-secondary p-4"
+          placeholder="Ask Operator about this recommendation..."
+          className="min-h-24 resize-none rounded-none border-0 bg-secondary p-4"
         />
         {error ? <p className="text-sm text-destructive">{error}</p> : null}
-        <Button className="w-full" disabled={!canSubmit || isPending} onClick={createTask}>
-          <Send className="h-4 w-4" />
-          {isPending ? "Routing..." : "Create task"}
-        </Button>
-        <div className="grid grid-cols-3 gap-2">
-          <Button variant="outline" size="sm">Explain</Button>
-          <Button variant="outline" size="sm">Compare</Button>
-          <Button variant="outline" size="sm">Review</Button>
+        <div className="mt-3 grid grid-cols-2 gap-2">
+          <Button className="col-span-2 rounded-none" disabled={isPending} onClick={createTask}>
+            <Send className="h-4 w-4" />
+            {isPending ? "Routing..." : "Create recommended task"}
+          </Button>
+          <Button variant="outline" size="sm" className="rounded-none">Compare options</Button>
+          <Button variant="outline" size="sm" className="rounded-none">Explain risk</Button>
         </div>
       </div>
     </aside>
+  );
+}
+
+function EvidenceChip({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="flex items-center justify-between gap-3 border border-border p-2 text-xs">
+      <span className="text-muted-foreground">{label}</span>
+      <span className="truncate font-medium">{value}</span>
+    </div>
   );
 }
 
