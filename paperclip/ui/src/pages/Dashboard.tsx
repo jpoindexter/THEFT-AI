@@ -365,7 +365,7 @@ function ObjectiveHeader({
           </div>
           <div className="min-w-0">
             <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
-              <Badge variant="outline" className="rounded-[10px] border-border bg-secondary px-3 py-1 text-foreground">
+              <Badge variant="outline" className="border-border bg-secondary px-3 py-1 text-foreground">
                 Objective
               </Badge>
               <span className="truncate">{companyName}</span>
@@ -407,7 +407,7 @@ function FreshCompanyPanel({ onAskOperator }: { onAskOperator: () => void }) {
         </p>
       </div>
       <div className="grid gap-2">
-        <Button onClick={onAskOperator} className="rounded-none">
+        <Button onClick={onAskOperator}>
           <Sparkles className="h-4 w-4" />
           Ask Operator for first move
         </Button>
@@ -478,7 +478,7 @@ function StrategyMapPanel({
                   <h3 className="truncate text-base font-semibold group-hover:text-foreground">{department.title}</h3>
                   <p className="mt-1 truncate text-xs text-muted-foreground">{summarizeAgent(department.agent)}</p>
                 </div>
-                <Badge variant={department.activeCount > 0 ? "default" : "outline"} className="rounded-[10px]">
+                <Badge variant={department.activeCount > 0 ? "default" : "outline"}>
                   {department.activeCount} open
                 </Badge>
               </div>
@@ -561,7 +561,7 @@ function ConstraintsPanel({
       <h2 className="text-xl font-semibold">Constraints</h2>
       <div className="mt-3 grid grid-cols-2 gap-2">
         {constraints.map((constraint) => (
-          <div key={constraint.label} className="rounded-[14px] bg-secondary p-4">
+          <div key={constraint.label} className="rounded-lg bg-secondary p-4">
             <p className="text-xs text-muted-foreground">{constraint.label}</p>
             <p className="mt-2 text-3xl font-semibold tabular-nums">{constraint.value}</p>
             <p className="mt-1 text-xs text-muted-foreground">{constraint.detail}</p>
@@ -591,14 +591,14 @@ function DecisionsPanel({
           View all
         </Link>
       </div>
-      <div className="mt-3 divide-y divide-border overflow-hidden rounded-[14px] bg-secondary">
+      <div className="mt-3 divide-y divide-border overflow-hidden rounded-lg bg-secondary">
         {approvalsCount > 0 ? (
           <Link to="/approvals/pending" className="flex items-center justify-between gap-3 p-3 text-inherit no-underline hover:bg-accent">
             <span>
               <span className="block text-sm">Pending approvals</span>
               <span className="text-xs text-muted-foreground">Founder decision required</span>
             </span>
-            <Badge variant="outline" className="rounded-[10px]">{approvalsCount}</Badge>
+            <Badge variant="outline">{approvalsCount}</Badge>
           </Link>
         ) : null}
         {interactionsCount > 0 ? (
@@ -607,7 +607,7 @@ function DecisionsPanel({
               <span className="block text-sm">Agent questions</span>
               <span className="text-xs text-muted-foreground">Clarifications waiting</span>
             </span>
-            <Badge variant="outline" className="rounded-[10px]">{interactionsCount}</Badge>
+            <Badge variant="outline">{interactionsCount}</Badge>
           </Link>
         ) : null}
         {reviewIssues.slice(0, 3).map((issue) => (
@@ -680,7 +680,7 @@ function OutcomesPanel({
           <Link
             key={`${issue.id}:${document.key}`}
             to={`/library?issue=${encodeURIComponent(issue.id)}&document=${encodeURIComponent(document.key)}`}
-            className="flex min-w-0 max-w-full items-start gap-2 overflow-hidden rounded-[14px] bg-secondary p-4 text-inherit no-underline hover:text-foreground"
+            className="flex min-w-0 max-w-full items-start gap-2 overflow-hidden rounded-lg bg-secondary p-4 text-inherit no-underline hover:text-foreground"
           >
             <FileText className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" />
             <span className="min-w-0 flex-1">
@@ -692,7 +692,7 @@ function OutcomesPanel({
           </Link>
         ))}
         {documents.length === 0 ? (
-          <div className="flex items-center gap-2 rounded-[14px] bg-secondary p-4 text-sm text-muted-foreground">
+          <div className="flex items-center gap-2 rounded-lg bg-secondary p-4 text-sm text-muted-foreground">
             <Library className="h-4 w-4" />
             Outcomes will appear as departments publish work.
           </div>
@@ -883,16 +883,16 @@ function OperatorDrawer({
           value={operatorDraft}
           onChange={(event) => setOperatorDraft(event.target.value)}
           placeholder="Ask Operator about this recommendation..."
-          className="min-h-24 resize-none rounded-none border-0 bg-secondary p-4"
+          className="min-h-24 resize-none border-0 bg-secondary p-4"
         />
         {error ? <p className="text-sm text-destructive">{error}</p> : null}
         <div className="mt-3 grid grid-cols-2 gap-2">
-          <Button className="col-span-2 rounded-none" disabled={isPending} onClick={createTask}>
+          <Button className="col-span-2" disabled={isPending} onClick={createTask}>
             <Send className="h-4 w-4" />
             {isPending ? "Routing..." : "Create recommended task"}
           </Button>
-          <Button variant="outline" size="sm" className="rounded-none">Compare options</Button>
-          <Button variant="outline" size="sm" className="rounded-none">Explain risk</Button>
+          <Button variant="outline" size="sm">Compare options</Button>
+          <Button variant="outline" size="sm">Explain risk</Button>
         </div>
       </div>
     </aside>
@@ -947,23 +947,23 @@ function OperatorDock({
         placeholder="Ask Operator..."
         className="hidden min-w-0 flex-1 bg-secondary px-5 py-3 text-base outline-none placeholder:text-muted-foreground sm:block"
       />
-      <Button variant="ghost" onClick={onToggle} className="hidden h-12 gap-2 rounded-none px-3 sm:inline-flex" aria-label="Explain next move">
+      <Button variant="ghost" onClick={onToggle} className="hidden h-12 gap-2 px-3 sm:inline-flex" aria-label="Explain next move">
         <Sparkles className="h-4 w-4" />
         <span className="hidden text-xs lg:inline">Explain</span>
       </Button>
-      <Button variant="ghost" onClick={onToggle} className="hidden h-12 gap-2 rounded-none px-3 sm:inline-flex" aria-label="Route work">
+      <Button variant="ghost" onClick={onToggle} className="hidden h-12 gap-2 px-3 sm:inline-flex" aria-label="Route work">
         <Route className="h-4 w-4" />
         <span className="hidden text-xs lg:inline">Route</span>
       </Button>
-      <Button variant="ghost" onClick={onToggle} className="hidden h-12 gap-2 rounded-none px-3 sm:inline-flex" aria-label="Review work">
+      <Button variant="ghost" onClick={onToggle} className="hidden h-12 gap-2 px-3 sm:inline-flex" aria-label="Review work">
         <CheckCircle2 className="h-4 w-4" />
         <span className="hidden text-xs lg:inline">Review</span>
       </Button>
-      <Button variant="outline" onClick={onToggle} className="ml-auto h-11 gap-2 rounded-none px-3 sm:hidden" aria-label="Open Operator">
+      <Button variant="outline" onClick={onToggle} className="ml-auto h-11 gap-2 px-3 sm:hidden" aria-label="Open Operator">
         <Sparkles className="h-4 w-4" />
         <span className="text-xs">Open</span>
       </Button>
-      <Button disabled={!canSubmit || isPending} onClick={createTask} className="hidden h-12 gap-2 rounded-none px-4 sm:inline-flex">
+      <Button disabled={!canSubmit || isPending} onClick={createTask} className="hidden h-12 gap-2 px-4 sm:inline-flex">
         <Send className="h-4 w-4" />
         <span className="hidden text-xs lg:inline">{isPending ? "Routing" : "Task"}</span>
       </Button>

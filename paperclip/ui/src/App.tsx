@@ -2,6 +2,7 @@ import { lazy, Suspense, type ComponentType } from "react";
 import { ArrowRight, Building2, CheckCircle2, Clock3, Database, Monitor, Plus, ShieldCheck } from "lucide-react";
 import { Navigate, Outlet, Route, Routes, useLocation, useNavigate, useParams } from "@/lib/router";
 import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
 import { Layout } from "./components/Layout";
 import { CloudAccessGate } from "./components/CloudAccessGate";
 import { useCompany } from "./context/CompanyContext";
@@ -265,8 +266,8 @@ function MissionLauncher() {
   }
 
   return (
-    <div className="min-h-dvh bg-background text-foreground">
-      <div className="grid min-h-dvh grid-cols-[56px_minmax(0,1fr)]">
+    <div className="theft-launcher-shell bg-background text-foreground">
+      <div className="theft-launcher-grid">
         <aside className="flex min-h-0 flex-col items-center justify-between border-r border-border bg-card py-6">
           <div className="flex flex-col items-center gap-5">
             <div className="flex size-9 items-center justify-center rounded-full bg-primary text-sm font-medium text-primary-foreground">
@@ -277,12 +278,12 @@ function MissionLauncher() {
               <Building2 className="size-5" />
             </div>
           </div>
-          <div className="mb-1 flex size-2 rounded-full bg-[#cdfe00]" aria-hidden />
+          <div className="mb-1 flex size-2 rounded-full bg-signal" aria-hidden />
         </aside>
 
-        <main className="flex min-w-0 items-center justify-center p-4 md:p-10">
-          <section className="w-full min-w-0 max-w-[760px] border border-border bg-card p-5 shadow-[0_18px_54px_rgb(20_24_20/0.06)] md:p-10">
-            <div className="mx-auto flex size-12 items-center justify-center rounded-[14px] bg-secondary text-foreground">
+        <main className="theft-launcher-main">
+          <Card className="theft-launcher-card">
+            <div className="mx-auto flex size-12 items-center justify-center rounded-md bg-secondary text-foreground">
               <Monitor className="size-6" />
             </div>
 
@@ -299,7 +300,7 @@ function MissionLauncher() {
             <div className="mt-8 space-y-3">
               <Button
                 size="lg"
-                className="h-14 w-full min-w-0 justify-between gap-3 rounded-[14px] bg-primary px-5 text-base font-medium text-primary-foreground"
+                className="h-14 w-full min-w-0 justify-between gap-3 bg-primary px-5 text-base font-medium text-primary-foreground"
                 onClick={() => openCompany()}
               >
                 <span className="flex min-w-0 items-center gap-3">
@@ -313,7 +314,7 @@ function MissionLauncher() {
               <Button
                 size="lg"
                 variant="outline"
-                className="h-14 w-full min-w-0 justify-between gap-3 rounded-[14px] px-5 text-base font-medium"
+                className="h-14 w-full min-w-0 justify-between gap-3 px-5 text-base font-medium"
                 onClick={() => openOnboarding()}
               >
                 <span className="flex min-w-0 items-center gap-3">
@@ -355,7 +356,7 @@ function MissionLauncher() {
                       className="flex w-full items-center justify-between gap-4 border-b border-border px-4 py-3 text-left last:border-b-0 hover:bg-secondary"
                     >
                       <span className="flex min-w-0 items-center gap-3">
-                        <span className="flex size-9 shrink-0 items-center justify-center rounded-[10px] bg-secondary text-sm font-medium">
+                        <span className="flex size-9 shrink-0 items-center justify-center rounded-md bg-secondary text-sm font-medium">
                           {company.name.slice(0, 1).toUpperCase()}
                         </span>
                         <span className="min-w-0">
@@ -379,7 +380,7 @@ function MissionLauncher() {
                 )}
               </div>
             </div>
-          </section>
+          </Card>
         </main>
       </div>
     </div>
@@ -397,7 +398,7 @@ function RuntimePill({
     <div className="flex items-center justify-center gap-2 px-4 py-3">
       <Icon className="size-4 text-muted-foreground" />
       <span>{label}</span>
-      <span className="size-1.5 rounded-full bg-[#cdfe00]" aria-hidden />
+      <span className="size-1.5 rounded-full bg-signal" aria-hidden />
     </div>
   );
 }

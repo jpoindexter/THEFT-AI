@@ -346,12 +346,7 @@ export function Layout() {
 
   return (
     <GeneralSettingsProvider value={{ keyboardShortcutsEnabled }}>
-      <div
-      className={cn(
-        "theft-shell bg-background text-foreground pt-[env(safe-area-inset-top)]",
-        isMobile ? "min-h-dvh overflow-x-hidden" : "flex h-dvh flex-col overflow-hidden",
-      )}
-      >
+      <div className="theft-shell flex h-dvh flex-col overflow-hidden bg-background text-foreground pt-[env(safe-area-inset-top)]">
       <a
         href="#main-content"
         className="sr-only focus:not-sr-only focus:fixed focus:left-3 focus:top-3 focus:z-[200] focus:rounded-md focus:bg-background focus:px-3 focus:py-2 focus:text-sm focus:font-medium focus:shadow-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
@@ -360,7 +355,7 @@ export function Layout() {
       </a>
       <WorktreeBanner />
       <DevRestartBanner devServer={health?.devServer} />
-      <div className={cn("min-h-0 flex-1", isMobile ? "w-full" : "flex overflow-hidden")}>
+      <div className={cn("min-h-0 flex-1", isMobile ? "w-full overflow-hidden" : "flex overflow-hidden")}>
         {isMobile && sidebarOpen && (
           <button
             type="button"
@@ -423,7 +418,7 @@ export function Layout() {
           </div>
         )}
 
-        <div className={cn("flex min-w-0 flex-col", isMobile ? "w-full" : "h-full flex-1")}>
+        <div className={cn("flex min-w-0 flex-col", isMobile ? "h-full w-full min-h-0" : "h-full flex-1")}>
           <div
             className={cn(
               isMobile && "sticky top-0 z-20 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/85",
@@ -431,14 +426,16 @@ export function Layout() {
           >
             <BreadcrumbBar />
           </div>
-          <div className={cn(isMobile ? "block" : "flex flex-1 min-h-0")}>
+          <div className={cn(isMobile ? "min-h-0 flex-1 overflow-hidden" : "flex flex-1 min-h-0")}>
             <main
               id="main-content"
               ref={mainContentRef}
               tabIndex={-1}
               className={cn(
                 "theft-main-surface min-w-0 flex-1 p-4 outline-none md:p-6",
-                isMobile ? "w-full max-w-full overflow-x-hidden pb-[calc(5rem+env(safe-area-inset-bottom))]" : "overflow-auto",
+                isMobile
+                  ? "h-full w-full max-w-full overflow-x-hidden overflow-y-auto overscroll-contain pb-[calc(5rem+env(safe-area-inset-bottom))]"
+                  : "overflow-auto",
               )}
             >
               {hasUnknownCompanyPrefix ? (

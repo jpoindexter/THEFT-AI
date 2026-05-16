@@ -40,15 +40,15 @@
   --text-micro: var(--theft-text-micro);
   --text-nano: var(--theft-text-nano);
   --text-badge: var(--theft-text-badge);
-  --radius-sm: 6px;
-  --radius-md: 10px;
-  --radius-lg: 10px;
-  --radius-xl: 10px;
+  --radius-sm: var(--theft-radius-small);
+  --radius-md: var(--theft-radius-control);
+  --radius-lg: var(--theft-radius-surface);
+  --radius-xl: var(--theft-radius-surface);
 }
 
 :root {
   color-scheme: light;
-  --radius: 12px;
+  --radius: 8px;
 
   /* THEFT/Sana design tokens. New product UI should consume these aliases,
      not one-off colors, spacing, radius, or layout constants. */
@@ -82,12 +82,15 @@
   --theft-space-6: calc(var(--theft-space-unit) * 6);
   --theft-space-7: calc(var(--theft-space-unit) * 7);
   --theft-space-8: calc(var(--theft-space-unit) * 8);
-  --theft-radius-surface: var(--radius-md);
-  --theft-radius-control: var(--radius-md);
+  --theft-radius-small: 6px;
+  --theft-radius-control: 8px;
+  --theft-radius-surface: 8px;
+  --theft-radius-pill: 999px;
   --theft-label-tracking: 0.12em;
   --theft-header-height: var(--theft-space-7);
   --theft-rail-width: calc(var(--theft-space-1) * 7);
   --theft-grid-unit: calc(var(--theft-space-1) * 9);
+  --theft-launcher-card-max-width: calc(var(--theft-space-1) * 95);
   --theft-onboarding-panel-width: calc(var(--theft-space-1) * 50);
   --theft-onboarding-panel-width-xl: calc(var(--theft-space-1) * 52);
   --theft-onboarding-panel-max-width: calc(var(--theft-space-1) * 52);
@@ -459,6 +462,39 @@
   width: var(--theft-onboarding-node-size);
 }
 
+.theft-launcher-shell {
+  height: 100dvh;
+  overflow: hidden;
+}
+
+.theft-launcher-grid {
+  display: grid;
+  grid-template-columns: var(--theft-rail-width) minmax(0, 1fr);
+  height: 100%;
+}
+
+.theft-launcher-main {
+  align-items: flex-start;
+  display: flex;
+  justify-content: center;
+  min-height: 0;
+  min-width: 0;
+  overflow-y: auto;
+  padding: var(--theft-space-2);
+}
+
+.theft-launcher-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--theft-radius-surface);
+  gap: 0;
+  box-shadow: var(--theft-shadow-soft);
+  max-width: var(--theft-launcher-card-max-width);
+  min-width: 0;
+  padding: var(--theft-space-3);
+  width: 100%;
+}
+
 .theft-onboarding-shell {
   grid-template-columns: minmax(0, 1fr);
 }
@@ -504,6 +540,14 @@
 
   .theft-onboarding-panel-inner {
     padding-inline: var(--theft-space-3);
+  }
+
+  .theft-launcher-main {
+    padding: var(--theft-space-5);
+  }
+
+  .theft-launcher-card {
+    padding: var(--theft-space-5);
   }
 }
 

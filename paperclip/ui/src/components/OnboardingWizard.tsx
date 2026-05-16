@@ -905,7 +905,7 @@ export function OnboardingWizard() {
                 onLaunch={handleLaunch}
               />
             ) : (
-            <div className="theft-onboarding-body grid min-h-0 flex-1 overflow-hidden">
+            <div className="theft-onboarding-body grid min-h-0 flex-1 overflow-x-hidden overflow-y-auto overscroll-contain">
               <OnboardingCanvasPreview
                 companyName={companyName}
                 companyStage={companyStage}
@@ -913,8 +913,8 @@ export function OnboardingWizard() {
                 agentName={agentName}
               />
 
-              <section className="flex h-full min-h-0 flex-col overflow-hidden border-l border-border bg-card">
-                <div className="theft-onboarding-panel-inner mx-auto flex h-full min-h-0 w-full flex-col">
+              <section className="flex min-h-full flex-col border-l border-border bg-card">
+                <div className="theft-onboarding-panel-inner mx-auto flex min-h-full w-full flex-col">
                   <div className="mb-4 flex shrink-0 items-start justify-between gap-4">
                     <div className="min-w-0">
                       <p className="theft-label">
@@ -957,7 +957,7 @@ export function OnboardingWizard() {
               </div>
 
               {/* Step content */}
-              <div className="min-h-0 flex-1 overflow-y-auto pr-1">
+              <div className="flex-1 pr-1">
               {step === 1 && (
                 <div className="space-y-4">
                   <div className="flex items-center gap-3 mb-1">

@@ -274,7 +274,7 @@ export function Goals() {
                       </p>
                       <h2 className="mt-2 text-lg font-medium">{nextNode?.goal.title ?? "Create first build-order node"}</h2>
                     </div>
-                    <Badge variant="outline" className="rounded-none">High impact</Badge>
+                    <Badge variant="outline">High impact</Badge>
                   </div>
                   <div className="mt-4 grid gap-4 text-sm md:grid-cols-3">
                     <InspectorMetric label="Rationale" value={nextNode?.nextAction ?? "Start the company roadmap"} />
@@ -388,7 +388,7 @@ function TechTreeFilterRail() {
           <p>Lock Locked</p>
         </div>
       </div>
-      <Button variant="outline" size="sm" className="w-full rounded-none">Show critical path</Button>
+      <Button variant="outline" size="sm" className="w-full">Show critical path</Button>
     </aside>
   );
 }
@@ -482,7 +482,7 @@ function TechTreeInspector({
             <InspectorSection title="Prerequisites" rows={[node.dependency, node.evidence]} />
             <InspectorSection title="Evidence required" rows={["Owner decision", "Linked task output", "Library artifact"]} />
             <InspectorSection title="Owner" rows={[node.owner]} />
-            <Button className="w-full rounded-none" onClick={onStartWork}>
+            <Button className="w-full" onClick={onStartWork}>
               <Plus className="mr-1.5 h-3.5 w-3.5" />
               Start this work
             </Button>

@@ -28,12 +28,27 @@ Keep the browser/root font size at normal readable scale. Do not simulate 75% br
 
 ## Component Rules
 
+- Use existing shadcn/ui primitives first for standard controls and surfaces: `Button`, `Card`, `Input`, `Textarea`, `Tabs`, `Select`, `Sheet`, `Dialog`, `DropdownMenu`, `Tooltip`, `Badge`, `Separator`, and `ScrollArea`.
+- THEFT-specific styling should wrap shadcn primitives with semantic screen templates and tokens. Do not hand-build a new button, card, tab bar, dialog, input, or sheet when a shadcn primitive exists.
+- Radius standard: surfaces/cards use `--theft-radius-surface` / `rounded-lg`; controls use `--theft-radius-control` / `rounded-md`; small nested affordances use `rounded-sm`; `rounded-full` is reserved for avatars, status dots, compact badges, and progress bars.
 - Do not add hex colors in TSX. Add or reuse a color token.
 - Do not add arbitrary Tailwind layout values like `grid-cols-[...]`, `min-w-[...]`, `left-[...]`, `tracking-[...]`, or `shadow-[...]` in active product screens.
 - Use `.theft-label` and `.theft-label-compact` for uppercase metadata labels.
 - Use `.theft-elevation-soft` for soft depth.
 - Use screen utilities like `.theft-onboarding-*`, `.theft-map-*`, and `.theft-tech-tree-*` for semantic layout constants.
 - System/runtime/admin pages can keep legacy code temporarily, but any touched product surface must move toward this contract.
+
+## Template Rule
+
+Active THEFT product screens should be assembled from shared screen templates, not unique page shells. New or touched routes should reuse the same scroll contract, rail/header/main structure, content widths, panel rhythm, and empty/loading/error states. If a page needs a new layout pattern, add the pattern as a named template or semantic CSS utility first, then consume it from the route.
+
+Use the `300 / 150 / 50` guardrail for maintainability:
+
+- files should trend under 300 lines after the product surface stabilizes;
+- render modules should trend under 150 lines;
+- functions and hooks should trend under 50 lines.
+
+Existing Paperclip runtime files exceed this and can be paid down incrementally. New THEFT UX work should not deepen that debt.
 
 ## Verification
 
