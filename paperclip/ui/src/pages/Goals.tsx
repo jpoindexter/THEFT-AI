@@ -14,7 +14,7 @@ import { PageSkeleton } from "../components/PageSkeleton";
 import { StatusBadge } from "../components/StatusBadge";
 import { Link } from "@/lib/router";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+import { TheftChip, TheftPageShell, TheftSectionHeader, TheftStat, TheftSurface } from "@/components/theft";
 import { ArrowRight, CheckCircle2, GitBranch, Layers3, Plus, Route, Target, Users } from "lucide-react";
 import { cn } from "../lib/utils";
 
@@ -234,54 +234,56 @@ export function Goals() {
   }
 
   return (
-    <div className="space-y-4">
-      {error && <p className="text-sm text-destructive">{error.message}</p>}
-
-      {goals && goals.length === 0 && (
-        <EmptyState icon={Target} message="No Tech Tree nodes yet." action="Add Node" onAction={() => openNewGoal()} />
+    <TheftPageShell
+      eyebrow="Strategy map / Tech Tree"
+      title="Tech Tree"
+      description="Company build order, dependencies, evidence, and next unlocks."
+      actions={(
+        <Button size="sm" variant="outline" onClick={() => openNewGoal()}>
+          <Plus className="mr-1.5 h-3.5 w-3.5" />
+          New Node
+        </Button>
       )}
+    >
+      <div className="space-y-4">
+        {error && <p className="text-sm text-destructive">{error.message}</p>}
 
-      {goals && goals.length > 0 && (
-        <>
-          <section className="theft-panel overflow-hidden">
+        {goals && goals.length === 0 && (
+          <EmptyState icon={Target} message="No Tech Tree nodes yet." action="Add Node" onAction={() => openNewGoal()} />
+        )}
+
+        {goals && goals.length > 0 && (
+          <TheftSurface tone="panel" padding="none" className="overflow-hidden">
             <div className="theft-tech-tree-layout grid min-w-0 gap-4 p-4">
               <TechTreeFilterRail />
               <main className="min-w-0">
                 <div className="mb-5 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-                  <div>
-                    <div className="theft-label">
-                      Strategy map / Tech Tree
-                    </div>
-                    <h1 className="mt-2 text-2xl font-medium">Tech Tree</h1>
-                    <p className="mt-2 max-w-3xl text-sm leading-6 text-muted-foreground">
-                      Company build order, dependencies, evidence, and next unlocks.
-                    </p>
-                  </div>
-                  <div className="theft-tech-tree-stats grid grid-cols-3 border border-border bg-card text-center">
-                    <TechTreeStat value={goals.length} label="nodes" />
-                    <TechTreeStat value={goals.filter((goal) => goal.status === "active").length} label="active" />
-                    <TechTreeStat value={goals.filter((goal) => goal.status === "achieved").length} label="done" />
+                  <TheftSectionHeader
+                    eyebrow="Build order"
+                    title="Strategy map"
+                    description="Company build order, dependencies, evidence, and next unlocks."
+                  />
+                  <div className="theft-tech-tree-stats grid grid-cols-3 gap-2 text-center">
+                    <TheftStat label="nodes" value={goals.length} />
+                    <TheftStat label="active" value={goals.filter((goal) => goal.status === "active").length} />
+                    <TheftStat label="done" value={goals.filter((goal) => goal.status === "achieved").length} />
                   </div>
                 </div>
 
                 <TechTreeBuildOrder nodes={techTreeNodes} selectedNode={nextNode} />
 
-                <div className="mt-4 border border-border bg-card p-4">
-                  <div className="flex flex-wrap items-center justify-between gap-4">
-                    <div>
-                      <p className="theft-label">
-                        Recommended next move
-                      </p>
-                      <h2 className="mt-2 text-lg font-medium">{nextNode?.goal.title ?? "Create first build-order node"}</h2>
-                    </div>
-                    <Badge variant="outline">High impact</Badge>
-                  </div>
+                <TheftSurface tone="plain" padding="md" className="mt-4">
+                  <TheftSectionHeader
+                    eyebrow="Recommended next move"
+                    title={nextNode?.goal.title ?? "Create first build-order node"}
+                    actions={<TheftChip>High impact</TheftChip>}
+                  />
                   <div className="mt-4 grid gap-4 text-sm md:grid-cols-3">
                     <InspectorMetric label="Rationale" value={nextNode?.nextAction ?? "Start the company roadmap"} />
                     <InspectorMetric label="Impact" value="Unlocks downstream work" />
                     <InspectorMetric label="Alternative" value="Route through Operator" />
                   </div>
-                </div>
+                </TheftSurface>
               </main>
               <TechTreeInspector
                 node={nextNode}
@@ -295,16 +297,10 @@ export function Goals() {
                 }}
               />
             </div>
-          </section>
-          <div className="flex items-center justify-start">
-            <Button size="sm" variant="outline" onClick={() => openNewGoal()}>
-              <Plus className="h-3.5 w-3.5 mr-1.5" />
-              New Node
-            </Button>
-          </div>
-        </>
-      )}
-    </div>
+          </TheftSurface>
+        )}
+      </div>
+    </TheftPageShell>
   );
 }
 
@@ -333,19 +329,10 @@ function TechTreeStageSection({ stage }: { stage: TechTreeStageView }) {
 
 function InspectorMetric({ label, value }: { label: string; value: string }) {
   return (
-    <div className="min-w-0 border border-border bg-background/50 px-2 py-2">
+    <TheftSurface tone="muted" padding="sm" className="min-w-0">
       <div className="theft-label-compact">{label}</div>
       <div className="mt-1 truncate text-xs text-foreground">{value}</div>
-    </div>
-  );
-}
-
-function TechTreeStat({ value, label }: { value: number; label: string }) {
-  return (
-    <div className="border-r border-border px-4 py-4 last:border-r-0">
-      <div className="text-lg font-semibold tabular-nums">{value}</div>
-      <div className="theft-label-compact">{label}</div>
-    </div>
+    </TheftSurface>
   );
 }
 
@@ -403,7 +390,7 @@ function TechTreeBuildOrder({
   const visibleNodes = BUILD_ORDER_COLUMNS.map((label, index) => nodes[index] ?? null);
 
   return (
-    <div className="border border-border bg-secondary p-4">
+    <TheftSurface tone="muted" padding="md">
       <div className="grid gap-4 md:grid-cols-3 xl:grid-cols-6">
         {BUILD_ORDER_COLUMNS.map((column, index) => {
           const node = visibleNodes[index];
@@ -413,18 +400,20 @@ function TechTreeBuildOrder({
           const locked = !node && index > 2;
           return (
             <div key={column} className="min-w-0">
-              <div className="border border-border bg-card px-4 py-4 text-center">
+              <TheftSurface tone="plain" padding="md" className="text-center">
                 <p className="text-sm font-medium">{column}</p>
                 <p className="mt-1 text-xs text-muted-foreground">{index + 1}</p>
-              </div>
+              </TheftSurface>
               <div className="mt-4 space-y-4">
                 {[0, 1, 2].map((row) => {
                   const rowTitle = row === 0 ? title : row === 1 ? `${column} support task` : `${column} evidence gate`;
                   return (
-                    <div
+                    <TheftSurface
                       key={`${column}:${row}`}
+                      tone="plain"
+                      padding="md"
                       className={cn(
-                        "min-h-20 border bg-card p-4 text-sm",
+                        "min-h-20 text-sm",
                         active && row === 0 ? "border-foreground" : "border-border",
                         locked && "opacity-50",
                       )}
@@ -433,7 +422,7 @@ function TechTreeBuildOrder({
                         <p className="line-clamp-2">{rowTitle}</p>
                         {locked ? <span className="text-xs">Lock</span> : <CircleMarker complete={complete && row === 0} />}
                       </div>
-                    </div>
+                    </TheftSurface>
                   );
                 })}
               </div>
@@ -443,15 +432,15 @@ function TechTreeBuildOrder({
       </div>
       <div className="mt-5 grid gap-4 border border-dashed border-border p-4 md:grid-cols-3 xl:grid-cols-6">
         {BUILD_ORDER_COLUMNS.map((column, index) => (
-          <div key={`${column}:artifact`} className="border border-border bg-card px-4 py-4 text-xs text-muted-foreground">
+          <TheftSurface key={`${column}:artifact`} tone="plain" padding="md" className="text-xs text-muted-foreground">
             {index === 0 ? "Customer interview notes" : index === 1 ? "Offer summary doc" : `${column} artifact`}
-          </div>
+          </TheftSurface>
         ))}
       </div>
       <p className="theft-label mt-3 text-center">
         Evidence & artifacts (Library)
       </p>
-    </div>
+    </TheftSurface>
   );
 }
 
@@ -464,7 +453,7 @@ function TechTreeInspector({
 }) {
   return (
     <aside className="min-w-0 border-t border-border pt-4 xl:border-l xl:border-t-0 xl:pl-4 xl:pt-0">
-      <div className="border border-border bg-card p-4">
+      <TheftSurface tone="plain" padding="md">
         <p className="theft-label">Selected node</p>
         {node ? (
           <div className="mt-4 space-y-4">
@@ -490,7 +479,7 @@ function TechTreeInspector({
         ) : (
           <p className="mt-3 text-sm text-muted-foreground">Add a node to create the company build order.</p>
         )}
-      </div>
+      </TheftSurface>
     </aside>
   );
 }

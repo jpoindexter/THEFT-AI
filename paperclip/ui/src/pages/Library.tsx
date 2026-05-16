@@ -20,6 +20,7 @@ import { agentsApi } from "../api/agents";
 import { issuesApi } from "../api/issues";
 import { EmptyState } from "../components/EmptyState";
 import { MarkdownBody } from "../components/MarkdownBody";
+import { TheftChip, TheftPageShell, TheftSectionHeader, TheftStat, TheftSurface } from "@/components/theft";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -222,163 +223,152 @@ export function Library() {
   }
 
   return (
-    <div className="h-full min-h-0 bg-background text-foreground">
-      <div className="border-b border-border bg-card px-5 py-4">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <div className="flex min-w-0 items-start gap-3">
-            <div className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-border bg-background">
-              <LibraryIcon className="h-4 w-4" />
+    <TheftPageShell
+      eyebrow="Company memory"
+      title="Outcomes Library"
+      description="Durable company output, provenance, and source tasks grouped by department."
+      actions={(
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => queryClient.invalidateQueries({ queryKey: queryKeys.library.items(selectedCompanyId) })}
+          disabled={isFetching}
+        >
+          <RefreshCw className={cn("h-4 w-4", isFetching && "animate-spin")} />
+          Refresh
+        </Button>
+      )}
+    >
+      <div className="space-y-4">
+        <TheftSurface tone="plain" padding="md" className="space-y-4">
+          <div className="flex flex-col gap-3 md:flex-row">
+            <div className="relative flex-1">
+              <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <Input
+                value={search}
+                onChange={(event) => setSearch(event.target.value)}
+                placeholder="Search Library"
+                className="pl-9"
+              />
             </div>
-            <div className="min-w-0">
-              <p className="text-xs font-medium uppercase tracking-[0.08em] text-muted-foreground">Company memory</p>
-              <h1 className="mt-1 text-xl font-semibold tracking-normal">Outcomes Library</h1>
-              <p className="mt-1 text-sm text-muted-foreground">
-                Durable company output, provenance, and source tasks grouped by department.
-              </p>
-            </div>
+            <select
+              value={departmentFilter}
+              onChange={(event) => setDepartmentFilter(event.target.value)}
+              className="h-10 rounded-md border border-border bg-card px-3 text-sm text-foreground"
+              aria-label="Filter by department"
+            >
+              <option value="all">All departments</option>
+              {departmentOptions.map((department) => (
+                <option key={department} value={department.toLowerCase()}>
+                  {department}
+                </option>
+              ))}
+            </select>
           </div>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => queryClient.invalidateQueries({ queryKey: queryKeys.library.items(selectedCompanyId) })}
-            disabled={isFetching}
-          >
-            <RefreshCw className={cn("h-4 w-4", isFetching && "animate-spin")} />
-            Refresh
-          </Button>
-        </div>
-        <div className="mt-4 flex flex-col gap-3 md:flex-row">
-          <div className="relative flex-1">
-            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-            <Input
-              value={search}
-              onChange={(event) => setSearch(event.target.value)}
-              placeholder="Search Library"
-              className="pl-9"
+          <div className="grid gap-2 text-sm sm:grid-cols-4">
+            <TheftStat label="Outputs" value={librarySummary.totalItems} />
+            <TheftStat label="Pinned / important" value={librarySummary.importantItems} />
+            <TheftStat label="Department shelves" value={librarySummary.departmentCount} />
+            <TheftStat
+              label="Latest"
+              value={librarySummary.latestUpdatedAt ? relativeTime(librarySummary.latestUpdatedAt) : "None"}
             />
           </div>
-          <select
-            value={departmentFilter}
-            onChange={(event) => setDepartmentFilter(event.target.value)}
-            className="h-10 rounded-md border border-border bg-card px-3 text-sm text-foreground"
-            aria-label="Filter by department"
-          >
-            <option value="all">All departments</option>
-            {departmentOptions.map((department) => (
-              <option key={department} value={department.toLowerCase()}>
-                {department}
-              </option>
-            ))}
-          </select>
-        </div>
-        <div className="mt-4 grid gap-2 text-sm sm:grid-cols-4">
-          <LibraryStat label="Outputs" value={librarySummary.totalItems} />
-          <LibraryStat label="Pinned / important" value={librarySummary.importantItems} />
-          <LibraryStat label="Department shelves" value={librarySummary.departmentCount} />
-          <LibraryStat
-            label="Latest"
-            value={librarySummary.latestUpdatedAt ? relativeTime(librarySummary.latestUpdatedAt) : "None"}
-          />
-        </div>
-      </div>
+        </TheftSurface>
 
-      {error ? (
-        <EmptyState icon={LibraryIcon} message={(error as Error).message || "Could not load Library items."} />
-      ) : isLoading ? (
-        <div className="p-5 text-sm text-muted-foreground">Loading Library...</div>
-      ) : allItems.length === 0 ? (
-        <EmptyState icon={LibraryIcon} message="No Library items yet. Route a task or save a department document to create company memory." />
-      ) : (
-        <div className="grid h-[calc(100vh-14rem)] min-h-[620px] grid-cols-1 lg:grid-cols-[minmax(360px,0.9fr)_minmax(0,1.1fr)]">
-          <section className="min-h-0 overflow-y-auto border-r border-border bg-card/50 p-4">
-            {pinnedItems.length > 0 ? (
-              <div className="mb-5">
-                <div className="mb-2 flex items-center gap-2 text-xs font-semibold uppercase text-muted-foreground">
-                  <Pin className="h-3.5 w-3.5" />
-                  Pinned company memory
+        {error ? (
+          <EmptyState icon={LibraryIcon} message={(error as Error).message || "Could not load Library items."} />
+        ) : isLoading ? (
+          <div className="p-5 text-sm text-muted-foreground">Loading Library...</div>
+        ) : allItems.length === 0 ? (
+          <EmptyState icon={LibraryIcon} message="No Library items yet. Route a task or save a department document to create company memory." />
+        ) : (
+          <TheftSurface
+            tone="plain"
+            padding="none"
+            className="grid min-h-[620px] overflow-hidden lg:h-[calc(100vh-18rem)] lg:grid-cols-[minmax(360px,0.9fr)_minmax(0,1.1fr)]"
+          >
+            <section className="min-h-0 overflow-y-auto border-r border-border bg-card/50 p-4">
+              {pinnedItems.length > 0 ? (
+                <div className="mb-5">
+                  <div className="mb-2 flex items-center gap-2 text-xs font-semibold uppercase text-muted-foreground">
+                    <Pin className="h-3.5 w-3.5" />
+                    Pinned company memory
+                  </div>
+                  <div className="space-y-2">
+                    {pinnedItems.slice(0, 6).map((item) => (
+                      <LibraryRow
+                        key={item.id}
+                        item={item}
+                        selected={selectedItem?.id === item.id}
+                        pinned={pinnedIds.has(item.id)}
+                        onSelect={() => setSelectedItemId(item.id)}
+                        onTogglePin={() => togglePin(item)}
+                      />
+                    ))}
+                  </div>
                 </div>
-                <div className="space-y-2">
-                  {pinnedItems.slice(0, 6).map((item) => (
-                    <LibraryRow
-                      key={item.id}
-                      item={item}
-                      selected={selectedItem?.id === item.id}
-                      pinned={pinnedIds.has(item.id)}
-                      onSelect={() => setSelectedItemId(item.id)}
-                      onTogglePin={() => togglePin(item)}
-                    />
+              ) : null}
+
+              {groups.length === 0 ? (
+                <div className="py-12 text-center text-sm text-muted-foreground">No Library items match this filter.</div>
+              ) : (
+                <div className="space-y-5">
+                  {groups.map((group) => (
+                    <div key={group.departmentKey}>
+                      <div className="mb-2 flex items-center gap-2 text-xs font-semibold uppercase text-muted-foreground">
+                        <Folder className="h-3.5 w-3.5" />
+                        {group.department}
+                        <TheftChip tone="muted" density="compact">{group.items.length}</TheftChip>
+                      </div>
+                      <div className="space-y-2">
+                        {group.items.map((item) => (
+                          <LibraryRow
+                            key={item.id}
+                            item={item}
+                            selected={selectedItem?.id === item.id}
+                            pinned={pinnedIds.has(item.id)}
+                            onSelect={() => setSelectedItemId(item.id)}
+                            onTogglePin={() => togglePin(item)}
+                          />
+                        ))}
+                      </div>
+                    </div>
                   ))}
                 </div>
-              </div>
-            ) : null}
+              )}
+            </section>
 
-            {groups.length === 0 ? (
-              <div className="py-12 text-center text-sm text-muted-foreground">No Library items match this filter.</div>
-            ) : (
-              <div className="space-y-5">
-                {groups.map((group) => (
-                  <div key={group.departmentKey}>
-                    <div className="mb-2 flex items-center gap-2 text-xs font-semibold uppercase text-muted-foreground">
-                      <Folder className="h-3.5 w-3.5" />
-                      {group.department}
-                      <span className="rounded-full bg-muted px-1.5 py-0.5 text-[10px]">{group.items.length}</span>
-                    </div>
-                    <div className="space-y-2">
-                      {group.items.map((item) => (
-                        <LibraryRow
-                          key={item.id}
-                          item={item}
-                          selected={selectedItem?.id === item.id}
-                          pinned={pinnedIds.has(item.id)}
-                          onSelect={() => setSelectedItemId(item.id)}
-                          onTogglePin={() => togglePin(item)}
-                        />
-                      ))}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </section>
-
-          <section className="min-h-0 overflow-y-auto bg-card p-5">
-            {selectedItem ? (
-              <LibraryDetail
-                item={selectedItem}
-                pinned={pinnedIds.has(selectedItem.id)}
-                onTogglePin={() => togglePin(selectedItem)}
-                document={selectedDocumentQuery.data ?? null}
-                documentLoading={selectedDocumentQuery.isLoading}
-                documentDraft={documentDraft}
-                onDocumentDraftChange={setDocumentDraft}
-                editingDocument={editingDocument}
-                onEditDocument={() => setEditingDocument(true)}
-                onCancelDocumentEdit={() => {
-                  setEditingDocument(false);
-                  setDocumentDraft(selectedDocumentQuery.data?.body ?? "");
-                }}
-                onSaveDocument={() => {
-                  if (selectedDocumentQuery.data) saveDocument.mutate(selectedDocumentQuery.data);
-                }}
-                saveError={saveDocument.error as Error | null}
-                saving={saveDocument.isPending}
-              />
-            ) : (
-              <EmptyState icon={LibraryIcon} message="Select a Library item." />
-            )}
-          </section>
-        </div>
-      )}
-    </div>
-  );
-}
-
-function LibraryStat({ label, value }: { label: string; value: number | string }) {
-  return (
-    <div className="border border-border bg-card/70 px-3 py-2">
-      <p className="text-sm font-medium tabular-nums">{value}</p>
-      <p className="mt-0.5 text-xs text-muted-foreground">{label}</p>
-    </div>
+            <section className="min-h-0 overflow-y-auto bg-card p-5">
+              {selectedItem ? (
+                <LibraryDetail
+                  item={selectedItem}
+                  pinned={pinnedIds.has(selectedItem.id)}
+                  onTogglePin={() => togglePin(selectedItem)}
+                  document={selectedDocumentQuery.data ?? null}
+                  documentLoading={selectedDocumentQuery.isLoading}
+                  documentDraft={documentDraft}
+                  onDocumentDraftChange={setDocumentDraft}
+                  editingDocument={editingDocument}
+                  onEditDocument={() => setEditingDocument(true)}
+                  onCancelDocumentEdit={() => {
+                    setEditingDocument(false);
+                    setDocumentDraft(selectedDocumentQuery.data?.body ?? "");
+                  }}
+                  onSaveDocument={() => {
+                    if (selectedDocumentQuery.data) saveDocument.mutate(selectedDocumentQuery.data);
+                  }}
+                  saveError={saveDocument.error as Error | null}
+                  saving={saveDocument.isPending}
+                />
+              ) : (
+                <EmptyState icon={LibraryIcon} message="Select a Library item." />
+              )}
+            </section>
+          </TheftSurface>
+        )}
+      </div>
+    </TheftPageShell>
   );
 }
 
@@ -463,44 +453,34 @@ function LibraryDetail({
   saveError: Error | null;
   saving: boolean;
 }) {
-  const Icon = itemIcon(item);
   return (
     <div className="mx-auto max-w-5xl">
-      <div className="flex flex-wrap items-start justify-between gap-3">
-        <div className="flex min-w-0 items-start gap-3">
-          <div className="rounded-md border border-border bg-card p-2">
-            <Icon className="h-5 w-5 text-muted-foreground" />
-          </div>
-          <div className="min-w-0">
-            <p className="text-xs font-medium uppercase tracking-[0.08em] text-muted-foreground">Artifact inspector</p>
-            <div className="flex flex-wrap items-center gap-2">
-              <h2 className="mt-1 truncate text-lg font-semibold tracking-normal">{item.title}</h2>
-              {item.isImportant ? (
-                <span className="rounded-full bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-800 dark:bg-amber-900/30 dark:text-amber-300">
-                  Important
-                </span>
-              ) : null}
-            </div>
-            <p className="mt-1 text-sm text-muted-foreground">
-              {itemKindLabel(item)} · {item.department} · {item.provenance}
-            </p>
-          </div>
-        </div>
-        <div className="flex flex-wrap items-center gap-2">
-          <Button variant="outline" size="sm" onClick={onTogglePin}>
-            {pinned ? <PinOff className="h-4 w-4" /> : <Pin className="h-4 w-4" />}
-            {pinned ? "Unpin" : "Pin"}
-          </Button>
-          {item.href ? (
-            <Button variant="outline" size="sm" asChild>
-              <a href={item.href} target={item.href.startsWith("/api/") ? undefined : "_blank"} rel="noreferrer">
-                {item.kind === "attachment" ? <Download className="h-4 w-4" /> : <ExternalLink className="h-4 w-4" />}
-                Open
-              </a>
+      <TheftSectionHeader
+        eyebrow="Artifact inspector"
+        title={(
+          <span className="flex min-w-0 flex-wrap items-center gap-2">
+            <span className="truncate">{item.title}</span>
+            {item.isImportant ? <TheftChip tone="important">Important</TheftChip> : null}
+          </span>
+        )}
+        description={`${itemKindLabel(item)} · ${item.department} · ${item.provenance}`}
+        actions={(
+          <div className="flex flex-wrap items-center gap-2">
+            <Button variant="outline" size="sm" onClick={onTogglePin}>
+              {pinned ? <PinOff className="h-4 w-4" /> : <Pin className="h-4 w-4" />}
+              {pinned ? "Unpin" : "Pin"}
             </Button>
-          ) : null}
-        </div>
-      </div>
+            {item.href ? (
+              <Button variant="outline" size="sm" asChild>
+                <a href={item.href} target={item.href.startsWith("/api/") ? undefined : "_blank"} rel="noreferrer">
+                  {item.kind === "attachment" ? <Download className="h-4 w-4" /> : <ExternalLink className="h-4 w-4" />}
+                  Open
+                </a>
+              </Button>
+            ) : null}
+          </div>
+        )}
+      />
 
       <dl className="mt-5 grid min-w-0 gap-3 border-y border-border py-4 text-sm sm:grid-cols-2 lg:grid-cols-4">
         <div className="min-w-0">
@@ -540,9 +520,9 @@ function LibraryDetail({
             {documentLoading ? (
               <div className="text-sm text-muted-foreground">Loading document...</div>
             ) : !document ? (
-              <div className="rounded-md border border-border p-4 text-sm text-muted-foreground">
+              <TheftSurface tone="plain" padding="md" className="text-sm text-muted-foreground">
                 This document could not be loaded from the task record.
-              </div>
+              </TheftSurface>
             ) : editingDocument ? (
               <div className="space-y-3">
                 <Textarea
@@ -565,13 +545,13 @@ function LibraryDetail({
                 </div>
               </div>
             ) : (
-              <div className="rounded-md border border-border bg-card p-4 text-foreground">
+              <TheftSurface tone="plain" padding="md" className="text-foreground">
                 <MarkdownBody>{document.body || "_Empty document_"}</MarkdownBody>
-              </div>
+              </TheftSurface>
             )}
           </div>
         ) : (
-          <div className="rounded-md border border-border bg-card p-4 text-foreground">
+          <TheftSurface tone="plain" padding="md" className="text-foreground">
             <h3 className="text-sm font-semibold">Artifact body</h3>
             <p className="mt-2 text-sm text-muted-foreground">{item.subtitle}</p>
             <p className="mt-2 text-xs text-muted-foreground">{item.reviewState ?? item.status ?? itemKindLabel(item)}</p>
@@ -585,7 +565,7 @@ function LibraryDetail({
                 This work product has no external URL yet. It is still tracked as company runtime output.
               </p>
             ) : null}
-          </div>
+          </TheftSurface>
         )}
       </div>
     </div>

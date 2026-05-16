@@ -25,6 +25,13 @@ import { issuesApi } from "../api/issues";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
+import {
+  TheftChip,
+  TheftPageShell,
+  TheftSectionHeader,
+  TheftStat,
+  TheftSurface,
+} from "@/components/theft";
 import { EmptyState } from "../components/EmptyState";
 import { PageSkeleton } from "../components/PageSkeleton";
 import { StatusIcon } from "../components/StatusIcon";
@@ -244,79 +251,81 @@ export function Dashboard() {
   const isFreshCompany = (issues?.length ?? 0) === 0 && latestLibraryDocuments.length === 0;
 
   return (
-    <div className="mx-auto max-w-[1760px] min-w-0 space-y-6 overflow-x-hidden px-1 pb-28 text-foreground md:px-3">
-      <section className="theft-dashboard-shell-grid grid min-w-0 gap-6" data-operator-open={String(operatorOpen)}>
-        <div className="min-w-0 space-y-6">
-          <ObjectiveHeader
-            companyName={selectedCompany.name}
-            stage={profile.stage ? THEFT_STAGE_LABELS[profile.stage] : null}
-            objective={objectiveTitle}
-            detail={objectiveDetail}
-            departments={departmentRows}
-            reviewCount={reviewCount}
-            outcomeCount={latestLibraryDocuments.length}
-          />
-
-          {isFreshCompany ? (
-            <FreshCompanyPanel onAskOperator={() => setOperatorOpen(true)} />
-          ) : null}
-
-          <div className="theft-dashboard-content-grid grid min-w-0 gap-6" data-operator-open={String(operatorOpen)}>
-            <StrategyMapPanel
+    <TheftPageShell className="min-h-0 bg-background text-foreground">
+      <div className="mx-auto max-w-[1760px] min-w-0 space-y-6 overflow-x-hidden px-1 pb-28 md:px-3">
+        <section className="theft-dashboard-shell-grid grid min-w-0 gap-6" data-operator-open={String(operatorOpen)}>
+          <div className="min-w-0 space-y-6">
+            <ObjectiveHeader
+              companyName={selectedCompany.name}
+              stage={profile.stage ? THEFT_STAGE_LABELS[profile.stage] : null}
               objective={objectiveTitle}
-              goals={roadmapGoals}
+              detail={objectiveDetail}
               departments={departmentRows}
-              nextTasks={nextTasks}
+              reviewCount={reviewCount}
+              outcomeCount={latestLibraryDocuments.length}
             />
 
-            <aside className="min-w-0 space-y-6">
-              <ConstraintsPanel
-                approvalsCount={approvals?.length ?? 0}
-                interactionsCount={pendingInteractions.length}
-                blockedCount={blockedIssues.length}
-                setupTodoCount={setupTodoCount}
-                outcomeCount={latestLibraryDocuments.length}
+            {isFreshCompany ? (
+              <FreshCompanyPanel onAskOperator={() => setOperatorOpen(true)} />
+            ) : null}
+
+            <div className="theft-dashboard-content-grid grid min-w-0 gap-6" data-operator-open={String(operatorOpen)}>
+              <StrategyMapPanel
+                objective={objectiveTitle}
+                goals={roadmapGoals}
+                departments={departmentRows}
+                nextTasks={nextTasks}
               />
-              <DecisionsPanel
-                reviewIssues={reviewIssues}
-                approvalsCount={approvals?.length ?? 0}
-                interactionsCount={pendingInteractions.length}
-              />
-              <ExecutionStatePanel departments={departmentRows} />
-              <OutcomesPanel documents={latestLibraryDocuments} />
-              <NextMovePanel bottleneck={bottleneck} />
-            </aside>
+
+              <aside className="min-w-0 space-y-6">
+                <ConstraintsPanel
+                  approvalsCount={approvals?.length ?? 0}
+                  interactionsCount={pendingInteractions.length}
+                  blockedCount={blockedIssues.length}
+                  setupTodoCount={setupTodoCount}
+                  outcomeCount={latestLibraryDocuments.length}
+                />
+                <DecisionsPanel
+                  reviewIssues={reviewIssues}
+                  approvalsCount={approvals?.length ?? 0}
+                  interactionsCount={pendingInteractions.length}
+                />
+                <ExecutionStatePanel departments={departmentRows} />
+                <OutcomesPanel documents={latestLibraryDocuments} />
+                <NextMovePanel bottleneck={bottleneck} />
+              </aside>
+            </div>
           </div>
-        </div>
 
-        {operatorOpen ? (
-          <OperatorDrawer
-            operator={operator}
-            departments={departmentRows}
-            selectedDepartmentKey={selectedDepartmentKey}
-            setSelectedDepartmentKey={setSelectedDepartmentKey}
-            operatorDraft={operatorDraft}
-            setOperatorDraft={setOperatorDraft}
-            createTask={() => createTaskMutation.mutate()}
-            error={createTaskMutation.error?.message}
-            isPending={createTaskMutation.isPending}
-            canSubmit={!!operatorDraft.trim()}
-            nextMove={bottleneck}
-            onClose={() => setOperatorOpen(false)}
-          />
-        ) : null}
-      </section>
+          {operatorOpen ? (
+            <OperatorDrawer
+              operator={operator}
+              departments={departmentRows}
+              selectedDepartmentKey={selectedDepartmentKey}
+              setSelectedDepartmentKey={setSelectedDepartmentKey}
+              operatorDraft={operatorDraft}
+              setOperatorDraft={setOperatorDraft}
+              createTask={() => createTaskMutation.mutate()}
+              error={createTaskMutation.error?.message}
+              isPending={createTaskMutation.isPending}
+              canSubmit={!!operatorDraft.trim()}
+              nextMove={bottleneck}
+              onClose={() => setOperatorOpen(false)}
+            />
+          ) : null}
+        </section>
 
-      <OperatorDock
-        open={operatorOpen}
-        onToggle={() => setOperatorOpen((value) => !value)}
-        operatorDraft={operatorDraft}
-        setOperatorDraft={setOperatorDraft}
-        createTask={() => createTaskMutation.mutate()}
-        isPending={createTaskMutation.isPending}
-        canSubmit={!!operatorDraft.trim()}
-      />
-    </div>
+        <OperatorDock
+          open={operatorOpen}
+          onToggle={() => setOperatorOpen((value) => !value)}
+          operatorDraft={operatorDraft}
+          setOperatorDraft={setOperatorDraft}
+          createTask={() => createTaskMutation.mutate()}
+          isPending={createTaskMutation.isPending}
+          canSubmit={!!operatorDraft.trim()}
+        />
+      </div>
+    </TheftPageShell>
   );
 }
 
@@ -328,9 +337,9 @@ function Panel({
   className?: string;
 }) {
   return (
-    <section className={cn("theft-panel min-w-0 p-5 md:p-7", className)}>
+    <TheftSurface tone="panel" padding="lg" className={cn("min-w-0 p-5 md:p-7", className)}>
       {children}
-    </section>
+    </TheftSurface>
   );
 }
 
@@ -362,9 +371,9 @@ function ObjectiveHeader({
           </div>
           <div className="min-w-0">
             <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
-              <Badge variant="outline" className="border-border bg-secondary px-3 py-1 text-foreground">
+              <TheftChip tone="muted" className="px-3 py-1">
                 Objective
-              </Badge>
+              </TheftChip>
               <span className="truncate">{companyName}</span>
               {stage ? <span>{stage}</span> : null}
             </div>
@@ -375,33 +384,38 @@ function ObjectiveHeader({
           </div>
         </div>
         <div className="theft-department-stat-grid grid w-full min-w-0 grid-cols-3 gap-2 lg:w-auto">
-          <MissionStat value={activeDepartments} label="departments" />
-          <MissionStat value={reviewCount} label="review" />
-          <MissionStat value={outcomeCount} label="outcomes" />
+          <TheftStat
+            value={activeDepartments}
+            label="departments"
+            surfaceTone="muted"
+            className="px-4 py-3 text-center"
+          />
+          <TheftStat
+            value={reviewCount}
+            label="review"
+            surfaceTone="muted"
+            className="px-4 py-3 text-center"
+          />
+          <TheftStat
+            value={outcomeCount}
+            label="outcomes"
+            surfaceTone="muted"
+            className="px-4 py-3 text-center"
+          />
         </div>
       </div>
     </Panel>
   );
 }
-
-function MissionStat({ value, label }: { value: number; label: string }) {
-  return (
-    <div className="bg-secondary px-4 py-3 text-center">
-      <p className="text-xl font-medium tabular-nums">{value}</p>
-      <p className="mt-1 text-xs text-muted-foreground">{label}</p>
-    </div>
-  );
-}
-
 function FreshCompanyPanel({ onAskOperator }: { onAskOperator: () => void }) {
   return (
     <Panel className="theft-fresh-company-grid grid gap-5 p-5 md:p-6">
       <div className="min-w-0">
-        <p className="theft-label-compact">Fresh company</p>
-        <h2 className="mt-2 text-xl font-semibold text-foreground">No execution history yet</h2>
-        <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">
-          Start by asking Operator for the first concrete task. THEFT will route it to a department, capture the output, and save the result into Library.
-        </p>
+        <TheftSectionHeader
+          eyebrow="Fresh company"
+          title="No execution history yet"
+          description="Start by asking Operator for the first concrete task. THEFT will route it to a department, capture the output, and save the result into Library."
+        />
       </div>
       <div className="grid gap-2">
         <Button onClick={onAskOperator}>
@@ -433,17 +447,16 @@ function StrategyMapPanel({
 
   return (
     <Panel className="min-h-[660px] max-w-full overflow-hidden p-4 md:p-5">
-      <div className="mb-5 flex items-center justify-between gap-3">
-        <div>
-          <h2 className="text-lg font-medium">Workspace / Strategy map</h2>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Objective to departments, tasks, and Library artifacts
-          </p>
-        </div>
-        <Link to="/goals" className="bg-secondary px-4 py-2 text-sm text-muted-foreground no-underline hover:text-foreground">
-          Tech Tree
-        </Link>
-      </div>
+      <TheftSectionHeader
+        className="mb-5"
+        title="Workspace / Strategy map"
+        description="Objective to departments, tasks, and Library artifacts"
+        actions={
+          <Link to="/goals" className="bg-secondary px-4 py-2 text-sm text-muted-foreground no-underline hover:text-foreground">
+            Tech Tree
+          </Link>
+        }
+      />
 
       <div className="min-w-0 max-w-full overflow-hidden bg-secondary p-4 md:p-5">
         <div className="theft-objective-card mx-auto max-w-2xl min-w-0 px-6 py-5 text-center">
@@ -555,14 +568,16 @@ function ConstraintsPanel({
 
   return (
     <Panel>
-      <h2 className="text-xl font-semibold">Constraints</h2>
+      <TheftSectionHeader title="Constraints" />
       <div className="mt-3 grid grid-cols-2 gap-2">
         {constraints.map((constraint) => (
-          <div key={constraint.label} className="rounded-lg bg-secondary p-4">
-            <p className="text-xs text-muted-foreground">{constraint.label}</p>
-            <p className="mt-2 text-3xl font-semibold tabular-nums">{constraint.value}</p>
-            <p className="mt-1 text-xs text-muted-foreground">{constraint.detail}</p>
-          </div>
+          <TheftStat
+            key={constraint.label}
+            label={constraint.label}
+            value={constraint.value}
+            description={constraint.detail}
+            surfaceTone="muted"
+          />
         ))}
       </div>
     </Panel>
@@ -582,12 +597,14 @@ function DecisionsPanel({
 
   return (
     <Panel>
-      <div className="flex items-center justify-between gap-3">
-        <h2 className="text-xl font-semibold">Decisions</h2>
-        <Link to="/inbox" className="text-sm text-muted-foreground no-underline hover:text-foreground">
-          View all
-        </Link>
-      </div>
+      <TheftSectionHeader
+        title="Decisions"
+        actions={
+          <Link to="/inbox" className="text-sm text-muted-foreground no-underline hover:text-foreground">
+            View all
+          </Link>
+        }
+      />
       <div className="mt-3 divide-y divide-border overflow-hidden rounded-lg bg-secondary">
         {approvalsCount > 0 ? (
           <Link to="/approvals/pending" className="flex items-center justify-between gap-3 p-3 text-inherit no-underline hover:bg-accent">
@@ -630,7 +647,7 @@ function DecisionsPanel({
 function ExecutionStatePanel({ departments }: { departments: DepartmentCanvasRow[] }) {
   return (
     <Panel>
-      <h2 className="text-base font-normal">Execution state</h2>
+      <TheftSectionHeader title="Execution state" />
       <div className="mt-3 space-y-3">
         {departments.map((department) => {
           const total = Math.max(department.issues.length, 1);
@@ -663,15 +680,15 @@ function OutcomesPanel({
 }) {
   return (
     <Panel>
-      <div className="flex items-center justify-between gap-3">
-        <div>
-        <h2 className="text-xl font-semibold">Outcomes</h2>
-          <p className="mt-1 text-sm text-muted-foreground">Latest Library artifacts and evidence.</p>
-        </div>
-        <Link to="/library" className="text-sm text-muted-foreground no-underline hover:text-foreground">
-          Library
-        </Link>
-      </div>
+      <TheftSectionHeader
+        title="Outcomes"
+        description="Latest Library artifacts and evidence."
+        actions={
+          <Link to="/library" className="text-sm text-muted-foreground no-underline hover:text-foreground">
+            Library
+          </Link>
+        }
+      />
       <div className="mt-3 grid gap-2">
         {documents.map(({ issue, document }) => (
           <Link
@@ -774,7 +791,7 @@ function OperatorDrawer({
   ];
 
   return (
-    <aside className="theft-panel flex max-h-[calc(100dvh-6rem)] min-h-[min(620px,calc(100dvh-7rem))] flex-col overflow-hidden p-0">
+    <TheftSurface tone="panel" padding="none" className="flex max-h-[calc(100dvh-6rem)] min-h-[min(620px,calc(100dvh-7rem))] flex-col overflow-hidden">
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0 p-5 pb-3 md:p-6 md:pb-3">
           <p className="theft-label-compact">Operator</p>
@@ -892,16 +909,16 @@ function OperatorDrawer({
           <Button variant="outline" size="sm">Explain risk</Button>
         </div>
       </div>
-    </aside>
+    </TheftSurface>
   );
 }
 
 function EvidenceChip({ label, value }: { label: string; value: string }) {
   return (
-    <div className="flex items-center justify-between gap-3 border border-border p-2 text-xs">
+    <TheftChip tone="muted" className="flex items-center justify-between gap-3 p-2 text-xs">
       <span className="text-muted-foreground">{label}</span>
       <span className="truncate font-medium">{value}</span>
-    </div>
+    </TheftChip>
   );
 }
 

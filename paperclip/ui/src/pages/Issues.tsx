@@ -15,6 +15,14 @@ import { EmptyState } from "../components/EmptyState";
 import { IssuesList } from "../components/IssuesList";
 import { StatusIcon } from "../components/StatusIcon";
 import {
+  TheftChip,
+  TheftPageShell,
+  TheftSectionHeader,
+  TheftStat,
+  TheftSurface,
+} from "@/components/theft";
+import { Button } from "@/components/ui/button";
+import {
   AlertTriangle,
   ArrowRight,
   Bot,
@@ -247,36 +255,38 @@ export function Issues() {
   }
 
   return (
-    <div className="space-y-5">
-      <TasksMissionHeader
-        buckets={founderBuckets}
-        isLoading={isLoading}
-        issueLinkState={issueLinkState}
-        agents={agents}
-      />
-      <IssuesList
-        issues={issues ?? []}
-        isLoading={isLoading}
-        isLoadingMoreIssues={isFetchingNextPage}
-        error={error as Error | null}
-        agents={agents}
-        projects={projects}
-        liveIssueIds={liveIssueIds}
-        viewStateKey="theft:tasks-review-queue"
-        issueLinkState={issueLinkState}
-        initialAssignees={searchParams.get("assignee") ? [searchParams.get("assignee")!] : undefined}
-        initialWorkspaces={initialWorkspaces.length > 0 ? initialWorkspaces : undefined}
-        initialSearch={syncedSearch}
-        onSearchChange={handleSearchChange}
-        enableRoutineVisibilityFilter
-        hasMoreIssues={hasMoreServerIssues}
-        onLoadMoreIssues={loadMoreServerIssues}
-        onUpdateIssue={(id, data) => updateIssue.mutate({ id, data })}
-        searchFilters={participantAgentId || workspaceIdFilter ? { participantAgentId, workspaceId: workspaceIdFilter } : undefined}
-        createIssueLabel="Task"
-        defaultSortField="workflow"
-      />
-    </div>
+    <TheftPageShell className="min-h-0 bg-background text-foreground">
+      <div className="mx-auto max-w-screen-2xl min-w-0 space-y-5 overflow-x-hidden px-1 pb-24 md:px-3">
+        <TasksMissionHeader
+          buckets={founderBuckets}
+          isLoading={isLoading}
+          issueLinkState={issueLinkState}
+          agents={agents}
+        />
+        <IssuesList
+          issues={issues ?? []}
+          isLoading={isLoading}
+          isLoadingMoreIssues={isFetchingNextPage}
+          error={error as Error | null}
+          agents={agents}
+          projects={projects}
+          liveIssueIds={liveIssueIds}
+          viewStateKey="theft:tasks-review-queue"
+          issueLinkState={issueLinkState}
+          initialAssignees={searchParams.get("assignee") ? [searchParams.get("assignee")!] : undefined}
+          initialWorkspaces={initialWorkspaces.length > 0 ? initialWorkspaces : undefined}
+          initialSearch={syncedSearch}
+          onSearchChange={handleSearchChange}
+          enableRoutineVisibilityFilter
+          hasMoreIssues={hasMoreServerIssues}
+          onLoadMoreIssues={loadMoreServerIssues}
+          onUpdateIssue={(id, data) => updateIssue.mutate({ id, data })}
+          searchFilters={participantAgentId || workspaceIdFilter ? { participantAgentId, workspaceId: workspaceIdFilter } : undefined}
+          createIssueLabel="Task"
+          defaultSortField="workflow"
+        />
+      </div>
+    </TheftPageShell>
   );
 }
 
@@ -298,21 +308,19 @@ function TasksMissionHeader({
   const decisionItems = nextIssue ? getIssueDecisionItems(nextIssue) : [];
 
   return (
-    <section className="theft-panel overflow-hidden p-0">
+    <TheftSurface tone="panel" padding="none" className="overflow-hidden">
       <div className="theft-tasks-mission-grid grid gap-0">
         <div className="space-y-5 p-5 md:p-7">
           <div className="flex flex-col gap-5 xl:flex-row xl:items-start xl:justify-between">
             <div className="max-w-2xl space-y-3">
-              <div className="theft-chip theft-chip-muted theft-label-compact">
+              <TheftChip tone="muted" density="compact" className="inline-flex items-center gap-2">
                 <Sparkles className="h-3.5 w-3.5" />
                 Needs Action
-              </div>
-              <div>
-                <h1 className="theft-heading text-2xl md:text-[2rem]">Task review queue</h1>
-                <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">
-                  The queue surfaces decisions, blocked work, and ready outputs first. Runtime detail stays available below.
-                </p>
-              </div>
+              </TheftChip>
+              <TheftSectionHeader
+                title={<span className="text-2xl md:text-3xl">Task review queue</span>}
+                description="The queue surfaces decisions, blocked work, and ready outputs first. Runtime detail stays available below."
+              />
             </div>
             <div className="theft-tasks-stat-grid grid grid-cols-2 gap-2 sm:grid-cols-4">
               <TaskBucketStat icon={AlertTriangle} label="Needs action" value={buckets.needsAction.length} tone="attention" />
@@ -323,7 +331,7 @@ function TasksMissionHeader({
           </div>
 
           <div className="theft-tasks-next-grid grid gap-4">
-            <div className="min-w-0 border border-border bg-card p-4 shadow-sm">
+            <TheftSurface tone="plain" padding="md">
               <div className="mb-4 flex flex-wrap items-start justify-between gap-3">
                 <div>
                   <p className="theft-label-compact">Recommended next move</p>
@@ -332,9 +340,9 @@ function TasksMissionHeader({
                   </p>
                 </div>
                 {nextIssue ? (
-                  <span className="rounded-full border border-border bg-background px-2.5 py-1 text-xs text-muted-foreground">
+                  <TheftChip tone="muted" density="compact">
                     {nextIssue.priority ?? "medium"} priority
-                  </span>
+                  </TheftChip>
                 ) : null}
               </div>
 
@@ -370,12 +378,12 @@ function TasksMissionHeader({
                   {isLoading ? "Loading tasks..." : "Create or route the next task when you are ready to advance the company."}
                 </div>
               )}
-            </div>
+            </TheftSurface>
 
-            <div className="border border-border bg-muted/20 p-4">
+            <TheftSurface tone="muted" padding="md">
               <div className="flex items-center justify-between gap-3">
                 <p className="theft-label-compact">Up next</p>
-                <span className="text-xs text-muted-foreground">{secondaryIssues.length} queued</span>
+                <TheftChip tone="muted" density="compact">{secondaryIssues.length} queued</TheftChip>
               </div>
               <div className="mt-3 space-y-2">
                 {secondaryIssues.length > 0 ? secondaryIssues.map((issue) => (
@@ -397,11 +405,11 @@ function TasksMissionHeader({
                   </div>
                 )}
               </div>
-            </div>
+            </TheftSurface>
           </div>
         </div>
 
-        <aside className="border-t border-border bg-muted/20 p-5 lg:border-l lg:border-t-0 md:p-6">
+        <aside className="border-t border-border bg-muted/20 p-5 md:p-6 lg:border-l lg:border-t-0">
           <div className="flex items-center gap-2">
             <span className="flex h-9 w-9 items-center justify-center rounded-full border border-border bg-background">
               <Bot className="h-4 w-4" />
@@ -412,26 +420,26 @@ function TasksMissionHeader({
             </div>
           </div>
           <div className="mt-5 space-y-3">
-            <button className="w-full border border-border bg-background px-3 py-3 text-left text-sm transition hover:border-foreground/40 hover:bg-card">
+            <Button variant="outline" className="h-auto w-full justify-start px-3 py-3 text-left text-sm font-normal">
               Summarize the bottleneck
-            </button>
-            <button className="w-full border border-border bg-background px-3 py-3 text-left text-sm transition hover:border-foreground/40 hover:bg-card">
+            </Button>
+            <Button variant="outline" className="h-auto w-full justify-start px-3 py-3 text-left text-sm font-normal">
               Route this to a department
-            </button>
-            <button className="w-full border border-border bg-background px-3 py-3 text-left text-sm transition hover:border-foreground/40 hover:bg-card">
+            </Button>
+            <Button variant="outline" className="h-auto w-full justify-start px-3 py-3 text-left text-sm font-normal">
               Draft the approval comment
-            </button>
+            </Button>
           </div>
-          <div className="mt-5 border border-border bg-background p-3">
+          <TheftSurface tone="plain" padding="sm" className="mt-5">
             <div className="flex items-center gap-2 text-xs text-muted-foreground">
               <MessageSquare className="h-3.5 w-3.5" />
               Persistent chat is docked here.
             </div>
             <p className="mt-2 text-sm text-foreground">What should move first?</p>
-          </div>
+          </TheftSurface>
         </aside>
       </div>
-    </section>
+    </TheftSurface>
   );
 }
 
@@ -447,25 +455,26 @@ function TaskBucketStat({
   tone?: "attention" | "neutral";
 }) {
   return (
-    <div className="border border-border bg-card/70 p-3 shadow-sm">
-      <div className="flex items-center justify-between gap-3">
-        <Icon className={tone === "attention" ? "h-4 w-4 text-foreground" : "h-4 w-4 text-muted-foreground"} />
-        <span className="text-2xl font-semibold tabular-nums text-foreground">{value}</span>
-      </div>
-      <p className="mt-2 text-xs text-muted-foreground">{label}</p>
-    </div>
+    <TheftStat
+      value={value}
+      label={label}
+      icon={<Icon />}
+      tone={tone === "attention" ? "warning" : "default"}
+      surfaceTone="muted"
+      className="px-3 py-3"
+    />
   );
 }
 
 function TaskSignal({ icon: Icon, label, value }: { icon: LucideIcon; label: string; value: string }) {
   return (
-    <div className="border border-border bg-muted/25 px-3 py-2">
+    <TheftSurface tone="muted" padding="sm" className="px-3 py-2">
       <div className="flex items-center gap-2 text-xs text-muted-foreground">
         <Icon className="h-3.5 w-3.5" />
         {label}
       </div>
       <p className="mt-1 truncate text-sm font-medium text-foreground">{value}</p>
-    </div>
+    </TheftSurface>
   );
 }
 

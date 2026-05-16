@@ -56,6 +56,7 @@ import { IssueGroupHeader } from "./IssueGroupHeader";
 import { IssueFiltersPopover } from "./IssueFiltersPopover";
 import { IssueRow } from "./IssueRow";
 import { PageSkeleton } from "./PageSkeleton";
+import { TheftChip, TheftSectionHeader, TheftSurface } from "@/components/theft";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
@@ -475,7 +476,7 @@ function SubIssueProgressSummaryStrip({
   const showCostSummary = !!costSummary && (costSummary.runCount > 0 || totalTokens > 0);
 
   return (
-    <div className="border border-border bg-background p-3">
+    <TheftSurface tone="plain" padding="sm">
       <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
         <div className="min-w-0 flex-1 space-y-2">
           <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm">
@@ -526,7 +527,7 @@ function SubIssueProgressSummaryStrip({
           </div>
         </div>
 
-        <div className="min-w-0 border border-border bg-background px-3 py-2 text-sm lg:w-72">
+        <TheftSurface tone="muted" padding="sm" className="min-w-0 px-3 py-2 text-sm lg:w-72">
           {target && targetIssue ? (
             <>
               <div className="text-xs font-medium text-muted-foreground">
@@ -551,9 +552,9 @@ function SubIssueProgressSummaryStrip({
           ) : (
             <div className="text-sm font-medium text-foreground">No actionable sub-issues</div>
           )}
-        </div>
+        </TheftSurface>
       </div>
-    </div>
+    </TheftSurface>
   );
 }
 
@@ -1241,40 +1242,48 @@ export function IssuesList({
         />
       ) : null}
 
-      {/* Toolbar */}
-      <div className="flex items-center justify-between gap-2 sm:gap-3">
-        <div className="flex min-w-0 items-center gap-2 sm:gap-3">
-          <Button size="sm" variant="outline" onClick={() => openCreateIssueDialog()}>
-            <Plus className="h-4 w-4 sm:mr-1" />
-            <span className="hidden sm:inline">{createButtonLabel}</span>
-          </Button>
-          <IssueSearchInput
-            value={issueSearch}
-            onDebouncedChange={(nextSearch) => {
-              setIssueSearch(nextSearch);
-              onSearchChange?.(nextSearch);
-            }}
-          />
-        </div>
+      <TheftSurface tone="panel" padding="sm" className="space-y-3">
+        <TheftSectionHeader
+          eyebrow="Task controls"
+          title="Queue filters"
+          description={`${filtered.length.toLocaleString()} visible of ${issues.length.toLocaleString()} loaded tasks`}
+          actions={(
+            <Button size="sm" variant="outline" onClick={() => openCreateIssueDialog()}>
+              <Plus className="h-4 w-4 sm:mr-1" />
+              <span className="hidden sm:inline">{createButtonLabel}</span>
+            </Button>
+          )}
+        />
 
-        <div className="flex items-center gap-0.5 sm:gap-1 shrink-0">
-          {/* View mode toggle */}
-          <div className="flex items-center border border-border rounded-md overflow-hidden mr-1">
-            <button
-              className={`p-1.5 transition-colors ${viewState.viewMode === "list" ? "bg-accent text-foreground" : "text-muted-foreground hover:text-foreground"}`}
-              onClick={() => updateView({ viewMode: "list" })}
-              title="List view"
-            >
-              <List className="h-3.5 w-3.5" />
-            </button>
-            <button
-              className={`p-1.5 transition-colors ${viewState.viewMode === "board" ? "bg-accent text-foreground" : "text-muted-foreground hover:text-foreground"}`}
-              onClick={() => updateView({ viewMode: "board" })}
-              title="Board view"
-            >
-              <Columns3 className="h-3.5 w-3.5" />
-            </button>
+        <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+          <div className="flex min-w-0 items-center gap-2 sm:gap-3">
+            <IssueSearchInput
+              value={issueSearch}
+              onDebouncedChange={(nextSearch) => {
+                setIssueSearch(nextSearch);
+                onSearchChange?.(nextSearch);
+              }}
+            />
           </div>
+
+          <div className="flex max-w-full shrink-0 items-center gap-0.5 overflow-x-auto pb-1 sm:gap-1">
+            {/* View mode toggle */}
+            <div className="mr-1 flex items-center overflow-hidden rounded-md border border-border">
+              <button
+                className={`p-1.5 transition-colors ${viewState.viewMode === "list" ? "bg-accent text-foreground" : "text-muted-foreground hover:text-foreground"}`}
+                onClick={() => updateView({ viewMode: "list" })}
+                title="List view"
+              >
+                <List className="h-3.5 w-3.5" />
+              </button>
+              <button
+                className={`p-1.5 transition-colors ${viewState.viewMode === "board" ? "bg-accent text-foreground" : "text-muted-foreground hover:text-foreground"}`}
+                onClick={() => updateView({ viewMode: "board" })}
+                title="Board view"
+              >
+                <Columns3 className="h-3.5 w-3.5" />
+              </button>
+            </div>
 
           {viewState.viewMode === "list" && (
             <Button
@@ -1390,8 +1399,9 @@ export function IssuesList({
               </PopoverContent>
             </Popover>
           )}
+          </div>
         </div>
-      </div>
+      </TheftSurface>
 
       {isLoading && <PageSkeleton variant="issues-list" />}
       {error && <p className="text-sm text-destructive">{error.message}</p>}
@@ -1530,23 +1540,29 @@ export function IssuesList({
                     ? `${firstVisibleBlockerDisplayLabel}: ${hiddenVisibleBlockerLabels}`
                     : firstVisibleBlockerDisplayLabel;
                   const checklistDependencyChips = checklistMeta && firstVisibleBlockerChip ? (
-                    <button
+                    <TheftChip
                       key={firstVisibleBlockerChip.blockerId}
-                      type="button"
-                      onClick={(event) => {
-                        event.preventDefault();
-                        event.stopPropagation();
-                        const target = document.getElementById(`issue-workflow-row-${firstVisibleBlockerChip.blockerId}`);
-                        if (!target) return;
-                        target.scrollIntoView({ behavior: "smooth", block: "nearest" });
-                        target.focus?.();
-                      }}
-                      className="inline-flex items-center rounded-full border border-amber-400/45 bg-amber-50/60 px-1.5 py-0.5 text-[10px] font-medium text-amber-700 hover:bg-amber-100/80 dark:border-amber-300/35 dark:bg-amber-400/10 dark:text-amber-300"
-                      title={firstVisibleBlockerTitle}
-                      aria-label={firstVisibleBlockerTitle}
+                      asChild
+                      tone="warning"
+                      density="compact"
                     >
-                      {firstVisibleBlockerDisplayLabel}
-                    </button>
+                      <button
+                        type="button"
+                        onClick={(event) => {
+                          event.preventDefault();
+                          event.stopPropagation();
+                          const target = document.getElementById(`issue-workflow-row-${firstVisibleBlockerChip.blockerId}`);
+                          if (!target) return;
+                          target.scrollIntoView({ behavior: "smooth", block: "nearest" });
+                          target.focus?.();
+                        }}
+                        className="inline-flex items-center"
+                        title={firstVisibleBlockerTitle}
+                        aria-label={firstVisibleBlockerTitle}
+                      >
+                        {firstVisibleBlockerDisplayLabel}
+                      </button>
+                    </TheftChip>
                   ) : null;
 
                   return (
@@ -1588,20 +1604,22 @@ export function IssuesList({
                                   Paused
                                 </span>
                               ) : (
-                                <span className="ml-1.5 inline-flex items-center rounded-full border border-amber-500/40 bg-amber-500/10 px-1.5 py-0.5 text-[10px] font-medium text-amber-700 dark:text-amber-300">
+                                <TheftChip tone="warning" density="compact" className="ml-1.5">
                                   {issueBadge}
-                                </span>
+                                </TheftChip>
                               )
                             ) : null}
                             {isSuccessfulRunHandoffRequired(issue) ? (
-                              <span
-                                className="ml-1.5 inline-flex items-center gap-1 rounded-full border border-amber-400/45 bg-amber-50/60 px-1.5 py-0.5 text-[10px] font-medium text-amber-700 dark:border-amber-300/35 dark:bg-amber-400/10 dark:text-amber-300"
+                              <TheftChip
+                                tone="warning"
+                                density="compact"
+                                className="ml-1.5 inline-flex items-center gap-1"
                                 aria-label="Needs next step"
                                 title="This issue needs a next step"
                               >
                                 <CircleDot className="h-3 w-3" />
                                 Needs next step
-                              </span>
+                              </TheftChip>
                             ) : null}
                           </>
                         )}

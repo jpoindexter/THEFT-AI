@@ -142,7 +142,7 @@
 | ID | Title | Status |
 |---|---|---|
 | T106 | Standardize active THEFT screens on shadcn/ui primitives before custom route styling | ▶ doing |
-| T107 | Create shared THEFT screen templates for launcher, workbench, split canvas/form, and detail/review flows | ☐ todo |
+| T107 | Create shared THEFT screen templates for launcher, workbench, split canvas/form, and detail/review flows | ✅ done |
 | T108 | Move route-specific scroll contracts into shared templates so pages do not clip or trap scroll | ☐ todo |
 | T109 | Split `OnboardingWizard.tsx` into modules that follow the 300 / 150 / 50 maintainability guardrail | ☐ todo |
 | T110 | Split dashboard, task detail, and Library product surfaces into reusable section/card modules | ☐ todo |
