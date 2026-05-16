@@ -90,10 +90,10 @@ export function IssueColumnPicker({
           {!iconOnly && "Columns"}
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-[300px] rounded-xl border-border/70 p-1.5 shadow-xl shadow-black/10">
+      <DropdownMenuContent align="end" className="w-72 rounded-xl border-border/70 p-1.5 shadow-xl shadow-black/10">
         <DropdownMenuLabel className="px-2 pb-1 pt-1.5">
           <div className="space-y-1">
-            <div className="text-[10px] font-semibold uppercase tracking-[0.22em] text-muted-foreground">
+            <div className="theft-label-compact">
               Desktop issue rows
             </div>
             <div className="text-sm font-medium text-foreground">
@@ -161,7 +161,7 @@ export function InboxIssueMetaLeading({
         </span>
       ) : null}
       {showIdentifier ? (
-        <span className="min-w-0 max-w-[18ch] truncate font-mono text-xs text-muted-foreground sm:max-w-none sm:shrink-0">
+        <span className="min-w-0 max-w-40 truncate font-mono text-xs text-muted-foreground sm:max-w-none sm:shrink-0">
           {issue.identifier ?? issue.id.slice(0, 8)}
         </span>
       ) : null}
@@ -183,7 +183,7 @@ export function InboxIssueMetaLeading({
           </span>
           <span
             className={cn(
-              "hidden text-[11px] font-medium sm:inline",
+              "hidden text-micro font-medium sm:inline",
               "text-blue-600 dark:text-blue-400",
             )}
           >
@@ -274,7 +274,7 @@ export function InboxIssueTrailingColumns({
 
         if (column === "project") {
           if (projectName) {
-            const accentColor = projectColor ?? "#64748b";
+            const accentColor = projectColor ?? "64748b";
             return (
               <span
                 key={column}
@@ -304,7 +304,7 @@ export function InboxIssueTrailingColumns({
                 {(issue.labels ?? []).slice(0, 2).map((label) => (
                   <span
                     key={label.id}
-                    className="inline-flex min-w-0 max-w-full shrink-0 items-center rounded-full border px-1.5 py-0 text-[10px] font-medium"
+                    className="inline-flex min-w-0 max-w-full shrink-0 items-center rounded-full border px-1.5 py-0 text-nano font-medium"
                     style={{
                       borderColor: label.color,
                       color: pickTextColorForPillBg(label.color, 0.12),
@@ -315,7 +315,7 @@ export function InboxIssueTrailingColumns({
                   </span>
                 ))}
                 {(issue.labels ?? []).length > 2 ? (
-                  <span className="shrink-0 text-[10px] font-medium text-muted-foreground">
+                  <span className="shrink-0 text-nano font-medium text-muted-foreground">
                     +{(issue.labels ?? []).length - 2}
                   </span>
                 ) : null}
@@ -336,9 +336,11 @@ export function InboxIssueTrailingColumns({
               {workspaceId && onFilterWorkspace ? (
                 <Tooltip>
                   <TooltipTrigger asChild>
-                    <button
+                    <Button
                       type="button"
-                      className="truncate rounded-sm text-left text-xs text-muted-foreground transition-colors hover:text-foreground hover:underline"
+                      variant="link"
+                      size="xs"
+                      className="h-auto min-w-0 justify-start truncate rounded-sm p-0 text-left text-xs text-muted-foreground hover:text-foreground"
                       onClick={(event) => {
                         event.preventDefault();
                         event.stopPropagation();
@@ -346,7 +348,7 @@ export function InboxIssueTrailingColumns({
                       }}
                     >
                       {workspaceName}
-                    </button>
+                    </Button>
                   </TooltipTrigger>
                   <TooltipContent side="top" sideOffset={6}>
                     Filter by workspace
@@ -377,7 +379,7 @@ export function InboxIssueTrailingColumns({
 
         if (column === "updated") {
           return (
-            <span key={column} className="min-w-0 truncate text-right text-[11px] font-medium text-muted-foreground">
+            <span key={column} className="min-w-0 truncate text-right text-micro font-medium text-muted-foreground">
               {activityText}
             </span>
           );

@@ -36,11 +36,11 @@ export function DevRestartBanner({ devServer }: { devServer?: DevServerHealthSta
     <div className="border-b border-amber-200 bg-amber-50 text-amber-950">
       <div className="flex min-h-9 flex-col gap-1 px-3 py-1.5 md:flex-row md:items-center md:justify-between">
         <div className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1 text-xs">
-          <div className="flex items-center gap-1.5 font-semibold uppercase tracking-[0.12em]">
+          <div className="theft-label-compact flex items-center gap-1.5 font-semibold text-amber-950">
             <AlertTriangle className="h-3 w-3 shrink-0" />
             <span>Restart required</span>
             {devServer.autoRestartEnabled ? (
-              <span className="rounded-full bg-amber-100 px-2 py-0.5 text-[10px] tracking-[0.08em] text-amber-900">
+              <span className="theft-label-compact rounded-full bg-amber-100 px-2 py-0.5 text-nano text-amber-900">
                 Auto-Restart On
               </span>
             ) : null}

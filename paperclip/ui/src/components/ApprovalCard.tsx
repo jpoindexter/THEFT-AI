@@ -63,7 +63,7 @@ export function ApprovalCard({
               <div className="flex flex-wrap items-center gap-2">
                 <Badge
                   variant="outline"
-                  className="border-border/70 bg-background/70 px-2 py-0.5 text-[11px] font-medium uppercase tracking-[0.08em] text-muted-foreground"
+                  className="theft-label-compact border-border/70 bg-background/70 px-2 py-0.5 font-medium"
                 >
                   {kindLabel}
                 </Badge>

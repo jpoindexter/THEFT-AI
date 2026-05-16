@@ -1,4 +1,5 @@
 import { useCallback, useState } from "react";
+import { Button } from "@/components/ui/button";
 import { getWorktreeUiBranding } from "../lib/worktree-branding";
 
 export function WorktreeBanner() {
@@ -17,26 +18,28 @@ export function WorktreeBanner() {
 
   return (
     <div
-      className="relative overflow-hidden border-b px-3 py-1.5 text-[11px] font-medium tracking-[0.2em] uppercase"
+      className="theft-label-compact relative overflow-hidden border-b px-3 py-1.5 font-medium"
       style={{
         backgroundColor: branding.color,
         color: branding.textColor,
         borderColor: `${branding.textColor}22`,
-        boxShadow: `inset 0 -1px 0 ${branding.textColor}18`,
-        backgroundImage: `linear-gradient(90deg, ${branding.textColor}14, transparent 28%, transparent 72%, ${branding.textColor}12), repeating-linear-gradient(135deg, transparent 0 10px, ${branding.textColor}08 10px 20px)`,
+        boxShadow: `inset 0 -0.0625rem 0 ${branding.textColor}18`,
+        backgroundImage: `linear-gradient(90deg, ${branding.textColor}14, transparent 28%, transparent 72%, ${branding.textColor}12), repeating-linear-gradient(135deg, transparent 0 0.625rem, ${branding.textColor}08 0.625rem 1.25rem)`,
       }}
     >
       <div className="flex items-center gap-2 overflow-hidden whitespace-nowrap">
         <span className="shrink-0 opacity-70">Worktree</span>
         <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-current opacity-70" aria-hidden="true" />
-        <button
+        <Button
           type="button"
+          variant="ghost"
+          size="xs"
           onClick={handleCopyName}
           title="Click to copy worktree name"
-          className="truncate font-semibold tracking-[0.12em] cursor-pointer hover:opacity-80 transition-opacity bg-transparent border-none p-0 text-current uppercase text-[11px]"
+          className="h-auto min-w-0 shrink cursor-pointer truncate rounded-sm bg-transparent p-0 font-semibold uppercase tracking-wider text-current hover:bg-transparent hover:text-current hover:opacity-80"
         >
           {copied ? "Copied!" : branding.name}
-        </button>
+        </Button>
       </div>
     </div>
   );

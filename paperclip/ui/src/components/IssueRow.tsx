@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import type { Issue } from "@paperclipai/shared";
 import { Link } from "@/lib/router";
 import { Eye, X } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import {
   createIssueDetailPath,
   rememberIssueDetailLocationState,
@@ -85,7 +86,7 @@ export function IssueRow({
   ) : null;
   const planningModeIndicator = issue.workMode === "planning" ? (
     <span
-      className="ml-1.5 inline-flex shrink-0 items-center rounded-full border border-amber-500/60 bg-amber-500/15 px-2 py-0.5 text-[10px] font-medium text-amber-700 dark:text-amber-300"
+      className="ml-1.5 inline-flex shrink-0 items-center rounded-full border border-amber-500/60 bg-amber-500/15 px-2 py-0.5 text-nano font-medium text-amber-700 dark:text-amber-300"
       title="This issue is in planning mode."
     >
       Planning
@@ -105,7 +106,7 @@ export function IssueRow({
       className={cn(
         "group flex items-start gap-2 border-b border-border py-2.5 pl-2 pr-3 text-sm no-underline text-inherit transition-colors last:border-b-0 sm:items-center sm:py-2 sm:pl-1",
         selected ? "hover:bg-transparent" : "hover:bg-accent/50",
-        checklistCurrentStep ? "border-l-2 border-l-primary bg-primary/5 pl-[calc(theme(spacing.2)-2px)] sm:pl-[calc(theme(spacing.1)-2px)]" : null,
+        checklistCurrentStep ? "border-l-2 border-l-primary bg-primary/5 pl-1.5 sm:pl-0.5" : null,
         className,
       )}
     >
@@ -134,7 +135,7 @@ export function IssueRow({
                 {productivityReviewIndicator}
               </span>
               {checklistStep}
-              <span className="min-w-0 max-w-[18ch] truncate font-mono text-xs text-muted-foreground sm:max-w-none sm:shrink-0">
+              <span className="min-w-0 max-w-40 truncate font-mono text-xs text-muted-foreground sm:max-w-none sm:shrink-0">
                 {identifier}
               </span>
               {planningModeIndicator}
@@ -161,8 +162,10 @@ export function IssueRow({
       {showUnreadSlot ? (
         <span className="inline-flex h-4 w-4 shrink-0 items-center justify-center self-center">
           {showUnreadDot ? (
-            <button
+            <Button
               type="button"
+              variant="ghost"
+              size="icon-xs"
               onClick={(event) => {
                 event.preventDefault();
                 event.stopPropagation();
@@ -176,7 +179,7 @@ export function IssueRow({
                 }
               }}
               className={cn(
-                "inline-flex h-4 w-4 items-center justify-center rounded-full transition-colors",
+                "h-4 w-4 rounded-full p-0",
                 selected ? "hover:bg-muted/80" : "hover:bg-blue-500/20",
               )}
               aria-label="Mark as read"
@@ -188,10 +191,12 @@ export function IssueRow({
                   unreadState === "fading" ? "opacity-0" : "opacity-100",
                 )}
               />
-            </button>
+            </Button>
           ) : onArchive ? (
-            <button
+            <Button
               type="button"
+              variant="ghost"
+              size="icon-xs"
               onClick={(event) => {
                 event.preventDefault();
                 event.stopPropagation();
@@ -204,11 +209,11 @@ export function IssueRow({
                 onArchive();
               }}
               disabled={archiveDisabled}
-              className="inline-flex h-4 w-4 items-center justify-center rounded-md text-muted-foreground opacity-0 transition-opacity hover:text-foreground group-hover:opacity-100 disabled:pointer-events-none disabled:opacity-30"
+              className="h-4 w-4 rounded-md p-0 text-muted-foreground opacity-0 transition-opacity hover:text-foreground group-hover:opacity-100 disabled:pointer-events-none disabled:opacity-30"
               aria-label="Dismiss from inbox"
             >
               <X className="h-3.5 w-3.5" />
-            </button>
+            </Button>
           ) : (
             <span className="inline-flex h-4 w-4" aria-hidden="true" />
           )}

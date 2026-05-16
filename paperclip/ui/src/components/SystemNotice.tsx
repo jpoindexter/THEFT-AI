@@ -9,6 +9,7 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
 
 export type SystemNoticeTone = "neutral" | "info" | "success" | "warning" | "danger";
 
@@ -113,8 +114,8 @@ function formatTimestamp(ts: string) {
 
 function MetadataRow({ row, tone }: { row: SystemNoticeMetadataRow; tone: ToneTokens }) {
   return (
-    <div className="grid grid-cols-[7.5rem_1fr] gap-x-3 gap-y-0.5 px-3 py-1.5 text-xs">
-      <div className="truncate text-[11px] font-medium uppercase tracking-[0.08em] text-muted-foreground">
+    <div className="flex flex-col gap-x-3 gap-y-0.5 px-3 py-1.5 text-xs sm:flex-row">
+      <div className="theft-label-compact shrink-0 truncate font-medium sm:w-32">
         {row.label}
       </div>
       <div className="min-w-0 break-words text-foreground/90">
@@ -124,7 +125,7 @@ function MetadataRow({ row, tone }: { row: SystemNoticeMetadataRow; tone: ToneTo
               return <span>{row.value}</span>;
             case "code":
               return (
-                <code className="rounded bg-muted px-1.5 py-0.5 font-mono text-[11px] text-foreground/80">
+                <code className="rounded bg-muted px-1.5 py-0.5 font-mono text-micro text-foreground/80">
                   {row.value}
                 </code>
               );
@@ -187,14 +188,14 @@ function MetadataRow({ row, tone }: { row: SystemNoticeMetadataRow; tone: ToneTo
                 return (
                   <a
                     href={row.href}
-                    className="inline-flex items-center gap-2 rounded-sm font-mono text-[11px] underline-offset-2 hover:underline"
+                    className="inline-flex items-center gap-2 rounded-sm font-mono text-micro underline-offset-2 hover:underline"
                   >
                     {inner}
                   </a>
                 );
               }
               return (
-                <span className="inline-flex items-center gap-2 font-mono text-[11px]">
+                <span className="inline-flex items-center gap-2 font-mono text-micro">
                   {inner}
                 </span>
               );
@@ -236,7 +237,7 @@ export function SystemNotice({
       role="status"
       aria-label={resolvedLabel}
       className={cn(
-        "relative w-full overflow-hidden rounded-lg border text-sm shadow-[0_1px_0_rgba(15,23,42,0.02)]",
+        "relative w-full overflow-hidden rounded-lg border text-sm shadow-xs",
         tokens.container,
         className,
       )}
@@ -252,7 +253,7 @@ export function SystemNotice({
           <ToneIcon className={cn("h-4 w-4", tokens.iconClass)} />
         </span>
         <div className="min-w-0 flex-1">
-          <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[11px] font-semibold uppercase tracking-[0.14em]">
+          <div className="theft-label-compact flex flex-wrap items-center gap-x-2 gap-y-0.5 font-semibold">
             <span className={tokens.label}>{resolvedLabel}</span>
             {source ? (
               <>
@@ -280,18 +281,19 @@ export function SystemNotice({
               </>
             ) : null}
           </div>
-          <div className="mt-1 break-words text-[14px] leading-6 text-foreground">{body}</div>
+          <div className="mt-1 break-words text-sm leading-6 text-foreground">{body}</div>
         </div>
         {hasDetails ? (
-          <button
+          <Button
             type="button"
+            variant="ghost"
+            size="xs"
             onClick={() => setOpen((v) => !v)}
             aria-expanded={open}
             aria-controls={detailsId}
             className={cn(
-              "ml-1 inline-flex h-7 shrink-0 items-center gap-1 rounded-md border border-transparent px-2 text-[11px] font-medium uppercase tracking-[0.12em] text-muted-foreground transition-[background-color,border-color,color]",
+              "theft-label-compact ml-1 h-7 shrink-0 gap-1 border border-transparent px-2 font-medium text-muted-foreground",
               "hover:border-border/70 hover:bg-background/70 hover:text-foreground",
-              "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50",
             )}
           >
             <span>{open ? "Hide details" : "Details"}</span>
@@ -301,7 +303,7 @@ export function SystemNotice({
                 open && "rotate-180",
               )}
             />
-          </button>
+          </Button>
         ) : null}
       </header>
       {hasDetails && open ? (
@@ -316,7 +318,7 @@ export function SystemNotice({
             {metadata!.map((section, sectionIdx) => (
               <div key={sectionIdx} className="py-1.5 first:pt-2 last:pb-2">
                 {section.title ? (
-                  <div className="px-3 pb-1 pt-0.5 text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+                  <div className="theft-label-compact px-3 pb-1 pt-0.5 text-nano font-semibold">
                     {section.title}
                   </div>
                 ) : null}

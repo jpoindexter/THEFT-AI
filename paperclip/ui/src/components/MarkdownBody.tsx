@@ -12,6 +12,7 @@ import { queryKeys } from "../lib/queryKeys";
 import { parseIssueReferenceFromHref, remarkLinkIssueReferences } from "../lib/issue-reference";
 import { remarkSoftBreaks } from "../lib/remark-soft-breaks";
 import { StatusIcon } from "./StatusIcon";
+import { Button } from "@/components/ui/button";
 
 interface MarkdownBodyProps {
   children: string;
@@ -317,7 +318,7 @@ function renderLinkBody(
   if (typeof children === "string" && children.length > 0) {
     if (children.length === 1) {
       return (
-        <span style={{ whiteSpace: "nowrap" }}>
+        <span className="whitespace-nowrap">
           {leadingIcon}
           {children}
           {trailingIcon}
@@ -330,14 +331,14 @@ function renderLinkBody(
     return (
       <>
         {leadingIcon ? (
-          <span style={{ whiteSpace: "nowrap" }}>
+          <span className="whitespace-nowrap">
             {leadingIcon}
             {first}
           </span>
         ) : first}
         {middle}
         {trailingIcon ? (
-          <span style={{ whiteSpace: "nowrap" }}>
+          <span className="whitespace-nowrap">
             {last}
             {trailingIcon}
           </span>
@@ -412,8 +413,10 @@ function CodeBlock({
       >
         {children}
       </pre>
-      <button
+      <Button
         type="button"
+        variant="ghost"
+        size="sm"
         onClick={handleCopy}
         aria-label="Copy code"
         title={label}
@@ -427,7 +430,7 @@ function CodeBlock({
           <Copy aria-hidden="true" className="h-3.5 w-3.5" />
         )}
         <span className="paperclip-markdown-codeblock-copy-label">{label}</span>
-      </button>
+      </Button>
     </div>
   );
 }
@@ -637,7 +640,8 @@ export function MarkdownBody({
           src={finalSrc}
           alt={alt ?? ""}
           onClick={onImageClick && finalSrc ? (e) => { e.preventDefault(); onImageClick(finalSrc); } : undefined}
-          style={onImageClick ? { cursor: "pointer", ...(imgProps.style as React.CSSProperties | undefined) } : imgProps.style as React.CSSProperties | undefined}
+          className={cn(imgProps.className, onImageClick && "cursor-pointer")}
+          style={imgProps.style as React.CSSProperties | undefined}
         />
       );
     };

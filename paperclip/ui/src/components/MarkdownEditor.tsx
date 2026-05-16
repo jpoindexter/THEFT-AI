@@ -42,6 +42,8 @@ import { normalizeMarkdown } from "../lib/normalize-markdown";
 import { pasteNormalizationPlugin } from "../lib/paste-normalization";
 import { cn } from "../lib/utils";
 import { useEditorAutocomplete, type SkillCommandOption } from "../context/EditorAutocompleteContext";
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
 
 /* ---- Mention types ---- */
 
@@ -1030,17 +1032,19 @@ export const MarkdownEditor = forwardRef<MarkdownEditorRef, MarkdownEditorProps>
       >
         <div className="flex items-start justify-between gap-3 px-3 pt-2 text-xs text-muted-foreground">
           <p>Rich editor unavailable for this markdown. Showing raw source instead.</p>
-          <button
+          <Button
             type="button"
-            className="shrink-0 underline underline-offset-2 hover:text-foreground"
+            variant="link"
+            size="sm"
+            className="h-auto shrink-0 px-0 py-0 text-xs text-muted-foreground"
             onClick={() => {
               setRichEditorError(null);
             }}
           >
             Retry rich editor
-          </button>
+          </Button>
         </div>
-        <textarea
+        <Textarea
           ref={fallbackTextareaRef}
           value={value}
           placeholder={placeholder}
@@ -1058,7 +1062,7 @@ export const MarkdownEditor = forwardRef<MarkdownEditorRef, MarkdownEditorProps>
             }
           }}
           className={cn(
-            "min-h-[12rem] w-full resize-none bg-transparent px-3 pb-3 pt-2 font-mono text-sm leading-6 outline-none",
+            "min-h-48 resize-none border-0 px-3 pb-3 pt-2 font-mono text-sm leading-6 shadow-none focus-visible:border-transparent focus-visible:ring-0",
             contentClassName,
           )}
         />
@@ -1222,7 +1226,7 @@ export const MarkdownEditor = forwardRef<MarkdownEditorRef, MarkdownEditorProps>
       {mentionActive && filteredMentions.length > 0 && mentionMenuPosition &&
         createPortal(
           <div
-            className="fixed z-[9999] min-w-[180px] max-w-[calc(100vw-16px)] max-h-[208px] overflow-y-auto rounded-md border border-border bg-popover shadow-md"
+            className="fixed z-[9999] max-h-52 min-w-44 max-w-80 overflow-y-auto rounded-md border border-border bg-popover shadow-md"
             style={{
               top: mentionMenuPosition.top,
               left: mentionMenuPosition.left,
@@ -1231,12 +1235,14 @@ export const MarkdownEditor = forwardRef<MarkdownEditorRef, MarkdownEditorProps>
             }}
           >
             {filteredMentions.map((option, i) => (
-              <button
+              <Button
                 key={option.id}
                 type="button"
+                variant="ghost"
+                size="sm"
                 tabIndex={-1}
                 className={cn(
-                  "flex items-center gap-2 w-full px-3 py-1.5 text-sm text-left hover:bg-accent/50 transition-colors",
+                  "h-auto w-full justify-start px-3 py-1.5 text-left font-normal hover:bg-accent/50",
                   i === mentionIndex && "bg-accent",
                 )}
                 onPointerDown={(e) => {
@@ -1261,7 +1267,7 @@ export const MarkdownEditor = forwardRef<MarkdownEditorRef, MarkdownEditorProps>
                 ) : option.kind === "project" && option.projectId ? (
                   <span
                     className="inline-flex h-2 w-2 rounded-full border border-border/50"
-                    style={{ backgroundColor: option.projectColor ?? "#64748b" }}
+                    style={{ backgroundColor: option.projectColor ?? "var(--muted-foreground)" }}
                   />
                 ) : option.kind === "user" ? (
                   <User className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
@@ -1273,21 +1279,21 @@ export const MarkdownEditor = forwardRef<MarkdownEditorRef, MarkdownEditorProps>
                 )}
                 <span>{option.kind === "skill" ? `/${option.slug}` : option.name}</span>
                 {option.kind === "project" && option.projectId && (
-                  <span className="ml-auto text-[10px] uppercase tracking-wide text-muted-foreground">
+                  <span className="ml-auto text-nano uppercase tracking-wide text-muted-foreground">
                     Project
                   </span>
                 )}
                 {option.kind === "user" && (
-                  <span className="ml-auto text-[10px] uppercase tracking-wide text-muted-foreground">
+                  <span className="ml-auto text-nano uppercase tracking-wide text-muted-foreground">
                     User
                   </span>
                 )}
                 {option.kind === "skill" && (
-                  <span className="ml-auto text-[10px] uppercase tracking-wide text-muted-foreground">
+                  <span className="ml-auto text-nano uppercase tracking-wide text-muted-foreground">
                     Skill
                   </span>
                 )}
-              </button>
+              </Button>
             ))}
           </div>,
           document.body,

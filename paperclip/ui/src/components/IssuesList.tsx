@@ -1269,20 +1269,26 @@ export function IssuesList({
           <div className="flex max-w-full shrink-0 items-center gap-0.5 overflow-x-auto pb-1 sm:gap-1">
             {/* View mode toggle */}
             <div className="mr-1 flex items-center overflow-hidden rounded-md border border-border">
-              <button
-                className={`p-1.5 transition-colors ${viewState.viewMode === "list" ? "bg-accent text-foreground" : "text-muted-foreground hover:text-foreground"}`}
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon-xs"
+                className={cn("h-7 w-7 rounded-sm p-0", viewState.viewMode === "list" ? "bg-accent text-foreground" : "text-muted-foreground hover:text-foreground")}
                 onClick={() => updateView({ viewMode: "list" })}
                 title="List view"
               >
                 <List className="h-3.5 w-3.5" />
-              </button>
-              <button
-                className={`p-1.5 transition-colors ${viewState.viewMode === "board" ? "bg-accent text-foreground" : "text-muted-foreground hover:text-foreground"}`}
+              </Button>
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon-xs"
+                className={cn("h-7 w-7 rounded-sm p-0", viewState.viewMode === "board" ? "bg-accent text-foreground" : "text-muted-foreground hover:text-foreground")}
                 onClick={() => updateView({ viewMode: "board" })}
                 title="Board view"
               >
                 <Columns3 className="h-3.5 w-3.5" />
-              </button>
+              </Button>
             </div>
 
           {viewState.viewMode === "list" && (
@@ -1339,9 +1345,12 @@ export function IssuesList({
                     ["created", "Created"],
                     ["updated", "Updated"],
                   ] as const).map(([field, label]) => (
-                    <button
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
                       key={field}
-                      className={`flex items-center justify-between w-full px-2 py-1.5 text-sm rounded-sm ${
+                      className={`h-auto w-full justify-between rounded-sm px-2 py-1.5 text-sm ${
                         viewState.sortField === field ? "bg-accent/50 text-foreground" : "hover:bg-accent/50 text-muted-foreground"
                       }`}
                       onClick={() => {
@@ -1358,7 +1367,7 @@ export function IssuesList({
                           {viewState.sortDir === "asc" ? "\u2191" : "\u2193"}
                         </span>
                       )}
-                    </button>
+                    </Button>
                   ))}
                 </div>
               </PopoverContent>
@@ -1384,16 +1393,19 @@ export function IssuesList({
                     ["parent", "Parent Issue"],
                     ["none", "None"],
                   ] as const).map(([value, label]) => (
-                    <button
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
                       key={value}
-                      className={`flex items-center justify-between w-full px-2 py-1.5 text-sm rounded-sm ${
+                      className={`h-auto w-full justify-between rounded-sm px-2 py-1.5 text-sm ${
                         viewState.groupBy === value ? "bg-accent/50 text-foreground" : "hover:bg-accent/50 text-muted-foreground"
                       }`}
                       onClick={() => updateView({ groupBy: value })}
                     >
                       <span>{label}</span>
                       {viewState.groupBy === value && <Check className="h-3.5 w-3.5" />}
-                    </button>
+                    </Button>
                   ))}
                 </div>
               </PopoverContent>
@@ -1546,8 +1558,10 @@ export function IssuesList({
                       tone="warning"
                       density="compact"
                     >
-                      <button
+                      <Button
                         type="button"
+                        variant="ghost"
+                        size="xs"
                         onClick={(event) => {
                           event.preventDefault();
                           event.stopPropagation();
@@ -1561,7 +1575,7 @@ export function IssuesList({
                         aria-label={firstVisibleBlockerTitle}
                       >
                         {firstVisibleBlockerDisplayLabel}
-                      </button>
+                      </Button>
                     </TheftChip>
                   ) : null;
 
@@ -1569,11 +1583,11 @@ export function IssuesList({
                     <div
                       key={issue.id}
                       style={{
-                        ...(depth > 0 ? { paddingLeft: `${depth * 16}px` } : {}),
+                        ...(depth > 0 ? { paddingLeft: `${depth}rem` } : {}),
                         ...(useDeferredRowRendering
                           ? {
                             contentVisibility: "auto",
-                            containIntrinsicSize: "44px",
+                            containIntrinsicSize: "2.75rem",
                           }
                           : {}),
                       }}
@@ -1596,7 +1610,7 @@ export function IssuesList({
                             {issueBadge ? (
                               issueBadge === "Paused" ? (
                                 <span
-                                  className={cn("ml-1.5 inline-flex items-center gap-1 rounded-full px-1.5 py-0.5 text-[10px] font-medium", statusBadge.paused)}
+                                  className={cn("ml-1.5 inline-flex items-center gap-1 rounded-full px-1.5 py-0.5 text-nano font-medium", statusBadge.paused)}
                                   aria-label="Paused"
                                   title="Paused"
                                 >
@@ -1626,9 +1640,9 @@ export function IssuesList({
                         className={isMutedIssue ? "opacity-70" : undefined}
                         mobileLeading={
                           hasChildren ? (
-                            <button type="button" onClick={toggleCollapse}>
+                            <Button type="button" variant="ghost" size="icon-xs" className="h-5 w-5 p-0" onClick={toggleCollapse}>
                               <ChevronRight className={cn("h-3.5 w-3.5 transition-transform", isExpanded && "rotate-90")} />
-                            </button>
+                            </Button>
                           ) : (
                             <span onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}>
                               <StatusIcon status={issue.status} blockerAttention={issue.blockerAttention} onChange={(s) => onUpdateIssue(issue.id, { status: s })} />
@@ -1638,13 +1652,15 @@ export function IssuesList({
                         desktopMetaLeading={(
                           <>
                             {hasChildren ? (
-                              <button
+                              <Button
                                 type="button"
-                                className="hidden shrink-0 items-center sm:inline-flex"
+                                variant="ghost"
+                                size="icon-xs"
+                                className="hidden h-5 w-5 shrink-0 p-0 sm:inline-flex"
                                 onClick={toggleCollapse}
                               >
                                 <ChevronRight className={cn("h-3.5 w-3.5 transition-transform", isExpanded && "rotate-90")} />
-                              </button>
+                              </Button>
                             ) : (
                               <span className="hidden w-3.5 shrink-0 sm:block" />
                             )}
@@ -1692,8 +1708,11 @@ export function IssuesList({
                                   }}
                                 >
                                   <PopoverTrigger asChild>
-                                    <button
-                                      className="flex w-full shrink-0 items-center overflow-hidden rounded-md px-2 py-1 transition-colors hover:bg-accent/50"
+                                    <Button
+                                      type="button"
+                                      variant="ghost"
+                                      size="sm"
+                                      className="h-auto w-full shrink-0 justify-start overflow-hidden rounded-md px-2 py-1"
                                       onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}
                                     >
                                       {issue.assigneeAgentId && agentName(issue.assigneeAgentId) ? (
@@ -1713,7 +1732,7 @@ export function IssuesList({
                                           Assignee
                                         </span>
                                       )}
-                                    </button>
+                                    </Button>
                                   </PopoverTrigger>
                                   <PopoverContent
                                     className="w-56 p-1"
@@ -1721,17 +1740,20 @@ export function IssuesList({
                                     onClick={(e) => e.stopPropagation()}
                                     onPointerDownOutside={() => setAssigneeSearch("")}
                                   >
-                                    <input
-                                      className="mb-1 w-full border-b border-border bg-transparent px-2 py-1.5 text-xs outline-none placeholder:text-muted-foreground/50"
+                                    <Input
+                                      className="mb-1 h-auto rounded-sm border-0 border-b border-border bg-transparent px-2 py-1.5 text-xs shadow-none focus-visible:ring-0"
                                       placeholder="Search assignees..."
                                       value={assigneeSearch}
                                       onChange={(e) => setAssigneeSearch(e.target.value)}
                                       autoFocus
                                     />
                                     <div className="max-h-48 overflow-y-auto overscroll-contain">
-                                      <button
+                                      <Button
+                                        type="button"
+                                        variant="ghost"
+                                        size="sm"
                                         className={cn(
-                                          "flex w-full items-center gap-2 rounded px-2 py-1.5 text-xs hover:bg-accent/50",
+                                          "h-auto w-full justify-start gap-2 rounded px-2 py-1.5 text-xs",
                                           !issue.assigneeAgentId && !issue.assigneeUserId && "bg-accent",
                                         )}
                                         onClick={(e) => {
@@ -1741,11 +1763,14 @@ export function IssuesList({
                                         }}
                                       >
                                         No assignee
-                                      </button>
+                                      </Button>
                                       {currentUserId && (
-                                        <button
+                                        <Button
+                                          type="button"
+                                          variant="ghost"
+                                          size="sm"
                                           className={cn(
-                                            "flex w-full items-center gap-2 rounded px-2 py-1.5 text-left text-xs hover:bg-accent/50",
+                                            "h-auto w-full justify-start gap-2 rounded px-2 py-1.5 text-left text-xs",
                                             issue.assigneeUserId === currentUserId && "bg-accent",
                                           )}
                                           onClick={(e) => {
@@ -1756,7 +1781,7 @@ export function IssuesList({
                                         >
                                           <User className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
                                           <span>Me</span>
-                                        </button>
+                                        </Button>
                                       )}
                                       {(agents ?? [])
                                         .filter((agent) => {
@@ -1764,10 +1789,13 @@ export function IssuesList({
                                           return agent.name.toLowerCase().includes(assigneeSearch.toLowerCase());
                                         })
                                         .map((agent) => (
-                                          <button
+                                          <Button
+                                            type="button"
+                                            variant="ghost"
+                                            size="sm"
                                             key={agent.id}
                                             className={cn(
-                                              "flex w-full items-center gap-2 rounded px-2 py-1.5 text-left text-xs hover:bg-accent/50",
+                                              "h-auto w-full justify-start gap-2 rounded px-2 py-1.5 text-left text-xs",
                                               issue.assigneeAgentId === agent.id && "bg-accent",
                                             )}
                                             onClick={(e) => {
@@ -1777,7 +1805,7 @@ export function IssuesList({
                                             }}
                                           >
                                             <Identity name={agent.name} size="sm" className="min-w-0" />
-                                          </button>
+                                          </Button>
                                         ))}
                                     </div>
                                   </PopoverContent>

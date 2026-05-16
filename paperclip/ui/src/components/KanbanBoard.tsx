@@ -68,7 +68,7 @@ function KanbanColumn({
   const isEmpty = issues.length === 0;
 
   return (
-    <div className={`flex flex-col shrink-0 transition-[width,min-width] ${isEmpty && !isOver ? "min-w-[48px] w-[48px]" : "min-w-[260px] w-[260px]"}`}>
+    <div className={`flex shrink-0 flex-col transition-[width,min-width] ${isEmpty && !isOver ? "min-w-12 w-12" : "min-w-64 w-64"}`}>
       <div className={`flex items-center gap-2 px-2 py-2 mb-1 ${isEmpty && !isOver ? "justify-center" : ""}`}>
         <StatusIcon status={status} />
         {(!isEmpty || isOver) && (
@@ -84,7 +84,7 @@ function KanbanColumn({
       </div>
       <div
         ref={setNodeRef}
-        className={`flex-1 min-h-[120px] rounded-md p-1 space-y-1 transition-colors ${
+        className={`min-h-32 flex-1 space-y-1 rounded-md p-1 transition-colors ${
           isOver ? "bg-accent/40" : "bg-muted/20"
         }`}
       >
@@ -163,7 +163,7 @@ function KanbanCard({
           </span>
           {isSuccessfulRunHandoffRequired(issue) ? (
             <span
-              className="inline-flex items-center gap-1 rounded-full border border-amber-400/45 bg-amber-50/60 px-1.5 py-0.5 text-[10px] font-medium text-amber-700 dark:border-amber-300/35 dark:bg-amber-400/10 dark:text-amber-300"
+              className="inline-flex items-center gap-1 rounded-full border border-amber-400/45 bg-amber-50/60 px-1.5 py-0.5 text-nano font-medium text-amber-700 dark:border-amber-300/35 dark:bg-amber-400/10 dark:text-amber-300"
               title="This issue needs a next step"
               aria-label="Needs next step"
             >
