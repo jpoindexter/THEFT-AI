@@ -241,6 +241,7 @@ export function Dashboard() {
   }
 
   const reviewCount = (approvals?.length ?? 0) + pendingInteractions.length + reviewIssues.length;
+  const isFreshCompany = (issues?.length ?? 0) === 0 && latestLibraryDocuments.length === 0;
 
   return (
     <div className="mx-auto max-w-[1760px] min-w-0 space-y-6 overflow-x-hidden px-1 pb-28 text-foreground md:px-3">
@@ -255,6 +256,10 @@ export function Dashboard() {
             reviewCount={reviewCount}
             outcomeCount={latestLibraryDocuments.length}
           />
+
+          {isFreshCompany ? (
+            <FreshCompanyPanel onAskOperator={() => setOperatorOpen(true)} />
+          ) : null}
 
           <div className={cn(
             "grid min-w-0 gap-6",
@@ -388,6 +393,29 @@ function MissionStat({ value, label }: { value: number; label: string }) {
       <p className="text-xl font-medium tabular-nums">{value}</p>
       <p className="mt-1 text-xs text-muted-foreground">{label}</p>
     </div>
+  );
+}
+
+function FreshCompanyPanel({ onAskOperator }: { onAskOperator: () => void }) {
+  return (
+    <Panel className="grid gap-5 p-5 md:grid-cols-[minmax(0,1fr)_280px] md:p-6">
+      <div className="min-w-0">
+        <p className="text-xs font-medium uppercase tracking-[0.08em] text-muted-foreground">Fresh company</p>
+        <h2 className="mt-2 text-xl font-semibold text-foreground">No execution history yet</h2>
+        <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">
+          Start by asking Operator for the first concrete task. THEFT will route it to a department, capture the output, and save the result into Library.
+        </p>
+      </div>
+      <div className="grid gap-2">
+        <Button onClick={onAskOperator} className="rounded-none">
+          <Sparkles className="h-4 w-4" />
+          Ask Operator for first move
+        </Button>
+        <Link to="/goals" className="border border-border bg-secondary px-4 py-2 text-center text-sm text-foreground no-underline hover:bg-accent">
+          Open Tech Tree
+        </Link>
+      </div>
+    </Panel>
   );
 }
 
