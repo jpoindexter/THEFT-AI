@@ -749,7 +749,7 @@ function OperatorDrawer({
   ];
 
   return (
-    <aside className="theft-panel flex max-h-[calc(100dvh-8rem)] min-h-[720px] flex-col overflow-hidden p-0">
+    <aside className="theft-panel flex max-h-[calc(100dvh-6rem)] min-h-[min(620px,calc(100dvh-7rem))] flex-col overflow-hidden p-0">
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0 p-5 pb-3 md:p-6 md:pb-3">
           <p className="text-xs uppercase tracking-[0.12em] text-muted-foreground">Operator</p>
@@ -900,38 +900,42 @@ function OperatorDock({
   if (open) return null;
 
   return (
-    <div className="fixed bottom-6 left-1/2 z-30 hidden w-[min(980px,calc(100vw-9rem))] -translate-x-1/2 items-center gap-2 border border-border bg-white/92 p-2 shadow-[0_18px_54px_rgb(20_24_20/0.12)] backdrop-blur md:flex">
+    <div className="fixed bottom-4 left-4 right-4 z-30 flex items-center gap-2 border border-border bg-white/94 p-2 shadow-[0_18px_54px_rgb(20_24_20/0.12)] backdrop-blur md:bottom-6 md:left-1/2 md:right-auto md:w-[min(980px,calc(100vw-9rem))] md:-translate-x-1/2">
       <button
         type="button"
         onClick={onToggle}
         title="Open Operator"
-        className="flex h-12 shrink-0 items-center gap-2 bg-secondary px-4 text-left text-sm hover:bg-accent"
+        className="flex h-11 shrink-0 items-center gap-2 bg-secondary px-3 text-left text-sm hover:bg-accent md:h-12 md:px-4"
       >
         <Bot className="h-5 w-5" />
         <span>
           <span className="block text-[11px] uppercase tracking-[0.12em] text-muted-foreground">Operator</span>
-          <span className="block text-xs">{open ? "Expanded" : "Collapsed"}</span>
+          <span className="block text-xs">Collapsed</span>
         </span>
       </button>
       <input
         value={operatorDraft}
         onChange={(event) => setOperatorDraft(event.target.value)}
         placeholder="Ask Operator..."
-        className="min-w-0 flex-1 bg-secondary px-5 py-3 text-base outline-none placeholder:text-muted-foreground"
+        className="hidden min-w-0 flex-1 bg-secondary px-5 py-3 text-base outline-none placeholder:text-muted-foreground sm:block"
       />
-      <Button variant="ghost" onClick={onToggle} className="h-12 gap-2 rounded-none px-3" aria-label="Explain next move">
+      <Button variant="ghost" onClick={onToggle} className="hidden h-12 gap-2 rounded-none px-3 sm:inline-flex" aria-label="Explain next move">
         <Sparkles className="h-4 w-4" />
         <span className="hidden text-xs lg:inline">Explain</span>
       </Button>
-      <Button variant="ghost" onClick={onToggle} className="h-12 gap-2 rounded-none px-3" aria-label="Route work">
+      <Button variant="ghost" onClick={onToggle} className="hidden h-12 gap-2 rounded-none px-3 sm:inline-flex" aria-label="Route work">
         <Route className="h-4 w-4" />
         <span className="hidden text-xs lg:inline">Route</span>
       </Button>
-      <Button variant="ghost" onClick={onToggle} className="h-12 gap-2 rounded-none px-3" aria-label="Review work">
+      <Button variant="ghost" onClick={onToggle} className="hidden h-12 gap-2 rounded-none px-3 sm:inline-flex" aria-label="Review work">
         <CheckCircle2 className="h-4 w-4" />
         <span className="hidden text-xs lg:inline">Review</span>
       </Button>
-      <Button disabled={!canSubmit || isPending} onClick={createTask} className="h-12 gap-2 rounded-none px-4">
+      <Button variant="outline" onClick={onToggle} className="ml-auto h-11 gap-2 rounded-none px-3 sm:hidden" aria-label="Open Operator">
+        <Sparkles className="h-4 w-4" />
+        <span className="text-xs">Open</span>
+      </Button>
+      <Button disabled={!canSubmit || isPending} onClick={createTask} className="hidden h-12 gap-2 rounded-none px-4 sm:inline-flex">
         <Send className="h-4 w-4" />
         <span className="hidden text-xs lg:inline">{isPending ? "Routing" : "Task"}</span>
       </Button>
