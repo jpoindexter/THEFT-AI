@@ -73,7 +73,16 @@ import {
   Database,
   Monitor,
   CircleDot,
-  Plus
+  Plus,
+  Target,
+  LockKeyhole,
+  Trophy,
+  Code2,
+  Palette,
+  Megaphone,
+  Headphones,
+  Scale,
+  DollarSign
 } from "lucide-react";
 
 
@@ -354,6 +363,53 @@ export function OnboardingWizard() {
     () => getOnboardingStageTaskTemplate(companyStage),
     [companyStage],
   );
+  const planReviewTitle = companyName.trim() || "New company";
+  const planObjective =
+    companyGoal.trim() ||
+    `Turn ${planReviewTitle} into a focused ${ONBOARDING_STAGE_LABELS[companyStage].toLowerCase()} company with a clear first task, department ownership, and Library output.`;
+  const planSections = [
+    {
+      title: "Objective",
+      icon: Target,
+      body: planObjective,
+    },
+    {
+      title: "Customer",
+      icon: Users,
+      bullets: [
+        "Primary: founders, operators, or teams building with local-first AI.",
+        "Secondary: technical teams that need control, speed, and durable artifacts.",
+        "Keep the first audience narrow enough for the Operator to route real work.",
+      ],
+    },
+    {
+      title: "Constraints",
+      icon: LockKeyhole,
+      bullets: [
+        "Local runtime remains the default control plane.",
+        "Founder approval stays in the loop before important decisions.",
+        `${DEPARTMENT_SEED_SPECS.length} departments activate with starter work and shared context.`,
+      ],
+    },
+    {
+      title: "Go-to-market",
+      icon: Rocket,
+      bullets: [
+        stageTaskTemplate.taskTitle,
+        "Route execution through departments, not a generic agent dashboard.",
+        "Promote useful results into the Library as company memory.",
+      ],
+    },
+    {
+      title: "First outcomes",
+      icon: Trophy,
+      bullets: [
+        taskTitle || stageTaskTemplate.taskTitle,
+        "Operator, roadmap, and departments ready in Mission Control.",
+        "First task queued with review, output, and next-move tracking.",
+      ],
+    },
+  ];
 
   useEffect(() => {
     if (taskTemplateCustomized) return;
@@ -817,7 +873,9 @@ export function OnboardingWizard() {
               <div className="flex min-w-0 items-center gap-2 text-sm font-medium">
                 <span className="truncate text-muted-foreground">Mission Control</span>
                 <span className="text-muted-foreground">/</span>
-                <span className="truncate text-foreground">Onboarding</span>
+                <span className="truncate text-foreground">
+                  {step === 4 ? "Plan Review" : "Onboarding"}
+                </span>
               </div>
               <button
                 onClick={handleClose}
@@ -841,7 +899,7 @@ export function OnboardingWizard() {
                   <div className="mb-6 flex items-start justify-between gap-4">
                     <div className="min-w-0">
                       <p className="text-xs font-medium uppercase tracking-[0.12em] text-muted-foreground">
-                        Onboarding
+                        {step === 4 ? "Plan Review" : "Onboarding"}
                       </p>
                       <h2 className="mt-2 truncate text-2xl font-medium">
                         {companyName.trim() || "New company"}
@@ -858,7 +916,7 @@ export function OnboardingWizard() {
                     { step: 1 as Step, label: "Company", icon: Building2 },
                     { step: 2 as Step, label: "Assembly", icon: Users },
                     { step: 3 as Step, label: "Task", icon: ListTodo },
-                    { step: 4 as Step, label: "Launch", icon: Rocket }
+                    { step: 4 as Step, label: "Plan", icon: Rocket }
                   ] as const
                 ).map(({ step: s, label, icon: Icon }) => (
                   <button
@@ -1546,61 +1604,59 @@ export function OnboardingWizard() {
                 <div className="space-y-5">
                   <div className="flex items-center gap-3 mb-1">
                     <div className="bg-muted/50 p-2">
-                      <Rocket className="h-5 w-5 text-muted-foreground" />
+                      <ListTodo className="h-5 w-5 text-muted-foreground" />
                     </div>
                     <div>
-                      <h3 className="font-medium">Launch your company OS</h3>
+                      <h3 className="font-medium">Review the business plan</h3>
                       <p className="text-xs text-muted-foreground">
-                        Launch creates the Operator, 8 departments, starter
-                        tasks, and a Command Center backed by the local runtime.
+                        Accept this plan to activate Operator, departments,
+                        starter tasks, and Mission Control.
                       </p>
                     </div>
                   </div>
-                  <div className="border border-border divide-y divide-border">
-                    <div className="flex items-center gap-3 px-3 py-2.5">
-                      <Building2 className="h-4 w-4 text-muted-foreground shrink-0" />
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium truncate">
-                          {companyName}
-                        </p>
-                        <p className="text-xs text-muted-foreground">Company</p>
+
+                  <div className="space-y-2">
+                    {planSections.map((section) => (
+                      <div key={section.title} className="border border-border p-3">
+                        <div className="flex items-center gap-2">
+                          <section.icon className="h-4 w-4 text-muted-foreground" />
+                          <p className="text-xs font-medium uppercase tracking-[0.12em] text-muted-foreground">
+                            {section.title}
+                          </p>
+                        </div>
+                        {"body" in section ? (
+                          <p className="mt-3 text-sm leading-6 text-muted-foreground">
+                            {section.body}
+                          </p>
+                        ) : (
+                          <ul className="mt-3 space-y-1.5 text-sm leading-6 text-muted-foreground">
+                            {section.bullets.map((bullet) => (
+                              <li key={bullet} className="flex gap-2">
+                                <span className="mt-2 size-1 rounded-full bg-foreground/40" />
+                                <span>{bullet}</span>
+                              </li>
+                            ))}
+                          </ul>
+                        )}
                       </div>
-                      <Check className="h-4 w-4 text-green-500 shrink-0" />
+                    ))}
+                  </div>
+
+                  <input
+                    className="w-full rounded-md border border-border bg-transparent px-3 py-2 text-sm outline-none focus:ring-1 focus:ring-ring placeholder:text-muted-foreground/50"
+                    placeholder="I want to change the plan..."
+                    value={stageInterviewAnswer}
+                    onChange={(e) => setStageInterviewAnswer(e.target.value)}
+                  />
+
+                  <div className="grid grid-cols-2 gap-2 border border-border p-3 text-xs">
+                    <div className="min-w-0">
+                      <p className="text-muted-foreground">Operator</p>
+                      <p className="mt-1 truncate font-medium">{agentName}</p>
                     </div>
-                    <div className="flex items-center gap-3 px-3 py-2.5">
-                      <Bot className="h-4 w-4 text-muted-foreground shrink-0" />
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium truncate">
-                          {agentName}
-                        </p>
-                        <p className="text-xs text-muted-foreground">
-                          Operator / {getUIAdapter(adapterType).label}
-                        </p>
-                      </div>
-                      <Check className="h-4 w-4 text-green-500 shrink-0" />
-                    </div>
-                    <div className="flex items-center gap-3 px-3 py-2.5">
-                      <ListTodo className="h-4 w-4 text-muted-foreground shrink-0" />
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium truncate">
-                          {taskTitle}
-                        </p>
-                        <p className="text-xs text-muted-foreground">Task</p>
-                      </div>
-                      <Check className="h-4 w-4 text-green-500 shrink-0" />
-                    </div>
-                    <div className="flex items-center gap-3 px-3 py-2.5">
-                      <Users className="h-4 w-4 text-muted-foreground shrink-0" />
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium truncate">
-                          {DEPARTMENT_SEED_SPECS.length} departments
-                        </p>
-                        <p className="text-xs text-muted-foreground">
-                          Engineering, Design, Marketing, Sales, Operations,
-                          Finance, Legal, Support
-                        </p>
-                      </div>
-                      <Check className="h-4 w-4 text-green-500 shrink-0" />
+                    <div className="min-w-0">
+                      <p className="text-muted-foreground">Runtime</p>
+                      <p className="mt-1 truncate font-medium">{getUIAdapter(adapterType).label}</p>
                     </div>
                   </div>
                 </div>
@@ -1680,7 +1736,7 @@ export function OnboardingWizard() {
                       ) : (
                         <ArrowRight className="h-3.5 w-3.5 mr-1" />
                       )}
-                      {loading ? "Creating..." : "Launch Company"}
+                      {loading ? "Activating..." : "Accept and activate"}
                     </Button>
                   )}
                 </div>
@@ -1707,6 +1763,25 @@ function OnboardingCanvasPreview({
   agentName: string;
 }) {
   const displayName = companyName.trim() || "New company";
+  const reviewMode = step === 4;
+  const mapNodes = reviewMode
+    ? [
+        { className: "left-1/2 top-0 -translate-x-1/2", icon: <Code2 className="size-4" />, label: "Engineering" },
+        { className: "left-[16%] top-[20%]", icon: <Palette className="size-4" />, label: "Design" },
+        { className: "right-[16%] top-[20%]", icon: <Megaphone className="size-4" />, label: "Marketing" },
+        { className: "right-[6%] top-[47%]", icon: <BarChart3 className="size-4" />, label: "Sales" },
+        { className: "bottom-[9%] right-[20%]", icon: <DollarSign className="size-4" />, label: "Finance" },
+        { className: "bottom-0 left-1/2 -translate-x-1/2", icon: <Scale className="size-4" />, label: "Legal" },
+        { className: "bottom-[9%] left-[20%]", icon: <Headphones className="size-4" />, label: "Support" },
+        { className: "left-[6%] top-[47%]", icon: <Settings2 className="size-4" />, label: "Operations" },
+      ]
+    : [
+        { className: "left-1/2 top-0 -translate-x-1/2", icon: <Flag className="size-4" />, label: "Brand" },
+        { className: "left-[12%] top-[32%]", icon: <Package className="size-4" />, label: "Product" },
+        { className: "right-[12%] top-[32%]", icon: <BarChart3 className="size-4" />, label: "Revenue" },
+        { className: "bottom-[10%] left-[22%]", icon: <Settings2 className="size-4" />, label: "Operations" },
+        { className: "bottom-[10%] right-[22%]", icon: <Database className="size-4" />, label: "Library" },
+      ];
 
   return (
     <section className="hidden min-h-0 overflow-hidden bg-background lg:block">
@@ -1717,9 +1792,11 @@ function OnboardingCanvasPreview({
           <div className="border border-border bg-card px-4 py-3 shadow-[0_10px_30px_rgb(20_24_20/0.04)]">
             <div className="flex items-center gap-2 text-xs font-medium uppercase tracking-[0.12em] text-muted-foreground">
               <span className="size-1.5 rounded-full bg-[#cdfe00]" />
-              Canvas initializing
+              {reviewMode ? "Workspace assembling" : "Canvas initializing"}
             </div>
-            <p className="mt-1 text-sm text-muted-foreground">Company map forming...</p>
+            <p className="mt-1 text-sm text-muted-foreground">
+              {reviewMode ? "Department graph preparing..." : "Company map forming..."}
+            </p>
           </div>
           <div className="flex border border-border bg-card">
             {[Monitor, CircleDot, Plus].map((Icon, index) => (
@@ -1749,11 +1826,9 @@ function OnboardingCanvasPreview({
             </p>
           </div>
 
-          <MapNode className="left-1/2 top-0 -translate-x-1/2" icon={<Flag className="size-4" />} label="Brand" />
-          <MapNode className="left-[12%] top-[32%]" icon={<Package className="size-4" />} label="Product" />
-          <MapNode className="right-[12%] top-[32%]" icon={<BarChart3 className="size-4" />} label="Revenue" />
-          <MapNode className="bottom-[10%] left-[22%]" icon={<Settings2 className="size-4" />} label="Operations" />
-          <MapNode className="bottom-[10%] right-[22%]" icon={<Database className="size-4" />} label="Library" />
+          {mapNodes.map((node) => (
+            <MapNode key={node.label} {...node} active={reviewMode} />
+          ))}
         </div>
 
         <div className="absolute bottom-6 left-6 z-10 w-64 border border-border bg-card px-4 py-3 shadow-[0_10px_30px_rgb(20_24_20/0.04)]">
@@ -1765,7 +1840,7 @@ function OnboardingCanvasPreview({
         <div className="absolute bottom-6 right-6 z-10 border border-border bg-card px-4 py-3 text-sm text-muted-foreground shadow-[0_10px_30px_rgb(20_24_20/0.04)]">
           <span className="font-medium text-foreground">{agentName || "Operator"}</span>
           <span className="mx-2 text-border">/</span>
-          Step {step} active
+          {reviewMode ? "Plan review ready" : `Step ${step} active`}
         </div>
       </div>
     </section>
@@ -1776,20 +1851,24 @@ function MapNode({
   className,
   icon,
   label,
+  active = false,
 }: {
   className: string;
   icon: ReactNode;
   label: string;
+  active?: boolean;
 }) {
   return (
     <div
       className={cn(
-        "absolute z-10 flex size-24 flex-col items-center justify-center border border-border bg-card text-center shadow-[0_12px_34px_rgb(20_24_20/0.06)]",
+        "absolute z-10 flex size-24 flex-col items-center justify-center border bg-card text-center shadow-[0_12px_34px_rgb(20_24_20/0.06)]",
+        active ? "border-foreground/35" : "border-border",
         className
       )}
     >
       <div className="mb-2 text-muted-foreground">{icon}</div>
       <div className="text-sm font-medium">{label}</div>
+      {active ? <span className="mt-2 size-1.5 rounded-full bg-[#cdfe00]" /> : null}
     </div>
   );
 }
