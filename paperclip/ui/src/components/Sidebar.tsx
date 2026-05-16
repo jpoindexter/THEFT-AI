@@ -77,12 +77,12 @@ export function Sidebar() {
 
   return (
     <aside className="w-full h-full min-h-0 border-r border-sidebar-border bg-sidebar text-sidebar-foreground flex flex-col items-center">
-      <div className="flex h-20 shrink-0 flex-col items-center justify-center gap-2 border-b border-sidebar-border px-2">
+      <div className="flex h-[4.5rem] shrink-0 flex-col items-center justify-center gap-1.5 border-b border-sidebar-border px-2">
         <SidebarCompanyMenu compact />
         <Button
           variant="ghost"
           size="icon-sm"
-          className="size-9 shrink-0 rounded-full text-muted-foreground hover:bg-sidebar-accent hover:text-foreground"
+          className="size-8 shrink-0 rounded-full text-muted-foreground hover:bg-sidebar-accent hover:text-foreground"
           onClick={openSearch}
           title="Search"
         >
@@ -90,7 +90,7 @@ export function Sidebar() {
         </Button>
       </div>
 
-      <nav className="flex min-h-0 flex-1 flex-col items-center justify-between gap-4 overflow-hidden px-0 py-4">
+      <nav className="flex min-h-0 flex-1 flex-col items-center justify-between gap-3 overflow-hidden px-2 py-3">
         <div className="flex flex-col items-center gap-1">
           <SidebarNavItem to="/dashboard" label="Mission Control" icon={LayoutDashboard} liveCount={liveRunCount} />
           <SidebarNavItem to="/issues" label="Tasks" icon={CircleDot} badge={inboxBadge.inbox} badgeTone={inboxBadge.failedRuns > 0 ? "danger" : "default"} alert={inboxBadge.failedRuns > 0} />

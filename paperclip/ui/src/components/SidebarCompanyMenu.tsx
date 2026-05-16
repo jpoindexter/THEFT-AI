@@ -227,7 +227,7 @@ export function SidebarCompanyMenu({ open: controlledOpen, onOpenChange, compact
           variant="ghost"
           className={cn(
             "h-9 justify-start gap-2 px-2 text-left",
-            compact ? "w-9 justify-center rounded-full" : "flex-1",
+            compact ? "w-8 justify-center rounded-full" : "flex-1",
           )}
           aria-label={selectedCompany ? `Open ${selectedCompany.name} workspace switcher` : "Open workspace switcher"}
         >

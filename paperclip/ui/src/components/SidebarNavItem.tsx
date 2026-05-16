@@ -53,7 +53,7 @@ export function SidebarNavItem({
     >
       {({ isActive }) => (
         <>
-      {isActive && !isMobile ? <span className="absolute -right-3 top-1/2 h-1.5 w-1.5 -translate-y-1/2 rounded-full bg-primary" aria-hidden /> : null}
+      {isActive && !isMobile ? <span className="absolute -right-2 top-1/2 h-1.5 w-1.5 -translate-y-1/2 rounded-full bg-primary" aria-hidden /> : null}
       <span className="relative shrink-0">
         <Icon className="h-5 w-5" />
         {alert && (
