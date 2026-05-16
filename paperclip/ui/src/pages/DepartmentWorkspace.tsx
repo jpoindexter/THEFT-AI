@@ -5,12 +5,14 @@ import type { Issue } from "@paperclipai/shared";
 import {
   AlertTriangle,
   ArrowRight,
+  Bot,
   CheckCircle2,
   FileText,
   Inbox,
   Library,
   ListChecks,
   ShieldCheck,
+  Sparkles,
   UserRoundCog,
   type LucideIcon,
 } from "lucide-react";
@@ -121,11 +123,14 @@ export function DepartmentWorkspace() {
 
   return (
     <div className="mx-auto max-w-7xl space-y-5">
-      <section className="theft-panel p-5">
+      <section className="theft-panel p-5 md:p-6">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
           <div>
             <div className="flex flex-wrap items-center gap-2">
-              <p className="text-xs font-medium uppercase tracking-normal text-muted-foreground">Department workspace</p>
+              <p className="inline-flex items-center gap-2 rounded-full border border-border bg-muted/25 px-3 py-1 text-xs font-medium uppercase tracking-[0.08em] text-muted-foreground">
+                <Sparkles className="h-3.5 w-3.5" />
+                Execution lane
+              </p>
               <Badge variant={department.activeCount > 0 ? "default" : "outline"} className="rounded-md">
                 {department.activeCount} open
               </Badge>
@@ -135,7 +140,7 @@ export function DepartmentWorkspace() {
             </div>
             <h1 className="theft-heading mt-2 text-2xl md:text-3xl">{department.title}</h1>
             <p className="mt-2 max-w-3xl text-sm leading-6 text-muted-foreground">
-              Department-owned execution lane for mission, current contribution, blockers, review-ready outputs, and Library evidence.
+              Department-owned work lane for mission, current contribution, blockers, review-ready outputs, and Library evidence.
             </p>
           </div>
           <div className="grid min-w-[260px] grid-cols-3 gap-2 text-center">
@@ -154,7 +159,7 @@ export function DepartmentWorkspace() {
       <section className="grid min-w-0 grid-cols-[minmax(0,1fr)] gap-5 xl:grid-cols-[minmax(0,1fr)_360px]">
         <div className="min-w-0 space-y-5">
           <WorkPanel
-            title="Active Work"
+            title="Now Moving"
             description="Work this department should move next."
             icon={Inbox}
             issues={activeWork}
@@ -187,30 +192,50 @@ export function DepartmentWorkspace() {
         </div>
 
         <aside className="min-w-0 space-y-5">
-          <div className="border border-border bg-card p-4  ">
+          <div className="border border-border bg-card p-4 shadow-sm">
             <div className="flex items-start gap-3">
-              <div className="mt-0.5 rounded-md bg-muted p-2 text-foreground">
-                <UserRoundCog className="h-4 w-4" />
+              <div className="mt-0.5 rounded-full border border-border bg-background p-2 text-foreground">
+                <Bot className="h-4 w-4" />
               </div>
               <div className="min-w-0">
-                <h2 className="text-base font-semibold">Runtime context</h2>
-                <p className="mt-1 truncate text-sm text-muted-foreground">
-                  {department.agent ? `${department.agent.name} - ${department.agent.status}` : "No lead assigned"}
-                </p>
+                <h2 className="text-base font-semibold">Operator brief</h2>
+                <p className="mt-1 text-sm text-muted-foreground">What this department should do next.</p>
               </div>
             </div>
-            <div className="mt-4 space-y-3 text-sm">
-              <InfoRow label="Role" value={selectedSpec.role} />
-              <InfoRow label="Next task" value={department.nextIssue?.title ?? "No task queued"} />
-              {department.agent ? (
-                <Button asChild variant="outline" size="sm" className="w-full">
-                  <Link to={`/agents/${department.agent.urlKey || department.agent.id}`}>Open diagnostics</Link>
+            <div className="mt-4 border border-border bg-background p-3">
+              <p className="text-xs font-medium uppercase tracking-[0.08em] text-muted-foreground">Recommended action</p>
+              <p className="mt-2 text-sm leading-6 text-foreground">
+                {department.nextIssue?.title ?? `Route the next ${department.title} task when the company objective is ready.`}
+              </p>
+            </div>
+            <div className="mt-3 grid gap-2">
+              {department.nextIssue ? (
+                <Button asChild size="sm" className="w-full">
+                  <Link to={issuePath(department.nextIssue)}>
+                    Open next task
+                    <ArrowRight className="h-4 w-4" />
+                  </Link>
                 </Button>
+              ) : null}
+              <Button asChild variant="outline" size="sm" className="w-full">
+                <Link to="/dashboard">Ask Operator to route work</Link>
+              </Button>
+            </div>
+            <div className="mt-4 space-y-3 text-sm">
+              <InfoRow label="Lead" value={department.agent ? department.agent.name : "No lead assigned"} />
+              <InfoRow label="Role" value={selectedSpec.role} />
+              {department.agent ? (
+                <Link
+                  to={`/agents/${department.agent.urlKey || department.agent.id}`}
+                  className="block text-xs text-muted-foreground underline-offset-2 hover:text-foreground hover:underline"
+                >
+                  Open runtime diagnostics
+                </Link>
               ) : null}
             </div>
           </div>
 
-          <div className="border border-border bg-card p-4  ">
+          <div className="border border-border bg-card p-4 shadow-sm">
             <div className="flex items-start gap-3">
               <div className="mt-0.5 rounded-md bg-muted p-2 text-foreground">
                 <Library className="h-4 w-4" />
@@ -241,13 +266,13 @@ export function DepartmentWorkspace() {
             </div>
           </div>
 
-          <div className="border border-border bg-card p-4  ">
+          <div className="border border-border bg-card p-4 shadow-sm">
             <div className="flex items-start gap-3">
               <div className="mt-0.5 rounded-md bg-muted p-2 text-foreground">
                 <ListChecks className="h-4 w-4" />
               </div>
               <div>
-                <h2 className="text-base font-semibold">Skills</h2>
+                <h2 className="text-base font-semibold">Capabilities</h2>
                 <p className="mt-1 text-sm text-muted-foreground">Secondary runtime context, not the main workspace.</p>
               </div>
             </div>
