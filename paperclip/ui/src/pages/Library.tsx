@@ -465,15 +465,16 @@ function LibraryDetail({
 }) {
   const Icon = itemIcon(item);
   return (
-    <div className="mx-auto max-w-4xl">
+    <div className="mx-auto max-w-5xl">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="flex min-w-0 items-start gap-3">
           <div className="rounded-md border border-border bg-card p-2">
             <Icon className="h-5 w-5 text-muted-foreground" />
           </div>
           <div className="min-w-0">
+            <p className="text-xs font-medium uppercase tracking-[0.08em] text-muted-foreground">Artifact inspector</p>
             <div className="flex flex-wrap items-center gap-2">
-              <h2 className="truncate text-lg font-semibold tracking-normal">{item.title}</h2>
+              <h2 className="mt-1 truncate text-lg font-semibold tracking-normal">{item.title}</h2>
               {item.isImportant ? (
                 <span className="rounded-full bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-800 dark:bg-amber-900/30 dark:text-amber-300">
                   Important
@@ -528,7 +529,7 @@ function LibraryDetail({
         {item.kind === "document" ? (
           <div>
             <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
-              <h3 className="text-sm font-semibold">Selected artifact preview</h3>
+              <h3 className="text-sm font-semibold">Artifact body</h3>
               {document && !editingDocument ? (
                 <Button variant="outline" size="sm" onClick={onEditDocument}>
                   <FileText className="h-4 w-4" />
@@ -571,7 +572,7 @@ function LibraryDetail({
           </div>
         ) : (
           <div className="rounded-md border border-border bg-card p-4 text-foreground">
-            <h3 className="text-sm font-semibold">Selected artifact preview</h3>
+            <h3 className="text-sm font-semibold">Artifact body</h3>
             <p className="mt-2 text-sm text-muted-foreground">{item.subtitle}</p>
             <p className="mt-2 text-xs text-muted-foreground">{item.reviewState ?? item.status ?? itemKindLabel(item)}</p>
             {item.contentType || item.byteSize ? (
