@@ -537,14 +537,20 @@ export function Costs() {
   const overviewError = spendError ?? financeError;
 
   return (
-    <div className="space-y-6">
-      <div className="space-y-5">
+    <div className="mx-auto max-w-7xl space-y-5">
+      <div className="theft-panel space-y-5 p-5 md:p-6">
           <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-            <div>
-                <h1 className="text-3xl font-semibold tracking-tight">Runtime usage</h1>
+            <div className="flex min-w-0 items-start gap-3">
+              <div className="mt-1 flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-border bg-background">
+                <DollarSign className="h-4 w-4" />
+              </div>
+              <div className="min-w-0">
+                <p className="text-xs font-medium uppercase tracking-[0.08em] text-muted-foreground">System diagnostics</p>
+                <h1 className="mt-1 text-2xl font-semibold tracking-tight">Runtime usage</h1>
                 <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">
-                  Runtime tokens, provider spend, quota windows, and local budget controls.
+                  Local runtime tokens, provider spend, quota windows, and budget stops. This is operational context, not the main work surface.
                 </p>
+              </div>
             </div>
 
             <div className="flex flex-wrap items-center gap-2">
