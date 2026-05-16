@@ -1,5 +1,6 @@
 import { lazy, Suspense, type ComponentType } from "react";
-import { Navigate, Outlet, Route, Routes, useLocation, useParams } from "@/lib/router";
+import { ArrowRight, Building2, CheckCircle2, Clock3, Database, Monitor, Plus, ShieldCheck } from "lucide-react";
+import { Navigate, Outlet, Route, Routes, useLocation, useNavigate, useParams } from "@/lib/router";
 import { Button } from "@/components/ui/button";
 import { Layout } from "./components/Layout";
 import { CloudAccessGate } from "./components/CloudAccessGate";
@@ -7,6 +8,7 @@ import { useCompany } from "./context/CompanyContext";
 import { useDialogActions, useDialogState } from "./context/DialogContext";
 import { loadLastInboxTab } from "./lib/inbox";
 import { shouldRedirectCompanylessRouteToOnboarding } from "./lib/onboarding-route";
+import { timeAgo } from "./lib/timeAgo";
 import { NotFoundPage } from "./pages/NotFound";
 
 function lazyPage<TModule extends Record<string, unknown>, TExport extends keyof TModule>(
@@ -202,27 +204,13 @@ function OnboardingRoutePage() {
 }
 
 function CompanyRootRedirect() {
-  const { companies, selectedCompany, loading } = useCompany();
-  const location = useLocation();
+  const { loading } = useCompany();
 
   if (loading) {
     return <div className="mx-auto max-w-xl py-10 text-sm text-muted-foreground">Loading...</div>;
   }
 
-  const targetCompany = selectedCompany ?? companies[0] ?? null;
-  if (!targetCompany) {
-    if (
-      shouldRedirectCompanylessRouteToOnboarding({
-        pathname: location.pathname,
-        hasCompanies: false,
-      })
-    ) {
-      return <Navigate to="/onboarding" replace />;
-    }
-    return <NoCompaniesStartPage />;
-  }
-
-  return <Navigate to={`/${targetCompany.issuePrefix}/dashboard`} replace />;
+  return <MissionLauncher />;
 }
 
 function UnprefixedBoardRedirect() {
@@ -255,19 +243,161 @@ function UnprefixedBoardRedirect() {
 }
 
 function NoCompaniesStartPage() {
+  return <MissionLauncher />;
+}
+
+function MissionLauncher() {
+  const { companies, selectedCompany } = useCompany();
   const { openOnboarding } = useDialogActions();
+  const navigate = useNavigate();
+  const recentCompanies = [...companies]
+    .filter((company) => company.status !== "archived")
+    .sort((a, b) => new Date(b.updatedAt ?? b.createdAt).getTime() - new Date(a.updatedAt ?? a.createdAt).getTime())
+    .slice(0, 4);
+  const primaryCompany = selectedCompany ?? recentCompanies[0] ?? null;
+
+  function openCompany(company = primaryCompany) {
+    if (!company) {
+      openOnboarding();
+      return;
+    }
+    navigate(`/${company.issuePrefix}/dashboard`);
+  }
 
   return (
-    <div className="mx-auto max-w-xl py-10">
-      <div className="rounded-lg border border-border bg-card p-6">
-        <h1 className="text-xl font-semibold">Create your THEFT company</h1>
-        <p className="mt-2 text-sm text-muted-foreground">
-          Start staged setup to seed Operator, 8 departments, roadmap tasks, and Library-ready work.
-        </p>
-        <div className="mt-4">
-          <Button onClick={() => openOnboarding()}>Start THEFT Setup</Button>
-        </div>
+    <div className="min-h-dvh bg-background text-foreground">
+      <div className="grid min-h-dvh grid-cols-[56px_minmax(0,1fr)]">
+        <aside className="flex min-h-0 flex-col items-center justify-between border-r border-border bg-card py-6">
+          <div className="flex flex-col items-center gap-5">
+            <div className="flex size-9 items-center justify-center rounded-full bg-primary text-sm font-medium text-primary-foreground">
+              T
+            </div>
+            <div className="h-px w-8 bg-border" />
+            <div className="flex size-10 items-center justify-center rounded-full bg-secondary text-foreground">
+              <Building2 className="size-5" />
+            </div>
+          </div>
+          <div className="mb-1 flex size-2 rounded-full bg-[#cdfe00]" aria-hidden />
+        </aside>
+
+        <main className="flex min-w-0 items-center justify-center p-4 md:p-10">
+          <section className="w-full min-w-0 max-w-[760px] border border-border bg-card p-5 shadow-[0_18px_54px_rgb(20_24_20/0.06)] md:p-10">
+            <div className="mx-auto flex size-12 items-center justify-center rounded-[14px] bg-secondary text-foreground">
+              <Monitor className="size-6" />
+            </div>
+
+            <div className="mt-7 text-center">
+              <p className="text-sm font-medium text-muted-foreground">THEFT AI</p>
+              <h1 className="mt-3 text-3xl font-medium leading-tight tracking-normal md:text-5xl">
+                Open Mission Control
+              </h1>
+              <p className="mx-auto mt-4 max-w-xl text-base leading-7 text-muted-foreground">
+                Build and operate a company from your local runtime.
+              </p>
+            </div>
+
+            <div className="mt-8 space-y-3">
+              <Button
+                size="lg"
+                className="h-14 w-full min-w-0 justify-between gap-3 rounded-[14px] bg-primary px-5 text-base font-medium text-primary-foreground"
+                onClick={() => openCompany()}
+              >
+                <span className="flex min-w-0 items-center gap-3">
+                  <Monitor className="size-5" />
+                  <span className="truncate">
+                    {primaryCompany ? `Open ${primaryCompany.name}` : "Open local company"}
+                  </span>
+                </span>
+                <ArrowRight className="size-5" />
+              </Button>
+              <Button
+                size="lg"
+                variant="outline"
+                className="h-14 w-full min-w-0 justify-between gap-3 rounded-[14px] px-5 text-base font-medium"
+                onClick={() => openOnboarding()}
+              >
+                <span className="flex min-w-0 items-center gap-3">
+                  <Plus className="size-5" />
+                  <span className="truncate">Start new company</span>
+                </span>
+                <ArrowRight className="size-5" />
+              </Button>
+            </div>
+
+            <div className="mt-5 grid divide-y divide-border border border-border text-sm text-muted-foreground md:grid-cols-3 md:divide-x md:divide-y-0">
+              <RuntimePill icon={Monitor} label="Local runtime ready" />
+              <RuntimePill icon={Database} label="Embedded Postgres" />
+              <RuntimePill icon={ShieldCheck} label="No cloud required" />
+            </div>
+
+            <div className="mt-8">
+              <div className="flex items-center justify-between gap-4">
+                <p className="text-sm font-medium uppercase tracking-[0.12em] text-muted-foreground">
+                  Recent companies
+                </p>
+                {recentCompanies.length > 0 ? (
+                  <button
+                    type="button"
+                    className="text-sm font-medium text-muted-foreground hover:text-foreground"
+                    onClick={() => navigate("/companies")}
+                  >
+                    View all
+                  </button>
+                ) : null}
+              </div>
+              <div className="mt-3 overflow-hidden border border-border">
+                {recentCompanies.length > 0 ? (
+                  recentCompanies.map((company) => (
+                    <button
+                      key={company.id}
+                      type="button"
+                      onClick={() => openCompany(company)}
+                      className="flex w-full items-center justify-between gap-4 border-b border-border px-4 py-3 text-left last:border-b-0 hover:bg-secondary"
+                    >
+                      <span className="flex min-w-0 items-center gap-3">
+                        <span className="flex size-9 shrink-0 items-center justify-center rounded-[10px] bg-secondary text-sm font-medium">
+                          {company.name.slice(0, 1).toUpperCase()}
+                        </span>
+                        <span className="min-w-0">
+                          <span className="block truncate text-sm font-medium text-foreground">{company.name}</span>
+                          <span className="mt-0.5 flex min-w-0 items-center gap-1.5 text-xs text-muted-foreground">
+                            <Clock3 className="size-3" />
+                            <span className="truncate">
+                              Last opened {timeAgo(company.updatedAt ?? company.createdAt)}
+                            </span>
+                          </span>
+                        </span>
+                      </span>
+                      <ArrowRight className="size-4 shrink-0 text-muted-foreground" />
+                    </button>
+                  ))
+                ) : (
+                  <div className="flex items-center gap-3 px-4 py-4 text-sm text-muted-foreground">
+                    <CheckCircle2 className="size-4" />
+                    Start setup to create your first local company.
+                  </div>
+                )}
+              </div>
+            </div>
+          </section>
+        </main>
       </div>
+    </div>
+  );
+}
+
+function RuntimePill({
+  icon: Icon,
+  label,
+}: {
+  icon: ComponentType<{ className?: string }>;
+  label: string;
+}) {
+  return (
+    <div className="flex items-center justify-center gap-2 px-4 py-3">
+      <Icon className="size-4 text-muted-foreground" />
+      <span>{label}</span>
+      <span className="size-1.5 rounded-full bg-[#cdfe00]" aria-hidden />
     </div>
   );
 }
