@@ -503,7 +503,7 @@ function IssueChatFallbackThread({
                 <div className="mb-2 flex items-center gap-2 text-sm">
                   <span className="font-medium text-foreground">{fallbackAuthorLabel(message)}</span>
                   {message.createdAt ? (
-                    <span className="text-[11px] text-muted-foreground">
+                    <span className="text-micro text-muted-foreground">
                       {commentDateLabel(message.createdAt)}
                     </span>
                   ) : null}
@@ -847,9 +847,10 @@ function IssueChatChainOfThought({
 
   return (
     <div>
-      <button
+      <Button
         type="button"
-        className="group flex w-full items-center gap-2.5 rounded-lg px-1 py-2 text-left transition-colors hover:bg-accent/5"
+        variant="ghost"
+        className="group h-auto w-full justify-start gap-2.5 px-1 py-2 text-left hover:bg-accent/5"
         onClick={() => hasContent && setExpanded((v) => !v)}
       >
         <span className="inline-flex items-center gap-2 text-sm font-medium text-foreground/80">
@@ -877,7 +878,7 @@ function IssueChatChainOfThought({
         {hasContent ? (
           <ChevronDown className={cn("ml-auto h-4 w-4 shrink-0 text-muted-foreground/50 transition-transform", expanded && "rotate-180")} />
         ) : null}
-      </button>
+      </Button>
       {expanded && hasContent ? (
         <div className="space-y-1 py-1">
           {isActive ? (
@@ -933,7 +934,7 @@ function IssueChatReasoningPart({ text }: { text: string }) {
         {ticker.exiting !== null && (
           <span
             key={`out-${ticker.key}`}
-            className="cot-line-exit absolute inset-x-0 truncate text-[13px] italic leading-5 text-muted-foreground/70"
+            className="cot-line-exit absolute inset-x-0 truncate text-sm italic leading-5 text-muted-foreground/70"
             onAnimationEnd={() => setTicker((t) => ({ ...t, exiting: null }))}
           >
             {ticker.exiting}
@@ -942,7 +943,7 @@ function IssueChatReasoningPart({ text }: { text: string }) {
         <span
           key={`in-${ticker.key}`}
           className={cn(
-            "absolute inset-x-0 truncate text-[13px] italic leading-5 text-muted-foreground/70",
+            "absolute inset-x-0 truncate text-sm italic leading-5 text-muted-foreground/70",
             ticker.key > 0 && "cot-line-enter",
           )}
         >
@@ -990,7 +991,7 @@ function IssueChatRollingToolPart({ toolParts }: { toolParts: ToolCallMessagePar
         {ticker.exiting !== null && (
           <span
             key={`out-${ticker.key}`}
-            className="cot-line-exit absolute inset-x-0 truncate text-[13px] leading-5 text-muted-foreground/70"
+            className="cot-line-exit absolute inset-x-0 truncate text-sm leading-5 text-muted-foreground/70"
             onAnimationEnd={() => setTicker((t) => ({ ...t, exiting: null }))}
           >
             {ticker.exiting}
@@ -999,7 +1000,7 @@ function IssueChatRollingToolPart({ toolParts }: { toolParts: ToolCallMessagePar
         <span
           key={`in-${ticker.key}`}
           className={cn(
-            "absolute inset-x-0 truncate text-[13px] leading-5 text-muted-foreground/70",
+            "absolute inset-x-0 truncate text-sm leading-5 text-muted-foreground/70",
             ticker.key > 0 && "cot-line-enter",
           )}
         >
@@ -1015,10 +1016,12 @@ function CopyablePreBlock({ children, className }: { children: string; className
   return (
     <div className="group/pre relative">
       <pre className={className}>{children}</pre>
-      <button
+      <Button
         type="button"
+        variant="ghost"
+        size="icon-xs"
         className={cn(
-          "absolute right-1.5 top-1.5 inline-flex h-6 w-6 items-center justify-center rounded-md bg-background/80 text-muted-foreground opacity-0 backdrop-blur-sm transition-opacity hover:text-foreground group-hover/pre:opacity-100",
+          "absolute right-1.5 top-1.5 bg-background/80 text-muted-foreground opacity-0 backdrop-blur-sm transition-opacity hover:text-foreground group-hover/pre:opacity-100",
           copied && "opacity-100",
         )}
         title="Copy"
@@ -1031,7 +1034,7 @@ function CopyablePreBlock({ children, className }: { children: string; className
         }}
       >
         {copied ? <Check className="h-3 w-3" /> : <Copy className="h-3 w-3" />}
-      </button>
+      </Button>
     </div>
   );
 }
@@ -1088,12 +1091,13 @@ function IssueChatToolPart({
       </div>
 
       <div className="min-w-0 flex-1">
-        <button
+        <Button
           type="button"
-          className="flex w-full items-center gap-2 rounded-md py-0.5 text-left transition-colors hover:bg-accent/5"
+          variant="ghost"
+          className="h-auto w-full justify-start gap-2 px-0 py-0.5 text-left hover:bg-accent/5"
           onClick={() => setOpen((current) => !current)}
         >
-          <span className="min-w-0 flex-1 truncate text-[13px] text-muted-foreground/80">
+          <span className="min-w-0 flex-1 truncate text-sm text-muted-foreground/80">
             {title}
             {!intentDetail && summary ? <span className="ml-1.5 text-muted-foreground/50">{summary}</span> : null}
           </span>
@@ -1101,22 +1105,22 @@ function IssueChatToolPart({
             <Loader2 className="h-3 w-3 shrink-0 animate-spin text-muted-foreground/50" />
           ) : null}
           <ChevronDown className={cn("h-3.5 w-3.5 shrink-0 text-muted-foreground/40 transition-transform", open && "rotate-180")} />
-        </button>
+        </Button>
 
         {open ? (
           <div className="mt-1 space-y-2 pb-1">
             {nonIntentDetails.length > 0 ? (
               <div>
-                <div className="mb-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground/60">
+                <div className="mb-1 text-micro font-semibold uppercase tracking-widest text-muted-foreground/60">
                   Input
                 </div>
                 <dl className="space-y-1.5">
                   {nonIntentDetails.map((detail) => (
                     <div key={`${detail.label}:${detail.value}`}>
-                      <dt className="text-[10px] font-medium text-muted-foreground/60">
+                      <dt className="text-micro font-medium text-muted-foreground/60">
                         {detail.label}
                       </dt>
-                      <dd className={cn("text-xs leading-5 text-foreground/70", detail.tone === "code" && "font-mono text-[11px]")}>
+                      <dd className={cn("text-xs leading-5 text-foreground/70", detail.tone === "code" && "font-mono text-micro")}>
                         {detail.value}
                       </dd>
                     </div>
@@ -1125,18 +1129,18 @@ function IssueChatToolPart({
               </div>
             ) : rawArgsText ? (
               <div>
-                <div className="mb-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground/60">
+                <div className="mb-1 text-micro font-semibold uppercase tracking-widest text-muted-foreground/60">
                   Input
                 </div>
-                <CopyablePreBlock className="overflow-x-auto rounded-md bg-accent/30 p-2 text-[11px] leading-4 text-foreground/70">{rawArgsText}</CopyablePreBlock>
+                <CopyablePreBlock className="overflow-x-auto rounded-md bg-accent/30 p-2 text-micro leading-4 text-foreground/70">{rawArgsText}</CopyablePreBlock>
               </div>
             ) : null}
             {result !== undefined ? (
               <div>
-                <div className="mb-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground/60">
+                <div className="mb-1 text-micro font-semibold uppercase tracking-widest text-muted-foreground/60">
                   Result
                 </div>
-                <CopyablePreBlock className="overflow-x-auto rounded-md bg-accent/30 p-2 text-[11px] leading-4 text-foreground/70">{resultText}</CopyablePreBlock>
+                <CopyablePreBlock className="overflow-x-auto rounded-md bg-accent/30 p-2 text-micro leading-4 text-foreground/70">{resultText}</CopyablePreBlock>
               </div>
             ) : null}
           </div>
@@ -1289,7 +1293,7 @@ function IssueChatUserMessage({
       <div className={cn("mb-1 flex items-center gap-2 px-1", isCurrentUser ? "justify-end" : "justify-start")}>
         <span className="text-sm font-medium text-foreground">{resolvedAuthorName}</span>
         {followUpRequested ? (
-          <Badge variant="outline" className="text-[10px] uppercase tracking-[0.14em]">
+          <Badge variant="outline" className="text-micro uppercase tracking-widest">
             Follow-up
           </Badge>
         ) : null}
@@ -1305,14 +1309,14 @@ function IssueChatUserMessage({
       >
         {queued ? (
           <div className="mb-1.5 flex items-center gap-2">
-            <span className="inline-flex items-center rounded-full border border-amber-400/60 bg-amber-100/70 px-2 py-0.5 text-[10px] font-medium uppercase tracking-[0.14em] text-amber-800 dark:border-amber-400/40 dark:bg-amber-500/20 dark:text-amber-200">
+            <span className="inline-flex items-center rounded-full border border-amber-400/60 bg-amber-100/70 px-2 py-0.5 text-micro font-medium uppercase tracking-widest text-amber-800 dark:border-amber-400/40 dark:bg-amber-500/20 dark:text-amber-200">
               {queueBadgeLabel}
             </span>
             {queueTargetRunId && onInterruptQueued ? (
               <Button
                 size="sm"
                 variant="outline"
-                className="h-6 border-red-300 px-2 text-[11px] text-red-700 hover:bg-red-50 hover:text-red-800 dark:border-red-500/40 dark:text-red-300 dark:hover:bg-red-500/10"
+                className="h-6 border-red-300 px-2 text-micro text-red-700 hover:bg-red-50 hover:text-red-800 dark:border-red-500/40 dark:text-red-300 dark:hover:bg-red-500/10"
                 disabled={isInterruptingQueuedRun}
                 onClick={() => void onInterruptQueued(queueTargetRunId)}
               >
@@ -1323,7 +1327,7 @@ function IssueChatUserMessage({
               <Button
                 size="sm"
                 variant="outline"
-                className="h-6 border-amber-300 px-2 text-[11px] text-amber-900 hover:bg-amber-100/80 hover:text-amber-950 dark:border-amber-500/40 dark:text-amber-100 dark:hover:bg-amber-500/10"
+                className="h-6 border-amber-300 px-2 text-micro text-amber-900 hover:bg-amber-100/80 hover:text-amber-950 dark:border-amber-500/40 dark:text-amber-100 dark:hover:bg-amber-500/10"
                 onClick={() => onCancelQueued(commentId)}
               >
                 Cancel
@@ -1337,7 +1341,7 @@ function IssueChatUserMessage({
       </div>
 
       {pending ? (
-        <div className={cn("mt-1 flex px-1 text-[11px] text-muted-foreground", isCurrentUser ? "justify-end" : "justify-start")}>
+        <div className={cn("mt-1 flex px-1 text-micro text-muted-foreground", isCurrentUser ? "justify-end" : "justify-start")}>
           Sending...
         </div>
       ) : (
@@ -1351,7 +1355,7 @@ function IssueChatUserMessage({
             <TooltipTrigger asChild>
               <a
                 href={anchorId ? `#${anchorId}` : undefined}
-                className="text-[11px] text-muted-foreground hover:text-foreground hover:underline"
+                className="text-micro text-muted-foreground hover:text-foreground hover:underline"
               >
                 {message.createdAt ? commentDateLabel(message.createdAt) : ""}
               </a>
@@ -1360,9 +1364,11 @@ function IssueChatUserMessage({
               {message.createdAt ? formatDateTime(message.createdAt) : ""}
             </TooltipContent>
           </Tooltip>
-          <button
+          <Button
             type="button"
-            className="inline-flex h-6 w-6 items-center justify-center text-muted-foreground transition-colors hover:text-foreground"
+            variant="ghost"
+            size="icon-xs"
+            className="text-muted-foreground hover:text-foreground"
             title="Copy message"
             aria-label="Copy message"
             onClick={() => {
@@ -1377,7 +1383,7 @@ function IssueChatUserMessage({
             }}
           >
             {copied ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
-          </button>
+          </Button>
         </div>
       )}
     </div>
@@ -1492,32 +1498,33 @@ function IssueChatAssistantMessage({
 
         <div className="min-w-0 flex-1">
           {isFoldable ? (
-            <button
+            <Button
               type="button"
-              className="group flex w-full items-center gap-2 py-0.5 text-left"
+              variant="ghost"
+              className="group h-auto w-full justify-start gap-2 px-0 py-0.5 text-left hover:bg-transparent"
               onClick={() => setFolded((v) => !v)}
             >
               <span className="text-sm font-medium text-foreground">{authorName}</span>
               <span className="text-xs text-muted-foreground/60">{chainOfThoughtLabel?.toLowerCase()}</span>
               <span className="ml-auto flex items-center gap-1.5">
                 {message.createdAt ? (
-                  <span className="text-[11px] text-muted-foreground/50">
+                  <span className="text-micro text-muted-foreground/50">
                     {commentDateLabel(message.createdAt)}
                   </span>
                 ) : null}
                 <ChevronDown className={cn("h-3.5 w-3.5 text-muted-foreground/40 transition-transform", !folded && "rotate-180")} />
               </span>
-            </button>
+            </Button>
           ) : (
             <div className="mb-1.5 flex items-center gap-2">
               <span className="text-sm font-medium text-foreground">{authorName}</span>
               {followUpRequested ? (
-                <Badge variant="outline" className="text-[10px] uppercase tracking-[0.14em]">
+                <Badge variant="outline" className="text-micro uppercase tracking-widest">
                   Follow-up
                 </Badge>
               ) : null}
               {isRunning ? (
-                <span className="inline-flex items-center gap-1 rounded-full border border-cyan-400/40 bg-cyan-500/10 px-2 py-0.5 text-[10px] font-medium uppercase tracking-[0.14em] text-cyan-700 dark:text-cyan-200">
+                <span className="inline-flex items-center gap-1 rounded-full border border-cyan-400/40 bg-cyan-500/10 px-2 py-0.5 text-micro font-medium uppercase tracking-widest text-cyan-700 dark:text-cyan-200">
                   <Loader2 className="h-3 w-3 animate-spin" />
                   Running
                 </span>
@@ -1556,9 +1563,11 @@ function IssueChatAssistantMessage({
               </div>
 
               <div className="mt-2 flex items-center gap-1">
-                <button
+                <Button
                   type="button"
-                  className="inline-flex h-7 w-7 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+                  variant="ghost"
+                  size="icon-xs"
+                  className="h-7 w-7 text-muted-foreground hover:text-foreground"
                   title="Copy message"
                   aria-label="Copy message"
                   onClick={() => {
@@ -1569,7 +1578,7 @@ function IssueChatAssistantMessage({
                   }}
                 >
                   {copied ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
-                </button>
+                </Button>
                 {commentId && onVote ? (
                   <IssueChatFeedbackButtons
                     activeVote={activeVote}
@@ -1582,7 +1591,7 @@ function IssueChatAssistantMessage({
                   <TooltipTrigger asChild>
                     <a
                       href={anchorId ? `#${anchorId}` : undefined}
-                      className="text-[11px] text-muted-foreground hover:text-foreground hover:underline"
+                      className="text-micro text-muted-foreground hover:text-foreground hover:underline"
                     >
                       {message.createdAt ? commentDateLabel(message.createdAt) : ""}
                     </a>
@@ -1732,11 +1741,13 @@ function IssueChatFeedbackButtons({
 
   return (
     <>
-      <button
+      <Button
         type="button"
         disabled={isSaving}
+        variant="ghost"
+        size="icon-xs"
         className={cn(
-          "inline-flex h-7 w-7 items-center justify-center rounded-md transition-colors",
+          "h-7 w-7",
           visibleVote === "up"
             ? "text-green-600 dark:text-green-400"
             : "text-muted-foreground hover:bg-accent hover:text-foreground",
@@ -1746,14 +1757,16 @@ function IssueChatFeedbackButtons({
         onClick={handleThumbsUp}
       >
         <ThumbsUp className="h-3.5 w-3.5" />
-      </button>
+      </Button>
       <Popover open={reasonOpen} onOpenChange={setReasonOpen}>
         <PopoverTrigger asChild>
-          <button
+          <Button
             type="button"
             disabled={isSaving}
+            variant="ghost"
+            size="icon-xs"
             className={cn(
-              "inline-flex h-7 w-7 items-center justify-center rounded-md transition-colors",
+              "h-7 w-7",
               visibleVote === "down"
                 ? "text-amber-600 dark:text-amber-400"
                 : "text-muted-foreground hover:bg-accent hover:text-foreground",
@@ -1763,7 +1776,7 @@ function IssueChatFeedbackButtons({
             onClick={handleThumbsDown}
           >
             <ThumbsDown className="h-3.5 w-3.5" />
-          </button>
+          </Button>
         </PopoverTrigger>
         <PopoverContent side="top" align="start" className="w-80 p-3">
           <div className="mb-2 text-sm font-medium">What could have been better?</div>
@@ -1919,16 +1932,18 @@ function ExpiredRequestConfirmationActivity({
         >
           {timeAgo(message.createdAt)}
         </a>
-        <button
+        <Button
           type="button"
-          className="inline-flex items-center gap-1 rounded-md border border-border/70 bg-background/70 px-1.5 py-0.5 text-[11px] font-medium text-muted-foreground transition-colors hover:border-border hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+          variant="outline"
+          size="xs"
+          className="h-auto border-border/70 bg-background/70 px-1.5 py-0.5 text-micro text-muted-foreground hover:border-border hover:text-foreground"
           aria-expanded={expanded}
           aria-controls={detailsId}
           onClick={() => setExpanded((current) => !current)}
         >
           <ChevronDown className={cn("h-3 w-3 transition-transform", expanded && "rotate-180")} />
           {expanded ? "Hide confirmation" : "Expired confirmation"}
-        </button>
+        </Button>
       </div>
       {expanded ? (
         <p className={cn("mt-1 text-xs text-muted-foreground", isCurrentUser && "text-right")}>
@@ -2027,7 +2042,7 @@ function isStaleSuccessfulRunHandoffNotice(input: {
 
 function StaleDispositionWarningMetadataRow({ row }: { row: SystemNoticeMetadataRow }) {
   const label = (
-    <span className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+    <span className="text-micro font-semibold uppercase tracking-widest text-muted-foreground">
       {row.label}
     </span>
   );
@@ -2037,7 +2052,7 @@ function StaleDispositionWarningMetadataRow({ row }: { row: SystemNoticeMetadata
         return <span>{row.value}</span>;
       case "code":
         return (
-          <code className="rounded bg-muted px-1.5 py-0.5 font-mono text-[11px] text-foreground/80">
+          <code className="rounded bg-muted px-1.5 py-0.5 font-mono text-micro text-foreground/80">
             {row.value}
           </code>
         );
@@ -2068,7 +2083,7 @@ function StaleDispositionWarningMetadataRow({ row }: { row: SystemNoticeMetadata
         const runShort = row.runId.length > 12 ? `${row.runId.slice(0, 8)}...` : row.runId;
         const content = (
           <>
-            <code className="rounded bg-muted px-1.5 py-0.5 font-mono text-[11px] text-foreground/80">
+            <code className="rounded bg-muted px-1.5 py-0.5 font-mono text-micro text-foreground/80">
               {runShort}
             </code>
             {row.status ? <span>{row.status}</span> : null}
@@ -2143,7 +2158,7 @@ function StaleDispositionWarningDetails({
       {sections.map((section) => (
         <div key={metadataSectionKey(section)} className="space-y-1.5">
           {section.title ? (
-            <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+            <div className="text-micro font-semibold uppercase tracking-widest text-muted-foreground">
               {section.title}
             </div>
           ) : null}
@@ -2178,11 +2193,12 @@ function StaleDispositionWarningRow({
       <div className="flex items-start gap-2.5 py-1.5">
         <span className="size-6 shrink-0" aria-hidden />
         <div className="min-w-0 flex-1">
-          <button
+          <Button
             type="button"
             aria-expanded={open}
             aria-controls={detailsId}
-            className="group flex w-full items-center gap-2 py-0.5 text-left"
+            variant="ghost"
+            className="group h-auto w-full justify-start gap-2 px-0 py-0.5 text-left hover:bg-transparent"
             onClick={() => setOpen((value) => !value)}
           >
             <span className="text-sm font-medium text-foreground/80">
@@ -2190,13 +2206,13 @@ function StaleDispositionWarningRow({
             </span>
             <span className="ml-auto flex items-center gap-1.5">
               {message.createdAt ? (
-                <span data-testid="stale-disposition-warning-time" className="text-[11px] text-muted-foreground/50">
+                <span data-testid="stale-disposition-warning-time" className="text-micro text-muted-foreground/50">
                   {commentDateLabel(message.createdAt)}
                 </span>
               ) : null}
               <ChevronDown className={cn("h-3.5 w-3.5 text-muted-foreground/40 transition-transform", open && "rotate-180")} />
             </span>
-          </button>
+          </Button>
           <div id={detailsId} hidden={!open} className="space-y-1 py-1">
             <StaleDispositionWarningDetails sections={sections} />
           </div>
@@ -2298,7 +2314,7 @@ function SystemNoticeCommentRow({
             <TooltipTrigger asChild>
               <a
                 href={anchorId ? `#${anchorId}` : undefined}
-                className="text-[11px] text-muted-foreground hover:text-foreground hover:underline"
+                className="text-micro text-muted-foreground hover:text-foreground hover:underline"
               >
                 {message.createdAt ? commentDateLabel(message.createdAt) : ""}
               </a>
@@ -2308,25 +2324,29 @@ function SystemNoticeCommentRow({
             </TooltipContent>
           </Tooltip>
           {anchorId ? (
-            <button
+            <Button
               type="button"
-              className="inline-flex h-6 w-6 items-center justify-center text-muted-foreground transition-colors hover:text-foreground"
+              variant="ghost"
+              size="icon-xs"
+              className="text-muted-foreground hover:text-foreground"
               title="Copy link"
               aria-label="Copy link to system notice"
               onClick={handleCopyLink}
             >
               {copiedLink ? <Check className="h-3.5 w-3.5" /> : <Paperclip className="h-3.5 w-3.5" />}
-            </button>
+            </Button>
           ) : null}
-          <button
+          <Button
             type="button"
-            className="inline-flex h-6 w-6 items-center justify-center text-muted-foreground transition-colors hover:text-foreground"
+            variant="ghost"
+            size="icon-xs"
+            className="text-muted-foreground hover:text-foreground"
             title="Copy notice text"
             aria-label="Copy system notice"
             onClick={handleCopy}
           >
             {copied ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
-          </button>
+          </Button>
         </div>
       </div>
     </div>
@@ -2517,7 +2537,7 @@ function IssueChatSystemMessage({ message }: { message: ThreadMessage }) {
               <span className="text-muted-foreground">run</span>
               <Link
                 to={`/agents/${runAgentId}/runs/${runId}`}
-                className="inline-flex items-center rounded-md border border-border bg-accent/40 px-1.5 py-0.5 font-mono text-[10px] text-muted-foreground transition-colors hover:bg-accent/60 hover:text-foreground"
+                className="inline-flex items-center rounded-md border border-border bg-accent/40 px-1.5 py-0.5 font-mono text-micro text-muted-foreground transition-colors hover:bg-accent/60 hover:text-foreground"
               >
                 {runId.slice(0, 8)}
               </Link>
@@ -3422,7 +3442,7 @@ const IssueChatComposer = forwardRef<IssueChatComposerHandle, IssueChatComposerP
       />
 
       {composerHint ? (
-        <div className="inline-flex items-center rounded-full border border-border/70 bg-muted/30 px-2 py-1 text-[11px] text-muted-foreground">
+        <div className="inline-flex items-center rounded-full border border-border/70 bg-muted/30 px-2 py-1 text-micro text-muted-foreground">
           {composerHint}
         </div>
       ) : null}
@@ -3506,12 +3526,14 @@ const IssueChatComposer = forwardRef<IssueChatComposerHandle, IssueChatComposerP
                 </Button>
               </PopoverTrigger>
               <PopoverContent className="w-44 p-1" align="start">
-                <button
+                <Button
                   type="button"
                   data-testid="issue-chat-composer-work-mode-menu-toggle"
                   data-pending-work-mode={pendingWorkMode}
+                  variant="ghost"
+                  size="xs"
                   className={cn(
-                    "flex w-full items-center gap-2 rounded px-2 py-1.5 text-xs hover:bg-accent/50",
+                    "h-auto w-full justify-start gap-2 rounded px-2 py-1.5 text-xs hover:bg-accent/50",
                     isPlanning ? "text-amber-700 dark:text-amber-300" : "text-foreground",
                   )}
                   onClick={() => {
@@ -3525,23 +3547,25 @@ const IssueChatComposer = forwardRef<IssueChatComposerHandle, IssueChatComposerP
                     <ClipboardList className="h-3.5 w-3.5 shrink-0 text-amber-600 dark:text-amber-300" aria-hidden />
                   )}
                   <span>{isPlanning ? "Switch to standard" : "Switch to planning"}</span>
-                </button>
+                </Button>
               </PopoverContent>
             </Popover>
           ) : null}
           {canToggleWorkMode && isPlanning ? (
-            <button
+            <Button
               type="button"
               data-testid="issue-chat-composer-work-mode-toggle"
               data-pending-work-mode={pendingWorkMode}
               aria-pressed
               title="Planning mode is on for this submission. Click to switch to Standard."
               onClick={() => setPendingWorkMode("standard")}
-              className="inline-flex items-center gap-1.5 rounded-md border border-amber-500/60 bg-amber-500/15 px-2 py-1 text-xs text-amber-800 transition-colors hover:bg-amber-500/25 dark:border-amber-500/50 dark:bg-amber-500/15 dark:text-amber-200 dark:hover:bg-amber-500/25"
+              variant="outline"
+              size="xs"
+              className="border-amber-500/60 bg-amber-500/15 text-xs text-amber-800 hover:bg-amber-500/25 dark:border-amber-500/50 dark:bg-amber-500/15 dark:text-amber-200 dark:hover:bg-amber-500/25"
             >
               <ClipboardList className="h-3.5 w-3.5" aria-hidden />
               <span>Planning</span>
-            </button>
+            </Button>
           ) : null}
         </div>
 
@@ -4173,13 +4197,15 @@ export function IssueChatThread({
       <div className={cn(variant === "embedded" ? "space-y-3" : "space-y-4")}>
         {resolvedShowJumpToLatest ? (
           <div className="flex justify-end">
-            <button
+            <Button
               type="button"
               onClick={handleJumpToLatest}
-              className="text-xs text-muted-foreground transition-colors hover:text-foreground"
+              variant="ghost"
+              size="xs"
+              className="text-muted-foreground hover:text-foreground"
             >
               Jump to latest
-            </button>
+            </Button>
           </div>
         ) : null}
 

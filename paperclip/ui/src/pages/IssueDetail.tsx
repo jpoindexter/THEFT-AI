@@ -412,7 +412,7 @@ function IssueChatSkeleton() {
           </div>
           <Skeleton className="h-8 w-8 rounded-full" />
         </div>
-        <Skeleton className="ml-auto h-16 w-[85%] rounded-xl" />
+        <Skeleton className="ml-auto h-16 w-5/6 rounded-xl" />
       </div>
       <div className="space-y-2 border-t border-border pt-3">
         <Skeleton className="h-3 w-28" />
@@ -443,7 +443,7 @@ function IssueDetailLoadingState({
                 <span className="text-sm font-mono text-muted-foreground shrink-0">{identifier}</span>
               ) : null}
               {headerSeed.originKind === "routine_execution" && headerSeed.originId ? (
-                <span className="inline-flex items-center gap-1 rounded-full border border-violet-500/30 bg-violet-500/10 px-2 py-0.5 text-[10px] font-medium text-violet-600 dark:text-violet-400 shrink-0">
+                <span className="inline-flex items-center gap-1 rounded-full border border-violet-500/30 bg-violet-500/10 px-2 py-0.5 text-micro font-medium text-violet-600 dark:text-violet-400 shrink-0">
                   <Repeat className="h-3 w-3" />
                   Routine
                 </span>
@@ -477,12 +477,12 @@ function IssueDetailLoadingState({
             <h2 className="text-xl font-bold leading-tight">{headerSeed.title}</h2>
             <div className="space-y-2">
               <Skeleton className="h-4 w-full max-w-xl" />
-              <Skeleton className="h-4 w-[72%]" />
+              <Skeleton className="h-4 w-3/4" />
             </div>
           </>
         ) : (
           <>
-            <Skeleton className="h-8 w-[min(100%,22rem)]" />
+            <Skeleton className="h-8 w-full max-w-sm" />
             <Skeleton className="h-16 w-full" />
           </>
         )}
@@ -567,28 +567,34 @@ function InboxMobileToolbar({
             </Button>
           </PopoverTrigger>
           <PopoverContent className="w-44 p-1" align="end">
-            <button
-              className="flex items-center gap-2 w-full px-2 py-1.5 text-xs rounded hover:bg-accent/50"
+            <Button
+              variant="ghost"
+              size="xs"
+              className="w-full justify-start"
               onClick={() => { onCopy(); setMenuOpen(false); }}
             >
               <Copy className="h-3 w-3" />
               Copy as markdown
-            </button>
-            <button
-              className="flex items-center gap-2 w-full px-2 py-1.5 text-xs rounded hover:bg-accent/50"
+            </Button>
+            <Button
+              variant="ghost"
+              size="xs"
+              className="w-full justify-start"
               onClick={() => { onProperties(); setMenuOpen(false); }}
             >
               <SlidersHorizontal className="h-3 w-3" />
               Properties
-            </button>
+            </Button>
             {issueIdProp && (
-              <button
-                className="flex items-center gap-2 w-full px-2 py-1.5 text-xs rounded hover:bg-accent/50 text-destructive"
+              <Button
+                variant="ghost"
+                size="xs"
+                className="w-full justify-start text-destructive hover:text-destructive"
                 onClick={() => { onHide(); setMenuOpen(false); }}
               >
                 <EyeOff className="h-3 w-3" />
                 Hide this issue
-              </button>
+              </Button>
             )}
           </PopoverContent>
         </Popover>
@@ -3245,7 +3251,7 @@ export function IssueDetail() {
                     resolvedIssueDetailState ?? location.state,
                     location.search,
                   )}
-                className="hover:text-foreground transition-colors truncate max-w-[200px]"
+                className="hover:text-foreground transition-colors truncate max-w-48"
                 title={ancestor.title}
               >
                 {ancestor.title}
@@ -3253,7 +3259,7 @@ export function IssueDetail() {
             </span>
           ))}
           <ChevronRight className="h-3 w-3 shrink-0" />
-          <span className="text-foreground/60 truncate max-w-[200px]">{issue.title}</span>
+          <span className="text-foreground/60 truncate max-w-48">{issue.title}</span>
         </nav>
       )}
 
@@ -3365,7 +3371,7 @@ export function IssueDetail() {
           <span className="text-sm font-mono text-muted-foreground shrink-0">{issue.identifier ?? issue.id.slice(0, 8)}</span>
 
           {hasLiveRuns && (
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-cyan-500/10 border border-cyan-500/30 px-2 py-0.5 text-[10px] font-medium text-cyan-600 dark:text-cyan-400 shrink-0">
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-cyan-500/10 border border-cyan-500/30 px-2 py-0.5 text-micro font-medium text-cyan-600 dark:text-cyan-400 shrink-0">
               <span className="relative flex h-1.5 w-1.5">
                 <span className="animate-pulse absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75" />
                 <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-cyan-400" />
@@ -3377,7 +3383,7 @@ export function IssueDetail() {
           {issue.originKind === "routine_execution" && issue.originId && (
             <Link
               to={`/routines/${issue.originId}`}
-              className="inline-flex items-center gap-1 rounded-full bg-violet-500/10 border border-violet-500/30 px-2 py-0.5 text-[10px] font-medium text-violet-600 dark:text-violet-400 shrink-0 hover:bg-violet-500/20 transition-colors"
+              className="inline-flex items-center gap-1 rounded-full bg-violet-500/10 border border-violet-500/30 px-2 py-0.5 text-micro font-medium text-violet-600 dark:text-violet-400 shrink-0 hover:bg-violet-500/20 transition-colors"
             >
               <Repeat className="h-3 w-3" />
               Routine
@@ -3390,7 +3396,7 @@ export function IssueDetail() {
 
           {issue.originKind === "issue_productivity_review" ? (
             <span
-              className="inline-flex items-center gap-1 rounded-full border border-amber-500/40 bg-amber-500/10 px-2 py-0.5 text-[10px] font-medium text-amber-700 dark:text-amber-300 shrink-0"
+              className="inline-flex items-center gap-1 rounded-full border border-amber-500/40 bg-amber-500/10 px-2 py-0.5 text-micro font-medium text-amber-700 dark:text-amber-300 shrink-0"
               title="This task is a productivity review."
             >
               <Eye className="h-3 w-3" />
@@ -3400,7 +3406,7 @@ export function IssueDetail() {
 
           {issue.workMode === "planning" ? (
             <span
-              className="inline-flex items-center rounded-full border border-amber-500/40 bg-amber-500/10 px-2 py-0.5 text-[10px] font-medium text-amber-700 dark:text-amber-300 shrink-0"
+              className="inline-flex items-center rounded-full border border-amber-500/40 bg-amber-500/10 px-2 py-0.5 text-micro font-medium text-amber-700 dark:text-amber-300 shrink-0"
               title="This issue is in planning mode."
             >
               Planning
@@ -3427,7 +3433,7 @@ export function IssueDetail() {
               {(issue.labels ?? []).slice(0, 4).map((label) => (
                 <span
                   key={label.id}
-                  className="inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-medium"
+                  className="inline-flex items-center rounded-full border px-2 py-0.5 text-micro font-medium"
                   style={{
                     borderColor: label.color,
                     color: pickTextColorForPillBg(label.color, 0.12),
@@ -3438,7 +3444,7 @@ export function IssueDetail() {
                 </span>
               ))}
               {(issue.labels ?? []).length > 4 && (
-                <span className="text-[10px] text-muted-foreground">+{(issue.labels ?? []).length - 4}</span>
+                <span className="text-micro text-muted-foreground">+{(issue.labels ?? []).length - 4}</span>
               )}
             </div>
           )}
@@ -3520,8 +3526,10 @@ export function IssueDetail() {
               </PopoverTrigger>
             <PopoverContent className="w-52 p-1" align="end">
               {canPauseLeafWork ? (
-                <button
-                  className="flex items-center gap-2 w-full px-2 py-1.5 text-xs rounded hover:bg-accent/50"
+                <Button
+                  variant="ghost"
+                  size="xs"
+                  className="w-full justify-start"
                   onClick={() => {
                     setTreeControlMode("pause");
                     setTreeControlCancelConfirmed(false);
@@ -3531,11 +3539,13 @@ export function IssueDetail() {
                 >
                   <PauseCircle className="h-3 w-3" />
                   Pause work...
-                </button>
+                </Button>
               ) : null}
               {canResumeLeafWork ? (
-                <button
-                  className="flex items-center gap-2 w-full px-2 py-1.5 text-xs rounded hover:bg-accent/50"
+                <Button
+                  variant="ghost"
+                  size="xs"
+                  className="w-full justify-start"
                   onClick={() => {
                     setTreeControlMode("resume");
                     setTreeControlWakeAgentsOnResume(isAgentOwnedNonTerminalIssue);
@@ -3545,12 +3555,14 @@ export function IssueDetail() {
                 >
                   <PlayCircle className="h-3 w-3" />
                   Resume work
-                </button>
+                </Button>
               ) : null}
               {canShowSubtreeControls ? (
                 <>
-                  <button
-                    className="flex items-center gap-2 w-full px-2 py-1.5 text-xs rounded hover:bg-accent/50"
+                  <Button
+                    variant="ghost"
+                    size="xs"
+                    className="w-full justify-start"
                     onClick={() => {
                       setTreeControlMode("pause");
                       setTreeControlCancelConfirmed(false);
@@ -3560,10 +3572,12 @@ export function IssueDetail() {
                   >
                     <PauseCircle className="h-3 w-3" />
                     Pause subtree...
-                  </button>
+                  </Button>
                   {canResumeSubtree ? (
-                    <button
-                      className="flex items-center gap-2 w-full px-2 py-1.5 text-xs rounded hover:bg-accent/50"
+                    <Button
+                      variant="ghost"
+                      size="xs"
+                      className="w-full justify-start"
                       onClick={() => {
                         setTreeControlMode("resume");
                         setTreeControlWakeAgentsOnResume(true);
@@ -3573,10 +3587,12 @@ export function IssueDetail() {
                     >
                       <PlayCircle className="h-3 w-3" />
                       Resume subtree
-                    </button>
+                    </Button>
                   ) : null}
-                  <button
-                    className="flex items-center gap-2 w-full px-2 py-1.5 text-xs rounded hover:bg-accent/50 text-destructive"
+                  <Button
+                    variant="ghost"
+                    size="xs"
+                    className="w-full justify-start text-destructive hover:text-destructive"
                     onClick={() => {
                       setTreeControlMode("cancel");
                       setTreeControlCancelConfirmed(false);
@@ -3586,10 +3602,12 @@ export function IssueDetail() {
                   >
                     <XCircle className="h-3 w-3" />
                     Cancel subtree...
-                  </button>
+                  </Button>
                   {canRestoreSubtree ? (
-                    <button
-                      className="flex items-center gap-2 w-full px-2 py-1.5 text-xs rounded hover:bg-accent/50"
+                    <Button
+                      variant="ghost"
+                      size="xs"
+                      className="w-full justify-start"
                       onClick={() => {
                         setTreeControlMode("restore");
                         setTreeControlWakeAgentsOnResume(false);
@@ -3600,12 +3618,14 @@ export function IssueDetail() {
                     >
                       <Repeat className="h-3 w-3" />
                       Restore subtree...
-                    </button>
+                    </Button>
                   ) : null}
                 </>
               ) : null}
-              <button
-                className="flex items-center gap-2 w-full px-2 py-1.5 text-xs rounded hover:bg-accent/50 text-destructive"
+              <Button
+                variant="ghost"
+                size="xs"
+                className="w-full justify-start text-destructive hover:text-destructive"
                 onClick={() => {
                   updateIssue.mutate(
                     { hiddenAt: new Date().toISOString() },
@@ -3616,7 +3636,7 @@ export function IssueDetail() {
               >
                 <EyeOff className="h-3 w-3" />
                 Hide this task
-              </button>
+              </Button>
             </PopoverContent>
             </Popover>
           </div>
@@ -3633,7 +3653,7 @@ export function IssueDetail() {
           value={issue.description ?? ""}
           onSave={(description) => updateIssue.mutateAsync({ description })}
           as="p"
-          className="text-[15px] leading-7 text-foreground"
+          className="text-sm leading-7 text-foreground"
           placeholder="Add a description..."
           multiline
           foldable
@@ -3805,9 +3825,11 @@ export function IssueDetail() {
                   >
                     <p className="text-xs text-white font-medium">Delete?</p>
                     <div className="flex gap-1.5">
-                      <button
+                      <Button
                         type="button"
-                        className="rounded bg-destructive px-2 py-0.5 text-xs text-white hover:bg-destructive/80"
+                        variant="destructive"
+                        size="xs"
+                        className="h-6 px-2"
                         onClick={(e) => {
                           e.stopPropagation();
                           deleteAttachment.mutate(attachment.id);
@@ -3816,23 +3838,27 @@ export function IssueDetail() {
                         disabled={deleteAttachment.isPending}
                       >
                         Yes
-                      </button>
-                      <button
+                      </Button>
+                      <Button
                         type="button"
-                        className="rounded bg-muted px-2 py-0.5 text-xs hover:bg-muted/80"
+                        variant="secondary"
+                        size="xs"
+                        className="h-6 px-2"
                         onClick={(e) => {
                           e.stopPropagation();
                           setConfirmDeleteId(null);
                         }}
                       >
                         No
-                      </button>
+                      </Button>
                     </div>
                   </div>
                 ) : (
-                  <button
+                  <Button
                     type="button"
-                    className="absolute top-1.5 right-1.5 rounded-md bg-black/50 p-1 text-white opacity-0 group-hover:opacity-100 transition-opacity hover:bg-destructive"
+                    variant="ghost"
+                    size="icon-xs"
+                    className="absolute top-1.5 right-1.5 bg-black/50 text-white opacity-0 transition-opacity hover:bg-destructive hover:text-white group-hover:opacity-100"
                     onClick={(e) => {
                       e.stopPropagation();
                       setConfirmDeleteId(attachment.id);
@@ -3840,7 +3866,7 @@ export function IssueDetail() {
                     title="Delete attachment"
                   >
                     <Trash2 className="h-3.5 w-3.5" />
-                  </button>
+                  </Button>
                 )}
               </div>
             ))}
@@ -3861,17 +3887,19 @@ export function IssueDetail() {
                   >
                     {attachment.originalFilename ?? attachment.id}
                   </a>
-                  <button
+                  <Button
                     type="button"
+                    variant="ghost"
+                    size="icon-xs"
                     className="text-muted-foreground hover:text-destructive"
                     onClick={() => deleteAttachment.mutate(attachment.id)}
                     disabled={deleteAttachment.isPending}
                     title="Delete attachment"
                   >
                     <Trash2 className="h-3.5 w-3.5" />
-                  </button>
+                  </Button>
                 </div>
-                <p className="text-[11px] text-muted-foreground">
+                <p className="text-xs text-muted-foreground">
                   {attachment.contentType} · {(attachment.byteSize / 1024).toFixed(1)} KB
                 </p>
               </div>
@@ -4019,7 +4047,7 @@ export function IssueDetail() {
       </Tabs>
 
       <Dialog open={treeControlOpen} onOpenChange={setTreeControlOpen}>
-        <DialogContent className="flex max-h-[calc(100dvh-2rem)] flex-col gap-0 overflow-hidden p-0 sm:max-w-[560px]">
+        <DialogContent className="flex max-h-dvh flex-col gap-0 overflow-hidden p-0 sm:max-w-xl">
           <DialogHeader className="border-b border-border/60 px-6 pb-4 pr-12 pt-6">
             <DialogTitle>{issueTreeControlLabel(treeControlMode, treeControlScope)}</DialogTitle>
             <DialogDescription>
@@ -4041,7 +4069,7 @@ export function IssueDetail() {
                 value={treeControlReason}
                 onChange={(event) => setTreeControlReason(event.target.value)}
                 placeholder="Explain why this subtree control is being applied..."
-                className="min-h-[88px]"
+                className="min-h-24"
               />
             </div>
 
@@ -4171,7 +4199,7 @@ export function IssueDetail() {
 
       {/* Mobile properties drawer */}
       <Sheet open={mobilePropsOpen} onOpenChange={setMobilePropsOpen}>
-        <SheetContent side="bottom" className="max-h-[85dvh] pb-[env(safe-area-inset-bottom)]">
+        <SheetContent side="bottom" className="max-h-dvh pb-[env(safe-area-inset-bottom)]">
           <SheetHeader>
             <SheetTitle className="text-sm">Properties</SheetTitle>
           </SheetHeader>

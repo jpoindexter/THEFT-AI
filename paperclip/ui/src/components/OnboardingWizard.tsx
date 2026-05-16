@@ -18,6 +18,8 @@ import {
   PopoverTrigger
 } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { TheftSplitCanvasFormTemplate } from "@/components/theft/templates/TheftSplitCanvasFormTemplate";
 import { cn } from "../lib/utils";
 import {
@@ -884,13 +886,15 @@ export function OnboardingWizard() {
                   {step === 5 ? "Company Assembly" : step === 4 ? "Plan Review" : "Onboarding"}
                 </span>
               </div>
-              <button
+              <Button
+                variant="ghost"
+                size="icon-sm"
                 onClick={handleClose}
                 className="flex size-9 items-center justify-center rounded-full text-muted-foreground hover:bg-secondary hover:text-foreground"
               >
                 <X className="h-4 w-4" />
                 <span className="sr-only">Close</span>
-              </button>
+              </Button>
             </header>
 
             {step === 5 ? (
@@ -942,12 +946,14 @@ export function OnboardingWizard() {
                           { step: 5 as Step, label: "Preview", icon: Monitor }
                         ] as const
                       ).map(({ step: s, label, icon: Icon }) => (
-                        <button
+                        <Button
                           key={s}
                           type="button"
+                          variant="ghost"
+                          size="sm"
                           onClick={() => setStep(s)}
                           className={cn(
-                            "flex shrink-0 cursor-pointer items-center gap-1.5 border-b-2 px-3 py-2 text-xs font-medium transition-colors",
+                            "flex h-auto shrink-0 cursor-pointer items-center gap-1.5 rounded-sm border-b-2 px-3 py-2 text-xs font-medium transition-colors",
                             s === step
                               ? "border-foreground text-foreground"
                               : "border-transparent text-muted-foreground hover:border-border hover:text-foreground/70"
@@ -955,7 +961,7 @@ export function OnboardingWizard() {
                         >
                           <Icon className="h-3.5 w-3.5" />
                           {label}
-                        </button>
+                        </Button>
                       ))}
                     </div>
                   </div>
@@ -986,7 +992,7 @@ export function OnboardingWizard() {
                     >
                       Company name
                     </label>
-                    <input
+                    <Input
                       className="w-full rounded-md border border-border bg-transparent px-3 py-2 text-sm outline-none focus:ring-1 focus:ring-ring placeholder:text-muted-foreground/50"
                       placeholder="Company name"
                       value={companyName}
@@ -1000,19 +1006,21 @@ export function OnboardingWizard() {
                     </label>
                     <div className="grid grid-cols-2 gap-2">
                       {ONBOARDING_STAGES.map((stage) => (
-                        <button
+                        <Button
                           key={stage}
                           type="button"
+                          variant="ghost"
+                          size="xs"
                           onClick={() => setCompanyStage(stage)}
                           className={cn(
-                            "rounded-md border px-2 py-1.5 text-xs text-left",
+                            "h-auto justify-start rounded-md border px-2 py-1.5 text-left text-xs",
                             companyStage === stage
                               ? "border-foreground bg-accent text-foreground"
                               : "border-border text-muted-foreground hover:text-foreground hover:bg-accent/40"
                           )}
                         >
                           {ONBOARDING_STAGE_LABELS[stage]}
-                        </button>
+                        </Button>
                       ))}
                     </div>
                   </div>
@@ -1023,20 +1031,22 @@ export function OnboardingWizard() {
                         <div className="text-xs mb-1">Company name</div>
                         <div className="flex gap-2 mb-2">
                           {(["done", "skipped"] as const).map((status) => (
-                            <button
+                            <Button
                               key={`name-${status}`}
                               type="button"
+                              variant="ghost"
+                              size="xs"
                               onClick={() => setSetupCompanyNameStatus(status)}
                               className={cn(
-                                "rounded border px-2 py-1 text-xs",
+                                "h-auto rounded border px-2 py-1 text-xs",
                                 setupCompanyNameStatus === status ? "border-foreground bg-accent" : "border-border"
                               )}
                             >
                               {status}
-                            </button>
+                            </Button>
                           ))}
                         </div>
-                        <input
+                        <Input
                           className="w-full rounded-md border border-border bg-transparent px-2 py-1.5 text-xs outline-none focus:ring-1 focus:ring-ring"
                           placeholder="Name note (optional)"
                           value={setupCompanyNameNote}
@@ -1047,20 +1057,22 @@ export function OnboardingWizard() {
                         <div className="text-xs mb-1">Legal / operating readiness</div>
                         <div className="flex gap-2 mb-2">
                           {(["todo", "done", "skipped"] as const).map((status) => (
-                            <button
+                            <Button
                               key={`legal-${status}`}
                               type="button"
+                              variant="ghost"
+                              size="xs"
                               onClick={() => setSetupLegalStatus(status)}
                               className={cn(
-                                "rounded border px-2 py-1 text-xs",
+                                "h-auto rounded border px-2 py-1 text-xs",
                                 setupLegalStatus === status ? "border-foreground bg-accent" : "border-border"
                               )}
                             >
                               {status}
-                            </button>
+                            </Button>
                           ))}
                         </div>
-                        <input
+                        <Input
                           className="w-full rounded-md border border-border bg-transparent px-2 py-1.5 text-xs outline-none focus:ring-1 focus:ring-ring"
                           placeholder="Legal, compliance, or operating note (optional)"
                           value={setupLegalNote}
@@ -1071,20 +1083,22 @@ export function OnboardingWizard() {
                         <div className="text-xs mb-1">Offer / product</div>
                         <div className="flex gap-2 mb-2">
                           {(["todo", "done", "skipped"] as const).map((status) => (
-                            <button
+                            <Button
                               key={`offer-${status}`}
                               type="button"
+                              variant="ghost"
+                              size="xs"
                               onClick={() => setSetupOfferStatus(status)}
                               className={cn(
-                                "rounded border px-2 py-1 text-xs",
+                                "h-auto rounded border px-2 py-1 text-xs",
                                 setupOfferStatus === status ? "border-foreground bg-accent" : "border-border"
                               )}
                             >
                               {status}
-                            </button>
+                            </Button>
                           ))}
                         </div>
-                        <input
+                        <Input
                           className="w-full rounded-md border border-border bg-transparent px-2 py-1.5 text-xs outline-none focus:ring-1 focus:ring-ring"
                           placeholder="Offer note (optional)"
                           value={setupOfferNote}
@@ -1104,7 +1118,7 @@ export function OnboardingWizard() {
                     >
                       Mission / goal (optional)
                     </label>
-                    <textarea
+                    <Textarea
                       className="w-full rounded-md border border-border bg-transparent px-4 py-2 text-sm outline-none focus:ring-1 focus:ring-ring placeholder:text-muted-foreground/50 resize-none min-h-16"
                       placeholder="What is this company trying to achieve?"
                       value={companyGoal}
@@ -1132,7 +1146,7 @@ export function OnboardingWizard() {
                     <label className="text-xs text-muted-foreground mb-1 block">
                       Operator name
                     </label>
-                    <input
+                    <Input
                       className="w-full rounded-md border border-border bg-transparent px-3 py-2 text-sm outline-none focus:ring-1 focus:ring-ring placeholder:text-muted-foreground/50"
                       placeholder="Operator"
                       value={agentName}
@@ -1193,9 +1207,10 @@ export function OnboardingWizard() {
                   </div>
 
                   <div className="rounded-md border border-border p-3">
-                    <button
+                    <Button
                       type="button"
-                      className="flex w-full items-center justify-between gap-3 text-left"
+                      variant="ghost"
+                      className="flex h-auto w-full items-center justify-between gap-3 p-0 text-left"
                       onClick={() => setShowAdvancedRuntime((value) => !value)}
                     >
                       <span className="flex min-w-0 items-center gap-2">
@@ -1216,7 +1231,7 @@ export function OnboardingWizard() {
                           showAdvancedRuntime ? "rotate-0" : "-rotate-90"
                         )}
                       />
-                    </button>
+                    </Button>
 
                   {/* Adapter type radio cards */}
                   {showAdvancedRuntime && <div className="mt-4">
@@ -1225,10 +1240,12 @@ export function OnboardingWizard() {
                     </label>
                     <div className="grid grid-cols-2 gap-2">
                       {recommendedAdapters.map((opt) => (
-                        <button
+                        <Button
                           key={opt.type}
+                          type="button"
+                          variant="ghost"
                           className={cn(
-                            "flex flex-col items-center gap-1.5 rounded-md border p-3 text-xs transition-colors relative",
+                            "relative flex h-auto flex-col items-center gap-1.5 rounded-md border p-3 text-xs transition-colors",
                             adapterType === opt.type
                               ? "border-foreground bg-accent"
                               : "border-border hover:bg-accent/50"
@@ -1259,12 +1276,15 @@ export function OnboardingWizard() {
                           <span className="text-muted-foreground text-nano">
                             {opt.description}
                           </span>
-                        </button>
+                        </Button>
                       ))}
                     </div>
 
-                    <button
-                      className="flex items-center gap-1.5 mt-3 text-xs text-muted-foreground hover:text-foreground transition-colors"
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      className="mt-3 flex h-auto items-center gap-1.5 p-0 text-xs text-muted-foreground transition-colors hover:text-foreground"
                       onClick={() => setShowMoreAdapters((v) => !v)}
                     >
                       <ChevronDown
@@ -1274,16 +1294,18 @@ export function OnboardingWizard() {
                         )}
                       />
                       More Agent Adapter Types
-                    </button>
+                    </Button>
 
                     {showMoreAdapters && (
                       <div className="grid grid-cols-2 gap-2 mt-2">
                         {moreAdapters.map((opt) => (
-                           <button
+                           <Button
                              key={opt.type}
+                             type="button"
                              disabled={!!opt.comingSoon}
+                             variant="ghost"
                              className={cn(
-                               "flex flex-col items-center gap-1.5 rounded-md border p-3 text-xs transition-colors relative",
+                               "relative flex h-auto flex-col items-center gap-1.5 rounded-md border p-3 text-xs transition-colors",
                                opt.comingSoon
                                  ? "border-border opacity-40 cursor-not-allowed"
                                  : adapterType === opt.type
@@ -1316,7 +1338,7 @@ export function OnboardingWizard() {
                                 ? opt.disabledLabel ?? "Coming soon"
                                 : opt.description}
                             </span>
-                          </button>
+                          </Button>
                         ))}
                       </div>
                     )}
@@ -1337,7 +1359,11 @@ export function OnboardingWizard() {
                           }}
                         >
                           <PopoverTrigger asChild>
-                            <button className="inline-flex items-center gap-1.5 rounded-md border border-border px-2.5 py-1.5 text-sm hover:bg-accent/50 transition-colors w-full justify-between">
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              className="inline-flex h-auto w-full items-center justify-between gap-1.5 rounded-md border border-border px-2.5 py-1.5 text-sm transition-colors hover:bg-accent/50"
+                            >
                               <span
                                 className={cn(
                                   !model && "text-muted-foreground"
@@ -1351,13 +1377,13 @@ export function OnboardingWizard() {
                                       : "Default")}
                               </span>
                               <ChevronDown className="h-3 w-3 text-muted-foreground" />
-                            </button>
+                            </Button>
                           </PopoverTrigger>
                           <PopoverContent
-                            className="w-[var(--radix-popover-trigger-width)] p-1"
+                            className="w-(--radix-popover-trigger-width) p-1"
                             align="start"
                           >
-                            <input
+                            <Input
                               className="w-full px-2 py-1.5 text-xs bg-transparent outline-none border-b border-border mb-1 placeholder:text-muted-foreground/50"
                               placeholder="Search models..."
                               value={modelSearch}
@@ -1365,9 +1391,11 @@ export function OnboardingWizard() {
                               autoFocus
                             />
                             {adapterType !== "opencode_local" && (
-                              <button
+                              <Button
+                                type="button"
+                                variant="ghost"
                                 className={cn(
-                                  "flex items-center gap-2 w-full px-2 py-1.5 text-sm rounded hover:bg-accent/50",
+                                  "flex h-auto w-full items-center justify-start gap-2 rounded px-2 py-1.5 text-sm hover:bg-accent/50",
                                   !model && "bg-accent"
                                 )}
                                 onClick={() => {
@@ -1376,7 +1404,7 @@ export function OnboardingWizard() {
                                 }}
                               >
                                 Default
-                              </button>
+                              </Button>
                             )}
                             <div className="max-h-60 overflow-y-auto">
                               {groupedModels.map((group) => (
@@ -1390,10 +1418,12 @@ export function OnboardingWizard() {
                                     </div>
                                   )}
                                   {group.entries.map((m) => (
-                                    <button
+                                    <Button
                                       key={m.id}
+                                      type="button"
+                                      variant="ghost"
                                       className={cn(
-                                        "flex items-center w-full px-2 py-1.5 text-sm rounded hover:bg-accent/50",
+                                        "flex h-auto w-full items-center rounded px-2 py-1.5 text-sm hover:bg-accent/50",
                                         m.id === model && "bg-accent"
                                       )}
                                       onClick={() => {
@@ -1409,7 +1439,7 @@ export function OnboardingWizard() {
                                           ? extractModelName(m.id)
                                           : m.label}
                                       </span>
-                                    </button>
+                                    </Button>
                                   ))}
                                 </div>
                               ))}
@@ -1551,7 +1581,7 @@ export function OnboardingWizard() {
                           ? "Gateway URL"
                           : "Webhook URL"}
                       </label>
-                      <input
+                      <Input
                         className="w-full rounded-md border border-border bg-transparent px-3 py-2 text-sm font-mono outline-none focus:ring-1 focus:ring-ring placeholder:text-muted-foreground/50"
                         placeholder={
                           adapterType === "openclaw_gateway"
@@ -1585,7 +1615,7 @@ export function OnboardingWizard() {
                     <label className="text-xs text-muted-foreground mb-1 block">
                       Task title
                     </label>
-                    <input
+                    <Input
                       className="w-full rounded-md border border-border bg-transparent px-3 py-2 text-sm outline-none focus:ring-1 focus:ring-ring placeholder:text-muted-foreground/50"
                       placeholder="e.g. Research competitor pricing"
                       value={taskTitle}
@@ -1600,7 +1630,7 @@ export function OnboardingWizard() {
                     <label className="text-xs text-muted-foreground mb-1 block">
                       Description (optional)
                     </label>
-                    <textarea
+                    <Textarea
                       ref={textareaRef}
                       className="w-full rounded-md border border-border bg-transparent px-4 py-2 text-sm outline-none focus:ring-1 focus:ring-ring placeholder:text-muted-foreground/50 resize-none min-h-32 max-h-80 overflow-y-auto"
                       placeholder="Add more detail about what the agent should do..."
@@ -1615,7 +1645,7 @@ export function OnboardingWizard() {
                     <label className="text-xs text-muted-foreground mb-1 block">
                       Stage interview: {stageTaskTemplate.interviewPrompt}
                     </label>
-                    <textarea
+                    <Textarea
                       className="w-full rounded-md border border-border bg-transparent px-4 py-2 text-sm outline-none focus:ring-1 focus:ring-ring placeholder:text-muted-foreground/50 resize-none min-h-20"
                       placeholder={stageTaskTemplate.interviewPlaceholder}
                       value={stageInterviewAnswer}
@@ -1667,7 +1697,7 @@ export function OnboardingWizard() {
                     ))}
                   </div>
 
-                  <input
+                  <Input
                     className="w-full rounded-md border border-border bg-transparent px-3 py-2 text-sm outline-none focus:ring-1 focus:ring-ring placeholder:text-muted-foreground/50"
                     placeholder="I want to change the plan..."
                     value={stageInterviewAnswer}
@@ -2099,13 +2129,15 @@ function OnboardingCanvasPreview({
           </div>
           <div className="flex border border-border bg-card">
             {[Monitor, CircleDot, Plus].map((Icon, index) => (
-              <button
+              <Button
                 key={index}
                 type="button"
+                variant="ghost"
+                size="icon-sm"
                 className="flex size-9 items-center justify-center border-l border-border first:border-l-0 text-muted-foreground hover:bg-secondary hover:text-foreground"
               >
                 <Icon className="size-4" />
-              </button>
+              </Button>
             ))}
           </div>
         </div>
