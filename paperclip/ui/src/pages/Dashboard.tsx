@@ -676,8 +676,8 @@ function OutcomesPanel({
 
 function NextMovePanel({ bottleneck }: { bottleneck: CompanyBottleneck }) {
   const content = (
-    <div className="rounded-[18px] bg-primary p-6 text-primary-foreground shadow-[0_18px_54px_rgb(20_24_20/0.12)]">
-      <p className="text-sm text-primary-foreground/65">Next move</p>
+    <div className="bg-primary p-6 text-primary-foreground shadow-[0_18px_54px_rgb(20_24_20/0.12)]">
+      <p className="text-sm text-primary-foreground/65">Next move recommended</p>
       <div className="mt-3 flex items-start gap-3">
         <CircleDot className="mt-0.5 h-5 w-5 shrink-0 text-primary-foreground" />
         <span className="min-w-0">
@@ -685,9 +685,12 @@ function NextMovePanel({ bottleneck }: { bottleneck: CompanyBottleneck }) {
           <span className="mt-3 block break-words text-sm leading-6 text-primary-foreground/70 [overflow-wrap:anywhere]">{bottleneck.detail}</span>
         </span>
       </div>
-      <div className="mt-5 flex items-center justify-between gap-3 text-xs text-primary-foreground/60">
+      <div className="mt-5 flex items-center justify-between gap-3 border-t border-primary-foreground/15 pt-4 text-xs text-primary-foreground/60">
         <span>{bottleneck.tone === "clear" ? "Ready for founder prompt" : "Recommended by current constraints"}</span>
-        <ArrowRight className="h-4 w-4" />
+        <span className="flex items-center gap-2 font-medium text-primary-foreground">
+          Review recommendation
+          <ArrowRight className="h-4 w-4" />
+        </span>
       </div>
     </div>
   );
@@ -813,30 +816,40 @@ function OperatorDock({
   if (open) return null;
 
   return (
-    <div className="fixed bottom-6 left-1/2 z-30 hidden w-[min(820px,calc(100vw-9rem))] -translate-x-1/2 items-center gap-3 rounded-[18px] bg-white/90 p-2 shadow-[0_18px_54px_rgb(20_24_20/0.12)] backdrop-blur md:flex">
+    <div className="fixed bottom-6 left-1/2 z-30 hidden w-[min(980px,calc(100vw-9rem))] -translate-x-1/2 items-center gap-2 border border-border bg-white/92 p-2 shadow-[0_18px_54px_rgb(20_24_20/0.12)] backdrop-blur md:flex">
       <button
         type="button"
         onClick={onToggle}
         title="Open Operator"
-        className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-secondary text-sm"
+        className="flex h-12 shrink-0 items-center gap-2 bg-secondary px-4 text-left text-sm hover:bg-accent"
       >
         <Bot className="h-5 w-5" />
-        <span className="sr-only">
-          <span className="block text-xs text-muted-foreground">Operator dock</span>
-          <span className="block">{open ? "Expanded" : "Collapsed"}</span>
+        <span>
+          <span className="block text-[11px] uppercase tracking-[0.12em] text-muted-foreground">Operator</span>
+          <span className="block text-xs">{open ? "Expanded" : "Collapsed"}</span>
         </span>
       </button>
       <input
         value={operatorDraft}
         onChange={(event) => setOperatorDraft(event.target.value)}
-        placeholder="Ask anything"
-        className="min-w-0 flex-1 rounded-[14px] bg-secondary px-5 py-3 text-base outline-none placeholder:text-muted-foreground"
+        placeholder="Ask Operator..."
+        className="min-w-0 flex-1 bg-secondary px-5 py-3 text-base outline-none placeholder:text-muted-foreground"
       />
-      <Button variant="ghost" size="icon" onClick={onToggle} className="rounded-[12px]" aria-label="Expand Operator">
+      <Button variant="ghost" onClick={onToggle} className="h-12 gap-2 rounded-none px-3" aria-label="Explain next move">
         <Sparkles className="h-4 w-4" />
+        <span className="hidden text-xs lg:inline">Explain</span>
       </Button>
-      <Button size="icon" disabled={!canSubmit || isPending} onClick={createTask} className="rounded-[12px]">
+      <Button variant="ghost" onClick={onToggle} className="h-12 gap-2 rounded-none px-3" aria-label="Route work">
+        <Route className="h-4 w-4" />
+        <span className="hidden text-xs lg:inline">Route</span>
+      </Button>
+      <Button variant="ghost" onClick={onToggle} className="h-12 gap-2 rounded-none px-3" aria-label="Review work">
+        <CheckCircle2 className="h-4 w-4" />
+        <span className="hidden text-xs lg:inline">Review</span>
+      </Button>
+      <Button disabled={!canSubmit || isPending} onClick={createTask} className="h-12 gap-2 rounded-none px-4">
         <Send className="h-4 w-4" />
+        <span className="hidden text-xs lg:inline">{isPending ? "Routing" : "Task"}</span>
       </Button>
     </div>
   );
