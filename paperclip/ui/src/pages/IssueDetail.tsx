@@ -57,7 +57,6 @@ import { useProjectOrder } from "../hooks/useProjectOrder";
 import { cn } from "../lib/utils";
 import type { IssueChatComposerHandle } from "../components/IssueChatThread";
 import { IssueDocumentsSection } from "../components/IssueDocumentsSection";
-import { IssuesList } from "../components/IssuesList";
 import { IssueRelatedWorkPanel } from "../components/IssueRelatedWorkPanel";
 import { IssueProperties } from "../components/IssueProperties";
 import { IssueWorkspaceCard } from "../components/IssueWorkspaceCard";
@@ -73,7 +72,9 @@ import type {
   IssueDetailComment,
 } from "../components/issue-detail/IssueDetailChatTypes";
 import { InboxMobileToolbar } from "../components/issue-detail/InboxMobileToolbar";
+import { IssueDetailPluginOutlets } from "../components/issue-detail/IssueDetailPluginOutlets";
 import { IssueDetailReviewHeader } from "../components/issue-detail/IssueDetailReviewHeader";
+import { IssueDetailSubIssuesSection } from "../components/issue-detail/IssueDetailSubIssuesSection";
 import { IssueDetailTitleSection } from "../components/issue-detail/IssueDetailTitleSection";
 import { IssueDetailLoadingState } from "../components/issue-detail/IssueDetailLoadingState";
 import {
@@ -93,8 +94,7 @@ import {
   readIssueRunStateFromCache,
   resolveRunningIssueRun,
 } from "../components/issue-detail/issueRunState";
-import { PluginSlotMount, PluginSlotOutlet, usePluginSlots } from "@/plugins/slots";
-import { PluginLauncherOutlet } from "@/plugins/launchers";
+import { PluginSlotMount, usePluginSlots } from "@/plugins/slots";
 import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -115,7 +115,6 @@ import {
   MessageSquare,
   MoreVertical,
   Paperclip,
-  Plus,
 } from "lucide-react";
 import {
   getClosedIsolatedExecutionWorkspaceMessage,
@@ -2156,81 +2155,27 @@ export function IssueDetail() {
           }}
         />
 
-      <PluginSlotOutlet
-        slotTypes={["toolbarButton", "contextMenuItem"]}
-        entityType="issue"
-        context={{
-          companyId: issue.companyId,
-          projectId: issue.projectId ?? null,
-          entityId: issue.id,
-          entityType: "issue",
-        }}
-        className="flex flex-wrap gap-2"
-        itemClassName="inline-flex"
-        missingBehavior="placeholder"
+      <IssueDetailPluginOutlets
+        companyId={issue.companyId}
+        projectId={issue.projectId ?? null}
+        issueId={issue.id}
       />
 
-      <PluginLauncherOutlet
-        placementZones={["toolbarButton"]}
-        entityType="issue"
-        context={{
-          companyId: issue.companyId,
-          projectId: issue.projectId ?? null,
-          entityId: issue.id,
-          entityType: "issue",
-        }}
-        className="flex flex-wrap gap-2"
-        itemClassName="inline-flex"
+      <IssueDetailSubIssuesSection
+        issue={issue}
+        childIssues={childIssues}
+        childIssuesLoading={childIssuesLoading}
+        agents={agents}
+        projects={projects}
+        liveIssueIds={liveIssueIds}
+        mutedChildIssueIds={mutedChildIssueIds}
+        childPauseBadgeById={childPauseBadgeById}
+        issueLinkState={resolvedIssueDetailState ?? location.state}
+        currentUserId={currentUserId}
+        showRichSubIssuesSection={showRichSubIssuesSection}
+        onCreateSubIssue={openNewSubIssue}
+        onUpdateIssue={handleChildIssueUpdate}
       />
-
-      <PluginSlotOutlet
-        slotTypes={["taskDetailView"]}
-        entityType="issue"
-        context={{
-          companyId: issue.companyId,
-          projectId: issue.projectId ?? null,
-          entityId: issue.id,
-          entityType: "issue",
-        }}
-        className="space-y-3"
-        itemClassName="rounded-lg border border-border p-3"
-        missingBehavior="placeholder"
-      />
-
-      {showRichSubIssuesSection ? (
-        <div className="space-y-3">
-          <div className="flex items-center justify-between gap-2">
-            <h3 className="text-sm font-medium text-muted-foreground">Subtasks</h3>
-          </div>
-          <IssuesList
-            issues={childIssues}
-            isLoading={childIssuesLoading}
-            agents={agents}
-            projects={projects}
-            liveIssueIds={liveIssueIds}
-            mutedIssueIds={mutedChildIssueIds}
-            issueBadgeById={childPauseBadgeById}
-            projectId={issue.projectId ?? undefined}
-            viewStateKey={`paperclip:issue-detail:${issue.id}:subissues-view`}
-            issueLinkState={resolvedIssueDetailState ?? location.state}
-            searchFilters={{ descendantOf: issue.id, includeBlockedBy: true }}
-            searchWithinLoadedIssues
-            baseCreateIssueDefaults={buildSubIssueDefaultsForViewer(issue, currentUserId)}
-            createIssueLabel="Subtask"
-            defaultSortField="workflow"
-            showProgressSummary
-            parentIssueIdForCostSummary={issue.id}
-            onUpdateIssue={handleChildIssueUpdate}
-          />
-        </div>
-      ) : (
-        <div className="flex flex-wrap items-center justify-end gap-2 min-w-0">
-          <Button variant="outline" size="sm" onClick={openNewSubIssue} className="shrink-0 shadow-none">
-            <Plus className="mr-1.5 h-3.5 w-3.5" />
-            New subtask
-          </Button>
-        </div>
-      )}
 
       <IssueDocumentsSection
         issue={issue}
