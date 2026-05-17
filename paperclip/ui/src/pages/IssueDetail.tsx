@@ -1,8 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useParams } from "@/lib/router";
-import { useQuery, useQueryClient, type InfiniteData } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { issuesApi } from "../api/issues";
-import { heartbeatsApi, type ActiveRunForIssue, type LiveRunForIssue } from "../api/heartbeats";
 import { useCompany } from "../context/CompanyContext";
 import { useDialogActions } from "../context/DialogContext";
 import { usePanel } from "../context/PanelContext";
@@ -11,14 +10,11 @@ import { assigneeValueFromSelection, suggestedCommentAssigneeValue } from "../li
 import { buildCompanyUserInlineOptions } from "../lib/company-members";
 import { queryKeys } from "../lib/queryKeys";
 import { keepPreviousDataForSameQueryTail } from "../lib/query-placeholder-data";
-import { shouldTrackIssueActiveRun } from "../lib/issueActiveRun";
 import { getIssueDetailQueryOptions } from "../lib/issueDetailCache";
 import {
-  loadRemainingIssueCommentPages,
   mergeIssueComments,
   type OptimisticIssueComment,
 } from "../lib/optimistic-issue-comments";
-import type { IssueChatComposerHandle } from "../components/IssueChatThread";
 import { IssueProperties } from "../components/IssueProperties";
 import { ScrollToBottom } from "../components/ScrollToBottom";
 import { IssueDetailArtifactsSection } from "../components/issue-detail/IssueDetailArtifactsSection";
@@ -34,24 +30,23 @@ import {
   truncate,
 } from "../components/issue-detail/IssueDetailUtils";
 import { IssueTreeControlDialog } from "../components/issue-detail/IssueTreeControlDialog";
-import {
-  ISSUE_COMMENT_PAGE_SIZE,
-  JUMP_TO_LATEST_MAX_COMMENT_PAGES,
-  useIssueDetailComments,
-} from "../components/issue-detail/useIssueDetailComments";
+import { useIssueDetailComments } from "../components/issue-detail/useIssueDetailComments";
 import { useIssueDetailApprovals } from "../components/issue-detail/useIssueDetailApprovals";
 import { useIssueDetailAttachments } from "../components/issue-detail/useIssueDetailAttachments";
 import { useIssueDetailCacheActions } from "../components/issue-detail/useIssueDetailCacheActions";
 import { useIssueDetailChildIssues } from "../components/issue-detail/useIssueDetailChildIssues";
+import { useIssueDetailCommentPagination } from "../components/issue-detail/useIssueDetailCommentPagination";
 import { useIssueDetailCommentPosting } from "../components/issue-detail/useIssueDetailCommentPosting";
 import { useIssueDetailFeedback } from "../components/issue-detail/useIssueDetailFeedback";
 import { useIssueDetailInboxToolbar } from "../components/issue-detail/useIssueDetailInboxToolbar";
 import { useIssueDetailInteractions } from "../components/issue-detail/useIssueDetailInteractions";
 import { useIssueDetailIssueActions } from "../components/issue-detail/useIssueDetailIssueActions";
 import { useIssueDetailKeyboardShortcuts } from "../components/issue-detail/useIssueDetailKeyboardShortcuts";
+import { useIssueDetailLiveRunState } from "../components/issue-detail/useIssueDetailLiveRunState";
 import { useIssueDetailLookups } from "../components/issue-detail/useIssueDetailLookups";
 import { useIssueDetailQueuedCommentActions } from "../components/issue-detail/useIssueDetailQueuedCommentActions";
 import { useIssueDetailRouteEffects, useIssueDetailRouteState } from "../components/issue-detail/useIssueDetailRouteState";
+import { useIssueDetailTabState } from "../components/issue-detail/useIssueDetailTabState";
 import { useIssueDetailTreeControl } from "../components/issue-detail/useIssueDetailTreeControl";
 import { Separator } from "@/components/ui/separator";
 import { TheftDetailReviewTemplate } from "@/components/theft/templates/TheftDetailReviewTemplate";
@@ -64,9 +59,7 @@ import {
 import {
   getClosedIsolatedExecutionWorkspaceMessage,
   isClosedIsolatedExecutionWorkspace,
-  ISSUE_CONTINUATION_SUMMARY_DOCUMENT_KEY,
   type ActivityEvent,
-  type IssueComment,
   type IssueWorkMode,
   type IssueThreadInteraction,
 } from "@paperclipai/shared";
@@ -90,13 +83,17 @@ export function IssueDetail() {
   } = useIssueDetailRouteState(issueId);
   const [moreOpen, setMoreOpen] = useState(false);
   const [mobilePropsOpen, setMobilePropsOpen] = useState(false);
-  const [detailTab, setDetailTab] = useState("related-work");
-  const [handoffFocusSignal, setHandoffFocusSignal] = useState(0);
   const [optimisticComments, setOptimisticComments] = useState<OptimisticIssueComment[]>([]);
   const [locallyQueuedCommentRunIds, setLocallyQueuedCommentRunIds] = useState<Map<string, string>>(() => new Map());
-  const [pendingCommentComposerFocusKey, setPendingCommentComposerFocusKey] = useState(0);
-  const commentComposerRef = useRef<IssueChatComposerHandle | null>(null);
   const cancelledQueuedOptimisticCommentIdsRef = useRef(new Set<string>());
+  const {
+    commentComposerRef,
+    detailTab,
+    focusCommentComposerFromShortcut,
+    handoffFocusSignal,
+    restoreQueuedCommentDraft,
+    setDetailTab,
+  } = useIssueDetailTabState({ locationHash: location.hash });
   const { data: issue, isLoading, error } = useQuery({
     ...getIssueDetailQueryOptions(queryClient, issueId!, {
       placeholderIssue: issueHeaderSeed ? {
@@ -130,30 +127,12 @@ export function IssueDetail() {
     placeholderData: keepPreviousDataForSameQueryTail<IssueThreadInteraction[]>(issueId ?? "pending"),
   });
 
-  const { data: liveRunCount = 0 } = useQuery<LiveRunForIssue[], Error, number>({
-    queryKey: queryKeys.issues.liveRuns(issueId!),
-    queryFn: () => heartbeatsApi.liveRunsForIssue(issueId!),
-    enabled: !!issueId,
-    refetchInterval: 3000,
-    select: (runs) => runs.length,
-    placeholderData: keepPreviousDataForSameQueryTail<LiveRunForIssue[]>(issueId ?? "pending"),
+  const { hasLiveRuns } = useIssueDetailLiveRunState({
+    issue,
+    issueId,
+    locallyQueuedCommentRunIds,
+    setLocallyQueuedCommentRunIds,
   });
-
-  const { data: hasActiveRun = false } = useQuery<ActiveRunForIssue | null, Error, boolean>({
-    queryKey: queryKeys.issues.activeRun(issueId!),
-    queryFn: () => heartbeatsApi.activeRunForIssue(issueId!),
-    enabled: !!issueId && (!!issue?.executionRunId || issue?.status === "in_progress"),
-    refetchInterval: liveRunCount > 0 ? false : 3000,
-    select: (run) => !!run,
-    placeholderData: keepPreviousDataForSameQueryTail<ActiveRunForIssue | null>(issueId ?? "pending"),
-  });
-  const resolvedHasActiveRun = issue ? shouldTrackIssueActiveRun(issue) && hasActiveRun : hasActiveRun;
-  const hasLiveRuns = liveRunCount > 0 || resolvedHasActiveRun;
-  useEffect(() => {
-    if (!hasLiveRuns && locallyQueuedCommentRunIds.size > 0) {
-      setLocallyQueuedCommentRunIds(new Map());
-    }
-  }, [hasLiveRuns, locallyQueuedCommentRunIds.size]);
   useIssueDetailRouteEffects({
     hasLiveRuns,
     issue,
@@ -322,10 +301,6 @@ export function IssueDetail() {
     invalidateIssueDetail,
   });
 
-  const restoreQueuedCommentDraft = useCallback((body: string) => {
-    commentComposerRef.current?.restoreDraft(body);
-  }, []);
-
   const {
     handleApprovalAction,
     pendingApprovalAction,
@@ -406,10 +381,6 @@ export function IssueDetail() {
   const navigateToInbox = useCallback(() => {
     navigate(sourceBreadcrumb.href.startsWith("/inbox") ? sourceBreadcrumb.href : "/inbox");
   }, [navigate, sourceBreadcrumb.href]);
-  const focusCommentComposerFromShortcut = useCallback(() => {
-    setDetailTab("chat");
-    setPendingCommentComposerFocusKey((current) => current + 1);
-  }, []);
   useIssueDetailKeyboardShortcuts({
     archiveIssueFromInbox,
     archivePending,
@@ -458,58 +429,15 @@ export function IssueDetail() {
     panelIssue,
   ]);
 
-  useEffect(() => {
-    const hash = location.hash;
-    if (!hash.startsWith("#document-")) return;
-    const documentKey = decodeURIComponent(hash.slice("#document-".length));
-    if (documentKey !== ISSUE_CONTINUATION_SUMMARY_DOCUMENT_KEY) return;
-    setDetailTab("activity");
-    setHandoffFocusSignal((current) => current + 1);
-  }, [location.hash]);
-
-  useEffect(() => {
-    if (pendingCommentComposerFocusKey === 0) return;
-    if (detailTab !== "chat") return;
-    commentComposerRef.current?.focus();
-  }, [detailTab, pendingCommentComposerFocusKey]);
-
-  const loadOlderComments = useCallback(() => {
-    void fetchOlderComments();
-  }, [fetchOlderComments]);
-  const refetchLatestComments = useCallback(async () => {
-    // Refetch page 0 first so comments that arrived after initial load are
-    // visible, then load every remaining older page. The chat thread is
-    // paginated and virtualized, so "latest" must be resolved against the
-    // complete comment set rather than the current loaded window.
-    const refreshed = await refetchComments();
-    const loaded = await loadRemainingIssueCommentPages<IssueComment>({
-      pages: refreshed.data?.pages,
-      pageParams: refreshed.data?.pageParams as Array<string | null> | undefined,
-      pageSize: ISSUE_COMMENT_PAGE_SIZE,
-      maxPages: JUMP_TO_LATEST_MAX_COMMENT_PAGES,
-      fetchPage: (afterCommentId) =>
-        issuesApi.listComments(issueId!, {
-          order: "desc",
-          limit: ISSUE_COMMENT_PAGE_SIZE,
-          after: afterCommentId,
-        }),
-    });
-    queryClient.setQueryData<InfiniteData<IssueComment[], string | null>>(
-      queryKeys.issues.comments(issueId!),
-      loaded,
-    );
-    await new Promise<void>((resolve) => {
-      if (typeof window === "undefined") {
-        resolve();
-        return;
-      }
-      window.requestAnimationFrame(() => resolve());
-    });
-  }, [issueId, queryClient, refetchComments]);
-  useEffect(() => {
-    if (!shouldPrefetchOlderComments) return;
-    void fetchOlderComments();
-  }, [fetchOlderComments, shouldPrefetchOlderComments]);
+  const {
+    loadOlderComments,
+    refetchLatestComments,
+  } = useIssueDetailCommentPagination({
+    fetchOlderComments,
+    issueId,
+    refetchComments,
+    shouldPrefetchOlderComments,
+  });
   if (isLoading) return <IssueDetailLoadingState headerSeed={issueHeaderSeed} />;
   if (error) return <p className="text-sm text-destructive">{error.message}</p>;
   if (!issue) return null;
