@@ -1,21 +1,18 @@
-import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Outlet, useLocation, useNavigate, useNavigationType, useParams } from "@/lib/router";
-import { Button } from "@/components/ui/button";
 import { Sidebar } from "./Sidebar";
-import { InstanceSidebar } from "./InstanceSidebar";
-import { CompanySettingsSidebar } from "./CompanySettingsSidebar";
-import { BreadcrumbBar } from "./BreadcrumbBar";
-import { PropertiesPanel } from "./PropertiesPanel";
 import { CommandPalette } from "./CommandPalette";
 import { KeyboardShortcutsCheatsheet } from "./KeyboardShortcutsCheatsheet";
 import { ToastViewport } from "./ToastViewport";
 import { MobileBottomNav } from "./MobileBottomNav";
 import { WorktreeBanner } from "./WorktreeBanner";
 import { DevRestartBanner } from "./DevRestartBanner";
-import { ResizableSidebarPane } from "./ResizableSidebarPane";
-import { SidebarAccountMenu } from "./SidebarAccountMenu";
-import { useDialogActions, useDialogState } from "../context/DialogContext";
+import { DesktopSidebarShell, MobileSidebarShell } from "./layout-shell/LayoutSidebars";
+import { LazyLayoutDialogs } from "./layout-shell/LazyLayoutDialogs";
+import { MainContentShell } from "./layout-shell/MainContentShell";
+import { useMobileLayoutShell } from "./layout-shell/useMobileLayoutShell";
+import { useDialogActions } from "../context/DialogContext";
 import { GeneralSettingsProvider } from "../context/GeneralSettingsContext";
 import { usePanel } from "../context/PanelContext";
 import { useCompany } from "../context/CompanyContext";
@@ -36,15 +33,9 @@ import {
 import { queryKeys } from "../lib/queryKeys";
 import { scheduleMainContentFocus } from "../lib/main-content-focus";
 import { cn } from "../lib/utils";
-import { NotFoundPage } from "../pages/NotFound";
 import { PluginSlotMount, resolveRouteSidebarSlot, usePluginSlots } from "../plugins/slots";
 
 const INSTANCE_SETTINGS_MEMORY_KEY = "paperclip.lastInstanceSettingsPath";
-
-const NewIssueDialog = lazy(async () => ({ default: (await import("./NewIssueDialog")).NewIssueDialog }));
-const NewProjectDialog = lazy(async () => ({ default: (await import("./NewProjectDialog")).NewProjectDialog }));
-const NewGoalDialog = lazy(async () => ({ default: (await import("./NewGoalDialog")).NewGoalDialog }));
-const NewAgentDialog = lazy(async () => ({ default: (await import("./NewAgentDialog")).NewAgentDialog }));
 
 function getCompanyRouteSegment(pathname: string, companyPrefix: string | undefined): string | null {
   if (!companyPrefix) return null;
@@ -82,12 +73,15 @@ export function Layout() {
   const isInstanceSettingsRoute = location.pathname.startsWith("/instance/");
   const isCompanySettingsRoute = location.pathname.includes("/company/settings");
   const onboardingTriggered = useRef(false);
-  const lastMainScrollTop = useRef(0);
   const previousPathname = useRef<string | null>(null);
   const mainContentRef = useRef<HTMLElement | null>(null);
-  const [mobileNavVisible, setMobileNavVisible] = useState(true);
   const [instanceSettingsTarget, setInstanceSettingsTarget] = useState<string>(() => readRememberedInstanceSettingsPath());
   const [shortcutsOpen, setShortcutsOpen] = useState(false);
+  const { mobileNavVisible } = useMobileLayoutShell({
+    isMobile,
+    setSidebarOpen,
+    sidebarOpen,
+  });
   const matchedCompany = useMemo(() => {
     if (!companyPrefix) return null;
     const requestedPrefix = companyPrefix.toUpperCase();
@@ -214,103 +208,6 @@ export function Layout() {
   });
 
   useEffect(() => {
-    if (!isMobile) {
-      setMobileNavVisible(true);
-      return;
-    }
-    lastMainScrollTop.current = 0;
-    setMobileNavVisible(true);
-  }, [isMobile]);
-
-  // Swipe gesture to open/close sidebar on mobile
-  useEffect(() => {
-    if (!isMobile) return;
-
-    const EDGE_ZONE = 30; // px from left edge to start open-swipe
-    const MIN_DISTANCE = 50; // minimum horizontal swipe distance
-    const MAX_VERTICAL = 75; // max vertical drift before we ignore
-
-    let startX = 0;
-    let startY = 0;
-
-    const onTouchStart = (e: TouchEvent) => {
-      const t = e.touches[0]!;
-      startX = t.clientX;
-      startY = t.clientY;
-    };
-
-    const onTouchEnd = (e: TouchEvent) => {
-      const t = e.changedTouches[0]!;
-      const dx = t.clientX - startX;
-      const dy = Math.abs(t.clientY - startY);
-
-      if (dy > MAX_VERTICAL) return; // vertical scroll, ignore
-
-      // Swipe right from left edge → open
-      if (!sidebarOpen && startX < EDGE_ZONE && dx > MIN_DISTANCE) {
-        setSidebarOpen(true);
-        return;
-      }
-
-      // Swipe left when open → close
-      if (sidebarOpen && dx < -MIN_DISTANCE) {
-        setSidebarOpen(false);
-      }
-    };
-
-    document.addEventListener("touchstart", onTouchStart, { passive: true });
-    document.addEventListener("touchend", onTouchEnd, { passive: true });
-
-    return () => {
-      document.removeEventListener("touchstart", onTouchStart);
-      document.removeEventListener("touchend", onTouchEnd);
-    };
-  }, [isMobile, sidebarOpen, setSidebarOpen]);
-
-  const updateMobileNavVisibility = useCallback((currentTop: number) => {
-    const delta = currentTop - lastMainScrollTop.current;
-
-    if (currentTop <= 24) {
-      setMobileNavVisible(true);
-    } else if (delta > 8) {
-      setMobileNavVisible(false);
-    } else if (delta < -8) {
-      setMobileNavVisible(true);
-    }
-
-    lastMainScrollTop.current = currentTop;
-  }, []);
-
-  useEffect(() => {
-    if (!isMobile) {
-      setMobileNavVisible(true);
-      lastMainScrollTop.current = 0;
-      return;
-    }
-
-    const onScroll = () => {
-      updateMobileNavVisibility(window.scrollY || document.documentElement.scrollTop || 0);
-    };
-
-    onScroll();
-    window.addEventListener("scroll", onScroll, { passive: true });
-
-    return () => {
-      window.removeEventListener("scroll", onScroll);
-    };
-  }, [isMobile, updateMobileNavVisibility]);
-
-  useEffect(() => {
-    const previousOverflow = document.body.style.overflow;
-
-    document.body.style.overflow = isMobile ? "visible" : "hidden";
-
-    return () => {
-      document.body.style.overflow = previousOverflow;
-    };
-  }, [isMobile]);
-
-  useEffect(() => {
     if (!location.pathname.startsWith("/instance/settings/")) return;
 
     const nextPath = normalizeRememberedInstanceSettingsPath(
@@ -357,126 +254,45 @@ export function Layout() {
       <WorktreeBanner />
       <DevRestartBanner devServer={health?.devServer} />
       <div className={cn("min-h-0 flex-1", isMobile ? "w-full overflow-hidden" : "flex overflow-hidden")}>
-        {isMobile && sidebarOpen && (
-          <Button
-            type="button"
-            variant="ghost"
-            className="fixed inset-0 z-40 h-auto w-auto rounded-sm bg-black/50 p-0 hover:bg-black/50"
-            onClick={() => setSidebarOpen(false)}
-            aria-label="Close sidebar"
+        {isMobile ? (
+          <MobileSidebarShell
+            companySidebar={companySidebar}
+            deploymentMode={health?.deploymentMode}
+            instanceSettingsTarget={instanceSettingsTarget}
+            isCompanySettingsRoute={isCompanySettingsRoute}
+            isInstanceSettingsRoute={isInstanceSettingsRoute}
+            setSidebarOpen={setSidebarOpen}
+            sidebarOpen={sidebarOpen}
+            version={health?.version}
+          />
+        ) : (
+          <DesktopSidebarShell
+            companySidebar={companySidebar}
+            deploymentMode={health?.deploymentMode}
+            instanceSettingsTarget={instanceSettingsTarget}
+            isCompanySettingsRoute={isCompanySettingsRoute}
+            isInstanceSettingsRoute={isInstanceSettingsRoute}
+            sidebarOpen={sidebarOpen}
+            version={health?.version}
           />
         )}
 
-        {isMobile ? (
-          <div
-            className={cn(
-              "fixed inset-y-0 left-0 z-50 flex flex-col overflow-hidden pt-[env(safe-area-inset-top)] transition-transform duration-100 ease-out",
-              sidebarOpen ? "translate-x-0" : "-translate-x-full"
-            )}
-          >
-            <div className="flex flex-1 min-h-0 overflow-hidden">
-              <div className="w-60 shrink-0 overflow-hidden">
-                {isInstanceSettingsRoute ? (
-                  <InstanceSidebar />
-                ) : isCompanySettingsRoute ? (
-                  <CompanySettingsSidebar />
-                ) : (
-                  companySidebar
-                )}
-              </div>
-            </div>
-            <SidebarAccountMenu
-              deploymentMode={health?.deploymentMode}
-              instanceSettingsTarget={instanceSettingsTarget}
-              version={health?.version}
-            />
-          </div>
-        ) : (
-          <div className="flex h-full flex-col shrink-0">
-            <div className="flex flex-1 min-h-0">
-              <ResizableSidebarPane
-                open={sidebarOpen}
-                resizable={false}
-                storageKey="theft.sana.sidebar.width"
-                defaultWidth={56}
-                minWidth={56}
-                maxWidth={56}
-                className="h-full shrink-0"
-              >
-                {isInstanceSettingsRoute ? (
-                  <InstanceSidebar />
-                ) : isCompanySettingsRoute ? (
-                  <CompanySettingsSidebar />
-                ) : (
-                  companySidebar
-                )}
-              </ResizableSidebarPane>
-            </div>
-            <SidebarAccountMenu
-              deploymentMode={health?.deploymentMode}
-              instanceSettingsTarget={instanceSettingsTarget}
-              version={health?.version}
-            />
-          </div>
-        )}
-
-        <div className={cn("flex min-w-0 flex-col", isMobile ? "h-full w-full min-h-0" : "h-full flex-1")}>
-          <div
-            className={cn(
-              isMobile && "sticky top-0 z-20 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/85",
-            )}
-          >
-            <BreadcrumbBar />
-          </div>
-          <div className={cn(isMobile ? "min-h-0 flex-1 overflow-hidden" : "flex flex-1 min-h-0")}>
-            <main
-              id="main-content"
-              ref={mainContentRef}
-              tabIndex={-1}
-              className={cn(
-                "theft-main-surface min-w-0 flex-1 p-4 outline-none md:p-6",
-                isMobile
-                  ? "h-full w-full max-w-full overflow-x-hidden overflow-y-auto overscroll-contain pb-[calc(5rem+env(safe-area-inset-bottom))]"
-                  : "overflow-auto",
-              )}
-            >
-              {hasUnknownCompanyPrefix ? (
-                <NotFoundPage
-                  scope="invalid_company_prefix"
-                  requestedPrefix={companyPrefix ?? selectedCompany?.issuePrefix}
-                />
-              ) : (
-                <Outlet />
-              )}
-            </main>
-            <PropertiesPanel />
-          </div>
-        </div>
+        <MainContentShell
+          companyPrefix={companyPrefix}
+          hasUnknownCompanyPrefix={hasUnknownCompanyPrefix}
+          isMobile={isMobile}
+          mainContentRef={mainContentRef}
+          selectedCompanyPrefix={selectedCompany?.issuePrefix}
+        >
+          <Outlet />
+        </MainContentShell>
       </div>
       {isMobile && <MobileBottomNav visible={mobileNavVisible} />}
       <CommandPalette />
-      <LayoutDialogs />
+      <LazyLayoutDialogs />
       <KeyboardShortcutsCheatsheet open={shortcutsOpen} onOpenChange={setShortcutsOpen} />
       <ToastViewport />
       </div>
     </GeneralSettingsProvider>
-  );
-}
-
-function LayoutDialogs() {
-  const {
-    newIssueOpen,
-    newProjectOpen,
-    newGoalOpen,
-    newAgentOpen,
-  } = useDialogState();
-
-  return (
-    <Suspense fallback={null}>
-      {newIssueOpen ? <NewIssueDialog /> : null}
-      {newProjectOpen ? <NewProjectDialog /> : null}
-      {newGoalOpen ? <NewGoalDialog /> : null}
-      {newAgentOpen ? <NewAgentDialog /> : null}
-    </Suspense>
   );
 }
