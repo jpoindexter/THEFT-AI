@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type ChangeEvent } from "react";
 import { Link, useLocation, useNavigate, useNavigationType, useParams } from "@/lib/router";
-import { useInfiniteQuery, useQuery, useMutation, useQueryClient, type InfiniteData } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient, type InfiniteData } from "@tanstack/react-query";
 import { issuesApi } from "../api/issues";
 import { approvalsApi } from "../api/approvals";
 import type { RunForIssue } from "../api/activity";
@@ -41,13 +41,10 @@ import {
   applyOptimisticIssueFieldUpdateToCollection,
   applyOptimisticIssueCommentUpdate,
   createOptimisticIssueComment,
-  flattenIssueCommentPages,
-  getNextIssueCommentPageParam,
   loadRemainingIssueCommentPages,
   matchesIssueRef,
   mergeIssueComments,
   removeIssueCommentFromPages,
-  shouldAutoloadOlderIssueComments,
   takeOptimisticIssueComment,
   upsertIssueCommentInPages,
   type OptimisticIssueComment,
@@ -90,6 +87,11 @@ import {
   readIssueRunStateFromCache,
   resolveRunningIssueRun,
 } from "../components/issue-detail/issueRunState";
+import {
+  ISSUE_COMMENT_PAGE_SIZE,
+  JUMP_TO_LATEST_MAX_COMMENT_PAGES,
+  useIssueDetailComments,
+} from "../components/issue-detail/useIssueDetailComments";
 import { usePluginSlots } from "@/plugins/slots";
 import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
@@ -124,10 +126,6 @@ import {
 } from "@paperclipai/shared";
 
 const FEEDBACK_TERMS_URL = import.meta.env.VITE_FEEDBACK_TERMS_URL?.trim() || "https://paperclip.ing/tos";
-const ISSUE_COMMENT_PAGE_SIZE = 50;
-const ISSUE_COMMENT_AUTOLOAD_LIMIT = ISSUE_COMMENT_PAGE_SIZE * 3;
-const JUMP_TO_LATEST_MAX_COMMENT_PAGES = 10;
-
 export function IssueDetail() {
   const { issueId } = useParams<{ issueId: string }>();
   const { selectedCompanyId } = useCompany();
@@ -192,42 +190,14 @@ export function IssueDetail() {
   }, [issue?.currentExecutionWorkspace]);
 
   const {
-    data: commentPages,
-    isLoading: commentsLoading,
-    isFetchingNextPage: commentsLoadingOlder,
-    hasNextPage: hasOlderComments,
-    fetchNextPage: fetchOlderComments,
-    refetch: refetchComments,
-  } = useInfiniteQuery({
-    queryKey: queryKeys.issues.comments(issueId!),
-    queryFn: ({ pageParam }) =>
-      issuesApi.listComments(issueId!, {
-        order: "desc",
-        limit: ISSUE_COMMENT_PAGE_SIZE,
-        ...(pageParam ? { after: pageParam } : {}),
-      }),
-    enabled: !!issueId,
-    initialPageParam: null as string | null,
-    getNextPageParam: (lastPage) =>
-      getNextIssueCommentPageParam(lastPage, ISSUE_COMMENT_PAGE_SIZE),
-    placeholderData: keepPreviousDataForSameQueryTail<InfiniteData<IssueComment[], string | null>>(issueId ?? "pending"),
-  });
-  const comments = useMemo(
-    () => flattenIssueCommentPages(commentPages?.pages),
-    [commentPages?.pages],
-  );
-  const shouldPrefetchOlderComments = useMemo(
-    () =>
-      shouldAutoloadOlderIssueComments({
-        activeDetailTab: detailTab,
-        hasOlderComments: hasOlderComments ?? false,
-        loadedCommentCount: comments.length,
-        initialPageLoading: commentsLoading,
-        olderPageLoading: commentsLoadingOlder,
-        autoLoadLimit: ISSUE_COMMENT_AUTOLOAD_LIMIT,
-      }),
-    [comments.length, commentsLoading, commentsLoadingOlder, detailTab, hasOlderComments],
-  );
+    comments,
+    commentsLoading,
+    commentsLoadingOlder,
+    hasOlderComments,
+    fetchOlderComments,
+    refetchComments,
+    shouldPrefetchOlderComments,
+  } = useIssueDetailComments({ issueId, activeDetailTab: detailTab });
   const { data: interactions = [] } = useQuery({
     queryKey: queryKeys.issues.interactions(issueId!),
     queryFn: () => issuesApi.listInteractions(issueId!),
