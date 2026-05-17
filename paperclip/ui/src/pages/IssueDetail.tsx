@@ -54,7 +54,7 @@ import {
 } from "../lib/optimistic-issue-comments";
 import { clearIssueExecutionRun, removeLiveRunById, upsertInterruptedRun } from "../lib/optimistic-issue-runs";
 import { useProjectOrder } from "../hooks/useProjectOrder";
-import { relativeTime, cn } from "../lib/utils";
+import { cn } from "../lib/utils";
 import { InlineEditor } from "../components/InlineEditor";
 import type { IssueChatComposerHandle } from "../components/IssueChatThread";
 import { IssueDocumentsSection } from "../components/IssueDocumentsSection";
@@ -80,6 +80,7 @@ import {
   IssueTreeControlDialog,
   issueTreeControlLabel,
 } from "../components/issue-detail/IssueTreeControlDialog";
+import { IssueTreePauseBanner } from "../components/issue-detail/IssueTreePauseBanner";
 import {
   dedupeLiveRunsById,
   readIssueRunStateFromCache,
@@ -2299,81 +2300,30 @@ export function IssueDetail() {
           This issue is hidden
         </div>
       )}
-      {activePauseHold && (
-        <div className="rounded-md border border-amber-500/35 bg-amber-500/10 p-3 text-sm text-amber-800 dark:text-amber-200">
-          {activePauseHold.isRoot ? (
-            <div className="space-y-2">
-              <div className="flex flex-wrap items-center gap-2">
-                <span className="font-medium">
-                  {childIssues.length === 0 ? "Paused by board." : "Subtree pause is active."}
-                </span>
-                <span className="text-xs text-amber-900/80 dark:text-amber-100/80">
-                  {childIssues.length === 0
-                    ? "Issue execution is held until resume. Human comments can still wake the assignee for triage."
-                    : "Root and descendant execution is held until resume. Human comments can still wake assignees for triage."}
-                </span>
-              </div>
-              <div className="text-xs text-amber-900/80 dark:text-amber-100/80">
-                {childIssues.length === 0
-                  ? "1 issue held"
-                  : `${heldDescendantCount} descendant${heldDescendantCount === 1 ? "" : "s"} held`}
-                {activeRootPauseHold?.createdAt ? ` · started ${relativeTime(activeRootPauseHold.createdAt)}` : ""}
-              </div>
-              {canShowSubtreeControls || canResumeLeafWork ? (
-                <div className="flex flex-wrap items-center gap-2">
-                  <Button
-                    size="sm"
-                    onClick={() => {
-                      setTreeControlMode("resume");
-                      setTreeControlWakeAgentsOnResume(isAgentOwnedNonTerminalIssue || canShowSubtreeControls);
-                      setTreeControlOpen(true);
-                    }}
-                  >
-                    {childIssues.length === 0 ? "Resume work" : "Resume subtree"}
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => {
-                      setTreeControlMode("resume");
-                      setTreeControlWakeAgentsOnResume(isAgentOwnedNonTerminalIssue || canShowSubtreeControls);
-                      setTreeControlOpen(true);
-                    }}
-                  >
-                    View affected ({childIssues.length === 0 ? 1 : heldDescendantCount})
-                  </Button>
-                  {canShowSubtreeControls ? (
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="text-destructive hover:text-destructive"
-                      onClick={() => {
-                        setTreeControlMode("cancel");
-                        setTreeControlCancelConfirmed(false);
-                        setTreeControlOpen(true);
-                      }}
-                    >
-                      Cancel subtree...
-                    </Button>
-                  ) : null}
-                </div>
-              ) : null}
-            </div>
-          ) : (
-            <div className="text-xs">
-              This issue is paused by ancestor{" "}
-              {activePauseHoldRoot?.identifier ? (
-                <Link to={createIssueDetailPath(activePauseHoldRoot.identifier)} className="underline">
-                  {activePauseHoldRoot.identifier}
-                </Link>
-              ) : (
-                activePauseHold.rootIssueId.slice(0, 8)
-              )}
-              . Resume from the root issue to deliver deferred work.
-            </div>
-          )}
-        </div>
-      )}
+      <IssueTreePauseBanner
+        activePauseHold={activePauseHold}
+        childIssueCount={childIssues.length}
+        heldDescendantCount={heldDescendantCount}
+        activeRootPauseHoldCreatedAt={activeRootPauseHold?.createdAt}
+        activePauseHoldRootIdentifier={activePauseHoldRoot?.identifier}
+        canShowSubtreeControls={canShowSubtreeControls}
+        canResumeLeafWork={canResumeLeafWork}
+        onResume={() => {
+          setTreeControlMode("resume");
+          setTreeControlWakeAgentsOnResume(isAgentOwnedNonTerminalIssue || canShowSubtreeControls);
+          setTreeControlOpen(true);
+        }}
+        onViewAffected={() => {
+          setTreeControlMode("resume");
+          setTreeControlWakeAgentsOnResume(isAgentOwnedNonTerminalIssue || canShowSubtreeControls);
+          setTreeControlOpen(true);
+        }}
+        onCancelSubtree={() => {
+          setTreeControlMode("cancel");
+          setTreeControlCancelConfirmed(false);
+          setTreeControlOpen(true);
+        }}
+      />
 
       <TaskReviewSummary
         issue={issue}
