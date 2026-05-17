@@ -60,7 +60,7 @@
     {
       "file": "paperclip/ui/src/components/MarkdownBody.tsx",
       "check": "inline-style",
-      "line": 581,
+      "line": 164,
       "sample": "style={",
       "reason": "Mention chip styles encode project colors and agent icon masks from parsed markdown href data."
     },

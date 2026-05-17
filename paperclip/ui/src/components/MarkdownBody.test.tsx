@@ -173,7 +173,7 @@ describe("MarkdownBody", () => {
     ]);
 
     expect(html).toContain('href="/issues/PAP-1271"');
-    expect(html).toContain("text-green-600");
+    expect(html).toContain("text-foreground border-foreground");
     expect(html).toContain(">PAP-1271<");
     expect(html).toContain('data-mention-kind="issue"');
     expect(html).toContain("paperclip-markdown-issue-ref");
@@ -214,8 +214,7 @@ describe("MarkdownBody", () => {
     expect(html).toContain('href="/issues/PAP-1180"');
     expect(html).toContain(">/issues/PAP-1179<");
     expect(html).toContain(">/PAP/issues/pap-1180<");
-    expect(html).toContain("text-red-600");
-    expect(html).toContain("text-green-600");
+    expect(html).toContain("text-foreground border-foreground");
   });
 
   it("does not auto-link non-issue internal route paths", () => {
@@ -237,8 +236,7 @@ describe("MarkdownBody", () => {
     expect(html).toContain('href="/issues/PAP-1311"');
     expect(html).toContain(">issue://PAP-1310<");
     expect(html).toContain(">issue://:PAP-1311<");
-    expect(html).toContain("text-green-600");
-    expect(html).toContain("text-red-600");
+    expect(html).toContain("text-foreground border-foreground");
   });
 
   it("linkifies issue identifiers inside inline code spans", () => {
@@ -247,8 +245,8 @@ describe("MarkdownBody", () => {
     ]);
 
     expect(html).toContain('href="/issues/PAP-1271"');
-    expect(html).toContain('<code style="overflow-wrap:anywhere;word-break:break-word">PAP-1271</code>');
-    expect(html).toContain("text-green-600");
+    expect(html).toContain('<code class="break-words">PAP-1271</code>');
+    expect(html).toContain("text-foreground border-foreground");
     expect(html).toContain("paperclip-markdown-issue-ref");
   });
 
@@ -345,7 +343,7 @@ describe("MarkdownBody", () => {
     const html = renderMarkdown("averyveryveryveryveryveryveryveryveryverylongtoken");
 
     expect(html).toContain('class="paperclip-markdown prose prose-sm min-w-0 max-w-full break-words overflow-hidden');
-    expect(html).toContain('style="overflow-wrap:anywhere;word-break:break-word"');
+    expect(html).toContain('class="break-words"');
     expect(html).toContain("<p");
   });
 
@@ -353,7 +351,7 @@ describe("MarkdownBody", () => {
     const html = renderMarkdown("[link](https://example.com/reallyreallyreallyreallyreallyreallyreallyreallylong)");
 
     expect(html).toContain('<a href="https://example.com/reallyreallyreallyreallyreallyreallyreallyreallylong"');
-    expect(html).toContain('style="overflow-wrap:anywhere;word-break:break-word"');
+    expect(html).toContain('class="break-words"');
   });
 
   it("renders markdown tables in a horizontally scrollable region", () => {
@@ -367,7 +365,8 @@ describe("MarkdownBody", () => {
     expect(html).toContain('aria-label="Scrollable table"');
     expect(html).toContain('tabindex="0"');
     expect(html).toContain("<table>");
-    expect(html).toContain('style="overflow-wrap:anywhere;word-break:normal"');
+    expect(html).toContain('<th class="break-words">');
+    expect(html).toContain('<td class="break-words">');
   });
 
   it("opens external links in a new tab with safe rel attributes", () => {
@@ -397,10 +396,10 @@ describe("MarkdownBody", () => {
     const html = renderMarkdown("[https://github.com/paperclipai/paperclip/pull/4099](https://github.com/paperclipai/paperclip/pull/4099)");
 
     expect(html).toContain('<a href="https://github.com/paperclipai/paperclip/pull/4099"');
-    expect(html).toContain('class="lucide lucide-github mr-1 inline h-3.5 w-3.5 align-[-0.125em]"');
+    expect(html).toContain('class="lucide lucide-github mr-1 inline h-3.5 w-3.5 align-middle"');
     // The icon and first character "h" must sit in a no-wrap span so the
     // icon can never be orphaned on the previous line from the URL text.
-    expect(html).toMatch(/<span style="white-space:nowrap">.*lucide-github.*?<\/svg>h<\/span>/);
+    expect(html).toMatch(/<span class="whitespace-nowrap">.*lucide-github.*?<\/svg>h<\/span>/);
     expect(html).toContain("ttps://github.com/paperclipai/paperclip/pull/4099");
     expect(html).not.toContain("lucide-external-link");
   });
@@ -409,7 +408,7 @@ describe("MarkdownBody", () => {
     const html = renderMarkdown("See https://github.com/paperclipai/paperclip/issues/1778");
 
     expect(html).toContain('<a href="https://github.com/paperclipai/paperclip/issues/1778"');
-    expect(html).toContain('class="lucide lucide-github mr-1 inline h-3.5 w-3.5 align-[-0.125em]"');
+    expect(html).toContain('class="lucide lucide-github mr-1 inline h-3.5 w-3.5 align-middle"');
   });
 
   it("does not prefix non-GitHub markdown links with the GitHub icon", () => {
@@ -426,7 +425,7 @@ describe("MarkdownBody", () => {
     expect(html).toContain("lucide-external-link");
     // Last character "s" must sit in a no-wrap span with the icon so the
     // indicator never wraps away from the link text.
-    expect(html).toMatch(/<span style="white-space:nowrap">s<svg[^>]*lucide-external-link/);
+    expect(html).toMatch(/<span class="whitespace-nowrap">s<svg[^>]*lucide-external-link/);
   });
 
   it("does not render the new-tab icon on internal links", () => {
@@ -439,7 +438,7 @@ describe("MarkdownBody", () => {
     const html = renderMarkdown("```text\nGET /heartbeat-runs/ca5d23fc-c15b-4826-8ff1-2b6dd11be096/log?offset=2062357&limitBytes=256000\n```");
 
     expect(html).toContain("<pre");
-    expect(html).toContain('style="max-width:100%;overflow-x:auto"');
+    expect(html).toContain('class="max-w-full overflow-x-auto"');
   });
 
   it("renders a copy button alongside fenced code blocks", () => {
