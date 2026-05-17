@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState, type ChangeEvent, type DragEvent } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type ChangeEvent } from "react";
 import { Link, useLocation, useNavigate, useNavigationType, useParams } from "@/lib/router";
 import { useInfiniteQuery, useQuery, useMutation, useQueryClient, type InfiniteData } from "@tanstack/react-query";
 import { issuesApi } from "../api/issues";
@@ -67,6 +67,7 @@ import { ImageGalleryModal } from "../components/ImageGalleryModal";
 import { ScrollToBottom } from "../components/ScrollToBottom";
 import { StatusIcon } from "../components/StatusIcon";
 import { PriorityIcon } from "../components/PriorityIcon";
+import { IssueAttachmentsSection } from "../components/issue-detail/IssueAttachmentsSection";
 import { IssueDetailActivityTab } from "../components/issue-detail/IssueDetailActivityTab";
 import { IssueDetailChatTab } from "../components/issue-detail/IssueDetailChatTab";
 import type {
@@ -126,7 +127,6 @@ import {
   Plus,
   Repeat,
   SlidersHorizontal,
-  Trash2,
   XCircle,
 } from "lucide-react";
 import {
@@ -376,7 +376,6 @@ export function IssueDetail() {
     approvalId: string;
     action: "approve" | "reject";
   } | null>(null);
-  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
   const [attachmentError, setAttachmentError] = useState<string | null>(null);
   const [attachmentDragActive, setAttachmentDragActive] = useState(false);
   const [galleryOpen, setGalleryOpen] = useState(false);
@@ -2155,12 +2154,9 @@ export function IssueDetail() {
     }
   };
 
-  const handleAttachmentDrop = async (evt: DragEvent<HTMLDivElement>) => {
-    evt.preventDefault();
-    setAttachmentDragActive(false);
-    const files = evt.dataTransfer.files;
-    if (!files || files.length === 0) return;
-    for (const file of Array.from(files)) {
+  const handleAttachmentFiles = async (files: File[]) => {
+    if (files.length === 0) return;
+    for (const file of files) {
       if (isMarkdownFile(file)) {
         await importMarkdownDocument.mutateAsync(file);
       } else {
@@ -2741,145 +2737,22 @@ export function IssueDetail() {
         extraActions={!hasAttachments ? attachmentUploadButton : null}
       />
 
-      {attachmentsInitialLoading ? (
-        <IssueSectionSkeleton titleWidth="w-24" rows={2} />
-      ) : hasAttachments ? (
-        <div
-        className={cn(
-          "space-y-3 rounded-lg transition-colors",
-        )}
-        onDragEnter={(evt) => {
-          evt.preventDefault();
-          setAttachmentDragActive(true);
+      <IssueAttachmentsSection
+        initialLoading={attachmentsInitialLoading}
+        imageAttachments={imageAttachments}
+        nonImageAttachments={nonImageAttachments}
+        uploadAction={attachmentUploadButton}
+        error={attachmentError}
+        deletePending={deleteAttachment.isPending}
+        onOpenImage={(attachment) => {
+          const idx = imageAttachments.findIndex((candidate) => candidate.id === attachment.id);
+          setGalleryIndex(idx >= 0 ? idx : 0);
+          setGalleryOpen(true);
         }}
-        onDragOver={(evt) => {
-          evt.preventDefault();
-          setAttachmentDragActive(true);
-        }}
-        onDragLeave={(evt) => {
-          if (evt.currentTarget.contains(evt.relatedTarget as Node | null)) return;
-          setAttachmentDragActive(false);
-        }}
-        onDrop={(evt) => void handleAttachmentDrop(evt)}
-      >
-        <div className="flex items-center justify-between gap-2">
-          <h3 className="text-sm font-medium text-muted-foreground">Attachments</h3>
-          {attachmentUploadButton}
-        </div>
-
-        {attachmentError && (
-          <p className="text-xs text-destructive">{attachmentError}</p>
-        )}
-
-        {imageAttachments.length > 0 && (
-          <div className="grid grid-cols-4 gap-2">
-            {imageAttachments.map((attachment) => (
-              <div
-                key={attachment.id}
-                className="group relative aspect-square rounded-lg overflow-hidden border border-border bg-accent/10 cursor-pointer"
-                onClick={() => {
-                  const idx = imageAttachments.findIndex((a) => a.id === attachment.id);
-                  setGalleryIndex(idx >= 0 ? idx : 0);
-                  setGalleryOpen(true);
-                }}
-              >
-                <img
-                  src={attachment.contentPath}
-                  alt={attachment.originalFilename ?? "attachment"}
-                  className="h-full w-full object-cover"
-                  loading="lazy"
-                />
-                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors" />
-                {confirmDeleteId === attachment.id ? (
-                  <div
-                    className="absolute inset-0 flex flex-col items-center justify-center gap-1.5 bg-black/60"
-                    onClick={(e) => e.stopPropagation()}
-                  >
-                    <p className="text-xs text-white font-medium">Delete?</p>
-                    <div className="flex gap-1.5">
-                      <Button
-                        type="button"
-                        variant="destructive"
-                        size="xs"
-                        className="h-6 px-2"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          deleteAttachment.mutate(attachment.id);
-                          setConfirmDeleteId(null);
-                        }}
-                        disabled={deleteAttachment.isPending}
-                      >
-                        Yes
-                      </Button>
-                      <Button
-                        type="button"
-                        variant="secondary"
-                        size="xs"
-                        className="h-6 px-2"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setConfirmDeleteId(null);
-                        }}
-                      >
-                        No
-                      </Button>
-                    </div>
-                  </div>
-                ) : (
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="icon-xs"
-                    className="absolute top-1.5 right-1.5 bg-black/50 text-white opacity-0 transition-opacity hover:bg-destructive hover:text-white group-hover:opacity-100"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setConfirmDeleteId(attachment.id);
-                    }}
-                    title="Delete attachment"
-                  >
-                    <Trash2 className="h-3.5 w-3.5" />
-                  </Button>
-                )}
-              </div>
-            ))}
-          </div>
-        )}
-
-        {nonImageAttachments.length > 0 && (
-          <div className="space-y-2">
-            {nonImageAttachments.map((attachment) => (
-              <div key={attachment.id} className="border border-border rounded-md p-2">
-                <div className="flex items-center justify-between gap-2">
-                  <a
-                    href={attachment.contentPath}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="text-xs hover:underline truncate"
-                    title={attachment.originalFilename ?? attachment.id}
-                  >
-                    {attachment.originalFilename ?? attachment.id}
-                  </a>
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="icon-xs"
-                    className="text-muted-foreground hover:text-destructive"
-                    onClick={() => deleteAttachment.mutate(attachment.id)}
-                    disabled={deleteAttachment.isPending}
-                    title="Delete attachment"
-                  >
-                    <Trash2 className="h-3.5 w-3.5" />
-                  </Button>
-                </div>
-                <p className="text-xs text-muted-foreground">
-                  {attachment.contentType} · {(attachment.byteSize / 1024).toFixed(1)} KB
-                </p>
-              </div>
-            ))}
-          </div>
-        )}
-        </div>
-      ) : null}
+        onDeleteAttachment={(attachmentId) => deleteAttachment.mutate(attachmentId)}
+        onDragActiveChange={setAttachmentDragActive}
+        onDropFiles={(files) => void handleAttachmentFiles(files)}
+      />
 
       <ImageGalleryModal
         images={imageAttachments}
