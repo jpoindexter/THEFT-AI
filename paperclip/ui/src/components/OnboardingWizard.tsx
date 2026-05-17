@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef, useCallback, useMemo, type ReactNode } from "react";
+import { useEffect, useState, useRef, useCallback, useMemo } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import type { AdapterEnvironmentTestResult } from "@paperclipai/shared";
 import { useLocation, useNavigate, useParams } from "@/lib/router";
@@ -12,20 +12,9 @@ import { issuesApi } from "../api/issues";
 import { projectsApi } from "../api/projects";
 import { queryKeys } from "../lib/queryKeys";
 import { Dialog, DialogPortal } from "@/components/ui/dialog";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger
-} from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { TheftSplitCanvasFormTemplate } from "@/components/theft/templates/TheftSplitCanvasFormTemplate";
-import { cn } from "../lib/utils";
-import {
-  extractModelName,
-  extractProviderIdWithFallback
-} from "../lib/model-utils";
+import { extractProviderIdWithFallback } from "../lib/model-utils";
 import { getUIAdapter } from "../adapters";
 import { listUIAdapters } from "../adapters";
 import { isVisualAdapterChoice } from "../adapters/metadata";
@@ -40,7 +29,6 @@ import {
   selectDefaultCompanyGoalId
 } from "../lib/onboarding-launch";
 import {
-  ONBOARDING_STAGES,
   ONBOARDING_STAGE_LABELS,
   type OnboardingStage,
   getOnboardingStageGoalTemplate,
@@ -58,81 +46,32 @@ import { DEFAULT_GEMINI_LOCAL_MODEL } from "@paperclipai/adapter-gemini-local";
 import { DEFAULT_OPENCODE_LOCAL_MODEL, isValidOpenCodeModelId } from "@paperclipai/adapter-opencode-local";
 import { resolveRouteOnboardingOptions } from "../lib/onboarding-route";
 import {
-  Building2,
-  Bot,
-  ListTodo,
+  DEFAULT_TASK_DESCRIPTION,
+  buildOperatorLaunchIssueDescription,
+} from "../lib/onboarding-copy";
+import { AssemblyPreviewScreen } from "./onboarding/AssemblyPreviewScreen";
+import { AssemblyStepForm } from "./onboarding/AssemblyStepForm";
+import { CompanyStepForm } from "./onboarding/CompanyStepForm";
+import { OnboardingCanvasPreview } from "./onboarding/OnboardingCanvasPreview";
+import {
+  OnboardingFormFooter,
+  OnboardingFormHeader,
+} from "./onboarding/OnboardingChrome";
+import { PlanReviewForm } from "./onboarding/PlanReviewForm";
+import { TaskStepForm } from "./onboarding/TaskStepForm";
+import type { AdapterChoice, OnboardingStep as Step } from "./onboarding/types";
+import {
   Rocket,
-  ArrowLeft,
-  ArrowRight,
-  Check,
-  Loader2,
-  ChevronDown,
   X,
-  Settings2,
   Users,
-  Flag,
-  Package,
-  BarChart3,
-  Database,
-  Monitor,
   CircleDot,
-  Plus,
   Target,
   LockKeyhole,
   Trophy,
-  Code2,
-  Palette,
-  Megaphone,
-  Headphones,
-  Scale,
-  DollarSign
 } from "lucide-react";
 
 
-type Step = 1 | 2 | 3 | 4 | 5;
 type AdapterType = string;
-
-const OPERATOR_TASK_CONTEXT = "You are the Operator. You set the direction for the company.";
-
-const DEFAULT_TASK_DESCRIPTION = `${OPERATOR_TASK_CONTEXT}
-
-- hire a founding engineer
-- write a hiring plan
-- break the roadmap into concrete tasks and start delegating work`;
-
-function buildOperatorLaunchIssueDescription(input: {
-  taskDescription: string;
-  stage: OnboardingStage;
-  prompt: string;
-  answer: string;
-}) {
-  const taskDescription = input.taskDescription.trim();
-  const withOperatorContext = taskDescription.includes(OPERATOR_TASK_CONTEXT)
-    ? taskDescription
-    : [OPERATOR_TASK_CONTEXT, taskDescription].filter(Boolean).join("\n\n");
-
-  return `${withOperatorContext}${buildInterviewContextSection({
-    stage: input.stage,
-    prompt: input.prompt,
-    answer: input.answer,
-  })}`.trim();
-}
-
-function buildInterviewContextSection(input: {
-  stage: OnboardingStage;
-  prompt: string;
-  answer: string;
-}) {
-  const answer = input.answer.trim();
-  if (!answer) return "";
-  return [
-    "",
-    "Onboarding context",
-    `- stage: ${input.stage}`,
-    `- ${input.prompt}`,
-    `  ${answer}`,
-  ].join("\n");
-}
 
 export function OnboardingWizard() {
   const { onboardingOpen, onboardingOptions, closeOnboarding } = useDialog();
@@ -284,7 +223,10 @@ export function OnboardingWizard() {
 
   // Build adapter grids dynamically from the UI registry + display metadata.
   // External/plugin adapters automatically appear with generic defaults.
-  const { recommendedAdapters, moreAdapters } = useMemo(() => {
+  const { recommendedAdapters, moreAdapters } = useMemo((): {
+    recommendedAdapters: AdapterChoice[];
+    moreAdapters: AdapterChoice[];
+  } => {
     const SYSTEM_ADAPTER_TYPES = new Set(["process", "http"]);
     const all = listUIAdapters()
       .filter((a) =>
@@ -899,7 +841,6 @@ export function OnboardingWizard() {
 
             {step === 5 ? (
               <AssemblyPreviewScreen
-                companyName={companyName}
                 companyStage={companyStage}
                 objective={planObjective}
                 taskTitle={taskTitle}
@@ -922,799 +863,97 @@ export function OnboardingWizard() {
                   />
                 }
                 formHeader={
-                  <div className="theft-onboarding-panel-inner mx-auto w-full space-y-4 px-0 py-0">
-                    <div className="flex shrink-0 items-start justify-between gap-4">
-                    <div className="min-w-0">
-                      <p className="theft-label">
-                        {step === 4 ? "Plan Review" : "Onboarding"}
-                      </p>
-                      <h2 className="mt-1.5 truncate text-xl font-medium">
-                        {companyName.trim() || "New company"}
-                      </h2>
-                    </div>
-                    <span className="shrink-0 text-sm tabular-nums text-muted-foreground">
-                      {step} / 5
-                    </span>
-                  </div>
-                    <div className="flex shrink-0 items-center gap-0 overflow-x-auto border-b border-border">
-                      {(
-                        [
-                          { step: 1 as Step, label: "Company", icon: Building2 },
-                          { step: 2 as Step, label: "Assembly", icon: Users },
-                          { step: 3 as Step, label: "Task", icon: ListTodo },
-                          { step: 4 as Step, label: "Plan", icon: Rocket },
-                          { step: 5 as Step, label: "Preview", icon: Monitor }
-                        ] as const
-                      ).map(({ step: s, label, icon: Icon }) => (
-                        <Button
-                          key={s}
-                          type="button"
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => setStep(s)}
-                          className={cn(
-                            "flex h-auto shrink-0 cursor-pointer items-center gap-1.5 rounded-sm border-b-2 px-3 py-2 text-xs font-medium transition-colors",
-                            s === step
-                              ? "border-foreground text-foreground"
-                              : "border-transparent text-muted-foreground hover:border-border hover:text-foreground/70"
-                          )}
-                        >
-                          <Icon className="h-3.5 w-3.5" />
-                          {label}
-                        </Button>
-                      ))}
-                    </div>
-                  </div>
+                  <OnboardingFormHeader
+                    step={step}
+                    companyName={companyName}
+                    onStepChange={setStep}
+                  />
                 }
                 form={
                   <div className="theft-onboarding-panel-inner mx-auto w-full min-w-0">
               {step === 1 && (
-                <div className="space-y-4">
-                  <div className="flex items-center gap-3 mb-1">
-                    <div className="bg-muted/50 p-2">
-                      <Building2 className="h-5 w-5 text-muted-foreground" />
-                    </div>
-                    <div>
-                      <h3 className="font-medium">Name your company</h3>
-                      <p className="text-xs text-muted-foreground">
-                        This is the operating company THEFT will assemble.
-                      </p>
-                    </div>
-                  </div>
-                  <div className="mt-3 group">
-                    <label
-                      className={cn(
-                        "text-xs mb-1 block transition-colors",
-                        companyName.trim()
-                          ? "text-foreground"
-                          : "text-muted-foreground group-focus-within:text-foreground"
-                      )}
-                    >
-                      Company name
-                    </label>
-                    <Input
-                      className="w-full rounded-md border border-border bg-transparent px-3 py-2 text-sm outline-none focus:ring-1 focus:ring-ring placeholder:text-muted-foreground/50"
-                      placeholder="Company name"
-                      value={companyName}
-                      onChange={(e) => setCompanyName(e.target.value)}
-                      autoFocus
-                    />
-                  </div>
-                  <div>
-                    <label className="text-xs text-muted-foreground mb-2 block">
-                      Company stage
-                    </label>
-                    <div className="grid grid-cols-2 gap-2">
-                      {ONBOARDING_STAGES.map((stage) => (
-                        <Button
-                          key={stage}
-                          type="button"
-                          variant="ghost"
-                          size="xs"
-                          onClick={() => setCompanyStage(stage)}
-                          className={cn(
-                            "h-auto justify-start rounded-md border px-2 py-1.5 text-left text-xs",
-                            companyStage === stage
-                              ? "border-foreground bg-accent text-foreground"
-                              : "border-border text-muted-foreground hover:text-foreground hover:bg-accent/40"
-                          )}
-                        >
-                          {ONBOARDING_STAGE_LABELS[stage]}
-                        </Button>
-                      ))}
-                    </div>
-                  </div>
-                  <div className="space-y-3">
-                    <div className="text-xs text-muted-foreground">Setup status</div>
-                    <div className="grid gap-2">
-                      <div className="theft-inset-surface p-2">
-                        <div className="text-xs mb-1">Company name</div>
-                        <div className="flex gap-2 mb-2">
-                          {(["done", "skipped"] as const).map((status) => (
-                            <Button
-                              key={`name-${status}`}
-                              type="button"
-                              variant="ghost"
-                              size="xs"
-                              onClick={() => setSetupCompanyNameStatus(status)}
-                              className={cn(
-                                "h-auto border px-2 py-1 text-xs",
-                                setupCompanyNameStatus === status ? "border-foreground bg-accent" : "border-border"
-                              )}
-                            >
-                              {status}
-                            </Button>
-                          ))}
-                        </div>
-                        <Input
-                          className="w-full rounded-md border border-border bg-transparent px-2 py-1.5 text-xs outline-none focus:ring-1 focus:ring-ring"
-                          placeholder="Name note (optional)"
-                          value={setupCompanyNameNote}
-                          onChange={(e) => setSetupCompanyNameNote(e.target.value)}
-                        />
-                      </div>
-                      <div className="theft-inset-surface p-2">
-                        <div className="text-xs mb-1">Legal / operating readiness</div>
-                        <div className="flex gap-2 mb-2">
-                          {(["todo", "done", "skipped"] as const).map((status) => (
-                            <Button
-                              key={`legal-${status}`}
-                              type="button"
-                              variant="ghost"
-                              size="xs"
-                              onClick={() => setSetupLegalStatus(status)}
-                              className={cn(
-                                "h-auto border px-2 py-1 text-xs",
-                                setupLegalStatus === status ? "border-foreground bg-accent" : "border-border"
-                              )}
-                            >
-                              {status}
-                            </Button>
-                          ))}
-                        </div>
-                        <Input
-                          className="w-full rounded-md border border-border bg-transparent px-2 py-1.5 text-xs outline-none focus:ring-1 focus:ring-ring"
-                          placeholder="Legal, compliance, or operating note (optional)"
-                          value={setupLegalNote}
-                          onChange={(e) => setSetupLegalNote(e.target.value)}
-                        />
-                      </div>
-                      <div className="theft-inset-surface p-2">
-                        <div className="text-xs mb-1">Offer / product</div>
-                        <div className="flex gap-2 mb-2">
-                          {(["todo", "done", "skipped"] as const).map((status) => (
-                            <Button
-                              key={`offer-${status}`}
-                              type="button"
-                              variant="ghost"
-                              size="xs"
-                              onClick={() => setSetupOfferStatus(status)}
-                              className={cn(
-                                "h-auto border px-2 py-1 text-xs",
-                                setupOfferStatus === status ? "border-foreground bg-accent" : "border-border"
-                              )}
-                            >
-                              {status}
-                            </Button>
-                          ))}
-                        </div>
-                        <Input
-                          className="w-full rounded-md border border-border bg-transparent px-2 py-1.5 text-xs outline-none focus:ring-1 focus:ring-ring"
-                          placeholder="Offer note (optional)"
-                          value={setupOfferNote}
-                          onChange={(e) => setSetupOfferNote(e.target.value)}
-                        />
-                      </div>
-                    </div>
-                  </div>
-                  <div className="group">
-                    <label
-                      className={cn(
-                        "text-xs mb-1 block transition-colors",
-                        companyGoal.trim()
-                          ? "text-foreground"
-                          : "text-muted-foreground group-focus-within:text-foreground"
-                      )}
-                    >
-                      Mission / goal (optional)
-                    </label>
-                    <Textarea
-                      className="w-full rounded-md border border-border bg-transparent px-4 py-2 text-sm outline-none focus:ring-1 focus:ring-ring placeholder:text-muted-foreground/50 resize-none min-h-16"
-                      placeholder="What is this company trying to achieve?"
-                      value={companyGoal}
-                      onChange={(e) => setCompanyGoal(e.target.value)}
-                    />
-                  </div>
-                </div>
+                <CompanyStepForm
+                  companyName={companyName}
+                  setCompanyName={setCompanyName}
+                  companyGoal={companyGoal}
+                  setCompanyGoal={setCompanyGoal}
+                  companyStage={companyStage}
+                  setCompanyStage={setCompanyStage}
+                  setupCompanyNameStatus={setupCompanyNameStatus}
+                  setSetupCompanyNameStatus={setSetupCompanyNameStatus}
+                  setupCompanyNameNote={setupCompanyNameNote}
+                  setSetupCompanyNameNote={setSetupCompanyNameNote}
+                  setupLegalStatus={setupLegalStatus}
+                  setSetupLegalStatus={setSetupLegalStatus}
+                  setupLegalNote={setupLegalNote}
+                  setSetupLegalNote={setSetupLegalNote}
+                  setupOfferStatus={setupOfferStatus}
+                  setSetupOfferStatus={setSetupOfferStatus}
+                  setupOfferNote={setupOfferNote}
+                  setSetupOfferNote={setSetupOfferNote}
+                />
               )}
 
               {step === 2 && (
-                <div className="space-y-4">
-                  <div className="flex items-center gap-3 mb-1">
-                    <div className="bg-muted/50 p-2">
-                      <Bot className="h-5 w-5 text-muted-foreground" />
-                    </div>
-                    <div>
-                      <h3 className="font-medium">Assemble your company</h3>
-                      <p className="text-xs text-muted-foreground">
-                        THEFT will create an Operator, departments, starter work,
-                        and Library-ready outputs.
-                      </p>
-                    </div>
-                  </div>
-                  <div>
-                    <label className="text-xs text-muted-foreground mb-1 block">
-                      Operator name
-                    </label>
-                    <Input
-                      className="w-full rounded-md border border-border bg-transparent px-3 py-2 text-sm outline-none focus:ring-1 focus:ring-ring placeholder:text-muted-foreground/50"
-                      placeholder="Operator"
-                      value={agentName}
-                      onChange={(e) => setAgentName(e.target.value)}
-                      autoFocus
-                    />
-                  </div>
-
-                  <div className="theft-surface-muted p-3">
-                    <div className="flex items-start justify-between gap-3">
-                      <div>
-                        <p className="text-sm font-medium">Company assembly preview</p>
-                        <p className="mt-0.5 text-xs text-muted-foreground">
-                          Launch creates one company workspace with Operator-led
-                          departments and starter tasks.
-                        </p>
-                      </div>
-                      <span className="theft-chip px-2 py-1 text-micro text-muted-foreground">
-                        {ONBOARDING_STAGE_LABELS[companyStage]}
-                      </span>
-                    </div>
-
-                    <div className="mt-3 grid gap-2">
-                      <div className="theft-inset-surface flex items-center gap-2 px-2.5 py-2">
-                        <Bot className="h-4 w-4 text-muted-foreground" />
-                        <div className="min-w-0 flex-1">
-                          <p className="truncate text-xs font-medium">{agentName || "Operator"}</p>
-                          <p className="text-micro text-muted-foreground">
-                            Routes work, keeps the founder oriented, and owns the first task.
-                          </p>
-                        </div>
-                      </div>
-
-                      <div>
-                        <div className="mb-1.5 flex items-center justify-between">
-                          <p className="text-xs font-medium">Departments</p>
-                          <p className="text-micro text-muted-foreground">
-                            {DEPARTMENT_SEED_SPECS.length} business lanes
-                          </p>
-                        </div>
-                        <div className="grid grid-cols-2 gap-1.5">
-                          {DEPARTMENT_SEED_SPECS.map((department) => (
-                            <div
-                              key={department.key}
-                              className="theft-inset-surface px-2 py-1.5"
-                            >
-                              <p className="truncate text-micro font-medium">
-                                {department.title}
-                              </p>
-                              <p className="truncate text-nano text-muted-foreground">
-                                {department.taskTitleByStage[companyStage]}
-                              </p>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="theft-surface-plain p-3">
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      className="flex h-auto w-full items-center justify-between gap-3 p-0 text-left"
-                      onClick={() => setShowAdvancedRuntime((value) => !value)}
-                    >
-                      <span className="flex min-w-0 items-center gap-2">
-                        <Settings2 className="h-4 w-4 text-muted-foreground" />
-                        <span className="min-w-0">
-                          <span className="block text-xs font-medium">
-                            Advanced runtime
-                          </span>
-                          <span className="block truncate text-micro text-muted-foreground">
-                            Using {getUIAdapter(adapterType).label}
-                            {model ? ` / ${model}` : ""}
-                          </span>
-                        </span>
-                      </span>
-                      <ChevronDown
-                        className={cn(
-                          "h-3.5 w-3.5 text-muted-foreground transition-transform",
-                          showAdvancedRuntime ? "rotate-0" : "-rotate-90"
-                        )}
-                      />
-                    </Button>
-
-                  {/* Adapter type radio cards */}
-                  {showAdvancedRuntime && <div className="mt-4">
-                    <label className="text-xs text-muted-foreground mb-2 block">
-                      Adapter type
-                    </label>
-                    <div className="grid grid-cols-2 gap-2">
-                      {recommendedAdapters.map((opt) => (
-                        <Button
-                          key={opt.type}
-                          type="button"
-                          variant="ghost"
-                          className={cn(
-                            "relative flex h-auto flex-col items-center gap-1.5 rounded-md border p-3 text-xs transition-colors",
-                            adapterType === opt.type
-                              ? "border-foreground bg-accent"
-                              : "border-border hover:bg-accent/50"
-                          )}
-                          onClick={() => {
-                            const nextType = opt.type;
-                            setAdapterType(nextType);
-                            if (nextType === "codex_local") {
-                              if (!model) {
-                                setModel(DEFAULT_CODEX_LOCAL_MODEL);
-                              }
-                              return;
-                            }
-                            if (nextType === "opencode_local") {
-                              setModel(DEFAULT_OPENCODE_LOCAL_MODEL);
-                              return;
-                            }
-                            setModel("");
-                          }}
-                        >
-                          {opt.recommended && (
-                            <span className="absolute -top-1.5 right-1.5 bg-green-500 text-white text-badge font-semibold px-1.5 py-0.5 rounded-full leading-none">
-                              Recommended
-                            </span>
-                          )}
-                          <opt.icon className="h-4 w-4" />
-                          <span className="font-medium">{opt.label}</span>
-                          <span className="text-muted-foreground text-nano">
-                            {opt.description}
-                          </span>
-                        </Button>
-                      ))}
-                    </div>
-
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="sm"
-                      className="mt-3 flex h-auto items-center gap-1.5 p-0 text-xs text-muted-foreground transition-colors hover:text-foreground"
-                      onClick={() => setShowMoreAdapters((v) => !v)}
-                    >
-                      <ChevronDown
-                        className={cn(
-                          "h-3 w-3 transition-transform",
-                          showMoreAdapters ? "rotate-0" : "-rotate-90"
-                        )}
-                      />
-                      More Agent Adapter Types
-                    </Button>
-
-                    {showMoreAdapters && (
-                      <div className="grid grid-cols-2 gap-2 mt-2">
-                        {moreAdapters.map((opt) => (
-                           <Button
-                             key={opt.type}
-                             type="button"
-                             disabled={!!opt.comingSoon}
-                             variant="ghost"
-                             className={cn(
-                               "relative flex h-auto flex-col items-center gap-1.5 rounded-md border p-3 text-xs transition-colors",
-                               opt.comingSoon
-                                 ? "border-border opacity-40 cursor-not-allowed"
-                                 : adapterType === opt.type
-                                 ? "border-foreground bg-accent"
-                                 : "border-border hover:bg-accent/50"
-                             )}
-                             onClick={() => {
-                               if (opt.comingSoon) return;
-                               const nextType = opt.type;
-                              setAdapterType(nextType);
-                              if (nextType === "gemini_local" && !model) {
-                                setModel(DEFAULT_GEMINI_LOCAL_MODEL);
-                                return;
-                              }
-                              if (nextType === "cursor" && !model) {
-                                setModel(DEFAULT_CURSOR_LOCAL_MODEL);
-                                return;
-                              }
-                              if (nextType === "opencode_local") {
-                                setModel(DEFAULT_OPENCODE_LOCAL_MODEL);
-                                return;
-                              }
-                              setModel("");
-                            }}
-                          >
-                            <opt.icon className="h-4 w-4" />
-                            <span className="font-medium">{opt.label}</span>
-                            <span className="text-muted-foreground text-nano">
-                              {opt.comingSoon
-                                ? opt.disabledLabel ?? "Coming soon"
-                                : opt.description}
-                            </span>
-                          </Button>
-                        ))}
-                      </div>
-                    )}
-                  </div>}
-
-                  {/* Conditional adapter fields */}
-                  {showAdvancedRuntime && isLocalAdapter && (
-                    <div className="space-y-3">
-                      <div>
-                        <label className="text-xs text-muted-foreground mb-1 block">
-                          Model
-                        </label>
-                        <Popover
-                          open={modelOpen}
-                          onOpenChange={(next) => {
-                            setModelOpen(next);
-                            if (!next) setModelSearch("");
-                          }}
-                        >
-                          <PopoverTrigger asChild>
-                            <Button
-                              type="button"
-                              variant="ghost"
-                              className="inline-flex h-auto w-full items-center justify-between gap-1.5 rounded-md border border-border px-2.5 py-1.5 text-sm transition-colors hover:bg-accent/50"
-                            >
-                              <span
-                                className={cn(
-                                  !model && "text-muted-foreground"
-                                )}
-                              >
-                                {selectedModel
-                                  ? selectedModel.label
-                                  : model ||
-                                    (adapterType === "opencode_local"
-                                      ? "Select model (required)"
-                                      : "Default")}
-                              </span>
-                              <ChevronDown className="h-3 w-3 text-muted-foreground" />
-                            </Button>
-                          </PopoverTrigger>
-                          <PopoverContent
-                            className="w-(--radix-popover-trigger-width) p-1"
-                            align="start"
-                          >
-                            <Input
-                              className="w-full px-2 py-1.5 text-xs bg-transparent outline-none border-b border-border mb-1 placeholder:text-muted-foreground/50"
-                              placeholder="Search models..."
-                              value={modelSearch}
-                              onChange={(e) => setModelSearch(e.target.value)}
-                              autoFocus
-                            />
-                            {adapterType !== "opencode_local" && (
-                              <Button
-                                type="button"
-                                variant="ghost"
-                                className={cn(
-                                  "flex h-auto w-full items-center justify-start gap-2 rounded px-2 py-1.5 text-sm hover:bg-accent/50",
-                                  !model && "bg-accent"
-                                )}
-                                onClick={() => {
-                                  setModel("");
-                                  setModelOpen(false);
-                                }}
-                              >
-                                Default
-                              </Button>
-                            )}
-                            <div className="max-h-60 overflow-y-auto">
-                              {groupedModels.map((group) => (
-                                <div
-                                  key={group.provider}
-                                  className="mb-1 last:mb-0"
-                                >
-                                  {adapterType === "opencode_local" && (
-                                    <div className="px-2 py-1 text-nano uppercase tracking-wide text-muted-foreground">
-                                      {group.provider} ({group.entries.length})
-                                    </div>
-                                  )}
-                                  {group.entries.map((m) => (
-                                    <Button
-                                      key={m.id}
-                                      type="button"
-                                      variant="ghost"
-                                      className={cn(
-                                        "flex h-auto w-full items-center rounded px-2 py-1.5 text-sm hover:bg-accent/50",
-                                        m.id === model && "bg-accent"
-                                      )}
-                                      onClick={() => {
-                                        setModel(m.id);
-                                        setModelOpen(false);
-                                      }}
-                                    >
-                                      <span
-                                        className="block w-full text-left truncate"
-                                        title={m.id}
-                                      >
-                                        {adapterType === "opencode_local"
-                                          ? extractModelName(m.id)
-                                          : m.label}
-                                      </span>
-                                    </Button>
-                                  ))}
-                                </div>
-                              ))}
-                            </div>
-                            {filteredModels.length === 0 && (
-                              <p className="px-2 py-1.5 text-xs text-muted-foreground">
-                                No models discovered.
-                              </p>
-                            )}
-                          </PopoverContent>
-                        </Popover>
-                      </div>
-                    </div>
-                  )}
-
-                  {showAdvancedRuntime && isLocalAdapter && (
-                    <div className="theft-surface-plain space-y-2 p-3">
-                      <div className="flex items-center justify-between gap-2">
-                        <div>
-                          <p className="text-xs font-medium">
-                            Adapter environment check
-                          </p>
-                          <p className="text-micro text-muted-foreground">
-                            Runs a live probe that asks the adapter CLI to
-                            respond with hello.
-                          </p>
-                        </div>
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          className="h-7 px-2.5 text-xs"
-                          disabled={adapterEnvLoading}
-                          onClick={() => void runAdapterEnvironmentTest()}
-                        >
-                          {adapterEnvLoading ? "Testing..." : "Test now"}
-                        </Button>
-                      </div>
-
-                      {adapterEnvError && (
-                        <div className="rounded-md border border-destructive/30 bg-destructive/10 px-2.5 py-2 text-micro text-destructive">
-                          {adapterEnvError}
-                        </div>
-                      )}
-
-                      {adapterEnvResult &&
-                      adapterEnvResult.status === "pass" ? (
-                        <div className="flex items-center gap-2 rounded-md border border-border bg-muted px-3 py-2 text-xs text-foreground animate-in fade-in slide-in-from-bottom-1 duration-300">
-                          <Check className="h-3.5 w-3.5 shrink-0" />
-                          <span className="font-medium">Passed</span>
-                        </div>
-                      ) : adapterEnvResult ? (
-                        <AdapterEnvironmentResult result={adapterEnvResult} />
-                      ) : null}
-
-                      {shouldSuggestUnsetAnthropicApiKey && (
-                        <div className="rounded-md border border-border bg-muted px-2.5 py-2 space-y-2">
-                          <p className="text-micro text-muted-foreground leading-relaxed">
-                            Claude failed while{" "}
-                            <span className="font-mono">ANTHROPIC_API_KEY</span>{" "}
-                            is set. You can clear it in this Operator adapter config
-                            and retry the probe.
-                          </p>
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            className="h-7 px-2.5 text-xs"
-                            disabled={
-                              adapterEnvLoading || unsetAnthropicLoading
-                            }
-                            onClick={() => void handleUnsetAnthropicApiKey()}
-                          >
-                            {unsetAnthropicLoading
-                              ? "Retrying..."
-                              : "Unset ANTHROPIC_API_KEY"}
-                          </Button>
-                        </div>
-                      )}
-
-                      {adapterEnvResult && adapterEnvResult.status === "fail" && (
-                        <div className="rounded-md border border-border/70 bg-muted/20 px-2.5 py-2 text-micro space-y-1.5">
-                          <p className="font-medium">Manual debug</p>
-                          <p className="text-muted-foreground font-mono break-all">
-                            {adapterType === "cursor"
-                              ? `${effectiveAdapterCommand} -p --mode ask --output-format json \"Respond with hello.\"`
-                              : adapterType === "codex_local"
-                              ? `${effectiveAdapterCommand} exec --json -`
-                              : adapterType === "gemini_local"
-                                ? `${effectiveAdapterCommand} --output-format json "Respond with hello."`
-                              : adapterType === "opencode_local"
-                                ? `${effectiveAdapterCommand} run --format json "Respond with hello."`
-                              : `${effectiveAdapterCommand} --print - --output-format stream-json --verbose`}
-                          </p>
-                          <p className="text-muted-foreground">
-                            Prompt:{" "}
-                            <span className="font-mono">Respond with hello.</span>
-                          </p>
-                          {adapterType === "cursor" ||
-                          adapterType === "codex_local" ||
-                          adapterType === "gemini_local" ||
-                          adapterType === "opencode_local" ? (
-                            <p className="text-muted-foreground">
-                              If auth fails, set{" "}
-                              <span className="font-mono">
-                                {adapterType === "cursor"
-                                  ? "CURSOR_API_KEY"
-                                  : adapterType === "gemini_local"
-                                    ? "GEMINI_API_KEY"
-                                    : "OPENAI_API_KEY"}
-                              </span>{" "}
-                              in env or run{" "}
-                              <span className="font-mono">
-                                {adapterType === "cursor"
-                                  ? "agent login"
-                                  : adapterType === "codex_local"
-                                    ? "codex login"
-                                    : adapterType === "gemini_local"
-                                      ? "gemini auth"
-                                      : "opencode auth login"}
-                              </span>
-                              .
-                            </p>
-                          ) : (
-                            <p className="text-muted-foreground">
-                              If login is required, run{" "}
-                              <span className="font-mono">claude login</span>{" "}
-                              and retry.
-                            </p>
-                          )}
-                        </div>
-                      )}
-                    </div>
-                  )}
-
-                  {showAdvancedRuntime && (adapterType === "http" ||
-                    adapterType === "openclaw_gateway") && (
-                    <div>
-                      <label className="text-xs text-muted-foreground mb-1 block">
-                        {adapterType === "openclaw_gateway"
-                          ? "Gateway URL"
-                          : "Webhook URL"}
-                      </label>
-                      <Input
-                        className="w-full rounded-md border border-border bg-transparent px-3 py-2 text-sm font-mono outline-none focus:ring-1 focus:ring-ring placeholder:text-muted-foreground/50"
-                        placeholder={
-                          adapterType === "openclaw_gateway"
-                            ? "ws://127.0.0.1:18789"
-                            : "https://..."
-                        }
-                        value={url}
-                        onChange={(e) => setUrl(e.target.value)}
-                      />
-                    </div>
-                  )}
-                  </div>
-                </div>
+                <AssemblyStepForm
+                  agentName={agentName}
+                  setAgentName={setAgentName}
+                  companyStage={companyStage}
+                  adapterType={adapterType}
+                  setAdapterType={setAdapterType}
+                  adapterLabel={getUIAdapter(adapterType).label}
+                  model={model}
+                  setModel={setModel}
+                  url={url}
+                  setUrl={setUrl}
+                  modelOpen={modelOpen}
+                  setModelOpen={setModelOpen}
+                  modelSearch={modelSearch}
+                  setModelSearch={setModelSearch}
+                  selectedModel={selectedModel}
+                  groupedModels={groupedModels}
+                  filteredModels={filteredModels}
+                  recommendedAdapters={recommendedAdapters}
+                  moreAdapters={moreAdapters}
+                  showAdvancedRuntime={showAdvancedRuntime}
+                  setShowAdvancedRuntime={setShowAdvancedRuntime}
+                  showMoreAdapters={showMoreAdapters}
+                  setShowMoreAdapters={setShowMoreAdapters}
+                  isLocalAdapter={isLocalAdapter}
+                  adapterEnvLoading={adapterEnvLoading}
+                  adapterEnvError={adapterEnvError}
+                  adapterEnvResult={adapterEnvResult}
+                  shouldSuggestUnsetAnthropicApiKey={shouldSuggestUnsetAnthropicApiKey}
+                  unsetAnthropicLoading={unsetAnthropicLoading}
+                  effectiveAdapterCommand={effectiveAdapterCommand}
+                  onTestEnvironment={() => void runAdapterEnvironmentTest()}
+                  onUnsetAnthropicApiKey={() => void handleUnsetAnthropicApiKey()}
+                />
               )}
 
               {step === 3 && (
-                <div className="space-y-4">
-                  <div className="flex items-center gap-3 mb-1">
-                    <div className="rounded-md bg-muted/50 p-2">
-                      <ListTodo className="h-5 w-5 text-muted-foreground" />
-                    </div>
-                    <div>
-                      <h3 className="font-medium">Set the first company task</h3>
-                      <p className="text-xs text-muted-foreground">
-                        Give the Operator a concrete business task to route,
-                        review, and turn into Library output.
-                      </p>
-                    </div>
-                  </div>
-                  <div>
-                    <label className="text-xs text-muted-foreground mb-1 block">
-                      Task title
-                    </label>
-                    <Input
-                      className="w-full rounded-md border border-border bg-transparent px-3 py-2 text-sm outline-none focus:ring-1 focus:ring-ring placeholder:text-muted-foreground/50"
-                      placeholder="e.g. Research competitor pricing"
-                      value={taskTitle}
-                      onChange={(e) => {
-                        setTaskTemplateCustomized(true);
-                        setTaskTitle(e.target.value);
-                      }}
-                      autoFocus
-                    />
-                  </div>
-                  <div>
-                    <label className="text-xs text-muted-foreground mb-1 block">
-                      Description (optional)
-                    </label>
-                    <Textarea
-                      ref={textareaRef}
-                      className="w-full rounded-md border border-border bg-transparent px-4 py-2 text-sm outline-none focus:ring-1 focus:ring-ring placeholder:text-muted-foreground/50 resize-none min-h-32 max-h-80 overflow-y-auto"
-                      placeholder="Add more detail about what the agent should do..."
-                      value={taskDescription}
-                      onChange={(e) => {
-                        setTaskTemplateCustomized(true);
-                        setTaskDescription(e.target.value);
-                      }}
-                    />
-                  </div>
-                  <div>
-                    <label className="text-xs text-muted-foreground mb-1 block">
-                      Stage interview: {stageTaskTemplate.interviewPrompt}
-                    </label>
-                    <Textarea
-                      className="w-full rounded-md border border-border bg-transparent px-4 py-2 text-sm outline-none focus:ring-1 focus:ring-ring placeholder:text-muted-foreground/50 resize-none min-h-20"
-                      placeholder={stageTaskTemplate.interviewPlaceholder}
-                      value={stageInterviewAnswer}
-                      onChange={(e) => setStageInterviewAnswer(e.target.value)}
-                    />
-                  </div>
-                </div>
+                <TaskStepForm
+                  taskTitle={taskTitle}
+                  setTaskTitle={setTaskTitle}
+                  taskDescription={taskDescription}
+                  setTaskDescription={setTaskDescription}
+                  setTaskTemplateCustomized={setTaskTemplateCustomized}
+                  stageInterviewPrompt={stageTaskTemplate.interviewPrompt}
+                  stageInterviewPlaceholder={stageTaskTemplate.interviewPlaceholder}
+                  stageInterviewAnswer={stageInterviewAnswer}
+                  setStageInterviewAnswer={setStageInterviewAnswer}
+                  textareaRef={textareaRef}
+                />
               )}
 
               {step === 4 && (
-                <div className="space-y-4">
-                  <div className="flex items-center gap-3 mb-1">
-                    <div className="rounded-md bg-muted/50 p-2">
-                      <ListTodo className="h-5 w-5 text-muted-foreground" />
-                    </div>
-                    <div>
-                      <h3 className="font-medium">Review the business plan</h3>
-                      <p className="text-xs text-muted-foreground">
-                        Accept this plan to activate Operator, departments,
-                        starter tasks, and Mission Control.
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="space-y-2">
-                    {planSections.map((section) => (
-                      <div key={section.title} className="theft-surface-plain p-3">
-                        <div className="flex items-center gap-2">
-                          <section.icon className="h-4 w-4 text-muted-foreground" />
-                          <p className="theft-label">
-                            {section.title}
-                          </p>
-                        </div>
-                        {"body" in section ? (
-                          <p className="mt-3 text-sm leading-6 text-muted-foreground">
-                            {section.body}
-                          </p>
-                        ) : (
-                          <ul className="mt-3 space-y-1.5 text-sm leading-6 text-muted-foreground">
-                            {section.bullets.map((bullet) => (
-                              <li key={bullet} className="flex gap-2">
-                                <span className="mt-2 size-1 rounded-full bg-foreground/40" />
-                                <span>{bullet}</span>
-                              </li>
-                            ))}
-                          </ul>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-
-                  <Input
-                    className="w-full rounded-md border border-border bg-transparent px-3 py-2 text-sm outline-none focus:ring-1 focus:ring-ring placeholder:text-muted-foreground/50"
-                    placeholder="I want to change the plan..."
-                    value={stageInterviewAnswer}
-                    onChange={(e) => setStageInterviewAnswer(e.target.value)}
-                  />
-
-                  <div className="theft-inset-surface grid grid-cols-2 gap-2 p-3 text-xs">
-                    <div className="min-w-0">
-                      <p className="text-muted-foreground">Operator</p>
-                      <p className="mt-1 truncate font-medium">{agentName}</p>
-                    </div>
-                    <div className="min-w-0">
-                      <p className="text-muted-foreground">Runtime</p>
-                      <p className="mt-1 truncate font-medium">{getUIAdapter(adapterType).label}</p>
-                    </div>
-                  </div>
-                </div>
+                <PlanReviewForm
+                  planSections={planSections}
+                  stageInterviewAnswer={stageInterviewAnswer}
+                  setStageInterviewAnswer={setStageInterviewAnswer}
+                  agentName={agentName}
+                  adapterLabel={getUIAdapter(adapterType).label}
+                />
               )}
 
               {/* Error */}
@@ -1726,73 +965,26 @@ export function OnboardingWizard() {
                   </div>
                 }
                 formFooter={
-                  <div className="theft-onboarding-panel-inner mx-auto flex w-full shrink-0 items-center justify-between bg-background">
-                <div>
-                  {step > 1 && step > (onboardingOptions.initialStep ?? 1) && (
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => setStep((step - 1) as Step)}
-                      disabled={loading}
-                    >
-                      <ArrowLeft className="h-3.5 w-3.5 mr-1" />
-                      Back
-                    </Button>
-                  )}
-                </div>
-                <div className="flex items-center gap-2">
-                  {step === 1 && (
-                    <Button
-                      size="sm"
-                      disabled={!companyName.trim() || loading}
-                      onClick={handleStep1Next}
-                    >
-                      {loading ? (
-                        <Loader2 className="h-3.5 w-3.5 mr-1 animate-spin" />
-                      ) : (
-                        <ArrowRight className="h-3.5 w-3.5 mr-1" />
-                      )}
-                      {loading ? "Creating..." : "Next"}
-                    </Button>
-                  )}
-                  {step === 2 && (
-                    <Button
-                      size="sm"
-                      disabled={
-                        !agentName.trim() || loading || adapterEnvLoading
-                      }
-                      onClick={handleStep2Next}
-                    >
-                      {loading ? (
-                        <Loader2 className="h-3.5 w-3.5 mr-1 animate-spin" />
-                      ) : (
-                        <ArrowRight className="h-3.5 w-3.5 mr-1" />
-                      )}
-                      {loading ? "Creating..." : "Next"}
-                    </Button>
-                  )}
-                  {step === 3 && (
-                    <Button
-                      size="sm"
-                      disabled={!taskTitle.trim() || loading}
-                      onClick={handleStep3Next}
-                    >
-                      {loading ? (
-                        <Loader2 className="h-3.5 w-3.5 mr-1 animate-spin" />
-                      ) : (
-                        <ArrowRight className="h-3.5 w-3.5 mr-1" />
-                      )}
-                      {loading ? "Creating..." : "Next"}
-                    </Button>
-                  )}
-                  {step === 4 && (
-                    <Button size="sm" disabled={loading} onClick={handlePlanReviewNext}>
-                      <ArrowRight className="h-3.5 w-3.5 mr-1" />
-                      Preview assembly
-                    </Button>
-                  )}
-                </div>
-                  </div>
+                  <OnboardingFormFooter
+                    step={step}
+                    minStep={(onboardingOptions.initialStep ?? 1) as Step}
+                    loading={loading}
+                    adapterEnvLoading={adapterEnvLoading}
+                    canContinue={
+                      step === 1
+                        ? Boolean(companyName.trim())
+                        : step === 2
+                          ? Boolean(agentName.trim())
+                          : step === 3
+                            ? Boolean(taskTitle.trim())
+                            : true
+                    }
+                    onBack={() => setStep((step - 1) as Step)}
+                    onStep1Next={handleStep1Next}
+                    onStep2Next={handleStep2Next}
+                    onStep3Next={handleStep3Next}
+                    onPlanReviewNext={handlePlanReviewNext}
+                  />
                 }
               />
             )}
@@ -1800,469 +992,5 @@ export function OnboardingWizard() {
         </div>
       </DialogPortal>
     </Dialog>
-  );
-}
-
-const DEPARTMENT_ASSEMBLY_META: Record<
-  string,
-  { icon: ReactNode; focus: string; outputs: string[]; capabilities: string[] }
-> = {
-  engineering: {
-    icon: <Code2 className="size-4" />,
-    focus: "Build robust, scalable products.",
-    outputs: ["Architecture doc", "Tech stack decision", "Repo template"],
-    capabilities: ["Software engineering", "System architecture", "Quality and testing"],
-  },
-  design: {
-    icon: <Palette className="size-4" />,
-    focus: "Create intuitive, memorable experiences.",
-    outputs: ["Design system", "UI kit", "Brand guide"],
-    capabilities: ["Product design", "Research synthesis", "Interaction design"],
-  },
-  marketing: {
-    icon: <Megaphone className="size-4" />,
-    focus: "Build awareness and demand.",
-    outputs: ["Messaging guide", "Content calendar", "Campaign brief"],
-    capabilities: ["Positioning", "Content engine", "Market research"],
-  },
-  sales: {
-    icon: <BarChart3 className="size-4" />,
-    focus: "Convert interest into revenue.",
-    outputs: ["Sales playbook", "Pitch deck", "Objection guide"],
-    capabilities: ["ICP definition", "Pipeline motion", "Revenue process"],
-  },
-  operations: {
-    icon: <Settings2 className="size-4" />,
-    focus: "Build systems that scale.",
-    outputs: ["SOP library", "Tooling map", "Ops handbook"],
-    capabilities: ["Process design", "Tooling stack", "Execution cadence"],
-  },
-  finance: {
-    icon: <DollarSign className="size-4" />,
-    focus: "Manage financial health and growth.",
-    outputs: ["Budget model", "P&L template", "KPI dashboard spec"],
-    capabilities: ["Unit economics", "Budgeting", "Reporting cadence"],
-  },
-  legal: {
-    icon: <Scale className="size-4" />,
-    focus: "Protect the company and reduce risk.",
-    outputs: ["Term sheet", "NDA template", "IP assignment"],
-    capabilities: ["Risk review", "Contract checklist", "Compliance triage"],
-  },
-  support: {
-    icon: <Headphones className="size-4" />,
-    focus: "Deliver value and retain customers.",
-    outputs: ["FAQ template", "Ticket workflows", "CS playbook"],
-    capabilities: ["Support process", "Knowledge base", "Customer feedback"],
-  },
-};
-
-function AssemblyPreviewScreen({
-  companyName,
-  companyStage,
-  objective,
-  taskTitle,
-  agentName,
-  adapterLabel,
-  loading,
-  onBack,
-  onLaunch,
-}: {
-  companyName: string;
-  companyStage: OnboardingStage;
-  objective: string;
-  taskTitle: string;
-  agentName: string;
-  adapterLabel: string;
-  loading: boolean;
-  onBack: () => void;
-  onLaunch: () => void;
-}) {
-  const selectedDepartment = DEPARTMENT_SEED_SPECS[0];
-  const selectedMeta = DEPARTMENT_ASSEMBLY_META[selectedDepartment.key];
-
-  return (
-    <div className="theft-assembly-grid grid min-h-0 flex-1 overflow-y-auto">
-      <aside className="hidden border-r border-border bg-card px-6 py-6 xl:block">
-        <p className="theft-label">
-          THEFT will assemble
-        </p>
-        <div className="mt-5 space-y-5 text-sm">
-          <AssemblyStatGroup
-            title="Structure"
-            rows={["1 objective", "3 strategic tracks", `${DEPARTMENT_SEED_SPECS.length} departments`]}
-          />
-          <AssemblyStatGroup
-            title="Work"
-            rows={[`${DEPARTMENT_SEED_SPECS.length + 1} starter tasks`, "40+ subtasks"]}
-          />
-          <AssemblyStatGroup
-            title="Library outputs"
-            rows={["32+ artifacts", "120+ templates"]}
-          />
-          <AssemblyStatGroup
-            title="Governance"
-            rows={["Decision rights", "Approval flows", "Risk controls"]}
-          />
-        </div>
-        <div className="theft-surface-plain mt-10 p-4 text-xs leading-5 text-muted-foreground">
-          <Check className="mb-2 size-4 text-foreground" />
-          All aligned to your answers and plan.
-        </div>
-      </aside>
-
-      <main className="min-w-0 px-5 py-6 md:px-8">
-        <div className="mb-7 flex flex-wrap items-start justify-between gap-4">
-          <div>
-            <p className="theft-label">
-              Company assembly
-            </p>
-            <h2 className="mt-2 text-2xl font-medium">Company Assembly Preview</h2>
-            <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
-              Review the operating structure, starter work, and outputs THEFT will create.
-            </p>
-          </div>
-          <div className="flex items-center gap-2 text-xs text-muted-foreground">
-            <span className="size-1.5 rounded-full bg-signal" />
-            Local runtime ready
-          </div>
-        </div>
-
-        <div className="mx-auto max-w-5xl">
-          <div className="theft-surface mx-auto max-w-xl p-6 text-center">
-            <p className="theft-label">
-              Mission objective
-            </p>
-            <p className="mt-2 text-lg leading-7">{objective}</p>
-          </div>
-
-          <div className="mt-6 grid gap-4 md:grid-cols-3">
-            {[
-              ["Product Excellence", "Ship valuable, usable, delightful products."],
-              ["Growth & Distribution", "Acquire, activate, and retain customers."],
-              ["Operational Leverage", "Systematize and scale profitably."],
-            ].map(([title, body]) => (
-              <div key={title} className="theft-surface-plain p-4">
-                <p className="text-sm font-medium">{title}</p>
-                <p className="mt-1 text-xs leading-5 text-muted-foreground">{body}</p>
-              </div>
-            ))}
-          </div>
-
-          <div className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-            {DEPARTMENT_SEED_SPECS.map((department) => {
-              const meta = DEPARTMENT_ASSEMBLY_META[department.key];
-              const selected = department.key === selectedDepartment.key;
-              return (
-                <div
-                  key={department.key}
-                  className={cn(
-                    "theft-surface-plain p-4",
-                    selected && "theft-selected-surface"
-                  )}
-                >
-                  <div className="flex items-center gap-2">
-                    <span className="flex size-8 items-center justify-center rounded-md bg-secondary text-muted-foreground">
-                      {meta.icon}
-                    </span>
-                    <div className="min-w-0">
-                      <p className="truncate text-sm font-medium">{department.title}</p>
-                      <p className="text-xs text-muted-foreground">{meta.focus}</p>
-                    </div>
-                  </div>
-                  <div className="mt-4">
-                    <p className="theft-label">
-                      Starter tasks
-                    </p>
-                    <ul className="mt-2 space-y-1 text-xs leading-5 text-muted-foreground">
-                      <li>{department.taskTitleByStage[companyStage]}</li>
-                      <li>{department.taskDescriptionByStage[companyStage]}</li>
-                    </ul>
-                  </div>
-                  <div className="mt-4">
-                    <p className="theft-label">
-                      Library outputs
-                    </p>
-                    <ul className="mt-2 space-y-1 text-xs leading-5 text-muted-foreground">
-                      {meta.outputs.slice(0, 3).map((output) => (
-                        <li key={output}>{output}</li>
-                      ))}
-                    </ul>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-
-          <div className="theft-surface-plain mt-6 p-4">
-            <p className="theft-label">
-              Tech tree initial path
-            </p>
-            <div className="mt-4 grid gap-2 md:grid-cols-5">
-              {["Company foundation", "Core systems & tooling", "First product MVP", "Market launch & feedback", "Scale systems & team"].map((node, index) => (
-                <div key={node} className="theft-inset-surface p-4 text-center">
-                  <p className="text-sm font-medium">{node}</p>
-                  <p className="theft-label-compact mt-2">
-                    {index === 0 ? "active" : index === 1 ? "next" : "available"}
-                  </p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </main>
-
-      <aside className="border-t border-border bg-card p-5 xl:border-l xl:border-t-0">
-        <p className="theft-label">
-          Inspector
-        </p>
-        <div className="mt-5 space-y-4">
-          <div className="theft-surface-plain p-4">
-            <p className="text-xs text-muted-foreground">Selected</p>
-            <div className="mt-2 flex items-center gap-2">
-              <span className="flex size-9 items-center justify-center rounded-md bg-secondary text-muted-foreground">
-                {selectedMeta.icon}
-              </span>
-              <p className="font-medium">{selectedDepartment.title}</p>
-            </div>
-          </div>
-          <InspectorBlock title="Mission" rows={[selectedMeta.focus]} />
-          <InspectorBlock
-            title="Starter task first"
-            rows={[taskTitle || selectedDepartment.taskTitleByStage[companyStage]]}
-          />
-          <InspectorBlock title="Default capabilities" rows={selectedMeta.capabilities} />
-          <InspectorBlock title="Expected outputs" rows={selectedMeta.outputs} />
-          <InspectorBlock title="Runtime" rows={[agentName || "Operator", adapterLabel]} />
-        </div>
-
-        <div className="mt-5 grid gap-2">
-          <Button className="h-12" disabled={loading} onClick={onLaunch}>
-            {loading ? (
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-            ) : (
-              <Rocket className="mr-2 h-4 w-4" />
-            )}
-            {loading ? "Launching..." : "Launch company"}
-          </Button>
-          <Button variant="outline" className="h-10" disabled={loading} onClick={onBack}>
-            Edit plan
-          </Button>
-        </div>
-      </aside>
-    </div>
-  );
-}
-
-function AssemblyStatGroup({ title, rows }: { title: string; rows: string[] }) {
-  return (
-    <div className="border-b border-border pb-4 last:border-b-0">
-      <p className="theft-label">{title}</p>
-      <div className="mt-2 space-y-1 text-muted-foreground">
-        {rows.map((row) => (
-          <p key={row}>{row}</p>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-function InspectorBlock({ title, rows }: { title: string; rows: string[] }) {
-  return (
-    <div className="theft-surface-plain p-4">
-      <p className="theft-label">{title}</p>
-      <ul className="mt-2 space-y-1.5 text-sm leading-5 text-muted-foreground">
-        {rows.map((row) => (
-          <li key={row}>{row}</li>
-        ))}
-      </ul>
-    </div>
-  );
-}
-
-function OnboardingCanvasPreview({
-  companyName,
-  companyStage,
-  step,
-  agentName,
-}: {
-  companyName: string;
-  companyStage: OnboardingStage;
-  step: Step;
-  agentName: string;
-}) {
-  const displayName = companyName.trim() || "New company";
-  const reviewMode = step === 4;
-  const mapNodes = reviewMode
-    ? [
-        { className: "theft-map-node-top", icon: <Code2 className="size-4" />, label: "Engineering" },
-        { className: "theft-map-node-left-upper", icon: <Palette className="size-4" />, label: "Design" },
-        { className: "theft-map-node-right-upper", icon: <Megaphone className="size-4" />, label: "Marketing" },
-        { className: "theft-map-node-right-middle", icon: <BarChart3 className="size-4" />, label: "Sales" },
-        { className: "theft-map-node-right-lower", icon: <DollarSign className="size-4" />, label: "Finance" },
-        { className: "theft-map-node-bottom", icon: <Scale className="size-4" />, label: "Legal" },
-        { className: "theft-map-node-left-lower", icon: <Headphones className="size-4" />, label: "Support" },
-        { className: "theft-map-node-left-middle", icon: <Settings2 className="size-4" />, label: "Operations" },
-      ]
-    : [
-        { className: "theft-map-node-top", icon: <Flag className="size-4" />, label: "Brand" },
-        { className: "theft-map-node-default-left", icon: <Package className="size-4" />, label: "Product" },
-        { className: "theft-map-node-default-right", icon: <BarChart3 className="size-4" />, label: "Revenue" },
-        { className: "theft-map-node-default-left-lower", icon: <Settings2 className="size-4" />, label: "Operations" },
-        { className: "theft-map-node-default-right-lower", icon: <Database className="size-4" />, label: "Library" },
-      ];
-
-  return (
-    <section className="hidden min-h-0 overflow-hidden bg-background lg:block">
-      <div className="theft-onboarding-canvas-frame relative h-full">
-        <div className="theft-grid-bg absolute inset-0" />
-
-        <div className="relative z-10 flex items-center justify-between">
-          <div className="theft-surface-plain px-4 py-2">
-            <div className="theft-label flex items-center gap-2">
-              <span className="size-1.5 rounded-full bg-signal" />
-              {reviewMode ? "Workspace assembling" : "Canvas initializing"}
-            </div>
-            <p className="mt-1 text-xs text-muted-foreground">
-              {reviewMode ? "Department graph preparing..." : "Company map forming..."}
-            </p>
-          </div>
-          <div className="theft-surface-plain flex overflow-hidden">
-            {[Monitor, CircleDot, Plus].map((Icon, index) => (
-              <Button
-                key={index}
-                type="button"
-                variant="ghost"
-                size="icon-sm"
-                className="flex size-9 items-center justify-center border-l border-border first:border-l-0 text-muted-foreground hover:bg-secondary hover:text-foreground"
-              >
-                <Icon className="size-4" />
-              </Button>
-            ))}
-          </div>
-        </div>
-
-        <div className="theft-onboarding-map absolute top-1/2 -translate-y-1/2">
-          <div className="theft-map-ring-outer absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full border border-border/80" />
-          <div className="theft-map-ring-middle absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full border border-dashed border-border" />
-          <div className="theft-map-ring-inner absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full border border-dashed border-border/80" />
-
-          <div className="theft-surface theft-map-center-card absolute left-1/2 top-1/2 z-10 -translate-x-1/2 -translate-y-1/2 p-4 text-center outline outline-1 outline-foreground/70">
-            <div className="mx-auto flex size-10 items-center justify-center rounded-md bg-secondary">
-              <Building2 className="size-5" />
-            </div>
-            <h3 className="mt-3 truncate text-base font-medium">{displayName}</h3>
-            <p className="theft-label-compact mt-1">
-              {ONBOARDING_STAGE_LABELS[companyStage]}
-            </p>
-          </div>
-
-          {mapNodes.map((node) => (
-            <MapNode key={node.label} {...node} active={reviewMode} />
-          ))}
-        </div>
-
-        <div className="theft-surface-plain absolute bottom-4 left-4 z-10 w-56 px-4 py-2">
-          <RuntimeLine label="Local runtime ready" />
-          <RuntimeLine label="Embedded Postgres" />
-          <RuntimeLine label="No cloud required" />
-        </div>
-
-        <div className="theft-surface-plain absolute bottom-4 right-4 z-10 px-4 py-2 text-xs text-muted-foreground">
-          <span className="font-medium text-foreground">{agentName || "Operator"}</span>
-          <span className="mx-2 text-border">/</span>
-          {reviewMode ? "Plan review ready" : `Step ${step} active`}
-        </div>
-      </div>
-    </section>
-  );
-}
-
-function MapNode({
-  className,
-  icon,
-  label,
-  active = false,
-}: {
-  className: string;
-  icon: ReactNode;
-  label: string;
-  active?: boolean;
-}) {
-  return (
-    <div
-      className={cn(
-        "theft-surface-plain theft-map-node absolute z-10 flex flex-col items-center justify-center text-center",
-        active && "outline outline-1 outline-foreground/30",
-        className
-      )}
-    >
-      <div className="mb-1.5 text-muted-foreground">{icon}</div>
-      <div className="text-xs font-medium">{label}</div>
-      {active ? <span className="mt-2 size-1.5 rounded-full bg-signal" /> : null}
-    </div>
-  );
-}
-
-function RuntimeLine({ label }: { label: string }) {
-  return (
-    <div className="flex items-center gap-2 py-1 text-xs text-muted-foreground">
-      <span className="size-1.5 rounded-full bg-signal" />
-      {label}
-    </div>
-  );
-}
-
-function AdapterEnvironmentResult({
-  result
-}: {
-  result: AdapterEnvironmentTestResult;
-}) {
-  const statusLabel =
-    result.status === "pass"
-      ? "Passed"
-      : result.status === "warn"
-      ? "Warnings"
-      : "Failed";
-  const statusClass =
-    result.status === "pass"
-      ? "text-foreground border-border bg-muted"
-      : result.status === "warn"
-      ? "text-foreground border-border bg-muted"
-      : "text-foreground border-foreground bg-muted";
-
-  return (
-    <div className={`rounded-md border px-2.5 py-2 text-micro ${statusClass}`}>
-      <div className="flex items-center justify-between gap-2">
-        <span className="font-medium">{statusLabel}</span>
-        <span className="opacity-80">
-          {new Date(result.testedAt).toLocaleTimeString()}
-        </span>
-      </div>
-      <div className="mt-1.5 space-y-1">
-        {result.checks.map((check, idx) => (
-          <div
-            key={`${check.code}-${idx}`}
-            className="leading-relaxed break-words"
-          >
-            <span className="font-medium uppercase tracking-wide opacity-80">
-              {check.level}
-            </span>
-            <span className="mx-1 opacity-60">·</span>
-            <span>{check.message}</span>
-            {check.detail && (
-              <span className="block opacity-75 break-all">
-                ({check.detail})
-              </span>
-            )}
-            {check.hint && (
-              <span className="block opacity-90 break-words">
-                Hint: {check.hint}
-              </span>
-            )}
-          </div>
-        ))}
-      </div>
-    </div>
   );
 }
