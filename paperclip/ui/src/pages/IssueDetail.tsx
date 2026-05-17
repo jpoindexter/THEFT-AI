@@ -18,11 +18,6 @@ import { keepPreviousDataForSameQueryTail } from "../lib/query-placeholder-data"
 import { shouldTrackIssueActiveRun } from "../lib/issueActiveRun";
 import { getIssueDetailQueryOptions } from "../lib/issueDetailCache";
 import {
-  hasBlockingShortcutDialog,
-  resolveIssueDetailGoKeyAction,
-  resolveInboxQuickArchiveKeyAction,
-} from "../lib/keyboardShortcuts";
-import {
   applyOptimisticIssueFieldUpdate,
   applyOptimisticIssueFieldUpdateToCollection,
   applyOptimisticIssueCommentUpdate,
@@ -70,6 +65,7 @@ import {
 import { useIssueDetailAttachments } from "../components/issue-detail/useIssueDetailAttachments";
 import { useIssueDetailChildIssues } from "../components/issue-detail/useIssueDetailChildIssues";
 import { useIssueDetailFeedback } from "../components/issue-detail/useIssueDetailFeedback";
+import { useIssueDetailKeyboardShortcuts } from "../components/issue-detail/useIssueDetailKeyboardShortcuts";
 import { useIssueDetailLookups } from "../components/issue-detail/useIssueDetailLookups";
 import { useIssueDetailRouteEffects, useIssueDetailRouteState } from "../components/issue-detail/useIssueDetailRouteState";
 import { useIssueDetailTreeControl } from "../components/issue-detail/useIssueDetailTreeControl";
@@ -1063,6 +1059,27 @@ export function IssueDetail() {
       });
     },
   });
+  const archivePending = archiveFromInbox.isPending;
+  const issueHidden = !!issue?.hiddenAt;
+  const archiveIssueFromInbox = useCallback((id: string) => {
+    if (!archiveFromInbox.isPending) archiveFromInbox.mutate(id);
+  }, [archiveFromInbox.isPending, archiveFromInbox.mutate]);
+  const navigateToInbox = useCallback(() => {
+    navigate(sourceBreadcrumb.href.startsWith("/inbox") ? sourceBreadcrumb.href : "/inbox");
+  }, [navigate, sourceBreadcrumb.href]);
+  const focusCommentComposerFromShortcut = useCallback(() => {
+    setDetailTab("chat");
+    setPendingCommentComposerFocusKey((current) => current + 1);
+  }, []);
+  useIssueDetailKeyboardShortcuts({
+    archiveIssueFromInbox,
+    archivePending,
+    focusCommentComposer: focusCommentComposerFromShortcut,
+    issueHidden,
+    issueId: issue?.id,
+    keyboardShortcutsEnabled,
+    navigateToInbox,
+  });
 
   useEffect(() => {
     if (!issue?.id) return;
@@ -1094,125 +1111,6 @@ export function IssueDetail() {
     panelChildIssues,
     panelIssue,
   ]);
-
-  const goToInboxShortcutArmedRef = useRef(false);
-  const goToInboxShortcutTimeoutRef = useRef<number | null>(null);
-  const canQuickArchiveFromInbox =
-    keyboardShortcutsEnabled &&
-    !issue?.hiddenAt;
-
-  useEffect(() => {
-    if (!issue?.id || !canQuickArchiveFromInbox) return;
-    const handleKeyDown = (event: KeyboardEvent) => {
-      const action = resolveInboxQuickArchiveKeyAction({
-        armed: canQuickArchiveFromInbox,
-        defaultPrevented: event.defaultPrevented,
-        key: event.key,
-        metaKey: event.metaKey,
-        ctrlKey: event.ctrlKey,
-        altKey: event.altKey,
-        target: event.target,
-        hasOpenDialog: hasBlockingShortcutDialog(document),
-      });
-
-      if (action !== "archive") return;
-
-      event.preventDefault();
-      if (!archiveFromInbox.isPending) {
-        archiveFromInbox.mutate(issue.id);
-      }
-    };
-
-    document.addEventListener("keydown", handleKeyDown, true);
-    return () => {
-      document.removeEventListener("keydown", handleKeyDown, true);
-    };
-  }, [archiveFromInbox, canQuickArchiveFromInbox, issue?.id]);
-
-  useEffect(() => {
-    if (!keyboardShortcutsEnabled) {
-      goToInboxShortcutArmedRef.current = false;
-      if (goToInboxShortcutTimeoutRef.current !== null) {
-        window.clearTimeout(goToInboxShortcutTimeoutRef.current);
-        goToInboxShortcutTimeoutRef.current = null;
-      }
-      return;
-    }
-
-    const clearArmTimeout = () => {
-      if (goToInboxShortcutTimeoutRef.current !== null) {
-        window.clearTimeout(goToInboxShortcutTimeoutRef.current);
-        goToInboxShortcutTimeoutRef.current = null;
-      }
-    };
-
-    const disarm = () => {
-      goToInboxShortcutArmedRef.current = false;
-      clearArmTimeout();
-    };
-
-    const arm = () => {
-      goToInboxShortcutArmedRef.current = true;
-      clearArmTimeout();
-      goToInboxShortcutTimeoutRef.current = window.setTimeout(() => {
-        goToInboxShortcutArmedRef.current = false;
-        goToInboxShortcutTimeoutRef.current = null;
-      }, 1200);
-    };
-
-    const handlePointerDown = () => {
-      disarm();
-    };
-
-    const handleFocusIn = (event: FocusEvent) => {
-      if (event.target instanceof HTMLElement && event.target !== document.body) {
-        disarm();
-      }
-    };
-
-    const handleKeyDown = (event: KeyboardEvent) => {
-      const action = resolveIssueDetailGoKeyAction({
-        armed: goToInboxShortcutArmedRef.current,
-        defaultPrevented: event.defaultPrevented,
-        key: event.key,
-        metaKey: event.metaKey,
-        ctrlKey: event.ctrlKey,
-        altKey: event.altKey,
-        target: event.target,
-        hasOpenDialog: hasBlockingShortcutDialog(document),
-      });
-
-      if (action === "ignore") return;
-      if (action === "arm") {
-        arm();
-        return;
-      }
-
-      disarm();
-      if (action === "navigate_inbox") {
-        event.preventDefault();
-        event.stopPropagation();
-        navigate(sourceBreadcrumb.href.startsWith("/inbox") ? sourceBreadcrumb.href : "/inbox");
-        return;
-      }
-      if (action === "focus_comment") {
-        event.preventDefault();
-        event.stopPropagation();
-        setDetailTab("chat");
-        setPendingCommentComposerFocusKey((current) => current + 1);
-      }
-    };
-
-    document.addEventListener("pointerdown", handlePointerDown, true);
-    document.addEventListener("focusin", handleFocusIn, true);
-    document.addEventListener("keydown", handleKeyDown, true);
-    return () => {
-      disarm();
-      document.removeEventListener("pointerdown", handlePointerDown, true);
-      document.removeEventListener("focusin", handleFocusIn, true);
-      document.removeEventListener("keydown", handleKeyDown, true);
-    };
-  }, [keyboardShortcutsEnabled, navigate, sourceBreadcrumb.href]);
 
   useEffect(() => {
     const hash = location.hash;
@@ -1278,8 +1176,6 @@ export function IssueDetail() {
 
   const backHref = sourceBreadcrumb.href ?? "/inbox";
   const showInboxToolbar = isMobile && isFromInbox;
-  const archivePending = archiveFromInbox.isPending;
-  const issueHidden = !!issue?.hiddenAt;
   const canArchiveFromInbox = isFromInbox && !!issue?.id && !issueHidden;
 
   useEffect(() => {
