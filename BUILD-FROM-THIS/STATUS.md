@@ -34,6 +34,7 @@ Current local modularization checkpoint:
 - Extracted onboarding adapter-selection, draft state, created-entity tracking, route-dialog state, runtime adapter handling, launch mutations, and shell rendering.
 - Extracted issue-detail shared utilities and loading state.
 - Extracted issue-detail review header, title section, header action buttons, and more-actions menu into guarded `issue-detail/` modules.
+- Extracted issue-detail activity cost summary so `IssueDetailActivityTab.tsx` now fits the 300-line guardrail.
 - Moved the issue-chat composer safe-area dock value into a semantic CSS utility.
 
 Latest verification for the active modularization slices:
