@@ -56,14 +56,11 @@ import { clearIssueExecutionRun, removeLiveRunById, upsertInterruptedRun } from 
 import { useProjectOrder } from "../hooks/useProjectOrder";
 import { cn } from "../lib/utils";
 import type { IssueChatComposerHandle } from "../components/IssueChatThread";
-import { IssueDocumentsSection } from "../components/IssueDocumentsSection";
 import { IssueRelatedWorkPanel } from "../components/IssueRelatedWorkPanel";
 import { IssueProperties } from "../components/IssueProperties";
-import { IssueWorkspaceCard } from "../components/IssueWorkspaceCard";
 import type { MentionOption } from "../components/MarkdownEditor";
-import { ImageGalleryModal } from "../components/ImageGalleryModal";
 import { ScrollToBottom } from "../components/ScrollToBottom";
-import { IssueAttachmentsSection } from "../components/issue-detail/IssueAttachmentsSection";
+import { IssueDetailArtifactsSection } from "../components/issue-detail/IssueDetailArtifactsSection";
 import { IssueDetailActivityTab } from "../components/issue-detail/IssueDetailActivityTab";
 import { IssueDetailChatTab } from "../components/issue-detail/IssueDetailChatTab";
 import type {
@@ -2177,18 +2174,19 @@ export function IssueDetail() {
         onUpdateIssue={handleChildIssueUpdate}
       />
 
-      <IssueDocumentsSection
+      <IssueDetailArtifactsSection
         issue={issue}
         canDeleteDocuments={Boolean(session?.user?.id)}
         feedbackVotes={feedbackVotes}
         feedbackDataSharingPreference={feedbackDataSharingPreference}
         feedbackTermsUrl={FEEDBACK_TERMS_URL}
         mentions={mentionOptions}
-        imageUploadHandler={async (file) => {
+        documentExtraActions={!hasAttachments ? attachmentUploadButton : null}
+        onUploadDocumentImage={async (file) => {
           const attachment = await uploadAttachment.mutateAsync(file);
           return attachment.contentPath;
         }}
-        onVote={async (revisionId, vote, options) => {
+        onVoteDocument={async (revisionId, vote, options) => {
           await feedbackVoteMutation.mutateAsync({
             targetType: "issue_document_revision",
             targetId: revisionId,
@@ -2198,16 +2196,12 @@ export function IssueDetail() {
             sharingPreferenceAtSubmit: feedbackDataSharingPreference,
           });
         }}
-        extraActions={!hasAttachments ? attachmentUploadButton : null}
-      />
-
-      <IssueAttachmentsSection
-        initialLoading={attachmentsInitialLoading}
+        attachmentsInitialLoading={attachmentsInitialLoading}
         imageAttachments={imageAttachments}
         nonImageAttachments={nonImageAttachments}
         uploadAction={attachmentUploadButton}
-        error={attachmentError}
-        deletePending={deleteAttachment.isPending}
+        attachmentError={attachmentError}
+        deleteAttachmentPending={deleteAttachment.isPending}
         onOpenImage={(attachment) => {
           const idx = imageAttachments.findIndex((candidate) => candidate.id === attachment.id);
           setGalleryIndex(idx >= 0 ? idx : 0);
@@ -2216,19 +2210,11 @@ export function IssueDetail() {
         onDeleteAttachment={(attachmentId) => deleteAttachment.mutate(attachmentId)}
         onDragActiveChange={setAttachmentDragActive}
         onDropFiles={(files) => void handleAttachmentFiles(files)}
-      />
-
-      <ImageGalleryModal
-        images={imageAttachments}
-        initialIndex={galleryIndex}
-        open={galleryOpen}
-        onOpenChange={setGalleryOpen}
-      />
-
-      <IssueWorkspaceCard
-        issue={issue}
+        galleryIndex={galleryIndex}
+        galleryOpen={galleryOpen}
+        onGalleryOpenChange={setGalleryOpen}
         project={resolvedProject}
-        onUpdate={(data) => updateIssue.mutate(data)}
+        onUpdateWorkspace={(data) => updateIssue.mutate(data)}
       />
 
       <Separator />
