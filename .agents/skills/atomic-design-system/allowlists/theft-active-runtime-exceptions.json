@@ -30,9 +30,9 @@
       "reason": "Virtualized row translate/size is computed at runtime."
     },
     {
-      "file": "paperclip/ui/src/components/IssueChatThread.tsx",
+      "file": "paperclip/ui/src/components/issue-chat/IssueChatThreadViewport.tsx",
       "check": "inline-style",
-      "line": 541,
+      "line": 122,
       "sample": "style={",
       "reason": "Composer spacer mirrors measured composer height."
     },

@@ -29,6 +29,7 @@ Current local modularization checkpoint:
 - Extracted issue chat latest-scroll and hash/composer-spacer control into route-local hooks.
 - Extracted issue chat shared message context, text/assistant message content, user/assistant/system role renderers, handoff callout, expired confirmation activity, and assignee pause notice into `issue-chat/`.
 - Extracted issue chat message/transcript preparation into `useIssueChatMessages`.
+- Extracted issue chat row routing, public prop contract, context assembly, derived thread state, and viewport rendering into `issue-chat/`.
 - Extracted issue document cards, revision menus, draft form, helper utilities, data/cache hooks, fold/hash state, autosave, draft events, copy action, revision preview, and server mutations into `issue-documents/`.
 - Extracted onboarding adapter-selection, draft state, created-entity tracking, route-dialog state, runtime adapter handling, launch mutations, and shell rendering.
 - Extracted issue-detail shared utilities and loading state.
@@ -48,7 +49,7 @@ Latest verification for the active modularization slices:
 Remaining high-value maintainability work:
 
 - `IssueDetail.tsx` is down to 2,748 lines, but it is still the largest active page.
-- `IssueChatThread.tsx` is down to 579 lines.
+- `IssueChatThread.tsx` is down to 275 lines and now fits the 300-line guardrail.
 - `OnboardingWizard.tsx` is down to 297 lines and now fits the 300-line guardrail.
 - `IssueDocumentsSection.tsx` is down to 207 lines and now fits the 300-line guardrail.
 - `index.css` is large because it is the current token/source-of-truth file; do not split it casually before token ownership is fully stable.
@@ -56,7 +57,7 @@ Remaining high-value maintainability work:
 Next best path:
 
 1. Continue extracting presentation organisms and action panels from `IssueDetail.tsx` while preserving runtime behavior.
-2. Split remaining `IssueChatThread.tsx` message-row/render orchestration.
+2. Keep smaller issue-chat modules under the guardrail as follow-up changes land.
 3. Keep smaller onboarding modules under the guardrail as follow-up changes land.
 4. Only after those pass gates, revisit broad visual polish. The current priority is architecture/template cleanup, not another visual rewrite.
 
