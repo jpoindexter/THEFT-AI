@@ -32,7 +32,7 @@
     {
       "file": "paperclip/ui/src/components/IssueChatThread.tsx",
       "check": "inline-style",
-      "line": 1406,
+      "line": 960,
       "sample": "style={",
       "reason": "Composer spacer mirrors measured composer height."
     },

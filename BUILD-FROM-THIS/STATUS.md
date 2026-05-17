@@ -27,7 +27,7 @@ Recent pushed checkpoints:
 Current local modularization checkpoint:
 
 - Extracted issue chat latest-scroll and hash/composer-spacer control into route-local hooks.
-- Extracted issue chat shared message context, text/assistant message content, handoff callout, and assignee pause notice into `issue-chat/`.
+- Extracted issue chat shared message context, text/assistant message content, user/assistant role renderers, handoff callout, and assignee pause notice into `issue-chat/`.
 - Extracted issue document cards, revision menus, draft form, helper utilities, data/cache hooks, fold/hash state, autosave, draft events, copy action, revision preview, and server mutations into `issue-documents/`.
 - Extracted onboarding adapter-selection, draft state, created-entity tracking, route-dialog state, runtime adapter handling, launch mutations, and shell rendering.
 - Extracted issue-detail shared utilities and loading state.
@@ -47,7 +47,7 @@ Latest verification for the active modularization slices:
 Remaining high-value maintainability work:
 
 - `IssueDetail.tsx` is down to 2,748 lines, but it is still the largest active page.
-- `IssueChatThread.tsx` is down to 1,444 lines.
+- `IssueChatThread.tsx` is down to 998 lines.
 - `OnboardingWizard.tsx` is down to 297 lines and now fits the 300-line guardrail.
 - `IssueDocumentsSection.tsx` is down to 207 lines and now fits the 300-line guardrail.
 - `index.css` is large because it is the current token/source-of-truth file; do not split it casually before token ownership is fully stable.
