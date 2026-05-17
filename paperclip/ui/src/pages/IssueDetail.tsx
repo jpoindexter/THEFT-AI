@@ -2,7 +2,6 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useParams } from "@/lib/router";
 import { useQuery, useMutation, useQueryClient, type InfiniteData } from "@tanstack/react-query";
 import { issuesApi } from "../api/issues";
-import type { RunForIssue } from "../api/activity";
 import { heartbeatsApi, type ActiveRunForIssue, type LiveRunForIssue } from "../api/heartbeats";
 import { useCompany } from "../context/CompanyContext";
 import { useDialogActions } from "../context/DialogContext";
@@ -21,11 +20,9 @@ import {
   loadRemainingIssueCommentPages,
   matchesIssueRef,
   mergeIssueComments,
-  takeOptimisticIssueComment,
   upsertIssueCommentInPages,
   type OptimisticIssueComment,
 } from "../lib/optimistic-issue-comments";
-import { clearIssueExecutionRun, removeLiveRunById, upsertInterruptedRun } from "../lib/optimistic-issue-runs";
 import type { IssueChatComposerHandle } from "../components/IssueChatThread";
 import { IssueProperties } from "../components/IssueProperties";
 import { ScrollToBottom } from "../components/ScrollToBottom";
@@ -45,11 +42,7 @@ import {
   truncate,
 } from "../components/issue-detail/IssueDetailUtils";
 import { IssueTreeControlDialog } from "../components/issue-detail/IssueTreeControlDialog";
-import {
-  dedupeLiveRunsById,
-  readIssueRunStateFromCache,
-  resolveRunningIssueRun,
-} from "../components/issue-detail/issueRunState";
+import { readIssueRunStateFromCache } from "../components/issue-detail/issueRunState";
 import {
   ISSUE_COMMENT_PAGE_SIZE,
   JUMP_TO_LATEST_MAX_COMMENT_PAGES,
@@ -64,6 +57,7 @@ import { useIssueDetailInboxToolbar } from "../components/issue-detail/useIssueD
 import { useIssueDetailInteractions } from "../components/issue-detail/useIssueDetailInteractions";
 import { useIssueDetailKeyboardShortcuts } from "../components/issue-detail/useIssueDetailKeyboardShortcuts";
 import { useIssueDetailLookups } from "../components/issue-detail/useIssueDetailLookups";
+import { useIssueDetailQueuedCommentActions } from "../components/issue-detail/useIssueDetailQueuedCommentActions";
 import { useIssueDetailRouteEffects, useIssueDetailRouteState } from "../components/issue-detail/useIssueDetailRouteState";
 import { useIssueDetailTreeControl } from "../components/issue-detail/useIssueDetailTreeControl";
 import { Separator } from "@/components/ui/separator";
@@ -694,147 +688,24 @@ export function IssueDetail() {
     },
   });
 
-  const interruptQueuedComment = useMutation({
-    mutationFn: (runId: string) => heartbeatsApi.cancel(runId),
-    onMutate: async (runId) => {
-      await Promise.all(issueCacheRefs.flatMap((ref) => [
-        queryClient.cancelQueries({ queryKey: queryKeys.issues.runs(ref) }),
-        queryClient.cancelQueries({ queryKey: queryKeys.issues.liveRuns(ref) }),
-        queryClient.cancelQueries({ queryKey: queryKeys.issues.activeRun(ref) }),
-        queryClient.cancelQueries({ queryKey: queryKeys.issues.detail(ref) }),
-      ]));
-
-      const previousRunState = issueCacheRefs.map((ref) => ({
-        ref,
-        runs: queryClient.getQueryData<RunForIssue[]>(queryKeys.issues.runs(ref)),
-        liveRuns: queryClient.getQueryData<LiveRunForIssue[]>(queryKeys.issues.liveRuns(ref)),
-        activeRun: queryClient.getQueryData<ActiveRunForIssue | null>(queryKeys.issues.activeRun(ref)),
-        issue: queryClient.getQueryData<Issue>(queryKeys.issues.detail(ref)),
-      }));
-      const previousLocalQueuedCommentRunIds = locallyQueuedCommentRunIds;
-      const cachedActiveRun =
-        previousRunState.find((state) => state.activeRun?.id === runId)?.activeRun ??
-        previousRunState.find((state) => state.activeRun)?.activeRun ??
-        null;
-      const liveRunList = dedupeLiveRunsById(previousRunState.flatMap((state) => state.liveRuns ?? []));
-      const runningIssueRun = resolveRunningIssueRun(cachedActiveRun, liveRunList);
-      const targetRun =
-        cachedActiveRun?.id === runId
-          ? cachedActiveRun
-          : liveRunList?.find((run) => run.id === runId) ?? runningIssueRun ?? null;
-
-      if (targetRun) {
-        const interruptedAt = new Date().toISOString();
-        for (const ref of issueCacheRefs) {
-          queryClient.setQueryData<RunForIssue[] | undefined>(
-            queryKeys.issues.runs(ref),
-            (current) => upsertInterruptedRun(current, targetRun, interruptedAt),
-          );
-        }
-      }
-
-      for (const ref of issueCacheRefs) {
-        queryClient.setQueryData(
-          queryKeys.issues.liveRuns(ref),
-          (current: LiveRunForIssue[] | undefined) => removeLiveRunById(current, runId),
-        );
-        queryClient.setQueryData(
-          queryKeys.issues.activeRun(ref),
-          (current: ActiveRunForIssue | null | undefined) => (current?.id === runId ? null : current),
-        );
-        queryClient.setQueryData(
-          queryKeys.issues.detail(ref),
-          (current: Issue | undefined) => clearIssueExecutionRun(current, runId),
-        );
-      }
-      setLocallyQueuedCommentRunIds((current) => {
-        const next = new Map([...current].filter(([, targetRunId]) => targetRunId !== runId));
-        return next.size === current.size ? current : next;
-      });
-
-      return {
-        previousRunState,
-        previousLocalQueuedCommentRunIds,
-      };
-    },
-    onSuccess: () => {
-      invalidateIssueDetail();
-      invalidateIssueRunState();
-      pushToast({
-        title: "Interrupt requested",
-        body: "The active run is stopping so queued comments can continue next.",
-        tone: "success",
-      });
-    },
-    onError: (err, _runId, context) => {
-      for (const state of context?.previousRunState ?? []) {
-        queryClient.setQueryData(queryKeys.issues.runs(state.ref), state.runs);
-        queryClient.setQueryData(queryKeys.issues.liveRuns(state.ref), state.liveRuns);
-        queryClient.setQueryData(queryKeys.issues.activeRun(state.ref), state.activeRun);
-        queryClient.setQueryData(queryKeys.issues.detail(state.ref), state.issue);
-      }
-      if (context?.previousLocalQueuedCommentRunIds) {
-        setLocallyQueuedCommentRunIds(context.previousLocalQueuedCommentRunIds);
-      }
-      pushToast({
-        title: "Interrupt failed",
-        body: err instanceof Error ? err.message : "Unable to interrupt the active run",
-        tone: "error",
-      });
-    },
+  const {
+    handleCancelQueuedComment,
+    handleInterruptQueuedRun,
+    interruptingQueuedRunId,
+  } = useIssueDetailQueuedCommentActions({
+    cancelledQueuedOptimisticCommentIdsRef,
+    invalidateIssueCollections,
+    invalidateIssueDetail,
+    invalidateIssueRunState,
+    invalidateIssueThreadLazily,
+    issueCacheRefs,
+    issueId,
+    locallyQueuedCommentRunIds,
+    removeCommentFromCache,
+    restoreQueuedCommentDraft,
+    setLocallyQueuedCommentRunIds,
+    setOptimisticComments,
   });
-
-  const cancelQueuedComment = useMutation({
-    mutationFn: async ({ commentId }: { commentId: string }) => issuesApi.cancelComment(issueId!, commentId),
-    onSuccess: (comment) => {
-      setLocallyQueuedCommentRunIds((current) => {
-        if (!current.has(comment.id)) return current;
-        const next = new Map(current);
-        next.delete(comment.id);
-        return next;
-      });
-      removeCommentFromCache(comment.id);
-      restoreQueuedCommentDraft(comment.body);
-      invalidateIssueDetail();
-      invalidateIssueThreadLazily();
-      invalidateIssueCollections();
-      pushToast({
-        title: "Queued comment canceled",
-        body: "The queued message was restored to the composer.",
-        tone: "success",
-      });
-    },
-    onError: (err) => {
-      pushToast({
-        title: "Cancel failed",
-        body: err instanceof Error ? err.message : "Unable to cancel the queued comment",
-        tone: "error",
-      });
-    },
-  });
-
-  const handleCancelQueuedComment = useCallback((commentId: string) => {
-    if (commentId.startsWith("optimistic-")) {
-      cancelledQueuedOptimisticCommentIdsRef.current.add(commentId);
-      let cancelledCommentBody: string | null = null;
-      setOptimisticComments((current) => {
-        const next = takeOptimisticIssueComment(current, commentId);
-        cancelledCommentBody = next.comment?.body ?? null;
-        return next.comments;
-      });
-      if (cancelledCommentBody) {
-        restoreQueuedCommentDraft(cancelledCommentBody);
-        pushToast({
-          title: "Queued comment canceled",
-          body: "The queued message was restored to the composer.",
-          tone: "success",
-        });
-      }
-      return;
-    }
-
-    void cancelQueuedComment.mutateAsync({ commentId });
-  }, [cancelQueuedComment, restoreQueuedCommentDraft, pushToast]);
 
   const archiveFromInbox = useMutation({
     mutationFn: (id: string) => issuesApi.archiveFromInbox(id),
@@ -983,9 +854,6 @@ export function IssueDetail() {
     }
     await addComment.mutateAsync({ body, reopen });
   }, [addComment, addCommentAndReassign]);
-  const handleInterruptQueuedRun = useCallback(async (runId: string) => {
-    await interruptQueuedComment.mutateAsync(runId);
-  }, [interruptQueuedComment]);
 
   if (isLoading) return <IssueDetailLoadingState headerSeed={issueHeaderSeed} />;
   if (error) return <p className="text-sm text-destructive">{error.message}</p>;
@@ -1175,7 +1043,7 @@ export function IssueDetail() {
             return updateIssue.mutateAsync({ workMode: nextMode }).then(() => undefined);
           },
           onCancelQueued: handleCancelQueuedComment,
-          interruptingQueuedRunId: interruptQueuedComment.isPending ? interruptQueuedComment.variables ?? null : null,
+          interruptingQueuedRunId,
           pausingWorkRunId: pauseIssueWorkRun.isPending ? pauseIssueWorkRun.variables ?? null : null,
           onImageClick: handleChatImageClick,
           onAcceptInteraction: handleAcceptInteraction,
