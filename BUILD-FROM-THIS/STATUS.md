@@ -67,6 +67,7 @@ Current local modularization checkpoint:
 - Trimmed issue-document editor hook imports so `useIssueDocumentEditor.ts` now fits the 300-line guardrail.
 - Extracted issue-filter creator search/selection into a guarded module so `IssueFiltersPopover.tsx` now fits the 300-line guardrail, and moved the reviewed label-color inline-style exception to its new line.
 - Extracted recursive issue-list row rendering into a guarded module so `IssuesListRows.tsx` now fits the 300-line guardrail.
+- Extracted activity-format label maps so `activity-format.ts` now fits the 300-line guardrail.
 - Moved the issue-chat composer safe-area dock value into a semantic CSS utility.
 
 Latest verification for the active modularization slices:
@@ -77,6 +78,7 @@ Latest verification for the active modularization slices:
 - Focused InlineEditor Vitest passed: 10 tests.
 - Focused IssueFiltersPopover and IssuesList Vitest passed: 29 tests across 2 files.
 - Focused IssuesList Vitest passed: 28 tests.
+- Focused activity-format Vitest passed: 6 tests.
 - Focused Vitest for issue chat, issue documents, and issue detail passed: 78 tests across 4 files.
 - Focused IssueChatThread Vitest passed: 61 tests across 2 files.
 - Focused onboarding utility Vitest passed: 21 tests across 5 files.
@@ -101,6 +103,7 @@ Remaining high-value maintainability work:
 - `useIssueDocumentEditor.ts` is down to 295 lines and now fits the 300-line guardrail.
 - `IssueFiltersPopover.tsx` is down to 265 lines and now fits the 300-line guardrail.
 - `IssuesListRows.tsx` is down to 125 lines and now fits the 300-line guardrail.
+- `activity-format.ts` is down to 251 lines and now fits the 300-line guardrail.
 - `IssueDocumentsSection.tsx` is down to 207 lines and now fits the 300-line guardrail.
 - `index.css` is large because it is the current token/source-of-truth file; do not split it casually before token ownership is fully stable.
 
