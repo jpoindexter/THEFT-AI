@@ -27,7 +27,7 @@ Recent pushed checkpoints:
 Current local modularization checkpoint:
 
 - Extracted issue chat latest-scroll and hash/composer-spacer control into route-local hooks.
-- Extracted issue document cards, revision menus, draft form, and helper utilities into `issue-documents/`.
+- Extracted issue document cards, revision menus, draft form, helper utilities, data/cache hooks, fold/hash state, autosave, draft events, copy action, revision preview, and server mutations into `issue-documents/`.
 - Extracted onboarding adapter-selection and plan-section derivation hooks.
 - Extracted issue-detail shared utilities and loading state.
 - Moved the issue-chat composer safe-area dock value into a semantic CSS utility.
@@ -45,7 +45,7 @@ Remaining high-value maintainability work:
 - `IssueDetail.tsx` is down to 2,748 lines, but it is still the largest active page.
 - `IssueChatThread.tsx` is down to 1,675 lines.
 - `OnboardingWizard.tsx` is down to 894 lines.
-- `IssueDocumentsSection.tsx` is down to 712 lines.
+- `IssueDocumentsSection.tsx` is down to 207 lines and now fits the 300-line guardrail.
 - `index.css` is large because it is the current token/source-of-truth file; do not split it casually before token ownership is fully stable.
 
 Next best path:
@@ -53,8 +53,7 @@ Next best path:
 1. Continue extracting presentation organisms and action panels from `IssueDetail.tsx` while preserving runtime behavior.
 2. Split remaining `IssueChatThread.tsx` message-row/render orchestration.
 3. Split `OnboardingWizard.tsx` launch/mutation orchestration and remaining step render modules.
-4. Split `IssueDocumentsSection.tsx` query/mutation/draft orchestration.
-5. Only after those pass gates, revisit broad visual polish. The current priority is architecture/template cleanup, not another visual rewrite.
+4. Only after those pass gates, revisit broad visual polish. The current priority is architecture/template cleanup, not another visual rewrite.
 
 THEFT should become one local app: Paperclip runtime/control plane as the tracked host, with THEFT design, staged onboarding, 8-department company setup, roadmap/canvas, Library, and local skills on top.
 
