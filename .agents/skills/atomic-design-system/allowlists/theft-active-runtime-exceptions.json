@@ -16,37 +16,37 @@
       "reason": "Measured max-height and mask state depend on runtime content height."
     },
     {
-      "file": "paperclip/ui/src/components/IssueChatThread.tsx",
+      "file": "paperclip/ui/src/components/issue-chat/VirtualizedThreadList.tsx",
       "check": "inline-style",
-      "line": 1773,
+      "line": 247,
       "sample": "style={",
       "reason": "Virtualizer total-height spacer is computed at runtime."
     },
     {
-      "file": "paperclip/ui/src/components/IssueChatThread.tsx",
+      "file": "paperclip/ui/src/components/issue-chat/VirtualizedThreadList.tsx",
       "check": "inline-style",
-      "line": 1802,
+      "line": 276,
       "sample": "style={",
       "reason": "Virtualized row translate/size is computed at runtime."
     },
     {
       "file": "paperclip/ui/src/components/IssueChatThread.tsx",
       "check": "inline-style",
-      "line": 3061,
+      "line": 2664,
       "sample": "style={",
       "reason": "Composer spacer mirrors measured composer height."
     },
     {
       "file": "paperclip/ui/src/components/IssueChatThread.tsx",
       "check": "arbitrary-tailwind",
-      "line": 3074,
+      "line": 2677,
       "sample": "bottom-[calc(env(safe-area-inset-bottom)+20px)]",
       "reason": "Mobile composer dock preserves safe-area offset until shared dock utility is introduced."
     },
     {
       "file": "paperclip/ui/src/components/IssueChatThread.tsx",
       "check": "raw-px",
-      "line": 3074,
+      "line": 2677,
       "sample": "20px",
       "reason": "Part of the reviewed mobile safe-area composer dock offset."
     },
