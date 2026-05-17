@@ -1338,8 +1338,8 @@ describe("IssueDetail", () => {
     await flushReact();
     await flushReact();
 
-    const wakeCheckbox = container.querySelector('input[type="checkbox"]') as HTMLInputElement | null;
-    expect(wakeCheckbox?.checked).toBe(true);
+    const wakeCheckbox = container.querySelector('[role="checkbox"]') as HTMLElement | null;
+    expect(wakeCheckbox?.getAttribute("aria-checked")).toBe("true");
 
     const applyResumeButton = Array.from(container.querySelectorAll("button"))
       .filter((button) => button.textContent?.trim() === "Resume work")
@@ -1496,7 +1496,7 @@ describe("IssueDetail", () => {
 
     const dialogContent = container.querySelector('[data-slot="dialog-content"]') as HTMLDivElement | null;
     expect(dialogContent).toBeTruthy();
-    expect(dialogContent!.className).toContain("max-h-[calc(100dvh-2rem)]");
+    expect(dialogContent!.className).toContain("max-h-dvh");
     expect(dialogContent!.className).toContain("overflow-hidden");
     expect(dialogContent!.className).toContain("flex-col");
 
@@ -1514,7 +1514,7 @@ describe("IssueDetail", () => {
     expect(cancelApplyButton).toBeTruthy();
     expect(cancelApplyButton!.disabled).toBe(true);
 
-    const confirmationCheckbox = dialogContent!.querySelector('input[type="checkbox"]') as HTMLInputElement | null;
+    const confirmationCheckbox = dialogContent!.querySelector('[role="checkbox"]') as HTMLElement | null;
     expect(confirmationCheckbox).toBeTruthy();
     await act(async () => {
       confirmationCheckbox!.click();
