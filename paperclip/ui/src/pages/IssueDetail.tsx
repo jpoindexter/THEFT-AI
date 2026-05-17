@@ -62,6 +62,7 @@ import type { MentionOption } from "../components/MarkdownEditor";
 import { ScrollToBottom } from "../components/ScrollToBottom";
 import { IssueDetailArtifactsSection } from "../components/issue-detail/IssueDetailArtifactsSection";
 import { IssueDetailActivityTab } from "../components/issue-detail/IssueDetailActivityTab";
+import { IssueDetailMobilePropertiesSheet } from "../components/issue-detail/IssueDetailMobilePropertiesSheet";
 import { IssueDetailChatTab } from "../components/issue-detail/IssueDetailChatTab";
 import type {
   ActionableIssueThreadInteraction,
@@ -95,8 +96,6 @@ import { PluginSlotMount, usePluginSlots } from "@/plugins/slots";
 import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { TheftDetailReviewTemplate } from "@/components/theft/templates/TheftDetailReviewTemplate";
 import { buildIssuePropertiesPanelKey } from "../lib/issue-properties-panel-key";
@@ -2369,25 +2368,14 @@ export function IssueDetail() {
         onApply={() => executeTreeControl.mutate()}
       />
 
-      {/* Mobile properties drawer */}
-      <Sheet open={mobilePropsOpen} onOpenChange={setMobilePropsOpen}>
-        <SheetContent side="bottom" className="max-h-dvh pb-[env(safe-area-inset-bottom)]">
-          <SheetHeader>
-            <SheetTitle className="text-sm">Properties</SheetTitle>
-          </SheetHeader>
-          <ScrollArea className="flex-1 overflow-y-auto">
-            <div className="px-4 pb-4">
-              <IssueProperties
-                issue={issue}
-                childIssues={childIssues}
-                onAddSubIssue={openNewSubIssue}
-                onUpdate={(data) => updateIssue.mutate(data)}
-                inline
-              />
-            </div>
-          </ScrollArea>
-        </SheetContent>
-      </Sheet>
+      <IssueDetailMobilePropertiesSheet
+        open={mobilePropsOpen}
+        onOpenChange={setMobilePropsOpen}
+        issue={issue}
+        childIssues={childIssues}
+        onAddSubIssue={openNewSubIssue}
+        onUpdateIssue={(data) => updateIssue.mutate(data)}
+      />
       <ScrollToBottom />
       </div>
     </TheftDetailReviewTemplate>
