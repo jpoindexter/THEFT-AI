@@ -5,11 +5,6 @@ import { issuesApi } from "../api/issues";
 import { approvalsApi } from "../api/approvals";
 import type { RunForIssue } from "../api/activity";
 import { heartbeatsApi, type ActiveRunForIssue, type LiveRunForIssue } from "../api/heartbeats";
-import { instanceSettingsApi } from "../api/instanceSettings";
-import { accessApi } from "../api/access";
-import { agentsApi } from "../api/agents";
-import { authApi } from "../api/auth";
-import { projectsApi } from "../api/projects";
 import { useCompany } from "../context/CompanyContext";
 import { useDialogActions } from "../context/DialogContext";
 import { usePanel } from "../context/PanelContext";
@@ -17,7 +12,7 @@ import { useSidebar } from "../context/SidebarContext";
 import { useToastActions } from "../context/ToastContext";
 import { useBreadcrumbs } from "../context/BreadcrumbContext";
 import { assigneeValueFromSelection, suggestedCommentAssigneeValue } from "../lib/assignees";
-import { buildCompanyUserInlineOptions, buildCompanyUserLabelMap, buildCompanyUserProfileMap, buildMarkdownMentionOptions } from "../lib/company-members";
+import { buildCompanyUserInlineOptions } from "../lib/company-members";
 import { queryKeys } from "../lib/queryKeys";
 import { keepPreviousDataForSameQueryTail } from "../lib/query-placeholder-data";
 import { collectLiveIssueIds } from "../lib/liveIssueIds";
@@ -50,11 +45,9 @@ import {
   type OptimisticIssueComment,
 } from "../lib/optimistic-issue-comments";
 import { clearIssueExecutionRun, removeLiveRunById, upsertInterruptedRun } from "../lib/optimistic-issue-runs";
-import { useProjectOrder } from "../hooks/useProjectOrder";
 import { cn } from "../lib/utils";
 import type { IssueChatComposerHandle } from "../components/IssueChatThread";
 import { IssueProperties } from "../components/IssueProperties";
-import type { MentionOption } from "../components/MarkdownEditor";
 import { ScrollToBottom } from "../components/ScrollToBottom";
 import { IssueDetailArtifactsSection } from "../components/issue-detail/IssueDetailArtifactsSection";
 import { IssueDetailMobilePropertiesSheet } from "../components/issue-detail/IssueDetailMobilePropertiesSheet";
@@ -92,7 +85,7 @@ import {
   JUMP_TO_LATEST_MAX_COMMENT_PAGES,
   useIssueDetailComments,
 } from "../components/issue-detail/useIssueDetailComments";
-import { usePluginSlots } from "@/plugins/slots";
+import { useIssueDetailLookups } from "../components/issue-detail/useIssueDetailLookups";
 import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -115,7 +108,6 @@ import {
   type AskUserQuestionsAnswer,
   type AskUserQuestionsInteraction,
   type ActivityEvent,
-  type Agent,
   type FeedbackVote,
   type Issue,
   type IssueAttachment,
@@ -258,71 +250,30 @@ export function IssueDetail() {
     placeholderData: keepPreviousDataForSameQueryTail<LiveRunForIssue[]>(resolvedCompanyId ?? "pending"),
   });
 
-  const { data: agents } = useQuery({
-    queryKey: queryKeys.agents.list(selectedCompanyId!),
-    queryFn: () => agentsApi.list(selectedCompanyId!),
-    enabled: !!selectedCompanyId,
+  const {
+    agents,
+    companyMembers,
+    session,
+    projects,
+    currentUserId,
+    canManageTreeControl,
+    feedbackVotes,
+    keyboardShortcutsEnabled,
+    feedbackDataSharingPreference,
+    issuePluginTabItems,
+    activePluginTab,
+    agentMap,
+    userProfileMap,
+    userLabelMap,
+    mentionOptions,
+    resolvedProject,
+  } = useIssueDetailLookups({
+    issueId,
+    issue,
+    selectedCompanyId,
+    resolvedCompanyId,
+    detailTab,
   });
-  const { data: companyMembers } = useQuery({
-    queryKey: queryKeys.access.companyUserDirectory(selectedCompanyId!),
-    queryFn: () => accessApi.listUserDirectory(selectedCompanyId!),
-    enabled: !!selectedCompanyId,
-  });
-
-  const { data: session } = useQuery({
-    queryKey: queryKeys.auth.session,
-    queryFn: () => authApi.getSession(),
-  });
-
-  const { data: projects } = useQuery({
-    queryKey: queryKeys.projects.list(selectedCompanyId!),
-    queryFn: () => projectsApi.list(selectedCompanyId!),
-    enabled: !!selectedCompanyId,
-  });
-  const currentUserId = session?.user?.id ?? session?.session?.userId ?? null;
-  const { data: boardAccess } = useQuery({
-    queryKey: queryKeys.access.currentBoardAccess,
-    queryFn: () => accessApi.getCurrentBoardAccess(),
-    enabled: !!session?.user?.id,
-    retry: false,
-  });
-  const canManageTreeControl = Boolean(
-    selectedCompanyId
-    && boardAccess?.companyIds?.includes(selectedCompanyId),
-  );
-  const { data: feedbackVotes } = useQuery({
-    queryKey: queryKeys.issues.feedbackVotes(issueId!),
-    queryFn: () => issuesApi.listFeedbackVotes(issueId!),
-    enabled: !!issueId && !!currentUserId,
-  });
-  const { data: instanceGeneralSettings } = useQuery({
-    queryKey: queryKeys.instance.generalSettings,
-    queryFn: () => instanceSettingsApi.getGeneral(),
-    enabled: !!issueId,
-    retry: false,
-  });
-  const keyboardShortcutsEnabled = instanceGeneralSettings?.keyboardShortcuts === true;
-  const feedbackDataSharingPreference = instanceGeneralSettings?.feedbackDataSharingPreference ?? "prompt";
-  const { orderedProjects } = useProjectOrder({
-    projects: projects ?? [],
-    companyId: selectedCompanyId,
-    userId: currentUserId,
-  });
-  const { slots: issuePluginDetailSlots } = usePluginSlots({
-    slotTypes: ["detailTab"],
-    entityType: "issue",
-    companyId: resolvedCompanyId,
-    enabled: !!resolvedCompanyId,
-  });
-  const issuePluginTabItems = useMemo(
-    () => issuePluginDetailSlots.map((slot) => ({
-      value: `plugin:${slot.pluginKey}:${slot.id}`,
-      label: slot.displayName,
-      slot,
-    })),
-    [issuePluginDetailSlots],
-  );
-  const activePluginTab = issuePluginTabItems.find((item) => item.value === detailTab) ?? null;
   const {
     data: treeControlPreview,
     isFetching: treeControlPreviewLoading,
@@ -372,31 +323,6 @@ export function IssueDetail() {
     enabled: !!issueId && canManageTreeControl,
   });
 
-  const agentMap = useMemo(() => {
-    const map = new Map<string, Agent>();
-    for (const a of agents ?? []) map.set(a.id, a);
-    return map;
-  }, [agents]);
-  const userProfileMap = useMemo(
-    () => buildCompanyUserProfileMap(companyMembers?.users),
-    [companyMembers?.users],
-  );
-  const userLabelMap = useMemo(
-    () => buildCompanyUserLabelMap(companyMembers?.users),
-    [companyMembers?.users],
-  );
-  const mentionOptions = useMemo<MentionOption[]>(() => {
-    return buildMarkdownMentionOptions({
-      agents,
-      projects: orderedProjects,
-      members: companyMembers?.users,
-    });
-  }, [agents, companyMembers?.users, orderedProjects]);
-
-  const resolvedProject = useMemo(
-    () => (issue?.projectId ? orderedProjects.find((project) => project.id === issue.projectId) ?? issue.project ?? null : null),
-    [issue?.project, issue?.projectId, orderedProjects],
-  );
   const childIssues = useMemo(
     () => {
       const descendants = issue?.id ? filterIssueDescendants(issue.id, rawChildIssues) : rawChildIssues;
