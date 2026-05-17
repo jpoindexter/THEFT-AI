@@ -1889,10 +1889,11 @@ describe("IssueChatThread", () => {
     expect(composer).not.toBeNull();
     expect(composer?.className).toContain("rounded-md");
     expect(composer?.className).not.toContain("rounded-lg");
-    expect(composer?.className).toContain("p-[15px]");
+    expect(composer?.className).toContain("p-4");
 
     const editor = container.querySelector('textarea[aria-label="Issue chat editor"]') as HTMLTextAreaElement | null;
-    expect(editor?.dataset.contentClassName).toContain("max-h-[28dvh]");
+    expect(editor?.dataset.contentClassName).toContain("max-h-48");
+    expect(editor?.dataset.contentClassName).toContain("sm:max-h-64");
     expect(editor?.dataset.contentClassName).toContain("overflow-y-auto");
     expect(editor?.dataset.contentClassName).not.toContain("min-h-[72px]");
     expect(editor?.dataset.fileDropTarget).toBe("parent");
