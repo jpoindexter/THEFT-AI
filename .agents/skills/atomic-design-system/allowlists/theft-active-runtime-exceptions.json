@@ -32,21 +32,21 @@
     {
       "file": "paperclip/ui/src/components/IssueChatThread.tsx",
       "check": "inline-style",
-      "line": 2664,
+      "line": 2108,
       "sample": "style={",
       "reason": "Composer spacer mirrors measured composer height."
     },
     {
       "file": "paperclip/ui/src/components/IssueChatThread.tsx",
       "check": "arbitrary-tailwind",
-      "line": 2677,
+      "line": 2121,
       "sample": "bottom-[calc(env(safe-area-inset-bottom)+20px)]",
       "reason": "Mobile composer dock preserves safe-area offset until shared dock utility is introduced."
     },
     {
       "file": "paperclip/ui/src/components/IssueChatThread.tsx",
       "check": "raw-px",
-      "line": 2677,
+      "line": 2121,
       "sample": "20px",
       "reason": "Part of the reviewed mobile safe-area composer dock offset."
     },
