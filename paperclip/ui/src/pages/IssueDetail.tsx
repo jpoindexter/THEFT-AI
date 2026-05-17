@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState, type ChangeEvent } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link, useLocation, useNavigate, useNavigationType, useParams } from "@/lib/router";
 import { useQuery, useMutation, useQueryClient, type InfiniteData } from "@tanstack/react-query";
 import { issuesApi } from "../api/issues";
@@ -44,7 +44,6 @@ import {
   type OptimisticIssueComment,
 } from "../lib/optimistic-issue-comments";
 import { clearIssueExecutionRun, removeLiveRunById, upsertInterruptedRun } from "../lib/optimistic-issue-runs";
-import { cn } from "../lib/utils";
 import type { IssueChatComposerHandle } from "../components/IssueChatThread";
 import { IssueProperties } from "../components/IssueProperties";
 import { ScrollToBottom } from "../components/ScrollToBottom";
@@ -63,11 +62,7 @@ import { IssueDetailSubIssuesSection } from "../components/issue-detail/IssueDet
 import { IssueDetailTitleSection } from "../components/issue-detail/IssueDetailTitleSection";
 import { IssueDetailLoadingState } from "../components/issue-detail/IssueDetailLoadingState";
 import {
-  fileBaseName,
-  isMarkdownFile,
   mergeOptimisticFeedbackVote,
-  slugifyDocumentKey,
-  titleizeFilename,
   truncate,
 } from "../components/issue-detail/IssueDetailUtils";
 import { IssueTreeControlDialog } from "../components/issue-detail/IssueTreeControlDialog";
@@ -81,19 +76,17 @@ import {
   JUMP_TO_LATEST_MAX_COMMENT_PAGES,
   useIssueDetailComments,
 } from "../components/issue-detail/useIssueDetailComments";
+import { useIssueDetailAttachments } from "../components/issue-detail/useIssueDetailAttachments";
 import { useIssueDetailChildIssues } from "../components/issue-detail/useIssueDetailChildIssues";
 import { useIssueDetailLookups } from "../components/issue-detail/useIssueDetailLookups";
 import { useIssueDetailTreeControl } from "../components/issue-detail/useIssueDetailTreeControl";
 import { Separator } from "@/components/ui/separator";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { TheftDetailReviewTemplate } from "@/components/theft/templates/TheftDetailReviewTemplate";
 import {
   AlertTriangle,
   ArrowLeft,
   Library,
   MoreVertical,
-  Paperclip,
 } from "lucide-react";
 import {
   getClosedIsolatedExecutionWorkspaceMessage,
@@ -104,7 +97,6 @@ import {
   type ActivityEvent,
   type FeedbackVote,
   type Issue,
-  type IssueAttachment,
   type IssueComment,
   type IssueWorkMode,
   type IssueThreadInteraction,
@@ -132,14 +124,9 @@ export function IssueDetail() {
     approvalId: string;
     action: "approve" | "reject";
   } | null>(null);
-  const [attachmentError, setAttachmentError] = useState<string | null>(null);
-  const [attachmentDragActive, setAttachmentDragActive] = useState(false);
-  const [galleryOpen, setGalleryOpen] = useState(false);
-  const [galleryIndex, setGalleryIndex] = useState(0);
   const [optimisticComments, setOptimisticComments] = useState<OptimisticIssueComment[]>([]);
   const [locallyQueuedCommentRunIds, setLocallyQueuedCommentRunIds] = useState<Map<string, string>>(() => new Map());
   const [pendingCommentComposerFocusKey, setPendingCommentComposerFocusKey] = useState(0);
-  const fileInputRef = useRef<HTMLInputElement | null>(null);
   const lastMarkedReadIssueIdRef = useRef<string | null>(null);
   const commentComposerRef = useRef<IssueChatComposerHandle | null>(null);
   const cancelledQueuedOptimisticCommentIdsRef = useRef(new Set<string>());
@@ -183,13 +170,6 @@ export function IssueDetail() {
     queryFn: () => issuesApi.listInteractions(issueId!),
     enabled: !!issueId,
     placeholderData: keepPreviousDataForSameQueryTail<IssueThreadInteraction[]>(issueId ?? "pending"),
-  });
-
-  const { data: attachments, isLoading: attachmentsLoading } = useQuery({
-    queryKey: queryKeys.issues.attachments(issueId!),
-    queryFn: () => issuesApi.listAttachments(issueId!),
-    enabled: !!issueId,
-    placeholderData: keepPreviousDataForSameQueryTail<IssueAttachment[]>(issueId ?? "pending"),
   });
 
   const { data: liveRunCount = 0 } = useQuery<LiveRunForIssue[], Error, number>({
@@ -357,6 +337,32 @@ export function IssueDetail() {
       queryClient.invalidateQueries({ queryKey: queryKeys.issues.activeRun(ref) });
     }
   }, [issueCacheRefs, queryClient]);
+  const {
+    attachmentError,
+    attachmentUploadButton,
+    attachmentsInitialLoading,
+    deleteAttachmentPending,
+    galleryIndex,
+    galleryOpen,
+    handleAttachmentFiles,
+    handleChatImageClick,
+    handleCommentAttachImage,
+    handleCommentImageUpload,
+    handleDeleteAttachment,
+    handleDropDescriptionFile,
+    handleOpenAttachmentImage,
+    handleUploadImageForMarkdown,
+    hasAttachments,
+    imageAttachments,
+    nonImageAttachments,
+    setAttachmentDragActive,
+    setGalleryOpen,
+  } = useIssueDetailAttachments({
+    issueId,
+    issue,
+    selectedCompanyId,
+    invalidateIssueDetail,
+  });
 
   const removeCommentFromCache = useCallback((commentId: string) => {
     queryClient.setQueryData<InfiniteData<IssueComment[], string | null> | undefined>(
@@ -1103,58 +1109,6 @@ export function IssueDetail() {
     },
   });
 
-  const uploadAttachment = useMutation({
-    mutationFn: async (file: File) => {
-      if (!selectedCompanyId) throw new Error("No company selected");
-      return issuesApi.uploadAttachment(selectedCompanyId, issueId!, file);
-    },
-    onSuccess: () => {
-      setAttachmentError(null);
-      queryClient.invalidateQueries({ queryKey: queryKeys.issues.attachments(issueId!) });
-      invalidateIssueDetail();
-    },
-    onError: (err) => {
-      setAttachmentError(err instanceof Error ? err.message : "Upload failed");
-    },
-  });
-
-  const importMarkdownDocument = useMutation({
-    mutationFn: async (file: File) => {
-      const baseName = fileBaseName(file.name);
-      const key = slugifyDocumentKey(baseName);
-      const existing = (issue?.documentSummaries ?? []).find((doc) => doc.key === key) ?? null;
-      const body = await file.text();
-      const inferredTitle = titleizeFilename(baseName);
-      const nextTitle = existing?.title ?? inferredTitle ?? null;
-      return issuesApi.upsertDocument(issueId!, key, {
-        title: key === "plan" ? null : nextTitle,
-        format: "markdown",
-        body,
-        baseRevisionId: existing?.latestRevisionId ?? null,
-      });
-    },
-    onSuccess: () => {
-      setAttachmentError(null);
-      invalidateIssueDetail();
-      queryClient.invalidateQueries({ queryKey: queryKeys.issues.documents(issueId!) });
-    },
-    onError: (err) => {
-      setAttachmentError(err instanceof Error ? err.message : "Document import failed");
-    },
-  });
-
-  const deleteAttachment = useMutation({
-    mutationFn: (attachmentId: string) => issuesApi.deleteAttachment(attachmentId),
-    onSuccess: () => {
-      setAttachmentError(null);
-      queryClient.invalidateQueries({ queryKey: queryKeys.issues.attachments(issueId!) });
-      invalidateIssueDetail();
-    },
-    onError: (err) => {
-      setAttachmentError(err instanceof Error ? err.message : "Delete failed");
-    },
-  });
-
   const archiveFromInbox = useMutation({
     mutationFn: (id: string) => issuesApi.archiveFromInbox(id),
     onSuccess: () => {
@@ -1381,33 +1335,6 @@ export function IssueDetail() {
     commentComposerRef.current?.focus();
   }, [detailTab, pendingCommentComposerFocusKey]);
 
-  const isImageAttachment = (attachment: IssueAttachment) => attachment.contentType.startsWith("image/");
-  const attachmentList = attachments ?? [];
-  const imageAttachments = attachmentList.filter(isImageAttachment);
-  const nonImageAttachments = attachmentList.filter((a) => !isImageAttachment(a));
-
-  const handleChatImageClick = useCallback(
-    (src: string) => {
-      // Try exact contentPath match first
-      let idx = imageAttachments.findIndex((a) => a.contentPath === src);
-      if (idx < 0) {
-        // Try matching by asset ID extracted from /api/assets/{assetId}/content URLs
-        const assetMatch = src.match(/\/api\/assets\/([^/]+)\/content/);
-        if (assetMatch) {
-          idx = imageAttachments.findIndex((a) => a.assetId === assetMatch[1]);
-        }
-      }
-      if (idx >= 0) {
-        setGalleryIndex(idx);
-        setGalleryOpen(true);
-      } else {
-        // Image not in attachment list — open in new tab
-        window.open(src, "_blank");
-      }
-    },
-    [imageAttachments],
-  );
-
   const copyIssueToClipboard = async () => {
     if (!issue) return;
     const decodeEntities = (text: string) => {
@@ -1483,7 +1410,6 @@ export function IssueDetail() {
     return () => setMobileToolbar(null);
   }, [showInboxToolbar, backHref, issue?.id, issueHidden, archivePending, setMobileToolbar]);
 
-  const attachmentsInitialLoading = attachmentsLoading && attachments === undefined;
   const loadOlderComments = useCallback(() => {
     void fetchOlderComments();
   }, [fetchOlderComments]);
@@ -1538,13 +1464,6 @@ export function IssueDetail() {
     }
     await addComment.mutateAsync({ body, reopen });
   }, [addComment, addCommentAndReassign]);
-  const handleCommentImageUpload = useCallback(async (file: File) => {
-    const attachment = await uploadAttachment.mutateAsync(file);
-    return attachment.contentPath;
-  }, [uploadAttachment]);
-  const handleCommentAttachImage = useCallback(async (file: File) => {
-    return uploadAttachment.mutateAsync(file);
-  }, [uploadAttachment]);
   const handleInterruptQueuedRun = useCallback(async (runId: string) => {
     await interruptQueuedComment.mutateAsync(runId);
   }, [interruptQueuedComment]);
@@ -1573,62 +1492,6 @@ export function IssueDetail() {
 
   // Ancestors are returned oldest-first from the server (root at end, immediate parent at start)
   const ancestors = issue.ancestors ?? [];
-  const handleFilePicked = async (evt: ChangeEvent<HTMLInputElement>) => {
-    const files = evt.target.files;
-    if (!files || files.length === 0) return;
-    for (const file of Array.from(files)) {
-      if (isMarkdownFile(file)) {
-        await importMarkdownDocument.mutateAsync(file);
-      } else {
-        await uploadAttachment.mutateAsync(file);
-      }
-    }
-    if (fileInputRef.current) {
-      fileInputRef.current.value = "";
-    }
-  };
-
-  const handleAttachmentFiles = async (files: File[]) => {
-    if (files.length === 0) return;
-    for (const file of files) {
-      if (isMarkdownFile(file)) {
-        await importMarkdownDocument.mutateAsync(file);
-      } else {
-        await uploadAttachment.mutateAsync(file);
-      }
-    }
-  };
-
-  const hasAttachments = attachmentList.length > 0;
-  const attachmentUploadButton = (
-    <>
-      <Input
-        ref={fileInputRef}
-        type="file"
-        className="hidden"
-        onChange={handleFilePicked}
-        multiple
-      />
-      <Button
-        variant="outline"
-        size="sm"
-        onClick={() => fileInputRef.current?.click()}
-        disabled={uploadAttachment.isPending || importMarkdownDocument.isPending}
-        className={cn(
-          "shadow-none",
-          attachmentDragActive && "border-primary bg-primary/5",
-        )}
-      >
-        <Paperclip className="h-3.5 w-3.5 mr-1.5" />
-        {uploadAttachment.isPending || importMarkdownDocument.isPending ? "Uploading..." : (
-          <>
-            <span className="hidden sm:inline">Upload attachment</span>
-            <span className="sm:hidden">Upload</span>
-          </>
-        )}
-      </Button>
-    </>
-  );
   const taskReviewOutputTitles = [
     ...(issue.documentSummaries ?? []).map((document) => document.title ?? document.key),
     ...(issue.planDocument ? [issue.planDocument.title ?? "Plan document"] : []),
@@ -1702,13 +1565,8 @@ export function IssueDetail() {
           }}
           onSaveTitle={(title) => updateIssue.mutateAsync({ title })}
           onSaveDescription={(description) => updateIssue.mutateAsync({ description })}
-          onUploadDescriptionImage={async (file) => {
-            const attachment = await uploadAttachment.mutateAsync(file);
-            return attachment.contentPath;
-          }}
-          onDropDescriptionFile={async (file) => {
-            await uploadAttachment.mutateAsync(file);
-          }}
+          onUploadDescriptionImage={handleUploadImageForMarkdown}
+          onDropDescriptionFile={handleDropDescriptionFile}
         />
 
       <IssueDetailPluginOutlets
@@ -1741,10 +1599,7 @@ export function IssueDetail() {
         feedbackTermsUrl={FEEDBACK_TERMS_URL}
         mentions={mentionOptions}
         documentExtraActions={!hasAttachments ? attachmentUploadButton : null}
-        onUploadDocumentImage={async (file) => {
-          const attachment = await uploadAttachment.mutateAsync(file);
-          return attachment.contentPath;
-        }}
+        onUploadDocumentImage={handleUploadImageForMarkdown}
         onVoteDocument={async (revisionId, vote, options) => {
           await feedbackVoteMutation.mutateAsync({
             targetType: "issue_document_revision",
@@ -1760,13 +1615,9 @@ export function IssueDetail() {
         nonImageAttachments={nonImageAttachments}
         uploadAction={attachmentUploadButton}
         attachmentError={attachmentError}
-        deleteAttachmentPending={deleteAttachment.isPending}
-        onOpenImage={(attachment) => {
-          const idx = imageAttachments.findIndex((candidate) => candidate.id === attachment.id);
-          setGalleryIndex(idx >= 0 ? idx : 0);
-          setGalleryOpen(true);
-        }}
-        onDeleteAttachment={(attachmentId) => deleteAttachment.mutate(attachmentId)}
+        deleteAttachmentPending={deleteAttachmentPending}
+        onOpenImage={handleOpenAttachmentImage}
+        onDeleteAttachment={handleDeleteAttachment}
         onDragActiveChange={setAttachmentDragActive}
         onDropFiles={(files) => void handleAttachmentFiles(files)}
         galleryIndex={galleryIndex}
