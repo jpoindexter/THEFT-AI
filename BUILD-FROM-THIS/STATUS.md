@@ -33,11 +33,13 @@ Current local modularization checkpoint:
 - Extracted issue document cards, revision menus, draft form, helper utilities, data/cache hooks, fold/hash state, autosave, draft events, copy action, revision preview, and server mutations into `issue-documents/`.
 - Extracted onboarding adapter-selection, draft state, created-entity tracking, route-dialog state, runtime adapter handling, launch mutations, and shell rendering.
 - Extracted issue-detail shared utilities and loading state.
+- Extracted issue-detail review header, title section, header action buttons, and more-actions menu into guarded `issue-detail/` modules.
 - Moved the issue-chat composer safe-area dock value into a semantic CSS utility.
 
 Latest verification for the active modularization slices:
 
 - `pnpm -C paperclip --filter @paperclipai/ui typecheck` passed.
+- Focused IssueDetail Vitest passed: 11 tests.
 - Focused Vitest for issue chat, issue documents, and issue detail passed: 78 tests across 4 files.
 - Focused IssueChatThread Vitest passed: 61 tests across 2 files.
 - Focused onboarding utility Vitest passed: 21 tests across 5 files.
@@ -48,7 +50,7 @@ Latest verification for the active modularization slices:
 
 Remaining high-value maintainability work:
 
-- `IssueDetail.tsx` is down to 2,748 lines, but it is still the largest active page.
+- `IssueDetail.tsx` is down to 2,464 lines, but it is still the largest active page.
 - `IssueChatThread.tsx` is down to 275 lines and now fits the 300-line guardrail.
 - `OnboardingWizard.tsx` is down to 297 lines and now fits the 300-line guardrail.
 - `IssueDocumentsSection.tsx` is down to 207 lines and now fits the 300-line guardrail.

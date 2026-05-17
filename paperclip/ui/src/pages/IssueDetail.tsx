@@ -55,7 +55,6 @@ import {
 import { clearIssueExecutionRun, removeLiveRunById, upsertInterruptedRun } from "../lib/optimistic-issue-runs";
 import { useProjectOrder } from "../hooks/useProjectOrder";
 import { cn } from "../lib/utils";
-import { InlineEditor } from "../components/InlineEditor";
 import type { IssueChatComposerHandle } from "../components/IssueChatThread";
 import { IssueDocumentsSection } from "../components/IssueDocumentsSection";
 import { IssuesList } from "../components/IssuesList";
@@ -65,8 +64,6 @@ import { IssueWorkspaceCard } from "../components/IssueWorkspaceCard";
 import type { MentionOption } from "../components/MarkdownEditor";
 import { ImageGalleryModal } from "../components/ImageGalleryModal";
 import { ScrollToBottom } from "../components/ScrollToBottom";
-import { StatusIcon } from "../components/StatusIcon";
-import { PriorityIcon } from "../components/PriorityIcon";
 import { IssueAttachmentsSection } from "../components/issue-detail/IssueAttachmentsSection";
 import { IssueDetailActivityTab } from "../components/issue-detail/IssueDetailActivityTab";
 import { IssueDetailChatTab } from "../components/issue-detail/IssueDetailChatTab";
@@ -76,6 +73,8 @@ import type {
   IssueDetailComment,
 } from "../components/issue-detail/IssueDetailChatTypes";
 import { InboxMobileToolbar } from "../components/issue-detail/InboxMobileToolbar";
+import { IssueDetailReviewHeader } from "../components/issue-detail/IssueDetailReviewHeader";
+import { IssueDetailTitleSection } from "../components/issue-detail/IssueDetailTitleSection";
 import { IssueDetailLoadingState } from "../components/issue-detail/IssueDetailLoadingState";
 import {
   fileBaseName,
@@ -89,24 +88,19 @@ import {
   IssueTreeControlDialog,
   issueTreeControlLabel,
 } from "../components/issue-detail/IssueTreeControlDialog";
-import { IssueTreePauseBanner } from "../components/issue-detail/IssueTreePauseBanner";
 import {
   dedupeLiveRunsById,
   readIssueRunStateFromCache,
   resolveRunningIssueRun,
 } from "../components/issue-detail/issueRunState";
-import { TaskReviewSummary } from "../components/issue-detail/TaskReviewSummary";
-import { ProductivityReviewBadge } from "../components/ProductivityReviewBadge";
 import { PluginSlotMount, PluginSlotOutlet, usePluginSlots } from "@/plugins/slots";
 import { PluginLauncherOutlet } from "@/plugins/launchers";
 import { Separator } from "@/components/ui/separator";
-import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { TheftChip } from "@/components/theft/atoms/TheftChip";
 import { TheftDetailReviewTemplate } from "@/components/theft/templates/TheftDetailReviewTemplate";
 import { buildIssuePropertiesPanelKey } from "../lib/issue-properties-panel-key";
 import { shouldRenderRichSubIssuesSection } from "../lib/issue-detail-subissues";
@@ -115,26 +109,13 @@ import { buildSubIssueDefaultsForViewer } from "../lib/subIssueDefaults";
 import {
   Activity as ActivityIcon,
   AlertTriangle,
-  Archive,
   ArrowLeft,
-  Check,
-  ChevronRight,
-  Copy,
-  Eye,
-  EyeOff,
-  Hexagon,
   Library,
   ListTree,
   MessageSquare,
-  MoreHorizontal,
   MoreVertical,
-  PauseCircle,
   Paperclip,
-  PlayCircle,
   Plus,
-  Repeat,
-  SlidersHorizontal,
-  XCircle,
 } from "lucide-react";
 import {
   getClosedIsolatedExecutionWorkspaceMessage,
@@ -2066,379 +2047,114 @@ export function IssueDetail() {
   return (
     <TheftDetailReviewTemplate className="min-h-0">
       <div className="mx-auto w-full max-w-6xl space-y-5">
-        {/* Parent chain breadcrumb */}
-      {ancestors.length > 0 && (
-        <nav className="flex items-center gap-1 text-xs text-muted-foreground flex-wrap">
-          {[...ancestors].reverse().map((ancestor, i) => (
-            <span key={ancestor.id} className="flex items-center gap-1">
-              {i > 0 && <ChevronRight className="h-3 w-3 shrink-0" />}
-              <Link
-                to={createIssueDetailPath(ancestor.identifier ?? ancestor.id)}
-                state={resolvedIssueDetailState ?? location.state}
-                onClickCapture={() =>
-                  rememberIssueDetailLocationState(
-                    ancestor.identifier ?? ancestor.id,
-                    resolvedIssueDetailState ?? location.state,
-                    location.search,
-                  )}
-                className="hover:text-foreground transition-colors truncate max-w-48"
-                title={ancestor.title}
-              >
-                {ancestor.title}
-              </Link>
-            </span>
-          ))}
-          <ChevronRight className="h-3 w-3 shrink-0" />
-          <span className="text-foreground/60 truncate max-w-48">{issue.title}</span>
-        </nav>
-      )}
-
-      {issue.hiddenAt && (
-        <div className="flex items-center gap-2 rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">
-          <EyeOff className="h-4 w-4 shrink-0" />
-          This issue is hidden
-        </div>
-      )}
-      <IssueTreePauseBanner
-        activePauseHold={activePauseHold}
-        childIssueCount={childIssues.length}
-        heldDescendantCount={heldDescendantCount}
-        activeRootPauseHoldCreatedAt={activeRootPauseHold?.createdAt}
-        activePauseHoldRootIdentifier={activePauseHoldRoot?.identifier}
-        canShowSubtreeControls={canShowSubtreeControls}
-        canResumeLeafWork={canResumeLeafWork}
-        onResume={() => {
-          setTreeControlMode("resume");
-          setTreeControlWakeAgentsOnResume(isAgentOwnedNonTerminalIssue || canShowSubtreeControls);
-          setTreeControlOpen(true);
-        }}
-        onViewAffected={() => {
-          setTreeControlMode("resume");
-          setTreeControlWakeAgentsOnResume(isAgentOwnedNonTerminalIssue || canShowSubtreeControls);
-          setTreeControlOpen(true);
-        }}
-        onCancelSubtree={() => {
-          setTreeControlMode("cancel");
-          setTreeControlCancelConfirmed(false);
-          setTreeControlOpen(true);
-        }}
-      />
-
-      <TaskReviewSummary
-        issue={issue}
-        owner={issue.assigneeAgentId ? agentMap.get(issue.assigneeAgentId) ?? null : null}
-        outputCount={taskReviewOutputCount}
-        outputTitles={taskReviewOutputTitles}
-        decisionCount={taskReviewDecisionCount}
-        commentCount={threadComments.length}
-        childTaskCount={childIssues.length}
-        hasLiveRuns={hasLiveRuns}
-        hasBlocker={issue.status === "blocked" || (issue.blockedBy?.length ?? 0) > 0}
-      />
-
-      <div className="space-y-3">
-        <div className="flex items-center gap-2 min-w-0 flex-wrap">
-          <StatusIcon
-            status={issue.status}
-            blockerAttention={issue.blockerAttention}
-            onChange={(status) => updateIssue.mutate({ status })}
-          />
-          <PriorityIcon
-            priority={issue.priority}
-            onChange={(priority) => updateIssue.mutate({ priority })}
-          />
-          <span className="text-sm font-mono text-muted-foreground shrink-0">{issue.identifier ?? issue.id.slice(0, 8)}</span>
-
-          {hasLiveRuns && (
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-cyan-500/10 border border-cyan-500/30 px-2 py-0.5 text-micro font-medium text-cyan-600 dark:text-cyan-400 shrink-0">
-              <span className="relative flex h-1.5 w-1.5">
-                <span className="animate-pulse absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75" />
-                <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-cyan-400" />
-              </span>
-              Live
-            </span>
-          )}
-
-          {issue.originKind === "routine_execution" && issue.originId && (
-            <Link
-              to={`/routines/${issue.originId}`}
-              className="inline-flex items-center gap-1 rounded-full bg-violet-500/10 border border-violet-500/30 px-2 py-0.5 text-micro font-medium text-violet-600 dark:text-violet-400 shrink-0 hover:bg-violet-500/20 transition-colors"
-            >
-              <Repeat className="h-3 w-3" />
-              Routine
-            </Link>
-          )}
-
-          {issue.productivityReview ? (
-            <ProductivityReviewBadge review={issue.productivityReview} />
-          ) : null}
-
-          {issue.originKind === "issue_productivity_review" ? (
-            <span
-              className="inline-flex items-center gap-1 rounded-full border border-amber-500/40 bg-amber-500/10 px-2 py-0.5 text-micro font-medium text-amber-700 dark:text-amber-300 shrink-0"
-              title="This task is a productivity review."
-            >
-              <Eye className="h-3 w-3" />
-              Productivity review
-            </span>
-          ) : null}
-
-          {issue.workMode === "planning" ? (
-            <span
-              className="inline-flex items-center rounded-full border border-amber-500/40 bg-amber-500/10 px-2 py-0.5 text-micro font-medium text-amber-700 dark:text-amber-300 shrink-0"
-              title="This issue is in planning mode."
-            >
-              Planning
-            </span>
-          ) : null}
-
-          {issue.projectId ? (
-            <Link
-              to={`/projects/${issue.projectId}`}
-              className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors rounded px-1 -mx-1 py-0.5 min-w-0"
-            >
-              <Hexagon className="h-3 w-3 shrink-0" />
-              <span className="truncate">{resolvedProject?.name ?? issue.project?.name ?? issue.projectId.slice(0, 8)}</span>
-            </Link>
-          ) : (
-            <span className="inline-flex items-center gap-1 text-xs text-muted-foreground opacity-50 px-1 -mx-1 py-0.5">
-              <Hexagon className="h-3 w-3 shrink-0" />
-              No project
-            </span>
-          )}
-
-          {(issue.labels ?? []).length > 0 && (
-            <div className="hidden sm:flex items-center gap-1">
-              {(issue.labels ?? []).slice(0, 4).map((label) => (
-                <TheftChip key={label.id} tone="muted" density="compact">
-                  {label.name}
-                </TheftChip>
-              ))}
-              {(issue.labels ?? []).length > 4 && (
-                <span className="text-micro text-muted-foreground">+{(issue.labels ?? []).length - 4}</span>
-              )}
-            </div>
-          )}
-
-          {!(isMobile && isFromInbox) && (
-            <div className="ml-auto flex items-center gap-0.5 md:hidden shrink-0">
-              <Button
-                variant="ghost"
-                size="icon-xs"
-                onClick={copyIssueToClipboard}
-                title="Copy issue as markdown"
-              >
-                {copied ? <Check className="h-4 w-4 text-green-500" /> : <Copy className="h-4 w-4" />}
-              </Button>
-              <Button
-                variant="ghost"
-                size="icon-xs"
-                onClick={() => setMobilePropsOpen(true)}
-                title="Properties"
-              >
-                <SlidersHorizontal className="h-4 w-4" />
-              </Button>
-            </div>
-          )}
-
-          <div className="hidden md:flex items-center md:ml-auto shrink-0">
-            {canArchiveFromInbox && (
-              <Button
-                variant="ghost"
-                size="icon-xs"
-                onClick={() => {
-                  if (!archivePending && issue?.id) archiveFromInbox.mutate(issue.id);
-                }}
-                disabled={archivePending}
-                title="Archive from inbox"
-                aria-label="Archive from inbox"
-              >
-                <Archive className="h-4 w-4" />
-              </Button>
-            )}
-            <Button
-              variant="ghost"
-              size="icon-xs"
-              onClick={copyIssueToClipboard}
-              title="Copy issue as markdown"
-            >
-              {copied ? <Check className="h-4 w-4 text-green-500" /> : <Copy className="h-4 w-4" />}
-            </Button>
-            <Button
-              variant="ghost"
-              size="icon-xs"
-              className={cn(
-                "shrink-0 transition-opacity duration-200",
-                panelVisible ? "opacity-0 pointer-events-none w-0 overflow-hidden" : "opacity-100",
-              )}
-              onClick={() => setPanelVisible(true)}
-              title="Show properties"
-            >
-              <SlidersHorizontal className="h-4 w-4" />
-            </Button>
-
-            <Popover open={moreOpen} onOpenChange={setMoreOpen}>
-              <PopoverTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="icon-xs"
-                  className="shrink-0"
-                  aria-label="More issue actions"
-                  title="More issue actions"
-                  onKeyDown={(event) => {
-                    if (event.key === "Enter" || event.key === " ") {
-                      event.preventDefault();
-                      setMoreOpen(true);
-                    }
-                  }}
-                >
-                  <MoreHorizontal className="h-4 w-4" />
-                </Button>
-              </PopoverTrigger>
-            <PopoverContent className="w-52 p-1" align="end">
-              {canPauseLeafWork ? (
-                <Button
-                  variant="ghost"
-                  size="xs"
-                  className="w-full justify-start"
-                  onClick={() => {
-                    setTreeControlMode("pause");
-                    setTreeControlCancelConfirmed(false);
-                    setTreeControlOpen(true);
-                    setMoreOpen(false);
-                  }}
-                >
-                  <PauseCircle className="h-3 w-3" />
-                  Pause work...
-                </Button>
-              ) : null}
-              {canResumeLeafWork ? (
-                <Button
-                  variant="ghost"
-                  size="xs"
-                  className="w-full justify-start"
-                  onClick={() => {
-                    setTreeControlMode("resume");
-                    setTreeControlWakeAgentsOnResume(isAgentOwnedNonTerminalIssue);
-                    setTreeControlOpen(true);
-                    setMoreOpen(false);
-                  }}
-                >
-                  <PlayCircle className="h-3 w-3" />
-                  Resume work
-                </Button>
-              ) : null}
-              {canShowSubtreeControls ? (
-                <>
-                  <Button
-                    variant="ghost"
-                    size="xs"
-                    className="w-full justify-start"
-                    onClick={() => {
-                      setTreeControlMode("pause");
-                      setTreeControlCancelConfirmed(false);
-                      setTreeControlOpen(true);
-                      setMoreOpen(false);
-                    }}
-                  >
-                    <PauseCircle className="h-3 w-3" />
-                    Pause subtree...
-                  </Button>
-                  {canResumeSubtree ? (
-                    <Button
-                      variant="ghost"
-                      size="xs"
-                      className="w-full justify-start"
-                      onClick={() => {
-                        setTreeControlMode("resume");
-                        setTreeControlWakeAgentsOnResume(true);
-                        setTreeControlOpen(true);
-                        setMoreOpen(false);
-                      }}
-                    >
-                      <PlayCircle className="h-3 w-3" />
-                      Resume subtree
-                    </Button>
-                  ) : null}
-                  <Button
-                    variant="ghost"
-                    size="xs"
-                    className="w-full justify-start text-destructive hover:text-destructive"
-                    onClick={() => {
-                      setTreeControlMode("cancel");
-                      setTreeControlCancelConfirmed(false);
-                      setTreeControlOpen(true);
-                      setMoreOpen(false);
-                    }}
-                  >
-                    <XCircle className="h-3 w-3" />
-                    Cancel subtree...
-                  </Button>
-                  {canRestoreSubtree ? (
-                    <Button
-                      variant="ghost"
-                      size="xs"
-                      className="w-full justify-start"
-                      onClick={() => {
-                        setTreeControlMode("restore");
-                        setTreeControlWakeAgentsOnResume(false);
-                        setTreeControlCancelConfirmed(false);
-                        setTreeControlOpen(true);
-                        setMoreOpen(false);
-                      }}
-                    >
-                      <Repeat className="h-3 w-3" />
-                      Restore subtree...
-                    </Button>
-                  ) : null}
-                </>
-              ) : null}
-              <Button
-                variant="ghost"
-                size="xs"
-                className="w-full justify-start text-destructive hover:text-destructive"
-                onClick={() => {
-                  updateIssue.mutate(
-                    { hiddenAt: new Date().toISOString() },
-                    { onSuccess: () => navigate("/issues/all") },
-                  );
-                  setMoreOpen(false);
-                }}
-              >
-                <EyeOff className="h-3 w-3" />
-                Hide this task
-              </Button>
-            </PopoverContent>
-            </Popover>
-          </div>
-        </div>
-
-        <InlineEditor
-          value={issue.title}
-          onSave={(title) => updateIssue.mutateAsync({ title })}
-          as="h2"
-          className="text-xl font-bold"
+        <IssueDetailReviewHeader
+          issue={issue}
+          ancestors={ancestors}
+          issueLinkState={resolvedIssueDetailState ?? location.state}
+          locationSearch={location.search}
+          activePauseHold={activePauseHold}
+          childIssueCount={childIssues.length}
+          heldDescendantCount={heldDescendantCount}
+          activeRootPauseHoldCreatedAt={activeRootPauseHold?.createdAt}
+          activePauseHoldRootIdentifier={activePauseHoldRoot?.identifier}
+          canShowSubtreeControls={canShowSubtreeControls}
+          canResumeLeafWork={canResumeLeafWork}
+          owner={issue.assigneeAgentId ? agentMap.get(issue.assigneeAgentId) ?? null : null}
+          outputCount={taskReviewOutputCount}
+          outputTitles={taskReviewOutputTitles}
+          decisionCount={taskReviewDecisionCount}
+          commentCount={threadComments.length}
+          hasLiveRuns={hasLiveRuns}
+          hasBlocker={issue.status === "blocked" || (issue.blockedBy?.length ?? 0) > 0}
+          onResume={() => {
+            setTreeControlMode("resume");
+            setTreeControlWakeAgentsOnResume(isAgentOwnedNonTerminalIssue || canShowSubtreeControls);
+            setTreeControlOpen(true);
+          }}
+          onViewAffected={() => {
+            setTreeControlMode("resume");
+            setTreeControlWakeAgentsOnResume(isAgentOwnedNonTerminalIssue || canShowSubtreeControls);
+            setTreeControlOpen(true);
+          }}
+          onCancelSubtree={() => {
+            setTreeControlMode("cancel");
+            setTreeControlCancelConfirmed(false);
+            setTreeControlOpen(true);
+          }}
         />
 
-        <InlineEditor
-          value={issue.description ?? ""}
-          onSave={(description) => updateIssue.mutateAsync({ description })}
-          as="p"
-          className="text-sm leading-7 text-foreground"
-          placeholder="Add a description..."
-          multiline
-          foldable
+        <IssueDetailTitleSection
+          issue={issue}
+          projectName={resolvedProject?.name ?? issue.project?.name ?? null}
           mentions={mentionOptions}
-          imageUploadHandler={async (file) => {
+          hasLiveRuns={hasLiveRuns}
+          isMobileInbox={isMobile && isFromInbox}
+          copied={copied}
+          panelVisible={panelVisible}
+          canArchiveFromInbox={canArchiveFromInbox}
+          archivePending={archivePending}
+          moreOpen={moreOpen}
+          canPauseLeafWork={canPauseLeafWork}
+          canResumeLeafWork={canResumeLeafWork}
+          canShowSubtreeControls={canShowSubtreeControls}
+          canResumeSubtree={canResumeSubtree}
+          canRestoreSubtree={canRestoreSubtree}
+          onMoreOpenChange={setMoreOpen}
+          onStatusChange={(status) => updateIssue.mutate({ status })}
+          onPriorityChange={(priority) => updateIssue.mutate({ priority })}
+          onCopy={copyIssueToClipboard}
+          onOpenMobileProps={() => setMobilePropsOpen(true)}
+          onShowPanel={() => setPanelVisible(true)}
+          onArchiveFromInbox={() => {
+            if (!archivePending) archiveFromInbox.mutate(issue.id);
+          }}
+          onPauseLeafWork={() => {
+            setTreeControlMode("pause");
+            setTreeControlCancelConfirmed(false);
+            setTreeControlOpen(true);
+          }}
+          onResumeLeafWork={() => {
+            setTreeControlMode("resume");
+            setTreeControlWakeAgentsOnResume(isAgentOwnedNonTerminalIssue);
+            setTreeControlOpen(true);
+          }}
+          onPauseSubtree={() => {
+            setTreeControlMode("pause");
+            setTreeControlCancelConfirmed(false);
+            setTreeControlOpen(true);
+          }}
+          onResumeSubtree={() => {
+            setTreeControlMode("resume");
+            setTreeControlWakeAgentsOnResume(true);
+            setTreeControlOpen(true);
+          }}
+          onCancelSubtree={() => {
+            setTreeControlMode("cancel");
+            setTreeControlCancelConfirmed(false);
+            setTreeControlOpen(true);
+          }}
+          onRestoreSubtree={() => {
+            setTreeControlMode("restore");
+            setTreeControlWakeAgentsOnResume(false);
+            setTreeControlCancelConfirmed(false);
+            setTreeControlOpen(true);
+          }}
+          onHideIssue={() => {
+            updateIssue.mutate(
+              { hiddenAt: new Date().toISOString() },
+              { onSuccess: () => navigate("/issues/all") },
+            );
+          }}
+          onSaveTitle={(title) => updateIssue.mutateAsync({ title })}
+          onSaveDescription={(description) => updateIssue.mutateAsync({ description })}
+          onUploadDescriptionImage={async (file) => {
             const attachment = await uploadAttachment.mutateAsync(file);
             return attachment.contentPath;
           }}
-          onDropFile={async (file) => {
+          onDropDescriptionFile={async (file) => {
             await uploadAttachment.mutateAsync(file);
           }}
         />
-
-      </div>
 
       <PluginSlotOutlet
         slotTypes={["toolbarButton", "contextMenuItem"]}

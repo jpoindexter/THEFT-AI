@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { createIssueDetailPath } from "@/lib/issueDetailBreadcrumb";
 import { relativeTime } from "@/lib/utils";
 
-type ActiveIssueTreePauseHold = {
+export type ActiveIssueTreePauseHold = {
   isRoot: boolean;
   rootIssueId: string;
 };
