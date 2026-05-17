@@ -23,6 +23,7 @@ import { Identity } from "./Identity";
 import type { Issue } from "@paperclipai/shared";
 import { AlertTriangle } from "lucide-react";
 import { isSuccessfulRunHandoffRequired } from "../lib/successful-run-handoff";
+import { cn } from "../lib/utils";
 
 const boardStatuses = [
   "backlog",
@@ -141,12 +142,15 @@ function KanbanCard({
   return (
     <div
       ref={setNodeRef}
+      // dnd-kit exposes live transform/transition values for sortable drag position.
       style={style}
       {...attributes}
       {...listeners}
-      className={`rounded-md border bg-card p-2.5 cursor-grab active:cursor-grabbing transition-shadow ${
-        isDragging && !isOverlay ? "opacity-30" : ""
-      } ${isOverlay ? "shadow-lg ring-1 ring-primary/20" : "hover:shadow-sm"}`}
+      className={cn(
+        "cursor-grab rounded-md border bg-card p-2.5 transition-shadow active:cursor-grabbing",
+        isDragging && !isOverlay && "opacity-30",
+        isOverlay ? "shadow-lg ring-1 ring-primary/20" : "hover:shadow-sm",
+      )}
     >
       <Link
         to={`/issues/${issue.identifier ?? issue.id}`}

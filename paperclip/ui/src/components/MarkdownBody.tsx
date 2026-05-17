@@ -1,4 +1,4 @@
-import { isValidElement, useCallback, useEffect, useId, useRef, useState, type ReactNode } from "react";
+import { isValidElement, useCallback, useEffect, useId, useRef, useState, type CSSProperties, type ReactNode } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Check, Copy, ExternalLink, Github } from "lucide-react";
 import Markdown, { defaultUrlTransform, type Components, type Options } from "react-markdown";
@@ -17,7 +17,7 @@ import { Button } from "@/components/ui/button";
 interface MarkdownBodyProps {
   children: string;
   className?: string;
-  style?: React.CSSProperties;
+  style?: CSSProperties;
   softBreaks?: boolean;
   linkIssueReferences?: boolean;
   /** Opt into Obsidian-style [[target]] / [[target|label]] wikilinks. */
@@ -61,7 +61,7 @@ function MarkdownIssueLink({
       aria-label={issueLabel}
     >
       {status ? (
-        <StatusIcon status={status} className="mr-1 h-3 w-3 align-[-0.125em]" />
+        <StatusIcon status={status} className="mr-1 h-3 w-3 align-middle" />
       ) : null}
       {children}
     </Link>
@@ -75,41 +75,8 @@ function loadMermaid() {
   return mermaidLoaderPromise;
 }
 
-const wrapAnywhereStyle: React.CSSProperties = {
-  overflowWrap: "anywhere",
-  wordBreak: "break-word",
-};
-
-const scrollableBlockStyle: React.CSSProperties = {
-  maxWidth: "100%",
-  overflowX: "auto",
-};
-
-const tableCellWrapStyle: React.CSSProperties = {
-  overflowWrap: "anywhere",
-  wordBreak: "normal",
-};
-
-function mergeWrapStyle(style?: React.CSSProperties): React.CSSProperties {
-  return {
-    ...wrapAnywhereStyle,
-    ...style,
-  };
-}
-
-function mergeTableCellStyle(style?: React.CSSProperties): React.CSSProperties {
-  return {
-    ...tableCellWrapStyle,
-    ...style,
-  };
-}
-
-function mergeScrollableBlockStyle(style?: React.CSSProperties): React.CSSProperties {
-  return {
-    ...scrollableBlockStyle,
-    ...style,
-  };
-}
+const MARKDOWN_WRAP_CLASS = "break-words";
+const MARKDOWN_SCROLLABLE_BLOCK_CLASS = "max-w-full overflow-x-auto";
 
 function flattenText(value: ReactNode): string {
   if (value == null) return "";
@@ -378,8 +345,9 @@ function CodeBlock({
       } else {
         const textarea = document.createElement("textarea");
         textarea.value = text;
-        textarea.style.position = "fixed";
-        textarea.style.left = "-9999px";
+        textarea.className = "fixed left-0 top-0 -translate-x-full opacity-0";
+        textarea.tabIndex = -1;
+        textarea.setAttribute("aria-hidden", "true");
         document.body.appendChild(textarea);
         try {
           textarea.select();
@@ -409,7 +377,7 @@ function CodeBlock({
       <pre
         {...preProps}
         ref={preRef}
-        style={mergeScrollableBlockStyle(preProps.style as React.CSSProperties | undefined)}
+        className={cn(preProps.className, MARKDOWN_SCROLLABLE_BLOCK_CLASS)}
       >
         {children}
       </pre>
@@ -514,35 +482,35 @@ export function MarkdownBody({
     remarkPlugins.push(remarkSoftBreaks);
   }
   const components: Components = {
-    p: ({ node: _node, style: paragraphStyle, children: paragraphChildren, ...paragraphProps }) => (
-      <p {...paragraphProps} style={mergeWrapStyle(paragraphStyle as React.CSSProperties | undefined)}>
+    p: ({ node: _node, className: paragraphClassName, children: paragraphChildren, ...paragraphProps }) => (
+      <p {...paragraphProps} className={cn(paragraphClassName, MARKDOWN_WRAP_CLASS)}>
         {paragraphChildren}
       </p>
     ),
-    li: ({ node: _node, style: listItemStyle, children: listItemChildren, ...listItemProps }) => (
-      <li {...listItemProps} style={mergeWrapStyle(listItemStyle as React.CSSProperties | undefined)}>
+    li: ({ node: _node, className: listItemClassName, children: listItemChildren, ...listItemProps }) => (
+      <li {...listItemProps} className={cn(listItemClassName, MARKDOWN_WRAP_CLASS)}>
         {listItemChildren}
       </li>
     ),
-    blockquote: ({ node: _node, style: blockquoteStyle, children: blockquoteChildren, ...blockquoteProps }) => (
-      <blockquote {...blockquoteProps} style={mergeWrapStyle(blockquoteStyle as React.CSSProperties | undefined)}>
+    blockquote: ({ node: _node, className: blockquoteClassName, children: blockquoteChildren, ...blockquoteProps }) => (
+      <blockquote {...blockquoteProps} className={cn(blockquoteClassName, MARKDOWN_WRAP_CLASS)}>
         {blockquoteChildren}
       </blockquote>
     ),
-    table: ({ node: _node, style: tableStyle, children: tableChildren, ...tableProps }) => (
+    table: ({ node: _node, children: tableChildren, ...tableProps }) => (
       <div className="paperclip-markdown-table-scroll" role="region" aria-label="Scrollable table" tabIndex={0}>
-        <table {...tableProps} style={tableStyle as React.CSSProperties | undefined}>
+        <table {...tableProps}>
           {tableChildren}
         </table>
       </div>
     ),
-    td: ({ node: _node, style: tableCellStyle, children: tableCellChildren, ...tableCellProps }) => (
-      <td {...tableCellProps} style={mergeTableCellStyle(tableCellStyle as React.CSSProperties | undefined)}>
+    td: ({ node: _node, className: tableCellClassName, children: tableCellChildren, ...tableCellProps }) => (
+      <td {...tableCellProps} className={cn(tableCellClassName, MARKDOWN_WRAP_CLASS)}>
         {tableCellChildren}
       </td>
     ),
-    th: ({ node: _node, style: tableHeaderStyle, children: tableHeaderChildren, ...tableHeaderProps }) => (
-      <th {...tableHeaderProps} style={mergeTableCellStyle(tableHeaderStyle as React.CSSProperties | undefined)}>
+    th: ({ node: _node, className: tableHeaderClassName, children: tableHeaderChildren, ...tableHeaderProps }) => (
+      <th {...tableHeaderProps} className={cn(tableHeaderClassName, MARKDOWN_WRAP_CLASS)}>
         {tableHeaderChildren}
       </th>
     ),
@@ -553,21 +521,25 @@ export function MarkdownBody({
       }
       return <CodeBlock preProps={preProps}>{preChildren}</CodeBlock>;
     },
-    code: ({ node: _node, style: codeStyle, children: codeChildren, ...codeProps }) => (
-      <code {...codeProps} style={mergeWrapStyle(codeStyle as React.CSSProperties | undefined)}>
+    code: ({ node: _node, className: codeClassName, children: codeChildren, ...codeProps }) => (
+      <code {...codeProps} className={cn(codeClassName, MARKDOWN_WRAP_CLASS)}>
         {codeChildren}
       </code>
     ),
-    a: ({ node: _node, href, style: linkStyle, children: linkChildren, ...anchorProps }) => {
+    a: ({ node: _node, href, className: linkClassName, style: linkStyle, children: linkChildren, ...anchorProps }) => {
       const dataProps = anchorProps as Record<string, unknown>;
       const isWikiLink = dataProps["data-paperclip-wiki-link"] === "true";
+      const linkStyleProps: { style?: CSSProperties } = linkStyle
+        ? { style: linkStyle as CSSProperties }
+        : {};
       if (isWikiLink && href && !/^[a-z][a-z\d+.-]*:/i.test(href) && !href.startsWith("//")) {
         return (
           <Link
             to={href}
             {...anchorProps}
+            {...linkStyleProps}
             rel="noreferrer"
-            style={mergeWrapStyle(linkStyle as React.CSSProperties | undefined)}
+            className={cn(linkClassName, MARKDOWN_WRAP_CLASS)}
           >
             {linkChildren}
           </Link>
@@ -601,9 +573,12 @@ export function MarkdownBody({
               "paperclip-mention-chip",
               `paperclip-mention-chip--${parsed.kind}`,
               parsed.kind === "project" && "paperclip-project-mention-chip",
+              linkClassName,
+              MARKDOWN_WRAP_CLASS,
             )}
             data-mention-kind={parsed.kind}
-            style={{ ...mergeWrapStyle(linkStyle as React.CSSProperties | undefined), ...mentionChipInlineStyle(parsed) }}
+            // Dynamic mention data controls project colors and agent icon masks; CSS classes own the static chip chrome.
+            style={{ ...(linkStyle as CSSProperties | undefined), ...mentionChipInlineStyle(parsed) }}
           >
             {linkChildren}
           </a>
@@ -612,18 +587,20 @@ export function MarkdownBody({
       const isGitHubLink = isGitHubUrl(href);
       const isExternal = isExternalHttpUrl(href);
       const leadingIcon = isGitHubLink ? (
-        <Github aria-hidden="true" className="mr-1 inline h-3.5 w-3.5 align-[-0.125em]" />
+        <Github aria-hidden="true" className="mr-1 inline h-3.5 w-3.5 align-middle" />
       ) : null;
       const trailingIcon = isExternal && !isGitHubLink ? (
-        <ExternalLink aria-hidden="true" className="ml-1 inline h-3 w-3 align-[-0.125em]" />
+        <ExternalLink aria-hidden="true" className="ml-1 inline h-3 w-3 align-middle" />
       ) : null;
       return (
         <a
           href={href}
+          {...anchorProps}
+          {...linkStyleProps}
           {...(isExternal
             ? { target: "_blank", rel: "noopener noreferrer" }
             : { rel: "noreferrer" })}
-          style={mergeWrapStyle(linkStyle as React.CSSProperties | undefined)}
+          className={cn(linkClassName, MARKDOWN_WRAP_CLASS)}
         >
           {renderLinkBody(linkChildren, leadingIcon, trailingIcon)}
         </a>
@@ -631,7 +608,7 @@ export function MarkdownBody({
     },
   };
   if (resolveImageSrc || onImageClick) {
-    components.img = ({ node: _node, src, alt, ...imgProps }) => {
+    components.img = ({ node: _node, src, alt, className: imageClassName, ...imgProps }) => {
       const resolved = resolveImageSrc && src ? resolveImageSrc(src) : null;
       const finalSrc = resolved ?? src;
       return (
@@ -640,21 +617,24 @@ export function MarkdownBody({
           src={finalSrc}
           alt={alt ?? ""}
           onClick={onImageClick && finalSrc ? (e) => { e.preventDefault(); onImageClick(finalSrc); } : undefined}
-          className={cn(imgProps.className, onImageClick && "cursor-pointer")}
-          style={imgProps.style as React.CSSProperties | undefined}
+          className={cn(imageClassName, onImageClick && "cursor-pointer")}
         />
       );
     };
   }
 
+  // Preserve the public style passthrough for callers that drive runtime state,
+  // while keeping renderer-owned wrapping/overflow rules in classes above.
+  const rootStyleProps: { style?: CSSProperties } = style ? { style } : {};
+
   return (
     <div
+      {...rootStyleProps}
       className={cn(
         "paperclip-markdown prose prose-sm min-w-0 max-w-full break-words overflow-hidden",
         theme === "dark" && "prose-invert",
         className,
       )}
-      style={mergeWrapStyle(style)}
     >
       <Markdown
         remarkPlugins={remarkPlugins}

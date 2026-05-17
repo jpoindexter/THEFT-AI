@@ -131,6 +131,7 @@ import { cn, formatDateTime, formatShortDate } from "../lib/utils";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Textarea } from "@/components/ui/textarea";
+import { Input } from "@/components/ui/input";
 import { AlertTriangle, ArrowRight, Brain, Check, ChevronDown, ClipboardList, Copy, Hammer, Loader2, MoreHorizontal, Paperclip, PauseCircle, Search, Square, ThumbsDown, ThumbsUp } from "lucide-react";
 import { IssueBlockedNotice } from "./IssueBlockedNotice";
 
@@ -622,8 +623,7 @@ const IssueChatTextPart = memo(function IssueChatTextPart({ text, recessed }: { 
   }
   return (
     <MarkdownBody
-      className="text-sm leading-6"
-      style={recessed ? { opacity: 0.55 } : undefined}
+      className={cn("text-sm leading-6", recessed && "opacity-60")}
       softBreaks
       onImageClick={onImageClick}
     >
@@ -649,8 +649,8 @@ export function SuccessfulRunHandoffCommentCallout({
         escalated
           ? "border-red-500/35 bg-red-500/10 text-red-950 dark:text-red-100"
           : "border-amber-300/70 bg-amber-50/90 text-amber-950 dark:border-amber-500/40 dark:bg-amber-500/10 dark:text-amber-100",
+        recessed && "opacity-60",
       )}
-      style={recessed ? { opacity: 0.55 } : undefined}
     >
       <div className="flex items-start gap-2">
         <AlertTriangle
@@ -1289,7 +1289,7 @@ function IssueChatUserMessage({
     </Avatar>
   );
   const messageBody = (
-    <div className={cn("flex min-w-0 max-w-[85%] flex-col", isCurrentUser && "items-end")}>
+    <div className={cn("flex min-w-0 max-w-3xl flex-col", isCurrentUser && "items-end")}>
       <div className={cn("mb-1 flex items-center gap-2 px-1", isCurrentUser ? "justify-end" : "justify-start")}>
         <span className="text-sm font-medium text-foreground">{resolvedAuthorName}</span>
         {followUpRequested ? (
@@ -2101,9 +2101,9 @@ function StaleDispositionWarningMetadataRow({ row }: { row: SystemNoticeMetadata
   })();
 
   return (
-    <div className="grid grid-cols-[7.5rem_minmax(0,1fr)] gap-2 text-xs leading-5">
-      {label}
-      <div className="min-w-0 break-words text-foreground/80">{value}</div>
+    <div className="grid grid-cols-4 gap-2 text-xs leading-5">
+      <div className="col-span-1 min-w-0">{label}</div>
+      <div className="col-span-3 min-w-0 break-words text-foreground/80">{value}</div>
     </div>
   );
 }
@@ -2990,6 +2990,8 @@ const VirtualizedIssueChatThreadListInner = forwardRef<
       ref={setRefs}
       data-testid="issue-chat-thread-virtualizer"
       data-virtual-count={messages.length}
+      // Runtime virtualizer measurements are intentionally inline; row count
+      // and measured heights are data-dependent and cannot be tokenized.
       style={{ position: "relative", width: "100%", height: totalSize }}
     >
       {virtualItems.map((virtualItem) => {
@@ -3017,6 +3019,8 @@ const VirtualizedIssueChatThreadListInner = forwardRef<
             onTransitionEndCapture={(event) => {
               virtualizer.measureElement(event.currentTarget);
             }}
+            // Runtime virtualizer positioning is intentionally inline; each
+            // row's translate offset is measured from live scroll geometry.
             style={{
               position: "absolute",
               top: 0,
@@ -3400,9 +3404,9 @@ const IssueChatComposer = forwardRef<IssueChatComposerHandle, IssueChatComposerP
       data-testid="issue-chat-composer"
       data-pending-work-mode={pendingWorkMode}
       className={cn(
-        "relative rounded-md border border-border/70 bg-background/95 p-[15px] shadow-[0_-12px_28px_rgba(15,23,42,0.08)] backdrop-blur transition-[border-color,background-color,box-shadow] duration-150 supports-[backdrop-filter]:bg-background/85 dark:shadow-[0_-12px_28px_rgba(0,0,0,0.28)]",
+        "relative rounded-md border border-border/70 bg-background/95 p-4 shadow-lg backdrop-blur transition-[border-color,background-color,box-shadow] duration-150 supports-[backdrop-filter]:bg-background/85 dark:shadow-lg",
         isPlanning && "border-amber-500/60 bg-amber-50/60 supports-[backdrop-filter]:bg-amber-50/40 dark:border-amber-500/50 dark:bg-amber-500/[0.07] dark:supports-[backdrop-filter]:bg-amber-500/[0.07]",
-        isDragOver && "border-primary/45 bg-background shadow-[0_-12px_28px_rgba(15,23,42,0.08),0_0_0_1px_hsl(var(--primary)/0.16)]",
+        isDragOver && "border-primary/45 bg-background ring-1 ring-primary/15",
       )}
       onDragEnterCapture={handleFileDragEnter}
       onDragOverCapture={handleFileDragOver}
@@ -3412,7 +3416,7 @@ const IssueChatComposer = forwardRef<IssueChatComposerHandle, IssueChatComposerP
       {isDragOver && canAcceptFiles ? (
         <div
           data-testid="issue-chat-composer-drop-overlay"
-          className="pointer-events-none absolute inset-2 z-30 flex items-center justify-center rounded-sm border border-dashed border-primary/55 bg-background/75 px-4 py-3 text-center shadow-sm backdrop-blur-[2px] dark:bg-background/65"
+          className="pointer-events-none absolute inset-2 z-30 flex items-center justify-center rounded-sm border border-dashed border-primary/55 bg-background/75 px-4 py-3 text-center shadow-sm backdrop-blur-sm dark:bg-background/65"
         >
           <div className="flex max-w-md items-center gap-3 rounded-md bg-background/80 px-3 py-2 text-left shadow-sm ring-1 ring-border/60">
             <span className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-primary/10 text-primary">
@@ -3438,7 +3442,7 @@ const IssueChatComposer = forwardRef<IssueChatComposerHandle, IssueChatComposerP
         imageUploadHandler={onImageUpload}
         fileDropTarget="parent"
         bordered={false}
-        contentClassName="max-h-[28dvh] overflow-y-auto pr-1 pb-2 text-sm scrollbar-auto-hide"
+        contentClassName="max-h-48 overflow-y-auto pr-1 pb-2 text-sm scrollbar-auto-hide sm:max-h-64"
       />
 
       {composerHint ? (
@@ -3496,7 +3500,7 @@ const IssueChatComposer = forwardRef<IssueChatComposerHandle, IssueChatComposerP
         <div className="mr-auto flex items-center gap-2">
           {(onImageUpload || onAttachImage) ? (
             <>
-              <input
+              <Input
                 ref={attachInputRef}
                 type="file"
                 className="hidden"
@@ -3964,7 +3968,7 @@ export function IssueChatThread({
   // Lands on the latest `comment-*` row and then drives the scroll the rest
   // of the way home as the virtualizer's per-row measurements arrive.
   //
-  // The virtualizer estimates 220px for unmeasured rows. On long threads
+  // The virtualizer uses its configured row estimate for unmeasured rows. On long threads
   // with tall markdown comments (PAP-2536 et al.), totalSize is hugely
   // underestimated until rows render and get measured. A single scroll
   // lands above the actual bottom; rendered rows then expand, the layout
@@ -4275,6 +4279,7 @@ export function IssueChatThread({
                 <div
                   aria-hidden
                   data-testid="issue-chat-bottom-spacer"
+                  // Composer anchoring depends on the measured dock height.
                   style={{ height: bottomSpacerHeight }}
                 />
               ) : null}
@@ -4286,6 +4291,8 @@ export function IssueChatThread({
           <div
             ref={composerViewportAnchorRef}
             data-testid="issue-chat-composer-dock"
+            // The safe-area CSS env offset keeps the sticky composer clear of
+            // mobile browser chrome; keep it local until a shared dock utility exists.
             className="sticky bottom-[calc(env(safe-area-inset-bottom)+20px)] z-20 space-y-2 bg-gradient-to-t from-background via-background/95 to-background/0 pt-6"
           >
             <IssueChatComposer

@@ -1215,7 +1215,7 @@ export const MarkdownEditor = forwardRef<MarkdownEditorRef, MarkdownEditorProps>
         }}
         className={cn("paperclip-mdxeditor", !bordered && "paperclip-mdxeditor--borderless")}
         contentEditableClassName={cn(
-          "paperclip-mdxeditor-content focus:outline-none [&_ul]:list-disc [&_ul]:pl-5 [&_ol]:list-decimal [&_ol]:pl-5 [&_li]:list-item",
+          "paperclip-mdxeditor-content focus:outline-none",
           contentClassName,
         )}
         additionalLexicalNodes={[MentionAwareLinkNode, mentionAwareLinkNodeReplacement]}
@@ -1226,11 +1226,11 @@ export const MarkdownEditor = forwardRef<MarkdownEditorRef, MarkdownEditorProps>
       {mentionActive && filteredMentions.length > 0 && mentionMenuPosition &&
         createPortal(
           <div
-            className="fixed z-[9999] max-h-52 min-w-44 max-w-80 overflow-y-auto rounded-md border border-border bg-popover shadow-md"
+            className="fixed z-50 max-h-52 min-w-44 max-w-80 touch-pan-y overflow-y-auto rounded-md border border-border bg-popover shadow-md"
+            // Autocomplete is portaled to body, so caret-measured viewport coordinates stay runtime-only.
             style={{
               top: mentionMenuPosition.top,
               left: mentionMenuPosition.left,
-              touchAction: "pan-y",
               WebkitOverflowScrolling: "touch",
             }}
           >
@@ -1267,6 +1267,7 @@ export const MarkdownEditor = forwardRef<MarkdownEditorRef, MarkdownEditorProps>
                 ) : option.kind === "project" && option.projectId ? (
                   <span
                     className="inline-flex h-2 w-2 rounded-full border border-border/50"
+                    // Project color is user data carried by the mention option, not a design token.
                     style={{ backgroundColor: option.projectColor ?? "var(--muted-foreground)" }}
                   />
                 ) : option.kind === "user" ? (

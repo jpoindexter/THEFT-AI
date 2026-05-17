@@ -1,7 +1,6 @@
 import type { ReactNode } from "react";
 import type { Issue } from "@paperclipai/shared";
 import { Columns3 } from "lucide-react";
-import { pickTextColorForPillBg } from "@/lib/color-contrast";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -46,19 +45,6 @@ const issueColumnDescriptions: Record<InboxIssueColumn, string> = {
 
 export function issueActivityText(issue: Issue): string {
   return `Updated ${timeAgo(issue.lastActivityAt ?? issue.lastExternalCommentAt ?? issue.updatedAt)}`;
-}
-
-function issueTrailingGridTemplate(columns: InboxIssueColumn[]): string {
-  return columns
-    .map((column) => {
-      if (column === "assignee") return "minmax(6rem, 8rem)";
-      if (column === "project") return "minmax(4.5rem, 7rem)";
-      if (column === "workspace") return "minmax(6rem, 9rem)";
-      if (column === "parent") return "minmax(3.5rem, 5.5rem)";
-      if (column === "labels") return "minmax(3rem, 6rem)";
-      return "minmax(3.5rem, 4.5rem)";
-    })
-    .join(" ");
 }
 
 export function IssueColumnPicker({
@@ -230,10 +216,7 @@ export function InboxIssueTrailingColumns({
   const userLabel = assigneeUserName ?? formatAssigneeUserLabel(issue.assigneeUserId, currentUserId) ?? "User";
 
   return (
-    <span
-      className="grid items-center gap-2"
-      style={{ gridTemplateColumns: issueTrailingGridTemplate(columns) }}
-    >
+    <span className="flex min-w-0 items-center justify-end gap-4">
       {columns.map((column) => {
         if (column === "assignee") {
           if (assigneeContent) {
@@ -274,17 +257,12 @@ export function InboxIssueTrailingColumns({
 
         if (column === "project") {
           if (projectName) {
-            const accentColor = projectColor ?? "64748b";
             return (
               <span
                 key={column}
-                className="inline-flex min-w-0 items-center gap-2 text-xs font-medium"
-                style={{ color: pickTextColorForPillBg(accentColor, 0.12) }}
+                className="inline-flex min-w-0 items-center gap-2 text-xs font-medium text-muted-foreground"
               >
-                <span
-                  className="h-1.5 w-1.5 shrink-0 rounded-full"
-                  style={{ backgroundColor: accentColor }}
-                />
+                <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-primary/60" />
                 <span className="truncate">{projectName}</span>
               </span>
             );
@@ -304,12 +282,7 @@ export function InboxIssueTrailingColumns({
                 {(issue.labels ?? []).slice(0, 2).map((label) => (
                   <span
                     key={label.id}
-                    className="inline-flex min-w-0 max-w-full shrink-0 items-center rounded-full border px-1.5 py-0 text-nano font-medium"
-                    style={{
-                      borderColor: label.color,
-                      color: pickTextColorForPillBg(label.color, 0.12),
-                      backgroundColor: `${label.color}1f`,
-                    }}
+                    className="inline-flex min-w-0 max-w-full shrink-0 items-center rounded-full border border-border bg-secondary px-1.5 py-0 text-nano font-medium text-muted-foreground"
                   >
                     <span className="truncate">{label.name}</span>
                   </span>

@@ -14,6 +14,8 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { HelpCircle, ChevronDown, ChevronRight } from "lucide-react";
 import { cn } from "../lib/utils";
 import { AGENT_ROLE_LABELS } from "@paperclipai/shared";
@@ -74,9 +76,14 @@ export function HintIcon({ text }: { text: string }) {
   return (
     <Tooltip>
       <TooltipTrigger asChild>
-        <button type="button" className="inline-flex text-muted-foreground/50 hover:text-muted-foreground transition-colors">
+        <Button
+          type="button"
+          variant="ghost"
+          size="icon-xs"
+          className="size-5 text-muted-foreground/50 hover:text-muted-foreground"
+        >
           <HelpCircle className="h-3 w-3" />
-        </button>
+        </Button>
       </TooltipTrigger>
       <TooltipContent side="top" className="max-w-xs">
         {text}
@@ -116,23 +123,11 @@ export function ToggleField({
         <span className="text-xs text-muted-foreground">{label}</span>
         {hint && <HintIcon text={hint} />}
       </div>
-      <button
-        data-slot="toggle"
+      <ToggleSwitch
         data-testid={toggleTestId}
-        type="button"
-        className={cn(
-          "relative inline-flex h-5 w-9 items-center rounded-full transition-colors",
-          checked ? "bg-green-600" : "bg-muted"
-        )}
-        onClick={() => onChange(!checked)}
-      >
-        <span
-          className={cn(
-            "inline-block h-3.5 w-3.5 rounded-full bg-white transition-transform",
-            checked ? "translate-x-4.5" : "translate-x-0.5"
-          )}
-        />
-      </button>
+        checked={checked}
+        onCheckedChange={onChange}
+      />
     </div>
   );
 }
@@ -175,9 +170,9 @@ export function ToggleWithNumber({
       {showNumber && (
         <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
           {numberPrefix && <span>{numberPrefix}</span>}
-          <input
+          <Input
             type="number"
-            className="w-16 rounded-md border border-border px-2 py-0.5 bg-transparent outline-none text-xs font-mono text-center"
+            className="h-7 w-16 px-2 py-0.5 text-center font-mono text-xs"
             value={number}
             onChange={(e) => onNumberChange(Number(e.target.value))}
           />
@@ -206,14 +201,17 @@ export function CollapsibleSection({
 }) {
   return (
     <div className={cn(bordered && "border-t border-border")}>
-      <button
-        className="flex items-center gap-2 w-full px-4 py-2 text-xs font-medium text-muted-foreground hover:bg-accent/30 transition-colors"
+      <Button
+        type="button"
+        variant="ghost"
+        size="sm"
+        className="h-auto w-full justify-start px-4 py-2 text-xs font-medium text-muted-foreground hover:bg-accent/30"
         onClick={onToggle}
       >
         {open ? <ChevronDown className="h-3 w-3" /> : <ChevronRight className="h-3 w-3" />}
         {icon}
         {title}
-      </button>
+      </Button>
       {open && <div className="px-4 pb-3">{children}</div>}
     </div>
   );
@@ -247,14 +245,14 @@ export function AutoExpandTextarea({
   useEffect(() => { adjustHeight(); }, [value, adjustHeight]);
 
   return (
-    <textarea
+    <Textarea
       ref={textareaRef}
-      className="w-full rounded-md border border-border px-2.5 py-1.5 bg-transparent outline-none text-sm font-mono placeholder:text-muted-foreground/40 resize-none overflow-hidden"
+      className="min-h-0 px-2.5 py-1.5 text-sm font-mono placeholder:text-muted-foreground/40 resize-none overflow-hidden shadow-none"
       placeholder={placeholder}
       value={value}
       onChange={(e) => onChange(e.target.value)}
       onBlur={onBlur}
-      style={{ minHeight }}
+      rows={rows}
     />
   );
 }
@@ -279,7 +277,7 @@ export function DraftInput({
   useEffect(() => setDraft(value), [value]);
 
   return (
-    <input
+    <Input
       className={className}
       value={draft}
       onChange={(e) => {
@@ -328,9 +326,9 @@ export function DraftTextarea({
   useEffect(() => { adjustHeight(); }, [draft, adjustHeight]);
 
   return (
-    <textarea
+    <Textarea
       ref={textareaRef}
-      className="w-full rounded-md border border-border px-2.5 py-1.5 bg-transparent outline-none text-sm font-mono placeholder:text-muted-foreground/40 resize-none overflow-hidden"
+      className="min-h-0 px-2.5 py-1.5 text-sm font-mono placeholder:text-muted-foreground/40 resize-none overflow-hidden shadow-none"
       placeholder={placeholder}
       value={draft}
       onChange={(e) => {
@@ -340,7 +338,7 @@ export function DraftTextarea({
       onBlur={() => {
         if (draft !== value) onCommit(draft);
       }}
-      style={{ minHeight }}
+      rows={rows}
     />
   );
 }
@@ -364,7 +362,7 @@ export function DraftNumberInput({
   useEffect(() => setDraft(String(value)), [value]);
 
   return (
-    <input
+    <Input
       type="number"
       className={className}
       value={draft}
@@ -389,13 +387,15 @@ export function ChoosePathButton() {
   const [open, setOpen] = useState(false);
   return (
     <>
-      <button
+      <Button
         type="button"
-        className="inline-flex items-center rounded-md border border-border px-2 py-0.5 text-xs text-muted-foreground hover:bg-accent/50 transition-colors shrink-0"
+        variant="outline"
+        size="xs"
+        className="shrink-0 font-normal text-muted-foreground hover:bg-accent/50"
         onClick={() => setOpen(true)}
       >
         Choose
-      </button>
+      </Button>
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent>
           <DialogHeader>

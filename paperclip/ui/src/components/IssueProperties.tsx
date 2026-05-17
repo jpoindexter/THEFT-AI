@@ -1,5 +1,4 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { pickTextColorForPillBg } from "@/lib/color-contrast";
 import { Link } from "@/lib/router";
 import type { Issue, IssueLabel, Project, WorkspaceRuntimeService } from "@paperclipai/shared";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -61,12 +60,7 @@ function defaultNewLabelColor() {
 
 function ProjectSwatch({ color }: { color?: string | null }) {
   if (color) {
-    return (
-      <span
-        className="shrink-0 h-3 w-3 rounded-sm"
-        style={{ backgroundColor: color }}
-      />
-    );
+    return <span className="h-3 w-3 shrink-0 rounded-sm bg-primary/60" />;
   }
 
   return <span className="shrink-0 h-3 w-3 rounded-sm bg-primary" />;
@@ -753,12 +747,7 @@ export function IssueProperties({
       {selectedIssueLabels.slice(0, 3).map((label) => (
         <span
           key={label.id}
-          className="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium border"
-          style={{
-            borderColor: label.color,
-            backgroundColor: `${label.color}22`,
-            color: pickTextColorForPillBg(label.color, 0.13),
-          }}
+          className="inline-flex items-center rounded-full border border-border bg-secondary px-2 py-0.5 text-xs font-medium text-muted-foreground"
         >
           {label.name}
         </span>
@@ -816,7 +805,7 @@ export function IssueProperties({
                 )}
                 onClick={() => toggleLabel(label.id)}
               >
-                <span className="h-2.5 w-2.5 rounded-full shrink-0" style={{ backgroundColor: label.color }} />
+                <span className="h-2.5 w-2.5 shrink-0 rounded-full bg-primary/60" />
                 <span className="truncate flex-1">{label.name}</span>
                 {selected && <Check className="h-3.5 w-3.5 shrink-0 text-foreground" aria-hidden="true" />}
               </Button>

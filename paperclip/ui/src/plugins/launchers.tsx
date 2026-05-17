@@ -189,7 +189,7 @@ function trapFocus(container: HTMLElement, event: KeyboardEvent): void {
 function launcherTriggerClassName(placementZone: PluginLauncherPlacementZone): string {
   switch (placementZone) {
     case "projectSidebarItem":
-      return "justify-start h-auto px-3 py-1 text-[12px] font-normal text-muted-foreground hover:text-foreground";
+      return "h-auto justify-start px-3 py-1 text-xs font-normal text-muted-foreground hover:text-foreground";
     case "contextMenuItem":
     case "commentContextMenuItem":
       return "justify-start h-7 w-full px-2 text-xs font-normal";
@@ -423,7 +423,7 @@ function LauncherRenderContent({
         <iframe
           src={`/_plugins/${encodeURIComponent(instance.launcher.pluginId)}/ui/${instance.launcher.action.target}`}
           title={`${instance.launcher.pluginDisplayName} ${instance.launcher.displayName}`}
-          className="h-full min-h-[24rem] w-full rounded-md border border-border bg-background"
+          className="h-full min-h-96 w-full rounded-md border border-border bg-background"
         />
       );
     }
@@ -522,13 +522,15 @@ function LauncherModalShell({
     : launcherShellBoundsStyle(instance.bounds);
 
   const panelClassName = shellType === "openDrawer"
-    ? "fixed right-0 top-0 h-full max-w-[min(44rem,100vw)] overflow-hidden border-l border-border bg-background shadow-2xl"
+    ? "fixed right-0 top-0 flex h-full max-w-full flex-col overflow-hidden border-l border-border bg-background shadow-2xl"
     : shellType === "openPopover"
-      ? "fixed overflow-hidden rounded-xl border border-border bg-background shadow-2xl"
-      : "fixed left-1/2 top-1/2 max-h-[calc(100vh-2rem)] -translate-x-1/2 -translate-y-1/2 overflow-hidden rounded-2xl border border-border bg-background shadow-2xl";
+      ? "fixed flex max-h-dvh flex-col overflow-hidden rounded-xl border border-border bg-background shadow-2xl"
+      : "fixed left-1/2 top-1/2 flex max-h-dvh -translate-x-1/2 -translate-y-1/2 flex-col overflow-hidden rounded-2xl border border-border bg-background shadow-2xl";
 
   return (
     <>
+      {/* Plugin launchers need runtime geometry: stacked z-indexes, requested bounds,
+          and popover anchors are driven by plugin state and DOMRects. */}
       <div
         className="fixed inset-0 bg-black/45"
         style={{ zIndex: baseZ }}
@@ -575,8 +577,7 @@ function LauncherModalShell({
         </div>
         <div
           className={cn(
-            "overflow-auto p-4",
-            shellType === "openDrawer" ? "h-[calc(100%-3.5rem)]" : "max-h-[calc(100vh-7rem)]",
+            "min-h-0 flex-1 overflow-auto p-4",
           )}
         >
           <LauncherRenderContent instance={instance} renderEnvironment={renderEnvironment} />

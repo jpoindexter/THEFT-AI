@@ -107,6 +107,18 @@ const progressSegmentClasses: Record<IssueStatus, string> = {
   blocked: "bg-red-500",
   cancelled: "bg-neutral-400",
 };
+const progressSegmentWidthClasses = ["w-0", "w-1/6", "w-1/4", "w-1/3", "w-1/2", "w-2/3", "w-3/4", "w-5/6", "w-full"];
+const issueDepthClasses = ["pl-0", "pl-4", "pl-8", "pl-12", "pl-16", "pl-20", "pl-24", "pl-28"];
+
+function progressSegmentWidthClass(count: number, total: number) {
+  if (total <= 0 || count <= 0) return progressSegmentWidthClasses[0];
+  const index = Math.round((count / total) * (progressSegmentWidthClasses.length - 1));
+  return progressSegmentWidthClasses[Math.min(Math.max(index, 0), progressSegmentWidthClasses.length - 1)];
+}
+
+function issueDepthClass(depth: number) {
+  return issueDepthClasses[Math.min(Math.max(depth, 0), issueDepthClasses.length - 1)];
+}
 
 /* ── View state ── */
 
@@ -518,8 +530,11 @@ function SubIssueProgressSummaryStrip({
             {statusEntries.map(({ status, count }) => (
               <span
                 key={status}
-                className={cn("h-full", progressSegmentClasses[status])}
-                style={{ width: `${(count / summary.totalCount) * 100}%` }}
+                className={cn(
+                  "h-full",
+                  progressSegmentClasses[status],
+                  progressSegmentWidthClass(count, summary.totalCount),
+                )}
                 title={`${issueStatusLabels[status]}: ${count}`}
                 aria-hidden="true"
               />
@@ -1582,15 +1597,7 @@ export function IssuesList({
                   return (
                     <div
                       key={issue.id}
-                      style={{
-                        ...(depth > 0 ? { paddingLeft: `${depth}rem` } : {}),
-                        ...(useDeferredRowRendering
-                          ? {
-                            contentVisibility: "auto",
-                            containIntrinsicSize: "2.75rem",
-                          }
-                          : {}),
-                      }}
+                      className={cn(issueDepthClass(depth), useDeferredRowRendering && "content-auto contain-intrinsic-size-11")}
                     >
                       <IssueRow
                         issue={issue}
