@@ -28,7 +28,7 @@ Current local modularization checkpoint:
 
 - Extracted issue chat latest-scroll and hash/composer-spacer control into route-local hooks.
 - Extracted issue document cards, revision menus, draft form, helper utilities, data/cache hooks, fold/hash state, autosave, draft events, copy action, revision preview, and server mutations into `issue-documents/`.
-- Extracted onboarding adapter-selection and plan-section derivation hooks.
+- Extracted onboarding adapter-selection, draft state, created-entity tracking, route-dialog state, runtime adapter handling, launch mutations, and shell rendering.
 - Extracted issue-detail shared utilities and loading state.
 - Moved the issue-chat composer safe-area dock value into a semantic CSS utility.
 
@@ -36,6 +36,8 @@ Latest verification for the active modularization slices:
 
 - `pnpm -C paperclip --filter @paperclipai/ui typecheck` passed.
 - Focused Vitest for issue chat, issue documents, and issue detail passed: 78 tests across 4 files.
+- Focused onboarding utility Vitest passed: 21 tests across 5 files.
+- `PAPERCLIP_E2E_PORT=3299 PAPERCLIP_E2E_DB_PORT=32399 pnpm -C paperclip exec playwright test tests/e2e/onboarding.spec.ts --config tests/e2e/playwright.config.ts` passed: 2 onboarding e2e tests.
 - `pnpm design:gate` passed with 0 active-route findings and 15 reviewed runtime exceptions.
 - `node paperclip/scripts/smoke/theft-mvp-route-smoke.mjs --screenshot-dir /private/tmp/theft-ui-check` passed all active MVP routes with no horizontal overflow.
 - `git diff --check` passed.
@@ -44,7 +46,7 @@ Remaining high-value maintainability work:
 
 - `IssueDetail.tsx` is down to 2,748 lines, but it is still the largest active page.
 - `IssueChatThread.tsx` is down to 1,675 lines.
-- `OnboardingWizard.tsx` is down to 894 lines.
+- `OnboardingWizard.tsx` is down to 297 lines and now fits the 300-line guardrail.
 - `IssueDocumentsSection.tsx` is down to 207 lines and now fits the 300-line guardrail.
 - `index.css` is large because it is the current token/source-of-truth file; do not split it casually before token ownership is fully stable.
 
@@ -52,7 +54,7 @@ Next best path:
 
 1. Continue extracting presentation organisms and action panels from `IssueDetail.tsx` while preserving runtime behavior.
 2. Split remaining `IssueChatThread.tsx` message-row/render orchestration.
-3. Split `OnboardingWizard.tsx` launch/mutation orchestration and remaining step render modules.
+3. Keep smaller onboarding modules under the guardrail as follow-up changes land.
 4. Only after those pass gates, revisit broad visual polish. The current priority is architecture/template cleanup, not another visual rewrite.
 
 THEFT should become one local app: Paperclip runtime/control plane as the tracked host, with THEFT design, staged onboarding, 8-department company setup, roadmap/canvas, Library, and local skills on top.

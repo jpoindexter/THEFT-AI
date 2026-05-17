@@ -70,10 +70,11 @@ test.describe("Onboarding wizard", () => {
     const agentNameInput = page.locator('input[placeholder="Operator"]');
     await expect(agentNameInput).toHaveValue(AGENT_NAME);
 
-    await expect(page.getByText("Company assembly preview")).toBeVisible();
-    await expect(page.getByText("8 business lanes")).toBeVisible();
+    const assemblyPreview = page.getByLabel("Company assembly preview");
+    await expect(assemblyPreview).toBeVisible();
+    await expect(assemblyPreview.getByText("8 business lanes")).toBeVisible();
     for (const department of REQUIRED_DEPARTMENTS) {
-      await expect(page.getByText(department, { exact: true })).toBeVisible();
+      await expect(assemblyPreview.getByText(department, { exact: true })).toBeVisible();
     }
 
     await expect(page.getByText("Advanced runtime")).toBeVisible();
@@ -136,7 +137,12 @@ test.describe("Onboarding wizard", () => {
     await page.getByRole("button", { name: "Next" }).click();
 
     await expect(
-      page.locator("h3", { hasText: "Launch your company OS" })
+      page.locator("h3", { hasText: "Review the business plan" })
+    ).toBeVisible({ timeout: 30_000 });
+    await page.getByRole("button", { name: "Preview assembly" }).click();
+
+    await expect(
+      page.locator("h2", { hasText: "Company Assembly Preview" })
     ).toBeVisible({ timeout: 30_000 });
 
     await expect(page.locator("text=" + COMPANY_NAME)).toBeVisible();
@@ -144,12 +150,12 @@ test.describe("Onboarding wizard", () => {
     await expect(page.locator("text=" + TASK_TITLE)).toBeVisible();
     await expect(page.getByText("8 departments", { exact: true })).toBeVisible();
 
-    await page.getByRole("button", { name: "Launch Company" }).click();
+    await page.getByRole("button", { name: "Launch company" }).click();
 
     await expect(page).toHaveURL(/\/dashboard$/, { timeout: 30_000 });
     await expect(page.getByRole("heading", { name: COMPANY_NAME })).toBeVisible();
-    await expect(page.getByRole("heading", { name: /Tech tree/i })).toBeVisible();
-    await expect(page.getByText("Operator tray")).toBeVisible();
+    await expect(page.getByRole("link", { name: /Tech Tree/i }).first()).toBeVisible();
+    await expect(page.getByText("Next Move recommended")).toBeVisible();
 
     const companiesRes = await page.request.get(`${baseUrl}/api/companies`);
     expect(companiesRes.ok()).toBe(true);

@@ -87,7 +87,7 @@ function AssemblyPreview({
   companyStage: OnboardingStage;
 }) {
   return (
-    <div className="theft-surface-muted p-3">
+    <div className="theft-surface-muted p-3" aria-label="Company assembly preview">
       <div className="flex items-start justify-between gap-3">
         <div>
           <p className="text-sm font-medium">Company assembly preview</p>
