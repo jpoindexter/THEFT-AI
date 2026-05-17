@@ -65,16 +65,16 @@
       "reason": "Mention chip styles encode project colors and agent icon masks from parsed markdown href data."
     },
     {
-      "file": "paperclip/ui/src/components/MarkdownEditor.tsx",
+      "file": "paperclip/ui/src/components/markdown-editor/MarkdownAutocompleteMenu.tsx",
       "check": "inline-style",
-      "line": 1231,
+      "line": 50,
       "sample": "style={",
       "reason": "Autocomplete menu is positioned from caret coordinates."
     },
     {
-      "file": "paperclip/ui/src/components/MarkdownEditor.tsx",
+      "file": "paperclip/ui/src/components/markdown-editor/MarkdownAutocompleteMenu.tsx",
       "check": "inline-style",
-      "line": 1271,
+      "line": 87,
       "sample": "style={",
       "reason": "Project color swatch uses user/project data."
     },
