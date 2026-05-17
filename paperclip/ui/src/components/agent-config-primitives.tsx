@@ -1,26 +1,22 @@
-import { useState, useRef, useEffect, useCallback } from "react";
 import {
   Tooltip,
   TooltipTrigger,
   TooltipContent,
 } from "@/components/ui/tooltip";
 import { ToggleSwitch } from "@/components/ui/toggle-switch";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-  DialogFooter,
-} from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { HelpCircle, ChevronDown, ChevronRight } from "lucide-react";
 import { cn } from "../lib/utils";
-export { adapterLabels, help, roleLabels } from "./agent-config/metadata";
 
-/* ---- Primitive components ---- */
+export { adapterLabels, help, roleLabels } from "./agent-config/metadata";
+export { ChoosePathButton } from "./agent-config/ChoosePathButton";
+export {
+  AutoExpandTextarea,
+  DraftInput,
+  DraftTextarea,
+  DraftNumberInput,
+} from "./agent-config/input-primitives";
 
 export function HintIcon({ text }: { text: string }) {
   return (
@@ -167,242 +163,6 @@ export function CollapsibleSection({
   );
 }
 
-export function AutoExpandTextarea({
-  value,
-  onChange,
-  onBlur,
-  placeholder,
-  minRows,
-}: {
-  value: string;
-  onChange: (v: string) => void;
-  onBlur?: () => void;
-  placeholder?: string;
-  minRows?: number;
-}) {
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
-  const rows = minRows ?? 3;
-  const lineHeight = 20;
-  const minHeight = rows * lineHeight;
-
-  const adjustHeight = useCallback(() => {
-    const el = textareaRef.current;
-    if (!el) return;
-    el.style.height = "auto";
-    el.style.height = `${Math.max(minHeight, el.scrollHeight)}px`;
-  }, [minHeight]);
-
-  useEffect(() => { adjustHeight(); }, [value, adjustHeight]);
-
-  return (
-    <Textarea
-      ref={textareaRef}
-      className="min-h-0 px-2.5 py-1.5 text-sm font-mono placeholder:text-muted-foreground/40 resize-none overflow-hidden shadow-none"
-      placeholder={placeholder}
-      value={value}
-      onChange={(e) => onChange(e.target.value)}
-      onBlur={onBlur}
-      rows={rows}
-    />
-  );
-}
-
-/**
- * Text input that manages internal draft state.
- * Calls `onCommit` on blur (and optionally on every change if `immediate` is set).
- */
-export function DraftInput({
-  value,
-  onCommit,
-  immediate,
-  className,
-  ...props
-}: {
-  value: string;
-  onCommit: (v: string) => void;
-  immediate?: boolean;
-  className?: string;
-} & Omit<React.InputHTMLAttributes<HTMLInputElement>, "value" | "onChange" | "className">) {
-  const [draft, setDraft] = useState(value);
-  useEffect(() => setDraft(value), [value]);
-
-  return (
-    <Input
-      className={className}
-      value={draft}
-      onChange={(e) => {
-        setDraft(e.target.value);
-        if (immediate) onCommit(e.target.value);
-      }}
-      onBlur={() => {
-        if (draft !== value) onCommit(draft);
-      }}
-      {...props}
-    />
-  );
-}
-
-/**
- * Auto-expanding textarea with draft state and blur-commit.
- */
-export function DraftTextarea({
-  value,
-  onCommit,
-  immediate,
-  placeholder,
-  minRows,
-}: {
-  value: string;
-  onCommit: (v: string) => void;
-  immediate?: boolean;
-  placeholder?: string;
-  minRows?: number;
-}) {
-  const [draft, setDraft] = useState(value);
-  useEffect(() => setDraft(value), [value]);
-
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
-  const rows = minRows ?? 3;
-  const lineHeight = 20;
-  const minHeight = rows * lineHeight;
-
-  const adjustHeight = useCallback(() => {
-    const el = textareaRef.current;
-    if (!el) return;
-    el.style.height = "auto";
-    el.style.height = `${Math.max(minHeight, el.scrollHeight)}px`;
-  }, [minHeight]);
-
-  useEffect(() => { adjustHeight(); }, [draft, adjustHeight]);
-
-  return (
-    <Textarea
-      ref={textareaRef}
-      className="min-h-0 px-2.5 py-1.5 text-sm font-mono placeholder:text-muted-foreground/40 resize-none overflow-hidden shadow-none"
-      placeholder={placeholder}
-      value={draft}
-      onChange={(e) => {
-        setDraft(e.target.value);
-        if (immediate) onCommit(e.target.value);
-      }}
-      onBlur={() => {
-        if (draft !== value) onCommit(draft);
-      }}
-      rows={rows}
-    />
-  );
-}
-
-/**
- * Number input with draft state and blur-commit.
- */
-export function DraftNumberInput({
-  value,
-  onCommit,
-  immediate,
-  className,
-  ...props
-}: {
-  value: number;
-  onCommit: (v: number) => void;
-  immediate?: boolean;
-  className?: string;
-} & Omit<React.InputHTMLAttributes<HTMLInputElement>, "value" | "onChange" | "className" | "type">) {
-  const [draft, setDraft] = useState(String(value));
-  useEffect(() => setDraft(String(value)), [value]);
-
-  return (
-    <Input
-      type="number"
-      className={className}
-      value={draft}
-      onChange={(e) => {
-        setDraft(e.target.value);
-        if (immediate) onCommit(Number(e.target.value) || 0);
-      }}
-      onBlur={() => {
-        const num = Number(draft) || 0;
-        if (num !== value) onCommit(num);
-      }}
-      {...props}
-    />
-  );
-}
-
-/**
- * "Choose" button that opens a dialog explaining the user must manually
- * type the path due to browser security limitations.
- */
-export function ChoosePathButton() {
-  const [open, setOpen] = useState(false);
-  return (
-    <>
-      <Button
-        type="button"
-        variant="outline"
-        size="xs"
-        className="shrink-0 font-normal text-muted-foreground hover:bg-accent/50"
-        onClick={() => setOpen(true)}
-      >
-        Choose
-      </Button>
-      <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Specify path manually</DialogTitle>
-            <DialogDescription>
-              Browser security blocks apps from reading full local paths via a file picker.
-              Copy the absolute path and paste it into the input.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="space-y-4 text-sm">
-            <section className="space-y-1.5">
-              <p className="font-medium">macOS (Finder)</p>
-              <ol className="list-decimal space-y-1 pl-5 text-muted-foreground">
-                <li>Find the folder in Finder.</li>
-                <li>Hold <kbd>Option</kbd> and right-click the folder.</li>
-                <li>Click "Copy &lt;folder name&gt; as Pathname".</li>
-                <li>Paste the result into the path input.</li>
-              </ol>
-              <p className="rounded-md bg-muted px-2 py-1 font-mono text-xs">
-                /Users/yourname/Documents/project
-              </p>
-            </section>
-            <section className="space-y-1.5">
-              <p className="font-medium">Windows (File Explorer)</p>
-              <ol className="list-decimal space-y-1 pl-5 text-muted-foreground">
-                <li>Find the folder in File Explorer.</li>
-                <li>Hold <kbd>Shift</kbd> and right-click the folder.</li>
-                <li>Click "Copy as path".</li>
-                <li>Paste the result into the path input.</li>
-              </ol>
-              <p className="rounded-md bg-muted px-2 py-1 font-mono text-xs">
-                C:\Users\yourname\Documents\project
-              </p>
-            </section>
-            <section className="space-y-1.5">
-              <p className="font-medium">Terminal fallback (macOS/Linux)</p>
-              <ol className="list-decimal space-y-1 pl-5 text-muted-foreground">
-                <li>Run <code>cd /path/to/folder</code>.</li>
-                <li>Run <code>pwd</code>.</li>
-                <li>Copy the output and paste it into the path input.</li>
-              </ol>
-            </section>
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setOpen(false)}>
-              OK
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-    </>
-  );
-}
-
-/**
- * Label + input rendered on the same line (inline layout for compact fields).
- */
 export function InlineField({ label, hint, children }: { label: string; hint?: string; children: React.ReactNode }) {
   return (
     <div className="flex items-center gap-3">
