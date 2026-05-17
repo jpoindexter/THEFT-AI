@@ -16,14 +16,11 @@ import { keepPreviousDataForSameQueryTail } from "../lib/query-placeholder-data"
 import { shouldTrackIssueActiveRun } from "../lib/issueActiveRun";
 import { getIssueDetailQueryOptions } from "../lib/issueDetailCache";
 import {
-  applyOptimisticIssueFieldUpdate,
-  applyOptimisticIssueFieldUpdateToCollection,
   applyOptimisticIssueCommentUpdate,
   createOptimisticIssueComment,
   loadRemainingIssueCommentPages,
   matchesIssueRef,
   mergeIssueComments,
-  removeIssueCommentFromPages,
   takeOptimisticIssueComment,
   upsertIssueCommentInPages,
   type OptimisticIssueComment,
@@ -61,6 +58,7 @@ import {
 } from "../components/issue-detail/useIssueDetailComments";
 import { useIssueDetailApprovals } from "../components/issue-detail/useIssueDetailApprovals";
 import { useIssueDetailAttachments } from "../components/issue-detail/useIssueDetailAttachments";
+import { useIssueDetailCacheActions } from "../components/issue-detail/useIssueDetailCacheActions";
 import { useIssueDetailChildIssues } from "../components/issue-detail/useIssueDetailChildIssues";
 import { useIssueDetailFeedback } from "../components/issue-detail/useIssueDetailFeedback";
 import { useIssueDetailInboxToolbar } from "../components/issue-detail/useIssueDetailInboxToolbar";
@@ -300,36 +298,21 @@ export function IssueDetail() {
     () => mergeIssueComments(comments ?? [], optimisticComments),
     [comments, optimisticComments],
   );
-  const issueCacheRefs = useMemo(() => {
-    const refs = new Set<string>();
-    if (issueId) refs.add(issueId);
-    if (issue?.id) refs.add(issue.id);
-    if (issue?.identifier) refs.add(issue.identifier);
-    return [...refs];
-  }, [issue?.id, issue?.identifier, issueId]);
-
-  const invalidateIssueDetail = useCallback(() => {
-    for (const ref of issueCacheRefs) {
-      queryClient.invalidateQueries({ queryKey: queryKeys.issues.detail(ref) });
-      queryClient.invalidateQueries({ queryKey: queryKeys.issues.activity(ref) });
-      queryClient.invalidateQueries({ queryKey: queryKeys.issues.interactions(ref) });
-    }
-  }, [issueCacheRefs, queryClient]);
-  const invalidateIssueThreadLazily = useCallback(() => {
-    for (const ref of issueCacheRefs) {
-      queryClient.invalidateQueries({ queryKey: queryKeys.issues.detail(ref), refetchType: "inactive" });
-      queryClient.invalidateQueries({ queryKey: queryKeys.issues.activity(ref), refetchType: "inactive" });
-      queryClient.invalidateQueries({ queryKey: queryKeys.issues.interactions(ref), refetchType: "inactive" });
-    }
-  }, [issueCacheRefs, queryClient]);
-
-  const invalidateIssueRunState = useCallback(() => {
-    for (const ref of issueCacheRefs) {
-      queryClient.invalidateQueries({ queryKey: queryKeys.issues.runs(ref) });
-      queryClient.invalidateQueries({ queryKey: queryKeys.issues.liveRuns(ref) });
-      queryClient.invalidateQueries({ queryKey: queryKeys.issues.activeRun(ref) });
-    }
-  }, [issueCacheRefs, queryClient]);
+  const {
+    applyOptimisticIssueCacheUpdate,
+    invalidateIssueCollections,
+    invalidateIssueDetail,
+    invalidateIssueRunState,
+    invalidateIssueThreadLazily,
+    issueCacheRefs,
+    mergeIssueResponseIntoCaches,
+    removeCommentFromCache,
+    upsertInteractionInCache,
+  } = useIssueDetailCacheActions({
+    issue,
+    issueId,
+    selectedCompanyId,
+  });
   const {
     attachmentError,
     attachmentUploadButton,
@@ -357,32 +340,10 @@ export function IssueDetail() {
     invalidateIssueDetail,
   });
 
-  const removeCommentFromCache = useCallback((commentId: string) => {
-    queryClient.setQueryData<InfiniteData<IssueComment[], string | null> | undefined>(
-      queryKeys.issues.comments(issueId!),
-      (current) => {
-        if (!current) return current;
-        return {
-          ...current,
-          pages: removeIssueCommentFromPages(current.pages, commentId),
-        };
-      },
-    );
-  }, [issueId, queryClient]);
-
   const restoreQueuedCommentDraft = useCallback((body: string) => {
     commentComposerRef.current?.restoreDraft(body);
   }, []);
 
-  const invalidateIssueCollections = useCallback(() => {
-    if (selectedCompanyId) {
-      queryClient.invalidateQueries({ queryKey: queryKeys.issues.list(selectedCompanyId) });
-      queryClient.invalidateQueries({ queryKey: queryKeys.issues.listMineByMe(selectedCompanyId) });
-      queryClient.invalidateQueries({ queryKey: queryKeys.issues.listTouchedByMe(selectedCompanyId) });
-      queryClient.invalidateQueries({ queryKey: queryKeys.issues.listUnreadTouchedByMe(selectedCompanyId) });
-      queryClient.invalidateQueries({ queryKey: queryKeys.sidebarBadges(selectedCompanyId) });
-    }
-  }, [queryClient, selectedCompanyId]);
   const {
     handleApprovalAction,
     pendingApprovalAction,
@@ -392,49 +353,6 @@ export function IssueDetail() {
     issueId,
     resolvedCompanyId,
   });
-  const upsertInteractionInCache = useCallback((interaction: IssueThreadInteraction) => {
-    queryClient.setQueryData<IssueThreadInteraction[] | undefined>(
-      queryKeys.issues.interactions(issueId!),
-      (current) => {
-        const existing = current ?? [];
-        const next = existing.filter((entry) => entry.id !== interaction.id);
-        next.push(interaction);
-        next.sort((left, right) => {
-          const createdAtDelta =
-            new Date(left.createdAt).getTime() - new Date(right.createdAt).getTime();
-          return createdAtDelta === 0 ? left.id.localeCompare(right.id) : createdAtDelta;
-        });
-        return next;
-      },
-    );
-  }, [issueId, queryClient]);
-
-  const applyOptimisticIssueCacheUpdate = useCallback((refs: Iterable<string>, data: Record<string, unknown>) => {
-    queryClient.setQueriesData<Issue>(
-      { queryKey: ["issues", "detail"] },
-      (cached) => (cached && matchesIssueRef(cached, refs) ? applyOptimisticIssueFieldUpdate(cached, data) : cached),
-    );
-
-    if (!selectedCompanyId) return;
-    queryClient.setQueryData<Issue[] | undefined>(
-      queryKeys.issues.list(selectedCompanyId),
-      (cached) => applyOptimisticIssueFieldUpdateToCollection(cached, refs, data),
-    );
-  }, [queryClient, selectedCompanyId]);
-
-  const mergeIssueResponseIntoCaches = useCallback((refs: Iterable<string>, nextIssue: Issue) => {
-    queryClient.setQueriesData<Issue>(
-      { queryKey: ["issues", "detail"] },
-      (cached) => (cached && matchesIssueRef(cached, refs) ? { ...cached, ...nextIssue } : cached),
-    );
-
-    if (!selectedCompanyId) return;
-    queryClient.setQueryData<Issue[] | undefined>(
-      queryKeys.issues.list(selectedCompanyId),
-      (cached) => cached?.map((item) => (matchesIssueRef(item, refs) ? { ...item, ...nextIssue } : item)),
-    );
-  }, [queryClient, selectedCompanyId]);
-
   const markIssueRead = useMutation({
     mutationFn: (id: string) => issuesApi.markRead(id),
     onSuccess: () => {
