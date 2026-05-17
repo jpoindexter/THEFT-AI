@@ -1,11 +1,50 @@
 # STATUS — What actually exists
 
-> Audit-derived, not assumed. Last updated 2026-05-14 by Codex session.
+> Audit-derived, not assumed. Last updated 2026-05-17 by Codex session.
 > Update when something changes status. Don't fabricate.
 
 ## Current Direction — Paperclip-Host Merge
 
 Canonical direction now lives in `SOURCE-OF-TRUTH.md` and `PARITY-DELTA.md`.
+
+## 2026-05-17 Active Build Checkpoint
+
+Current active branch: `codex-current-design-migration`.
+
+The Paperclip app is genuinely large. The remaining drag is mostly not missing MVP capability; it is oversized route/organism code inherited from the Paperclip host plus the THEFT UX migration. The active-route design-system gate currently passes with zero unallowed findings, but several files still exceed the maintainability guardrail and need continued modularization.
+
+Recent pushed checkpoints:
+
+- `ebec216` / `theft-issue-chat-virtualized-list-20260517` — extracted issue chat virtualization.
+- `f75531d` / `theft-issue-chat-composer-20260517` — extracted issue chat composer.
+- `3bc8908` / `theft-issue-chat-composer-modules-20260517` — split composer internals below the 300-line target.
+- `e68b80f` / `theft-issue-detail-mobile-toolbar-20260517` — extracted mobile issue toolbar.
+- `3f1d23e` / `theft-issue-detail-chat-tab-20260517` — extracted issue detail chat tab and run metadata hook.
+- `5e07ad6` / `theft-issue-tree-control-dialog-20260517` — extracted tree-control dialog.
+- `a33593a` / `theft-issue-tree-pause-banner-20260517` — extracted pause/subtree banner.
+- `4826e4f` / `theft-issue-attachments-section-20260517` — extracted attachments section.
+
+Latest verification for the active modularization slices:
+
+- `pnpm -C paperclip --filter @paperclipai/ui typecheck` passed.
+- `pnpm -C paperclip --filter @paperclipai/ui exec vitest run src/pages/IssueDetail.test.tsx` passed.
+- `pnpm design:gate` passed with 0 active-route findings and 17 reviewed runtime exceptions.
+- `node paperclip/scripts/smoke/theft-mvp-route-smoke.mjs --company-prefix THEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA --screenshot-dir /private/tmp/theft-issue-attachments-section-smoke` passed all active MVP routes with no horizontal overflow.
+
+Remaining high-value maintainability work:
+
+- `IssueDetail.tsx` is reduced from over 3.3k lines to about 2.9k lines, but it is still the largest active page.
+- `IssueChatThread.tsx` remains about 2.1k lines.
+- `IssueDocumentsSection.tsx` remains about 1.2k lines.
+- `OnboardingWizard.tsx` remains about 1k lines.
+- `index.css` is large because it is the current token/source-of-truth file; do not split it casually before token ownership is fully stable.
+
+Next best path:
+
+1. Continue extracting presentation organisms from `IssueDetail.tsx` while preserving runtime behavior.
+2. Split `IssueChatThread.tsx` fallback/error-boundary and latest-scroll controller next.
+3. Then split `IssueDocumentsSection.tsx` and `OnboardingWizard.tsx`.
+4. Only after those pass gates, revisit broad visual polish. The current priority is architecture/template cleanup, not another visual rewrite.
 
 THEFT should become one local app: Paperclip runtime/control plane as the tracked host, with THEFT design, staged onboarding, 8-department company setup, roadmap/canvas, Library, and local skills on top.
 

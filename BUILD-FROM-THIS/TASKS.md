@@ -145,7 +145,7 @@
 | T107 | Create shared THEFT screen templates for launcher, workbench, split canvas/form, and detail/review flows | ✅ done |
 | T108 | Move route-specific scroll contracts into shared templates so pages do not clip or trap scroll | ☐ todo |
 | T109 | Split `OnboardingWizard.tsx` into modules that follow the 300 / 150 / 50 maintainability guardrail | ☐ todo |
-| T110 | Split dashboard, task detail, and Library product surfaces into reusable section/card modules | ☐ todo |
+| T110 | Split dashboard, task detail, and Library product surfaces into reusable section/card modules | ▶ doing |
 | T111 | Replace touched one-off colors, shadows, radii, and arbitrary layout values with THEFT tokens or shadcn variants | ☐ todo |
 | T112 | Add lint/smoke checks for active product screens: shadcn primitive usage, no hex TSX, no horizontal overflow, and scrollable short viewports | ☐ todo |
 
