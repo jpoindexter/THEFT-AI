@@ -8,9 +8,7 @@ import type {
 import {
   createContext,
   memo,
-  useCallback,
   useContext,
-  useEffect,
   useId,
   useLayoutEffect,
   useMemo,
@@ -18,7 +16,7 @@ import {
   useState,
   type Ref,
 } from "react";
-import { Link, useLocation } from "@/lib/router";
+import { Link } from "@/lib/router";
 import type {
   Agent,
   FeedbackDataSharingPreference,
@@ -70,11 +68,6 @@ import { Identity } from "./Identity";
 import type { InlineEntityOption } from "./InlineEntitySelector";
 import { IssueThreadInteractionCard } from "./IssueThreadInteractionCard";
 import { AgentIcon } from "./AgentIconPicker";
-import {
-  captureComposerViewportSnapshot,
-  restoreComposerViewportSnapshot,
-  shouldPreserveComposerViewport,
-} from "../lib/issue-chat-scroll";
 import type { CompanyUserProfile } from "../lib/company-members";
 import { timeAgo } from "../lib/timeAgo";
 import {
@@ -86,10 +79,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip
 import { AlertTriangle, ArrowRight, Check, ChevronDown, Copy, Loader2, MoreHorizontal, PauseCircle, Search, Square } from "lucide-react";
 import { IssueBlockedNotice } from "./IssueBlockedNotice";
 import { IssueChatChainOfThought, type IssueChatCoTPart } from "./issue-chat/ChainOfThoughtParts";
-import {
-  SUBMIT_SCROLL_RESERVE_VH,
-  toIsoString,
-} from "./issue-chat/ComposerHelpers";
+import { toIsoString } from "./issue-chat/ComposerHelpers";
 import {
   IssueChatComposer,
   type CommentReassignment,
@@ -102,9 +92,7 @@ import {
 } from "./issue-chat/IssueChatErrorBoundary";
 import {
   findLatestCommentMessageIndex,
-  findMessageAnchorIndex,
   issueChatMessageActiveVote,
-  issueChatMessageAnchorId,
   issueChatMessageCommentId,
   issueChatMessageCustom,
   issueChatMessageKind,
@@ -127,8 +115,8 @@ import {
 import {
   VIRTUALIZED_THREAD_ROW_THRESHOLD,
   VirtualizedIssueChatThreadList,
-  type VirtualizedIssueChatThreadListHandle,
 } from "./issue-chat/VirtualizedThreadList";
+import { useIssueChatScrollController } from "./issue-chat/useIssueChatScrollController";
 
 export {
   VIRTUALIZED_THREAD_ROW_THRESHOLD,
@@ -1352,20 +1340,6 @@ export function IssueChatThread({
   onWorkModeChange,
   onRefreshLatestComments,
 }: IssueChatThreadProps) {
-  const location = useLocation();
-  const lastScrolledHashRef = useRef<string | null>(null);
-  const virtualizedThreadRef = useRef<VirtualizedIssueChatThreadListHandle | null>(null);
-  const bottomAnchorRef = useRef<HTMLDivElement | null>(null);
-  const composerViewportAnchorRef = useRef<HTMLDivElement | null>(null);
-  const composerViewportSnapshotRef = useRef<ReturnType<typeof captureComposerViewportSnapshot>>(null);
-  const preserveComposerViewportRef = useRef(false);
-  const pendingSubmitScrollRef = useRef(false);
-  const lastUserMessageIdRef = useRef<string | null>(null);
-  const spacerBaselineAnchorRef = useRef<string | null>(null);
-  const spacerInitialReserveRef = useRef(0);
-  const latestSettleTimeoutsRef = useRef<number[]>([]);
-  const latestSettleCleanupRef = useRef<(() => void) | null>(null);
-  const [bottomSpacerHeight, setBottomSpacerHeight] = useState(0);
   const displayLiveRuns = useMemo(() => {
     const deduped = new Map<string, LiveRunForIssue>();
     for (const run of liveRuns) {
@@ -1405,17 +1379,6 @@ export function IssueChatThread({
     }
     return ids;
   }, [displayLiveRuns]);
-  const clearLatestSettleTimeouts = useCallback(() => {
-    for (const timeout of latestSettleTimeoutsRef.current) {
-      window.clearTimeout(timeout);
-    }
-    latestSettleTimeoutsRef.current = [];
-    latestSettleCleanupRef.current?.();
-    latestSettleCleanupRef.current = null;
-  }, []);
-
-  useEffect(() => clearLatestSettleTimeouts, [clearLatestSettleTimeouts]);
-
   const { transcriptByRun, hasOutputForRun } = useLiveRunTranscripts({
     runs: enableLiveTranscriptPolling ? transcriptRuns : [],
     companyId,
@@ -1469,8 +1432,6 @@ export function IssueChatThread({
     stableMessageCacheRef.current = stabilized.cache;
     return stabilized.messages;
   }, [rawMessages]);
-  const latestMessagesRef = useRef<readonly ThreadMessage[]>(messages);
-  latestMessagesRef.current = messages;
 
   const isRunning = displayLiveRuns.some((run) => run.status === "queued" || run.status === "running");
   const unresolvedBlockers = useMemo(
@@ -1491,312 +1452,27 @@ export function IssueChatThread({
     return map;
   }, [feedbackVotes]);
   const useVirtualizedThread = messages.length >= VIRTUALIZED_THREAD_ROW_THRESHOLD;
-  const messageAnchorIndex = useMemo(() => {
-    const map = new Map<string, number>();
-    messages.forEach((message, index) => {
-      const anchorId = issueChatMessageAnchorId(message);
-      if (anchorId) map.set(anchorId, index);
-    });
-    return map;
-  }, [messages]);
-
-  function scrollToThreadAnchor(
-    anchorId: string,
-    options?: { align?: "start" | "center" | "end" | "auto"; behavior?: ScrollBehavior },
-    messageSnapshot: readonly ThreadMessage[] = messages,
-  ) {
-    const snapshotUsesVirtualizer = messageSnapshot.length >= VIRTUALIZED_THREAD_ROW_THRESHOLD;
-    const virtualIndex =
-      messageSnapshot === messages
-        ? messageAnchorIndex.get(anchorId)
-        : findMessageAnchorIndex(messageSnapshot, anchorId);
-    if (snapshotUsesVirtualizer && virtualIndex !== undefined && virtualIndex >= 0) {
-      if (!virtualizedThreadRef.current) return false;
-      virtualizedThreadRef.current.scrollToIndex(virtualIndex, {
-        align: options?.align ?? "center",
-        behavior: options?.behavior ?? "smooth",
-      });
-      return true;
-    }
-
-    const element = document.getElementById(anchorId);
-    if (!element) return false;
-    element.scrollIntoView({
-      behavior: options?.behavior ?? "smooth",
-      block: options?.align === "start"
-        ? "start"
-        : options?.align === "end"
-          ? "end"
-          : "center",
-    });
-    return true;
-  }
+  const {
+    virtualizedThreadRef,
+    bottomAnchorRef,
+    composerViewportAnchorRef,
+    bottomSpacerHeight,
+    prepareSubmitScroll,
+    handleJumpToLatest,
+  } = useIssueChatScrollController({
+    messages,
+    onRefreshLatestComments,
+  });
 
   const runtime = usePaperclipIssueRuntime({
     messages,
     isRunning,
     onSend: ({ body, reopen, reassignment }) => {
-      pendingSubmitScrollRef.current = true;
+      prepareSubmitScroll();
       return onAdd(body, reopen, reassignment);
     },
     onCancel: onCancelRun,
   });
-
-  useEffect(() => {
-    const lastUserMessage = [...messages].reverse().find((m) => m.role === "user");
-    const lastUserId = lastUserMessage?.id ?? null;
-
-    if (
-      pendingSubmitScrollRef.current
-      && lastUserId
-      && lastUserId !== lastUserMessageIdRef.current
-    ) {
-      pendingSubmitScrollRef.current = false;
-      const custom = lastUserMessage?.metadata.custom as { anchorId?: unknown } | undefined;
-      const anchorId = typeof custom?.anchorId === "string" ? custom.anchorId : null;
-      if (anchorId) {
-        const reserve = Math.round(window.innerHeight * SUBMIT_SCROLL_RESERVE_VH);
-        spacerBaselineAnchorRef.current = anchorId;
-        spacerInitialReserveRef.current = reserve;
-        setBottomSpacerHeight(reserve);
-        requestAnimationFrame(() => {
-          scrollToThreadAnchor(anchorId, { align: "start", behavior: "smooth" });
-        });
-      }
-    }
-
-    lastUserMessageIdRef.current = lastUserId;
-  }, [messageAnchorIndex, messages, useVirtualizedThread]);
-
-  useLayoutEffect(() => {
-    const anchorId = spacerBaselineAnchorRef.current;
-    if (!anchorId || spacerInitialReserveRef.current <= 0) return;
-    const userEl = document.getElementById(anchorId);
-    const bottomEl = bottomAnchorRef.current;
-    if (!userEl || !bottomEl) return;
-    const contentBelow = Math.max(
-      0,
-      bottomEl.getBoundingClientRect().top - userEl.getBoundingClientRect().bottom,
-    );
-    const next = Math.max(0, spacerInitialReserveRef.current - contentBelow);
-    setBottomSpacerHeight((prev) => (prev === next ? prev : next));
-    if (next === 0) {
-      spacerBaselineAnchorRef.current = null;
-      spacerInitialReserveRef.current = 0;
-    }
-  }, [messages]);
-  useLayoutEffect(() => {
-    const composerElement = composerViewportAnchorRef.current;
-    if (preserveComposerViewportRef.current) {
-      restoreComposerViewportSnapshot(
-        composerViewportSnapshotRef.current,
-        composerElement,
-      );
-    }
-
-    composerViewportSnapshotRef.current = captureComposerViewportSnapshot(composerElement);
-    preserveComposerViewportRef.current = shouldPreserveComposerViewport(composerElement);
-  }, [messages]);
-
-  useEffect(() => {
-    const hash = location.hash || (typeof window !== "undefined" ? window.location.hash : "");
-    if (
-      !(
-        hash.startsWith("#comment-")
-        || hash.startsWith("#activity-")
-        || hash.startsWith("#run-")
-        || hash.startsWith("#interaction-")
-      )
-    ) return;
-    if (messages.length === 0 || lastScrolledHashRef.current === hash) return;
-    const targetId = hash.slice(1);
-    let cancelled = false;
-    const attemptScroll = (finalAttempt = false) => {
-      if (cancelled || lastScrolledHashRef.current === hash) return;
-      const didScroll = scrollToThreadAnchor(targetId, { align: "center", behavior: "smooth" });
-      if (!didScroll) return;
-      if (finalAttempt || !useVirtualizedThread || document.getElementById(targetId)) {
-        lastScrolledHashRef.current = hash;
-      }
-    };
-
-    attemptScroll();
-    const frame = requestAnimationFrame(() => attemptScroll());
-    const timeout = window.setTimeout(() => attemptScroll(true), 250);
-    return () => {
-      cancelled = true;
-      cancelAnimationFrame(frame);
-      window.clearTimeout(timeout);
-    };
-  }, [location.hash, messageAnchorIndex, messages, useVirtualizedThread]);
-
-  function jumpToLatestFallback() {
-    if (useVirtualizedThread) {
-      virtualizedThreadRef.current?.scrollToLatest({ behavior: "smooth" });
-      return;
-    }
-    bottomAnchorRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
-  }
-
-  // Lands on the latest `comment-*` row and then drives the scroll the rest
-  // of the way home as the virtualizer's per-row measurements arrive.
-  //
-  // The virtualizer uses its configured row estimate for unmeasured rows. On long threads
-  // with tall markdown comments (PAP-2536 et al.), totalSize is hugely
-  // underestimated until rows render and get measured. A single scroll
-  // lands above the actual bottom; rendered rows then expand, the layout
-  // grows, and the user has to keep clicking Jump-to-latest to walk closer
-  // to the real bottom. The convergence loop below issues `scrollIntoView`
-  // on the latest comment element on every tick until the DOM bottom of
-  // that element is at the scroll container's bottom (or scroll position
-  // and content height stop changing).
-  function scrollToLatestCommentWithSettle(messageSnapshot: readonly ThreadMessage[] = latestMessagesRef.current) {
-    const latestCommentIndex = findLatestCommentMessageIndex(messageSnapshot);
-    if (latestCommentIndex < 0) {
-      jumpToLatestFallback();
-      return;
-    }
-    const latestCommentAnchor = issueChatMessageAnchorId(messageSnapshot[latestCommentIndex]);
-    if (!latestCommentAnchor) {
-      jumpToLatestFallback();
-      return;
-    }
-
-    const initial = scrollToThreadAnchor(
-      latestCommentAnchor,
-      { align: "end", behavior: "smooth" },
-      messageSnapshot,
-    );
-    if (!initial) {
-      jumpToLatestFallback();
-      return;
-    }
-
-    if (typeof window === "undefined") return;
-
-    const startedAt = (typeof performance !== "undefined" ? performance.now() : Date.now());
-    const MAX_DURATION_MS = 4000;
-    const TICK_MS = 80;
-    const TOLERANCE_PX = 4;
-
-    clearLatestSettleTimeouts();
-    const resolveScrollContainer = (): HTMLElement | null =>
-      (document.getElementById("main-content") as HTMLElement | null);
-    const cancelTarget = resolveScrollContainer() ?? window;
-
-    let lastScrollTop = -1;
-    let lastScrollHeight = -1;
-    let stableTicks = 0;
-    let cancelled = false;
-
-    const cancel = () => {
-      cancelled = true;
-    };
-
-    const cleanup = () => {
-      cancelTarget.removeEventListener("wheel", cancel);
-      cancelTarget.removeEventListener("touchstart", cancel);
-    };
-
-    cancelTarget.addEventListener("wheel", cancel, { once: true, passive: true });
-    cancelTarget.addEventListener("touchstart", cancel, { once: true, passive: true });
-    latestSettleCleanupRef.current = cleanup;
-
-    const finish = () => {
-      cleanup();
-      latestSettleCleanupRef.current = null;
-      for (const timeout of latestSettleTimeoutsRef.current) {
-        window.clearTimeout(timeout);
-      }
-      latestSettleTimeoutsRef.current = [];
-    };
-
-    const scheduleTick = (delay: number) => {
-      const timeout = window.setTimeout(() => {
-        latestSettleTimeoutsRef.current = latestSettleTimeoutsRef.current.filter((entry) => entry !== timeout);
-        tick();
-      }, delay);
-      latestSettleTimeoutsRef.current.push(timeout);
-    };
-
-    const tick = () => {
-      const now = (typeof performance !== "undefined" ? performance.now() : Date.now());
-      if (cancelled || now - startedAt > MAX_DURATION_MS) {
-        finish();
-        return;
-      }
-
-      if (typeof document === "undefined") {
-        finish();
-        return;
-      }
-
-      const el = document.getElementById(latestCommentAnchor);
-      if (!el) {
-        // Row hasn't been rendered into the virtualizer's buffer yet — nudge
-        // the offset (instant) so it gets mounted, then keep settling.
-        virtualizedThreadRef.current?.scrollToIndex(latestCommentIndex, {
-          align: "end",
-          behavior: "auto",
-        });
-        scheduleTick(TICK_MS);
-        return;
-      }
-
-      const container = resolveScrollContainer();
-      const containerBottom = container
-        ? container.getBoundingClientRect().bottom
-        : window.innerHeight;
-      const elBottom = el.getBoundingClientRect().bottom;
-      const offBottom = elBottom - containerBottom;
-
-      if (Math.abs(offBottom) > TOLERANCE_PX) {
-        el.scrollIntoView({ behavior: "smooth", block: "end" });
-      }
-
-      const currentScrollTop = container?.scrollTop ?? window.scrollY;
-      const currentScrollHeight = container?.scrollHeight ?? document.documentElement.scrollHeight;
-      const scrollStable = Math.abs(currentScrollTop - lastScrollTop) < 1;
-      const heightStable = currentScrollHeight === lastScrollHeight;
-      const atBottom = Math.abs(offBottom) <= TOLERANCE_PX;
-      if (scrollStable && heightStable && atBottom) {
-        stableTicks += 1;
-        if (stableTicks >= 3) {
-          finish();
-          return;
-        }
-      } else {
-        stableTicks = 0;
-      }
-      lastScrollTop = currentScrollTop;
-      lastScrollHeight = currentScrollHeight;
-      scheduleTick(TICK_MS);
-    };
-
-    // Hold the first iteration off for one frame so the initial smooth
-    // scroll has begun (and the virtualizer has rendered the buffer around
-    // the target) before we start settling.
-    scheduleTick(120);
-  }
-
-  function handleJumpToLatest() {
-    if (onRefreshLatestComments) {
-      // Refetching the comments query (page 0 first) brings any comment that
-      // arrived after the initial load — including ones live updates may
-      // have missed during reconnects — into the loaded set before we
-      // resolve the latest target. Otherwise we'd land on the latest
-      // *loaded* comment but not the absolute newest. (PAP-2672 follow-up.)
-      const refreshed = onRefreshLatestComments();
-      if (refreshed && typeof (refreshed as Promise<unknown>).then === "function") {
-        (refreshed as Promise<unknown>).then(
-          () => scrollToLatestCommentWithSettle(latestMessagesRef.current),
-          () => scrollToLatestCommentWithSettle(latestMessagesRef.current),
-        );
-        return;
-      }
-    }
-    scrollToLatestCommentWithSettle(latestMessagesRef.current);
-  }
 
   const stableOnVote = useStableEvent(onVote);
   const stableOnStopRun = useStableEvent(onStopRun);
@@ -1971,7 +1647,7 @@ export function IssueChatThread({
             data-testid="issue-chat-composer-dock"
             // The safe-area CSS env offset keeps the sticky composer clear of
             // mobile browser chrome; keep it local until a shared dock utility exists.
-            className="sticky bottom-[calc(env(safe-area-inset-bottom)+20px)] z-20 space-y-2 bg-gradient-to-t from-background via-background/95 to-background/0 pt-6"
+            className="issue-chat-composer-dock sticky z-20 space-y-2 bg-gradient-to-t from-background via-background/95 to-background/0 pt-6"
           >
             <IssueChatComposer
               ref={composerRef}

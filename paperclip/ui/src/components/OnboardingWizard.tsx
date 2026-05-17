@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef, useCallback, useMemo } from "react";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import type { AdapterEnvironmentTestResult } from "@paperclipai/shared";
 import { useLocation, useNavigate, useParams } from "@/lib/router";
 import { useDialog } from "../context/DialogContext";
@@ -14,13 +14,8 @@ import { queryKeys } from "../lib/queryKeys";
 import { Dialog, DialogPortal } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { TheftSplitCanvasFormTemplate } from "@/components/theft/templates/TheftSplitCanvasFormTemplate";
-import { extractProviderIdWithFallback } from "../lib/model-utils";
 import { getUIAdapter } from "../adapters";
-import { listUIAdapters } from "../adapters";
-import { isVisualAdapterChoice } from "../adapters/metadata";
 import { useDisabledAdaptersSync } from "../adapters/use-disabled-adapters";
-import { useAdapterCapabilities } from "../adapters/use-adapter-capabilities";
-import { getAdapterDisplay } from "../adapters/adapter-display-registry";
 import { defaultCreateValues } from "./agent-config-defaults";
 import { parseOnboardingGoalInput } from "../lib/onboarding-goal";
 import {
@@ -29,7 +24,6 @@ import {
   selectDefaultCompanyGoalId
 } from "../lib/onboarding-launch";
 import {
-  ONBOARDING_STAGE_LABELS,
   type OnboardingStage,
   getOnboardingStageGoalTemplate,
   getOnboardingStageTaskTemplate,
@@ -59,15 +53,12 @@ import {
 } from "./onboarding/OnboardingChrome";
 import { PlanReviewForm } from "./onboarding/PlanReviewForm";
 import { TaskStepForm } from "./onboarding/TaskStepForm";
-import type { AdapterChoice, OnboardingStep as Step } from "./onboarding/types";
+import type { OnboardingStep as Step } from "./onboarding/types";
+import { useOnboardingAdapterSelection } from "./onboarding/useOnboardingAdapterSelection";
+import { useOnboardingPlanSections } from "./onboarding/useOnboardingPlanSections";
 import {
-  Rocket,
   X,
-  Users,
   CircleDot,
-  Target,
-  LockKeyhole,
-  Trophy,
 } from "lucide-react";
 
 
@@ -208,39 +199,22 @@ export function OnboardingWizard() {
     if (step === 3) autoResizeTextarea();
   }, [step, taskDescription, autoResizeTextarea]);
 
-  const { data: adapterModels } = useQuery({
-    // The wizard doesn't expose an environment selector, so models always
-    // resolve against the local Paperclip host (environmentId = null).
-    queryKey: createdCompanyId
-      ? queryKeys.agents.adapterModels(createdCompanyId, adapterType, null)
-      : ["agents", "none", "adapter-models", adapterType, null],
-    queryFn: () => agentsApi.adapterModels(createdCompanyId!, adapterType, { environmentId: null }),
-    enabled: Boolean(createdCompanyId) && effectiveOnboardingOpen && step === 2
+  const {
+    selectedModel,
+    filteredModels,
+    groupedModels,
+    recommendedAdapters,
+    moreAdapters,
+    isLocalAdapter,
+  } = useOnboardingAdapterSelection({
+    createdCompanyId,
+    effectiveOnboardingOpen,
+    step,
+    adapterType,
+    model,
+    disabledTypes,
+    modelSearch,
   });
-  const getCapabilities = useAdapterCapabilities();
-  const adapterCaps = getCapabilities(adapterType);
-  const isLocalAdapter = adapterCaps.supportsInstructionsBundle || adapterCaps.supportsSkills || adapterCaps.supportsLocalAgentJwt;
-
-  // Build adapter grids dynamically from the UI registry + display metadata.
-  // External/plugin adapters automatically appear with generic defaults.
-  const { recommendedAdapters, moreAdapters } = useMemo((): {
-    recommendedAdapters: AdapterChoice[];
-    moreAdapters: AdapterChoice[];
-  } => {
-    const SYSTEM_ADAPTER_TYPES = new Set(["process", "http"]);
-    const all = listUIAdapters()
-      .filter((a) =>
-        !SYSTEM_ADAPTER_TYPES.has(a.type) &&
-        !disabledTypes.has(a.type) &&
-        isVisualAdapterChoice(a.type)
-      )
-      .map((a) => ({ ...getAdapterDisplay(a.type), type: a.type }));
-
-    return {
-      recommendedAdapters: all.filter((a) => a.recommended),
-      moreAdapters: all.filter((a) => !a.recommended),
-    };
-  }, [disabledTypes]);
   const COMMAND_PLACEHOLDERS: Record<string, string> = {
     claude_local: "claude",
     codex_local: "codex",
@@ -259,7 +233,6 @@ export function OnboardingWizard() {
     setAdapterEnvError(null);
   }, [step, adapterType, model, command, args, url]);
 
-  const selectedModel = (adapterModels ?? []).find((m) => m.id === model);
   const hasAnthropicApiKeyOverrideCheck =
     adapterEnvResult?.checks.some(
       (check) =>
@@ -269,92 +242,17 @@ export function OnboardingWizard() {
     adapterType === "claude_local" &&
     adapterEnvResult?.status === "fail" &&
     hasAnthropicApiKeyOverrideCheck;
-  const filteredModels = useMemo(() => {
-    const query = modelSearch.trim().toLowerCase();
-    return (adapterModels ?? []).filter((entry) => {
-      if (!query) return true;
-      const provider = extractProviderIdWithFallback(entry.id, "");
-      return (
-        entry.id.toLowerCase().includes(query) ||
-        entry.label.toLowerCase().includes(query) ||
-        provider.toLowerCase().includes(query)
-      );
-    });
-  }, [adapterModels, modelSearch]);
-  const groupedModels = useMemo(() => {
-    if (adapterType !== "opencode_local") {
-      return [
-        {
-          provider: "models",
-          entries: [...filteredModels].sort((a, b) => a.id.localeCompare(b.id))
-        }
-      ];
-    }
-    const groups = new Map<string, Array<{ id: string; label: string }>>();
-    for (const entry of filteredModels) {
-      const provider = extractProviderIdWithFallback(entry.id);
-      const bucket = groups.get(provider) ?? [];
-      bucket.push(entry);
-      groups.set(provider, bucket);
-    }
-    return Array.from(groups.entries())
-      .sort(([a], [b]) => a.localeCompare(b))
-      .map(([provider, entries]) => ({
-        provider,
-        entries: [...entries].sort((a, b) => a.id.localeCompare(b.id))
-      }));
-  }, [filteredModels, adapterType]);
   const stageTaskTemplate = useMemo(
     () => getOnboardingStageTaskTemplate(companyStage),
     [companyStage],
   );
-  const planReviewTitle = companyName.trim() || "New company";
-  const planObjective =
-    companyGoal.trim() ||
-    `Turn ${planReviewTitle} into a focused ${ONBOARDING_STAGE_LABELS[companyStage].toLowerCase()} company with a clear first task, department ownership, and Library output.`;
-  const planSections = [
-    {
-      title: "Objective",
-      icon: Target,
-      body: planObjective,
-    },
-    {
-      title: "Customer",
-      icon: Users,
-      bullets: [
-        "Primary: founders, operators, or teams building with local-first AI.",
-        "Secondary: technical teams that need control, speed, and durable artifacts.",
-        "Keep the first audience narrow enough for the Operator to route real work.",
-      ],
-    },
-    {
-      title: "Constraints",
-      icon: LockKeyhole,
-      bullets: [
-        "Local runtime remains the default control plane.",
-        "Founder approval stays in the loop before important decisions.",
-        `${DEPARTMENT_SEED_SPECS.length} departments activate with starter work and shared context.`,
-      ],
-    },
-    {
-      title: "Go-to-market",
-      icon: Rocket,
-      bullets: [
-        stageTaskTemplate.taskTitle,
-        "Route execution through departments, not a generic agent dashboard.",
-        "Promote useful results into the Library as company memory.",
-      ],
-    },
-    {
-      title: "First outcomes",
-      icon: Trophy,
-      bullets: [
-        taskTitle || stageTaskTemplate.taskTitle,
-        "Operator, roadmap, and departments ready in Mission Control.",
-        "First task queued with review, output, and next-move tracking.",
-      ],
-    },
-  ];
+  const { planObjective, planSections } = useOnboardingPlanSections({
+    companyName,
+    companyGoal,
+    companyStage,
+    taskTitle,
+    stageTaskTemplate,
+  });
 
   useEffect(() => {
     if (taskTemplateCustomized) return;

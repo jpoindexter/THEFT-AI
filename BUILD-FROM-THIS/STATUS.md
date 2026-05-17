@@ -24,27 +24,37 @@ Recent pushed checkpoints:
 - `a33593a` / `theft-issue-tree-pause-banner-20260517` — extracted pause/subtree banner.
 - `4826e4f` / `theft-issue-attachments-section-20260517` — extracted attachments section.
 
+Current local modularization checkpoint:
+
+- Extracted issue chat latest-scroll and hash/composer-spacer control into route-local hooks.
+- Extracted issue document cards, revision menus, draft form, and helper utilities into `issue-documents/`.
+- Extracted onboarding adapter-selection and plan-section derivation hooks.
+- Extracted issue-detail shared utilities and loading state.
+- Moved the issue-chat composer safe-area dock value into a semantic CSS utility.
+
 Latest verification for the active modularization slices:
 
 - `pnpm -C paperclip --filter @paperclipai/ui typecheck` passed.
-- `pnpm -C paperclip --filter @paperclipai/ui exec vitest run src/pages/IssueDetail.test.tsx` passed.
-- `pnpm design:gate` passed with 0 active-route findings and 17 reviewed runtime exceptions.
-- `node paperclip/scripts/smoke/theft-mvp-route-smoke.mjs --company-prefix THEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA --screenshot-dir /private/tmp/theft-issue-attachments-section-smoke` passed all active MVP routes with no horizontal overflow.
+- Focused Vitest for issue chat, issue documents, and issue detail passed: 78 tests across 4 files.
+- `pnpm design:gate` passed with 0 active-route findings and 15 reviewed runtime exceptions.
+- `node paperclip/scripts/smoke/theft-mvp-route-smoke.mjs --screenshot-dir /private/tmp/theft-ui-check` passed all active MVP routes with no horizontal overflow.
+- `git diff --check` passed.
 
 Remaining high-value maintainability work:
 
-- `IssueDetail.tsx` is reduced from over 3.3k lines to about 2.9k lines, but it is still the largest active page.
-- `IssueChatThread.tsx` remains about 2.1k lines.
-- `IssueDocumentsSection.tsx` remains about 1.2k lines.
-- `OnboardingWizard.tsx` remains about 1k lines.
+- `IssueDetail.tsx` is down to 2,748 lines, but it is still the largest active page.
+- `IssueChatThread.tsx` is down to 1,675 lines.
+- `OnboardingWizard.tsx` is down to 894 lines.
+- `IssueDocumentsSection.tsx` is down to 712 lines.
 - `index.css` is large because it is the current token/source-of-truth file; do not split it casually before token ownership is fully stable.
 
 Next best path:
 
-1. Continue extracting presentation organisms from `IssueDetail.tsx` while preserving runtime behavior.
-2. Split `IssueChatThread.tsx` fallback/error-boundary and latest-scroll controller next.
-3. Then split `IssueDocumentsSection.tsx` and `OnboardingWizard.tsx`.
-4. Only after those pass gates, revisit broad visual polish. The current priority is architecture/template cleanup, not another visual rewrite.
+1. Continue extracting presentation organisms and action panels from `IssueDetail.tsx` while preserving runtime behavior.
+2. Split remaining `IssueChatThread.tsx` message-row/render orchestration.
+3. Split `OnboardingWizard.tsx` launch/mutation orchestration and remaining step render modules.
+4. Split `IssueDocumentsSection.tsx` query/mutation/draft orchestration.
+5. Only after those pass gates, revisit broad visual polish. The current priority is architecture/template cleanup, not another visual rewrite.
 
 THEFT should become one local app: Paperclip runtime/control plane as the tracked host, with THEFT design, staged onboarding, 8-department company setup, roadmap/canvas, Library, and local skills on top.
 

@@ -1882,7 +1882,7 @@ describe("IssueChatThread", () => {
     const dock = container.querySelector('[data-testid="issue-chat-composer-dock"]') as HTMLDivElement | null;
     expect(dock).not.toBeNull();
     expect(dock?.className).toContain("sticky");
-    expect(dock?.className).toContain("bottom-[calc(env(safe-area-inset-bottom)+20px)]");
+    expect(dock?.className).toContain("issue-chat-composer-dock");
     expect(dock?.className).toContain("z-20");
 
     const composer = container.querySelector('[data-testid="issue-chat-composer"]') as HTMLDivElement | null;

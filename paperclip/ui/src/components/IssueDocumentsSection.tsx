@@ -10,128 +10,29 @@ import type {
 } from "@paperclipai/shared";
 import { isSystemIssueDocumentKey } from "@paperclipai/shared";
 import { useLocation } from "@/lib/router";
-import { ApiError } from "../api/client";
 import { issuesApi } from "../api/issues";
 import { useAutosaveIndicator } from "../hooks/useAutosaveIndicator";
 import { deriveDocumentRevisionState } from "../lib/document-revisions";
 import { queryKeys } from "../lib/queryKeys";
-import { cn, relativeTime } from "../lib/utils";
-import { FoldCurtain } from "./FoldCurtain";
-import { MarkdownBody } from "./MarkdownBody";
-import { MarkdownEditor, type MentionOption } from "./MarkdownEditor";
-import { OutputFeedbackButtons } from "./OutputFeedbackButtons";
+import type { MentionOption } from "./MarkdownEditor";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuRadioGroup,
-  DropdownMenuRadioItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Check, ChevronDown, ChevronRight, Copy, Diff, Download, FilePenLine, FileText, MoreHorizontal, Plus, Trash2, X } from "lucide-react";
+import { Plus } from "lucide-react";
 import { DocumentDiffModal } from "./DocumentDiffModal";
-
-type DraftState = {
-  key: string;
-  title: string;
-  body: string;
-  baseRevisionId: string | null;
-  isNew: boolean;
-};
-
-type DocumentConflictState = {
-  key: string;
-  serverDocument: IssueDocument;
-  localDraft: DraftState;
-  showRemote: boolean;
-};
-
-const DOCUMENT_AUTOSAVE_DEBOUNCE_MS = 900;
-const DOCUMENT_KEY_PATTERN = /^[a-z0-9][a-z0-9_-]*$/;
-const getFoldedDocumentsStorageKey = (issueId: string) => `paperclip:issue-document-folds:${issueId}`;
-
-function loadFoldedDocumentKeys(issueId: string) {
-  if (typeof window === "undefined") return [];
-  try {
-    const raw = window.localStorage.getItem(getFoldedDocumentsStorageKey(issueId));
-    if (!raw) return [];
-    const parsed = JSON.parse(raw);
-    return Array.isArray(parsed) ? parsed.filter((value): value is string => typeof value === "string") : [];
-  } catch {
-    return [];
-  }
-}
-
-function saveFoldedDocumentKeys(issueId: string, keys: string[]) {
-  if (typeof window === "undefined") return;
-  window.localStorage.setItem(getFoldedDocumentsStorageKey(issueId), JSON.stringify(keys));
-}
-
-function renderFoldableBody(body: string, className?: string) {
-  return (
-    <FoldCurtain>
-      <MarkdownBody className={className} softBreaks={false}>{body}</MarkdownBody>
-    </FoldCurtain>
-  );
-}
-
-function isPlanKey(key: string) {
-  return key.trim().toLowerCase() === "plan";
-}
-
-function titlesMatchKey(title: string | null | undefined, key: string) {
-  return (title ?? "").trim().toLowerCase() === key.trim().toLowerCase();
-}
-
-function isDocumentConflictError(error: unknown) {
-  return error instanceof ApiError && error.status === 409;
-}
-
-function downloadDocumentFile(key: string, body: string) {
-  const blob = new Blob([body], { type: "text/markdown;charset=utf-8" });
-  const url = URL.createObjectURL(blob);
-  const anchor = document.createElement("a");
-  anchor.href = url;
-  anchor.download = `${key}.md`;
-  document.body.appendChild(anchor);
-  anchor.click();
-  anchor.remove();
-  URL.revokeObjectURL(url);
-}
-
-function getRevisionActorLabel(revision: DocumentRevision) {
-  if (revision.createdByUserId) return "board";
-  if (revision.createdByAgentId) return "agent";
-  return "system";
-}
-
-function documentHasUnsavedChanges(doc: IssueDocument, draft: DraftState | null) {
-  if (!draft || draft.isNew || draft.key !== doc.key) return false;
-  return draft.body !== doc.body || (doc.title ?? "") !== draft.title;
-}
-
-function toDocumentSummary(document: IssueDocument) {
-  return {
-    id: document.id,
-    companyId: document.companyId,
-    issueId: document.issueId,
-    key: document.key,
-    title: document.title,
-    format: document.format,
-    latestRevisionId: document.latestRevisionId,
-    latestRevisionNumber: document.latestRevisionNumber,
-    createdByAgentId: document.createdByAgentId,
-    createdByUserId: document.createdByUserId,
-    updatedByAgentId: document.updatedByAgentId,
-    updatedByUserId: document.updatedByUserId,
-    createdAt: document.createdAt,
-    updatedAt: document.updatedAt,
-  };
-}
+import { IssueDocumentCard } from "./issue-documents/IssueDocumentCard";
+import { LegacyPlanDocumentCard } from "./issue-documents/LegacyPlanDocumentCard";
+import { NewIssueDocumentDraftForm } from "./issue-documents/NewIssueDocumentDraftForm";
+import {
+  DOCUMENT_AUTOSAVE_DEBOUNCE_MS,
+  DOCUMENT_KEY_PATTERN,
+  documentHasUnsavedChanges,
+  isDocumentConflictError,
+  isPlanKey,
+  loadFoldedDocumentKeys,
+  saveFoldedDocumentKeys,
+  toDocumentSummary,
+  type DocumentConflictState,
+  type DraftState,
+} from "./issue-documents/IssueDocumentUtils";
 
 export function IssueDocumentsSection({
   issue,
@@ -714,479 +615,83 @@ export function IssueDocumentsSection({
 
       {error && <p className="text-xs text-destructive">{error}</p>}
 
-      {draft?.isNew && (
-        <div
-          className="space-y-3 rounded-lg border border-border bg-accent/10 p-3"
+      {draft?.isNew ? (
+        <NewIssueDocumentDraftForm
+          draft={draft}
+          keyError={newDocumentKeyError}
+          isSaving={upsertDocument.isPending}
+          mentions={mentions}
+          imageUploadHandler={imageUploadHandler}
+          setDraft={setDraft}
+          onCancel={cancelDraft}
+          onCommit={() => void commitDraft(draft, { clearAfterSave: false, trackAutosave: false })}
           onBlurCapture={handleDraftBlur}
           onKeyDown={handleDraftKeyDown}
-        >
-          <Input
-            autoFocus
-            value={draft.key}
-            onChange={(event) =>
-              setDraft((current) => current ? { ...current, key: event.target.value.toLowerCase() } : current)
-            }
-            placeholder="Document key"
-          />
-          {newDocumentKeyError && (
-            <p className="text-xs text-destructive">{newDocumentKeyError}</p>
-          )}
-          {!isPlanKey(draft.key) && (
-            <Input
-              value={draft.title}
-              onChange={(event) =>
-                setDraft((current) => current ? { ...current, title: event.target.value } : current)
-              }
-              placeholder="Optional title"
-            />
-          )}
-          <MarkdownEditor
-            value={draft.body}
-            onChange={(body) =>
-              setDraft((current) => current ? { ...current, body } : current)
-            }
-            placeholder="Markdown body"
-            bordered={false}
-            className="bg-transparent"
-            contentClassName="min-h-56 text-base leading-7"
-            mentions={mentions}
-            imageUploadHandler={imageUploadHandler}
-            onSubmit={() => void commitDraft(draft, { clearAfterSave: false, trackAutosave: false })}
-          />
-          <div className="flex items-center justify-end gap-2">
-            <Button variant="outline" size="sm" onClick={cancelDraft}>
-              <X className="mr-1.5 h-3.5 w-3.5" />
-              Cancel
-            </Button>
-            <Button
-              size="sm"
-              onClick={() => void commitDraft(draft, { clearAfterSave: false, trackAutosave: false })}
-              disabled={upsertDocument.isPending}
-            >
-              {upsertDocument.isPending ? "Saving..." : "Create document"}
-            </Button>
-          </div>
-        </div>
-      )}
+        />
+      ) : null}
 
       {!hasRealPlan && issue.legacyPlanDocument ? (
-        <div
-          id="document-plan"
-          className={cn(
-            "rounded-lg border border-amber-500/30 bg-amber-500/5 p-3 transition-colors duration-1000",
-            highlightDocumentKey === "plan" && "border-primary/50 bg-primary/5",
-          )}
-        >
-          <div className="mb-2 flex items-center gap-2">
-            <FileText className="h-4 w-4 text-amber-600" />
-            <span className="rounded-full border border-amber-500/30 px-2 py-0.5 font-mono text-nano uppercase tracking-widest text-amber-700 dark:text-amber-300">
-              PLAN
-            </span>
-          </div>
-          {renderFoldableBody(issue.legacyPlanDocument.body, documentBodyContentClassName)}
-        </div>
+        <LegacyPlanDocumentCard
+          body={issue.legacyPlanDocument.body}
+          highlighted={highlightDocumentKey === "plan"}
+          bodyClassName={documentBodyContentClassName}
+        />
       ) : null}
 
       <div className="space-y-3">
-        {sortedDocuments.map((doc) => {
-          const activeDraft = draft?.key === doc.key && !draft.isNew ? draft : null;
-          const activeConflict = documentConflict?.key === doc.key ? documentConflict : null;
-          const isFolded = foldedDocumentKeys.includes(doc.key);
-          const rawRevisionHistory = getDocumentRevisions(doc.key);
-          const revisionState = deriveDocumentRevisionState(doc, rawRevisionHistory);
-          const revisionHistory = revisionState.revisions;
-          const currentRevision = revisionState.currentRevision;
-          const selectedRevisionId = selectedRevisionIds[doc.key] ?? null;
-          const selectedHistoricalRevision = selectedRevisionId
-            ? revisionHistory.find((revision) => revision.id === selectedRevisionId) ?? null
-            : null;
-          const isHistoricalPreview = Boolean(selectedHistoricalRevision);
-          const displayedTitle = selectedHistoricalRevision
-            ? selectedHistoricalRevision.title ?? ""
-            : activeDraft?.title ?? currentRevision.title ?? "";
-          const displayedBody = selectedHistoricalRevision?.body ?? activeDraft?.body ?? currentRevision.body;
-          const displayedRevisionNumber = selectedHistoricalRevision?.revisionNumber ?? currentRevision.revisionNumber;
-          const displayedUpdatedAt = selectedHistoricalRevision?.createdAt ?? currentRevision.createdAt;
-          const showTitle = !isPlanKey(doc.key) && !!displayedTitle.trim() && !titlesMatchKey(displayedTitle, doc.key);
-          const canVoteOnDocument = Boolean(doc.latestRevisionId && doc.updatedByAgentId && !doc.updatedByUserId && onVote);
-
-          return (
-            <div
-              key={doc.id}
-              id={`document-${doc.key}`}
-              className={cn(
-                "rounded-lg border border-border p-3 transition-colors duration-1000",
-                highlightDocumentKey === doc.key && "border-primary/50 bg-primary/5",
-              )}
-            >
-              <div className="flex items-start justify-between gap-3">
-                <div className="min-w-0">
-                  <div className="flex items-center gap-2 min-w-0">
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="icon-xs"
-                      className="size-5 rounded-sm text-muted-foreground hover:bg-accent/60 hover:text-foreground"
-                      onClick={() => toggleFoldedDocument(doc.key)}
-                      aria-label={isFolded ? `Expand ${doc.key} document` : `Collapse ${doc.key} document`}
-                      aria-expanded={!isFolded}
-                    >
-                      {isFolded ? <ChevronRight className="h-3.5 w-3.5" /> : <ChevronDown className="h-3.5 w-3.5" />}
-                    </Button>
-                    <span className="shrink-0 rounded-full border border-border px-2 py-0.5 font-mono text-nano uppercase tracking-widest text-muted-foreground">
-                      {doc.key}
-                    </span>
-                    <DropdownMenu
-                      open={revisionMenuOpenKey === doc.key}
-                      onOpenChange={(open) => setRevisionMenuOpenKey(open ? doc.key : null)}
-                    >
-                      <DropdownMenuTrigger asChild>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className={cn(
-                            "h-auto px-1.5 py-0 text-micro font-normal text-muted-foreground hover:text-foreground",
-                            isHistoricalPreview && "text-amber-300 hover:text-amber-200",
-                          )}
-                        >
-                          rev {displayedRevisionNumber}
-                          <ChevronDown className="h-3 w-3" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="start" className="w-72">
-                        <DropdownMenuLabel>Revision history</DropdownMenuLabel>
-                        {revisionMenuOpenKey === doc.key && isFetchingDocumentRevisions && rawRevisionHistory.length === 0 ? (
-                          <DropdownMenuItem disabled>Loading revisions...</DropdownMenuItem>
-                        ) : revisionHistory.length > 0 ? (
-                          <DropdownMenuRadioGroup value={selectedRevisionId ?? currentRevision.id ?? ""}>
-                            {revisionHistory.map((revision) => {
-                              const isCurrentRevision = revision.id === currentRevision.id;
-                              return (
-                                <DropdownMenuRadioItem
-                                  key={revision.id}
-                                  value={revision.id}
-                                  onSelect={() => previewRevision(doc, revision.id)}
-                                  className="items-start"
-                                >
-                                  <div className="flex min-w-0 flex-col">
-                                    <div className="flex items-center gap-2">
-                                      <span className="font-medium">rev {revision.revisionNumber}</span>
-                                      {isCurrentRevision ? (
-                                        <span className="rounded-full border border-border px-1.5 py-0.5 text-nano uppercase tracking-wide text-muted-foreground">
-                                          Current
-                                        </span>
-                                      ) : null}
-                                    </div>
-                                    <span className="text-xs text-muted-foreground">
-                                      {relativeTime(revision.createdAt)} • {getRevisionActorLabel(revision)}
-                                    </span>
-                                  </div>
-                                </DropdownMenuRadioItem>
-                              );
-                            })}
-                          </DropdownMenuRadioGroup>
-                        ) : (
-                          <DropdownMenuItem disabled>No revisions yet</DropdownMenuItem>
-                        )}
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                    <a
-                      href={`#document-${encodeURIComponent(doc.key)}`}
-                      className="truncate text-micro text-muted-foreground transition-colors hover:text-foreground hover:underline"
-                    >
-                      updated {relativeTime(displayedUpdatedAt)}
-                    </a>
-                  </div>
-                  {showTitle && <p className="mt-2 text-sm font-medium">{displayedTitle}</p>}
-                </div>
-                <div className="flex items-center gap-1 shrink-0">
-                  <Button
-                    variant="ghost"
-                    size="icon-xs"
-                    className={cn(
-                      "text-muted-foreground transition-colors",
-                      copiedDocumentKey === doc.key && "text-foreground",
-                    )}
-                    title={copiedDocumentKey === doc.key ? "Copied" : "Copy document"}
-                    onClick={() => void copyDocumentBody(doc.key, displayedBody)}
-                  >
-                    {copiedDocumentKey === doc.key ? (
-                      <Check className="h-3.5 w-3.5" />
-                    ) : (
-                      <Copy className="h-3.5 w-3.5" />
-                    )}
-                  </Button>
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button
-                        variant="ghost"
-                        size="icon-xs"
-                        className="text-muted-foreground"
-                        title="Document actions"
-                      >
-                        <MoreHorizontal className="h-3.5 w-3.5" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                      {!isHistoricalPreview ? (
-                        <DropdownMenuItem onClick={() => beginEdit(doc.key)}>
-                          <FilePenLine className="h-3.5 w-3.5" />
-                          Edit document
-                        </DropdownMenuItem>
-                      ) : null}
-                      {!isHistoricalPreview ? <DropdownMenuSeparator /> : null}
-                      <DropdownMenuItem
-                        onClick={() => downloadDocumentFile(doc.key, displayedBody)}
-                      >
-                        <Download className="h-3.5 w-3.5" />
-                        Download document
-                      </DropdownMenuItem>
-                      {doc.latestRevisionNumber > 1 ? (
-                        <DropdownMenuItem onClick={() => setDiffViewKey(doc.key)}>
-                          <Diff className="h-3.5 w-3.5" />
-                          View diff
-                        </DropdownMenuItem>
-                      ) : null}
-                      {canDeleteDocuments ? <DropdownMenuSeparator /> : null}
-                      {canDeleteDocuments ? (
-                        <DropdownMenuItem
-                          variant="destructive"
-                          onClick={() => setConfirmDeleteKey(doc.key)}
-                        >
-                          <Trash2 className="h-3.5 w-3.5" />
-                          Delete document
-                        </DropdownMenuItem>
-                      ) : null}
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </div>
-              </div>
-
-              {!isFolded ? (
-                <div
-                  className="mt-3 space-y-3"
-                  onBlurCapture={!isHistoricalPreview
-                    ? async (event) => {
-                        if (activeDraft) {
-                          await handleDraftBlur(event);
-                        }
-                      }
-                    : undefined}
-                  onKeyDown={!isHistoricalPreview
-                    ? async (event) => {
-                        if (activeDraft) {
-                          await handleDraftKeyDown(event);
-                        }
-                      }
-                    : undefined}
-                >
-                  {isHistoricalPreview && selectedHistoricalRevision && (
-                    <div className="rounded-md border border-amber-500/30 bg-amber-500/5 px-3 py-3">
-                      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-                        <div className="space-y-1">
-                          <p className="text-sm font-medium text-amber-200">
-                            Viewing revision {selectedHistoricalRevision.revisionNumber}
-                          </p>
-                          <p className="text-xs text-muted-foreground">
-                            This is a historical preview. Restoring it creates a new latest revision and keeps history append-only.
-                          </p>
-                        </div>
-                        <div className="flex flex-wrap items-center gap-2">
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => returnToLatestRevision(doc.key)}
-                          >
-                            Return to latest
-                          </Button>
-                          <Button
-                            size="sm"
-                            onClick={() => restoreDocumentRevision.mutate({
-                              key: doc.key,
-                              revisionId: selectedHistoricalRevision.id,
-                            })}
-                            disabled={restoreDocumentRevision.isPending}
-                          >
-                            {restoreDocumentRevision.isPending && restoreDocumentRevision.variables?.key === doc.key
-                              ? "Restoring..."
-                              : "Restore this revision"}
-                          </Button>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-                  {activeConflict && !isHistoricalPreview && (
-                    <div className="rounded-md border border-amber-500/30 bg-amber-500/5 px-3 py-3">
-                      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-                        <div className="space-y-1">
-                          <p className="text-sm font-medium text-amber-200">Out of date</p>
-                          <p className="text-xs text-muted-foreground">
-                            This document changed while you were editing. Your local draft is preserved and autosave is paused.
-                          </p>
-                        </div>
-                        <div className="flex flex-wrap items-center gap-2">
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() =>
-                              setDocumentConflict((current) =>
-                                current?.key === doc.key
-                                  ? { ...current, showRemote: !current.showRemote }
-                                  : current,
-                              )
-                            }
-                          >
-                            {activeConflict.showRemote ? "Hide remote" : "Review remote"}
-                          </Button>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => keepConflictedDraft(doc.key)}
-                          >
-                            Keep my draft
-                          </Button>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => reloadDocumentFromServer(doc.key)}
-                          >
-                            Reload remote
-                          </Button>
-                          <Button
-                            size="sm"
-                            onClick={() => void overwriteDocumentFromDraft(doc.key)}
-                            disabled={upsertDocument.isPending}
-                          >
-                            {upsertDocument.isPending ? "Saving..." : "Overwrite remote"}
-                          </Button>
-                        </div>
-                      </div>
-                      {activeConflict.showRemote && (
-                        <div className="mt-3 rounded-md border border-border/70 bg-background/60 p-3">
-                          <div className="mb-2 flex items-center gap-2 text-micro text-muted-foreground">
-                            <span>Remote revision {activeConflict.serverDocument.latestRevisionNumber}</span>
-                            <span>•</span>
-                            <span>updated {relativeTime(activeConflict.serverDocument.updatedAt)}</span>
-                          </div>
-                          {!isPlanKey(doc.key) && activeConflict.serverDocument.title ? (
-                            <p className="mb-2 text-sm font-medium">{activeConflict.serverDocument.title}</p>
-                          ) : null}
-                          {renderFoldableBody(activeConflict.serverDocument.body, "text-sm leading-7")}
-                        </div>
-                      )}
-                    </div>
-                  )}
-                  {activeDraft && !isPlanKey(doc.key) && !isHistoricalPreview && (
-                    <Input
-                      value={activeDraft.title}
-                      onChange={(event) => {
-                        markDocumentDirty(doc.key);
-                        setDraft((current) => current ? { ...current, title: event.target.value } : current);
-                      }}
-                      placeholder="Optional title"
-                    />
-                  )}
-                  <div
-                    className={`${documentBodyShellClassName} ${
-                      activeDraft || isHistoricalPreview ? "" : "rounded-md hover:bg-accent/10"
-                    }`}
-                  >
-                    {isHistoricalPreview ? (
-                      renderFoldableBody(displayedBody, documentBodyContentClassName)
-                    ) : activeDraft ? (
-                      <MarkdownEditor
-                        value={displayedBody}
-                        onChange={(body) => {
-                          markDocumentDirty(doc.key);
-                          setDraft((current) => {
-                            if (current && current.key === doc.key && !current.isNew) {
-                              return { ...current, body };
-                            }
-                            return current;
-                          });
-                        }}
-                        placeholder="Markdown body"
-                        bordered={false}
-                        className="bg-transparent"
-                        contentClassName={documentBodyContentClassName}
-                        mentions={mentions}
-                        imageUploadHandler={imageUploadHandler}
-                        onSubmit={() => void commitDraft(activeDraft ?? draft, { clearAfterSave: false, trackAutosave: true })}
-                      />
-                    ) : (
-                      renderFoldableBody(displayedBody, documentBodyContentClassName)
-                    )}
-                  </div>
-                  <div className="flex min-h-4 items-center justify-end px-1">
-                    <span
-                      className={`text-micro transition-opacity duration-150 ${
-                        isHistoricalPreview
-                          ? "text-amber-300"
-                          : activeConflict
-                          ? "text-amber-300"
-                          : autosaveState === "error"
-                            ? "text-destructive"
-                            : "text-muted-foreground"
-                      } ${activeDraft || isHistoricalPreview ? "opacity-100" : "opacity-0"}`}
-                    >
-                      {isHistoricalPreview
-                        ? "Viewing historical revision"
-                        : activeDraft
-                          ? activeConflict
-                          ? "Out of date"
-                          : autosaveDocumentKey === doc.key
-                            ? autosaveState === "saving"
-                              ? "Autosaving..."
-                              : autosaveState === "saved"
-                                ? "Saved"
-                                : autosaveState === "error"
-                                  ? "Could not save"
-                                  : ""
-                            : ""
-                          : ""}
-                    </span>
-                  </div>
-                  {canVoteOnDocument && doc.latestRevisionId ? (
-                    <OutputFeedbackButtons
-                      activeVote={feedbackVoteByTargetId.get(doc.latestRevisionId) ?? null}
-                      sharingPreference={feedbackDataSharingPreference}
-                      termsUrl={feedbackTermsUrl}
-                      onVote={(vote: FeedbackVoteValue, options?: { allowSharing?: boolean; reason?: string }) =>
-                        onVote?.(doc.latestRevisionId!, vote, options) ?? Promise.resolve()
-                      }
-                    />
-                  ) : null}
-                </div>
-              ) : null}
-
-              {confirmDeleteKey === doc.key && (
-                <div className="mt-3 flex items-center justify-between gap-3 rounded-md border border-destructive/20 bg-destructive/5 px-4 py-3">
-                  <p className="text-sm text-destructive font-medium">
-                    Delete this document? This cannot be undone.
-                  </p>
-                  <div className="flex items-center gap-2 shrink-0">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => setConfirmDeleteKey(null)}
-                      disabled={deleteDocument.isPending}
-                    >
-                      Cancel
-                    </Button>
-                    <Button
-                      variant="destructive"
-                      size="sm"
-                      onClick={() => deleteDocument.mutate(doc.key)}
-                      disabled={deleteDocument.isPending}
-                    >
-                      {deleteDocument.isPending ? "Deleting..." : "Delete"}
-                    </Button>
-                  </div>
-                </div>
-              )}
-            </div>
-          );
-        })}
+        {sortedDocuments.map((doc) => (
+          <IssueDocumentCard
+            key={doc.id}
+            document={doc}
+            activeDraft={draft?.key === doc.key && !draft.isNew ? draft : null}
+            activeConflict={documentConflict?.key === doc.key ? documentConflict : null}
+            rawRevisionHistory={getDocumentRevisions(doc.key)}
+            selectedRevisionId={selectedRevisionIds[doc.key] ?? null}
+            isRevisionMenuOpen={revisionMenuOpenKey === doc.key}
+            isFetchingDocumentRevisions={isFetchingDocumentRevisions}
+            highlighted={highlightDocumentKey === doc.key}
+            isFolded={foldedDocumentKeys.includes(doc.key)}
+            isCopied={copiedDocumentKey === doc.key}
+            canDeleteDocuments={canDeleteDocuments}
+            isConfirmingDelete={confirmDeleteKey === doc.key}
+            isDeleting={deleteDocument.isPending}
+            isSaving={upsertDocument.isPending}
+            isRestoring={restoreDocumentRevision.isPending && restoreDocumentRevision.variables?.key === doc.key}
+            autosaveState={autosaveState}
+            autosaveDocumentKey={autosaveDocumentKey}
+            bodyShellClassName={documentBodyShellClassName}
+            bodyContentClassName={documentBodyContentClassName}
+            mentions={mentions}
+            imageUploadHandler={imageUploadHandler}
+            feedbackDataSharingPreference={feedbackDataSharingPreference}
+            feedbackTermsUrl={feedbackTermsUrl}
+            activeFeedbackVote={doc.latestRevisionId ? feedbackVoteByTargetId.get(doc.latestRevisionId) ?? null : null}
+            onVote={onVote}
+            setDraft={setDraft}
+            commitDraft={commitDraft}
+            markDocumentDirty={markDocumentDirty}
+            onToggleFold={toggleFoldedDocument}
+            onRevisionMenuOpenChange={(key, open) => setRevisionMenuOpenKey(open ? key : null)}
+            onPreviewRevision={previewRevision}
+            onCopyDocumentBody={copyDocumentBody}
+            onBeginEdit={beginEdit}
+            onOpenDiff={setDiffViewKey}
+            onConfirmDelete={setConfirmDeleteKey}
+            onDelete={(key) => deleteDocument.mutate(key)}
+            onReturnToLatestRevision={returnToLatestRevision}
+            onRestoreRevision={(key, revisionId) => restoreDocumentRevision.mutate({ key, revisionId })}
+            onToggleConflictRemote={(key) =>
+              setDocumentConflict((current) =>
+                current?.key === key ? { ...current, showRemote: !current.showRemote } : current,
+              )
+            }
+            onKeepConflictedDraft={keepConflictedDraft}
+            onReloadDocumentFromServer={reloadDocumentFromServer}
+            onOverwriteDocumentFromDraft={(key) => void overwriteDocumentFromDraft(key)}
+            onDraftBlur={handleDraftBlur}
+            onDraftKeyDown={handleDraftKeyDown}
+          />
+        ))}
       </div>
 
       {diffViewKey && (() => {
