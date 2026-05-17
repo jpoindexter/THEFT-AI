@@ -10,7 +10,6 @@ import { useDialogActions } from "../context/DialogContext";
 import { usePanel } from "../context/PanelContext";
 import { useSidebar } from "../context/SidebarContext";
 import { useToastActions } from "../context/ToastContext";
-import { useBreadcrumbs } from "../context/BreadcrumbContext";
 import { assigneeValueFromSelection, suggestedCommentAssigneeValue } from "../lib/assignees";
 import { buildCompanyUserInlineOptions } from "../lib/company-members";
 import { queryKeys } from "../lib/queryKeys";
@@ -42,7 +41,6 @@ import type {
   CommentReassignment,
   IssueDetailComment,
 } from "../components/issue-detail/IssueDetailChatTypes";
-import { InboxMobileToolbar } from "../components/issue-detail/InboxMobileToolbar";
 import { IssueDetailPluginOutlets } from "../components/issue-detail/IssueDetailPluginOutlets";
 import { IssueDetailReviewHeader } from "../components/issue-detail/IssueDetailReviewHeader";
 import { IssueDetailSubIssuesSection } from "../components/issue-detail/IssueDetailSubIssuesSection";
@@ -65,6 +63,7 @@ import {
 import { useIssueDetailAttachments } from "../components/issue-detail/useIssueDetailAttachments";
 import { useIssueDetailChildIssues } from "../components/issue-detail/useIssueDetailChildIssues";
 import { useIssueDetailFeedback } from "../components/issue-detail/useIssueDetailFeedback";
+import { useIssueDetailInboxToolbar } from "../components/issue-detail/useIssueDetailInboxToolbar";
 import { useIssueDetailKeyboardShortcuts } from "../components/issue-detail/useIssueDetailKeyboardShortcuts";
 import { useIssueDetailLookups } from "../components/issue-detail/useIssueDetailLookups";
 import { useIssueDetailRouteEffects, useIssueDetailRouteState } from "../components/issue-detail/useIssueDetailRouteState";
@@ -96,7 +95,6 @@ export function IssueDetail() {
   const { selectedCompanyId } = useCompany();
   const { openNewIssue } = useDialogActions();
   const { openPanel, closePanel, panelVisible, setPanelVisible } = usePanel();
-  const { setMobileToolbar } = useBreadcrumbs();
   const queryClient = useQueryClient();
   const { pushToast } = useToastActions();
   const { isMobile } = useSidebar();
@@ -110,7 +108,6 @@ export function IssueDetail() {
     navigationType,
   } = useIssueDetailRouteState(issueId);
   const [moreOpen, setMoreOpen] = useState(false);
-  const [copied, setCopied] = useState(false);
   const [mobilePropsOpen, setMobilePropsOpen] = useState(false);
   const [detailTab, setDetailTab] = useState("related-work");
   const [handoffFocusSignal, setHandoffFocusSignal] = useState(0);
@@ -1071,6 +1068,12 @@ export function IssueDetail() {
     setDetailTab("chat");
     setPendingCommentComposerFocusKey((current) => current + 1);
   }, []);
+  const hideIssue = useCallback(() => {
+    updateIssue.mutate(
+      { hiddenAt: new Date().toISOString() },
+      { onSuccess: () => navigate("/issues/all") },
+    );
+  }, [navigate, updateIssue]);
   useIssueDetailKeyboardShortcuts({
     archiveIssueFromInbox,
     archivePending,
@@ -1079,6 +1082,20 @@ export function IssueDetail() {
     issueId: issue?.id,
     keyboardShortcutsEnabled,
     navigateToInbox,
+  });
+  const {
+    canArchiveFromInbox,
+    copied,
+    copyIssueToClipboard,
+  } = useIssueDetailInboxToolbar({
+    archivePending,
+    issue,
+    isFromInbox,
+    isMobile,
+    onArchive: archiveIssueFromInbox,
+    onHide: hideIssue,
+    onOpenProperties: () => setMobilePropsOpen(true),
+    sourceBreadcrumbHref: sourceBreadcrumb.href,
   });
 
   useEffect(() => {
@@ -1126,79 +1143,6 @@ export function IssueDetail() {
     if (detailTab !== "chat") return;
     commentComposerRef.current?.focus();
   }, [detailTab, pendingCommentComposerFocusKey]);
-
-  const copyIssueToClipboard = async () => {
-    if (!issue) return;
-    const decodeEntities = (text: string) => {
-      const el = document.createElement("textarea");
-      el.innerHTML = text;
-      return el.value;
-    };
-    const title = decodeEntities(issue.title);
-    const body = decodeEntities(issue.description ?? "");
-    const md = `# ${issue.identifier}: ${title}\n\n${body}`.trimEnd();
-    await navigator.clipboard.writeText(md);
-    setCopied(true);
-    pushToast({ title: "Copied to clipboard", tone: "success" });
-    setTimeout(() => setCopied(false), 2000);
-  };
-
-  // Gmail-style mobile toolbar when viewing an issue from inbox.
-  // Callbacks are stored in a ref so the effect deps stay stable and
-  // don't trigger an infinite render loop (useMutation results and
-  // non-memoized functions change identity every render).
-  const inboxToolbarCallbacksRef = useRef({
-    onArchive: () => {
-      if (!archiveFromInbox.isPending && issue?.id) archiveFromInbox.mutate(issue.id);
-    },
-    onCopy: () => copyIssueToClipboard(),
-    onProperties: () => setMobilePropsOpen(true),
-    onHide: () => {
-      updateIssue.mutate(
-        { hiddenAt: new Date().toISOString() },
-        { onSuccess: () => navigate("/issues/all") },
-      );
-    },
-  });
-  inboxToolbarCallbacksRef.current = {
-    onArchive: () => {
-      if (!archiveFromInbox.isPending && issue?.id) archiveFromInbox.mutate(issue.id);
-    },
-    onCopy: () => copyIssueToClipboard(),
-    onProperties: () => setMobilePropsOpen(true),
-    onHide: () => {
-      updateIssue.mutate(
-        { hiddenAt: new Date().toISOString() },
-        { onSuccess: () => navigate("/issues/all") },
-      );
-    },
-  };
-
-  const backHref = sourceBreadcrumb.href ?? "/inbox";
-  const showInboxToolbar = isMobile && isFromInbox;
-  const canArchiveFromInbox = isFromInbox && !!issue?.id && !issueHidden;
-
-  useEffect(() => {
-    if (!showInboxToolbar) {
-      setMobileToolbar(null);
-      return;
-    }
-
-    setMobileToolbar(
-      <InboxMobileToolbar
-        backHref={backHref}
-        issueId={issue?.id}
-        issueHidden={issueHidden}
-        archivePending={archivePending}
-        onArchive={() => inboxToolbarCallbacksRef.current.onArchive()}
-        onCopy={() => inboxToolbarCallbacksRef.current.onCopy()}
-        onProperties={() => inboxToolbarCallbacksRef.current.onProperties()}
-        onHide={() => inboxToolbarCallbacksRef.current.onHide()}
-      />,
-    );
-
-    return () => setMobileToolbar(null);
-  }, [showInboxToolbar, backHref, issue?.id, issueHidden, archivePending, setMobileToolbar]);
 
   const loadOlderComments = useCallback(() => {
     void fetchOlderComments();
@@ -1337,12 +1281,7 @@ export function IssueDetail() {
           onResumeSubtree={openResumeSubtreeControl}
           onCancelSubtree={openCancelSubtreeControl}
           onRestoreSubtree={openRestoreSubtreeControl}
-          onHideIssue={() => {
-            updateIssue.mutate(
-              { hiddenAt: new Date().toISOString() },
-              { onSuccess: () => navigate("/issues/all") },
-            );
-          }}
+          onHideIssue={hideIssue}
           onSaveTitle={(title) => updateIssue.mutateAsync({ title })}
           onSaveDescription={(description) => updateIssue.mutateAsync({ description })}
           onUploadDescriptionImage={handleUploadImageForMarkdown}
