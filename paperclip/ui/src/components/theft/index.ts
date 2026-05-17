@@ -23,6 +23,12 @@ export {
   OutcomesPanel,
   StrategyMapPanel,
 } from "./organisms/mission-control"
+export {
+  LibraryControls,
+  LibraryDetail,
+  LibraryShelf,
+  LibraryWorkspace,
+} from "./organisms/library"
 export { TechTreeStrategyMap } from "./organisms/tech-tree"
 export { TheftDetailReviewTemplate } from "./templates/TheftDetailReviewTemplate"
 export type { TheftDetailReviewTemplateProps } from "./templates/TheftDetailReviewTemplate"
