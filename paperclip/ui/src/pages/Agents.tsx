@@ -1,23 +1,27 @@
 import { useState, useEffect, useMemo } from "react";
-import { Link, useNavigate, useLocation } from "@/lib/router";
+import { useNavigate, useLocation } from "@/lib/router";
 import { useQuery } from "@tanstack/react-query";
-import { agentsApi, type OrgNode } from "../api/agents";
+import { agentsApi } from "../api/agents";
 import { heartbeatsApi } from "../api/heartbeats";
 import { useCompany } from "../context/CompanyContext";
 import { useDialogActions } from "../context/DialogContext";
 import { useBreadcrumbs } from "../context/BreadcrumbContext";
 import { useSidebar } from "../context/SidebarContext";
 import { queryKeys } from "../lib/queryKeys";
-import { StatusBadge } from "../components/StatusBadge";
-import { agentStatusDot, agentStatusDotDefault } from "../lib/status-colors";
-import { EntityRow } from "../components/EntityRow";
 import { EmptyState } from "../components/EmptyState";
 import { PageSkeleton } from "../components/PageSkeleton";
-import { relativeTime, cn, agentRouteRef, agentUrl } from "../lib/utils";
+import { cn } from "../lib/utils";
 import { PageTabBar } from "../components/PageTabBar";
 import { Tabs } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import {
+  AgentsListPanel,
+  AgentsOrgTree,
+  filterAgents,
+  filterOrgTree,
+  type FilterTab,
+} from "@/components/agents/AgentsViewParts";
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
@@ -25,53 +29,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Bot, Plus, List, GitBranch, SlidersHorizontal } from "lucide-react";
-import { AGENT_ROLE_LABELS, type Agent } from "@paperclipai/shared";
-
-import { getAdapterLabel } from "../adapters/adapter-display-registry";
-
-const roleLabels = AGENT_ROLE_LABELS as Record<string, string>;
-
-type FilterTab = "all" | "active" | "paused" | "error";
-
-const ORG_TREE_DEPTH_CLASSES = ["pl-0", "pl-6", "pl-12", "pl-16", "pl-20", "pl-24", "pl-28"];
-
-function orgTreeDepthClass(depth: number) {
-  return ORG_TREE_DEPTH_CLASSES[Math.min(Math.max(depth, 0), ORG_TREE_DEPTH_CLASSES.length - 1)];
-}
-
-function matchesFilter(status: string, tab: FilterTab, showTerminated: boolean): boolean {
-  if (status === "terminated") return showTerminated;
-  if (tab === "all") return true;
-  if (tab === "active") return status === "active" || status === "running" || status === "idle";
-  if (tab === "paused") return status === "paused";
-  if (tab === "error") return status === "error";
-  return true;
-}
-
-function filterAgents(agents: Agent[], tab: FilterTab, showTerminated: boolean): Agent[] {
-  return agents
-    .filter((a) => matchesFilter(a.status, tab, showTerminated))
-    .sort((a, b) => a.name.localeCompare(b.name));
-}
-
-function getConfiguredModel(agent: Agent): string | null {
-  const value = agent.adapterConfig?.model;
-  if (typeof value !== "string") return null;
-  const model = value.trim();
-  return model.length > 0 ? model : null;
-}
-
-function filterOrgTree(nodes: OrgNode[], tab: FilterTab, showTerminated: boolean): OrgNode[] {
-  return nodes
-    .reduce<OrgNode[]>((acc, node) => {
-      const filteredReports = filterOrgTree(node.reports, tab, showTerminated);
-      if (matchesFilter(node.status, tab, showTerminated) || filteredReports.length > 0) {
-        acc.push({ ...node, reports: filteredReports });
-      }
-      return acc;
-    }, [])
-    .sort((a, b) => a.name.localeCompare(b.name));
-}
+import type { Agent } from "@paperclipai/shared";
 
 export function Agents() {
   const { selectedCompanyId } = useCompany();
@@ -234,65 +192,7 @@ export function Agents() {
 
       {/* List view */}
       {effectiveView === "list" && filtered.length > 0 && (
-        <div className="border border-border">
-          {filtered.map((agent) => {
-            return (
-              <EntityRow
-                key={agent.id}
-                title={agent.name}
-                subtitle={`${roleLabels[agent.role] ?? agent.role}${agent.title ? ` - ${agent.title}` : ""}`}
-                to={agentUrl(agent)}
-                className={agent.pausedAt && tab !== "paused" ? "opacity-50" : ""}
-                leading={
-                  <span className="relative flex h-2.5 w-2.5">
-                    <span
-                      className={`absolute inline-flex h-full w-full rounded-full ${agentStatusDot[agent.status] ?? agentStatusDotDefault}`}
-                    />
-                  </span>
-                }
-                trailing={
-                  <div className="flex items-center gap-3">
-                    <span className="sm:hidden">
-                      {liveRunByAgent.has(agent.id) ? (
-                        <LiveRunIndicator
-                          agentRef={agentRouteRef(agent)}
-                          runId={liveRunByAgent.get(agent.id)!.runId}
-                          liveCount={liveRunByAgent.get(agent.id)!.liveCount}
-                        />
-                      ) : (
-                        <StatusBadge status={agent.status} />
-                      )}
-                    </span>
-                    <div className="hidden sm:flex items-center gap-3">
-                      {liveRunByAgent.has(agent.id) && (
-                        <LiveRunIndicator
-                          agentRef={agentRouteRef(agent)}
-                          runId={liveRunByAgent.get(agent.id)!.runId}
-                          liveCount={liveRunByAgent.get(agent.id)!.liveCount}
-                        />
-                      )}
-                      <span className="w-28 whitespace-nowrap text-left font-mono text-xs text-muted-foreground">
-                        {getAdapterLabel(agent.adapterType)}
-                      </span>
-                      <span
-                        className="w-36 truncate text-left font-mono text-xs text-muted-foreground"
-                        title={getConfiguredModel(agent) ?? undefined}
-                      >
-                        {getConfiguredModel(agent) ?? "—"}
-                      </span>
-                      <span className="text-xs text-muted-foreground w-16 text-right">
-                        {agent.lastHeartbeatAt ? relativeTime(agent.lastHeartbeatAt) : "—"}
-                      </span>
-                      <span className="w-20 flex justify-end">
-                        <StatusBadge status={agent.status} />
-                      </span>
-                    </div>
-                  </div>
-                }
-              />
-            );
-          })}
-        </div>
+        <AgentsListPanel agents={filtered} liveRunByAgent={liveRunByAgent} tab={tab} />
       )}
 
       {effectiveView === "list" && agents && agents.length > 0 && filtered.length === 0 && (
@@ -303,11 +203,12 @@ export function Agents() {
 
       {/* Org chart view */}
       {effectiveView === "org" && filteredOrg.length > 0 && (
-        <div className="border border-border py-1">
-          {filteredOrg.map((node) => (
-            <OrgTreeNode key={node.id} node={node} depth={0} agentMap={agentMap} liveRunByAgent={liveRunByAgent} tab={tab} />
-          ))}
-        </div>
+        <AgentsOrgTree
+          agentMap={agentMap}
+          liveRunByAgent={liveRunByAgent}
+          nodes={filteredOrg}
+          tab={tab}
+        />
       )}
 
       {effectiveView === "org" && orgTree && orgTree.length > 0 && filteredOrg.length === 0 && (
@@ -322,117 +223,5 @@ export function Agents() {
         </p>
       )}
     </div>
-  );
-}
-
-function OrgTreeNode({
-  node,
-  depth,
-  agentMap,
-  liveRunByAgent,
-  tab,
-}: {
-  node: OrgNode;
-  depth: number;
-  agentMap: Map<string, Agent>;
-  liveRunByAgent: Map<string, { runId: string; liveCount: number }>;
-  tab: FilterTab;
-}) {
-  const agent = agentMap.get(node.id);
-
-  const statusColor = agentStatusDot[node.status] ?? agentStatusDotDefault;
-
-  return (
-    <div className={orgTreeDepthClass(depth)}>
-      <Link
-        to={agent ? agentUrl(agent) : `/agents/${node.id}`}
-        className={cn("flex items-center gap-3 px-3 py-2 hover:bg-accent/30 transition-colors w-full text-left no-underline text-inherit", agent?.pausedAt && tab !== "paused" && "opacity-50")}
-      >
-        <span className="relative flex h-2.5 w-2.5 shrink-0">
-          <span className={`absolute inline-flex h-full w-full rounded-full ${statusColor}`} />
-        </span>
-        <div className="flex-1 min-w-0">
-          <span className="text-sm font-medium">{node.name}</span>
-          <span className="text-xs text-muted-foreground ml-2">
-            {roleLabels[node.role] ?? node.role}
-            {agent?.title ? ` - ${agent.title}` : ""}
-          </span>
-        </div>
-        <div className="flex items-center gap-3 shrink-0">
-          <span className="sm:hidden">
-            {liveRunByAgent.has(node.id) ? (
-              <LiveRunIndicator
-                agentRef={agent ? agentRouteRef(agent) : node.id}
-                runId={liveRunByAgent.get(node.id)!.runId}
-                liveCount={liveRunByAgent.get(node.id)!.liveCount}
-              />
-            ) : (
-              <StatusBadge status={node.status} />
-            )}
-          </span>
-          <div className="hidden sm:flex items-center gap-3">
-            {liveRunByAgent.has(node.id) && (
-              <LiveRunIndicator
-                agentRef={agent ? agentRouteRef(agent) : node.id}
-                runId={liveRunByAgent.get(node.id)!.runId}
-                liveCount={liveRunByAgent.get(node.id)!.liveCount}
-              />
-            )}
-            {agent && (
-              <>
-                <span className="w-28 whitespace-nowrap text-left font-mono text-xs text-muted-foreground">
-                  {getAdapterLabel(agent.adapterType)}
-                </span>
-                <span
-                  className="w-36 truncate text-left font-mono text-xs text-muted-foreground"
-                  title={getConfiguredModel(agent) ?? undefined}
-                >
-                  {getConfiguredModel(agent) ?? "—"}
-                </span>
-                <span className="text-xs text-muted-foreground w-16 text-right">
-                  {agent.lastHeartbeatAt ? relativeTime(agent.lastHeartbeatAt) : "—"}
-                </span>
-              </>
-            )}
-            <span className="w-20 flex justify-end">
-              <StatusBadge status={node.status} />
-            </span>
-          </div>
-        </div>
-      </Link>
-      {node.reports && node.reports.length > 0 && (
-        <div className="border-l border-border/50 ml-4">
-          {node.reports.map((child) => (
-            <OrgTreeNode key={child.id} node={child} depth={depth + 1} agentMap={agentMap} liveRunByAgent={liveRunByAgent} tab={tab} />
-          ))}
-        </div>
-      )}
-    </div>
-  );
-}
-
-function LiveRunIndicator({
-  agentRef,
-  runId,
-  liveCount,
-}: {
-  agentRef: string;
-  runId: string;
-  liveCount: number;
-}) {
-  return (
-    <Link
-      to={`/agents/${agentRef}/runs/${runId}`}
-      className="flex items-center gap-1.5 rounded-full bg-chart-1/10 px-2 py-0.5 no-underline transition-colors hover:bg-chart-1/20"
-      onClick={(e) => e.stopPropagation()}
-    >
-      <span className="relative flex h-2 w-2">
-        <span className="absolute inline-flex h-full w-full animate-pulse rounded-full bg-chart-1 opacity-75" />
-        <span className="relative inline-flex h-2 w-2 rounded-full bg-chart-1" />
-      </span>
-      <span className="text-xs font-medium text-chart-1">
-        Live{liveCount > 1 ? ` (${liveCount})` : ""}
-      </span>
-    </Link>
   );
 }
