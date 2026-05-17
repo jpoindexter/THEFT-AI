@@ -6,29 +6,20 @@ import { useCompany } from "../context/CompanyContext";
 import { useDialogActions } from "../context/DialogContext";
 import { usePanel } from "../context/PanelContext";
 import { useSidebar } from "../context/SidebarContext";
-import { assigneeValueFromSelection, suggestedCommentAssigneeValue } from "../lib/assignees";
-import { buildCompanyUserInlineOptions } from "../lib/company-members";
 import { queryKeys } from "../lib/queryKeys";
 import { keepPreviousDataForSameQueryTail } from "../lib/query-placeholder-data";
 import { getIssueDetailQueryOptions } from "../lib/issueDetailCache";
-import {
-  mergeIssueComments,
-  type OptimisticIssueComment,
-} from "../lib/optimistic-issue-comments";
+import type { OptimisticIssueComment } from "../lib/optimistic-issue-comments";
 import { IssueProperties } from "../components/IssueProperties";
 import { ScrollToBottom } from "../components/ScrollToBottom";
 import { IssueDetailArtifactsSection } from "../components/issue-detail/IssueDetailArtifactsSection";
 import { IssueDetailMobilePropertiesSheet } from "../components/issue-detail/IssueDetailMobilePropertiesSheet";
 import { IssueDetailTabs } from "../components/issue-detail/IssueDetailTabs";
-import type { IssueDetailComment } from "../components/issue-detail/IssueDetailChatTypes";
 import { IssueDetailPluginOutlets } from "../components/issue-detail/IssueDetailPluginOutlets";
 import { IssueDetailReviewHeader } from "../components/issue-detail/IssueDetailReviewHeader";
 import { IssueDetailSubIssuesSection } from "../components/issue-detail/IssueDetailSubIssuesSection";
 import { IssueDetailTitleSection } from "../components/issue-detail/IssueDetailTitleSection";
 import { IssueDetailLoadingState } from "../components/issue-detail/IssueDetailLoadingState";
-import {
-  truncate,
-} from "../components/issue-detail/IssueDetailUtils";
 import { IssueTreeControlDialog } from "../components/issue-detail/IssueTreeControlDialog";
 import { useIssueDetailComments } from "../components/issue-detail/useIssueDetailComments";
 import { useIssueDetailApprovals } from "../components/issue-detail/useIssueDetailApprovals";
@@ -47,19 +38,13 @@ import { useIssueDetailLookups } from "../components/issue-detail/useIssueDetail
 import { useIssueDetailQueuedCommentActions } from "../components/issue-detail/useIssueDetailQueuedCommentActions";
 import { useIssueDetailRouteEffects, useIssueDetailRouteState } from "../components/issue-detail/useIssueDetailRouteState";
 import { useIssueDetailTabState } from "../components/issue-detail/useIssueDetailTabState";
+import { useIssueDetailThreadState } from "../components/issue-detail/useIssueDetailThreadState";
 import { useIssueDetailTreeControl } from "../components/issue-detail/useIssueDetailTreeControl";
 import { Separator } from "@/components/ui/separator";
 import { TheftDetailReviewTemplate } from "@/components/theft/templates/TheftDetailReviewTemplate";
 import {
-  AlertTriangle,
-  ArrowLeft,
-  Library,
-  MoreVertical,
-} from "lucide-react";
-import {
   getClosedIsolatedExecutionWorkspaceMessage,
   isClosedIsolatedExecutionWorkspace,
-  type ActivityEvent,
   type IssueWorkMode,
   type IssueThreadInteraction,
 } from "@paperclipai/shared";
@@ -225,40 +210,19 @@ export function IssueDetail() {
     issueId,
   });
 
-  const commentReassignOptions = useMemo(() => {
-    const options: Array<{ id: string; label: string; searchText?: string }> = [];
-    options.push(...buildCompanyUserInlineOptions(companyMembers?.users, { excludeUserIds: [currentUserId] }));
-    const activeAgents = [...(agents ?? [])]
-      .filter((agent) => agent.status !== "terminated")
-      .sort((a, b) => a.name.localeCompare(b.name));
-    for (const agent of activeAgents) {
-      options.push({ id: `agent:${agent.id}`, label: agent.name });
-    }
-    if (currentUserId) {
-      options.push({ id: `user:${currentUserId}`, label: "Me" });
-    }
-    return options;
-  }, [agents, companyMembers?.users, currentUserId]);
-
-  const actualAssigneeValue = useMemo(
-    () => assigneeValueFromSelection(issue ?? {}),
-    [issue],
-  );
-
-  const suggestedAssigneeValue = useMemo(
-    () =>
-      suggestedCommentAssigneeValue(
-        issue ?? {},
-        mergeIssueComments(comments ?? [], optimisticComments),
-        currentUserId,
-      ),
-    [issue, comments, optimisticComments, currentUserId],
-  );
-
-  const threadComments = useMemo(
-    () => mergeIssueComments(comments ?? [], optimisticComments),
-    [comments, optimisticComments],
-  );
+  const {
+    actualAssigneeValue,
+    commentReassignOptions,
+    suggestedAssigneeValue,
+    threadComments,
+  } = useIssueDetailThreadState({
+    agents,
+    comments,
+    companyUsers: companyMembers?.users,
+    currentUserId,
+    issue,
+    optimisticComments,
+  });
   const {
     applyOptimisticIssueCacheUpdate,
     invalidateIssueCollections,
