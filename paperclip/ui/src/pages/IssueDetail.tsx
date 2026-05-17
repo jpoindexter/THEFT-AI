@@ -74,6 +74,7 @@ import { ScrollToBottom } from "../components/ScrollToBottom";
 import { StatusIcon } from "../components/StatusIcon";
 import { PriorityIcon } from "../components/PriorityIcon";
 import { IssueDetailActivityTab } from "../components/issue-detail/IssueDetailActivityTab";
+import { InboxMobileToolbar } from "../components/issue-detail/InboxMobileToolbar";
 import { IssueSectionSkeleton } from "../components/issue-detail/IssueSectionSkeleton";
 import { TaskReviewSummary } from "../components/issue-detail/TaskReviewSummary";
 import { ProductivityReviewBadge } from "../components/ProductivityReviewBadge";
@@ -441,106 +442,6 @@ function IssueDetailLoadingState({
       </div>
 
       <IssueSectionSkeleton titleWidth="w-24" rows={3} />
-    </div>
-  );
-}
-
-interface InboxMobileToolbarProps {
-  backHref: string;
-  issueId: string | undefined;
-  issueHidden: boolean;
-  onArchive: () => void;
-  archivePending: boolean;
-  onCopy: () => void;
-  onProperties: () => void;
-  onHide: () => void;
-}
-
-function InboxMobileToolbar({
-  backHref,
-  issueId: issueIdProp,
-  issueHidden,
-  onArchive,
-  archivePending,
-  onCopy,
-  onProperties,
-  onHide,
-}: InboxMobileToolbarProps) {
-  const navigate = useNavigate();
-  const [menuOpen, setMenuOpen] = useState(false);
-
-  return (
-    <div className="flex items-center w-full">
-      <Button
-        variant="ghost"
-        size="icon-sm"
-        onClick={() => {
-          // Use browser back when we have real history so the inbox
-          // restores its scroll position. Fall back to a PUSH to
-          // backHref when there's no prior entry (e.g. deep-link).
-          if (window.history.length > 1) {
-            navigate(-1);
-          } else {
-            navigate(backHref);
-          }
-        }}
-        aria-label="Back to inbox"
-      >
-        <ArrowLeft className="h-5 w-5" />
-      </Button>
-
-      <div className="ml-auto flex items-center gap-0.5">
-        {issueIdProp && !issueHidden && (
-          <Button
-            variant="ghost"
-            size="icon-sm"
-            onClick={onArchive}
-            disabled={archivePending}
-            aria-label="Archive from inbox"
-          >
-            <Archive className="h-5 w-5" />
-          </Button>
-        )}
-
-        <Popover open={menuOpen} onOpenChange={setMenuOpen}>
-          <PopoverTrigger asChild>
-            <Button variant="ghost" size="icon-sm" aria-label="More actions">
-              <MoreVertical className="h-5 w-5" />
-            </Button>
-          </PopoverTrigger>
-          <PopoverContent className="w-44 p-1" align="end">
-            <Button
-              variant="ghost"
-              size="xs"
-              className="w-full justify-start"
-              onClick={() => { onCopy(); setMenuOpen(false); }}
-            >
-              <Copy className="h-3 w-3" />
-              Copy as markdown
-            </Button>
-            <Button
-              variant="ghost"
-              size="xs"
-              className="w-full justify-start"
-              onClick={() => { onProperties(); setMenuOpen(false); }}
-            >
-              <SlidersHorizontal className="h-3 w-3" />
-              Properties
-            </Button>
-            {issueIdProp && (
-              <Button
-                variant="ghost"
-                size="xs"
-                className="w-full justify-start text-destructive hover:text-destructive"
-                onClick={() => { onHide(); setMenuOpen(false); }}
-              >
-                <EyeOff className="h-3 w-3" />
-                Hide this issue
-              </Button>
-            )}
-          </PopoverContent>
-        </Popover>
-      </div>
     </div>
   );
 }
