@@ -73,6 +73,7 @@ Current local modularization checkpoint:
 - Extracted persisted-run-log hydration/polling and transcript helpers so `useLiveRunTranscripts.ts` now fits the 300-line guardrail.
 - Extracted agent model-dropdown popover content so `model-dropdown.tsx` now fits the 300-line guardrail.
 - Extracted access API DTOs into a guarded type module so `api/access.ts` now fits the 300-line guardrail.
+- Extracted plugin API DTOs, local-folder endpoints, and bridge endpoints into guarded modules so `api/plugins.ts` now fits the 300-line guardrail.
 - Moved the issue-chat composer safe-area dock value into a semantic CSS utility.
 
 Latest verification for the active modularization slices:
@@ -89,6 +90,7 @@ Latest verification for the active modularization slices:
 - Focused useLiveRunTranscripts Vitest passed: 7 tests.
 - Focused agent-config patch Vitest passed after model-dropdown split: 6 tests.
 - Focused access-route Vitest passed: 14 tests across CompanyAccess, InviteLanding, and CloudAccessGate.
+- Focused plugin API/settings Vitest passed: 11 tests across pluginsApi, PluginSettings, and PluginPage.
 - Focused Vitest for issue chat, issue documents, and issue detail passed: 78 tests across 4 files.
 - Focused IssueChatThread Vitest passed: 61 tests across 2 files.
 - Focused onboarding utility Vitest passed: 21 tests across 5 files.
@@ -119,6 +121,7 @@ Remaining high-value maintainability work:
 - `useLiveRunTranscripts.ts` is down to 298 lines and now fits the 300-line guardrail.
 - `model-dropdown.tsx` is down to 289 lines and now fits the 300-line guardrail.
 - `api/access.ts` is down to 191 lines and now fits the 300-line guardrail; access DTOs live in `api/access-types.ts` at 247 lines.
+- `api/plugins.ts` is down to 225 lines and now fits the 300-line guardrail; plugin DTOs, local-folder endpoints, and bridge endpoints are split into guarded modules.
 - `IssueDocumentsSection.tsx` is down to 207 lines and now fits the 300-line guardrail.
 - `index.css` is large because it is the current token/source-of-truth file; do not split it casually before token ownership is fully stable.
 
