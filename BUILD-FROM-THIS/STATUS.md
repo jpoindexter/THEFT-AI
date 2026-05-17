@@ -56,6 +56,7 @@ Current local modularization checkpoint:
 - Extracted issue-detail read/update/child-update/monitor/archive/hide mutations into a guarded route-local hook.
 - Extracted issue-detail live-run state, tab/hash focus state, composer focus helpers, and comment pagination refresh into guarded route-local hooks.
 - Extracted issue-detail thread presentation state for reassignment options, assignee values, and optimistic comment merging into a guarded route-local hook.
+- Extracted department workspace repeated panel helpers so `DepartmentWorkspace.tsx` now fits the 300-line guardrail.
 - Moved the issue-chat composer safe-area dock value into a semantic CSS utility.
 
 Latest verification for the active modularization slices:
@@ -74,6 +75,7 @@ Remaining high-value maintainability work:
 
 - `IssueDetail.tsx` is down to 633 lines, but it is still the largest active page.
 - `IssueChatThread.tsx` is down to 275 lines and now fits the 300-line guardrail.
+- `DepartmentWorkspace.tsx` is down to 282 lines and now fits the 300-line guardrail.
 - `OnboardingWizard.tsx` is down to 297 lines and now fits the 300-line guardrail.
 - `IssueDocumentsSection.tsx` is down to 207 lines and now fits the 300-line guardrail.
 - `index.css` is large because it is the current token/source-of-truth file; do not split it casually before token ownership is fully stable.
