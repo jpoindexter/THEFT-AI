@@ -306,7 +306,7 @@ export function Goals() {
 
 function TechTreeStageSection({ stage }: { stage: TechTreeStageView }) {
   return (
-    <section className="min-w-0 border border-border bg-card/60">
+    <section className="theft-surface-muted min-w-0 overflow-hidden">
       <div className="flex items-start justify-between gap-4 border-b border-border px-4 py-2">
         <div>
           <h2 className="text-sm font-medium text-foreground">{stage.label}</h2>
@@ -316,7 +316,7 @@ function TechTreeStageSection({ stage }: { stage: TechTreeStageView }) {
       </div>
       <div className="space-y-2 p-2">
         {stage.nodes.length === 0 ? (
-          <div className="border border-dashed border-border bg-background/40 px-4 py-4 text-sm text-muted-foreground">
+          <div className="rounded-lg border border-dashed border-border bg-background/40 px-4 py-4 text-sm text-muted-foreground">
             No nodes in this stage yet.
           </div>
         ) : (
@@ -505,7 +505,7 @@ function CircleMarker({ complete = false }: { complete?: boolean }) {
 
 function RoadmapRule({ icon: Icon, label, value }: { icon: typeof Users; label: string; value: string }) {
   return (
-    <div className="flex items-center justify-between gap-4 border border-border bg-background/50 px-2 py-2">
+    <div className="theft-inset-surface flex items-center justify-between gap-4 px-2 py-2">
       <span className="flex items-center gap-2 text-foreground">
         <Icon className="h-3.5 w-3.5 text-muted-foreground" />
         {label}

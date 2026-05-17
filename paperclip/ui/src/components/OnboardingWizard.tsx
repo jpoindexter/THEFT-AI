@@ -1027,7 +1027,7 @@ export function OnboardingWizard() {
                   <div className="space-y-3">
                     <div className="text-xs text-muted-foreground">Setup status</div>
                     <div className="grid gap-2">
-                      <div className="rounded-md border border-border p-2">
+                      <div className="theft-inset-surface p-2">
                         <div className="text-xs mb-1">Company name</div>
                         <div className="flex gap-2 mb-2">
                           {(["done", "skipped"] as const).map((status) => (
@@ -1038,7 +1038,7 @@ export function OnboardingWizard() {
                               size="xs"
                               onClick={() => setSetupCompanyNameStatus(status)}
                               className={cn(
-                                "h-auto rounded border px-2 py-1 text-xs",
+                                "h-auto border px-2 py-1 text-xs",
                                 setupCompanyNameStatus === status ? "border-foreground bg-accent" : "border-border"
                               )}
                             >
@@ -1053,7 +1053,7 @@ export function OnboardingWizard() {
                           onChange={(e) => setSetupCompanyNameNote(e.target.value)}
                         />
                       </div>
-                      <div className="rounded-md border border-border p-2">
+                      <div className="theft-inset-surface p-2">
                         <div className="text-xs mb-1">Legal / operating readiness</div>
                         <div className="flex gap-2 mb-2">
                           {(["todo", "done", "skipped"] as const).map((status) => (
@@ -1064,7 +1064,7 @@ export function OnboardingWizard() {
                               size="xs"
                               onClick={() => setSetupLegalStatus(status)}
                               className={cn(
-                                "h-auto rounded border px-2 py-1 text-xs",
+                                "h-auto border px-2 py-1 text-xs",
                                 setupLegalStatus === status ? "border-foreground bg-accent" : "border-border"
                               )}
                             >
@@ -1079,7 +1079,7 @@ export function OnboardingWizard() {
                           onChange={(e) => setSetupLegalNote(e.target.value)}
                         />
                       </div>
-                      <div className="rounded-md border border-border p-2">
+                      <div className="theft-inset-surface p-2">
                         <div className="text-xs mb-1">Offer / product</div>
                         <div className="flex gap-2 mb-2">
                           {(["todo", "done", "skipped"] as const).map((status) => (
@@ -1090,7 +1090,7 @@ export function OnboardingWizard() {
                               size="xs"
                               onClick={() => setSetupOfferStatus(status)}
                               className={cn(
-                                "h-auto rounded border px-2 py-1 text-xs",
+                                "h-auto border px-2 py-1 text-xs",
                                 setupOfferStatus === status ? "border-foreground bg-accent" : "border-border"
                               )}
                             >
@@ -1155,7 +1155,7 @@ export function OnboardingWizard() {
                     />
                   </div>
 
-                  <div className="rounded-md border border-border bg-muted/15 p-3">
+                  <div className="theft-surface-muted p-3">
                     <div className="flex items-start justify-between gap-3">
                       <div>
                         <p className="text-sm font-medium">Company assembly preview</p>
@@ -1164,13 +1164,13 @@ export function OnboardingWizard() {
                           departments and starter tasks.
                         </p>
                       </div>
-                      <span className="rounded border border-border px-2 py-1 text-micro text-muted-foreground">
+                      <span className="theft-chip px-2 py-1 text-micro text-muted-foreground">
                         {ONBOARDING_STAGE_LABELS[companyStage]}
                       </span>
                     </div>
 
                     <div className="mt-3 grid gap-2">
-                      <div className="flex items-center gap-2 rounded border border-border bg-background/60 px-2.5 py-2">
+                      <div className="theft-inset-surface flex items-center gap-2 px-2.5 py-2">
                         <Bot className="h-4 w-4 text-muted-foreground" />
                         <div className="min-w-0 flex-1">
                           <p className="truncate text-xs font-medium">{agentName || "Operator"}</p>
@@ -1191,7 +1191,7 @@ export function OnboardingWizard() {
                           {DEPARTMENT_SEED_SPECS.map((department) => (
                             <div
                               key={department.key}
-                              className="rounded border border-border bg-background/60 px-2 py-1.5"
+                              className="theft-inset-surface px-2 py-1.5"
                             >
                               <p className="truncate text-micro font-medium">
                                 {department.title}
@@ -1206,7 +1206,7 @@ export function OnboardingWizard() {
                     </div>
                   </div>
 
-                  <div className="rounded-md border border-border p-3">
+                  <div className="theft-surface-plain p-3">
                     <Button
                       type="button"
                       variant="ghost"
@@ -1456,7 +1456,7 @@ export function OnboardingWizard() {
                   )}
 
                   {showAdvancedRuntime && isLocalAdapter && (
-                    <div className="space-y-2 rounded-md border border-border p-3">
+                    <div className="theft-surface-plain space-y-2 p-3">
                       <div className="flex items-center justify-between gap-2">
                         <div>
                           <p className="text-xs font-medium">
@@ -1600,7 +1600,7 @@ export function OnboardingWizard() {
               {step === 3 && (
                 <div className="space-y-4">
                   <div className="flex items-center gap-3 mb-1">
-                    <div className="bg-muted/50 p-2">
+                    <div className="rounded-md bg-muted/50 p-2">
                       <ListTodo className="h-5 w-5 text-muted-foreground" />
                     </div>
                     <div>
@@ -1658,7 +1658,7 @@ export function OnboardingWizard() {
               {step === 4 && (
                 <div className="space-y-4">
                   <div className="flex items-center gap-3 mb-1">
-                    <div className="bg-muted/50 p-2">
+                    <div className="rounded-md bg-muted/50 p-2">
                       <ListTodo className="h-5 w-5 text-muted-foreground" />
                     </div>
                     <div>
@@ -1672,7 +1672,7 @@ export function OnboardingWizard() {
 
                   <div className="space-y-2">
                     {planSections.map((section) => (
-                      <div key={section.title} className="border border-border p-3">
+                      <div key={section.title} className="theft-surface-plain p-3">
                         <div className="flex items-center gap-2">
                           <section.icon className="h-4 w-4 text-muted-foreground" />
                           <p className="theft-label">
@@ -1704,7 +1704,7 @@ export function OnboardingWizard() {
                     onChange={(e) => setStageInterviewAnswer(e.target.value)}
                   />
 
-                  <div className="grid grid-cols-2 gap-2 border border-border p-3 text-xs">
+                  <div className="theft-inset-surface grid grid-cols-2 gap-2 p-3 text-xs">
                     <div className="min-w-0">
                       <p className="text-muted-foreground">Operator</p>
                       <p className="mt-1 truncate font-medium">{agentName}</p>
@@ -1905,7 +1905,7 @@ function AssemblyPreviewScreen({
             rows={["Decision rights", "Approval flows", "Risk controls"]}
           />
         </div>
-        <div className="mt-10 border border-border p-4 text-xs leading-5 text-muted-foreground">
+        <div className="theft-surface-plain mt-10 p-4 text-xs leading-5 text-muted-foreground">
           <Check className="mb-2 size-4 text-foreground" />
           All aligned to your answers and plan.
         </div>
@@ -1929,7 +1929,7 @@ function AssemblyPreviewScreen({
         </div>
 
         <div className="mx-auto max-w-5xl">
-          <div className="theft-elevation-soft mx-auto max-w-xl border border-border bg-card p-6 text-center">
+          <div className="theft-surface mx-auto max-w-xl p-6 text-center">
             <p className="theft-label">
               Mission objective
             </p>
@@ -1942,7 +1942,7 @@ function AssemblyPreviewScreen({
               ["Growth & Distribution", "Acquire, activate, and retain customers."],
               ["Operational Leverage", "Systematize and scale profitably."],
             ].map(([title, body]) => (
-              <div key={title} className="border border-border bg-card p-4">
+              <div key={title} className="theft-surface-plain p-4">
                 <p className="text-sm font-medium">{title}</p>
                 <p className="mt-1 text-xs leading-5 text-muted-foreground">{body}</p>
               </div>
@@ -1957,12 +1957,12 @@ function AssemblyPreviewScreen({
                 <div
                   key={department.key}
                   className={cn(
-                    "theft-elevation-soft border bg-card p-4",
-                    selected ? "border-foreground" : "border-border"
+                    "theft-surface-plain p-4",
+                    selected && "theft-selected-surface"
                   )}
                 >
                   <div className="flex items-center gap-2">
-                    <span className="flex size-8 items-center justify-center bg-secondary text-muted-foreground">
+                    <span className="flex size-8 items-center justify-center rounded-md bg-secondary text-muted-foreground">
                       {meta.icon}
                     </span>
                     <div className="min-w-0">
@@ -1994,13 +1994,13 @@ function AssemblyPreviewScreen({
             })}
           </div>
 
-          <div className="mt-6 border border-border bg-card p-4">
+          <div className="theft-surface-plain mt-6 p-4">
             <p className="theft-label">
               Tech tree initial path
             </p>
             <div className="mt-4 grid gap-2 md:grid-cols-5">
               {["Company foundation", "Core systems & tooling", "First product MVP", "Market launch & feedback", "Scale systems & team"].map((node, index) => (
-                <div key={node} className="border border-border p-4 text-center">
+                <div key={node} className="theft-inset-surface p-4 text-center">
                   <p className="text-sm font-medium">{node}</p>
                   <p className="theft-label-compact mt-2">
                     {index === 0 ? "active" : index === 1 ? "next" : "available"}
@@ -2017,10 +2017,10 @@ function AssemblyPreviewScreen({
           Inspector
         </p>
         <div className="mt-5 space-y-4">
-          <div className="border border-border p-4">
+          <div className="theft-surface-plain p-4">
             <p className="text-xs text-muted-foreground">Selected</p>
             <div className="mt-2 flex items-center gap-2">
-              <span className="flex size-9 items-center justify-center bg-secondary text-muted-foreground">
+              <span className="flex size-9 items-center justify-center rounded-md bg-secondary text-muted-foreground">
                 {selectedMeta.icon}
               </span>
               <p className="font-medium">{selectedDepartment.title}</p>
@@ -2069,7 +2069,7 @@ function AssemblyStatGroup({ title, rows }: { title: string; rows: string[] }) {
 
 function InspectorBlock({ title, rows }: { title: string; rows: string[] }) {
   return (
-    <div className="border border-border p-4">
+    <div className="theft-surface-plain p-4">
       <p className="theft-label">{title}</p>
       <ul className="mt-2 space-y-1.5 text-sm leading-5 text-muted-foreground">
         {rows.map((row) => (
@@ -2118,7 +2118,7 @@ function OnboardingCanvasPreview({
         <div className="theft-grid-bg absolute inset-0" />
 
         <div className="relative z-10 flex items-center justify-between">
-          <div className="theft-elevation-soft border border-border bg-card px-4 py-2">
+          <div className="theft-surface-plain px-4 py-2">
             <div className="theft-label flex items-center gap-2">
               <span className="size-1.5 rounded-full bg-signal" />
               {reviewMode ? "Workspace assembling" : "Canvas initializing"}
@@ -2127,7 +2127,7 @@ function OnboardingCanvasPreview({
               {reviewMode ? "Department graph preparing..." : "Company map forming..."}
             </p>
           </div>
-          <div className="flex border border-border bg-card">
+          <div className="theft-surface-plain flex overflow-hidden">
             {[Monitor, CircleDot, Plus].map((Icon, index) => (
               <Button
                 key={index}
@@ -2147,7 +2147,7 @@ function OnboardingCanvasPreview({
           <div className="theft-map-ring-middle absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full border border-dashed border-border" />
           <div className="theft-map-ring-inner absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full border border-dashed border-border/80" />
 
-          <div className="theft-elevation-soft theft-map-center-card absolute left-1/2 top-1/2 z-10 -translate-x-1/2 -translate-y-1/2 border border-foreground bg-card p-4 text-center">
+          <div className="theft-surface theft-map-center-card absolute left-1/2 top-1/2 z-10 -translate-x-1/2 -translate-y-1/2 p-4 text-center outline outline-1 outline-foreground/70">
             <div className="mx-auto flex size-10 items-center justify-center rounded-md bg-secondary">
               <Building2 className="size-5" />
             </div>
@@ -2162,13 +2162,13 @@ function OnboardingCanvasPreview({
           ))}
         </div>
 
-        <div className="theft-elevation-soft absolute bottom-4 left-4 z-10 w-56 border border-border bg-card px-4 py-2">
+        <div className="theft-surface-plain absolute bottom-4 left-4 z-10 w-56 px-4 py-2">
           <RuntimeLine label="Local runtime ready" />
           <RuntimeLine label="Embedded Postgres" />
           <RuntimeLine label="No cloud required" />
         </div>
 
-        <div className="theft-elevation-soft absolute bottom-4 right-4 z-10 border border-border bg-card px-4 py-2 text-xs text-muted-foreground">
+        <div className="theft-surface-plain absolute bottom-4 right-4 z-10 px-4 py-2 text-xs text-muted-foreground">
           <span className="font-medium text-foreground">{agentName || "Operator"}</span>
           <span className="mx-2 text-border">/</span>
           {reviewMode ? "Plan review ready" : `Step ${step} active`}
@@ -2192,8 +2192,8 @@ function MapNode({
   return (
     <div
       className={cn(
-        "theft-elevation-soft theft-map-node absolute z-10 flex flex-col items-center justify-center border bg-card text-center",
-        active ? "border-foreground/35" : "border-border",
+        "theft-surface-plain theft-map-node absolute z-10 flex flex-col items-center justify-center text-center",
+        active && "outline outline-1 outline-foreground/30",
         className
       )}
     >

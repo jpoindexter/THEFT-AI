@@ -479,7 +479,7 @@ function StrategyMapPanel({
         }
       />
 
-      <div className="min-w-0 max-w-full overflow-hidden bg-secondary p-4 md:p-5">
+      <div className="theft-surface-muted min-w-0 max-w-full overflow-hidden p-4 md:p-5">
         <div className="theft-objective-card mx-auto max-w-2xl min-w-0 px-6 py-5 text-center">
           <p className="text-sm text-muted-foreground">Current objective</p>
           <p className="mt-2 text-lg font-semibold text-foreground">{objective}</p>
@@ -489,7 +489,7 @@ function StrategyMapPanel({
 
         <div className="grid gap-3 md:grid-cols-3">
           {visibleTracks.map((track) => (
-            <div key={track} className="bg-card px-5 py-4 text-center shadow-sm">
+            <div key={track} className="theft-surface-plain px-5 py-4 text-center">
               <p className="line-clamp-2 text-sm font-medium">{track}</p>
             </div>
           ))}
@@ -502,7 +502,7 @@ function StrategyMapPanel({
             <Link
               key={department.key}
               to={`/departments/${department.key}`}
-              className="group min-w-0 max-w-full overflow-hidden bg-card p-4 text-inherit no-underline shadow-sm transition-transform hover:-translate-y-0.5"
+              className="theft-surface-plain group min-w-0 max-w-full overflow-hidden p-4 text-inherit no-underline transition-transform hover:-translate-y-0.5 hover:border-primary/70 hover:bg-accent/40"
             >
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0">
@@ -541,7 +541,7 @@ function StrategyMapPanel({
           ))}
         </div>
 
-        <div className="mt-6 bg-card p-4 shadow-sm">
+        <div className="theft-surface-plain mt-6 p-4">
           <div className="flex items-center justify-between gap-3">
             <p className="text-sm font-medium text-muted-foreground">Available next work</p>
             <Route className="h-4 w-4 text-muted-foreground" />
@@ -551,7 +551,7 @@ function StrategyMapPanel({
               <Link
               key={issue.id}
               to={issuePath(issue)}
-              className="min-w-0 max-w-full overflow-hidden bg-secondary px-4 py-3 text-inherit no-underline hover:text-foreground"
+              className="theft-surface-muted min-w-0 max-w-full overflow-hidden px-4 py-3 text-inherit no-underline hover:text-foreground"
             >
                 <p className="min-w-0 break-words line-clamp-1 text-sm [overflow-wrap:anywhere]">{issue.title}</p>
                 <p className="mt-1 text-xs text-muted-foreground">{formatStatusLabel(issue.status)}</p>
@@ -626,7 +626,7 @@ function DecisionsPanel({
           </Link>
         }
       />
-      <div className="mt-3 divide-y divide-border overflow-hidden rounded-lg bg-secondary">
+      <div className="theft-surface-muted mt-3 divide-y divide-border overflow-hidden">
         {approvalsCount > 0 ? (
           <Link to="/approvals/pending" className="flex items-center justify-between gap-3 p-3 text-inherit no-underline hover:bg-accent">
             <span>
@@ -826,7 +826,7 @@ function OperatorDrawer({
 
       <div className="min-h-0 flex-1 overflow-y-auto px-5 pb-5 md:px-6">
         <div className="space-y-4">
-          <div className="border border-border bg-secondary p-4">
+          <div className="theft-surface-muted p-4">
             <div className="flex items-center justify-between gap-3 text-xs text-muted-foreground">
               <span>You</span>
               <span>now</span>
@@ -834,12 +834,12 @@ function OperatorDrawer({
             <p className="mt-2 text-sm">What should we do next?</p>
           </div>
 
-          <div className="border border-border p-4">
+          <div className="theft-surface-plain p-4">
             <div className="flex items-center justify-between gap-3 text-xs text-muted-foreground">
               <span>Operator</span>
               <span>recommended</span>
             </div>
-            <div className="mt-3 border border-foreground bg-card p-3">
+            <div className="theft-inset-surface theft-selected-surface mt-3 p-3">
               <p className="theft-label-compact">Next move</p>
               <p className="mt-2 text-base font-medium">{nextMove.label}</p>
               <p className="mt-2 text-xs leading-5 text-muted-foreground">
@@ -865,21 +865,21 @@ function OperatorDrawer({
             <div className="mt-4">
               <p className="theft-label-compact">Tradeoffs</p>
               <div className="mt-2 grid gap-2 text-xs text-muted-foreground">
-                <div className="border border-border p-2">
+                <div className="theft-inset-surface p-2">
                   <span className="font-medium text-foreground">Upside:</span> moves the company toward a durable outcome.
                 </div>
-                <div className="border border-border p-2">
+                <div className="theft-inset-surface p-2">
                   <span className="font-medium text-foreground">Risk:</span> may need revision if context is incomplete.
                 </div>
               </div>
             </div>
           </div>
 
-          <div className="border border-border p-4">
+          <div className="theft-surface-plain p-4">
             <p className="theft-label-compact">Proposed tasks</p>
             <div className="mt-3 space-y-2">
               {proposedTasks.map((task) => (
-                <div key={task.title} className="border border-border bg-secondary p-3">
+                <div key={task.title} className="theft-surface-muted p-3">
                   <p className="text-sm font-medium">{task.title}</p>
                   <p className="mt-1 text-xs text-muted-foreground">
                     {task.department} · {task.artifact}

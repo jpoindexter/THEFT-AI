@@ -10,7 +10,7 @@ const theftSurfaceVariants = cva("min-w-0", {
       default: "theft-surface",
       muted: "theft-surface-muted",
       panel: "theft-panel",
-      plain: "border bg-card text-card-foreground shadow-none",
+      plain: "theft-surface-plain",
       interactive:
         "theft-surface transition-colors hover:bg-accent/60 focus-within:ring-2 focus-within:ring-ring/20",
     },

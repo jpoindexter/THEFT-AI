@@ -202,9 +202,9 @@ export function DepartmentWorkspace() {
                 <p className="mt-1 text-sm text-muted-foreground">What this department should do next.</p>
               </div>
             </div>
-            <div className="mt-4 border border-border bg-background p-3">
+            <div className="theft-inset-surface mt-4 p-3">
               <p className="theft-label-compact">Recommended action</p>
-              <p className="mt-2 text-sm leading-6 text-foreground">
+              <p className="mt-2 min-w-0 break-words text-sm leading-6 text-foreground [overflow-wrap:anywhere]">
                 {department.nextIssue?.title ?? `Route the next ${department.title} task when the company objective is ready.`}
               </p>
             </div>
@@ -235,7 +235,7 @@ export function DepartmentWorkspace() {
             </div>
           </div>
 
-          <div className="border border-border bg-card p-4 shadow-sm">
+          <div className="theft-surface p-4">
             <div className="flex items-start gap-3">
               <div className="mt-0.5 rounded-md bg-muted p-2 text-foreground">
                 <Library className="h-4 w-4" />
@@ -253,7 +253,7 @@ export function DepartmentWorkspace() {
                   <Link
                     key={`${issue.id}:${document.key}`}
                     to={`/library?issue=${encodeURIComponent(issue.id)}`}
-                    className="block border border-border bg-card/80 p-3 text-inherit no-underline transition-colors hover:border-primary/70 hover:bg-accent/40"
+                    className="theft-surface-plain block p-3 text-inherit no-underline transition-colors hover:border-primary/70 hover:bg-accent/40"
                   >
                     <div className="flex items-center gap-2 text-sm font-medium">
                       <FileText className="h-4 w-4 shrink-0 text-muted-foreground" />
@@ -266,7 +266,7 @@ export function DepartmentWorkspace() {
             </div>
           </div>
 
-          <div className="border border-border bg-card p-4 shadow-sm">
+          <div className="theft-surface p-4">
             <div className="flex items-start gap-3">
               <div className="mt-0.5 rounded-md bg-muted p-2 text-foreground">
                 <ListChecks className="h-4 w-4" />
@@ -292,7 +292,7 @@ export function DepartmentWorkspace() {
 
 function DepartmentFocusCard({ label, value }: { label: string; value: string }) {
   return (
-    <div className="min-w-0 border border-border bg-card/70 p-3">
+    <div className="theft-surface-muted min-w-0 p-3">
       <p className="theft-label-compact">{label}</p>
       <p className="mt-2 break-words text-sm leading-6 text-foreground [overflow-wrap:anywhere]">{value}</p>
     </div>
@@ -301,7 +301,7 @@ function DepartmentFocusCard({ label, value }: { label: string; value: string })
 
 function DepartmentStat({ label, value }: { label: string; value: number }) {
   return (
-    <div className="border border-border bg-card/70 p-3">
+    <div className="theft-surface-muted p-3">
       <p className="text-lg font-semibold">{value}</p>
       <p className="mt-1 text-xs text-muted-foreground">{label}</p>
     </div>
@@ -333,7 +333,7 @@ function WorkPanel({
   tone?: "default" | "attention";
 }) {
   return (
-    <div className="min-w-0 border border-border bg-card p-4">
+    <div className="theft-surface-plain min-w-0 p-4">
       <div className="flex items-start justify-between gap-3">
         <div className="flex items-start gap-3">
           <div className={cn("mt-0.5 rounded-md p-2", tone === "attention" ? "bg-destructive/10 text-destructive" : "bg-muted text-foreground")}>
@@ -346,7 +346,7 @@ function WorkPanel({
         </div>
         <Badge variant="outline">{issues.length}</Badge>
       </div>
-      <div className="mt-4 divide-y divide-border border border-border">
+      <div className="theft-inset-surface mt-4 divide-y divide-border overflow-hidden">
         {issues.length === 0 ? (
           <p className="p-3 text-sm text-muted-foreground">{empty}</p>
         ) : (

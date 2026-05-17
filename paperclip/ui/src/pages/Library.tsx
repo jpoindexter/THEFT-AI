@@ -399,8 +399,8 @@ function LibraryRow({
   return (
     <div
       className={cn(
-        "group flex w-full items-start gap-3 rounded-md border px-3 py-2 text-left transition-colors",
-        selected ? "border-primary bg-accent/40" : "border-border bg-card/90 hover:bg-accent/40",
+        "theft-surface-plain group flex w-full items-start gap-3 px-3 py-2 text-left transition-colors",
+        selected ? "theft-selected-surface" : "hover:bg-accent/40",
       )}
     >
       <Button

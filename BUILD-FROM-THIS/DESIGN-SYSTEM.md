@@ -52,6 +52,7 @@ Keep the browser/root font size at normal readable scale. Do not simulate 75% br
 - Use existing shadcn/ui primitives first for standard controls and surfaces: `Button`, `Card`, `Input`, `Textarea`, `Tabs`, `Select`, `Sheet`, `Dialog`, `DropdownMenu`, `Tooltip`, `Badge`, `Separator`, and `ScrollArea`.
 - THEFT-specific styling should wrap shadcn primitives with semantic screen templates and tokens. Do not hand-build a new button, card, tab bar, dialog, input, or sheet when a shadcn primitive exists.
 - Radius standard: surfaces/cards use `--theft-radius-surface` / `rounded-lg`; controls use `--theft-radius-control` / `rounded-md`; small nested affordances use `rounded-sm`; `rounded-full` is reserved for avatars, status dots, compact badges, and progress bars.
+- Current radius baseline: `--radius: 0.5rem`; surfaces/cards and controls resolve to the same 8px soft edge. Do not add square product panels; use `theft-surface`, `theft-surface-plain`, `theft-surface-muted`, `theft-inset-surface`, or shadcn primitives.
 - Do not add hex colors in TSX. Add or reuse a color token.
 - Do not add arbitrary Tailwind layout values like `grid-cols-[...]`, `min-w-[...]`, `left-[...]`, `tracking-[...]`, or `shadow-[...]` in active product screens.
 - Use `.theft-label` and `.theft-label-compact` for uppercase metadata labels.
