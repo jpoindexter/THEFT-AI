@@ -2,7 +2,6 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useParams } from "@/lib/router";
 import { useQuery, useMutation, useQueryClient, type InfiniteData } from "@tanstack/react-query";
 import { issuesApi } from "../api/issues";
-import { approvalsApi } from "../api/approvals";
 import type { RunForIssue } from "../api/activity";
 import { heartbeatsApi, type ActiveRunForIssue, type LiveRunForIssue } from "../api/heartbeats";
 import { useCompany } from "../context/CompanyContext";
@@ -60,6 +59,7 @@ import {
   JUMP_TO_LATEST_MAX_COMMENT_PAGES,
   useIssueDetailComments,
 } from "../components/issue-detail/useIssueDetailComments";
+import { useIssueDetailApprovals } from "../components/issue-detail/useIssueDetailApprovals";
 import { useIssueDetailAttachments } from "../components/issue-detail/useIssueDetailAttachments";
 import { useIssueDetailChildIssues } from "../components/issue-detail/useIssueDetailChildIssues";
 import { useIssueDetailFeedback } from "../components/issue-detail/useIssueDetailFeedback";
@@ -111,10 +111,6 @@ export function IssueDetail() {
   const [mobilePropsOpen, setMobilePropsOpen] = useState(false);
   const [detailTab, setDetailTab] = useState("related-work");
   const [handoffFocusSignal, setHandoffFocusSignal] = useState(0);
-  const [pendingApprovalAction, setPendingApprovalAction] = useState<{
-    approvalId: string;
-    action: "approve" | "reject";
-  } | null>(null);
   const [optimisticComments, setOptimisticComments] = useState<OptimisticIssueComment[]>([]);
   const [locallyQueuedCommentRunIds, setLocallyQueuedCommentRunIds] = useState<Map<string, string>>(() => new Map());
   const [pendingCommentComposerFocusKey, setPendingCommentComposerFocusKey] = useState(0);
@@ -387,6 +383,15 @@ export function IssueDetail() {
       queryClient.invalidateQueries({ queryKey: queryKeys.sidebarBadges(selectedCompanyId) });
     }
   }, [queryClient, selectedCompanyId]);
+  const {
+    handleApprovalAction,
+    pendingApprovalAction,
+  } = useIssueDetailApprovals({
+    invalidateIssueCollections,
+    invalidateIssueDetail,
+    issueId,
+    resolvedCompanyId,
+  });
   const upsertInteractionInCache = useCallback((interaction: IssueThreadInteraction) => {
     queryClient.setQueryData<IssueThreadInteraction[] | undefined>(
       queryKeys.issues.interactions(issueId!),
@@ -534,41 +539,6 @@ export function IssueDetail() {
         body: err instanceof Error ? err.message : "Unable to trigger the monitor right now",
         tone: "error",
       });
-    },
-  });
-
-  const approvalDecision = useMutation({
-    mutationFn: async ({ approvalId, action }: { approvalId: string; action: "approve" | "reject" }) => {
-      if (action === "approve") {
-        return approvalsApi.approve(approvalId);
-      }
-      return approvalsApi.reject(approvalId);
-    },
-    onMutate: ({ approvalId, action }) => {
-      setPendingApprovalAction({ approvalId, action });
-    },
-    onSuccess: (_approval, variables) => {
-      invalidateIssueDetail();
-      queryClient.invalidateQueries({ queryKey: queryKeys.issues.approvals(issueId!) });
-      invalidateIssueCollections();
-      queryClient.invalidateQueries({ queryKey: queryKeys.approvals.detail(variables.approvalId) });
-      if (resolvedCompanyId) {
-        queryClient.invalidateQueries({ queryKey: queryKeys.approvals.list(resolvedCompanyId) });
-      }
-      pushToast({
-        title: variables.action === "approve" ? "Approval approved" : "Approval rejected",
-        tone: "success",
-      });
-    },
-    onError: (err, variables) => {
-      pushToast({
-        title: variables.action === "approve" ? "Approval failed" : "Rejection failed",
-        body: err instanceof Error ? err.message : "Unable to update approval",
-        tone: "error",
-      });
-    },
-    onSettled: () => {
-      setPendingApprovalAction(null);
     },
   });
 
@@ -1418,9 +1388,7 @@ export function IssueDetail() {
           userProfileMap,
           pendingApprovalAction,
           handoffFocusSignal,
-          onApprovalAction: (approvalId, action) => {
-            approvalDecision.mutate({ approvalId, action });
-          },
+          onApprovalAction: handleApprovalAction,
           onCheckMonitorNow: () => checkIssueMonitorNow.mutate(),
           checkingMonitorNow: checkIssueMonitorNow.isPending,
         }}
