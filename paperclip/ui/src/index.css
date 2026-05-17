@@ -133,6 +133,9 @@
   --theft-tech-tree-filter-width: calc(var(--theft-space-1) * 21);
   --theft-tech-tree-inspector-width: calc(var(--theft-space-1) * 40);
   --theft-tech-tree-stat-min-width: calc(var(--theft-space-1) * 32);
+  --theft-tech-tree-phase-height: calc(var(--theft-space-1) * 10);
+  --theft-tech-tree-node-height: calc(var(--theft-space-1) * 9);
+  --theft-tech-tree-artifact-height: calc(var(--theft-space-1) * 7);
   --theft-dashboard-side-width: calc(var(--theft-space-1) * 48.75);
   --theft-dashboard-operator-width: calc(var(--theft-space-1) * 52.5);
   --theft-dashboard-max-width: calc(var(--theft-space-1) * 220);
@@ -648,6 +651,24 @@
 .theft-tech-tree-node-card {
   border-radius: var(--theft-radius-surface);
   grid-template-columns: minmax(0, 1fr);
+}
+
+.theft-tech-tree-build-column {
+  grid-template-rows:
+    var(--theft-tech-tree-phase-height)
+    repeat(3, var(--theft-tech-tree-node-height));
+}
+
+.theft-tech-tree-phase-card {
+  min-height: var(--theft-tech-tree-phase-height);
+}
+
+.theft-tech-tree-build-node {
+  min-height: var(--theft-tech-tree-node-height);
+}
+
+.theft-tech-tree-artifact-card {
+  min-height: var(--theft-tech-tree-artifact-height);
 }
 
 .theft-department-stat-grid {
