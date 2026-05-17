@@ -86,9 +86,9 @@
       "reason": "Resizable pane width is controlled by runtime drag state and persisted preference."
     },
     {
-      "file": "paperclip/ui/src/components/SidebarCompanyMenu.tsx",
+      "file": "paperclip/ui/src/components/sidebar-company-menu/SortableCompanyItem.tsx",
       "check": "inline-style",
-      "line": 91,
+      "line": 54,
       "sample": "style={",
       "reason": "dnd-kit sortable transform and transition are runtime drag state."
     },

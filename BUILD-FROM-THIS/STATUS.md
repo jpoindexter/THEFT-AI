@@ -59,6 +59,7 @@ Current local modularization checkpoint:
 - Extracted department workspace repeated panel helpers so `DepartmentWorkspace.tsx` now fits the 300-line guardrail.
 - Extracted agents list/org-tree rendering helpers so `Agents.tsx` now fits the 300-line guardrail.
 - Extracted issue trailing-column rendering so `IssueColumns.tsx` now fits the 300-line guardrail.
+- Extracted sidebar workspace-switcher sortable item rendering so `SidebarCompanyMenu.tsx` now fits the 300-line guardrail, and moved the reviewed dnd-kit inline-style exception to the new module path.
 - Moved the issue-chat composer safe-area dock value into a semantic CSS utility.
 
 Latest verification for the active modularization slices:
@@ -80,6 +81,7 @@ Remaining high-value maintainability work:
 - `DepartmentWorkspace.tsx` is down to 282 lines and now fits the 300-line guardrail.
 - `Agents.tsx` is down to 227 lines and now fits the 300-line guardrail.
 - `IssueColumns.tsx` is down to 180 lines and now fits the 300-line guardrail.
+- `SidebarCompanyMenu.tsx` is down to 259 lines and now fits the 300-line guardrail.
 - `OnboardingWizard.tsx` is down to 297 lines and now fits the 300-line guardrail.
 - `IssueDocumentsSection.tsx` is down to 207 lines and now fits the 300-line guardrail.
 - `index.css` is large because it is the current token/source-of-truth file; do not split it casually before token ownership is fully stable.
