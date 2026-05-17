@@ -1,0 +1,131 @@
+{
+  "description": "Reviewed active-route design-system exceptions that are runtime geometry, virtualization, drag transforms, or user/project data. New active-route drift should still fail the design gate.",
+  "exceptions": [
+    {
+      "file": "paperclip/ui/src/components/CompanyPatternIcon.tsx",
+      "check": "inline-style",
+      "line": 211,
+      "sample": "style={",
+      "reason": "Canvas icon imageRendering must stay pixelated for crisp generated company avatars."
+    },
+    {
+      "file": "paperclip/ui/src/components/FoldCurtain.tsx",
+      "check": "inline-style",
+      "line": 120,
+      "sample": "style={",
+      "reason": "Measured max-height and mask state depend on runtime content height."
+    },
+    {
+      "file": "paperclip/ui/src/components/IssueChatThread.tsx",
+      "check": "inline-style",
+      "line": 2995,
+      "sample": "style={",
+      "reason": "Virtualizer total-height spacer is computed at runtime."
+    },
+    {
+      "file": "paperclip/ui/src/components/IssueChatThread.tsx",
+      "check": "inline-style",
+      "line": 3024,
+      "sample": "style={",
+      "reason": "Virtualized row translate/size is computed at runtime."
+    },
+    {
+      "file": "paperclip/ui/src/components/IssueChatThread.tsx",
+      "check": "inline-style",
+      "line": 4283,
+      "sample": "style={",
+      "reason": "Composer spacer mirrors measured composer height."
+    },
+    {
+      "file": "paperclip/ui/src/components/IssueChatThread.tsx",
+      "check": "arbitrary-tailwind",
+      "line": 4296,
+      "sample": "bottom-[calc(env(safe-area-inset-bottom)+20px)]",
+      "reason": "Mobile composer dock preserves safe-area offset until shared dock utility is introduced."
+    },
+    {
+      "file": "paperclip/ui/src/components/IssueChatThread.tsx",
+      "check": "raw-px",
+      "line": 4296,
+      "sample": "20px",
+      "reason": "Part of the reviewed mobile safe-area composer dock offset."
+    },
+    {
+      "file": "paperclip/ui/src/components/IssueFiltersPopover.tsx",
+      "check": "inline-style",
+      "line": 341,
+      "sample": "style={",
+      "reason": "Label swatch color is user/workspace data."
+    },
+    {
+      "file": "paperclip/ui/src/components/KanbanBoard.tsx",
+      "check": "inline-style",
+      "line": 132,
+      "sample": "style = {",
+      "reason": "dnd-kit sortable transform and transition are runtime drag state."
+    },
+    {
+      "file": "paperclip/ui/src/components/KanbanBoard.tsx",
+      "check": "inline-style",
+      "line": 146,
+      "sample": "style={",
+      "reason": "dnd-kit sortable style is applied directly to the draggable node."
+    },
+    {
+      "file": "paperclip/ui/src/components/MarkdownBody.tsx",
+      "check": "inline-style",
+      "line": 581,
+      "sample": "style={",
+      "reason": "Mention chip styles encode project colors and agent icon masks from parsed markdown href data."
+    },
+    {
+      "file": "paperclip/ui/src/components/MarkdownEditor.tsx",
+      "check": "inline-style",
+      "line": 1231,
+      "sample": "style={",
+      "reason": "Autocomplete menu is positioned from caret coordinates."
+    },
+    {
+      "file": "paperclip/ui/src/components/MarkdownEditor.tsx",
+      "check": "inline-style",
+      "line": 1271,
+      "sample": "style={",
+      "reason": "Project color swatch uses user/project data."
+    },
+    {
+      "file": "paperclip/ui/src/components/ResizableSidebarPane.tsx",
+      "check": "inline-style",
+      "line": 164,
+      "sample": "style={",
+      "reason": "Resizable pane width is controlled by runtime drag state and persisted preference."
+    },
+    {
+      "file": "paperclip/ui/src/components/SidebarCompanyMenu.tsx",
+      "check": "inline-style",
+      "line": 91,
+      "sample": "style={",
+      "reason": "dnd-kit sortable transform and transition are runtime drag state."
+    },
+    {
+      "file": "paperclip/ui/src/components/WorktreeBanner.tsx",
+      "check": "inline-style",
+      "line": 22,
+      "sample": "style={",
+      "reason": "Worktree branding colors are generated runtime context."
+    },
+    {
+      "file": "paperclip/ui/src/plugins/launchers.tsx",
+      "check": "inline-style",
+      "line": 536,
+      "sample": "style={",
+      "reason": "Plugin launcher stack z-index and bounds are runtime geometry."
+    },
+    {
+      "file": "paperclip/ui/src/plugins/launchers.tsx",
+      "check": "inline-style",
+      "line": 551,
+      "sample": "style={",
+      "reason": "Plugin launcher popover anchoring comes from DOMRect runtime geometry."
+    }
+  ]
+}

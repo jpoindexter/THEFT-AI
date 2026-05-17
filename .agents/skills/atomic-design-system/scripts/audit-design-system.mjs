@@ -124,6 +124,8 @@ Options:
   --active-routes          Scan THEFT MVP active route seeds plus local static imports.
   --drift-only             Count product drift only, excluding token source and shadcn primitive findings.
   --json                   Print machine-readable JSON.
+  --allowlist <file>       Exclude reviewed runtime exceptions from gate counts.
+                           Repeatable. JSON shape: { "exceptions": [...] }.
   --max-findings <n>       Limit printed findings in text mode. Default: ${DEFAULT_MAX_FINDINGS}.
   --baseline <file>        Fail when current counts exceed a previously written baseline.
   --write-baseline <file>  Write the current audit summary as a baseline JSON file.
@@ -136,6 +138,7 @@ Examples:
   node .agents/skills/atomic-design-system/scripts/audit-design-system.mjs . --max-findings 40
   node .agents/skills/atomic-design-system/scripts/audit-design-system.mjs --active-routes --json
   node .agents/skills/atomic-design-system/scripts/audit-design-system.mjs --active-routes --drift-only
+  node .agents/skills/atomic-design-system/scripts/audit-design-system.mjs --active-routes --drift-only --allowlist .agents/skills/atomic-design-system/allowlists/theft-active-runtime-exceptions.json --fail-on medium
   node .agents/skills/atomic-design-system/scripts/audit-design-system.mjs --active-routes --write-baseline /private/tmp/theft-design-baseline.json
   node .agents/skills/atomic-design-system/scripts/audit-design-system.mjs --active-routes --baseline /private/tmp/theft-design-baseline.json
 `);
@@ -144,6 +147,7 @@ Examples:
 function parseArgs(argv) {
   const options = {
     activeRoutes: false,
+    allowlistPaths: [],
     baselinePath: null,
     driftOnly: false,
     failOn: null,
@@ -170,6 +174,10 @@ function parseArgs(argv) {
     }
     if (arg === "--json") {
       options.json = true;
+      continue;
+    }
+    if (arg === "--allowlist") {
+      options.allowlistPaths.push(readRequiredValue(argv[++index], "--allowlist"));
       continue;
     }
     if (arg === "--max-findings") {
@@ -377,10 +385,67 @@ function scanFile(file) {
   };
 }
 
+function readAllowlist(paths) {
+  const exceptions = [];
+
+  for (const allowlistPath of paths) {
+    const absolute = path.resolve(allowlistPath);
+    const parsed = JSON.parse(readFileSync(absolute, "utf8"));
+    const entries = Array.isArray(parsed) ? parsed : parsed.exceptions;
+    if (!Array.isArray(entries)) {
+      throw new Error(`Allowlist ${allowlistPath} must be an array or an object with an exceptions array.`);
+    }
+
+    entries.forEach((entry, index) => {
+      if (!entry || typeof entry !== "object") {
+        throw new Error(`Allowlist ${allowlistPath} entry ${index} must be an object.`);
+      }
+      if (typeof entry.file !== "string" || typeof entry.check !== "string") {
+        throw new Error(`Allowlist ${allowlistPath} entry ${index} requires string file and check fields.`);
+      }
+      exceptions.push({ ...entry, source: allowlistPath });
+    });
+  }
+
+  return exceptions;
+}
+
+function matchesAllowlist(finding, exception) {
+  if (exception.file !== finding.file) return false;
+  if (exception.check !== finding.check) return false;
+  if (exception.line !== undefined && Number(exception.line) !== finding.line) return false;
+  if (exception.sample !== undefined && exception.sample !== finding.sample) return false;
+  if (exception.severity !== undefined && exception.severity !== finding.severity) return false;
+  return true;
+}
+
+function splitAllowlistedFindings(findings, exceptions) {
+  if (exceptions.length === 0) return { findings, allowedFindings: [] };
+
+  const allowedFindings = [];
+  const remainingFindings = [];
+
+  for (const finding of findings) {
+    const exception = exceptions.find((entry) => matchesAllowlist(finding, entry));
+    if (exception) {
+      allowedFindings.push({
+        ...finding,
+        allowlistReason: exception.reason ?? "Reviewed runtime exception",
+        allowlistSource: exception.source,
+      });
+    } else {
+      remainingFindings.push(finding);
+    }
+  }
+
+  return { findings: remainingFindings, allowedFindings };
+}
+
 function summarize(scannedFiles, options) {
-  const findings = scannedFiles
+  const rawFindings = scannedFiles
     .flatMap((file) => file.findings)
     .filter((finding) => !options.driftOnly || !isDesignSystemSource(finding.file));
+  const { findings, allowedFindings } = splitAllowlistedFindings(rawFindings, options.allowlist);
   const byCheck = countBy(findings, (finding) => finding.check);
   const byLayer = countBy(findings, (finding) => finding.layer);
   const bySeverity = countBy(findings, (finding) => finding.severity);
@@ -393,6 +458,7 @@ function summarize(scannedFiles, options) {
     .map(({ file, lines, layer }) => ({ file, lines, layer }));
 
   const counts = {
+    allowedFindings: allowedFindings.length,
     filesScanned: scannedFiles.length,
     findings: findings.length,
     byCheck: Object.fromEntries(sortCountEntries(byCheck)),
@@ -411,6 +477,7 @@ function summarize(scannedFiles, options) {
     counts,
     oversized,
     findings,
+    allowedFindings,
   };
 }
 
@@ -445,6 +512,7 @@ function baselinePayload(summary) {
     mode: summary.mode,
     targets: summary.targets,
     counts: {
+      allowedFindings: summary.counts.allowedFindings,
       filesScanned: summary.counts.filesScanned,
       findings: summary.counts.findings,
       byCheck: summary.counts.byCheck,
@@ -491,6 +559,9 @@ function printTextSummary(summary, options, failures) {
   console.log(`Target(s): ${summary.targets.join(", ")}`);
   console.log(`Files scanned: ${summary.counts.filesScanned}`);
   console.log(`Findings: ${summary.counts.findings}`);
+  if (summary.counts.allowedFindings > 0) {
+    console.log(`Allowed runtime exceptions: ${summary.counts.allowedFindings}`);
+  }
 
   printObjectCounts("Findings by severity", summary.counts.bySeverity);
   printObjectCounts("Findings by check", summary.counts.byCheck);
@@ -514,6 +585,18 @@ function printTextSummary(summary, options, failures) {
     console.log(`  ... ${summary.findings.length - options.maxFindings} more`);
   }
 
+  if (summary.allowedFindings.length > 0) {
+    console.log("\nAllowed runtime exceptions");
+    for (const finding of summary.allowedFindings.slice(0, options.maxFindings)) {
+      console.log(
+        `  ${finding.check} ${finding.file}:${finding.line} ${JSON.stringify(finding.sample)} — ${finding.allowlistReason}`,
+      );
+    }
+    if (summary.allowedFindings.length > options.maxFindings) {
+      console.log(`  ... ${summary.allowedFindings.length - options.maxFindings} more`);
+    }
+  }
+
   if (failures.length > 0) {
     console.log("\nGate failures");
     for (const failure of failures) console.log(`  ${failure}`);
@@ -522,10 +605,13 @@ function printTextSummary(summary, options, failures) {
 
 function jsonPayload(summary, options, failures) {
   const visibleFindings = summary.findings.slice(0, options.maxFindings);
+  const visibleAllowedFindings = summary.allowedFindings.slice(0, options.maxFindings);
   return {
     ...summary,
     findings: visibleFindings,
     findingsTruncated: Math.max(0, summary.findings.length - visibleFindings.length),
+    allowedFindings: visibleAllowedFindings,
+    allowedFindingsTruncated: Math.max(0, summary.allowedFindings.length - visibleAllowedFindings.length),
     gateFailures: failures,
   };
 }
@@ -543,6 +629,7 @@ function main() {
   }
 
   const files = filesForOptions(options);
+  options.allowlist = readAllowlist(options.allowlistPaths);
   const scannedFiles = files.map(scanFile);
   const summary = summarize(scannedFiles, options);
   const failures = [

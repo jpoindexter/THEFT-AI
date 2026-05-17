@@ -75,6 +75,15 @@ Use this skill to turn a messy UI codebase into one governed design system. The 
      node .agents/skills/atomic-design-system/scripts/audit-design-system.mjs --active-routes --drift-only
      ```
 
+   - For THEFT active routes, use the reviewed runtime exception allowlist when enforcing the current launch gate:
+
+     ```bash
+     pnpm design:gate
+     ```
+
+     The allowlist lives at `.agents/skills/atomic-design-system/allowlists/theft-active-runtime-exceptions.json`.
+     Add to it only for runtime geometry, virtualization, drag transforms, or user/project color data with a concrete reason.
+
 ## Deliverables
 
 For an audit-only request, return:
@@ -104,6 +113,7 @@ Useful flags:
 - `--active-routes`: focus on THEFT MVP route files plus local static imports.
 - `--json`: produce machine-readable output for agents or CI.
 - `--drift-only`: exclude source-of-truth token files and shadcn primitive implementations from product-drift counts.
+- `--allowlist <file>`: exclude reviewed runtime exceptions from gate counts. Repeatable.
 - `--max-findings <n>`: keep text output readable.
 - `--write-baseline <file>`: save current counts for no-new-drift gating.
 - `--baseline <file>`: fail if current counts exceed the baseline.

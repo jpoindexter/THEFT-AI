@@ -88,9 +88,12 @@ The reusable audit workflow lives in `.agents/skills/atomic-design-system/SKILL.
 Before committing frontend design work:
 
 ```bash
+pnpm design:gate
 node .agents/skills/atomic-design-system/scripts/audit-design-system.mjs paperclip/ui/src
 pnpm -C paperclip --filter @paperclipai/ui typecheck
 node paperclip/scripts/smoke/theft-mvp-route-smoke.mjs --screenshot-dir /private/tmp/theft-ui-check
 node paperclip/scripts/smoke/theft-mvp-route-smoke.mjs --mobile --screenshot-dir /private/tmp/theft-ui-check-mobile
 git diff --check
 ```
+
+`pnpm design:gate` scans active THEFT routes, excludes shadcn/token source files, and applies only the reviewed runtime exception allowlist in `.agents/skills/atomic-design-system/allowlists/theft-active-runtime-exceptions.json`.
