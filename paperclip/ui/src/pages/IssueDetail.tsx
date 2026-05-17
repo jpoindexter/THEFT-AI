@@ -15,12 +15,9 @@ import { keepPreviousDataForSameQueryTail } from "../lib/query-placeholder-data"
 import { shouldTrackIssueActiveRun } from "../lib/issueActiveRun";
 import { getIssueDetailQueryOptions } from "../lib/issueDetailCache";
 import {
-  applyOptimisticIssueCommentUpdate,
-  createOptimisticIssueComment,
   loadRemainingIssueCommentPages,
   matchesIssueRef,
   mergeIssueComments,
-  upsertIssueCommentInPages,
   type OptimisticIssueComment,
 } from "../lib/optimistic-issue-comments";
 import type { IssueChatComposerHandle } from "../components/IssueChatThread";
@@ -29,10 +26,7 @@ import { ScrollToBottom } from "../components/ScrollToBottom";
 import { IssueDetailArtifactsSection } from "../components/issue-detail/IssueDetailArtifactsSection";
 import { IssueDetailMobilePropertiesSheet } from "../components/issue-detail/IssueDetailMobilePropertiesSheet";
 import { IssueDetailTabs } from "../components/issue-detail/IssueDetailTabs";
-import type {
-  CommentReassignment,
-  IssueDetailComment,
-} from "../components/issue-detail/IssueDetailChatTypes";
+import type { IssueDetailComment } from "../components/issue-detail/IssueDetailChatTypes";
 import { IssueDetailPluginOutlets } from "../components/issue-detail/IssueDetailPluginOutlets";
 import { IssueDetailReviewHeader } from "../components/issue-detail/IssueDetailReviewHeader";
 import { IssueDetailSubIssuesSection } from "../components/issue-detail/IssueDetailSubIssuesSection";
@@ -42,7 +36,6 @@ import {
   truncate,
 } from "../components/issue-detail/IssueDetailUtils";
 import { IssueTreeControlDialog } from "../components/issue-detail/IssueTreeControlDialog";
-import { readIssueRunStateFromCache } from "../components/issue-detail/issueRunState";
 import {
   ISSUE_COMMENT_PAGE_SIZE,
   JUMP_TO_LATEST_MAX_COMMENT_PAGES,
@@ -52,6 +45,7 @@ import { useIssueDetailApprovals } from "../components/issue-detail/useIssueDeta
 import { useIssueDetailAttachments } from "../components/issue-detail/useIssueDetailAttachments";
 import { useIssueDetailCacheActions } from "../components/issue-detail/useIssueDetailCacheActions";
 import { useIssueDetailChildIssues } from "../components/issue-detail/useIssueDetailChildIssues";
+import { useIssueDetailCommentPosting } from "../components/issue-detail/useIssueDetailCommentPosting";
 import { useIssueDetailFeedback } from "../components/issue-detail/useIssueDetailFeedback";
 import { useIssueDetailInboxToolbar } from "../components/issue-detail/useIssueDetailInboxToolbar";
 import { useIssueDetailInteractions } from "../components/issue-detail/useIssueDetailInteractions";
@@ -452,106 +446,17 @@ export function IssueDetail() {
     },
   });
 
-  const addComment = useMutation({
-    mutationFn: ({ body, reopen, interrupt }: { body: string; reopen?: boolean; interrupt?: boolean }) =>
-      issuesApi.addComment(issueId!, body, reopen, interrupt),
-    onMutate: async ({ body, reopen, interrupt }) => {
-      await queryClient.cancelQueries({ queryKey: queryKeys.issues.comments(issueId!) });
-      await queryClient.cancelQueries({ queryKey: queryKeys.issues.detail(issueId!) });
-
-      const previousIssue = queryClient.getQueryData<Issue>(queryKeys.issues.detail(issueId!));
-      const queuedComment = !interrupt ? readIssueRunStateFromCache(queryClient, issueId!).runningIssueRun : null;
-      const optimisticComment = issue
-        ? createOptimisticIssueComment({
-            companyId: issue.companyId,
-            issueId: issue.id,
-            body,
-            authorUserId: currentUserId,
-            clientStatus: queuedComment ? "queued" : "pending",
-            queueTargetRunId: queuedComment?.id ?? null,
-          })
-        : null;
-
-      if (optimisticComment) {
-        setOptimisticComments((current) => [...current, optimisticComment]);
-      }
-      if (previousIssue) {
-        queryClient.setQueryData(
-          queryKeys.issues.detail(issueId!),
-          applyOptimisticIssueCommentUpdate(previousIssue, { reopen }),
-        );
-      }
-
-      return {
-        optimisticCommentId: optimisticComment?.clientId ?? null,
-        queuedCommentTargetRunId: queuedComment?.id ?? null,
-        previousIssue,
-      };
-    },
-    onSuccess: async (comment, _variables, context) => {
-      if (context?.optimisticCommentId) {
-        setOptimisticComments((current) =>
-          current.filter((entry) => entry.clientId !== context.optimisticCommentId),
-        );
-      }
-      if (context?.optimisticCommentId && cancelledQueuedOptimisticCommentIdsRef.current.has(context.optimisticCommentId)) {
-        cancelledQueuedOptimisticCommentIdsRef.current.delete(context.optimisticCommentId);
-        try {
-          await issuesApi.cancelComment(issueId!, comment.id);
-          invalidateIssueDetail();
-          invalidateIssueThreadLazily();
-          invalidateIssueCollections();
-          return;
-        } catch (err) {
-          pushToast({
-            title: "Cancel failed",
-            body: err instanceof Error ? err.message : "Unable to cancel the queued comment",
-            tone: "error",
-          });
-        }
-      }
-      if (context?.queuedCommentTargetRunId) {
-        setLocallyQueuedCommentRunIds((current) => {
-          const next = new Map(current);
-          next.set(comment.id, context.queuedCommentTargetRunId!);
-          return next;
-        });
-      }
-      queryClient.setQueryData<InfiniteData<IssueComment[], string | null>>(
-        queryKeys.issues.comments(issueId!),
-        (current) => current ? {
-          ...current,
-          pages: upsertIssueCommentInPages(current.pages, comment),
-        } : {
-          pageParams: [null],
-          pages: upsertIssueCommentInPages(undefined, comment),
-        },
-      );
-    },
-    onError: (err, _variables, context) => {
-      if (context?.optimisticCommentId) {
-        setOptimisticComments((current) =>
-          current.filter((entry) => entry.clientId !== context.optimisticCommentId),
-        );
-      }
-      if (context?.previousIssue) {
-        queryClient.setQueryData(queryKeys.issues.detail(issueId!), context.previousIssue);
-      }
-      pushToast({
-        title: "Comment failed",
-        body: err instanceof Error ? err.message : "Unable to post comment",
-        tone: "error",
-      });
-    },
-    onSettled: (_result, _error, variables) => {
-      invalidateIssueThreadLazily();
-      if (variables.interrupt) {
-        invalidateIssueRunState();
-      }
-      if (variables.reopen) {
-        invalidateIssueCollections();
-      }
-    },
+  const { handleChatAdd } = useIssueDetailCommentPosting({
+    cancelledQueuedOptimisticCommentIdsRef,
+    currentUserId,
+    invalidateIssueCollections,
+    invalidateIssueDetail,
+    invalidateIssueRunState,
+    invalidateIssueThreadLazily,
+    issue,
+    issueId,
+    setLocallyQueuedCommentRunIds,
+    setOptimisticComments,
   });
   const {
     handleAcceptInteraction,
@@ -565,127 +470,6 @@ export function IssueDetail() {
     issueId,
     resolvedCompanyId,
     upsertInteractionInCache,
-  });
-
-  const addCommentAndReassign = useMutation({
-    mutationFn: ({
-      body,
-      reopen,
-      interrupt,
-      reassignment,
-    }: {
-      body: string;
-      reopen?: boolean;
-      interrupt?: boolean;
-      reassignment: CommentReassignment;
-    }) =>
-      issuesApi.update(issueId!, {
-        comment: body,
-        assigneeAgentId: reassignment.assigneeAgentId,
-        assigneeUserId: reassignment.assigneeUserId,
-        ...(reopen ? { status: "todo" } : {}),
-        ...(interrupt ? { interrupt } : {}),
-      }),
-    onMutate: async ({ body, reopen, reassignment, interrupt }) => {
-      await queryClient.cancelQueries({ queryKey: queryKeys.issues.comments(issueId!) });
-      await queryClient.cancelQueries({ queryKey: queryKeys.issues.detail(issueId!) });
-
-      const previousIssue = queryClient.getQueryData<Issue>(queryKeys.issues.detail(issueId!));
-      const queuedComment = !interrupt ? readIssueRunStateFromCache(queryClient, issueId!).runningIssueRun : null;
-      const optimisticComment = issue
-        ? createOptimisticIssueComment({
-            companyId: issue.companyId,
-            issueId: issue.id,
-            body,
-            authorUserId: currentUserId,
-            clientStatus: queuedComment ? "queued" : "pending",
-            queueTargetRunId: queuedComment?.id ?? null,
-          })
-        : null;
-
-      if (optimisticComment) {
-        setOptimisticComments((current) => [...current, optimisticComment]);
-      }
-      if (previousIssue) {
-        queryClient.setQueryData(
-          queryKeys.issues.detail(issueId!),
-          applyOptimisticIssueCommentUpdate(previousIssue, { reopen, reassignment }),
-        );
-      }
-
-      return {
-        optimisticCommentId: optimisticComment?.clientId ?? null,
-        queuedCommentTargetRunId: queuedComment?.id ?? null,
-        previousIssue,
-      };
-    },
-    onSuccess: async (result, _variables, context) => {
-      if (context?.optimisticCommentId) {
-        setOptimisticComments((current) =>
-          current.filter((entry) => entry.clientId !== context.optimisticCommentId),
-        );
-      }
-
-      const { comment, ...nextIssue } = result;
-      queryClient.setQueryData(queryKeys.issues.detail(issueId!), nextIssue);
-      if (comment && context?.optimisticCommentId && cancelledQueuedOptimisticCommentIdsRef.current.has(context.optimisticCommentId)) {
-        cancelledQueuedOptimisticCommentIdsRef.current.delete(context.optimisticCommentId);
-        try {
-          await issuesApi.cancelComment(issueId!, comment.id);
-          invalidateIssueDetail();
-          invalidateIssueThreadLazily();
-          invalidateIssueCollections();
-          return;
-        } catch (err) {
-          pushToast({
-            title: "Cancel failed",
-            body: err instanceof Error ? err.message : "Unable to cancel the queued comment",
-            tone: "error",
-          });
-        }
-      }
-      if (comment && context?.queuedCommentTargetRunId) {
-        setLocallyQueuedCommentRunIds((current) => {
-          const next = new Map(current);
-          next.set(comment.id, context.queuedCommentTargetRunId!);
-          return next;
-        });
-      }
-      if (comment) {
-        queryClient.setQueryData<InfiniteData<IssueComment[], string | null>>(
-          queryKeys.issues.comments(issueId!),
-          (current) => current ? {
-            ...current,
-            pages: upsertIssueCommentInPages(current.pages, comment),
-          } : {
-            pageParams: [null],
-            pages: upsertIssueCommentInPages(undefined, comment),
-          },
-        );
-      }
-    },
-    onError: (err, _variables, context) => {
-      if (context?.optimisticCommentId) {
-        setOptimisticComments((current) =>
-          current.filter((entry) => entry.clientId !== context.optimisticCommentId),
-        );
-      }
-      if (context?.previousIssue) {
-        queryClient.setQueryData(queryKeys.issues.detail(issueId!), context.previousIssue);
-      }
-      pushToast({
-        title: "Comment failed",
-        body: err instanceof Error ? err.message : "Unable to post comment",
-        tone: "error",
-      });
-    },
-    onSettled: (_result, _error, variables) => {
-      invalidateIssueThreadLazily();
-      if (variables.interrupt) {
-        invalidateIssueRunState();
-      }
-      invalidateIssueCollections();
-    },
   });
 
   const {
@@ -847,14 +631,6 @@ export function IssueDetail() {
     if (!shouldPrefetchOlderComments) return;
     void fetchOlderComments();
   }, [fetchOlderComments, shouldPrefetchOlderComments]);
-  const handleChatAdd = useCallback(async (body: string, reopen?: boolean, reassignment?: CommentReassignment) => {
-    if (reassignment) {
-      await addCommentAndReassign.mutateAsync({ body, reopen, reassignment });
-      return;
-    }
-    await addComment.mutateAsync({ body, reopen });
-  }, [addComment, addCommentAndReassign]);
-
   if (isLoading) return <IssueDetailLoadingState headerSeed={issueHeaderSeed} />;
   if (error) return <p className="text-sm text-destructive">{error.message}</p>;
   if (!issue) return null;
