@@ -1183,10 +1183,10 @@ describe("IssuesList", () => {
       const childRow = rows.find((row) => row.textContent?.includes("Child issue"));
       expect(parentRow).not.toBeUndefined();
       expect(childRow).not.toBeUndefined();
-      expect((parentRow?.parentElement as HTMLDivElement | null)?.style.contentVisibility).toBe("");
-      expect((parentRow?.parentElement as HTMLDivElement | null)?.style.containIntrinsicSize).toBe("");
-      expect((childRow?.parentElement as HTMLDivElement | null)?.style.contentVisibility).toBe("auto");
-      expect((childRow?.parentElement as HTMLDivElement | null)?.style.containIntrinsicSize).toBe("44px");
+      expect(parentRow?.parentElement?.classList.contains("content-auto")).toBe(false);
+      expect(parentRow?.parentElement?.classList.contains("contain-intrinsic-size-11")).toBe(false);
+      expect(childRow?.parentElement?.classList.contains("content-auto")).toBe(true);
+      expect(childRow?.parentElement?.classList.contains("contain-intrinsic-size-11")).toBe(true);
     });
 
     act(() => {
