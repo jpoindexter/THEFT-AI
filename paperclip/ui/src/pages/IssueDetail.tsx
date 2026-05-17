@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Link, useLocation, useNavigate, useNavigationType, useParams } from "@/lib/router";
+import { useParams } from "@/lib/router";
 import { useQuery, useMutation, useQueryClient, type InfiniteData } from "@tanstack/react-query";
 import { issuesApi } from "../api/issues";
 import { approvalsApi } from "../api/approvals";
@@ -15,14 +15,6 @@ import { assigneeValueFromSelection, suggestedCommentAssigneeValue } from "../li
 import { buildCompanyUserInlineOptions } from "../lib/company-members";
 import { queryKeys } from "../lib/queryKeys";
 import { keepPreviousDataForSameQueryTail } from "../lib/query-placeholder-data";
-import {
-  hasLegacyIssueDetailQuery,
-  createIssueDetailPath,
-  readIssueDetailLocationState,
-  readIssueDetailBreadcrumb,
-  readIssueDetailHeaderSeed,
-  rememberIssueDetailLocationState,
-} from "../lib/issueDetailBreadcrumb";
 import { shouldTrackIssueActiveRun } from "../lib/issueActiveRun";
 import { getIssueDetailQueryOptions } from "../lib/issueDetailCache";
 import {
@@ -79,6 +71,7 @@ import {
 import { useIssueDetailAttachments } from "../components/issue-detail/useIssueDetailAttachments";
 import { useIssueDetailChildIssues } from "../components/issue-detail/useIssueDetailChildIssues";
 import { useIssueDetailLookups } from "../components/issue-detail/useIssueDetailLookups";
+import { useIssueDetailRouteEffects, useIssueDetailRouteState } from "../components/issue-detail/useIssueDetailRouteState";
 import { useIssueDetailTreeControl } from "../components/issue-detail/useIssueDetailTreeControl";
 import { Separator } from "@/components/ui/separator";
 import { TheftDetailReviewTemplate } from "@/components/theft/templates/TheftDetailReviewTemplate";
@@ -108,13 +101,19 @@ export function IssueDetail() {
   const { selectedCompanyId } = useCompany();
   const { openNewIssue } = useDialogActions();
   const { openPanel, closePanel, panelVisible, setPanelVisible } = usePanel();
-  const { setBreadcrumbs, setMobileToolbar } = useBreadcrumbs();
+  const { setMobileToolbar } = useBreadcrumbs();
   const queryClient = useQueryClient();
-  const navigate = useNavigate();
-  const navigationType = useNavigationType();
-  const location = useLocation();
   const { pushToast } = useToastActions();
   const { isMobile } = useSidebar();
+  const {
+    isFromInbox,
+    issueHeaderSeed,
+    location,
+    navigate,
+    resolvedIssueDetailState,
+    sourceBreadcrumb,
+    navigationType,
+  } = useIssueDetailRouteState(issueId);
   const [moreOpen, setMoreOpen] = useState(false);
   const [copied, setCopied] = useState(false);
   const [mobilePropsOpen, setMobilePropsOpen] = useState(false);
@@ -130,15 +129,6 @@ export function IssueDetail() {
   const lastMarkedReadIssueIdRef = useRef<string | null>(null);
   const commentComposerRef = useRef<IssueChatComposerHandle | null>(null);
   const cancelledQueuedOptimisticCommentIdsRef = useRef(new Set<string>());
-  const resolvedIssueDetailState = useMemo(
-    () => readIssueDetailLocationState(issueId, location.state, location.search),
-    [issueId, location.state, location.search],
-  );
-  const issueHeaderSeed = useMemo(
-    () => readIssueDetailHeaderSeed(location.state) ?? readIssueDetailHeaderSeed(resolvedIssueDetailState),
-    [location.state, resolvedIssueDetailState],
-  );
-
   const { data: issue, isLoading, error } = useQuery({
     ...getIssueDetailQueryOptions(queryClient, issueId!, {
       placeholderIssue: issueHeaderSeed ? {
@@ -196,10 +186,18 @@ export function IssueDetail() {
       setLocallyQueuedCommentRunIds(new Map());
     }
   }, [hasLiveRuns, locallyQueuedCommentRunIds.size]);
-  const sourceBreadcrumb = useMemo(
-    () => readIssueDetailBreadcrumb(issueId, location.state, location.search) ?? { label: "Tasks", href: "/issues" },
-    [issueId, location.state, location.search],
-  );
+  useIssueDetailRouteEffects({
+    hasLiveRuns,
+    issue,
+    issueId,
+    isFromInbox,
+    issueHeaderSeed,
+    location,
+    navigate,
+    navigationType,
+    resolvedIssueDetailState,
+    sourceBreadcrumb,
+  });
 
   const {
     agents,
@@ -306,7 +304,6 @@ export function IssueDetail() {
     () => mergeIssueComments(comments ?? [], optimisticComments),
     [comments, optimisticComments],
   );
-  const breadcrumbTitle = issue?.title ?? issueId ?? "Issue";
   const issueCacheRefs = useMemo(() => {
     const refs = new Set<string>();
     if (issueId) refs.add(issueId);
@@ -1124,51 +1121,6 @@ export function IssueDetail() {
       });
     },
   });
-
-  useEffect(() => {
-    setBreadcrumbs([
-      sourceBreadcrumb,
-      { label: hasLiveRuns ? `🔵 ${breadcrumbTitle}` : breadcrumbTitle },
-    ]);
-  }, [
-    breadcrumbTitle,
-    hasLiveRuns,
-    setBreadcrumbs,
-    sourceBreadcrumb.href,
-    sourceBreadcrumb.label,
-  ]);
-
-  const isFromInbox = resolvedIssueDetailState?.issueDetailSource === "inbox";
-
-  // Scroll to top on forward navigation (PUSH/REPLACE) so issue doesn't
-  // inherit the inbox/issues-list scroll position on mobile.
-  useEffect(() => {
-    if (navigationType === "POP") return;
-    window.scrollTo({ top: 0, left: 0, behavior: "auto" });
-    const main = document.getElementById("main-content");
-    if (main) main.scrollTop = 0;
-  }, [issueId, navigationType]);
-
-  // Redirect to identifier-based URL if navigated via UUID
-  useEffect(() => {
-    const nextState = resolvedIssueDetailState ?? location.state;
-    if (issue?.identifier && issueId !== issue.identifier) {
-      rememberIssueDetailLocationState(issue.identifier, nextState, location.search);
-      navigate(createIssueDetailPath(issue.identifier), {
-        replace: true,
-        state: nextState,
-      });
-      return;
-    }
-
-    if (issueId && hasLegacyIssueDetailQuery(location.search)) {
-      rememberIssueDetailLocationState(issueId, nextState, location.search);
-      navigate(createIssueDetailPath(issueId), {
-        replace: true,
-        state: nextState,
-      });
-    }
-  }, [issue, issueId, navigate, location.state, location.search, resolvedIssueDetailState]);
 
   useEffect(() => {
     if (!issue?.id) return;
