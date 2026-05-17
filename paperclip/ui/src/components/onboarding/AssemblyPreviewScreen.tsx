@@ -16,6 +16,7 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import type { OnboardingStage } from "@/lib/onboarding-context";
 import { DEPARTMENT_SEED_SPECS } from "@/lib/onboarding-seed";
+import { AssemblyStatGroup, InspectorBlock } from "./AssemblyPreviewPrimitives";
 
 const DEPARTMENT_ASSEMBLY_META: Record<
   string,
@@ -282,31 +283,5 @@ function DepartmentCardContent({
         </ul>
       </div>
     </>
-  );
-}
-
-function AssemblyStatGroup({ title, rows }: { title: string; rows: string[] }) {
-  return (
-    <div className="border-b border-border pb-4 last:border-b-0">
-      <p className="theft-label">{title}</p>
-      <div className="mt-2 space-y-1 text-muted-foreground">
-        {rows.map((row) => (
-          <p key={row}>{row}</p>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-function InspectorBlock({ title, rows }: { title: string; rows: string[] }) {
-  return (
-    <div className="theft-surface-plain p-4">
-      <p className="theft-label">{title}</p>
-      <ul className="mt-2 space-y-1.5 text-sm leading-5 text-muted-foreground">
-        {rows.map((row) => (
-          <li key={row}>{row}</li>
-        ))}
-      </ul>
-    </div>
   );
 }
