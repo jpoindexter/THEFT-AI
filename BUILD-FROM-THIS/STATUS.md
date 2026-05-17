@@ -38,6 +38,7 @@ Current local modularization checkpoint:
 - Extracted issue-detail plugin outlets and subtask section into guarded `issue-detail/` modules.
 - Extracted issue-detail artifact/workspace block into a guarded `issue-detail/` module.
 - Extracted issue-detail mobile properties drawer into a guarded `issue-detail/` module.
+- Extracted issue-detail tabs into a guarded `issue-detail/` organism.
 - Moved the issue-chat composer safe-area dock value into a semantic CSS utility.
 
 Latest verification for the active modularization slices:
@@ -54,7 +55,7 @@ Latest verification for the active modularization slices:
 
 Remaining high-value maintainability work:
 
-- `IssueDetail.tsx` is down to 2,383 lines, but it is still the largest active page.
+- `IssueDetail.tsx` is down to 2,342 lines, but it is still the largest active page.
 - `IssueChatThread.tsx` is down to 275 lines and now fits the 300-line guardrail.
 - `OnboardingWizard.tsx` is down to 297 lines and now fits the 300-line guardrail.
 - `IssueDocumentsSection.tsx` is down to 207 lines and now fits the 300-line guardrail.

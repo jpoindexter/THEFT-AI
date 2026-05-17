@@ -56,14 +56,12 @@ import { clearIssueExecutionRun, removeLiveRunById, upsertInterruptedRun } from 
 import { useProjectOrder } from "../hooks/useProjectOrder";
 import { cn } from "../lib/utils";
 import type { IssueChatComposerHandle } from "../components/IssueChatThread";
-import { IssueRelatedWorkPanel } from "../components/IssueRelatedWorkPanel";
 import { IssueProperties } from "../components/IssueProperties";
 import type { MentionOption } from "../components/MarkdownEditor";
 import { ScrollToBottom } from "../components/ScrollToBottom";
 import { IssueDetailArtifactsSection } from "../components/issue-detail/IssueDetailArtifactsSection";
-import { IssueDetailActivityTab } from "../components/issue-detail/IssueDetailActivityTab";
 import { IssueDetailMobilePropertiesSheet } from "../components/issue-detail/IssueDetailMobilePropertiesSheet";
-import { IssueDetailChatTab } from "../components/issue-detail/IssueDetailChatTab";
+import { IssueDetailTabs } from "../components/issue-detail/IssueDetailTabs";
 import type {
   ActionableIssueThreadInteraction,
   CommentReassignment,
@@ -92,23 +90,19 @@ import {
   readIssueRunStateFromCache,
   resolveRunningIssueRun,
 } from "../components/issue-detail/issueRunState";
-import { PluginSlotMount, usePluginSlots } from "@/plugins/slots";
+import { usePluginSlots } from "@/plugins/slots";
 import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { TheftDetailReviewTemplate } from "@/components/theft/templates/TheftDetailReviewTemplate";
 import { buildIssuePropertiesPanelKey } from "../lib/issue-properties-panel-key";
 import { shouldRenderRichSubIssuesSection } from "../lib/issue-detail-subissues";
 import { filterIssueDescendants } from "../lib/issue-tree";
 import { buildSubIssueDefaultsForViewer } from "../lib/subIssueDefaults";
 import {
-  Activity as ActivityIcon,
   AlertTriangle,
   ArrowLeft,
   Library,
-  ListTree,
-  MessageSquare,
   MoreVertical,
   Paperclip,
 } from "lucide-react";
@@ -2218,127 +2212,92 @@ export function IssueDetail() {
 
       <Separator />
 
-      <Tabs value={detailTab} onValueChange={setDetailTab} className="space-y-3">
-        <TabsList variant="line" className="w-full justify-start gap-1">
-          <TabsTrigger value="related-work" className="gap-1.5">
-            <ListTree className="h-3.5 w-3.5" />
-            Context
-          </TabsTrigger>
-          <TabsTrigger value="chat" className="gap-1.5">
-            <MessageSquare className="h-3.5 w-3.5" />
-            Runtime diagnostics
-          </TabsTrigger>
-          <TabsTrigger value="activity" className="gap-1.5">
-            <ActivityIcon className="h-3.5 w-3.5" />
-            Audit
-          </TabsTrigger>
-          {issuePluginTabItems.map((item) => (
-            <TabsTrigger key={item.value} value={item.value}>
-              {item.label}
-            </TabsTrigger>
-          ))}
-        </TabsList>
-
-        <TabsContent value="chat">
-          <IssueDetailChatTab
-            issueId={issue.id}
-            companyId={issue.companyId}
-            projectId={issue.projectId ?? null}
-            issueStatus={issue.status}
-            issueWorkMode={issue.workMode ?? "standard"}
-            executionRunId={issue.executionRunId ?? null}
-            blockedBy={issue.blockedBy ?? []}
-            blockerAttention={issue.blockerAttention ?? null}
-            successfulRunHandoff={issue.successfulRunHandoff ?? null}
-            comments={threadComments}
-            locallyQueuedCommentRunIds={locallyQueuedCommentRunIds}
-            interactions={interactions}
-            hasOlderComments={hasOlderComments}
-            commentsLoadingOlder={commentsLoadingOlder}
-            onLoadOlderComments={loadOlderComments}
-            onRefreshLatestComments={refetchLatestComments}
-            composerRef={commentComposerRef}
-            feedbackVotes={feedbackVotes}
-            feedbackDataSharingPreference={feedbackDataSharingPreference}
-            feedbackTermsUrl={FEEDBACK_TERMS_URL}
-            agentMap={agentMap}
-            currentUserId={currentUserId}
-            userLabelMap={userLabelMap}
-            userProfileMap={userProfileMap}
-            draftKey={`paperclip:issue-comment-draft:${issue.id}`}
-            reassignOptions={commentReassignOptions}
-            currentAssigneeValue={actualAssigneeValue}
-            suggestedAssigneeValue={suggestedAssigneeValue}
-            mentions={mentionOptions}
-            composerDisabledReason={commentComposerDisabledReason}
-            composerHint={composerHint}
-            queuedCommentReason={queuedCommentReason}
-            onVote={handleCommentVote}
-            onAdd={handleChatAdd}
-            onImageUpload={handleCommentImageUpload}
-            onAttachImage={handleCommentAttachImage}
-            onInterruptQueued={handleInterruptQueuedRun}
-            onPauseWorkRun={canManageTreeControl
+      <IssueDetailTabs
+        value={detailTab}
+        onValueChange={setDetailTab}
+        relatedWork={issue.relatedWork}
+        pluginTabItems={issuePluginTabItems}
+        activePluginTab={activePluginTab}
+        pluginContext={{
+          companyId: issue.companyId,
+          projectId: issue.projectId ?? null,
+          entityId: issue.id,
+          entityType: "issue",
+        }}
+        chatProps={{
+          issueId: issue.id,
+          companyId: issue.companyId,
+          projectId: issue.projectId ?? null,
+          issueStatus: issue.status,
+          issueWorkMode: issue.workMode ?? "standard",
+          executionRunId: issue.executionRunId ?? null,
+          blockedBy: issue.blockedBy ?? [],
+          blockerAttention: issue.blockerAttention ?? null,
+          successfulRunHandoff: issue.successfulRunHandoff ?? null,
+          comments: threadComments,
+          locallyQueuedCommentRunIds,
+          interactions,
+          hasOlderComments,
+          commentsLoadingOlder,
+          onLoadOlderComments: loadOlderComments,
+          onRefreshLatestComments: refetchLatestComments,
+          composerRef: commentComposerRef,
+          feedbackVotes,
+          feedbackDataSharingPreference,
+          feedbackTermsUrl: FEEDBACK_TERMS_URL,
+          agentMap,
+          currentUserId,
+          userLabelMap,
+          userProfileMap,
+          draftKey: `paperclip:issue-comment-draft:${issue.id}`,
+          reassignOptions: commentReassignOptions,
+          currentAssigneeValue: actualAssigneeValue,
+          suggestedAssigneeValue,
+          mentions: mentionOptions,
+          composerDisabledReason: commentComposerDisabledReason,
+          composerHint,
+          queuedCommentReason,
+          onVote: handleCommentVote,
+          onAdd: handleChatAdd,
+          onImageUpload: handleCommentImageUpload,
+          onAttachImage: handleCommentAttachImage,
+          onInterruptQueued: handleInterruptQueuedRun,
+          onPauseWorkRun: canManageTreeControl
               ? (runId) => pauseIssueWorkRun.mutateAsync({ runId, scope: treeControlScope }).then(() => undefined)
-              : undefined}
-            onWorkModeChange={(nextMode) => {
-              const currentMode: IssueWorkMode = issue.workMode ?? "standard";
-              if (currentMode === nextMode) return;
-              return updateIssue.mutateAsync({ workMode: nextMode }).then(() => undefined);
-            }}
-            onCancelQueued={handleCancelQueuedComment}
-            interruptingQueuedRunId={interruptQueuedComment.isPending ? interruptQueuedComment.variables ?? null : null}
-            pausingWorkRunId={pauseIssueWorkRun.isPending ? pauseIssueWorkRun.variables?.runId ?? null : null}
-            onImageClick={handleChatImageClick}
-            onAcceptInteraction={handleAcceptInteraction}
-            onRejectInteraction={handleRejectInteraction}
-            onSubmitInteractionAnswers={handleSubmitInteractionAnswers}
-            onCancelInteraction={handleCancelInteraction}
-          />
-        </TabsContent>
-
-        <TabsContent value="activity">
-          {detailTab === "activity" ? (
-            <IssueDetailActivityTab
-              issue={issue}
-              issueId={issue.id}
-              companyId={issue.companyId}
-              issueStatus={issue.status}
-              childIssues={childIssues}
-              agentMap={agentMap}
-              hasLiveRuns={hasLiveRuns}
-              currentUserId={currentUserId}
-              userProfileMap={userProfileMap}
-              pendingApprovalAction={pendingApprovalAction}
-              handoffFocusSignal={handoffFocusSignal}
-              onApprovalAction={(approvalId, action) => {
-                approvalDecision.mutate({ approvalId, action });
-              }}
-              onCheckMonitorNow={() => checkIssueMonitorNow.mutate()}
-              checkingMonitorNow={checkIssueMonitorNow.isPending}
-            />
-          ) : null}
-        </TabsContent>
-
-        <TabsContent value="related-work">
-          <IssueRelatedWorkPanel relatedWork={issue.relatedWork} />
-        </TabsContent>
-
-        {activePluginTab && (
-          <TabsContent value={activePluginTab.value}>
-            <PluginSlotMount
-              slot={activePluginTab.slot}
-              context={{
-                companyId: issue.companyId,
-                projectId: issue.projectId ?? null,
-                entityId: issue.id,
-                entityType: "issue",
-              }}
-              missingBehavior="placeholder"
-            />
-          </TabsContent>
-        )}
-      </Tabs>
+              : undefined,
+          onWorkModeChange: (nextMode) => {
+            const currentMode: IssueWorkMode = issue.workMode ?? "standard";
+            if (currentMode === nextMode) return;
+            return updateIssue.mutateAsync({ workMode: nextMode }).then(() => undefined);
+          },
+          onCancelQueued: handleCancelQueuedComment,
+          interruptingQueuedRunId: interruptQueuedComment.isPending ? interruptQueuedComment.variables ?? null : null,
+          pausingWorkRunId: pauseIssueWorkRun.isPending ? pauseIssueWorkRun.variables?.runId ?? null : null,
+          onImageClick: handleChatImageClick,
+          onAcceptInteraction: handleAcceptInteraction,
+          onRejectInteraction: handleRejectInteraction,
+          onSubmitInteractionAnswers: handleSubmitInteractionAnswers,
+          onCancelInteraction: handleCancelInteraction,
+        }}
+        activityProps={{
+          issue,
+          issueId: issue.id,
+          companyId: issue.companyId,
+          issueStatus: issue.status,
+          childIssues,
+          agentMap,
+          hasLiveRuns,
+          currentUserId,
+          userProfileMap,
+          pendingApprovalAction,
+          handoffFocusSignal,
+          onApprovalAction: (approvalId, action) => {
+            approvalDecision.mutate({ approvalId, action });
+          },
+          onCheckMonitorNow: () => checkIssueMonitorNow.mutate(),
+          checkingMonitorNow: checkIssueMonitorNow.isPending,
+        }}
+      />
 
       <IssueTreeControlDialog
         open={treeControlOpen}
