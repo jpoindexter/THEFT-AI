@@ -2,7 +2,7 @@
 
 import { describe, expect, it } from "vitest";
 import { renderToStaticMarkup } from "react-dom/server";
-import { buildTechTreeNodeViews, buildTechTreeStageViews, getNextTechTreeNode } from "./Goals";
+import { buildTechTreeNodeViews, buildTechTreeStageViews, getNextTechTreeNode } from "../lib/techTree";
 import { GoalPropertiesToggleButton, getGoalLinkedIssues, getGoalLinkedProjects } from "./GoalDetail";
 import type { Agent, Goal, Issue, Project } from "@paperclipai/shared";
 
