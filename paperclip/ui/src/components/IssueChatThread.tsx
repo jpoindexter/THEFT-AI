@@ -114,6 +114,20 @@ import {
   type ComposerAttachmentItem,
 } from "./issue-chat/ComposerHelpers";
 import { IssueChatFeedbackButtons } from "./issue-chat/FeedbackButtons";
+import {
+  findLatestCommentMessageIndex,
+  findMessageAnchorIndex,
+  issueChatMessageActiveVote,
+  issueChatMessageAnchorId,
+  issueChatMessageCommentId,
+  issueChatMessageCustom,
+  issueChatMessageKind,
+  issueChatMessageQueueTargetRunId,
+  issueChatMessageRunId,
+  issueChatMessageRunIsActive,
+  issueChatMessageRunIsStopping,
+  issueChatMessageQueuedRunIsInterrupting,
+} from "./issue-chat/MessageState";
 import { SystemNoticeCommentRow } from "./issue-chat/SystemNoticeCommentRow";
 import {
   formatInteractionActorLabel,
@@ -124,6 +138,8 @@ import {
   isTimelineWorkspaceChange,
   runStatusClass,
 } from "./issue-chat/SystemMessageHelpers";
+
+export { findLatestCommentMessageIndex };
 
 interface IssueChatMessageContext {
   feedbackDataSharingPreference: FeedbackDataSharingPreference;
@@ -1395,62 +1411,6 @@ function IssueChatSystemMessage({ message }: { message: ThreadMessage }) {
   return null;
 }
 
-function issueChatMessageCustom(message: ThreadMessage): Record<string, unknown> {
-  return (message.metadata?.custom ?? {}) as Record<string, unknown>;
-}
-
-function issueChatMessageKind(message: ThreadMessage): string {
-  const custom = issueChatMessageCustom(message);
-  return typeof custom.kind === "string" ? custom.kind : message.role;
-}
-
-function issueChatMessageCommentId(message: ThreadMessage): string | null {
-  const custom = issueChatMessageCustom(message);
-  return typeof custom.commentId === "string" ? custom.commentId : null;
-}
-
-function issueChatMessageRunId(message: ThreadMessage): string | null {
-  const custom = issueChatMessageCustom(message);
-  return typeof custom.runId === "string" ? custom.runId : null;
-}
-
-function issueChatMessageQueueTargetRunId(message: ThreadMessage): string | null {
-  const custom = issueChatMessageCustom(message);
-  return typeof custom.queueTargetRunId === "string" ? custom.queueTargetRunId : null;
-}
-
-function issueChatMessageActiveVote(
-  message: ThreadMessage,
-  feedbackVoteByTargetId: ReadonlyMap<string, FeedbackVoteValue>,
-): FeedbackVoteValue | null {
-  const commentId = issueChatMessageCommentId(message);
-  return commentId ? feedbackVoteByTargetId.get(commentId) ?? null : null;
-}
-
-function issueChatMessageRunIsActive(
-  message: ThreadMessage,
-  activeRunIds: ReadonlySet<string>,
-): boolean {
-  const runId = issueChatMessageRunId(message);
-  return Boolean(runId && activeRunIds.has(runId));
-}
-
-function issueChatMessageRunIsStopping(
-  message: ThreadMessage,
-  stoppingRunId: string | null | undefined,
-): boolean {
-  const runId = issueChatMessageRunId(message);
-  return Boolean(runId && stoppingRunId === runId);
-}
-
-function issueChatMessageQueuedRunIsInterrupting(
-  message: ThreadMessage,
-  interruptingQueuedRunId: string | null | undefined,
-): boolean {
-  const queueTargetRunId = issueChatMessageQueueTargetRunId(message);
-  return Boolean(queueTargetRunId && interruptingQueuedRunId === queueTargetRunId);
-}
-
 // Above ~150 merged rows the direct render path forces React to mount and
 // re-render hundreds of Markdown bodies, feedback controls, and avatars on
 // unrelated parent updates. Above this threshold we switch to a windowed
@@ -1479,23 +1439,6 @@ interface VirtualizedIssueChatThreadListHandle {
   ) => void;
   scrollToLatest: (options?: { behavior?: ScrollBehavior }) => void;
   measure: () => void;
-}
-
-function issueChatMessageAnchorId(message: ThreadMessage): string | null {
-  const custom = message.metadata.custom as { anchorId?: unknown } | undefined;
-  return typeof custom?.anchorId === "string" ? custom.anchorId : null;
-}
-
-function findMessageAnchorIndex(messages: readonly ThreadMessage[], anchorId: string): number {
-  return messages.findIndex((message) => issueChatMessageAnchorId(message) === anchorId);
-}
-
-export function findLatestCommentMessageIndex(messages: readonly ThreadMessage[]): number {
-  for (let index = messages.length - 1; index >= 0; index -= 1) {
-    const anchorId = issueChatMessageAnchorId(messages[index]);
-    if (anchorId && anchorId.startsWith("comment-")) return index;
-  }
-  return -1;
 }
 
 type VirtualizedVisibleAnchorSnapshot = {
