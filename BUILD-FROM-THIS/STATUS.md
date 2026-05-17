@@ -27,6 +27,7 @@ Recent pushed checkpoints:
 Current local modularization checkpoint:
 
 - Extracted issue chat latest-scroll and hash/composer-spacer control into route-local hooks.
+- Extracted issue chat shared message context, text/assistant message content, handoff callout, and assignee pause notice into `issue-chat/`.
 - Extracted issue document cards, revision menus, draft form, helper utilities, data/cache hooks, fold/hash state, autosave, draft events, copy action, revision preview, and server mutations into `issue-documents/`.
 - Extracted onboarding adapter-selection, draft state, created-entity tracking, route-dialog state, runtime adapter handling, launch mutations, and shell rendering.
 - Extracted issue-detail shared utilities and loading state.
@@ -36,6 +37,7 @@ Latest verification for the active modularization slices:
 
 - `pnpm -C paperclip --filter @paperclipai/ui typecheck` passed.
 - Focused Vitest for issue chat, issue documents, and issue detail passed: 78 tests across 4 files.
+- Focused IssueChatThread Vitest passed: 61 tests across 2 files.
 - Focused onboarding utility Vitest passed: 21 tests across 5 files.
 - `PAPERCLIP_E2E_PORT=3299 PAPERCLIP_E2E_DB_PORT=32399 pnpm -C paperclip exec playwright test tests/e2e/onboarding.spec.ts --config tests/e2e/playwright.config.ts` passed: 2 onboarding e2e tests.
 - `pnpm design:gate` passed with 0 active-route findings and 15 reviewed runtime exceptions.
@@ -45,7 +47,7 @@ Latest verification for the active modularization slices:
 Remaining high-value maintainability work:
 
 - `IssueDetail.tsx` is down to 2,748 lines, but it is still the largest active page.
-- `IssueChatThread.tsx` is down to 1,675 lines.
+- `IssueChatThread.tsx` is down to 1,444 lines.
 - `OnboardingWizard.tsx` is down to 297 lines and now fits the 300-line guardrail.
 - `IssueDocumentsSection.tsx` is down to 207 lines and now fits the 300-line guardrail.
 - `index.css` is large because it is the current token/source-of-truth file; do not split it casually before token ownership is fully stable.
