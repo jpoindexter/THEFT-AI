@@ -3,6 +3,7 @@ import type { IssueProductivityReview } from "@paperclipai/shared";
 import { Link } from "../lib/router";
 import { cn } from "../lib/utils";
 import { createIssueDetailPath } from "../lib/issueDetailBreadcrumb";
+import { badgeVariants } from "./ui/badge";
 import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip";
 
 const TRIGGER_LABELS: Record<string, string> = {
@@ -46,7 +47,8 @@ export function ProductivityReviewBadge({
         <Link
           to={reviewPath}
           className={cn(
-            "inline-flex items-center gap-1 rounded-full border border-amber-500/40 bg-amber-500/10 px-2 py-0.5 text-[10px] font-medium text-amber-700 dark:text-amber-300 shrink-0 hover:bg-amber-500/20 transition-colors",
+            badgeVariants({ variant: "outline" }),
+            "theft-chip-important text-nano font-medium hover:bg-accent/60",
             className,
           )}
           aria-label={`Under review · productivity review ${reviewIdentifier} (${label})`}

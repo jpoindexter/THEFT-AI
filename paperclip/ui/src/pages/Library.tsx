@@ -23,6 +23,13 @@ import { MarkdownBody } from "../components/MarkdownBody";
 import { TheftChip, TheftPageShell, TheftSectionHeader, TheftStat, TheftSurface } from "@/components/theft";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { useBreadcrumbs } from "../context/BreadcrumbContext";
 import { useCompany } from "../context/CompanyContext";
@@ -251,19 +258,22 @@ export function Library() {
                 className="pl-9"
               />
             </div>
-            <select
+            <Select
               value={departmentFilter}
-              onChange={(event) => setDepartmentFilter(event.target.value)}
-              className="h-10 rounded-md border border-border bg-card px-3 text-sm text-foreground"
-              aria-label="Filter by department"
+              onValueChange={setDepartmentFilter}
             >
-              <option value="all">All departments</option>
-              {departmentOptions.map((department) => (
-                <option key={department} value={department.toLowerCase()}>
-                  {department}
-                </option>
-              ))}
-            </select>
+              <SelectTrigger className="w-full md:w-56" aria-label="Filter by department">
+                <SelectValue placeholder="All departments" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All departments</SelectItem>
+                {departmentOptions.map((department) => (
+                  <SelectItem key={department} value={department.toLowerCase()}>
+                    {department}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
           <div className="grid gap-2 text-sm sm:grid-cols-4">
             <TheftStat label="Outputs" value={librarySummary.totalItems} />
@@ -286,7 +296,7 @@ export function Library() {
           <TheftSurface
             tone="plain"
             padding="none"
-            className="grid min-h-[620px] overflow-hidden lg:h-[calc(100vh-18rem)] lg:grid-cols-[minmax(360px,0.9fr)_minmax(0,1.1fr)]"
+            className="theft-library-workspace grid overflow-hidden"
           >
             <section className="min-h-0 overflow-y-auto border-r border-border bg-card/50 p-4">
               {pinnedItems.length > 0 ? (
@@ -387,40 +397,37 @@ function LibraryRow({
 }) {
   const Icon = itemIcon(item);
   return (
-    <button
-      type="button"
-      onClick={onSelect}
+    <div
       className={cn(
         "group flex w-full items-start gap-3 rounded-md border px-3 py-2 text-left transition-colors",
         selected ? "border-primary bg-accent/40" : "border-border bg-card/90 hover:bg-accent/40",
       )}
     >
-      <Icon className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" />
-      <span className="min-w-0 flex-1">
-        <span className="block truncate text-sm font-medium">{item.title}</span>
-        <span className="mt-0.5 block truncate text-xs text-muted-foreground">
-          {itemKindLabel(item)} · {item.sourceTaskLabel}
+      <Button
+        type="button"
+        variant="ghost"
+        onClick={onSelect}
+        className="h-auto min-w-0 flex-1 justify-start gap-3 p-0 text-left font-normal hover:bg-transparent"
+      >
+        <Icon className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" />
+        <span className="min-w-0 flex-1">
+          <span className="block truncate text-sm font-medium">{item.title}</span>
+          <span className="mt-0.5 block truncate text-xs text-muted-foreground">
+            {itemKindLabel(item)} · {item.sourceTaskLabel}
+          </span>
         </span>
-      </span>
-      <span
-        role="button"
-        tabIndex={0}
+      </Button>
+      <Button
+        type="button"
+        variant="ghost"
+        size="icon-xs"
         aria-label={pinned ? "Unpin item" : "Pin item"}
-        onClick={(event) => {
-          event.stopPropagation();
-          onTogglePin();
-        }}
-        onKeyDown={(event) => {
-          if (event.key !== "Enter" && event.key !== " ") return;
-          event.preventDefault();
-          event.stopPropagation();
-          onTogglePin();
-        }}
-        className="rounded-sm p-1 text-muted-foreground opacity-70 hover:bg-background hover:text-foreground group-hover:opacity-100"
+        onClick={onTogglePin}
+        className="text-muted-foreground opacity-70 hover:bg-background hover:text-foreground group-hover:opacity-100"
       >
         {pinned ? <PinOff className="h-3.5 w-3.5" /> : <Pin className="h-3.5 w-3.5" />}
-      </span>
-    </button>
+      </Button>
+    </div>
   );
 }
 
@@ -528,7 +535,7 @@ function LibraryDetail({
                 <Textarea
                   value={documentDraft}
                   onChange={(event) => onDocumentDraftChange(event.target.value)}
-                  className="min-h-[420px] font-mono text-sm"
+                  className="theft-library-editor font-mono text-sm"
                   aria-label="Markdown document body"
                 />
                 {saveError ? (

@@ -1,4 +1,5 @@
 import {
+  type CSSProperties,
   useEffect,
   useLayoutEffect,
   useRef,
@@ -11,7 +12,7 @@ import { cn } from "@/lib/utils";
 
 interface FoldCurtainProps {
   children: ReactNode;
-  /** Max height (px) when collapsed. Defaults to 420 (desktop) / 320 (< 640px viewport). */
+  /** Max height when collapsed. Defaults to 420 on desktop / 320 below the mobile breakpoint. */
   collapsedHeight?: number;
   /** Only curtain when natural height ≥ collapsedHeight + this buffer. */
   activationBuffer?: number;
@@ -89,12 +90,22 @@ export function FoldCurtain({
   const shouldCurtain = hasMeasured && naturalHeight >= collapsedHeight + activationBuffer;
   const isClipped = shouldCurtain && !expanded;
 
-  const maskStyle = isClipped
+  const maskStyle: CSSProperties | undefined = isClipped
     ? {
         WebkitMaskImage: `linear-gradient(to bottom, black 0, black calc(100% - ${FADE_HEIGHT_PX}px), transparent 100%)`,
         maskImage: `linear-gradient(to bottom, black 0, black calc(100% - ${FADE_HEIGHT_PX}px), transparent 100%)`,
       }
     : undefined;
+  const contentStyle: CSSProperties = {
+    maxHeight: isClipped
+      ? `${collapsedHeight}px`
+      : shouldCurtain
+        ? `${naturalHeight}px`
+        : undefined,
+    transitionDuration: allowTransition ? `${EXPAND_TRANSITION_MS}ms` : undefined,
+    transitionTimingFunction: "cubic-bezier(0.16, 1, 0.3, 1)",
+    ...maskStyle,
+  };
 
   return (
     <div className={cn("fold-curtain", className)} data-expanded={expanded ? "true" : "false"}>
@@ -105,16 +116,8 @@ export function FoldCurtain({
           allowTransition && "motion-safe:transition-[max-height] motion-reduce:transition-none",
           contentClassName,
         )}
-        style={{
-          maxHeight: isClipped
-            ? `${collapsedHeight}px`
-            : shouldCurtain
-              ? `${naturalHeight}px`
-              : undefined,
-          transitionDuration: allowTransition ? `${EXPAND_TRANSITION_MS}ms` : undefined,
-          transitionTimingFunction: "cubic-bezier(0.16, 1, 0.3, 1)",
-          ...maskStyle,
-        }}
+        // Measured height and mask values are runtime-dependent, so this style remains intentionally dynamic.
+        style={contentStyle}
       >
         {children}
       </div>

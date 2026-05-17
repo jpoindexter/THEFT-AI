@@ -1,5 +1,7 @@
 import { forwardRef, useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { Check } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { orderItemsBySelectedAndRecent } from "../lib/recent-selections";
 import { cn } from "../lib/utils";
@@ -109,11 +111,13 @@ export const InlineEntitySelector = forwardRef<HTMLButtonElement, InlineEntitySe
         }}
       >
         <PopoverTrigger asChild>
-          <button
+          <Button
             ref={ref}
             type="button"
+            variant="outline"
+            size="xs"
             className={cn(
-              "inline-flex min-w-0 items-center gap-1 rounded-md border border-border bg-muted/40 px-2 py-1 text-sm font-medium text-foreground transition-colors hover:bg-accent/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+              "h-auto min-w-0 justify-start bg-muted/40 px-2 py-1 text-sm text-foreground hover:bg-accent/50",
               className,
             )}
             onPointerDown={() => { isPointerDownRef.current = true; }}
@@ -125,13 +129,13 @@ export const InlineEntitySelector = forwardRef<HTMLButtonElement, InlineEntitySe
             {renderTriggerValue
               ? renderTriggerValue(currentOption)
               : (currentOption?.label ?? <span className="text-muted-foreground">{placeholder}</span>)}
-          </button>
+          </Button>
         </PopoverTrigger>
         <PopoverContent
           align="start"
           side="bottom"
           collisionPadding={16}
-          className="w-[min(20rem,calc(100vw-2rem))] p-1"
+          className="w-(--radix-popover-content-available-width) max-w-xs p-1"
           disablePortal={disablePortal}
           onOpenAutoFocus={(event) => {
             event.preventDefault();
@@ -151,9 +155,9 @@ export const InlineEntitySelector = forwardRef<HTMLButtonElement, InlineEntitySe
             shouldPreventCloseAutoFocusRef.current = false;
           }}
         >
-          <input
+          <Input
             ref={inputRef}
-            className="w-full border-b border-border bg-transparent px-2 py-1.5 text-sm outline-none placeholder:text-muted-foreground/60"
+            className="h-8 rounded-sm border-x-0 border-t-0 border-b border-border bg-transparent px-2 py-1.5 text-sm shadow-none placeholder:text-muted-foreground/60 focus-visible:border-border focus-visible:ring-0"
             placeholder={searchPlaceholder}
             value={query}
             onChange={(event) => {
@@ -204,11 +208,13 @@ export const InlineEntitySelector = forwardRef<HTMLButtonElement, InlineEntitySe
                 const isSelected = option.id === value;
                 const isHighlighted = index === highlightedIndex;
                 return (
-                  <button
+                  <Button
                     key={option.id || "__none__"}
                     type="button"
+                    variant="ghost"
+                    size="sm"
                     className={cn(
-                      "flex w-full items-center gap-2 rounded px-2 py-1.5 text-left text-sm touch-manipulation",
+                      "h-auto w-full justify-start rounded-sm px-2 py-1.5 text-left text-sm touch-manipulation",
                       isHighlighted && "bg-accent",
                     )}
                     onMouseEnter={() => setHighlightedIndexValue(index)}
@@ -216,7 +222,7 @@ export const InlineEntitySelector = forwardRef<HTMLButtonElement, InlineEntitySe
                   >
                     {renderOption ? renderOption(option, isSelected) : <span className="truncate">{option.label}</span>}
                     <Check className={cn("ml-auto h-3.5 w-3.5 text-muted-foreground", isSelected ? "opacity-100" : "opacity-0")} />
-                  </button>
+                  </Button>
                 );
               })
             )}

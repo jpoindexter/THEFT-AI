@@ -17,13 +17,20 @@ interface ThemeContextValue {
 }
 
 const THEME_STORAGE_KEY = "paperclip.theme";
-const DARK_THEME_COLOR = "#fbfcf8";
-const LIGHT_THEME_COLOR = "#fbfcf8";
+const THEME_COLOR_TOKEN_BY_THEME: Record<Theme, string> = {
+  light: "--theft-canvas",
+  dark: "--theft-canvas",
+};
+const THEME_COLOR_FALLBACK = "Canvas";
 const ThemeContext = createContext<ThemeContextValue | undefined>(undefined);
 
 function resolveThemeFromDocument(): Theme {
   if (typeof document === "undefined") return "light";
   return document.documentElement.classList.contains("dark") ? "dark" : "light";
+}
+
+function readThemeColor(root: HTMLElement, theme: Theme): string {
+  return getComputedStyle(root).getPropertyValue(THEME_COLOR_TOKEN_BY_THEME[theme]).trim() || THEME_COLOR_FALLBACK;
 }
 
 function applyTheme(theme: Theme) {
@@ -33,7 +40,7 @@ function applyTheme(theme: Theme) {
   root.style.colorScheme = "light";
   const themeColorMeta = document.querySelector('meta[name="theme-color"]');
   if (themeColorMeta instanceof HTMLMetaElement) {
-    themeColorMeta.setAttribute("content", theme === "dark" ? DARK_THEME_COLOR : LIGHT_THEME_COLOR);
+    themeColorMeta.setAttribute("content", readThemeColor(root, theme));
   }
 }
 

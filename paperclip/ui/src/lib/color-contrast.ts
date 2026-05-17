@@ -6,8 +6,22 @@
  * light page backgrounds.
  */
 
-const DARK_BG = { r: 24, g: 24, b: 27 }; // zinc-900 (#18181b)
-const LIGHT_BG = { r: 255, g: 255, b: 255 }; // white
+type RgbColor = { r: number; g: number; b: number };
+
+const DARK_BG: RgbColor = { r: 24, g: 24, b: 27 };
+const LIGHT_BG: RgbColor = { r: 255, g: 255, b: 255 };
+const LIGHT_TEXT_RGB: RgbColor = { r: 248, g: 250, b: 252 };
+const DARK_TEXT_RGB: RgbColor = { r: 17, g: 24, b: 39 };
+const TEXT_LIGHT = rgbToHex(LIGHT_TEXT_RGB);
+const TEXT_DARK = rgbToHex(DARK_TEXT_RGB);
+
+function colorChannelToHex(value: number): string {
+  return value.toString(16).padStart(2, "0");
+}
+
+function rgbToHex({ r, g, b }: RgbColor): string {
+  return `#${colorChannelToHex(r)}${colorChannelToHex(g)}${colorChannelToHex(b)}`;
+}
 
 export function hexToRgb(hex: string): { r: number; g: number; b: number } | null {
   const match = /^#?([0-9a-f]{3,6})$/i.exec(hex.trim());
@@ -57,19 +71,16 @@ function isDarkMode(): boolean {
  * Composite a foreground RGB at the given alpha over a background RGB.
  */
 function composite(
-  fg: { r: number; g: number; b: number },
-  bg: { r: number; g: number; b: number },
+  fg: RgbColor,
+  bg: RgbColor,
   alpha: number,
-): { r: number; g: number; b: number } {
+): RgbColor {
   return {
     r: Math.round(alpha * fg.r + (1 - alpha) * bg.r),
     g: Math.round(alpha * fg.g + (1 - alpha) * bg.g),
     b: Math.round(alpha * fg.b + (1 - alpha) * bg.b),
   };
 }
-
-const TEXT_LIGHT = "#f8fafc";
-const TEXT_DARK = "#111827";
 
 /**
  * Pick a readable text color for a solid background.
@@ -79,8 +90,8 @@ export function pickTextColorForSolidBg(hexColor: string): string {
   const rgb = hexToRgb(hexColor);
   if (!rgb) return TEXT_LIGHT;
   const bgLum = relativeLuminance(rgb.r, rgb.g, rgb.b);
-  const whiteLum = relativeLuminance(248, 250, 252);
-  const blackLum = relativeLuminance(17, 24, 39);
+  const whiteLum = relativeLuminance(LIGHT_TEXT_RGB.r, LIGHT_TEXT_RGB.g, LIGHT_TEXT_RGB.b);
+  const blackLum = relativeLuminance(DARK_TEXT_RGB.r, DARK_TEXT_RGB.g, DARK_TEXT_RGB.b);
   return contrastRatio(bgLum, whiteLum) >= contrastRatio(bgLum, blackLum)
     ? TEXT_LIGHT
     : TEXT_DARK;
@@ -89,7 +100,7 @@ export function pickTextColorForSolidBg(hexColor: string): string {
 /**
  * Pick a readable text color for a semi-transparent pill background.
  *
- * Composites `rgba(hexColor, alpha)` over the current page background
+ * Composites the project color at the given alpha over the current page background
  * (dark or light mode) and then picks the text color with better
  * WCAG contrast ratio.
  */
@@ -99,8 +110,8 @@ export function pickTextColorForPillBg(hexColor: string, alpha = 0.22): string {
   const pageBg = isDarkMode() ? DARK_BG : LIGHT_BG;
   const effectiveBg = composite(fg, pageBg, alpha);
   const bgLum = relativeLuminance(effectiveBg.r, effectiveBg.g, effectiveBg.b);
-  const whiteLum = relativeLuminance(248, 250, 252);
-  const blackLum = relativeLuminance(17, 24, 39);
+  const whiteLum = relativeLuminance(LIGHT_TEXT_RGB.r, LIGHT_TEXT_RGB.g, LIGHT_TEXT_RGB.b);
+  const blackLum = relativeLuminance(DARK_TEXT_RGB.r, DARK_TEXT_RGB.g, DARK_TEXT_RGB.b);
   return contrastRatio(bgLum, whiteLum) >= contrastRatio(bgLum, blackLum)
     ? TEXT_LIGHT
     : TEXT_DARK;

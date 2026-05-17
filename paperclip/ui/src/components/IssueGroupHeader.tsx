@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import { ChevronRight } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { cn } from "../lib/utils";
 
 type IssueGroupHeaderProps = {
@@ -22,9 +23,11 @@ export function IssueGroupHeader({
   return (
     <div className={cn("flex items-center py-1.5 pl-1 pr-3", className)}>
       {collapsible ? (
-        <button
+        <Button
           type="button"
-          className="flex min-w-0 items-center gap-1.5 text-left"
+          variant="ghost"
+          size="sm"
+          className="h-auto min-w-0 flex-1 justify-start gap-1.5 px-0 py-0 text-left hover:bg-transparent"
           aria-expanded={!collapsed}
           onClick={onToggle}
         >
@@ -34,7 +37,7 @@ export function IssueGroupHeader({
           <span className="truncate text-sm font-semibold uppercase tracking-wide">
             {label}
           </span>
-        </button>
+        </Button>
       ) : (
         <div className="flex min-w-0 items-center gap-1.5">
           <span className="truncate text-sm font-semibold uppercase tracking-wide">

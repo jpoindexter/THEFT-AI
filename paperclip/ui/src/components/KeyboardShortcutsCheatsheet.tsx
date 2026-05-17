@@ -49,7 +49,7 @@ const sections: ShortcutSection[] = [
 
 function KeyCap({ children }: { children: string }) {
   return (
-    <kbd className="inline-flex h-6 min-w-6 items-center justify-center rounded border border-border bg-muted px-1.5 font-mono text-xs font-medium text-foreground shadow-[0_1px_0_1px_hsl(var(--border))]">
+    <kbd className="inline-flex h-6 min-w-6 items-center justify-center rounded-sm border border-border bg-muted px-1.5 font-mono text-xs font-medium text-foreground shadow-xs">
       {children}
     </kbd>
   );
@@ -61,7 +61,7 @@ export function KeyboardShortcutsCheatsheetContent() {
       <div className="divide-y divide-border border-t border-border">
         {sections.map((section) => (
           <div key={section.title} className="px-5 py-3">
-            <h3 className="mb-2 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+            <h3 className="mb-2 theft-label-compact text-muted-foreground">
               {section.title}
             </h3>
             <div className="space-y-1.5">

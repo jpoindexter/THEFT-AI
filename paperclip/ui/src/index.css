@@ -135,6 +135,10 @@
   --theft-tech-tree-stat-min-width: calc(var(--theft-space-1) * 32);
   --theft-dashboard-side-width: calc(var(--theft-space-1) * 48.75);
   --theft-dashboard-operator-width: calc(var(--theft-space-1) * 52.5);
+  --theft-dashboard-max-width: calc(var(--theft-space-1) * 220);
+  --theft-strategy-map-min-height: calc(var(--theft-space-1) * 82.5);
+  --theft-operator-drawer-min-height: min(calc(var(--theft-space-1) * 77.5), calc(100dvh - calc(var(--theft-space-1) * 14)));
+  --theft-operator-drawer-max-height: calc(100dvh - calc(var(--theft-space-1) * 12));
   --theft-fresh-company-action-width: calc(var(--theft-space-1) * 35);
   --theft-department-stat-width: calc(var(--theft-space-1) * 35);
   --theft-department-side-width: calc(var(--theft-space-1) * 45);
@@ -144,6 +148,7 @@
   --theft-library-workspace-height: calc(100vh - calc(var(--theft-space-1) * 28));
   --theft-library-workspace-min-height: calc(var(--theft-space-1) * 78);
   --theft-library-list-min-width: calc(var(--theft-space-1) * 45);
+  --theft-library-editor-min-height: calc(var(--theft-space-1) * 52.5);
   --theft-operator-dock-width: min(
     calc(var(--theft-space-1) * 122),
     calc(100vw - calc(var(--theft-space-1) * 18))
@@ -600,6 +605,23 @@
   height: var(--theft-library-workspace-height);
   min-height: var(--theft-library-workspace-min-height);
   grid-template-columns: minmax(0, 1fr);
+}
+
+.theft-library-editor {
+  min-height: var(--theft-library-editor-min-height);
+}
+
+.theft-dashboard-container {
+  max-width: var(--theft-dashboard-max-width);
+}
+
+.theft-strategy-map-panel {
+  min-height: var(--theft-strategy-map-min-height);
+}
+
+.theft-operator-drawer {
+  max-height: var(--theft-operator-drawer-max-height);
+  min-height: var(--theft-operator-drawer-min-height);
 }
 
 .theft-operator-dock {

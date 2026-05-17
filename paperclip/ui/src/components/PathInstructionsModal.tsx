@@ -7,6 +7,8 @@ import {
   DialogTitle,
   DialogDescription,
 } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from "@/lib/utils";
 
 type Platform = "mac" | "windows" | "linux";
@@ -77,25 +79,24 @@ export function PathInstructionsModal({
           </DialogDescription>
         </DialogHeader>
 
-        {/* Platform tabs */}
-        <div className="flex gap-1 rounded-md border border-border p-0.5">
-          {platforms.map((p) => (
-            <button
-              key={p.id}
-              type="button"
-              className={cn(
-                "flex flex-1 items-center justify-center gap-1.5 rounded px-2 py-1 text-xs transition-colors",
-                platform === p.id
-                  ? "bg-accent text-foreground"
-                  : "text-muted-foreground hover:text-foreground hover:bg-accent/50",
-              )}
-              onClick={() => setPlatform(p.id)}
-            >
-              <p.icon className="h-3.5 w-3.5" />
-              {p.label}
-            </button>
-          ))}
-        </div>
+        <Tabs
+          value={platform}
+          onValueChange={(value) => setPlatform(value as Platform)}
+          className="gap-0"
+        >
+          <TabsList className="grid w-full grid-cols-3">
+            {platforms.map((p) => (
+              <TabsTrigger
+                key={p.id}
+                value={p.id}
+                className="gap-1.5 text-xs"
+              >
+                <p.icon className="h-3.5 w-3.5" />
+                {p.label}
+              </TabsTrigger>
+            ))}
+          </TabsList>
+        </Tabs>
 
         {/* Steps */}
         <ol className="space-y-2 text-sm">
@@ -127,16 +128,18 @@ export function ChoosePathButton({ className }: { className?: string }) {
   const [open, setOpen] = useState(false);
   return (
     <>
-      <button
+      <Button
         type="button"
+        variant="outline"
+        size="xs"
         className={cn(
-          "inline-flex items-center rounded-md border border-border px-2 py-0.5 text-xs text-muted-foreground hover:bg-accent/50 transition-colors shrink-0",
+          "shrink-0 text-muted-foreground hover:bg-accent/50",
           className,
         )}
         onClick={() => setOpen(true)}
       >
         Choose
-      </button>
+      </Button>
       <PathInstructionsModal open={open} onOpenChange={setOpen} />
     </>
   );

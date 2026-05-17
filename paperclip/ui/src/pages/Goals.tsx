@@ -352,8 +352,8 @@ function TechTreeFilterRail() {
       <div>
         <p className="theft-label">View</p>
         <div className="mt-3 grid gap-2 text-sm">
-          <button className="border border-foreground bg-secondary px-4 py-2 text-left">Strategy Map</button>
-          <button className="border border-border px-4 py-2 text-left text-muted-foreground">Build Order</button>
+          <Button variant="secondary" className="justify-start">Strategy Map</Button>
+          <Button variant="outline" className="justify-start text-muted-foreground">Build Order</Button>
         </div>
       </div>
       <div className="border-t border-border pt-4">

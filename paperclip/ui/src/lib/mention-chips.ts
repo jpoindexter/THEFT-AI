@@ -35,6 +35,7 @@ export type ParsedMentionChip =
     };
 
 const iconMaskCache = new Map<string, string>();
+const PROJECT_MENTION_BACKGROUND_ALPHA = 0.22;
 
 export function parseMentionChipHref(href: string): ParsedMentionChip | null {
   if (/^https?:\/\//i.test(href.trim())) {
@@ -152,9 +153,21 @@ function projectMentionColors(color: string): Pick<CSSProperties, "borderColor" 
   if (!rgb) return {};
   return {
     borderColor: color,
-    backgroundColor: `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.22)`,
+    backgroundColor: rgbToAlphaHexColor(rgb, PROJECT_MENTION_BACKGROUND_ALPHA),
     color: pickTextColorForPillBg(color),
   };
+}
+
+function colorChannelToHex(value: number): string {
+  return value.toString(16).padStart(2, "0");
+}
+
+function rgbToAlphaHexColor(
+  { r, g, b }: { r: number; g: number; b: number },
+  alpha: number,
+): string {
+  const alphaChannel = Math.round(Math.max(0, Math.min(1, alpha)) * 255);
+  return `#${colorChannelToHex(r)}${colorChannelToHex(g)}${colorChannelToHex(b)}${colorChannelToHex(alphaChannel)}`;
 }
 
 function buildAgentIconMask(iconName: string | null): string | null {
@@ -176,7 +189,7 @@ function buildAgentIconMask(iconName: string | null): string | null {
 
   const svg =
     `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" ` +
-    `fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" ` +
+    `fill="none" stroke="black" stroke-width="2" stroke-linecap="round" ` +
     `stroke-linejoin="round">${body}</svg>`;
   const url = `url("data:image/svg+xml,${encodeURIComponent(svg)}")`;
   iconMaskCache.set(cacheKey, url);

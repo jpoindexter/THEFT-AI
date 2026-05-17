@@ -86,7 +86,7 @@ export function PageSkeleton({ variant = "list" }: PageSkeletonProps) {
               <Skeleton className="h-4 w-40" />
               <div className="space-y-1 border border-border">
                 {Array.from({ length: 3 }).map((_, row) => (
-                  <Skeleton key={row} className="h-14 w-full rounded-none" />
+                  <Skeleton key={row} className="h-14 w-full rounded-sm" />
                 ))}
               </div>
             </div>
@@ -99,7 +99,7 @@ export function PageSkeleton({ variant = "list" }: PageSkeletonProps) {
   if (variant === "org-chart") {
     return (
       <div className="space-y-4">
-        <Skeleton className="h-[calc(100vh-4rem)] w-full rounded-lg border border-border" />
+        <Skeleton className="h-dvh max-h-full w-full rounded-lg border border-border" />
       </div>
     );
   }
@@ -152,7 +152,7 @@ export function PageSkeleton({ variant = "list" }: PageSkeletonProps) {
           <Skeleton className="h-4 w-40" />
           <div className="space-y-1">
             {Array.from({ length: 8 }).map((_, i) => (
-              <Skeleton key={i} className="h-11 w-full rounded-none" />
+              <Skeleton key={i} className="h-11 w-full rounded-sm" />
             ))}
           </div>
         </div>
@@ -172,7 +172,7 @@ export function PageSkeleton({ variant = "list" }: PageSkeletonProps) {
 
       <div className="space-y-1">
         {Array.from({ length: 7 }).map((_, i) => (
-          <Skeleton key={i} className="h-11 w-full rounded-none" />
+          <Skeleton key={i} className="h-11 w-full rounded-sm" />
         ))}
       </div>
     </div>

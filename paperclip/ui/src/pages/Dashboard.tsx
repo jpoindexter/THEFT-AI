@@ -24,6 +24,7 @@ import { goalsApi } from "../api/goals";
 import { issuesApi } from "../api/issues";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import {
   TheftChip,
@@ -56,6 +57,26 @@ import {
 
 const ATTENTION_INTERACTION_ISSUE_LIMIT = 12;
 const LIBRARY_ISSUE_LIMIT = 8;
+const PROGRESS_WIDTH_CLASSES = [
+  "w-0",
+  "w-1/12",
+  "w-1/6",
+  "w-1/4",
+  "w-1/3",
+  "w-5/12",
+  "w-1/2",
+  "w-7/12",
+  "w-2/3",
+  "w-3/4",
+  "w-5/6",
+  "w-11/12",
+  "w-full",
+];
+
+function progressWidthClass(score: number) {
+  const clamped = Math.min(Math.max(score, 0), 100);
+  return PROGRESS_WIDTH_CLASSES[Math.round((clamped / 100) * (PROGRESS_WIDTH_CLASSES.length - 1))];
+}
 
 function issuePath(issue: Issue) {
   return `/issues/${issue.identifier ?? issue.id}`;
@@ -252,7 +273,7 @@ export function Dashboard() {
 
   return (
     <TheftPageShell className="min-h-0 bg-background text-foreground">
-      <div className="mx-auto max-w-[1760px] min-w-0 space-y-6 overflow-x-hidden px-1 pb-28 md:px-3">
+      <div className="theft-dashboard-container mx-auto min-w-0 space-y-6 overflow-x-hidden px-1 pb-28 md:px-3">
         <section className="theft-dashboard-shell-grid grid min-w-0 gap-6" data-operator-open={String(operatorOpen)}>
           <div className="min-w-0 space-y-6">
             <ObjectiveHeader
@@ -446,7 +467,7 @@ function StrategyMapPanel({
   const visibleTracks = tracks.length > 0 ? tracks.map((goal) => goal.title) : fallbackTracks;
 
   return (
-    <Panel className="min-h-[660px] max-w-full overflow-hidden p-4 md:p-5">
+    <Panel className="theft-strategy-map-panel max-w-full overflow-hidden p-4 md:p-5">
       <TheftSectionHeader
         className="mb-5"
         title="Workspace / Strategy map"
@@ -663,7 +684,7 @@ function ExecutionStatePanel({ departments }: { departments: DepartmentCanvasRow
                 <span className="text-muted-foreground tabular-nums">{score}%</span>
               </div>
               <div className="mt-2 h-1.5 rounded-full bg-secondary">
-                <div className="h-full rounded-full bg-foreground" style={{ width: `${Math.min(score, 100)}%` }} />
+                <div className={cn("h-full rounded-full bg-foreground", progressWidthClass(score))} />
               </div>
             </Link>
           );
@@ -791,7 +812,7 @@ function OperatorDrawer({
   ];
 
   return (
-    <TheftSurface tone="panel" padding="none" className="flex max-h-[calc(100dvh-6rem)] min-h-[min(620px,calc(100dvh-7rem))] flex-col overflow-hidden">
+    <TheftSurface tone="panel" padding="none" className="theft-operator-drawer flex flex-col overflow-hidden">
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0 p-5 pb-3 md:p-6 md:pb-3">
           <p className="theft-label-compact">Operator</p>
@@ -872,20 +893,19 @@ function OperatorDrawer({
             <p className="theft-label-compact">Route to department</p>
             <div className="mt-2 grid grid-cols-2 gap-2">
               {departments.map((department) => (
-                <button
+                <Button
                   key={department.key}
                   type="button"
+                  variant={selectedDepartmentKey === department.key ? "secondary" : "outline"}
                   onClick={() => setSelectedDepartmentKey(department.key)}
                   className={cn(
-                    "border px-3 py-3 text-left text-xs transition-colors",
-                    selectedDepartmentKey === department.key
-                      ? "border-foreground bg-secondary text-foreground"
-                      : "border-border bg-card text-muted-foreground hover:text-foreground",
+                    "h-auto flex-col items-start justify-start px-3 py-3 text-left text-xs font-normal",
+                    selectedDepartmentKey !== department.key && "text-muted-foreground hover:text-foreground",
                   )}
                 >
                   <span className="block truncate">{department.title}</span>
                   <span className="mt-0.5 block truncate">{department.agent?.name ?? "No lead"}</span>
-                </button>
+                </Button>
               ))}
             </div>
           </div>
@@ -943,23 +963,24 @@ function OperatorDock({
 
   return (
     <div className="theft-operator-dock fixed bottom-4 left-4 right-4 z-30 flex items-center gap-2 p-2 backdrop-blur md:bottom-6 md:left-1/2 md:right-auto md:-translate-x-1/2">
-      <button
+      <Button
         type="button"
         onClick={onToggle}
         title="Open Operator"
-        className="flex h-11 shrink-0 items-center gap-2 bg-secondary px-3 text-left text-sm hover:bg-accent md:h-12 md:px-4"
+        variant="secondary"
+        className="h-11 shrink-0 justify-start gap-2 px-3 text-left text-sm md:h-12 md:px-4"
       >
         <Bot className="h-5 w-5" />
         <span>
           <span className="theft-label-compact block">Operator</span>
           <span className="block text-xs">Collapsed</span>
         </span>
-      </button>
-      <input
+      </Button>
+      <Input
         value={operatorDraft}
         onChange={(event) => setOperatorDraft(event.target.value)}
         placeholder="Ask Operator..."
-        className="hidden min-w-0 flex-1 bg-secondary px-5 py-3 text-base outline-none placeholder:text-muted-foreground sm:block"
+        className="hidden h-12 min-w-0 flex-1 bg-secondary px-5 text-base shadow-none sm:block"
       />
       <Button variant="ghost" onClick={onToggle} className="hidden h-12 gap-2 px-3 sm:inline-flex" aria-label="Explain next move">
         <Sparkles className="h-4 w-4" />

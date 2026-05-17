@@ -1,6 +1,7 @@
 import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Outlet, useLocation, useNavigate, useNavigationType, useParams } from "@/lib/router";
+import { Button } from "@/components/ui/button";
 import { Sidebar } from "./Sidebar";
 import { InstanceSidebar } from "./InstanceSidebar";
 import { CompanySettingsSidebar } from "./CompanySettingsSidebar";
@@ -357,9 +358,10 @@ export function Layout() {
       <DevRestartBanner devServer={health?.devServer} />
       <div className={cn("min-h-0 flex-1", isMobile ? "w-full overflow-hidden" : "flex overflow-hidden")}>
         {isMobile && sidebarOpen && (
-          <button
+          <Button
             type="button"
-            className="fixed inset-0 z-40 bg-black/50"
+            variant="ghost"
+            className="fixed inset-0 z-40 h-auto w-auto rounded-sm bg-black/50 p-0 hover:bg-black/50"
             onClick={() => setSidebarOpen(false)}
             aria-label="Close sidebar"
           />

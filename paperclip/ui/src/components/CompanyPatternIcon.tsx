@@ -75,6 +75,11 @@ function hslToRgb(h: number, s: number, l: number): [number, number, number] {
   ];
 }
 
+function rgbToHexColor([r, g, b]: [number, number, number]): string {
+  const toHex = (value: number) => value.toString(16).padStart(2, "0");
+  return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
+}
+
 function hexToHue(hex: string): number {
   const r = parseInt(hex.slice(1, 3), 16) / 255;
   const g = parseInt(hex.slice(3, 5), 16) / 255;
@@ -103,12 +108,12 @@ function makeCompanyPatternDataUrl(seed: string, brandColor?: string | null, log
   const rand = mulberry32(hashString(seed));
 
   const hue = brandColor ? hexToHue(brandColor) : Math.floor(rand() * 360);
-  const [offR, offG, offB] = hslToRgb(
+  const offColor = hslToRgb(
     hue,
     54 + Math.floor(rand() * 14),
     36 + Math.floor(rand() * 12),
   );
-  const [onR, onG, onB] = hslToRgb(
+  const onColor = hslToRgb(
     hue + (rand() > 0.5 ? 10 : -10),
     86 + Math.floor(rand() * 10),
     82 + Math.floor(rand() * 10),
@@ -125,10 +130,10 @@ function makeCompanyPatternDataUrl(seed: string, brandColor?: string | null, log
   const diagonalPhase = rand() * Math.PI * 2;
   const antiDiagonalPhase = rand() * Math.PI * 2;
 
-  ctx.fillStyle = `rgb(${offR} ${offG} ${offB})`;
+  ctx.fillStyle = rgbToHexColor(offColor);
   ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-  ctx.fillStyle = `rgb(${onR} ${onG} ${onB})`;
+  ctx.fillStyle = rgbToHexColor(onColor);
   const dotRadius = cellSize * 0.46;
 
   for (let y = 0; y < logicalSize; y++) {
@@ -202,13 +207,14 @@ export function CompanyPatternIcon({
           alt=""
           aria-hidden="true"
           className="absolute inset-0 h-full w-full"
+          // Generated canvas avatars must stay crisp; the current token contract has no image-rendering utility.
           style={{ imageRendering: "pixelated" }}
         />
       ) : (
         <div className="absolute inset-0 bg-muted" />
       )}
       {!logo && (
-        <span className="relative z-10 drop-shadow-[0_1px_2px_rgba(0,0,0,0.65)]">
+        <span className="relative z-10 drop-shadow-sm">
           {initial}
         </span>
       )}

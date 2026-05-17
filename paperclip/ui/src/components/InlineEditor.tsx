@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from "react";
+import { Textarea } from "@/components/ui/textarea";
 import { cn } from "../lib/utils";
 import { MarkdownBody } from "./MarkdownBody";
 import { MarkdownEditor, type MarkdownEditorRef, type MentionOption } from "./MarkdownEditor";
@@ -344,7 +345,7 @@ export function InlineEditor({
         <div className="flex min-h-4 items-center justify-end pr-1">
           <span
             className={cn(
-              "text-[11px] transition-opacity duration-150",
+              "text-micro transition-opacity duration-150",
               autosaveState === "error" ? "text-destructive" : "text-muted-foreground",
               autosaveState === "idle" ? "opacity-0" : "opacity-100",
             )}
@@ -365,7 +366,7 @@ export function InlineEditor({
   if (editing) {
 
     return (
-      <textarea
+      <Textarea
         ref={inputRef}
         value={draft}
         rows={1}
@@ -378,7 +379,7 @@ export function InlineEditor({
         }}
         onKeyDown={handleKeyDown}
         className={cn(
-          "w-full bg-transparent rounded outline-none resize-none overflow-hidden",
+          "min-h-0 w-full resize-none overflow-hidden rounded border-0 bg-transparent py-0 shadow-none focus-visible:border-transparent focus-visible:ring-0",
           pad,
           className
         )}

@@ -5,6 +5,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { Button } from "@/components/ui/button";
 import { User } from "lucide-react";
 import { cn } from "../lib/utils";
 import { roleLabels } from "./agent-config-primitives";
@@ -39,12 +40,13 @@ export function ReportsToPicker({
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
-        <button
+        <Button
           type="button"
+          variant="outline"
+          size="xs"
           className={cn(
-            "inline-flex max-w-full min-w-0 items-center gap-1.5 overflow-hidden rounded-md border border-border px-2 py-1 text-xs hover:bg-accent/50 transition-colors",
+            "max-w-full min-w-0 justify-start gap-1.5 overflow-hidden border-border px-2 font-normal hover:bg-accent/50",
             terminatedManager && "border-amber-600/45 bg-amber-500/5",
-            disabled && "opacity-60 cursor-not-allowed",
           )}
           disabled={disabled}
         >
@@ -73,13 +75,15 @@ export function ReportsToPicker({
               </span>
             </>
           )}
-        </button>
+        </Button>
       </PopoverTrigger>
       <PopoverContent className="w-48 p-1" align="start">
-        <button
+        <Button
           type="button"
+          variant="ghost"
+          size="xs"
           className={cn(
-            "flex items-center gap-2 w-full px-2 py-1.5 text-xs rounded hover:bg-accent/50",
+            "h-auto w-full justify-start px-2 py-1.5 font-normal hover:bg-accent/50",
             value === null && "bg-accent",
           )}
           onClick={() => {
@@ -88,7 +92,7 @@ export function ReportsToPicker({
           }}
         >
           No manager
-        </button>
+        </Button>
         {terminatedManager && (
           <div className="flex min-w-0 items-center gap-2 overflow-hidden px-2 py-1.5 text-xs text-muted-foreground border-b border-border mb-0.5">
             <AgentIcon icon={current.icon} className="shrink-0 h-3 w-3" />
@@ -103,11 +107,13 @@ export function ReportsToPicker({
           </div>
         )}
         {rows.map((a) => (
-          <button
+          <Button
             type="button"
             key={a.id}
+            variant="ghost"
+            size="xs"
             className={cn(
-              "flex items-center gap-2 w-full min-w-0 px-2 py-1.5 text-xs rounded hover:bg-accent/50 overflow-hidden",
+              "h-auto w-full min-w-0 justify-start gap-2 overflow-hidden px-2 py-1.5 font-normal hover:bg-accent/50",
               a.id === value && "bg-accent",
             )}
             onClick={() => {
@@ -118,7 +124,7 @@ export function ReportsToPicker({
             <AgentIcon icon={a.icon} className="shrink-0 h-3 w-3 text-muted-foreground" />
             <span className="min-w-0 truncate">{a.name}</span>
             <span className="text-muted-foreground ml-auto shrink-0">{roleLabels[a.role] ?? a.role}</span>
-          </button>
+          </Button>
         ))}
       </PopoverContent>
     </Popover>

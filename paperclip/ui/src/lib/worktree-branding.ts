@@ -5,6 +5,12 @@ export type WorktreeUiBranding = {
   textColor: string;
 };
 
+type RgbColor = { r: number; g: number; b: number };
+
+const BLACK_RGB: RgbColor = { r: 0, g: 0, b: 0 };
+const READABLE_TEXT_LIGHT: RgbColor = { r: 248, g: 250, b: 252 };
+const READABLE_TEXT_DARK: RgbColor = { r: 17, g: 24, b: 39 };
+
 function readMetaContent(name: string): string | null {
   if (typeof document === "undefined") return null;
   const element = document.querySelector(`meta[name="${name}"]`);
@@ -24,8 +30,17 @@ function normalizeHexColor(value: string | null): string | null {
   return null;
 }
 
-function hexToRgb(color: string): { r: number; g: number; b: number } {
-  const normalized = normalizeHexColor(color) ?? "#000000";
+function colorChannelToHex(value: number): string {
+  return value.toString(16).padStart(2, "0");
+}
+
+function rgbToHex({ r, g, b }: RgbColor): string {
+  return `#${colorChannelToHex(r)}${colorChannelToHex(g)}${colorChannelToHex(b)}`;
+}
+
+function hexToRgb(color: string): RgbColor {
+  const normalized = normalizeHexColor(color);
+  if (!normalized) return BLACK_RGB;
   return {
     r: Number.parseInt(normalized.slice(1, 3), 16),
     g: Number.parseInt(normalized.slice(3, 5), 16),
@@ -46,7 +61,7 @@ function pickReadableTextColor(background: string): string {
     (0.0722 * relativeLuminanceChannel(b));
   const whiteContrast = 1.05 / (luminance + 0.05);
   const blackContrast = (luminance + 0.05) / 0.05;
-  return whiteContrast >= blackContrast ? "#f8fafc" : "#111827";
+  return rgbToHex(whiteContrast >= blackContrast ? READABLE_TEXT_LIGHT : READABLE_TEXT_DARK);
 }
 
 export function getWorktreeUiBranding(): WorktreeUiBranding | null {

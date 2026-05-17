@@ -1,5 +1,4 @@
 import { memo, useCallback, useEffect, useMemo, useRef, useState, type ChangeEvent, type DragEvent, type Ref } from "react";
-import { pickTextColorForPillBg } from "@/lib/color-contrast";
 import { Link, useLocation, useNavigate, useNavigationType, useParams } from "@/lib/router";
 import { useInfiniteQuery, useQuery, useMutation, useQueryClient, type InfiniteData, type QueryClient } from "@tanstack/react-query";
 import { ApiError } from "../api/client";
@@ -86,6 +85,8 @@ import { PluginLauncherOutlet } from "@/plugins/launchers";
 import { Separator } from "@/components/ui/separator";
 import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Input } from "@/components/ui/input";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -175,6 +176,12 @@ const FEEDBACK_TERMS_URL = import.meta.env.VITE_FEEDBACK_TERMS_URL?.trim() || "h
 const ISSUE_COMMENT_PAGE_SIZE = 50;
 const ISSUE_COMMENT_AUTOLOAD_LIMIT = ISSUE_COMMENT_PAGE_SIZE * 3;
 const JUMP_TO_LATEST_MAX_COMMENT_PAGES = 10;
+const TREE_PREVIEW_DEPTH_CLASSES = ["pl-0", "pl-3.5", "pl-7", "pl-10", "pl-14", "pl-16", "pl-20"];
+
+function treePreviewDepthClass(depth: number) {
+  return TREE_PREVIEW_DEPTH_CLASSES[Math.min(Math.max(depth, 0), TREE_PREVIEW_DEPTH_CLASSES.length - 1)];
+}
+
 const TREE_CONTROL_MODE_LABEL: Record<IssueTreeControlMode, string> = {
   pause: "Pause subtree",
   resume: "Resume subtree",
@@ -3199,7 +3206,7 @@ export function IssueDetail() {
     && (treeControlMode !== "cancel" || treeControlCancelConfirmed);
   const attachmentUploadButton = (
     <>
-      <input
+      <Input
         ref={fileInputRef}
         type="file"
         className="hidden"
@@ -3431,17 +3438,9 @@ export function IssueDetail() {
           {(issue.labels ?? []).length > 0 && (
             <div className="hidden sm:flex items-center gap-1">
               {(issue.labels ?? []).slice(0, 4).map((label) => (
-                <span
-                  key={label.id}
-                  className="inline-flex items-center rounded-full border px-2 py-0.5 text-micro font-medium"
-                  style={{
-                    borderColor: label.color,
-                    color: pickTextColorForPillBg(label.color, 0.12),
-                    backgroundColor: `${label.color}1f`,
-                  }}
-                >
+                <TheftChip key={label.id} tone="muted" density="compact">
                   {label.name}
-                </span>
+                </TheftChip>
               ))}
               {(issue.labels ?? []).length > 4 && (
                 <span className="text-micro text-muted-foreground">+{(issue.labels ?? []).length - 4}</span>
@@ -4076,12 +4075,11 @@ export function IssueDetail() {
             {(treeControlMode === "resume" || treeControlMode === "restore") ? (
               <div className="space-y-2">
                 <label className="flex items-start gap-2 text-sm">
-                  <input
-                    type="checkbox"
+                  <Checkbox
                     className="mt-0.5"
                     disabled={previewAffectedAgentCount === 0}
                     checked={treeControlWakeAgentsOnResume}
-                    onChange={(event) => setTreeControlWakeAgentsOnResume(event.target.checked)}
+                    onCheckedChange={(checked) => setTreeControlWakeAgentsOnResume(checked === true)}
                   />
                   <span>
                     <span className="block font-medium">Wake affected agents ({previewAffectedAgentCount})</span>
@@ -4109,11 +4107,10 @@ export function IssueDetail() {
 
             {treeControlMode === "cancel" ? (
               <label className="flex items-start gap-2 rounded-md border border-destructive/30 bg-destructive/5 p-2 text-sm">
-                <input
-                  type="checkbox"
+                <Checkbox
                   className="mt-0.5"
                   checked={treeControlCancelConfirmed}
-                  onChange={(event) => setTreeControlCancelConfirmed(event.target.checked)}
+                  onCheckedChange={(checked) => setTreeControlCancelConfirmed(checked === true)}
                 />
                 <span>I understand this will cancel {previewAffectedIssueCount} issues.</span>
               </label>
@@ -4154,7 +4151,7 @@ export function IssueDetail() {
                   {treePreviewAffectedIssueRows.length > 0 ? (
                     <div className="max-h-56 overflow-y-auto overscroll-contain">
                       {treePreviewAffectedIssueRows.map(({ candidate, issue: previewIssue }) => (
-                        <div key={candidate.id} style={candidate.depth > 0 ? { paddingLeft: `${Math.min(candidate.depth, 6) * 14}px` } : undefined}>
+                        <div key={candidate.id} className={treePreviewDepthClass(candidate.depth)}>
                           <Link
                             to={createIssueDetailPath(candidate.identifier ?? candidate.id)}
                             issuePrefetch={previewIssue}

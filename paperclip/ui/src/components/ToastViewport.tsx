@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "@/lib/router";
 import { X } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import {
   useToastActions,
   useToastState,
@@ -40,7 +41,7 @@ function AnimatedToast({
   return (
     <li
       className={cn(
-        "pointer-events-auto rounded-sm border shadow-lg backdrop-blur-xl transition-[transform,opacity] duration-200 ease-out",
+        "pointer-events-auto rounded-sm border shadow-lg backdrop-blur-xl transition-all duration-200 ease-out",
         visible
           ? "translate-y-0 opacity-100"
           : "translate-y-3 opacity-0",
@@ -66,14 +67,16 @@ function AnimatedToast({
             </Link>
           )}
         </div>
-        <button
+        <Button
           type="button"
+          variant="ghost"
+          size="icon-xs"
           aria-label="Dismiss notification"
           onClick={() => onDismiss(toast.id)}
-          className="mt-0.5 shrink-0 rounded p-1 opacity-50 hover:bg-black/10 hover:opacity-100 dark:hover:bg-white/10"
+          className="mt-0.5 shrink-0 opacity-50 hover:bg-foreground/10 hover:opacity-100"
         >
           <X className="h-3.5 w-3.5" />
-        </button>
+        </Button>
       </div>
     </li>
   );
@@ -89,7 +92,7 @@ export function ToastViewport() {
     <aside
       aria-live="polite"
       aria-atomic="false"
-      className="pointer-events-none fixed bottom-3 left-3 z-[120] w-full max-w-sm px-1"
+      className="pointer-events-none fixed bottom-3 left-3 z-120 w-full max-w-sm px-1"
     >
       <ol className="flex w-full flex-col-reverse gap-2">
         {toasts.map((toast) => (

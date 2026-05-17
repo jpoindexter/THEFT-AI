@@ -4,6 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { cn } from "@/lib/utils";
 import { Bot, Filter, HardDrive, Search, User, X } from "lucide-react";
 import { PriorityIcon } from "./PriorityIcon";
 import { StatusIcon } from "./StatusIcon";
@@ -108,11 +109,20 @@ export function IssueFiltersPopover({
   return (
     <Popover>
       <PopoverTrigger asChild>
-        <Button variant={buttonVariant} size={iconOnly ? "icon" : "sm"} className={`text-xs ${iconOnly ? "relative h-8 w-8 shrink-0" : ""} ${activeFilterCount > 0 ? "text-blue-600 dark:text-blue-400" : ""}`} title={iconOnly ? (activeFilterCount > 0 ? `Filters: ${activeFilterCount}` : "Filter") : undefined}>
+        <Button
+          variant={buttonVariant}
+          size={iconOnly ? "icon" : "sm"}
+          className={cn(
+            "text-xs",
+            iconOnly && "relative h-8 w-8 shrink-0",
+            activeFilterCount > 0 && "text-primary",
+          )}
+          title={iconOnly ? (activeFilterCount > 0 ? `Filters: ${activeFilterCount}` : "Filter") : undefined}
+        >
           <Filter className={iconOnly ? "h-3.5 w-3.5" : "h-3.5 w-3.5 sm:h-3 sm:w-3 sm:mr-1"} />
           {!iconOnly && <span className="hidden sm:inline">{activeFilterCount > 0 ? `Filters: ${activeFilterCount}` : "Filter"}</span>}
-          {!iconOnly && activeFilterCount > 0 ? <span className="ml-0.5 text-[10px] font-medium sm:hidden">{activeFilterCount}</span> : null}
-          {iconOnly && activeFilterCount > 0 ? <span className="absolute -right-1 -top-1 flex h-3.5 w-3.5 items-center justify-center rounded-full bg-blue-600 text-[9px] font-bold text-white">{activeFilterCount}</span> : null}
+          {!iconOnly && activeFilterCount > 0 ? <span className="ml-0.5 text-nano font-medium sm:hidden">{activeFilterCount}</span> : null}
+          {iconOnly && activeFilterCount > 0 ? <span className="absolute -right-1 -top-1 flex h-3.5 w-3.5 items-center justify-center rounded-full bg-primary text-badge font-bold text-primary-foreground">{activeFilterCount}</span> : null}
           {!iconOnly && activeFilterCount > 0 ? (
             <X
               className="ml-1 hidden h-3 w-3 sm:block"
@@ -126,19 +136,22 @@ export function IssueFiltersPopover({
       </PopoverTrigger>
       <PopoverContent
         align="end"
-        className="w-[min(780px,calc(100vw-2rem))] max-h-[min(80vh,42rem)] overflow-y-auto overscroll-contain p-0"
+        collisionPadding={16}
+        className="w-(--radix-popover-content-available-width) max-w-3xl max-h-(--radix-popover-content-available-height) overflow-y-auto overscroll-contain p-0"
       >
         <div className="space-y-3 p-3">
           <div className="flex items-center justify-between">
             <span className="text-sm font-medium">Filters</span>
             {activeFilterCount > 0 ? (
-              <button
+              <Button
                 type="button"
-                className="text-xs text-muted-foreground hover:text-foreground"
+                variant="ghost"
+                size="xs"
+                className="h-auto px-0 py-0 text-xs text-muted-foreground hover:bg-transparent hover:text-foreground"
                 onClick={() => onChange(defaultIssueFilterState)}
               >
                 Clear
-              </button>
+              </Button>
             ) : null}
           </div>
 
@@ -148,18 +161,19 @@ export function IssueFiltersPopover({
               {issueQuickFilterPresets.map((preset) => {
                 const isActive = issueFilterArraysEqual(state.statuses, preset.statuses);
                 return (
-                  <button
+                  <Button
                     key={preset.label}
                     type="button"
-                    className={`rounded-full border px-2.5 py-1 text-xs transition-colors ${
-                      isActive
-                        ? "border-primary bg-primary text-primary-foreground"
-                        : "border-border text-muted-foreground hover:border-foreground/30 hover:text-foreground"
-                    }`}
+                    variant={isActive ? "default" : "outline"}
+                    size="xs"
+                    className={cn(
+                      "rounded-full text-xs",
+                      !isActive && "text-muted-foreground hover:text-foreground",
+                    )}
                     onClick={() => onChange({ statuses: isActive ? [] : [...preset.statuses] })}
                   >
                     {preset.label}
-                  </button>
+                  </Button>
                 );
               })}
             </div>
@@ -244,14 +258,16 @@ export function IssueFiltersPopover({
                         <Badge key={creator.id} variant="secondary" className="gap-1 pr-1">
                           {creator.kind === "agent" ? <Bot className="h-3 w-3" /> : <User className="h-3 w-3" />}
                           <span>{creator.label}</span>
-                          <button
+                          <Button
                             type="button"
+                            variant="ghost"
+                            size="icon-xs"
                             className="rounded-full p-0.5 hover:bg-accent"
                             onClick={() => onChange({ creators: state.creators.filter((value) => value !== creator.id) })}
                             aria-label={`Remove creator ${creator.label}`}
                           >
                             <X className="h-3 w-3" />
-                          </button>
+                          </Button>
                         </Badge>
                       ))}
                     </div>
@@ -269,18 +285,21 @@ export function IssueFiltersPopover({
                     {visibleCreatorOptions.length > 0 ? visibleCreatorOptions.map((creator) => {
                       const selected = state.creators.includes(creator.id);
                       return (
-                        <button
+                        <Button
                           key={creator.id}
                           type="button"
-                          className={`flex w-full items-center gap-2 rounded-sm px-2 py-1 text-left text-sm ${
-                            selected ? "bg-accent text-foreground" : "text-muted-foreground hover:bg-accent/50 hover:text-foreground"
-                          }`}
+                          variant="ghost"
+                          size="xs"
+                          className={cn(
+                            "h-auto w-full justify-start rounded-sm px-2 py-1 text-left text-sm",
+                            selected ? "bg-accent text-foreground" : "text-muted-foreground hover:bg-accent/50 hover:text-foreground",
+                          )}
                           onClick={() => onChange({ creators: toggleIssueFilterValue(state.creators, creator.id) })}
                         >
                           {creator.kind === "agent" ? <Bot className="h-3.5 w-3.5" /> : <User className="h-3.5 w-3.5" />}
                           <span className="min-w-0 flex-1 truncate">{creator.label}</span>
                           {selected ? <X className="h-3 w-3" /> : null}
-                        </button>
+                        </Button>
                       );
                     }) : (
                       <div className="px-2 py-1 text-xs text-muted-foreground">No creators match.</div>
@@ -318,6 +337,7 @@ export function IssueFiltersPopover({
                           checked={state.labels.includes(label.id)}
                           onCheckedChange={() => onChange({ labels: toggleIssueFilterValue(state.labels, label.id) })}
                         />
+                        {/* Runtime label colors are user/workspace data, so the swatch keeps a dynamic style. */}
                         <span className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: label.color }} />
                         <span className="text-sm">{label.name}</span>
                       </label>

@@ -88,7 +88,7 @@ export function StatusIcon({ status, blockerAttention, onChange, className, show
         "relative inline-flex h-4 w-4 rounded-full border-2 shrink-0",
         colorClass,
         onChange && !showLabel && "cursor-pointer",
-        className
+        className,
       )}
       data-blocker-attention-state={blockerAttentionState}
       aria-label={ariaLabel}
@@ -112,10 +112,15 @@ export function StatusIcon({ status, blockerAttention, onChange, className, show
   if (!onChange) return showLabel ? <span className="inline-flex items-center gap-1.5">{circle}<span className="text-sm">{statusLabel(status)}</span></span> : circle;
 
   const trigger = showLabel ? (
-    <button className="inline-flex items-center gap-1.5 cursor-pointer hover:bg-accent/50 rounded px-1 -mx-1 py-0.5 transition-colors">
+    <Button
+      type="button"
+      variant="ghost"
+      size="xs"
+      className="-mx-1 h-auto min-h-0 cursor-pointer gap-1.5 px-1 py-0.5 font-normal text-foreground hover:bg-accent/50"
+    >
       {circle}
       <span className="text-sm">{statusLabel(status)}</span>
-    </button>
+    </Button>
   ) : circle;
 
   return (
