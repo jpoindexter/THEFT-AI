@@ -54,7 +54,6 @@ import { IssueDetailSubIssuesSection } from "../components/issue-detail/IssueDet
 import { IssueDetailTitleSection } from "../components/issue-detail/IssueDetailTitleSection";
 import { IssueDetailLoadingState } from "../components/issue-detail/IssueDetailLoadingState";
 import {
-  mergeOptimisticFeedbackVote,
   truncate,
 } from "../components/issue-detail/IssueDetailUtils";
 import { IssueTreeControlDialog } from "../components/issue-detail/IssueTreeControlDialog";
@@ -70,6 +69,7 @@ import {
 } from "../components/issue-detail/useIssueDetailComments";
 import { useIssueDetailAttachments } from "../components/issue-detail/useIssueDetailAttachments";
 import { useIssueDetailChildIssues } from "../components/issue-detail/useIssueDetailChildIssues";
+import { useIssueDetailFeedback } from "../components/issue-detail/useIssueDetailFeedback";
 import { useIssueDetailLookups } from "../components/issue-detail/useIssueDetailLookups";
 import { useIssueDetailRouteEffects, useIssueDetailRouteState } from "../components/issue-detail/useIssueDetailRouteState";
 import { useIssueDetailTreeControl } from "../components/issue-detail/useIssueDetailTreeControl";
@@ -88,7 +88,6 @@ import {
   type AskUserQuestionsAnswer,
   type AskUserQuestionsInteraction,
   type ActivityEvent,
-  type FeedbackVote,
   type Issue,
   type IssueComment,
   type IssueWorkMode,
@@ -268,6 +267,14 @@ export function IssueDetail() {
     childIssues,
     canManageTreeControl,
     agentMap,
+  });
+  const {
+    handleCommentVote,
+    handleDocumentVote,
+  } = useIssueDetailFeedback({
+    currentUserId,
+    feedbackDataSharingPreference,
+    issueId,
   });
 
   const commentReassignOptions = useMemo(() => {
@@ -1041,71 +1048,6 @@ export function IssueDetail() {
     void cancelQueuedComment.mutateAsync({ commentId });
   }, [cancelQueuedComment, restoreQueuedCommentDraft, pushToast]);
 
-  const feedbackVoteMutation = useMutation({
-    mutationFn: (variables: {
-      targetType: "issue_comment" | "issue_document_revision";
-      targetId: string;
-      vote: "up" | "down";
-      reason?: string;
-      allowSharing?: boolean;
-      sharingPreferenceAtSubmit: "allowed" | "not_allowed" | "prompt";
-    }) =>
-      issuesApi.upsertFeedbackVote(issueId!, {
-        targetType: variables.targetType,
-        targetId: variables.targetId,
-        vote: variables.vote,
-        ...(variables.reason ? { reason: variables.reason } : {}),
-        ...(variables.allowSharing ? { allowSharing: true } : {}),
-      }),
-    onMutate: async (variables) => {
-      await queryClient.cancelQueries({ queryKey: queryKeys.issues.feedbackVotes(issueId!) });
-      const previousVotes = queryClient.getQueryData<FeedbackVote[]>(
-        queryKeys.issues.feedbackVotes(issueId!),
-      );
-      queryClient.setQueryData<FeedbackVote[]>(
-        queryKeys.issues.feedbackVotes(issueId!),
-        mergeOptimisticFeedbackVote(
-          previousVotes,
-          {
-            issueId: issueId!,
-            targetType: variables.targetType,
-            targetId: variables.targetId,
-            vote: variables.vote,
-            reason: variables.reason,
-          },
-          currentUserId,
-        ),
-      );
-      return { previousVotes };
-    },
-    onSuccess: (_savedVote, variables) => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.issues.feedbackVotes(issueId!) });
-      queryClient.invalidateQueries({ queryKey: queryKeys.companies.all });
-      queryClient.invalidateQueries({ queryKey: queryKeys.instance.generalSettings });
-      pushToast({
-        title:
-          variables.sharingPreferenceAtSubmit === "prompt"
-            ? variables.allowSharing
-              ? "Feedback saved. Future votes will share"
-              : "Feedback saved. Future votes will stay local"
-            : variables.allowSharing
-              ? "Feedback saved and sharing enabled"
-              : "Feedback saved",
-        tone: "success",
-      });
-    },
-    onError: (err, _variables, context) => {
-      if (context?.previousVotes) {
-        queryClient.setQueryData(queryKeys.issues.feedbackVotes(issueId!), context.previousVotes);
-      }
-      pushToast({
-        title: "Failed to save feedback",
-        body: err instanceof Error ? err.message : "Unknown error",
-        tone: "error",
-      });
-    },
-  });
-
   const archiveFromInbox = useMutation({
     mutationFn: (id: string) => issuesApi.archiveFromInbox(id),
     onSuccess: () => {
@@ -1399,16 +1341,6 @@ export function IssueDetail() {
     if (!shouldPrefetchOlderComments) return;
     void fetchOlderComments();
   }, [fetchOlderComments, shouldPrefetchOlderComments]);
-  const handleCommentVote = useCallback(async (commentId: string, vote: "up" | "down", options?: { allowSharing?: boolean; reason?: string }) => {
-    await feedbackVoteMutation.mutateAsync({
-      targetType: "issue_comment",
-      targetId: commentId,
-      vote,
-      reason: options?.reason,
-      allowSharing: options?.allowSharing,
-      sharingPreferenceAtSubmit: feedbackDataSharingPreference,
-    });
-  }, [feedbackDataSharingPreference, feedbackVoteMutation]);
   const handleChatAdd = useCallback(async (body: string, reopen?: boolean, reassignment?: CommentReassignment) => {
     if (reassignment) {
       await addCommentAndReassign.mutateAsync({ body, reopen, reassignment });
@@ -1552,16 +1484,7 @@ export function IssueDetail() {
         mentions={mentionOptions}
         documentExtraActions={!hasAttachments ? attachmentUploadButton : null}
         onUploadDocumentImage={handleUploadImageForMarkdown}
-        onVoteDocument={async (revisionId, vote, options) => {
-          await feedbackVoteMutation.mutateAsync({
-            targetType: "issue_document_revision",
-            targetId: revisionId,
-            vote,
-            reason: options?.reason,
-            allowSharing: options?.allowSharing,
-            sharingPreferenceAtSubmit: feedbackDataSharingPreference,
-          });
-        }}
+        onVoteDocument={handleDocumentVote}
         attachmentsInitialLoading={attachmentsInitialLoading}
         imageAttachments={imageAttachments}
         nonImageAttachments={nonImageAttachments}
