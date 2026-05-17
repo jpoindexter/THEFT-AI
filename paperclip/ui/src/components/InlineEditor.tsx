@@ -1,48 +1,17 @@
 import { useState, useRef, useEffect, useCallback } from "react";
-import { Textarea } from "@/components/ui/textarea";
-import { cn } from "../lib/utils";
-import { MarkdownBody } from "./MarkdownBody";
-import { MarkdownEditor, type MarkdownEditorRef, type MentionOption } from "./MarkdownEditor";
+import type { MarkdownEditorRef } from "./MarkdownEditor";
 import { useAutosaveIndicator } from "../hooks/useAutosaveIndicator";
-import { FoldCurtain } from "./FoldCurtain";
+import { queueContainedBlurCommit } from "./inline-editor/blur-commit";
+import {
+  InlineEditorDisplay,
+  InlineEditorMarkdownComposer,
+  InlineEditorMarkdownPreview,
+  InlineEditorTextarea,
+} from "./inline-editor/InlineEditorViews";
+import type { InlineEditorProps } from "./inline-editor/types";
+import { useInlineEditorAutosave } from "./inline-editor/useInlineEditorAutosave";
 
-interface InlineEditorProps {
-  value: string;
-  onSave: (value: string) => void | Promise<unknown>;
-  as?: "h1" | "h2" | "p" | "span";
-  className?: string;
-  placeholder?: string;
-  multiline?: boolean;
-  imageUploadHandler?: (file: File) => Promise<string>;
-  /** Called when a non-image file is dropped onto the editor. */
-  onDropFile?: (file: File) => Promise<void>;
-  mentions?: MentionOption[];
-  nullable?: boolean;
-  /** When true, long display-mode markdown is clipped with a fade curtain that expands on click. */
-  foldable?: boolean;
-}
-
-/** Shared padding so display and edit modes occupy the exact same box. */
-const pad = "px-1 -mx-1";
-const markdownPad = "px-1";
-const AUTOSAVE_DEBOUNCE_MS = 900;
-
-export function queueContainedBlurCommit(container: HTMLDivElement, onCommit: () => void) {
-  let frameId = requestAnimationFrame(() => {
-    frameId = requestAnimationFrame(() => {
-      frameId = 0;
-      const active = document.activeElement;
-      if (active instanceof Node && container.contains(active)) return;
-      onCommit();
-    });
-  });
-
-  return () => {
-    if (frameId === 0) return;
-    cancelAnimationFrame(frameId);
-    frameId = 0;
-  };
-}
+export { queueContainedBlurCommit } from "./inline-editor/blur-commit";
 
 export function InlineEditor({
   value,
@@ -228,31 +197,19 @@ export function InlineEditor({
     }
   }
 
-  useEffect(() => {
-    if (!multiline) return;
-    if (!multilineFocused) return;
-    const trimmed = draft.trim();
-    // Nullable: empty draft can still be a real edit (clearing); only skip debounce when unchanged or empty is invalid.
-    if (trimmed === value || (!trimmed && !nullable)) {
-      if (autosaveState !== "saved") {
-        reset();
-      }
-      return;
-    }
-    markDirty();
-    if (autosaveDebounceRef.current) {
-      clearTimeout(autosaveDebounceRef.current);
-    }
-    autosaveDebounceRef.current = setTimeout(() => {
-      void runSave(() => commit(trimmed));
-    }, AUTOSAVE_DEBOUNCE_MS);
-
-    return () => {
-      if (autosaveDebounceRef.current) {
-        clearTimeout(autosaveDebounceRef.current);
-      }
-    };
-  }, [autosaveState, commit, draft, markDirty, multiline, multilineFocused, nullable, reset, runSave, value]);
+  useInlineEditorAutosave({
+    autosaveDebounceRef,
+    autosaveState,
+    commit,
+    draft,
+    markDirty,
+    multiline,
+    multilineFocused,
+    nullable,
+    reset,
+    runSave,
+    value,
+  });
 
   if (multiline) {
     const previewValue = autosaveState === "saved" || autosaveState === "idle" ? draft : value;
@@ -266,49 +223,27 @@ export function InlineEditor({
         setMultilineEditing(true);
       };
       return (
-        <div
-          className={cn(markdownPad, "rounded transition-colors hover:bg-accent/20")}
-          onClick={(event) => {
-            if (event.defaultPrevented) return;
-            const target = event.target as HTMLElement | null;
-            if (target && target.closest("a,button,[data-mention-kind],[data-radix-popper-content-wrapper]")) {
-              return;
-            }
-            enterEditMode();
-          }}
-          onDragEnter={() => enterEditMode()}
-          onKeyDown={(event) => {
-            if (event.key !== "Enter" && event.key !== " ") return;
-            event.preventDefault();
-            enterEditMode();
-          }}
-          role="textbox"
-          aria-multiline="true"
-          aria-label={placeholder}
-          tabIndex={0}
-        >
-          {foldable ? (
-            <FoldCurtain>
-              <MarkdownBody className={cn("paperclip-edit-in-place-content", className)}>
-                {previewValue}
-              </MarkdownBody>
-            </FoldCurtain>
-          ) : (
-            <MarkdownBody className={cn("paperclip-edit-in-place-content", className)}>
-              {previewValue}
-            </MarkdownBody>
-          )}
-        </div>
+        <InlineEditorMarkdownPreview
+          previewValue={previewValue}
+          className={className}
+          placeholder={placeholder}
+          foldable={foldable}
+          onEnterEditMode={enterEditMode}
+        />
       );
     }
 
     return (
-      <div
-        className={cn(
-          markdownPad,
-          "rounded transition-colors",
-          multilineFocused ? "bg-transparent" : "hover:bg-accent/20",
-        )}
+      <InlineEditorMarkdownComposer
+        markdownRef={markdownRef}
+        draft={draft}
+        placeholder={placeholder}
+        className={className}
+        multilineFocused={multilineFocused}
+        autosaveState={autosaveState}
+        imageUploadHandler={imageUploadHandler}
+        onDropFile={onDropFile}
+        mentions={mentions}
         onFocusCapture={(event) => {
           // Ignore focus events where the active element isn't actually inside
           // the wrapper (React 19 can emit a synthetic focus after a blur).
@@ -326,63 +261,23 @@ export function InlineEditor({
           scheduleBlurCommit(event.currentTarget);
         }}
         onKeyDown={handleKeyDown}
-      >
-        <MarkdownEditor
-          ref={markdownRef}
-          value={draft}
-          onChange={setDraft}
-          placeholder={placeholder}
-          bordered={false}
-          className="bg-transparent"
-          contentClassName={cn("paperclip-edit-in-place-content", className)}
-          imageUploadHandler={imageUploadHandler}
-          onDropFile={onDropFile}
-          mentions={mentions}
-          onSubmit={() => {
-            finalizeMultilineBlurOrSubmit();
-          }}
-        />
-        <div className="flex min-h-4 items-center justify-end pr-1">
-          <span
-            className={cn(
-              "text-micro transition-opacity duration-150",
-              autosaveState === "error" ? "text-destructive" : "text-muted-foreground",
-              autosaveState === "idle" ? "opacity-0" : "opacity-100",
-            )}
-          >
-            {autosaveState === "saving"
-              ? "Autosaving..."
-              : autosaveState === "saved"
-                ? "Saved"
-                : autosaveState === "error"
-                  ? "Could not save"
-                  : "Idle"}
-          </span>
-        </div>
-      </div>
+        onChange={setDraft}
+        onSubmit={finalizeMultilineBlurOrSubmit}
+      />
     );
   }
 
   if (editing) {
 
     return (
-      <Textarea
-        ref={inputRef}
-        value={draft}
-        rows={1}
-        onChange={(e) => {
-          setDraft(e.target.value);
-          autoSize(e.target);
-        }}
-        onBlur={() => {
-          void commit();
-        }}
+      <InlineEditorTextarea
+        inputRef={inputRef}
+        draft={draft}
+        className={className}
+        onAutoSize={autoSize}
+        onBlur={() => void commit()}
+        onChange={setDraft}
         onKeyDown={handleKeyDown}
-        className={cn(
-          "min-h-0 w-full resize-none overflow-hidden rounded border-0 bg-transparent py-0 shadow-none focus-visible:border-transparent focus-visible:ring-0",
-          pad,
-          className
-        )}
       />
     );
   }
@@ -392,16 +287,12 @@ export function InlineEditor({
   const DisplayTag = value && multiline ? "div" : Tag;
 
   return (
-    <DisplayTag
-      className={cn(
-        "cursor-pointer rounded hover:bg-accent/50 transition-colors overflow-hidden",
-        pad,
-        !value && "text-muted-foreground italic",
-        className,
-      )}
-      onClick={() => setEditing(true)}
-    >
-      {value || placeholder}
-    </DisplayTag>
+    <InlineEditorDisplay
+      as={DisplayTag}
+      value={value}
+      placeholder={placeholder}
+      className={className}
+      onEdit={() => setEditing(true)}
+    />
   );
 }
