@@ -1,13 +1,12 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useParams } from "@/lib/router";
-import { useQuery, useMutation, useQueryClient, type InfiniteData } from "@tanstack/react-query";
+import { useQuery, useQueryClient, type InfiniteData } from "@tanstack/react-query";
 import { issuesApi } from "../api/issues";
 import { heartbeatsApi, type ActiveRunForIssue, type LiveRunForIssue } from "../api/heartbeats";
 import { useCompany } from "../context/CompanyContext";
 import { useDialogActions } from "../context/DialogContext";
 import { usePanel } from "../context/PanelContext";
 import { useSidebar } from "../context/SidebarContext";
-import { useToastActions } from "../context/ToastContext";
 import { assigneeValueFromSelection, suggestedCommentAssigneeValue } from "../lib/assignees";
 import { buildCompanyUserInlineOptions } from "../lib/company-members";
 import { queryKeys } from "../lib/queryKeys";
@@ -16,7 +15,6 @@ import { shouldTrackIssueActiveRun } from "../lib/issueActiveRun";
 import { getIssueDetailQueryOptions } from "../lib/issueDetailCache";
 import {
   loadRemainingIssueCommentPages,
-  matchesIssueRef,
   mergeIssueComments,
   type OptimisticIssueComment,
 } from "../lib/optimistic-issue-comments";
@@ -49,6 +47,7 @@ import { useIssueDetailCommentPosting } from "../components/issue-detail/useIssu
 import { useIssueDetailFeedback } from "../components/issue-detail/useIssueDetailFeedback";
 import { useIssueDetailInboxToolbar } from "../components/issue-detail/useIssueDetailInboxToolbar";
 import { useIssueDetailInteractions } from "../components/issue-detail/useIssueDetailInteractions";
+import { useIssueDetailIssueActions } from "../components/issue-detail/useIssueDetailIssueActions";
 import { useIssueDetailKeyboardShortcuts } from "../components/issue-detail/useIssueDetailKeyboardShortcuts";
 import { useIssueDetailLookups } from "../components/issue-detail/useIssueDetailLookups";
 import { useIssueDetailQueuedCommentActions } from "../components/issue-detail/useIssueDetailQueuedCommentActions";
@@ -67,7 +66,6 @@ import {
   isClosedIsolatedExecutionWorkspace,
   ISSUE_CONTINUATION_SUMMARY_DOCUMENT_KEY,
   type ActivityEvent,
-  type Issue,
   type IssueComment,
   type IssueWorkMode,
   type IssueThreadInteraction,
@@ -80,7 +78,6 @@ export function IssueDetail() {
   const { openNewIssue } = useDialogActions();
   const { openPanel, closePanel, panelVisible, setPanelVisible } = usePanel();
   const queryClient = useQueryClient();
-  const { pushToast } = useToastActions();
   const { isMobile } = useSidebar();
   const {
     isFromInbox,
@@ -98,7 +95,6 @@ export function IssueDetail() {
   const [optimisticComments, setOptimisticComments] = useState<OptimisticIssueComment[]>([]);
   const [locallyQueuedCommentRunIds, setLocallyQueuedCommentRunIds] = useState<Map<string, string>>(() => new Map());
   const [pendingCommentComposerFocusKey, setPendingCommentComposerFocusKey] = useState(0);
-  const lastMarkedReadIssueIdRef = useRef<string | null>(null);
   const commentComposerRef = useRef<IssueChatComposerHandle | null>(null);
   const cancelledQueuedOptimisticCommentIdsRef = useRef(new Set<string>());
   const { data: issue, isLoading, error } = useQuery({
@@ -339,111 +335,27 @@ export function IssueDetail() {
     issueId,
     resolvedCompanyId,
   });
-  const markIssueRead = useMutation({
-    mutationFn: (id: string) => issuesApi.markRead(id),
-    onSuccess: () => {
-      if (selectedCompanyId) {
-        queryClient.invalidateQueries({ queryKey: queryKeys.issues.listMineByMe(selectedCompanyId) });
-        queryClient.invalidateQueries({ queryKey: queryKeys.issues.listTouchedByMe(selectedCompanyId) });
-        queryClient.invalidateQueries({ queryKey: queryKeys.issues.listUnreadTouchedByMe(selectedCompanyId) });
-        queryClient.invalidateQueries({ queryKey: queryKeys.sidebarBadges(selectedCompanyId) });
-      }
-    },
-  });
-
-  const updateIssue = useMutation({
-    mutationFn: (data: Record<string, unknown>) => issuesApi.update(issueId!, data),
-    onMutate: async (data) => {
-      await queryClient.cancelQueries({ queryKey: queryKeys.issues.detail(issueId!) });
-      if (selectedCompanyId) {
-        await queryClient.cancelQueries({ queryKey: queryKeys.issues.list(selectedCompanyId) });
-      }
-
-      const previousIssue = queryClient.getQueryData<Issue>(queryKeys.issues.detail(issueId!));
-      const issueRefs = new Set<string>([issueId!]);
-      if (previousIssue?.id) issueRefs.add(previousIssue.id);
-      if (previousIssue?.identifier) issueRefs.add(previousIssue.identifier);
-
-      const previousDetailQueries = queryClient
-        .getQueriesData<Issue>({ queryKey: ["issues", "detail"] })
-        .filter(([, cachedIssue]) => cachedIssue && matchesIssueRef(cachedIssue, issueRefs));
-      const previousList = selectedCompanyId
-        ? queryClient.getQueryData<Issue[]>(queryKeys.issues.list(selectedCompanyId))
-        : undefined;
-
-      applyOptimisticIssueCacheUpdate(issueRefs, data);
-
-      return { previousDetailQueries, previousList, selectedCompanyId };
-    },
-    onSuccess: ({ comment: _comment, ...nextIssue }) => {
-      const issueRefs = new Set<string>([issueId!, nextIssue.id]);
-      if (nextIssue.identifier) issueRefs.add(nextIssue.identifier);
-      mergeIssueResponseIntoCaches(issueRefs, nextIssue);
-      queryClient.invalidateQueries({ queryKey: queryKeys.issues.activity(issueId!) });
-      invalidateIssueCollections();
-    },
-    onError: (err, _variables, context) => {
-      for (const [queryKey, previousIssue] of context?.previousDetailQueries ?? []) {
-        queryClient.setQueryData(queryKey, previousIssue);
-      }
-      if (context?.selectedCompanyId) {
-        queryClient.setQueryData(queryKeys.issues.list(context.selectedCompanyId), context.previousList);
-      }
-      pushToast({
-        title: "Issue update failed",
-        body: err instanceof Error ? err.message : "Unable to save issue changes",
-        tone: "error",
-      });
-    },
-    onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.issues.detail(issueId!) });
-      if (selectedCompanyId) {
-        queryClient.invalidateQueries({ queryKey: queryKeys.issues.list(selectedCompanyId) });
-      }
-    },
-  });
-  const handleIssuePropertiesUpdate = useCallback((data: Record<string, unknown>) => {
-    updateIssue.mutate(data);
-  }, [updateIssue.mutate]);
-
-  const updateChildIssue = useMutation({
-    mutationFn: ({ id, data }: { id: string; data: Record<string, unknown> }) => issuesApi.update(id, data),
-    onSuccess: () => {
-      if (resolvedCompanyId) {
-        queryClient.invalidateQueries({ queryKey: ["issues", resolvedCompanyId] });
-        queryClient.invalidateQueries({ queryKey: queryKeys.sidebarBadges(resolvedCompanyId) });
-      }
-    },
-    onError: (err) => {
-      pushToast({
-        title: "Issue update failed",
-        body: err instanceof Error ? err.message : "Unable to save sub-issue changes",
-        tone: "error",
-      });
-    },
-  });
-  const handleChildIssueUpdate = useCallback((id: string, data: Record<string, unknown>) => {
-    updateChildIssue.mutate({ id, data });
-  }, [updateChildIssue]);
-
-  const checkIssueMonitorNow = useMutation({
-    mutationFn: () => issuesApi.checkMonitorNow(issueId!),
-    onSuccess: () => {
-      invalidateIssueDetail();
-      invalidateIssueRunState();
-      invalidateIssueCollections();
-      pushToast({
-        title: "Monitor check queued",
-        tone: "success",
-      });
-    },
-    onError: (err) => {
-      pushToast({
-        title: "Monitor check failed",
-        body: err instanceof Error ? err.message : "Unable to trigger the monitor right now",
-        tone: "error",
-      });
-    },
+  const {
+    archiveIssueFromInbox,
+    archivePending,
+    checkIssueMonitorNow,
+    handleChildIssueUpdate,
+    handleIssuePropertiesUpdate,
+    hideIssue,
+    issueHidden,
+    updateIssue,
+  } = useIssueDetailIssueActions({
+    applyOptimisticIssueCacheUpdate,
+    invalidateIssueCollections,
+    invalidateIssueDetail,
+    invalidateIssueRunState,
+    issue,
+    issueId,
+    mergeIssueResponseIntoCaches,
+    navigate,
+    resolvedCompanyId,
+    selectedCompanyId,
+    sourceBreadcrumbHref: sourceBreadcrumb.href,
   });
 
   const { handleChatAdd } = useIssueDetailCommentPosting({
@@ -491,26 +403,6 @@ export function IssueDetail() {
     setOptimisticComments,
   });
 
-  const archiveFromInbox = useMutation({
-    mutationFn: (id: string) => issuesApi.archiveFromInbox(id),
-    onSuccess: () => {
-      invalidateIssueCollections();
-      navigate(sourceBreadcrumb.href.startsWith("/inbox") ? sourceBreadcrumb.href : "/inbox", { replace: true });
-      pushToast({ title: "Issue archived from inbox", tone: "success" });
-    },
-    onError: (err) => {
-      pushToast({
-        title: "Archive failed",
-        body: err instanceof Error ? err.message : "Unable to archive this issue from the inbox",
-        tone: "error",
-      });
-    },
-  });
-  const archivePending = archiveFromInbox.isPending;
-  const issueHidden = !!issue?.hiddenAt;
-  const archiveIssueFromInbox = useCallback((id: string) => {
-    if (!archiveFromInbox.isPending) archiveFromInbox.mutate(id);
-  }, [archiveFromInbox.isPending, archiveFromInbox.mutate]);
   const navigateToInbox = useCallback(() => {
     navigate(sourceBreadcrumb.href.startsWith("/inbox") ? sourceBreadcrumb.href : "/inbox");
   }, [navigate, sourceBreadcrumb.href]);
@@ -518,12 +410,6 @@ export function IssueDetail() {
     setDetailTab("chat");
     setPendingCommentComposerFocusKey((current) => current + 1);
   }, []);
-  const hideIssue = useCallback(() => {
-    updateIssue.mutate(
-      { hiddenAt: new Date().toISOString() },
-      { onSuccess: () => navigate("/issues/all") },
-    );
-  }, [navigate, updateIssue]);
   useIssueDetailKeyboardShortcuts({
     archiveIssueFromInbox,
     archivePending,
@@ -547,13 +433,6 @@ export function IssueDetail() {
     onOpenProperties: () => setMobilePropsOpen(true),
     sourceBreadcrumbHref: sourceBreadcrumb.href,
   });
-
-  useEffect(() => {
-    if (!issue?.id) return;
-    if (lastMarkedReadIssueIdRef.current === issue.id) return;
-    lastMarkedReadIssueIdRef.current = issue.id;
-    markIssueRead.mutate(issue.id);
-  }, [issue?.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     if (!panelIssue) {
@@ -694,7 +573,7 @@ export function IssueDetail() {
           onOpenMobileProps={() => setMobilePropsOpen(true)}
           onShowPanel={() => setPanelVisible(true)}
           onArchiveFromInbox={() => {
-            if (!archivePending) archiveFromInbox.mutate(issue.id);
+            archiveIssueFromInbox(issue.id);
           }}
           onPauseLeafWork={openPauseLeafControl}
           onResumeLeafWork={openResumeLeafControl}

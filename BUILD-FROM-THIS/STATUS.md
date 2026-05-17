@@ -53,6 +53,7 @@ Current local modularization checkpoint:
 - Extracted issue-detail chat interaction accept/reject/answer/cancel mutations into a guarded route-local hook.
 - Extracted issue-detail queued comment cancel/interrupt mutations and optimistic queued-comment restore handling into a guarded route-local hook.
 - Extracted issue-detail comment posting/reassignment mutations, optimistic comment staging, and comment cache upsert into a guarded route-local hook.
+- Extracted issue-detail read/update/child-update/monitor/archive/hide mutations into a guarded route-local hook.
 - Moved the issue-chat composer safe-area dock value into a semantic CSS utility.
 
 Latest verification for the active modularization slices:
@@ -69,7 +70,7 @@ Latest verification for the active modularization slices:
 
 Remaining high-value maintainability work:
 
-- `IssueDetail.tsx` is down to 862 lines, but it is still the largest active page.
+- `IssueDetail.tsx` is down to 741 lines, but it is still the largest active page.
 - `IssueChatThread.tsx` is down to 275 lines and now fits the 300-line guardrail.
 - `OnboardingWizard.tsx` is down to 297 lines and now fits the 300-line guardrail.
 - `IssueDocumentsSection.tsx` is down to 207 lines and now fits the 300-line guardrail.
