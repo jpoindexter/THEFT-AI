@@ -171,12 +171,12 @@ describe("IssueWorkspaceCard", () => {
       editButton!.dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true }));
     });
 
-    const selects = container.querySelectorAll("select");
-    expect(selects).toHaveLength(3);
+    const selectTriggers = container.querySelectorAll('button[data-slot="select-trigger"]');
+    expect(selectTriggers).toHaveLength(3);
 
-    const environmentSelect = selects[2] as HTMLSelectElement;
+    const environmentSelect = selectTriggers[2] as HTMLButtonElement;
     expect(environmentSelect.disabled).toBe(true);
-    expect(environmentSelect.value).toBe("env-workspace");
+    expect(environmentSelect.textContent).toContain("Local");
     expect(container.textContent).toContain("Environment selection is locked while reusing an existing workspace.");
 
     const saveButton = Array.from(container.querySelectorAll("button")).find((button) => button.textContent?.includes("Save"));
@@ -239,8 +239,8 @@ describe("IssueWorkspaceCard", () => {
       editButton!.dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true }));
     });
 
-    const selects = container.querySelectorAll("select");
-    expect(selects).toHaveLength(2);
+    const selectTriggers = container.querySelectorAll('button[data-slot="select-trigger"]');
+    expect(selectTriggers).toHaveLength(2);
     expect(container.textContent).not.toContain("Project default environment");
 
     act(() => {

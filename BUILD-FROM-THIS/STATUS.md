@@ -62,12 +62,14 @@ Current local modularization checkpoint:
 - Extracted sidebar workspace-switcher sortable item rendering so `SidebarCompanyMenu.tsx` now fits the 300-line guardrail, and moved the reviewed dnd-kit inline-style exception to the new module path.
 - Extracted system notice metadata rendering so `SystemNotice.tsx` now fits the 300-line guardrail.
 - Extracted onboarding assembly preview stat/inspector primitives so `AssemblyPreviewScreen.tsx` now fits the 300-line guardrail.
+- Extracted issue workspace card helpers, primitives, view, and environment selector so `IssueWorkspaceCard.tsx` now fits the 300-line guardrail.
 - Moved the issue-chat composer safe-area dock value into a semantic CSS utility.
 
 Latest verification for the active modularization slices:
 
 - `pnpm -C paperclip --filter @paperclipai/ui typecheck` passed.
 - Focused IssueDetail Vitest passed: 11 tests.
+- Focused IssueWorkspaceCard Vitest passed: 2 tests.
 - Focused Vitest for issue chat, issue documents, and issue detail passed: 78 tests across 4 files.
 - Focused IssueChatThread Vitest passed: 61 tests across 2 files.
 - Focused onboarding utility Vitest passed: 21 tests across 5 files.
@@ -87,6 +89,7 @@ Remaining high-value maintainability work:
 - `SystemNotice.tsx` is down to 231 lines and now fits the 300-line guardrail.
 - `OnboardingWizard.tsx` is down to 297 lines and now fits the 300-line guardrail.
 - `AssemblyPreviewScreen.tsx` is down to 287 lines and now fits the 300-line guardrail.
+- `IssueWorkspaceCard.tsx` is down to 260 lines and now fits the 300-line guardrail.
 - `IssueDocumentsSection.tsx` is down to 207 lines and now fits the 300-line guardrail.
 - `index.css` is large because it is the current token/source-of-truth file; do not split it casually before token ownership is fully stable.
 
