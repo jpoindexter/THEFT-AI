@@ -64,6 +64,7 @@ Current local modularization checkpoint:
 - Extracted onboarding assembly preview stat/inspector primitives so `AssemblyPreviewScreen.tsx` now fits the 300-line guardrail.
 - Extracted issue workspace card helpers, primitives, view, and environment selector so `IssueWorkspaceCard.tsx` now fits the 300-line guardrail.
 - Extracted inline-editor render views, blur scheduling, autosave debounce, and public props so `InlineEditor.tsx` now fits the 300-line guardrail.
+- Trimmed issue-document editor hook imports so `useIssueDocumentEditor.ts` now fits the 300-line guardrail.
 - Moved the issue-chat composer safe-area dock value into a semantic CSS utility.
 
 Latest verification for the active modularization slices:
@@ -93,6 +94,7 @@ Remaining high-value maintainability work:
 - `AssemblyPreviewScreen.tsx` is down to 287 lines and now fits the 300-line guardrail.
 - `IssueWorkspaceCard.tsx` is down to 260 lines and now fits the 300-line guardrail.
 - `InlineEditor.tsx` is down to 298 lines and now fits the 300-line guardrail.
+- `useIssueDocumentEditor.ts` is down to 295 lines and now fits the 300-line guardrail.
 - `IssueDocumentsSection.tsx` is down to 207 lines and now fits the 300-line guardrail.
 - `index.css` is large because it is the current token/source-of-truth file; do not split it casually before token ownership is fully stable.
 
