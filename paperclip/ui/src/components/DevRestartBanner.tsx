@@ -33,30 +33,30 @@ export function DevRestartBanner({ devServer }: { devServer?: DevServerHealthSta
   const sample = devServer.changedPathsSample.slice(0, 3);
 
   return (
-    <div className="border-b border-amber-200 bg-amber-50 text-amber-950">
+    <div className="border-b border-border bg-background text-foreground">
       <div className="flex min-h-9 flex-col gap-1 px-3 py-1.5 md:flex-row md:items-center md:justify-between">
         <div className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1 text-xs">
-          <div className="theft-label-compact flex items-center gap-1.5 font-semibold text-amber-950">
+          <div className="theft-label-compact flex items-center gap-1.5 font-semibold text-foreground">
             <AlertTriangle className="h-3 w-3 shrink-0" />
             <span>Restart required</span>
             {devServer.autoRestartEnabled ? (
-              <span className="theft-label-compact rounded-full bg-amber-100 px-2 py-0.5 text-nano text-amber-900">
+              <span className="theft-label-compact rounded-full bg-muted px-2 py-0.5 text-nano text-foreground">
                 Auto-Restart On
               </span>
             ) : null}
           </div>
-          <span className="text-amber-900/80">
+          <span className="text-muted-foreground">
             {describeReason(devServer)}
             {changedAt ? ` · updated ${changedAt}` : ""}
           </span>
           {sample.length > 0 ? (
-            <span className="truncate text-amber-900/65">
+            <span className="truncate text-muted-foreground">
               Changed: {sample.join(", ")}
               {devServer.changedPathCount > sample.length ? ` +${devServer.changedPathCount - sample.length} more` : ""}
             </span>
           ) : null}
           {devServer.pendingMigrations.length > 0 ? (
-            <span className="truncate text-amber-900/65">
+            <span className="truncate text-muted-foreground">
               Pending migrations: {devServer.pendingMigrations.slice(0, 2).join(", ")}
               {devServer.pendingMigrations.length > 2 ? ` +${devServer.pendingMigrations.length - 2} more` : ""}
             </span>
@@ -65,17 +65,17 @@ export function DevRestartBanner({ devServer }: { devServer?: DevServerHealthSta
 
         <div className="flex shrink-0 items-center gap-2 text-xs font-medium">
           {devServer.waitingForIdle ? (
-            <div className="inline-flex items-center gap-1.5 rounded-full bg-amber-100 px-2.5 py-1 text-amber-900">
+            <div className="inline-flex items-center gap-1.5 rounded-full bg-muted px-2.5 py-1 text-foreground">
               <TimerReset className="h-3 w-3" />
               <span>Waiting for {devServer.activeRunCount} live run{devServer.activeRunCount === 1 ? "" : "s"} to finish</span>
             </div>
           ) : devServer.autoRestartEnabled ? (
-            <div className="inline-flex items-center gap-1.5 rounded-full bg-amber-100 px-2.5 py-1 text-amber-900">
+            <div className="inline-flex items-center gap-1.5 rounded-full bg-muted px-2.5 py-1 text-foreground">
               <RotateCcw className="h-3 w-3" />
               <span>Auto-restart will trigger when the instance is idle</span>
             </div>
           ) : (
-            <div className="inline-flex items-center gap-1.5 rounded-full bg-amber-100 px-2.5 py-1 text-amber-900">
+            <div className="inline-flex items-center gap-1.5 rounded-full bg-muted px-2.5 py-1 text-foreground">
               <RotateCcw className="h-3 w-3" />
               <span>Restart <code>pnpm dev:once</code> after the active work is safe to interrupt</span>
             </div>

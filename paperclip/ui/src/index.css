@@ -48,30 +48,30 @@
 
 :root {
   color-scheme: light;
-  --radius: 0.5rem;
+  --radius: 10px;
 
-  /* THEFT/Sana design tokens. New product UI should consume these aliases,
+  /* THEFT monochrome design tokens. New product UI should consume these aliases,
      not one-off colors, spacing, radius, or layout constants. */
-  --theft-color-tarmac: #0a1217;
+  --theft-color-tarmac: #0a0a0a;
   --theft-color-canvas-white: #ffffff;
-  --theft-color-limestone: #e4eff7;
+  --theft-color-limestone: #f2f2f2;
   --theft-color-jet-black: #000000;
-  --theft-color-cloud-gray: #85898b;
-  --theft-color-steel-gray: #6c7174;
-  --theft-color-signal: #cdfe00;
+  --theft-color-cloud-gray: #737373;
+  --theft-color-steel-gray: #737373;
+  --theft-color-signal: #0a0a0a;
   --theft-ink: var(--theft-color-tarmac);
   --theft-graphite: var(--theft-color-steel-gray);
-  --theft-stone: #f4f5f1;
-  --theft-canvas: #fbfcf8;
+  --theft-stone: #f7f7f7;
+  --theft-canvas: #ffffff;
   --theft-panel: var(--theft-color-canvas-white);
-  --theft-panel-soft: #f5f6f2;
-  --theft-line: #e9ebe4;
-  --theft-line-strong: #dfe2da;
+  --theft-panel-soft: #f2f2f2;
+  --theft-line: #e5e5e5;
+  --theft-line-strong: #d4d4d4;
   --theft-brand: var(--theft-color-tarmac);
-  --theft-blue: #2f7df6;
-  --theft-green: #26b36b;
-  --theft-amber: #d9911f;
-  --theft-red: #e85b5b;
+  --theft-blue: #737373;
+  --theft-green: #0a0a0a;
+  --theft-amber: #737373;
+  --theft-red: #0a0a0a;
   --theft-signal: var(--theft-color-signal);
   --theft-space-unit: 8px;
   --theft-space-1: var(--theft-space-unit);
@@ -82,7 +82,7 @@
   --theft-space-6: calc(var(--theft-space-unit) * 6);
   --theft-space-7: calc(var(--theft-space-unit) * 7);
   --theft-space-8: calc(var(--theft-space-unit) * 8);
-  --theft-radius-small: calc(var(--radius) - 2px);
+  --theft-radius-small: var(--radius);
   --theft-radius-control: var(--radius);
   --theft-radius-surface: var(--radius);
   --theft-radius-pill: 999px;
@@ -153,23 +153,23 @@
     calc(var(--theft-space-1) * 122),
     calc(100vw - calc(var(--theft-space-1) * 18))
   );
-  --theft-shadow-hairline: 0 1px 2px rgb(20 24 20 / 0.04);
-  --theft-shadow-soft: 0 var(--theft-space-1) var(--theft-space-3) rgb(20 24 20 / 0.05);
-  --theft-shadow-dock: 0 calc(var(--theft-space-1) * 2) calc(var(--theft-space-1) * 7) rgb(20 24 20 / 0.12);
+  --theft-shadow-hairline: none;
+  --theft-shadow-soft: none;
+  --theft-shadow-dock: none;
   --font-sana-serif: "Sana Serif", "Playfair Display", ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
-  --font-sana-sans: "Sana Sans", "Avenir Next", Inter, "Helvetica Neue", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-sana-sans: "Geist", "Sana Sans", Inter, "Avenir Next", "Helvetica Neue", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   --font-nb-akademie: var(--font-sana-sans);
   --font-nb-akademie-mono: var(--font-sana-sans);
   --theft-text-micro: 11px;
   --theft-text-nano: 10px;
   --theft-text-badge: 9px;
   --theft-root-font-size: 100%;
-  --text-caption: 13px;
-  --leading-caption: 1.4;
-  --text-body: 16px;
-  --leading-body: 1.5;
-  --text-subheading: 20px;
-  --leading-subheading: 1.2;
+  --text-caption: 12px;
+  --leading-caption: 1.5;
+  --text-body: 14px;
+  --leading-body: 1.43;
+  --text-subheading: 18px;
+  --leading-subheading: 1.33;
   --text-display: 72px;
   --leading-display: 1.1;
   --font-weight-regular: 400;
@@ -185,37 +185,37 @@
   --primary-foreground: #ffffff;
   --secondary: var(--theft-panel-soft);
   --secondary-foreground: var(--theft-ink);
-  --muted: #eef0eb;
-  --muted-foreground: #777c78;
-  --accent: #eff1ed;
+  --muted: #f2f2f2;
+  --muted-foreground: #737373;
+  --accent: #f2f2f2;
   --accent-foreground: var(--theft-ink);
   --destructive: var(--theft-red);
   --destructive-foreground: #ffffff;
   --border: var(--theft-line);
   --input: var(--theft-line-strong);
   --ring: var(--theft-brand);
-  --chart-1: var(--theft-blue);
-  --chart-2: var(--theft-green);
-  --chart-3: #8b6ff7;
-  --chart-4: var(--theft-amber);
-  --chart-5: #111111;
+  --chart-1: #0a0a0a;
+  --chart-2: #404040;
+  --chart-3: #737373;
+  --chart-4: #a3a3a3;
+  --chart-5: #d4d4d4;
   --sidebar: #ffffff;
   --sidebar-foreground: var(--theft-ink);
   --sidebar-primary: var(--theft-brand);
   --sidebar-primary-foreground: #ffffff;
-  --sidebar-accent: #f2f3ef;
+  --sidebar-accent: #f2f2f2;
   --sidebar-accent-foreground: var(--theft-ink);
   --sidebar-border: var(--theft-line);
   --sidebar-ring: var(--ring);
-  --chip-match-title-bg: oklch(0.97 0.02 265);
-  --chip-match-title-fg: oklch(0.4 0.13 265);
-  --chip-match-title-border: oklch(0.85 0.05 265);
-  --chip-match-comment-bg: oklch(0.97 0.02 145);
-  --chip-match-comment-fg: oklch(0.4 0.10 145);
-  --chip-match-comment-border: oklch(0.85 0.05 145);
-  --chip-match-document-bg: oklch(0.97 0.02 295);
-  --chip-match-document-fg: oklch(0.4 0.10 295);
-  --chip-match-document-border: oklch(0.85 0.05 295);
+  --chip-match-title-bg: var(--muted);
+  --chip-match-title-fg: var(--foreground);
+  --chip-match-title-border: var(--border);
+  --chip-match-comment-bg: var(--muted);
+  --chip-match-comment-fg: var(--foreground);
+  --chip-match-comment-border: var(--border);
+  --chip-match-document-bg: var(--muted);
+  --chip-match-document-fg: var(--foreground);
+  --chip-match-document-border: var(--border);
   --chip-match-identifier-bg: var(--muted);
   --chip-match-identifier-fg: var(--muted-foreground);
   --chip-match-identifier-border: var(--border);
@@ -233,37 +233,37 @@
   --primary-foreground: #ffffff;
   --secondary: var(--theft-panel-soft);
   --secondary-foreground: var(--theft-ink);
-  --muted: #eef0eb;
-  --muted-foreground: #777c78;
-  --accent: #eff1ed;
+  --muted: #f2f2f2;
+  --muted-foreground: #737373;
+  --accent: #f2f2f2;
   --accent-foreground: var(--theft-ink);
   --destructive: var(--theft-red);
   --destructive-foreground: #ffffff;
   --border: var(--theft-line);
   --input: var(--theft-line-strong);
   --ring: var(--theft-brand);
-  --chart-1: var(--theft-blue);
-  --chart-2: var(--theft-green);
-  --chart-3: #8b6ff7;
-  --chart-4: var(--theft-amber);
-  --chart-5: #111111;
+  --chart-1: #0a0a0a;
+  --chart-2: #404040;
+  --chart-3: #737373;
+  --chart-4: #a3a3a3;
+  --chart-5: #d4d4d4;
   --sidebar: #ffffff;
   --sidebar-foreground: var(--theft-ink);
   --sidebar-primary: var(--theft-brand);
   --sidebar-primary-foreground: #ffffff;
-  --sidebar-accent: #f2f3ef;
+  --sidebar-accent: #f2f2f2;
   --sidebar-accent-foreground: var(--theft-ink);
   --sidebar-border: var(--theft-line);
   --sidebar-ring: var(--ring);
-  --chip-match-title-bg: oklch(0.27 0.04 265 / 0.5);
-  --chip-match-title-fg: oklch(0.78 0.10 265);
-  --chip-match-title-border: oklch(0.4 0.06 265);
-  --chip-match-comment-bg: oklch(0.27 0.04 145 / 0.5);
-  --chip-match-comment-fg: oklch(0.78 0.08 145);
-  --chip-match-comment-border: oklch(0.4 0.05 145);
-  --chip-match-document-bg: oklch(0.27 0.04 295 / 0.5);
-  --chip-match-document-fg: oklch(0.78 0.08 295);
-  --chip-match-document-border: oklch(0.4 0.05 295);
+  --chip-match-title-bg: var(--muted);
+  --chip-match-title-fg: var(--foreground);
+  --chip-match-title-border: var(--border);
+  --chip-match-comment-bg: var(--muted);
+  --chip-match-comment-fg: var(--foreground);
+  --chip-match-comment-border: var(--border);
+  --chip-match-document-bg: var(--muted);
+  --chip-match-document-fg: var(--foreground);
+  --chip-match-document-border: var(--border);
   --chip-match-identifier-bg: var(--muted);
   --chip-match-identifier-fg: var(--muted-foreground);
   --chip-match-identifier-border: var(--border);
@@ -351,7 +351,7 @@
 
 .theft-panel {
   border: 1px solid var(--border);
-  background: color-mix(in oklab, var(--card) 96%, transparent);
+  background: var(--card);
   border-radius: var(--theft-radius-surface);
   box-shadow: var(--theft-shadow-soft);
 }
@@ -365,7 +365,7 @@
 
 .theft-surface-muted {
   border: 1px solid var(--border);
-  background: color-mix(in oklab, var(--secondary) 68%, transparent);
+  background: var(--secondary);
   border-radius: var(--theft-radius-surface);
 }
 
@@ -379,12 +379,16 @@
 
 .theft-selected-surface {
   border-color: var(--primary);
-  background: color-mix(in oklab, var(--accent) 64%, var(--card));
+  background: var(--accent);
+}
+
+.theft-pixelated-image {
+  image-rendering: pixelated;
 }
 
 .theft-inset-surface {
   border: 1px solid var(--border);
-  background: color-mix(in oklab, var(--background) 74%, var(--card));
+  background: var(--card);
   border-radius: var(--theft-radius-surface);
 }
 
@@ -401,6 +405,7 @@
 [data-slot="checkbox"],
 [data-slot="command-input"] {
   border-radius: var(--theft-radius-control);
+  box-shadow: none;
 }
 
 [data-slot="dropdown-menu-content"],
@@ -409,7 +414,7 @@
 [data-slot="popover-content"],
 [data-slot="dialog-content"] {
   border-radius: var(--theft-radius-surface);
-  box-shadow: var(--theft-shadow-soft);
+  box-shadow: none;
 }
 
 [data-slot="dropdown-menu-item"],

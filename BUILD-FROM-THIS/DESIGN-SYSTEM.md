@@ -4,7 +4,7 @@
 
 ## Current Target
 
-THEFT should read as a clean, white, Sana-style operating workbench: low chrome, quiet hierarchy, black/gray typography, and one strong lime signal color for primary action/state. The 099 and command-center renders are structure/density references, not permission to make the active app dark, neon, or dashboard-heavy.
+THEFT should read as a clean monochromatic operating workbench: flat white canvas, quiet hierarchy, black/gray typography, border-defined structure, and no decorative shadows. The UI reference packet in `/Users/jasonpoindexter/Desktop/ui` is the current visual direction. The 099 and command-center renders remain structure/density references, not permission to make the active app dark, neon, colorful, or dashboard-heavy.
 
 ## Single Source Of Truth
 
@@ -51,12 +51,13 @@ Keep the browser/root font size at normal readable scale. Do not simulate 75% br
 
 - Use existing shadcn/ui primitives first for standard controls and surfaces: `Button`, `Card`, `Input`, `Textarea`, `Tabs`, `Select`, `Sheet`, `Dialog`, `DropdownMenu`, `Tooltip`, `Badge`, `Separator`, and `ScrollArea`.
 - THEFT-specific styling should wrap shadcn primitives with semantic screen templates and tokens. Do not hand-build a new button, card, tab bar, dialog, input, or sheet when a shadcn primitive exists.
-- Radius standard: surfaces/cards use `--theft-radius-surface` / `rounded-lg`; controls use `--theft-radius-control` / `rounded-md`; small nested affordances use `rounded-sm`; `rounded-full` is reserved for avatars, status dots, compact badges, and progress bars.
-- Current radius baseline: `--radius: 0.5rem`; surfaces/cards and controls resolve to the same 8px soft edge. Do not add square product panels; use `theft-surface`, `theft-surface-plain`, `theft-surface-muted`, `theft-inset-surface`, or shadcn primitives.
+- Radius standard: surfaces/cards, controls, and small nested affordances resolve to the same `--radius: 10px` value for now. `rounded-full` is reserved for avatars, status dots, compact badges, and progress bars.
+- Current visual baseline: monochrome, flat, and border-led. Do not add drop shadows or square product panels; use `theft-surface`, `theft-surface-plain`, `theft-surface-muted`, `theft-inset-surface`, or shadcn primitives.
+- Status, priority, alert, live, and runtime feedback should stay monochrome for the MVP baseline. Use text, border weight, iconography, labels, and position before introducing hue.
 - Do not add hex colors in TSX. Add or reuse a color token.
 - Do not add arbitrary Tailwind layout values like `grid-cols-[...]`, `min-w-[...]`, `left-[...]`, `tracking-[...]`, or `shadow-[...]` in active product screens.
 - Use `.theft-label` and `.theft-label-compact` for uppercase metadata labels.
-- Use `.theft-elevation-soft` for soft depth.
+- `.theft-elevation-soft` is intentionally flat in the monochrome baseline. Use borders and spacing for hierarchy, not shadows.
 - Use screen utilities like `.theft-onboarding-*`, `.theft-map-*`, and `.theft-tech-tree-*` for semantic layout constants.
 - System/runtime/admin pages can keep legacy code temporarily, but any touched product surface must move toward this contract.
 

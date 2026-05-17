@@ -5,7 +5,7 @@ import { describe, expect, it } from "vitest";
 import { StatusIcon } from "./StatusIcon";
 
 describe("StatusIcon", () => {
-  it("renders covered blocked issues with the cyan covered state visual", () => {
+  it("renders covered blocked issues with the covered state visual", () => {
     const html = renderToStaticMarkup(
       <StatusIcon
         status="blocked"
@@ -25,7 +25,7 @@ describe("StatusIcon", () => {
     expect(html).toContain('data-blocker-attention-state="covered"');
     expect(html).toContain('aria-label="Blocked · waiting on active sub-issue PAP-2"');
     expect(html).toContain('title="Blocked · waiting on active sub-issue PAP-2"');
-    expect(html).toContain("border-cyan-600");
+    expect(html).toContain("border-muted-foreground");
     expect(html).not.toContain("border-red-600");
     expect(html).not.toContain("border-dashed");
     expect(html).toContain("-bottom-0.5");
@@ -49,7 +49,7 @@ describe("StatusIcon", () => {
     );
 
     expect(html).toContain('aria-label="Blocked · covered by 2 active dependencies"');
-    expect(html).toContain("border-cyan-600");
+    expect(html).toContain("border-muted-foreground");
     expect(html).not.toContain("border-dashed");
   });
 
@@ -73,7 +73,7 @@ describe("StatusIcon", () => {
     expect(html).not.toContain('data-blocker-attention-state="covered"');
     expect(html).toContain('data-blocker-attention-state="needs_attention"');
     expect(html).toContain('aria-label="Blocked · 1 blocker needs attention"');
-    expect(html).toContain("border-red-600");
+    expect(html).toContain("border-foreground");
     expect(html).not.toContain("border-dashed");
   });
 
@@ -96,12 +96,12 @@ describe("StatusIcon", () => {
 
     expect(html).toContain('data-blocker-attention-state="needs_attention"');
     expect(html).toContain('aria-label="Blocked · 3 blockers need attention; 2 covered by active work"');
-    expect(html).toContain("border-red-600");
+    expect(html).toContain("border-foreground");
     expect(html).not.toContain("border-cyan-600");
-    expect(html).toContain("bg-cyan-600");
+    expect(html).toContain("bg-current");
   });
 
-  it("renders stalled review chains with amber visual and stalled-leaf copy", () => {
+  it("renders stalled review chains with stalled visual and stalled-leaf copy", () => {
     const html = renderToStaticMarkup(
       <StatusIcon
         status="blocked"
@@ -120,7 +120,7 @@ describe("StatusIcon", () => {
 
     expect(html).toContain('data-blocker-attention-state="stalled"');
     expect(html).toContain('aria-label="Blocked · review stalled on PAP-2279"');
-    expect(html).toContain("border-amber-600");
+    expect(html).toContain("border-foreground");
     expect(html).not.toContain("border-cyan-600");
     expect(html).not.toContain("border-red-600");
   });

@@ -212,21 +212,21 @@ describe("InboxIssueMetaLeading", () => {
       root.render(<InboxIssueMetaLeading issue={createIssue()} isLive />);
     });
 
-    const statusIcon = container.querySelector('span[class*="border-blue-600"]');
-    const liveBadge = container.querySelector('span[class*="px-1.5"][class*="bg-blue-500/10"]');
+    const statusIcon = container.querySelector('span[class*="border-muted-foreground"]');
+    const liveBadge = container.querySelector('span[class*="px-1.5"][class*="bg-muted"]');
     const liveBadgeLabel = Array.from(container.querySelectorAll("span")).find(
       (node) => node.textContent === "Live" && node.className.includes("text-"),
     );
-    const liveDot = container.querySelector('span[class*="bg-blue-500"]');
+    const liveDot = container.querySelector('span[class*="bg-foreground"]');
     const pulseRing = container.querySelector('span[class*="animate-pulse"]');
 
     expect(statusIcon).not.toBeNull();
     expect(statusIcon?.className).not.toContain("!border-muted-foreground");
     expect(statusIcon?.className).not.toContain("!text-muted-foreground");
     expect(liveBadge).not.toBeNull();
-    expect(liveBadge?.className).toContain("bg-blue-500/10");
+    expect(liveBadge?.className).toContain("bg-muted");
     expect(liveBadgeLabel).not.toBeNull();
-    expect(liveBadgeLabel?.className).toContain("text-blue-600");
+    expect(liveBadgeLabel?.className).toContain("text-foreground");
     expect(liveDot).not.toBeNull();
     expect(pulseRing).not.toBeNull();
 

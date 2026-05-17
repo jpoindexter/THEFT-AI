@@ -35,67 +35,11 @@ function mulberry32(seed: number): () => number {
   };
 }
 
-function hslToRgb(h: number, s: number, l: number): [number, number, number] {
-  const hue = ((h % 360) + 360) % 360;
-  const sat = Math.max(0, Math.min(100, s)) / 100;
-  const light = Math.max(0, Math.min(100, l)) / 100;
-
-  const c = (1 - Math.abs(2 * light - 1)) * sat;
-  const x = c * (1 - Math.abs(((hue / 60) % 2) - 1));
-  const m = light - c / 2;
-
-  let r = 0;
-  let g = 0;
-  let b = 0;
-
-  if (hue < 60) {
-    r = c;
-    g = x;
-  } else if (hue < 120) {
-    r = x;
-    g = c;
-  } else if (hue < 180) {
-    g = c;
-    b = x;
-  } else if (hue < 240) {
-    g = x;
-    b = c;
-  } else if (hue < 300) {
-    r = x;
-    b = c;
-  } else {
-    r = c;
-    b = x;
-  }
-
-  return [
-    Math.round((r + m) * 255),
-    Math.round((g + m) * 255),
-    Math.round((b + m) * 255),
-  ];
+function themeColor(name: string, fallback: string): string {
+  return getComputedStyle(document.documentElement).getPropertyValue(name).trim() || fallback;
 }
 
-function rgbToHexColor([r, g, b]: [number, number, number]): string {
-  const toHex = (value: number) => value.toString(16).padStart(2, "0");
-  return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
-}
-
-function hexToHue(hex: string): number {
-  const r = parseInt(hex.slice(1, 3), 16) / 255;
-  const g = parseInt(hex.slice(3, 5), 16) / 255;
-  const b = parseInt(hex.slice(5, 7), 16) / 255;
-  const max = Math.max(r, g, b);
-  const min = Math.min(r, g, b);
-  const d = max - min;
-  if (d === 0) return 0;
-  let h = 0;
-  if (max === r) h = ((g - b) / d) % 6;
-  else if (max === g) h = (b - r) / d + 2;
-  else h = (r - g) / d + 4;
-  return ((h * 60) + 360) % 360;
-}
-
-function makeCompanyPatternDataUrl(seed: string, brandColor?: string | null, logicalSize = 22, cellSize = 2): string {
+function makeCompanyPatternDataUrl(seed: string, _brandColor?: string | null, logicalSize = 22, cellSize = 2): string {
   if (typeof document === "undefined") return "";
 
   const canvas = document.createElement("canvas");
@@ -106,18 +50,8 @@ function makeCompanyPatternDataUrl(seed: string, brandColor?: string | null, log
   if (!ctx) return "";
 
   const rand = mulberry32(hashString(seed));
-
-  const hue = brandColor ? hexToHue(brandColor) : Math.floor(rand() * 360);
-  const offColor = hslToRgb(
-    hue,
-    54 + Math.floor(rand() * 14),
-    36 + Math.floor(rand() * 12),
-  );
-  const onColor = hslToRgb(
-    hue + (rand() > 0.5 ? 10 : -10),
-    86 + Math.floor(rand() * 10),
-    82 + Math.floor(rand() * 10),
-  );
+  const offColor = themeColor("--theft-color-tarmac", "black");
+  const onColor = themeColor("--theft-color-limestone", "white");
 
   const center = (logicalSize - 1) / 2;
   const half = Math.max(center, 1);
@@ -130,10 +64,10 @@ function makeCompanyPatternDataUrl(seed: string, brandColor?: string | null, log
   const diagonalPhase = rand() * Math.PI * 2;
   const antiDiagonalPhase = rand() * Math.PI * 2;
 
-  ctx.fillStyle = rgbToHexColor(offColor);
+  ctx.fillStyle = offColor;
   ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-  ctx.fillStyle = rgbToHexColor(onColor);
+  ctx.fillStyle = onColor;
   const dotRadius = cellSize * 0.46;
 
   for (let y = 0; y < logicalSize; y++) {
@@ -206,15 +140,13 @@ export function CompanyPatternIcon({
           src={patternDataUrl}
           alt=""
           aria-hidden="true"
-          className="absolute inset-0 h-full w-full"
-          // Generated canvas avatars must stay crisp; the current token contract has no image-rendering utility.
-          style={{ imageRendering: "pixelated" }}
+          className="theft-pixelated-image absolute inset-0 h-full w-full"
         />
       ) : (
         <div className="absolute inset-0 bg-muted" />
       )}
       {!logo && (
-        <span className="relative z-10 drop-shadow-sm">
+        <span className="relative z-10">
           {initial}
         </span>
       )}

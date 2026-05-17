@@ -69,7 +69,7 @@ export function IssueRow({
   const productivityReviewIndicator = productivityReview ? (
     <span
       className={cn(
-        "inline-flex h-4 w-4 shrink-0 items-center justify-center rounded-full border border-amber-500/40 bg-amber-500/10 text-amber-600 dark:text-amber-300",
+        "inline-flex h-4 w-4 shrink-0 items-center justify-center rounded-full border border-border bg-muted text-foreground",
         selected ? "border-muted-foreground text-muted-foreground" : null,
       )}
       title={`Productivity review: ${productivityReviewTriggerLabel(productivityReview.trigger)}`}
@@ -86,7 +86,7 @@ export function IssueRow({
   ) : null;
   const planningModeIndicator = issue.workMode === "planning" ? (
     <span
-      className="ml-1.5 inline-flex shrink-0 items-center rounded-full border border-amber-500/60 bg-amber-500/15 px-2 py-0.5 text-nano font-medium text-amber-700 dark:text-amber-300"
+      className="ml-1.5 inline-flex shrink-0 items-center rounded-full border border-border bg-muted px-2 py-0.5 text-nano font-medium text-foreground"
       title="This issue is in planning mode."
     >
       Planning
@@ -180,14 +180,14 @@ export function IssueRow({
               }}
               className={cn(
                 "h-4 w-4 rounded-full p-0",
-                selected ? "hover:bg-muted/80" : "hover:bg-blue-500/20",
+                selected ? "hover:bg-muted/80" : "hover:bg-muted",
               )}
               aria-label="Mark as read"
             >
               <span
                 className={cn(
                   "block h-2 w-2 rounded-full transition-opacity duration-300",
-                  selected ? "bg-muted-foreground/70" : "bg-blue-600 dark:bg-blue-400",
+                  selected ? "bg-muted-foreground/70" : "bg-foreground",
                   unreadState === "fading" ? "opacity-0" : "opacity-100",
                 )}
               />
