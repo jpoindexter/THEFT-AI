@@ -39,7 +39,7 @@
     {
       "file": "paperclip/ui/src/components/IssueFiltersPopover.tsx",
       "check": "inline-style",
-      "line": 341,
+      "line": 214,
       "sample": "style={",
       "reason": "Label swatch color is user/workspace data."
     },

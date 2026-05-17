@@ -73,7 +73,7 @@ describe("IssueFiltersPopover", () => {
     const popoverContent = container.querySelector("[data-testid='popover-content']");
     expect(popoverContent).not.toBeNull();
     expect(popoverContent?.className).toContain("overflow-y-auto");
-    expect(popoverContent?.className).toContain("max-h-[min(80vh,42rem)]");
+    expect(popoverContent?.className).toContain("max-h-(--radix-popover-content-available-height)");
 
     const layoutGrid = Array.from(popoverContent?.querySelectorAll("div") ?? []).find((element) =>
       element.className.includes("md:grid-cols-3"),
