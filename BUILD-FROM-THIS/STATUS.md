@@ -27,7 +27,8 @@ T119 is now in progress after the active product route launch gate passed. First
 - `ProjectProperties.tsx` started its split: save/status/archive/property primitives and exported field types moved into `project-properties/`, reducing the parent from 1184 to 1004 lines while keeping typecheck and the active design gate green.
 - `CompanySwitcher.tsx` and `CopyText.tsx` now scan clean after replacing arbitrary dropdown width, raw status colors, native copy button, and fallback copy positioning.
 - `ProjectProperties.tsx` continued its split: goals, codebase/workspace, workspace parts, and execution workspace controls moved into guarded `project-properties/` modules. The parent is now 222 lines, every extracted module fits under 300, and the focused scanner reports zero findings.
-- Repo-wide design drift count is down to 1493 findings after the first nine T119 slices.
+- `ExecutionParticipantPicker.tsx` now scans clean after moving the trigger, search field, and participant rows to shadcn primitives and tokenized micro/max-width classes.
+- Repo-wide design drift count is down to 1482 findings after the first ten T119 slices.
 
 The Paperclip app is genuinely large. The remaining drag is mostly not missing MVP capability; it is oversized route/organism code inherited from the Paperclip host plus the THEFT UX migration. The active-route design-system gate currently passes with zero unallowed findings, but several files still exceed the maintainability guardrail and need continued modularization.
 

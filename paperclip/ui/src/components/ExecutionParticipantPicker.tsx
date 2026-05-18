@@ -11,6 +11,8 @@ import {
   stageParticipantValues,
 } from "../lib/issue-execution-policy";
 import { cn } from "../lib/utils";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { User, Eye, ShieldCheck } from "lucide-react";
 import { AgentIcon } from "./AgentIconPicker";
@@ -95,9 +97,11 @@ export function ExecutionParticipantPicker({
   return (
     <Popover open={open} onOpenChange={(o) => { setOpen(o); if (!o) setSearch(""); }}>
       <PopoverTrigger asChild>
-        <button
+        <Button
+          variant="outline"
+          size="xs"
           className={cn(
-            "inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-medium transition-colors cursor-pointer",
+            "h-auto rounded-full px-2 py-0.5 text-micro",
             values.length > 0
               ? "border-border text-foreground hover:bg-accent/50"
               : "border-dashed border-border/60 text-muted-foreground hover:border-border hover:text-foreground",
@@ -105,55 +109,61 @@ export function ExecutionParticipantPicker({
         >
           <Icon className="h-3 w-3" />
           {values.length > 0 ? (
-            <span className="truncate max-w-[100px]">
+            <span className="max-w-24 truncate">
               {values.map(participantLabel).join(", ")}
             </span>
           ) : (
             <span>{label}</span>
           )}
-        </button>
+        </Button>
       </PopoverTrigger>
       <PopoverContent className="p-1 w-56" align="start" collisionPadding={16}>
-        <input
-          className="w-full px-2 py-1.5 text-xs bg-transparent outline-none border-b border-border mb-1 placeholder:text-muted-foreground/50"
+        <Input
+          className="mb-1 h-8 border-border bg-transparent px-2 py-1.5 text-xs shadow-none placeholder:text-muted-foreground/50 focus-visible:ring-0"
           placeholder={`Search ${label.toLowerCase()}...`}
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           autoFocus
         />
         <div className="max-h-48 overflow-y-auto overscroll-contain">
-          <button
+          <Button
+            variant="ghost"
+            size="sm"
             className={cn(
-              "flex items-center gap-2 w-full px-2 py-1.5 text-xs rounded hover:bg-accent/50",
+              "h-auto w-full justify-start rounded px-2 py-1.5 text-xs",
               values.length === 0 && "bg-accent",
             )}
             onClick={() => updatePolicy([])}
           >
             No {label.toLowerCase()}
-          </button>
+          </Button>
           {currentUserId && (
-            <button
+            <Button
+              variant="ghost"
+              size="sm"
               className={cn(
-                "flex items-center gap-2 w-full px-2 py-1.5 text-xs rounded hover:bg-accent/50",
+                "h-auto w-full justify-start rounded px-2 py-1.5 text-xs",
                 values.includes(`user:${currentUserId}`) && "bg-accent",
               )}
               onClick={() => toggle(`user:${currentUserId}`)}
             >
               <User className="h-3 w-3 shrink-0 text-muted-foreground" />
               Assign to me
-            </button>
+            </Button>
           )}
           {issue.createdByUserId && issue.createdByUserId !== currentUserId && (
-            <button
+            <Button
+              variant="ghost"
+              size="sm"
               className={cn(
-                "flex items-center gap-2 w-full px-2 py-1.5 text-xs rounded hover:bg-accent/50",
+                "h-auto w-full justify-start rounded px-2 py-1.5 text-xs",
                 values.includes(`user:${issue.createdByUserId}`) && "bg-accent",
               )}
               onClick={() => toggle(`user:${issue.createdByUserId}`)}
             >
               <User className="h-3 w-3 shrink-0 text-muted-foreground" />
               {creatorUserLabel ?? "Requester"}
-            </button>
+            </Button>
           )}
           {otherUserOptions
             .filter((option) => {
@@ -161,17 +171,19 @@ export function ExecutionParticipantPicker({
               return `${option.label} ${option.searchText ?? ""}`.toLowerCase().includes(search.toLowerCase());
             })
             .map((option) => (
-              <button
+              <Button
                 key={option.id}
+                variant="ghost"
+                size="sm"
                 className={cn(
-                  "flex items-center gap-2 w-full px-2 py-1.5 text-xs rounded hover:bg-accent/50",
+                  "h-auto w-full justify-start rounded px-2 py-1.5 text-xs",
                   values.includes(option.id) && "bg-accent",
                 )}
                 onClick={() => toggle(option.id)}
               >
                 <User className="h-3 w-3 shrink-0 text-muted-foreground" />
                 {option.label}
-              </button>
+              </Button>
             ))}
           {sortedAgents
             .filter((agent) => {
@@ -181,17 +193,19 @@ export function ExecutionParticipantPicker({
             .map((agent) => {
               const encoded = `agent:${agent.id}`;
               return (
-                <button
+                <Button
                   key={agent.id}
+                  variant="ghost"
+                  size="sm"
                   className={cn(
-                    "flex items-center gap-2 w-full px-2 py-1.5 text-xs rounded hover:bg-accent/50",
+                    "h-auto w-full justify-start rounded px-2 py-1.5 text-xs",
                     values.includes(encoded) && "bg-accent",
                   )}
                   onClick={() => toggle(encoded)}
                 >
                   <AgentIcon icon={agent.icon} className="shrink-0 h-3 w-3 text-muted-foreground" />
                   {agent.name}
-                </button>
+                </Button>
               );
             })}
         </div>
