@@ -140,6 +140,10 @@ T119 is now in progress after the active product route launch gate passed. First
   - `Routines.tsx` is down from 954 lines to 280 lines after moving model helpers, list controls, grouped list rendering, composer sections, page data queries, and action mutations under `pages/routines/`.
   - Every touched routines module fits under the 300-line guardrail; focused routines scanner reports zero findings.
   - Focused `Routines` Vitest passed 5 tests, typecheck passed, active-route design gate passed, and repo-wide scanner is down to 503 findings.
+- T120 continued with the next-smallest runtime support module:
+  - `LiveUpdatesProvider.tsx` is down from 1025 lines to 159 lines after moving live-event handling, invalidation, visible-issue routing, comment hydration, toast builders, toast gating, and socket cleanup under `context/live-updates/`.
+  - Every touched live-updates module fits under the 300-line guardrail; focused live-updates scanner reports zero findings.
+  - Focused `LiveUpdatesProvider` Vitest passed 14 tests, typecheck passed, active-route design gate passed, and repo-wide scanner remains at 503 findings because this slice reduced module size rather than drift count.
 
 The Paperclip app is genuinely large. The remaining drag is mostly not missing MVP capability; it is oversized route/organism code inherited from the Paperclip host plus the THEFT UX migration. The active-route design-system gate currently passes with zero unallowed findings, but several files still exceed the maintainability guardrail and need continued modularization.
 
