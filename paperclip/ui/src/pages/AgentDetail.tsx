@@ -31,7 +31,6 @@ import { assetsApi } from "../api/assets";
 import { getUIAdapter, buildTranscript, onAdapterChange } from "../adapters";
 import { StatusBadge } from "../components/StatusBadge";
 import { agentStatusDot, agentStatusDotDefault } from "../lib/status-colors";
-import { MarkdownBody } from "../components/MarkdownBody";
 import { CopyText } from "../components/CopyText";
 import { EntityRow } from "../components/EntityRow";
 import { Identity } from "../components/Identity";
@@ -59,6 +58,7 @@ import {
 import { Collapsible, CollapsibleTrigger, CollapsibleContent } from "@/components/ui/collapsible";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { RunTranscriptView, type TranscriptMode } from "../components/transcript/RunTranscriptView";
 import {
   isUuidLike,
@@ -74,10 +74,11 @@ import { redactHomePathUserSegments, redactHomePathUserSegmentsInValue } from "@
 import { agentRouteRef } from "../lib/utils";
 import { WorkspaceOperationsSection } from "./agent-detail/WorkspaceOperationsSection";
 import { AgentDetailHeader } from "./agent-detail/AgentDetailHeader";
-import { RunsTab, defaultRunStatusInfo, runMetrics, runStatusIcons, sourceLabels } from "./agent-detail/RunsTab";
+import { RunsTab, runMetrics } from "./agent-detail/RunsTab";
 import { RunSummaryCard } from "./agent-detail/RunSummaryCard";
 import { ConfigurationRevisionsSection } from "./agent-detail/ConfigurationRevisionsSection";
 import { AgentSkillsTab } from "./agent-detail/AgentSkillsTab";
+import { LatestRunCard } from "./agent-detail/LatestRunCard";
 
 export { AgentSkillsTab };
 
@@ -684,10 +685,7 @@ export function AgentDetail() {
       {/* Mobile bottom Save/Cancel bar */}
       {isMobile && showConfigActionBar && (
         <div className="fixed inset-x-0 bottom-0 z-30 border-t border-border bg-background/95 backdrop-blur-sm">
-          <div
-            className="flex items-center justify-end gap-2 px-3 py-2"
-            style={{ paddingBottom: "max(env(safe-area-inset-bottom), 0.5rem)" }}
-          >
+          <div className="theft-mobile-action-bar-inner flex items-center justify-end gap-2 px-3 py-2">
             <Button
               variant="ghost"
               size="sm"
@@ -782,102 +780,6 @@ export function AgentDetail() {
 }
 
 /* ---- Helper components ---- */
-
-function SummaryRow({ label, children }: { label: string; children: React.ReactNode }) {
-  return (
-    <div className="flex items-center justify-between">
-      <span className="text-muted-foreground text-xs">{label}</span>
-      <div className="flex items-center gap-1">{children}</div>
-    </div>
-  );
-}
-
-function LatestRunCard({ runs, agentId }: { runs: HeartbeatRun[]; agentId: string }) {
-  if (runs.length === 0) return null;
-
-  const sorted = [...runs].sort(
-    (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-  );
-
-  const liveRun = sorted.find((r) => r.status === "running" || r.status === "queued");
-  const run = liveRun ?? sorted[0];
-  const isLive = run.status === "running" || run.status === "queued";
-  const statusInfo = runStatusIcons[run.status] ?? defaultRunStatusInfo;
-  const StatusIcon = statusInfo.icon;
-  const summaryRaw = run.resultJson
-    ? String((run.resultJson as Record<string, unknown>).summary ?? (run.resultJson as Record<string, unknown>).result ?? "")
-    : run.error ?? "";
-
-  // Extract a clean 2-3 line excerpt: first non-empty, non-header, non-list-mark lines
-  const summary = useMemo(() => {
-    if (!summaryRaw) return "";
-    const lines = summaryRaw
-      .replace(/^#{1,6}\s+/gm, "")
-      .split("\n")
-      .map((l) => l.trim())
-      .filter((l) => l.length > 0 && !l.startsWith("---") && !l.startsWith("|") && !l.startsWith("```") && !/^[-*>]/.test(l) && !/^\d+\./.test(l));
-    const excerpt: string[] = [];
-    let chars = 0;
-    for (const line of lines) {
-      if (excerpt.length >= 3 || chars + line.length > 280) break;
-      excerpt.push(line);
-      chars += line.length;
-    }
-    return excerpt.join(" ");
-  }, [summaryRaw]);
-
-  return (
-    <div className="space-y-3">
-      <div className="flex w-full items-center justify-between">
-        <h3 className="flex items-center gap-2 text-sm font-medium">
-          {isLive && (
-            <span className="relative flex h-2 w-2">
-              <span className="animate-pulse absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75" />
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-cyan-400" />
-            </span>
-          )}
-          {isLive ? "Live Run" : "Latest Run"}
-        </h3>
-        <Link
-          to={`/agents/${agentId}/runs/${run.id}`}
-          className="shrink-0 text-xs text-muted-foreground hover:text-foreground transition-colors no-underline"
-        >
-          View details &rarr;
-        </Link>
-      </div>
-
-      <Link
-        to={`/agents/${agentId}/runs/${run.id}`}
-        className={cn(
-          "block border rounded-lg p-4 space-y-2 w-full no-underline transition-colors hover:bg-muted/50 cursor-pointer",
-          isLive ? "border-cyan-500/30 shadow-[0_0_12px_rgba(6,182,212,0.08)]" : "border-border"
-        )}
-      >
-        <div className="flex items-center gap-2">
-          <StatusIcon className={cn("h-3.5 w-3.5", statusInfo.color, run.status === "running" && "animate-spin")} />
-          <StatusBadge status={run.status} />
-          <span className="font-mono text-xs text-muted-foreground">{run.id.slice(0, 8)}</span>
-          <span className={cn(
-            "inline-flex items-center rounded-full px-1.5 py-0.5 text-[10px] font-medium",
-            run.invocationSource === "timer" ? "bg-blue-100 text-blue-700 dark:bg-blue-900/50 dark:text-blue-300"
-              : run.invocationSource === "assignment" ? "bg-violet-100 text-violet-700 dark:bg-violet-900/50 dark:text-violet-300"
-              : run.invocationSource === "on_demand" ? "bg-cyan-100 text-cyan-700 dark:bg-cyan-900/50 dark:text-cyan-300"
-              : "bg-muted text-muted-foreground"
-          )}>
-            {sourceLabels[run.invocationSource] ?? run.invocationSource}
-          </span>
-          <span className="ml-auto text-xs text-muted-foreground">{relativeTime(run.createdAt)}</span>
-        </div>
-
-        {summary && (
-          <div className="overflow-hidden max-h-16">
-            <MarkdownBody className="[&>*:first-child]:mt-0 [&>*:last-child]:mb-0">{summary}</MarkdownBody>
-          </div>
-        )}
-      </Link>
-    </div>
-  );
-}
 
 /* ---- Agent Overview (main single-page view) ---- */
 
@@ -1556,6 +1458,14 @@ function PromptsTab({
   const instructionsSideBySide =
     !isMobile && instructionPaneWidth !== null && instructionPaneWidth >= filePanelWidth + 520;
 
+  useEffect(() => {
+    if (!containerRef.current) return;
+    containerRef.current.style.setProperty(
+      "--agent-instructions-file-width",
+      `${filePanelWidth / 16}rem`,
+    );
+  }, [filePanelWidth]);
+
   if (!isLocal) {
     return (
       <div className="max-w-3xl">
@@ -1589,7 +1499,7 @@ function PromptsTab({
         </CollapsibleTrigger>
         <CollapsibleContent className="pt-4 pb-6">
           <TooltipProvider>
-            <div className="grid gap-x-6 gap-y-4 md:grid-cols-[auto_minmax(0,1fr)_minmax(12rem,0.65fr)]">
+            <div className="grid gap-x-6 gap-y-4 md:grid-cols-3">
               <label className="space-y-1.5 min-w-0">
                 <span className="text-xs font-medium text-muted-foreground flex items-center gap-1">
                   Mode
@@ -1737,12 +1647,7 @@ function PromptsTab({
 
       <div
         ref={containerRef}
-        className="grid min-w-0 gap-3"
-        style={
-          instructionsSideBySide
-            ? { gridTemplateColumns: `${filePanelWidth}px 0.5rem minmax(0, 1fr)` }
-            : undefined
-        }
+        className={cn("grid min-w-0 gap-3", instructionsSideBySide && "agent-instructions-pane-grid")}
       >
         <div className={cn(
           "min-w-0 w-full border border-border rounded-lg p-3 space-y-3",
@@ -1851,7 +1756,7 @@ function PromptsTab({
                 return (
                   <Tooltip>
                     <TooltipTrigger asChild>
-                      <span className="ml-3 shrink-0 rounded border border-amber-500/40 bg-amber-500/10 text-amber-200 px-1.5 py-0.5 text-[10px] uppercase tracking-wide cursor-help">
+                      <span className="theft-label-nano ml-3 shrink-0 cursor-help rounded border border-amber-500/40 bg-amber-500/10 px-1.5 py-0.5 text-amber-200">
                         virtual file
                       </span>
                     </TooltipTrigger>
@@ -1862,7 +1767,7 @@ function PromptsTab({
                 );
               }
               return (
-                <span className="ml-3 shrink-0 rounded border border-border text-muted-foreground px-1.5 py-0.5 text-[10px] uppercase tracking-wide">
+                <span className="theft-label-nano ml-3 shrink-0 rounded border border-border px-1.5 py-0.5 text-muted-foreground">
                   {file.isEntryFile ? "entry" : `${file.size}b`}
                 </span>
               );
@@ -1947,7 +1852,7 @@ function PromptsTab({
               onChange={(value) => setDraft(value ?? "")}
               placeholder="# Agent instructions"
               className="min-w-0 overflow-hidden"
-              contentClassName="min-h-[420px] max-w-full break-words text-sm font-mono"
+              contentClassName="theft-library-editor max-w-full break-words text-sm font-mono"
               imageUploadHandler={async (file) => {
                 const namespace = `agents/${agent.id}/instructions/${selectedOrEntryFile.replaceAll("/", "-")}`;
                 const asset = await uploadMarkdownImage.mutateAsync({ file, namespace });
@@ -1955,10 +1860,10 @@ function PromptsTab({
               }}
             />
           ) : (
-            <textarea
+            <Textarea
               value={displayValue}
               onChange={(event) => setDraft(event.target.value)}
-              className="min-h-[420px] w-full min-w-0 rounded-md border border-border bg-transparent px-3 py-2 font-mono text-sm outline-none"
+              className="theft-library-editor min-w-0 font-mono text-sm"
               placeholder="File contents"
             />
           )}
@@ -1976,7 +1881,7 @@ function PromptsTabSkeleton() {
         <div className="flex items-start justify-between gap-4">
           <div className="space-y-2">
             <Skeleton className="h-4 w-40" />
-            <Skeleton className="h-4 w-[30rem] max-w-full" />
+            <Skeleton className="h-4 w-full max-w-lg" />
           </div>
           <Skeleton className="h-4 w-16" />
         </div>
@@ -1989,8 +1894,8 @@ function PromptsTabSkeleton() {
           ))}
         </div>
       </div>
-      <div className="grid gap-4 lg:grid-cols-[260px_minmax(0,1fr)]">
-        <div className="rounded-lg border border-border p-3 space-y-3">
+      <div className="grid gap-4 lg:grid-cols-4">
+        <div className="rounded-lg border border-border p-3 space-y-3 lg:col-span-1">
           <div className="flex items-center justify-between">
             <Skeleton className="h-4 w-12" />
             <Skeleton className="h-8 w-16" />
@@ -1998,11 +1903,11 @@ function PromptsTabSkeleton() {
           <Skeleton className="h-10 w-full" />
           <div className="space-y-2">
             {Array.from({ length: 5 }).map((_, index) => (
-              <Skeleton key={index} className="h-9 w-full rounded-none" />
+              <Skeleton key={index} className="h-9 w-full rounded-sm" />
             ))}
           </div>
         </div>
-        <div className="rounded-lg border border-border p-4 space-y-3">
+        <div className="rounded-lg border border-border p-4 space-y-3 lg:col-span-3">
           <div className="space-y-2">
             <Skeleton className="h-4 w-48" />
             <Skeleton className="h-3 w-28" />
@@ -2018,7 +1923,7 @@ function PromptEditorSkeleton() {
   return (
     <div className="space-y-3">
       <Skeleton className="h-10 w-full" />
-      <Skeleton className="h-[420px] w-full" />
+      <Skeleton className="theft-library-editor w-full" />
     </div>
   );
 }
@@ -2690,19 +2595,21 @@ function LogViewer({ run, adapterType }: { run: HeartbeatRun; adapterType: strin
         <div className="flex items-center gap-2">
           <div className="inline-flex rounded-lg border border-border/70 bg-background/70 p-0.5">
             {(["nice", "raw"] as const).map((mode) => (
-              <button
+              <Button
                 key={mode}
                 type="button"
+                variant="ghost"
+                size="xs"
                 className={cn(
-                  "rounded-md px-2.5 py-1 text-[11px] font-medium capitalize transition-colors",
+                  "theft-label-nano rounded-md px-2.5 py-1 capitalize transition-colors",
                   transcriptMode === mode
-                    ? "bg-accent text-foreground shadow-sm"
+                    ? "bg-accent text-foreground"
                     : "text-muted-foreground hover:text-foreground",
                 )}
                 onClick={() => setTranscriptMode(mode)}
               >
                 {mode}
-              </button>
+              </Button>
             ))}
           </div>
           {isLive && !isFollowing && (
@@ -2731,7 +2638,7 @@ function LogViewer({ run, adapterType }: { run: HeartbeatRun; adapterType: strin
           )}
         </div>
       </div>
-      <div className="max-h-[38rem] overflow-y-auto rounded-2xl border border-border/70 bg-background/40 p-3 sm:p-4">
+      <div className="agent-run-transcript-panel overflow-y-auto rounded-2xl border border-border/70 bg-background/40 p-3 sm:p-4">
         <RunTranscriptView
           entries={transcript}
           mode={transcriptMode}

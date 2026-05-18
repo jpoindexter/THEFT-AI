@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback, useMemo } from "react";
+import { useState, useEffect, useRef, useCallback, useMemo, type KeyboardEvent } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import type { IssueWorkMode } from "@paperclipai/shared";
 import { useDialog } from "../context/DialogContext";
@@ -25,23 +25,10 @@ import {
   currentUserAssigneeOption,
   parseAssigneeValue,
 } from "../lib/assignees";
-import {
-  Dialog,
-  DialogContent,
-} from "@/components/ui/dialog";
-import { cn } from "../lib/utils";
 import { extractProviderIdWithFallback } from "../lib/model-utils";
 import type { MarkdownEditorRef, MentionOption } from "./MarkdownEditor";
 import type { InlineEntityOption } from "./InlineEntitySelector";
-import { ExecutionWorkspaceFields } from "./new-issue-dialog/ExecutionWorkspaceFields";
-import { NewIssueAssignmentRows } from "./new-issue-dialog/NewIssueAssignmentRows";
-import { NewIssueDialogFooter } from "./new-issue-dialog/NewIssueDialogFooter";
-import { NewIssueDialogHeader } from "./new-issue-dialog/NewIssueDialogHeader";
-import { IssueAssigneeOptionsPanel } from "./new-issue-dialog/IssueAssigneeOptionsPanel";
-import { IssuePropertyChips } from "./new-issue-dialog/IssuePropertyChips";
-import { NewIssueDescriptionSection } from "./new-issue-dialog/NewIssueDescriptionSection";
-import { NewIssueTitleSection } from "./new-issue-dialog/NewIssueTitleSection";
-import { NewIssueParentIssueNotice } from "./new-issue-dialog/NewIssueParentIssueNotice";
+import { NewIssueDialogSurface } from "./new-issue-dialog/NewIssueDialogSurface";
 import { useStagedIssueFiles, type StagedIssueFile } from "./new-issue-dialog/useStagedIssueFiles";
 import {
   clearIssueDraft,
@@ -649,7 +636,7 @@ export function NewIssueDialog() {
     });
   }
 
-  function handleKeyDown(e: React.KeyboardEvent) {
+  function handleKeyDown(e: KeyboardEvent<HTMLDivElement>) {
     if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) {
       e.preventDefault();
       handleSubmit();
@@ -771,208 +758,133 @@ export function NewIssueDialog() {
     [assigneeAdapterModels],
   );
   return (
-    <Dialog
-      open={newIssueOpen}
-      onOpenChange={(open) => {
-        if (!open && !createIssue.isPending) closeNewIssue();
+    <NewIssueDialogSurface
+      adapterType={assigneeAdapterType}
+      agents={agents ?? []}
+      assigneeChrome={assigneeChrome}
+      assigneeOptions={assigneeOptions}
+      assigneeOptionsOpen={assigneeOptionsOpen}
+      assigneeOptionsTitle={assigneeOptionsTitle}
+      assigneeSelectorRef={assigneeSelectorRef}
+      assigneeSupportsCheapLane={assigneeSupportsCheapLane}
+      assigneeThinkingEffort={assigneeThinkingEffort}
+      assigneeValue={assigneeValue}
+      canDiscardDraft={canDiscardDraft}
+      cheapProfile={assigneeCheapProfile}
+      closeNewIssue={closeNewIssue}
+      companies={companies}
+      companyOpen={companyOpen}
+      currentAssignee={currentAssignee}
+      currentProject={currentProject}
+      currentProjectSupportsExecutionWorkspace={currentProjectSupportsExecutionWorkspace}
+      description={description}
+      descriptionEditorRef={descriptionEditorRef}
+      dialogCompany={dialogCompany}
+      effectiveCompanyId={effectiveCompanyId}
+      errorMessage={createIssue.isError ? createIssueErrorMessage : null}
+      expanded={expanded}
+      imageUploadHandler={uploadDescriptionImageHandler}
+      isFileDragOver={isFileDragOver}
+      isSubIssueMode={isSubIssueMode}
+      mentions={mentionOptions}
+      modelLane={assigneeModelLane}
+      modelOverride={assigneeModelOverride}
+      modelOverrideOptions={modelOverrideOptions}
+      moreOpen={moreOpen}
+      newIssueOpen={newIssueOpen}
+      parentExecutionWorkspaceLabel={parentExecutionWorkspaceLabel}
+      parentIssueLabel={parentIssueLabel}
+      parentTitle={newIssueDefaults.parentTitle}
+      participantMenuOpen={participantMenuOpen}
+      pending={createIssue.isPending}
+      priority={priority}
+      priorityOpen={priorityOpen}
+      projectId={projectId}
+      projectOptions={projectOptions}
+      projectSelectorRef={projectSelectorRef}
+      projects={orderedProjects}
+      recentAssigneeOptionIds={recentAssigneeOptionIds}
+      recentProjectIds={recentProjectIds}
+      reusableWorkspaces={deduplicatedReusableWorkspaces}
+      reviewerValue={reviewerValue}
+      approverValue={approverValue}
+      selectedExecutionWorkspaceId={selectedExecutionWorkspaceId}
+      selectedReusableExecutionWorkspace={selectedReusableExecutionWorkspace}
+      showApproverRow={showApproverRow}
+      showParentWorkspaceWarning={showParentWorkspaceWarning}
+      showReviewerRow={showReviewerRow}
+      stageFileInputRef={stageFileInputRef}
+      stagedFiles={stagedFiles}
+      status={status}
+      statusOpen={statusOpen}
+      supportsAssigneeOverrides={supportsAssigneeOverrides}
+      thinkingEffortOptions={thinkingEffortOptions}
+      title={title}
+      titleHasText={titleHasText}
+      uploadDisabled={createIssue.isPending}
+      workMode={workMode}
+      workModeOpen={workModeOpen}
+      executionWorkspaceMode={executionWorkspaceMode}
+      onApproverChange={setApproverValue}
+      onApproverRowToggle={() => {
+        setShowApproverRow((value) => !value);
+        if (showApproverRow) setApproverValue("");
+        setParticipantMenuOpen(false);
       }}
-    >
-      <DialogContent
-        showCloseButton={false}
-        aria-describedby={undefined}
-        className={cn(
-          "flex h-dvh max-h-dvh flex-col gap-0 overflow-hidden p-0 sm:h-auto",
-          expanded
-            ? "sm:h-dvh sm:max-w-2xl"
-            : "sm:max-w-lg"
-        )}
-        onKeyDown={handleKeyDown}
-        onEscapeKeyDown={(event) => {
-          if (createIssue.isPending) {
-            event.preventDefault();
-          }
-        }}
-        onPointerDownOutside={(event) => {
-          if (createIssue.isPending) {
-            event.preventDefault();
-            return;
-          }
-          // Radix Dialog's modal DismissableLayer calls preventDefault() on
-          // pointerdown events that originate outside the Dialog DOM tree.
-          // Popover portals render at the body level (outside the Dialog), so
-          // touch events on popover content get their default prevented — which
-          // kills scroll gesture recognition on mobile.  Telling Radix "this
-          // event is handled" skips that preventDefault, restoring touch scroll.
-          const target = event.detail.originalEvent.target as HTMLElement | null;
-          if (target?.closest("[data-radix-popper-content-wrapper]")) {
-            event.preventDefault();
-          }
-        }}
-      >
-        <NewIssueDialogHeader
-          companyOpen={companyOpen}
-          companies={companies}
-          dialogCompany={dialogCompany}
-          effectiveCompanyId={effectiveCompanyId}
-          expanded={expanded}
-          isSubIssueMode={isSubIssueMode}
-          pending={createIssue.isPending}
-          onClose={closeNewIssue}
-          onCompanyChange={handleCompanyChange}
-          onCompanyOpenChange={setCompanyOpen}
-          onExpandedChange={setExpanded}
-        />
-
-        <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain">
-          <NewIssueTitleSection
-            value={title}
-            pending={createIssue.isPending}
-            assigneeValue={assigneeValue}
-            projectId={projectId}
-            descriptionEditorRef={descriptionEditorRef}
-            assigneeSelectorRef={assigneeSelectorRef}
-            projectSelectorRef={projectSelectorRef}
-            onChange={handleTitleChange}
-          />
-
-          <NewIssueAssignmentRows
-            agents={agents ?? []}
-            assigneeOptions={assigneeOptions}
-            assigneeSelectorRef={assigneeSelectorRef}
-            assigneeValue={assigneeValue}
-            approverValue={approverValue}
-            currentAssignee={currentAssignee}
-            currentProject={currentProject}
-            participantMenuOpen={participantMenuOpen}
-            projectId={projectId}
-            projectOptions={projectOptions}
-            projectSelectorRef={projectSelectorRef}
-            projects={orderedProjects}
-            recentAssigneeOptionIds={recentAssigneeOptionIds}
-            recentProjectIds={recentProjectIds}
-            reviewerValue={reviewerValue}
-            showApproverRow={showApproverRow}
-            showReviewerRow={showReviewerRow}
-            onApproverChange={setApproverValue}
-            onApproverRowToggle={() => {
-              setShowApproverRow((value) => !value);
-              if (showApproverRow) setApproverValue("");
-              setParticipantMenuOpen(false);
-            }}
-            onAssigneeChange={(value) => {
-              const nextAssignee = parseAssigneeValue(value);
-              if (nextAssignee.assigneeAgentId) {
-                trackRecentAssignee(nextAssignee.assigneeAgentId);
-              }
-              setAssigneeValue(value);
-            }}
-            onAssigneeConfirm={() => {
-              if (projectId) {
-                descriptionEditorRef.current?.focus();
-              } else {
-                projectSelectorRef.current?.focus();
-              }
-            }}
-            onParticipantMenuOpenChange={setParticipantMenuOpen}
-            onProjectChange={handleProjectChange}
-            onProjectConfirm={() => {
-              descriptionEditorRef.current?.focus();
-            }}
-            onReviewerChange={setReviewerValue}
-            onReviewerRowToggle={() => {
-              setShowReviewerRow((value) => !value);
-              if (showReviewerRow) setReviewerValue("");
-              setParticipantMenuOpen(false);
-            }}
-          />
-
-          <NewIssueParentIssueNotice
-            isSubIssueMode={isSubIssueMode}
-            parentIssueLabel={parentIssueLabel}
-            parentTitle={newIssueDefaults.parentTitle}
-          />
-
-          {currentProject && currentProjectSupportsExecutionWorkspace ? (
-            <ExecutionWorkspaceFields
-              executionWorkspaceMode={executionWorkspaceMode}
-              parentExecutionWorkspaceLabel={parentExecutionWorkspaceLabel}
-              reusableWorkspaces={deduplicatedReusableWorkspaces}
-              selectedExecutionWorkspaceId={selectedExecutionWorkspaceId}
-              selectedReusableExecutionWorkspace={selectedReusableExecutionWorkspace}
-              showParentWorkspaceWarning={showParentWorkspaceWarning}
-              onExecutionWorkspaceModeChange={setExecutionWorkspaceMode}
-              onSelectedExecutionWorkspaceIdChange={setSelectedExecutionWorkspaceId}
-            />
-          ) : null}
-
-          <IssueAssigneeOptionsPanel
-            adapterType={assigneeAdapterType}
-            assigneeChrome={assigneeChrome}
-            assigneeOptionsOpen={assigneeOptionsOpen}
-            assigneeOptionsTitle={assigneeOptionsTitle}
-            assigneeSupportsCheapLane={assigneeSupportsCheapLane}
-            assigneeThinkingEffort={assigneeThinkingEffort}
-            cheapProfile={assigneeCheapProfile}
-            modelLane={assigneeModelLane}
-            modelOverride={assigneeModelOverride}
-            modelOverrideOptions={modelOverrideOptions}
-            supportsAssigneeOverrides={supportsAssigneeOverrides}
-            thinkingEffortOptions={thinkingEffortOptions}
-            onAssigneeChromeToggle={() => setAssigneeChrome((value) => !value)}
-            onAssigneeOptionsOpenChange={setAssigneeOptionsOpen}
-            onModelLaneChange={setAssigneeModelLane}
-            onModelOverrideChange={setAssigneeModelOverride}
-            onThinkingEffortChange={setAssigneeThinkingEffort}
-          />
-
-          <NewIssueDescriptionSection
-            value={description}
-            expanded={expanded}
-            mentions={mentionOptions}
-            descriptionEditorRef={descriptionEditorRef}
-            imageUploadHandler={uploadDescriptionImageHandler}
-            stagedFiles={stagedFiles}
-            isFileDragOver={isFileDragOver}
-            pending={createIssue.isPending}
-            onChange={handleDescriptionChange}
-            onDragEnter={handleFileDragEnter}
-            onDragOver={handleFileDragOver}
-            onDragLeave={handleFileDragLeave}
-            onDrop={handleFileDrop}
-            onRemoveStagedFile={removeStagedFile}
-          />
-        </div>
-
-        <IssuePropertyChips
-          status={status}
-          statusOpen={statusOpen}
-          priority={priority}
-          priorityOpen={priorityOpen}
-          stageFileInputRef={stageFileInputRef}
-          uploadDisabled={createIssue.isPending}
-          workMode={workMode}
-          workModeOpen={workModeOpen}
-          moreOpen={moreOpen}
-          onStatusChange={setStatus}
-          onStatusOpenChange={setStatusOpen}
-          onPriorityChange={setPriority}
-          onPriorityOpenChange={setPriorityOpen}
-          onStageFilesPicked={handleStageFilesPicked}
-          onWorkModeChange={setWorkMode}
-          onWorkModeOpenChange={setWorkModeOpen}
-          onMoreOpenChange={setMoreOpen}
-        />
-
-        <NewIssueDialogFooter
-          canDiscardDraft={canDiscardDraft}
-          errorMessage={createIssue.isError ? createIssueErrorMessage : null}
-          isSubIssueMode={isSubIssueMode}
-          pending={createIssue.isPending}
-          titleHasText={titleHasText}
-          onDiscardDraft={discardDraft}
-          onSubmit={handleSubmit}
-        />
-      </DialogContent>
-    </Dialog>
+      onAssigneeChange={(value) => {
+        const nextAssignee = parseAssigneeValue(value);
+        if (nextAssignee.assigneeAgentId) {
+          trackRecentAssignee(nextAssignee.assigneeAgentId);
+        }
+        setAssigneeValue(value);
+      }}
+      onAssigneeChromeToggle={() => setAssigneeChrome((value) => !value)}
+      onAssigneeConfirm={() => {
+        if (projectId) {
+          descriptionEditorRef.current?.focus();
+        } else {
+          projectSelectorRef.current?.focus();
+        }
+      }}
+      onAssigneeOptionsOpenChange={setAssigneeOptionsOpen}
+      onClose={closeNewIssue}
+      onCompanyChange={handleCompanyChange}
+      onCompanyOpenChange={setCompanyOpen}
+      onDescriptionChange={handleDescriptionChange}
+      onDiscardDraft={discardDraft}
+      onDragEnter={handleFileDragEnter}
+      onDragLeave={handleFileDragLeave}
+      onDragOver={handleFileDragOver}
+      onDrop={handleFileDrop}
+      onExecutionWorkspaceModeChange={setExecutionWorkspaceMode}
+      onExpandedChange={setExpanded}
+      onKeyDown={handleKeyDown}
+      onModelLaneChange={setAssigneeModelLane}
+      onModelOverrideChange={setAssigneeModelOverride}
+      onMoreOpenChange={setMoreOpen}
+      onParticipantMenuOpenChange={setParticipantMenuOpen}
+      onPriorityChange={setPriority}
+      onPriorityOpenChange={setPriorityOpen}
+      onProjectChange={handleProjectChange}
+      onProjectConfirm={() => {
+        descriptionEditorRef.current?.focus();
+      }}
+      onRemoveStagedFile={removeStagedFile}
+      onReviewerChange={setReviewerValue}
+      onReviewerRowToggle={() => {
+        setShowReviewerRow((value) => !value);
+        if (showReviewerRow) setReviewerValue("");
+        setParticipantMenuOpen(false);
+      }}
+      onSelectedExecutionWorkspaceIdChange={setSelectedExecutionWorkspaceId}
+      onStageFilesPicked={handleStageFilesPicked}
+      onStatusChange={setStatus}
+      onStatusOpenChange={setStatusOpen}
+      onSubmit={handleSubmit}
+      onThinkingEffortChange={setAssigneeThinkingEffort}
+      onTitleChange={handleTitleChange}
+      onWorkModeChange={setWorkMode}
+      onWorkModeOpenChange={setWorkModeOpen}
+    />
   );
 }

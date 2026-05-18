@@ -483,6 +483,18 @@
   bottom: calc(env(safe-area-inset-bottom) + calc(var(--theft-space-1) * 2.5));
 }
 
+.theft-mobile-action-bar-inner {
+  padding-bottom: max(env(safe-area-inset-bottom), var(--theft-space-1));
+}
+
+.agent-run-transcript-panel {
+  max-height: calc(var(--theft-space-1) * 76);
+}
+
+.agent-instructions-pane-grid {
+  grid-template-columns: var(--agent-instructions-file-width, 18rem) 0.5rem minmax(0, 1fr);
+}
+
 .theft-grid-bg {
   background-image:
     linear-gradient(

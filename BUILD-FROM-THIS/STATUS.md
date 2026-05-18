@@ -76,6 +76,12 @@ T119 is now in progress after the active product route launch gate passed. First
 - `AgentDetail.tsx` continued page-level cleanup with skills tab state/rendering moved into guarded `pages/agent-detail/AgentSkillsTab.tsx` and `AgentSkillRows.tsx`; the parent is down to 3009 lines.
 - `CompanyImport.tsx` continued page-level cleanup with preview result rendering and import helper logic moved into guarded `pages/company-import/` modules; the parent is down to 557 lines and focused scanner remains clean.
 - T119 has reached a clean checkpoint sufficient to move the roadmap into T120: active product route gate is still green, focused tests for the touched dialog pass, and repo-wide drift is down to 1081 findings. Remaining drift is mostly runtime/admin/page-level debt to handle through the T120 migration sequence rather than unbounded ad hoc cleanup.
+- T120 continued with strict worker ownership across runtime/admin surfaces:
+  - `NewIssueDialog.tsx` moved dialog chrome and body rendering into `NewIssueDialogSurface.tsx` and `NewIssueDialogBody.tsx`; the parent is down to 891 lines and focused scanner reports zero findings.
+  - `CompanyImport.tsx` moved import preview state and adapter override payload construction into route-local hooks; the parent is down to 367 lines and focused scanner remains clean.
+  - `AgentDetail.tsx` moved latest-run rendering into `pages/agent-detail/LatestRunCard.tsx`, converted touched instructions/run-log controls to shadcn/token utilities, and now has zero focused scanner findings for the `AgentDetail` target.
+  - Shared semantic CSS utilities were added for the mobile action bar, run transcript height, and resizable instructions pane. Active-route `pnpm design:gate` still reports zero findings.
+- Repo-wide design drift is down to 1057 findings after this T120 batch. Remaining oversized targets are still mostly runtime/admin pages: `AgentDetail`, `Inbox`, `CompanySkills`, `PluginSettings`, `ExecutionWorkspaceDetail`, `Costs`, and related settings/runtime surfaces.
 
 The Paperclip app is genuinely large. The remaining drag is mostly not missing MVP capability; it is oversized route/organism code inherited from the Paperclip host plus the THEFT UX migration. The active-route design-system gate currently passes with zero unallowed findings, but several files still exceed the maintainability guardrail and need continued modularization.
 

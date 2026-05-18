@@ -4,7 +4,6 @@ import type {
   CompanyPortabilityCollisionStrategy,
   CompanyPortabilityPreviewResult,
   CompanyPortabilitySource,
-  CompanyPortabilityAdapterOverride,
 } from "@paperclipai/shared";
 import { useCompany } from "../context/CompanyContext";
 import { useBreadcrumbs } from "../context/BreadcrumbContext";
@@ -15,30 +14,18 @@ import { agentsApi } from "../api/agents";
 import { queryKeys } from "../lib/queryKeys";
 import { EmptyState } from "../components/EmptyState";
 import { Download } from "lucide-react";
-import { defaultCreateValues } from "../components/agent-config-defaults";
-import { getUIAdapter } from "../adapters";
 import { ImportPreviewResults } from "./company-import/ImportPreviewResults";
 import { ImportSourceSection } from "./company-import/ImportSourceSection";
 import {
-  type AdapterPickerItem,
-} from "./company-import/ImportReviewSetup";
-import {
   applyImportedSidebarOrder,
-  buildActionMap,
   buildConflictList,
   deriveSourcePrefix,
-  ensureMarkdownPath,
   prefixedName,
   readLocalPackageZip,
   type LocalCompanyImportPackage,
 } from "./company-import/importPreviewModel";
-import type { CreateConfigValues } from "@paperclipai/adapter-utils";
-import {
-  type FileTreeNode,
-  buildFileTree,
-  countFiles,
-  collectAllPaths,
-} from "../components/FileTree";
+import { useImportAdapterOverrides } from "./company-import/useImportAdapterOverrides";
+import { useImportPreviewState } from "./company-import/useImportPreviewState";
 
 // ── Main page ─────────────────────────────────────────────────────────
 
@@ -69,9 +56,6 @@ export function CompanyImport() {
   // Preview state
   const [importPreview, setImportPreview] =
     useState<CompanyPortabilityPreviewResult | null>(null);
-  const [selectedFile, setSelectedFile] = useState<string | null>(null);
-  const [expandedDirs, setExpandedDirs] = useState<Set<string>>(new Set());
-  const [checkedFiles, setCheckedFiles] = useState<Set<string>>(new Set());
 
   // Conflict resolution state
   const [nameOverrides, setNameOverrides] = useState<Record<string, string>>({});
@@ -79,10 +63,13 @@ export function CompanyImport() {
   const [confirmedSlugs, setConfirmedSlugs] = useState<Set<string>>(new Set());
   const [collisionStrategy, setCollisionStrategy] = useState<CompanyPortabilityCollisionStrategy>("rename");
 
-  // Adapter override state
-  const [adapterOverrides, setAdapterOverrides] = useState<Record<string, string>>({});
-  const [adapterExpandedSlugs, setAdapterExpandedSlugs] = useState<Set<string>>(new Set());
-  const [adapterConfigValues, setAdapterConfigValues] = useState<Record<string, CreateConfigValues>>({});
+  const previewState = useImportPreviewState({
+    importPreview,
+    targetMode,
+    nameOverrides,
+    skippedSlugs,
+  });
+  const adapterState = useImportAdapterOverrides({ importPreview });
 
   // Fetch current company agents to find CEO adapter type
   const { data: companyAgents } = useQuery({
@@ -154,45 +141,8 @@ export function CompanyImport() {
       setSkippedSlugs(new Set());
       setConfirmedSlugs(new Set());
 
-      // Initialize adapter overrides — default all agents to the CEO's adapter type
-      const defaultAdapters: Record<string, string> = {};
-      for (const agent of result.manifest.agents) {
-        defaultAdapters[agent.slug] = ceoAdapterType;
-      }
-      setAdapterOverrides(defaultAdapters);
-      setAdapterExpandedSlugs(new Set());
-      setAdapterConfigValues({});
-
-      // Check all files by default, then uncheck COMPANY.md for existing company
-      const allFiles = new Set(Object.keys(result.files));
-      if (targetMode === "existing" && result.manifest.company && result.plan.companyAction === "update") {
-        const companyPath = ensureMarkdownPath(result.manifest.company.path);
-        allFiles.delete(companyPath);
-      }
-      setCheckedFiles(allFiles);
-
-      // Expand top-level dirs + all ancestor dirs of files with conflicts (update action)
-      const am = buildActionMap(result);
-      const tree = buildFileTree(result.files, am);
-      const dirsToExpand = new Set<string>();
-      for (const node of tree) {
-        if (node.kind === "dir") dirsToExpand.add(node.path);
-      }
-      // Auto-expand directories containing conflicting files so they're visible
-      for (const [filePath, action] of am) {
-        if (action === "update") {
-          const segments = filePath.split("/").filter(Boolean);
-          let current = "";
-          for (let i = 0; i < segments.length - 1; i++) {
-            current = current ? `${current}/${segments[i]}` : segments[i];
-            dirsToExpand.add(current);
-          }
-        }
-      }
-      setExpandedDirs(dirsToExpand);
-      // Select first file
-      const firstFile = Object.keys(result.files)[0];
-      if (firstFile) setSelectedFile(firstFile);
+      adapterState.initializeAdapterOverrides(result, ceoAdapterType);
+      previewState.initializeForPreview(result);
     },
     onError: (err) => {
       pushToast({
@@ -216,7 +166,7 @@ export function CompanyImport() {
   }
 
   function buildSelectedFiles(): string[] | undefined {
-    const selected = Array.from(checkedFiles).sort();
+    const selected = Array.from(previewState.checkedFiles).sort();
     return selected.length > 0 ? selected : undefined;
   }
 
@@ -235,7 +185,7 @@ export function CompanyImport() {
         collisionStrategy,
         nameOverrides: buildFinalNameOverrides(),
         selectedFiles: buildSelectedFiles(),
-        adapterOverrides: buildFinalAdapterOverrides(),
+        adapterOverrides: adapterState.buildFinalAdapterOverrides(),
       });
     },
     onSuccess: async (result) => {
@@ -287,86 +237,6 @@ export function CompanyImport() {
     }
   }
 
-  const actionMap = useMemo(
-    () => (importPreview ? buildActionMap(importPreview) : new Map<string, string>()),
-    [importPreview],
-  );
-
-  const tree = useMemo(
-    () => (importPreview ? buildFileTree(importPreview.files, actionMap) : []),
-    [importPreview, actionMap],
-  );
-
-  const conflicts = useMemo(
-    () => (importPreview ? buildConflictList(importPreview) : []),
-    [importPreview],
-  );
-
-  // Map directory paths → planned rename name for display in the file tree
-  // Also maps file paths for use in the preview header
-  const renameMap = useMemo(() => {
-    const map = new Map<string, string>();
-    if (!importPreview) return map;
-    for (const c of conflicts) {
-      if (!c.filePath) continue;
-      const isSkipped = skippedSlugs.has(c.slug);
-      if (isSkipped) continue;
-      const renamedTo = nameOverrides[c.slug] ?? c.plannedName;
-      if (renamedTo === c.originalName) continue;
-      // Map the parent directory (e.g. agents/ceo → gstack-ceo) for the file tree
-      const parentDir = c.filePath.split("/").slice(0, -1).join("/");
-      if (parentDir) map.set(parentDir, renamedTo);
-      // Map the file path too — used by the preview header, not shown in tree
-      map.set(c.filePath, renamedTo);
-    }
-    return map;
-  }, [importPreview, conflicts, nameOverrides, skippedSlugs]);
-
-  const totalFiles = useMemo(() => countFiles(tree), [tree]);
-  const selectedCount = checkedFiles.size;
-
-  function handleToggleDir(path: string) {
-    setExpandedDirs((prev) => {
-      const next = new Set(prev);
-      if (next.has(path)) next.delete(path);
-      else next.add(path);
-      return next;
-    });
-  }
-
-  function handleToggleCheck(path: string, kind: "file" | "dir") {
-    if (!importPreview) return;
-    setCheckedFiles((prev) => {
-      const next = new Set(prev);
-      if (kind === "file") {
-        if (next.has(path)) next.delete(path);
-        else next.add(path);
-      } else {
-        const findNode = (nodes: FileTreeNode[], target: string): FileTreeNode | null => {
-          for (const n of nodes) {
-            if (n.path === target) return n;
-            const found = findNode(n.children, target);
-            if (found) return found;
-          }
-          return null;
-        };
-        const dirNode = findNode(tree, path);
-        if (dirNode) {
-          const childFiles = collectAllPaths(dirNode.children, "file");
-          for (const child of dirNode.children) {
-            if (child.kind === "file") childFiles.add(child.path);
-          }
-          const allChecked = [...childFiles].every((p) => next.has(p));
-          for (const f of childFiles) {
-            if (allChecked) next.delete(f);
-            else next.add(f);
-          }
-        }
-      }
-      return next;
-    });
-  }
-
   function handleConflictRename(slug: string, newName: string) {
     setNameOverrides((prev) => ({ ...prev, [slug]: newName }));
     // Editing the name un-confirms
@@ -399,7 +269,7 @@ export function CompanyImport() {
 
       // Sync with file tree checkboxes
       if (filePath) {
-        setCheckedFiles((prevChecked) => {
+        previewState.setCheckedFiles((prevChecked) => {
           const nextChecked = new Set(prevChecked);
           if (wasSkipped) {
             nextChecked.add(filePath);
@@ -414,69 +284,9 @@ export function CompanyImport() {
     });
   }
 
-  function handleAdapterChange(slug: string, adapterType: string) {
-    setAdapterOverrides((prev) => ({ ...prev, [slug]: adapterType }));
-    // Reset config values when adapter type changes
-    setAdapterConfigValues((prev) => {
-      const next = { ...prev };
-      delete next[slug];
-      return next;
-    });
-  }
-
-  function handleAdapterToggleExpand(slug: string) {
-    setAdapterExpandedSlugs((prev) => {
-      const next = new Set(prev);
-      if (next.has(slug)) next.delete(slug);
-      else next.add(slug);
-      return next;
-    });
-  }
-
-  function handleAdapterConfigChange(slug: string, patch: Partial<CreateConfigValues>) {
-    setAdapterConfigValues((prev) => ({
-      ...prev,
-      [slug]: { ...(prev[slug] ?? { ...defaultCreateValues, adapterType: adapterOverrides[slug] ?? "claude_local" }), ...patch },
-    }));
-  }
-
-  // Build the list of agents for adapter picking
-  const adapterAgents = useMemo<AdapterPickerItem[]>(() => {
-    if (!importPreview) return [];
-    return importPreview.manifest.agents.map((a) => ({
-      slug: a.slug,
-      name: a.name,
-      adapterType: a.adapterType,
-    }));
-  }, [importPreview]);
-
-  // Build final adapterOverrides for import request
-  function buildFinalAdapterOverrides(): Record<string, CompanyPortabilityAdapterOverride> | undefined {
-    if (adapterAgents.length === 0) return undefined;
-    const overrides: Record<string, CompanyPortabilityAdapterOverride> = {};
-    for (const agent of adapterAgents) {
-      const selectedType = adapterOverrides[agent.slug] ?? agent.adapterType;
-      const configVals = adapterConfigValues[agent.slug];
-      const override: CompanyPortabilityAdapterOverride = { adapterType: selectedType };
-      if (configVals) {
-        const uiAdapter = getUIAdapter(selectedType);
-        override.adapterConfig = uiAdapter.buildAdapterConfig(configVals);
-      }
-      overrides[agent.slug] = override;
-    }
-    return Object.keys(overrides).length > 0 ? overrides : undefined;
-  }
-
   const hasSource =
     sourceMode === "local" ? !!localPackage : importUrl.trim().length > 0;
   const hasErrors = importPreview ? importPreview.errors.length > 0 : false;
-
-  const previewContent = selectedFile && importPreview
-    ? (() => {
-        return importPreview.files[selectedFile] ?? null;
-      })()
-    : null;
-  const selectedAction = selectedFile ? (actionMap.get(selectedFile) ?? null) : null;
 
   if (!selectedCompanyId) {
     return <EmptyState icon={Download} message="Select a company to import into." />;
@@ -520,35 +330,35 @@ export function CompanyImport() {
       {importPreview && (
         <ImportPreviewResults
           importPreview={importPreview}
-          tree={tree}
-          selectedFile={selectedFile}
-          expandedDirs={expandedDirs}
-          checkedFiles={checkedFiles}
-          selectedCount={selectedCount}
-          totalFiles={totalFiles}
-          conflicts={conflicts}
+          tree={previewState.tree}
+          selectedFile={previewState.selectedFile}
+          expandedDirs={previewState.expandedDirs}
+          checkedFiles={previewState.checkedFiles}
+          selectedCount={previewState.selectedCount}
+          totalFiles={previewState.totalFiles}
+          conflicts={previewState.conflicts}
           hasErrors={hasErrors}
           isImporting={importMutation.isPending}
-          selectedAction={selectedAction}
-          renamedTo={selectedFile ? (renameMap.get(selectedFile) ?? null) : null}
-          previewContent={previewContent}
-          renameMap={renameMap}
+          selectedAction={previewState.selectedAction}
+          renamedTo={previewState.renamedTo}
+          previewContent={previewState.previewContent}
+          renameMap={previewState.renameMap}
           nameOverrides={nameOverrides}
           skippedSlugs={skippedSlugs}
           confirmedSlugs={confirmedSlugs}
-          adapterAgents={adapterAgents}
-          adapterOverrides={adapterOverrides}
-          adapterExpandedSlugs={adapterExpandedSlugs}
-          adapterConfigValues={adapterConfigValues}
+          adapterAgents={adapterState.adapterAgents}
+          adapterOverrides={adapterState.adapterOverrides}
+          adapterExpandedSlugs={adapterState.adapterExpandedSlugs}
+          adapterConfigValues={adapterState.adapterConfigValues}
           onConflictRename={handleConflictRename}
           onConflictToggleSkip={handleConflictToggleSkip}
           onConflictToggleConfirm={handleConflictToggleConfirm}
-          onAdapterChange={handleAdapterChange}
-          onAdapterToggleExpand={handleAdapterToggleExpand}
-          onAdapterConfigChange={handleAdapterConfigChange}
-          onToggleDir={handleToggleDir}
-          onSelectFile={setSelectedFile}
-          onToggleCheck={handleToggleCheck}
+          onAdapterChange={adapterState.handleAdapterChange}
+          onAdapterToggleExpand={adapterState.handleAdapterToggleExpand}
+          onAdapterConfigChange={adapterState.handleAdapterConfigChange}
+          onToggleDir={previewState.handleToggleDir}
+          onSelectFile={previewState.setSelectedFile}
+          onToggleCheck={previewState.handleToggleCheck}
           onImport={() => importMutation.mutate()}
         />
       )}
