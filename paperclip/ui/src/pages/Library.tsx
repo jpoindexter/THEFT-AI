@@ -166,50 +166,49 @@ export function Library() {
           Refresh
         </Button>
       )}
+      contentClassName="block space-y-4"
     >
-      <div className="space-y-4">
-        <LibraryControls
-          search={search}
-          onSearchChange={setSearch}
-          departmentFilter={departmentFilter}
-          onDepartmentFilterChange={setDepartmentFilter}
-          departmentOptions={departmentOptions}
-          summary={librarySummary}
-        />
+      <LibraryControls
+        search={search}
+        onSearchChange={setSearch}
+        departmentFilter={departmentFilter}
+        onDepartmentFilterChange={setDepartmentFilter}
+        departmentOptions={departmentOptions}
+        summary={librarySummary}
+      />
 
-        {error ? (
-          <EmptyState icon={LibraryIcon} message={(error as Error).message || "Could not load Library items."} />
-        ) : isLoading ? (
-          <div className="p-5 text-sm text-muted-foreground">Loading Library...</div>
-        ) : allItems.length === 0 ? (
-          <EmptyState icon={LibraryIcon} message="No Library items yet. Route a task or save a department document to create company memory." />
-        ) : (
-          <LibraryWorkspace
-            groups={groups}
-            pinnedItems={pinnedItems}
-            selectedItem={selectedItem}
-            selectedItemId={selectedItemId}
-            pinnedIds={pinnedIds}
-            onSelect={(item) => setSelectedItemId(item.id)}
-            onTogglePin={togglePin}
-            document={selectedDocumentQuery.data ?? null}
-            documentLoading={selectedDocumentQuery.isLoading}
-            documentDraft={documentDraft}
-            onDocumentDraftChange={setDocumentDraft}
-            editingDocument={editingDocument}
-            onEditDocument={() => setEditingDocument(true)}
-            onCancelDocumentEdit={() => {
-              setEditingDocument(false);
-              setDocumentDraft(selectedDocumentQuery.data?.body ?? "");
-            }}
-            onSaveDocument={() => {
-              if (selectedDocumentQuery.data) saveDocument.mutate(selectedDocumentQuery.data);
-            }}
-            saveError={saveDocument.error as Error | null}
-            saving={saveDocument.isPending}
-          />
-        )}
-      </div>
+      {error ? (
+        <EmptyState icon={LibraryIcon} message={(error as Error).message || "Could not load Library items."} />
+      ) : isLoading ? (
+        <div className="p-5 text-sm text-muted-foreground">Loading Library...</div>
+      ) : allItems.length === 0 ? (
+        <EmptyState icon={LibraryIcon} message="No Library items yet. Route a task or save a department document to create company memory." />
+      ) : (
+        <LibraryWorkspace
+          groups={groups}
+          pinnedItems={pinnedItems}
+          selectedItem={selectedItem}
+          selectedItemId={selectedItemId}
+          pinnedIds={pinnedIds}
+          onSelect={(item) => setSelectedItemId(item.id)}
+          onTogglePin={togglePin}
+          document={selectedDocumentQuery.data ?? null}
+          documentLoading={selectedDocumentQuery.isLoading}
+          documentDraft={documentDraft}
+          onDocumentDraftChange={setDocumentDraft}
+          editingDocument={editingDocument}
+          onEditDocument={() => setEditingDocument(true)}
+          onCancelDocumentEdit={() => {
+            setEditingDocument(false);
+            setDocumentDraft(selectedDocumentQuery.data?.body ?? "");
+          }}
+          onSaveDocument={() => {
+            if (selectedDocumentQuery.data) saveDocument.mutate(selectedDocumentQuery.data);
+          }}
+          saveError={saveDocument.error as Error | null}
+          saving={saveDocument.isPending}
+        />
+      )}
     </TheftPageShell>
   );
 }

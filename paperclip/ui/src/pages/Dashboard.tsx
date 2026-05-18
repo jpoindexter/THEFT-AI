@@ -215,80 +215,81 @@ export function Dashboard() {
   const isFreshCompany = (issues?.length ?? 0) === 0 && latestLibraryDocuments.length === 0;
 
   return (
-    <TheftPageShell className="min-h-0 bg-background text-foreground">
-      <div className="theft-dashboard-container mx-auto min-w-0 space-y-6 overflow-x-hidden px-1 pb-28 md:px-3">
-        <section className="theft-dashboard-shell-grid grid min-w-0 gap-6" data-operator-open={String(operatorOpen)}>
-          <div className="min-w-0 space-y-6">
-            <ObjectiveHeader
-              companyName={selectedCompany.name}
-              stage={profile.stage ? THEFT_STAGE_LABELS[profile.stage] : null}
-              objective={objectiveTitle}
-              detail={objectiveDetail}
-              departments={departmentRows}
-              reviewCount={reviewCount}
-              outcomeCount={latestLibraryDocuments.length}
-            />
+    <TheftPageShell
+      className="min-h-0 bg-background text-foreground"
+      contentClassName="theft-dashboard-container block space-y-6 overflow-x-hidden px-1 pb-28 md:px-3"
+    >
+      <section className="theft-dashboard-shell-grid grid min-w-0 gap-6" data-operator-open={String(operatorOpen)}>
+        <div className="min-w-0 space-y-6">
+          <ObjectiveHeader
+            companyName={selectedCompany.name}
+            stage={profile.stage ? THEFT_STAGE_LABELS[profile.stage] : null}
+            objective={objectiveTitle}
+            detail={objectiveDetail}
+            departments={departmentRows}
+            reviewCount={reviewCount}
+            outcomeCount={latestLibraryDocuments.length}
+          />
 
-            {isFreshCompany ? (
-              <FreshCompanyPanel onAskOperator={() => setOperatorOpen(true)} />
-            ) : null}
-
-            <div className="theft-dashboard-content-grid grid min-w-0 gap-6" data-operator-open={String(operatorOpen)}>
-              <StrategyMapPanel
-                objective={objectiveTitle}
-                goals={roadmapGoals}
-                departments={departmentRows}
-                nextTasks={nextTasks}
-              />
-
-              <aside className="min-w-0 space-y-6">
-                <ConstraintsPanel
-                  approvalsCount={approvals?.length ?? 0}
-                  interactionsCount={pendingInteractions.length}
-                  blockedCount={blockedIssues.length}
-                  setupTodoCount={setupTodoCount}
-                  outcomeCount={latestLibraryDocuments.length}
-                />
-                <DecisionsPanel
-                  reviewIssues={reviewIssues}
-                  approvalsCount={approvals?.length ?? 0}
-                  interactionsCount={pendingInteractions.length}
-                />
-                <ExecutionStatePanel departments={departmentRows} />
-                <OutcomesPanel documents={latestLibraryDocuments} />
-                <NextMovePanel bottleneck={bottleneck} />
-              </aside>
-            </div>
-          </div>
-
-          {operatorOpen ? (
-            <OperatorDrawer
-              operator={operator}
-              departments={departmentRows}
-              selectedDepartmentKey={selectedDepartmentKey}
-              setSelectedDepartmentKey={setSelectedDepartmentKey}
-              operatorDraft={operatorDraft}
-              setOperatorDraft={setOperatorDraft}
-              createTask={() => createTaskMutation.mutate()}
-              error={createTaskMutation.error?.message}
-              isPending={createTaskMutation.isPending}
-              canSubmit={!!operatorDraft.trim()}
-              nextMove={bottleneck}
-              onClose={() => setOperatorOpen(false)}
-            />
+          {isFreshCompany ? (
+            <FreshCompanyPanel onAskOperator={() => setOperatorOpen(true)} />
           ) : null}
-        </section>
 
-        <OperatorDock
-          open={operatorOpen}
-          onToggle={() => setOperatorOpen((value) => !value)}
-          operatorDraft={operatorDraft}
-          setOperatorDraft={setOperatorDraft}
-          createTask={() => createTaskMutation.mutate()}
-          isPending={createTaskMutation.isPending}
-          canSubmit={!!operatorDraft.trim()}
-        />
-      </div>
+          <div className="theft-dashboard-content-grid grid min-w-0 gap-6" data-operator-open={String(operatorOpen)}>
+            <StrategyMapPanel
+              objective={objectiveTitle}
+              goals={roadmapGoals}
+              departments={departmentRows}
+              nextTasks={nextTasks}
+            />
+
+            <aside className="min-w-0 space-y-6">
+              <ConstraintsPanel
+                approvalsCount={approvals?.length ?? 0}
+                interactionsCount={pendingInteractions.length}
+                blockedCount={blockedIssues.length}
+                setupTodoCount={setupTodoCount}
+                outcomeCount={latestLibraryDocuments.length}
+              />
+              <DecisionsPanel
+                reviewIssues={reviewIssues}
+                approvalsCount={approvals?.length ?? 0}
+                interactionsCount={pendingInteractions.length}
+              />
+              <ExecutionStatePanel departments={departmentRows} />
+              <OutcomesPanel documents={latestLibraryDocuments} />
+              <NextMovePanel bottleneck={bottleneck} />
+            </aside>
+          </div>
+        </div>
+
+        {operatorOpen ? (
+          <OperatorDrawer
+            operator={operator}
+            departments={departmentRows}
+            selectedDepartmentKey={selectedDepartmentKey}
+            setSelectedDepartmentKey={setSelectedDepartmentKey}
+            operatorDraft={operatorDraft}
+            setOperatorDraft={setOperatorDraft}
+            createTask={() => createTaskMutation.mutate()}
+            error={createTaskMutation.error?.message}
+            isPending={createTaskMutation.isPending}
+            canSubmit={!!operatorDraft.trim()}
+            nextMove={bottleneck}
+            onClose={() => setOperatorOpen(false)}
+          />
+        ) : null}
+      </section>
+
+      <OperatorDock
+        open={operatorOpen}
+        onToggle={() => setOperatorOpen((value) => !value)}
+        operatorDraft={operatorDraft}
+        setOperatorDraft={setOperatorDraft}
+        createTask={() => createTaskMutation.mutate()}
+        isPending={createTaskMutation.isPending}
+        canSubmit={!!operatorDraft.trim()}
+      />
     </TheftPageShell>
   );
 }

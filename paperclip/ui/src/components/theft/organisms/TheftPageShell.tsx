@@ -6,10 +6,14 @@ import { cn } from "@/lib/utils"
 type TheftPageShellProps = Omit<React.ComponentProps<"section">, "title"> & {
   actions?: React.ReactNode
   aside?: React.ReactNode
+  asideClassName?: string
+  contentClassName?: string
   description?: React.ReactNode
   eyebrow?: React.ReactNode
   footer?: React.ReactNode
+  mainClassName?: string
   title?: React.ReactNode
+  viewportClassName?: string
 }
 
 const TheftPageShell = React.forwardRef<HTMLElement, TheftPageShellProps>(
@@ -17,12 +21,16 @@ const TheftPageShell = React.forwardRef<HTMLElement, TheftPageShellProps>(
     {
       actions,
       aside,
+      asideClassName,
       children,
       className,
+      contentClassName,
       description,
       eyebrow,
       footer,
+      mainClassName,
       title,
+      viewportClassName,
       ...props
     },
     ref,
@@ -46,21 +54,22 @@ const TheftPageShell = React.forwardRef<HTMLElement, TheftPageShellProps>(
             />
           </div>
         ) : null}
-        <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain">
+        <div className={cn("min-h-0 flex-1 overflow-y-auto overscroll-contain", viewportClassName)}>
           <div
             className={cn(
               "mx-auto grid w-full max-w-screen-2xl gap-6 px-6 py-6",
               aside ? "lg:grid-cols-4" : "",
+              contentClassName,
             )}
           >
             <main
               data-slot="theft-page-main"
-              className={cn("min-w-0", aside ? "lg:col-span-3" : "")}
+              className={cn("min-w-0", aside ? "lg:col-span-3" : "", mainClassName)}
             >
               {children}
             </main>
             {aside ? (
-              <aside data-slot="theft-page-aside" className="min-w-0">
+              <aside data-slot="theft-page-aside" className={cn("min-w-0", asideClassName)}>
                 {aside}
               </aside>
             ) : null}

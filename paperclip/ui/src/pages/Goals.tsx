@@ -74,29 +74,28 @@ export function Goals() {
           New Node
         </Button>
       )}
+      contentClassName="block space-y-4"
     >
-      <div className="space-y-4">
-        {error && <p className="text-sm text-destructive">{error.message}</p>}
+      {error && <p className="text-sm text-destructive">{error.message}</p>}
 
-        {goals && goals.length === 0 && (
-          <EmptyState icon={Target} message="No Tech Tree nodes yet." action="Add Node" onAction={() => openNewGoal()} />
-        )}
+      {goals && goals.length === 0 && (
+        <EmptyState icon={Target} message="No Tech Tree nodes yet." action="Add Node" onAction={() => openNewGoal()} />
+      )}
 
-        {goals && goals.length > 0 && (
-          <TechTreeStrategyMap
-            goals={goals}
-            nodes={techTreeNodes}
-            selectedNode={nextNode}
-            onStartWork={(node) => {
-              openNewIssue({
-                goalId: node.goal.id,
-                title: node.startWorkTitle,
-                description: `Advance Tech Tree node: ${node.goal.title}`,
-              });
-            }}
-          />
-        )}
-      </div>
+      {goals && goals.length > 0 && (
+        <TechTreeStrategyMap
+          goals={goals}
+          nodes={techTreeNodes}
+          selectedNode={nextNode}
+          onStartWork={(node) => {
+            openNewIssue({
+              goalId: node.goal.id,
+              title: node.startWorkTitle,
+              description: `Advance Tech Tree node: ${node.goal.title}`,
+            });
+          }}
+        />
+      )}
     </TheftPageShell>
   );
 }

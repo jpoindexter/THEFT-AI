@@ -154,37 +154,38 @@ export function Issues() {
   }
 
   return (
-    <TheftPageShell className="min-h-0 bg-background text-foreground">
-      <div className="mx-auto max-w-screen-2xl min-w-0 space-y-5 overflow-x-hidden px-1 pb-24 md:px-3">
-        <TasksMissionHeader
-          buckets={founderBuckets}
-          isLoading={isLoading}
-          issueLinkState={issueLinkState}
-          agents={agents}
-        />
-        <IssuesList
-          issues={issues ?? []}
-          isLoading={isLoading}
-          isLoadingMoreIssues={isFetchingNextPage}
-          error={error as Error | null}
-          agents={agents}
-          projects={projects}
-          liveIssueIds={liveIssueIds}
-          viewStateKey="theft:tasks-review-queue"
-          issueLinkState={issueLinkState}
-          initialAssignees={searchParams.get("assignee") ? [searchParams.get("assignee")!] : undefined}
-          initialWorkspaces={initialWorkspaces.length > 0 ? initialWorkspaces : undefined}
-          initialSearch={syncedSearch}
-          onSearchChange={handleSearchChange}
-          enableRoutineVisibilityFilter
-          hasMoreIssues={hasMoreServerIssues}
-          onLoadMoreIssues={loadMoreServerIssues}
-          onUpdateIssue={(id, data) => updateIssue.mutate({ id, data })}
-          searchFilters={participantAgentId || workspaceIdFilter ? { participantAgentId, workspaceId: workspaceIdFilter } : undefined}
-          createIssueLabel="Task"
-          defaultSortField="workflow"
-        />
-      </div>
+    <TheftPageShell
+      className="min-h-0 bg-background text-foreground"
+      contentClassName="block space-y-5 overflow-x-hidden px-1 pb-24 md:px-3"
+    >
+      <TasksMissionHeader
+        buckets={founderBuckets}
+        isLoading={isLoading}
+        issueLinkState={issueLinkState}
+        agents={agents}
+      />
+      <IssuesList
+        issues={issues ?? []}
+        isLoading={isLoading}
+        isLoadingMoreIssues={isFetchingNextPage}
+        error={error as Error | null}
+        agents={agents}
+        projects={projects}
+        liveIssueIds={liveIssueIds}
+        viewStateKey="theft:tasks-review-queue"
+        issueLinkState={issueLinkState}
+        initialAssignees={searchParams.get("assignee") ? [searchParams.get("assignee")!] : undefined}
+        initialWorkspaces={initialWorkspaces.length > 0 ? initialWorkspaces : undefined}
+        initialSearch={syncedSearch}
+        onSearchChange={handleSearchChange}
+        enableRoutineVisibilityFilter
+        hasMoreIssues={hasMoreServerIssues}
+        onLoadMoreIssues={loadMoreServerIssues}
+        onUpdateIssue={(id, data) => updateIssue.mutate({ id, data })}
+        searchFilters={participantAgentId || workspaceIdFilter ? { participantAgentId, workspaceId: workspaceIdFilter } : undefined}
+        createIssueLabel="Task"
+        defaultSortField="workflow"
+      />
     </TheftPageShell>
   );
 }
