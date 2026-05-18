@@ -1,12 +1,8 @@
 import { useMemo, useState } from "react";
-import { Link, NavLink, useLocation } from "@/lib/router";
+import { useLocation } from "@/lib/router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   ChevronRight,
-  MoreHorizontal,
-  PauseCircle,
-  Pencil,
-  PlayCircle,
   Plus,
 } from "lucide-react";
 import { useCompany } from "../context/CompanyContext";
@@ -16,142 +12,17 @@ import { useToastActions } from "../context/ToastContext";
 import { agentsApi } from "../api/agents";
 import { authApi } from "../api/auth";
 import { heartbeatsApi } from "../api/heartbeats";
-import { SIDEBAR_SCROLL_RESET_STATE } from "../lib/navigation-scroll";
 import { queryKeys } from "../lib/queryKeys";
-import { cn, agentRouteRef, agentUrl } from "../lib/utils";
+import { agentRouteRef, cn } from "../lib/utils";
 import { useAgentOrder } from "../hooks/useAgentOrder";
-import { AgentIcon } from "./AgentIconPicker";
-import { BudgetSidebarMarker } from "./BudgetSidebarMarker";
 import { Button } from "@/components/ui/button";
 import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import type { Agent } from "@paperclipai/shared";
-
-function SidebarAgentItem({
-  activeAgentId,
-  activeTab,
-  agent,
-  disabled,
-  isMobile,
-  onPauseResume,
-  runCount,
-  setSidebarOpen,
-}: {
-  activeAgentId: string | null;
-  activeTab: string | null;
-  agent: Agent;
-  disabled: boolean;
-  isMobile: boolean;
-  onPauseResume: (agent: Agent, action: "pause" | "resume") => void;
-  runCount: number;
-  setSidebarOpen: (open: boolean) => void;
-}) {
-  const routeRef = agentRouteRef(agent);
-  const href = activeTab ? `${agentUrl(agent)}/${activeTab}` : agentUrl(agent);
-  const editHref = `${agentUrl(agent)}/configuration`;
-  const isActive = activeAgentId === routeRef;
-  const isPaused = agent.status === "paused";
-  const isBudgetPaused = isPaused && agent.pauseReason === "budget";
-  const pauseResumeLabel = isPaused ? "Resume agent" : "Pause agent";
-  const pauseResumeDisabled = disabled || agent.status === "pending_approval" || isBudgetPaused;
-  const pauseResumeDisabledLabel = disabled
-    ? "Updating..."
-    : isBudgetPaused
-      ? "Budget paused"
-      : pauseResumeLabel;
-
-  return (
-    <div className="group/agent relative flex items-center">
-      <NavLink
-        to={href}
-        state={SIDEBAR_SCROLL_RESET_STATE}
-        onClick={() => {
-          if (isMobile) setSidebarOpen(false);
-        }}
-        className={cn(
-          "flex min-w-0 flex-1 items-center gap-2.5 px-3 py-1.5 pr-8 text-[13px] font-medium transition-colors",
-          isActive
-            ? "bg-sidebar-accent text-sidebar-accent-foreground"
-            : "text-sidebar-foreground/75 hover:bg-sidebar-accent/70 hover:text-sidebar-accent-foreground"
-        )}
-      >
-        <AgentIcon icon={agent.icon} className="shrink-0 h-3.5 w-3.5 text-muted-foreground" />
-        <span className="flex-1 truncate">{agent.name}</span>
-        {(agent.pauseReason === "budget" || runCount > 0) && (
-          <span className="ml-auto flex items-center gap-1.5 shrink-0">
-            {agent.pauseReason === "budget" ? (
-              <BudgetSidebarMarker title="Agent paused by budget" />
-            ) : null}
-            {runCount > 0 ? (
-              <span className="relative flex h-2 w-2">
-                <span className="animate-pulse absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75" />
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500" />
-              </span>
-            ) : null}
-            {runCount > 0 ? (
-              <span className="text-[11px] font-medium text-blue-600 dark:text-blue-400">
-                {runCount} live
-              </span>
-            ) : null}
-          </span>
-        )}
-      </NavLink>
-
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button
-            variant="ghost"
-            size="icon-xs"
-            className={cn(
-              "absolute right-1 top-1/2 h-6 w-6 -translate-y-1/2 transition-opacity data-[state=open]:pointer-events-auto data-[state=open]:opacity-100",
-              isMobile
-                ? "opacity-100"
-                : "pointer-events-none opacity-0 group-hover/agent:pointer-events-auto group-hover/agent:opacity-100 group-focus-within/agent:pointer-events-auto group-focus-within/agent:opacity-100",
-            )}
-            aria-label={`Open actions for ${agent.name}`}
-          >
-            <MoreHorizontal className="h-3.5 w-3.5" />
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" className="w-44">
-          <DropdownMenuItem asChild>
-            <Link
-              to={editHref}
-              onClick={() => {
-                if (isMobile) setSidebarOpen(false);
-              }}
-            >
-              <Pencil className="size-4" />
-              <span>Edit agent</span>
-            </Link>
-          </DropdownMenuItem>
-          <DropdownMenuSeparator />
-          <DropdownMenuItem
-            onClick={() => {
-              if (pauseResumeDisabled) return;
-              onPauseResume(agent, isPaused ? "resume" : "pause");
-            }}
-            disabled={pauseResumeDisabled}
-            title={isBudgetPaused ? "Agent was paused by budget limits" : undefined}
-          >
-            {isPaused ? <PlayCircle className="size-4" /> : <PauseCircle className="size-4" />}
-            <span>{pauseResumeDisabledLabel}</span>
-          </DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
-    </div>
-  );
-}
+import { SidebarAgentItem } from "./sidebar-agents/SidebarAgentItem";
 
 export function SidebarAgents() {
   const [open, setOpen] = useState(true);
@@ -262,20 +133,23 @@ export function SidebarAgents() {
                 open && "rotate-90"
               )}
             />
-            <span className="text-[10px] font-medium uppercase tracking-widest font-mono text-muted-foreground">
+            <span className="theft-label-compact font-mono text-muted-foreground">
               Agents
             </span>
           </CollapsibleTrigger>
-          <button
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon-xs"
             onClick={(e) => {
               e.stopPropagation();
               openNewAgent();
             }}
-            className="flex items-center justify-center h-4 w-4 rounded text-muted-foreground hover:text-foreground hover:bg-sidebar-accent/70 transition-colors"
+            className="h-4 w-4 text-muted-foreground hover:bg-sidebar-accent/70 hover:text-foreground"
             aria-label="New agent"
           >
             <Plus className="h-3 w-3" />
-          </button>
+          </Button>
         </div>
       </div>
 
