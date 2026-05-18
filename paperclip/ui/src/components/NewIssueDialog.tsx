@@ -1,7 +1,6 @@
 import { memo, useState, useEffect, useRef, useCallback, useMemo, type ChangeEvent, type DragEvent, type RefObject } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import type { IssueWorkMode } from "@paperclipai/shared";
-import { pickTextColorForSolidBg } from "@/lib/color-contrast";
 import { useDialog } from "../context/DialogContext";
 import { useCompany } from "../context/CompanyContext";
 import { useAdapterCapabilities } from "../adapters/use-adapter-capabilities";
@@ -31,6 +30,7 @@ import {
   DialogContent,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
 import { ToggleSwitch } from "@/components/ui/toggle-switch";
 import {
   Popover,
@@ -38,8 +38,6 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import {
-  Maximize2,
-  Minimize2,
   MoreHorizontal,
   ChevronRight,
   ChevronDown,
@@ -56,6 +54,9 @@ import { extractProviderIdWithFallback } from "../lib/model-utils";
 import { MarkdownEditor, type MarkdownEditorRef, type MentionOption } from "./MarkdownEditor";
 import { AgentIcon } from "./AgentIconPicker";
 import { InlineEntitySelector, type InlineEntityOption } from "./InlineEntitySelector";
+import { ProjectSwatch } from "./issue-properties/PropertyControls";
+import { ExecutionWorkspaceFields } from "./new-issue-dialog/ExecutionWorkspaceFields";
+import { NewIssueDialogHeader } from "./new-issue-dialog/NewIssueDialogHeader";
 import { IssuePropertyChips } from "./new-issue-dialog/IssuePropertyChips";
 
 const DRAFT_KEY = "paperclip:issue-draft";
@@ -198,12 +199,6 @@ function formatFileSize(file: File) {
   return `${(file.size / (1024 * 1024)).toFixed(1)} MB`;
 }
 
-const EXECUTION_WORKSPACE_MODES = [
-  { value: "shared_workspace", label: "Project default" },
-  { value: "isolated_workspace", label: "New isolated workspace" },
-  { value: "reuse_existing", label: "Reuse existing workspace" },
-] as const;
-
 function defaultProjectWorkspaceIdForProject(project: { workspaces?: Array<{ id: string; isPrimary: boolean }>; executionWorkspacePolicy?: { defaultProjectWorkspaceId?: string | null } | null } | null | undefined) {
   if (!project) return "";
   return project.executionWorkspacePolicy?.defaultProjectWorkspaceId
@@ -265,8 +260,8 @@ const IssueTitleTextarea = memo(function IssueTitleTextarea({
   }, [value]);
 
   return (
-    <textarea
-      className="w-full text-lg font-semibold bg-transparent outline-none resize-none overflow-hidden placeholder:text-muted-foreground/50"
+    <Textarea
+      className="min-h-0 w-full resize-none overflow-hidden border-0 bg-transparent px-0 py-0 text-lg font-semibold shadow-none outline-none placeholder:text-muted-foreground/50 focus-visible:border-transparent focus-visible:ring-0 md:text-lg"
       placeholder="Issue title"
       rows={1}
       value={draftValue}
@@ -1152,9 +1147,9 @@ export function NewIssueDialog() {
         showCloseButton={false}
         aria-describedby={undefined}
         className={cn(
-          "flex h-[calc(100dvh-2rem)] max-h-[calc(100dvh-2rem)] flex-col gap-0 overflow-hidden p-0 sm:h-auto",
+          "flex h-dvh max-h-dvh flex-col gap-0 overflow-hidden p-0 sm:h-auto",
           expanded
-            ? "sm:max-w-2xl sm:h-[calc(100dvh-2rem)]"
+            ? "sm:h-dvh sm:max-w-2xl"
             : "sm:max-w-lg"
         )}
         onKeyDown={handleKeyDown}
@@ -1180,87 +1175,19 @@ export function NewIssueDialog() {
           }
         }}
       >
-        {/* Header bar */}
-        <div className="flex items-center justify-between px-4 py-2.5 border-b border-border shrink-0">
-          <div className="flex items-center gap-2 text-sm text-muted-foreground">
-            <Popover open={companyOpen} onOpenChange={setCompanyOpen}>
-              <PopoverTrigger asChild>
-                <button
-                  className={cn(
-                    "px-1.5 py-0.5 rounded text-xs font-semibold cursor-pointer hover:opacity-80 transition-opacity",
-                    !dialogCompany?.brandColor && "bg-muted",
-                  )}
-                  disabled={isSubIssueMode}
-                  style={
-                    dialogCompany?.brandColor
-                      ? {
-                          backgroundColor: dialogCompany.brandColor,
-                          color: pickTextColorForSolidBg(dialogCompany.brandColor),
-                        }
-                      : undefined
-                  }
-                >
-                  {(dialogCompany?.name ?? "").slice(0, 3).toUpperCase()}
-                </button>
-              </PopoverTrigger>
-              <PopoverContent className="w-48 p-1" align="start">
-                {companies.filter((c) => c.status !== "archived").map((c) => (
-                  <button
-                    key={c.id}
-                    className={cn(
-                      "flex items-center gap-2 w-full px-2 py-1.5 text-xs rounded hover:bg-accent/50",
-                      c.id === effectiveCompanyId && "bg-accent",
-                    )}
-                    onClick={() => {
-                      handleCompanyChange(c.id);
-                      setCompanyOpen(false);
-                    }}
-                  >
-                    <span
-                      className={cn(
-                        "px-1 py-0.5 rounded text-nano font-semibold leading-none",
-                        !c.brandColor && "bg-muted",
-                      )}
-                      style={
-                        c.brandColor
-                          ? {
-                              backgroundColor: c.brandColor,
-                              color: pickTextColorForSolidBg(c.brandColor),
-                            }
-                          : undefined
-                      }
-                    >
-                      {c.name.slice(0, 3).toUpperCase()}
-                    </span>
-                    <span className="truncate">{c.name}</span>
-                  </button>
-                ))}
-              </PopoverContent>
-            </Popover>
-            <span className="text-muted-foreground/60">&rsaquo;</span>
-            <span>{isSubIssueMode ? "New sub-issue" : "New issue"}</span>
-          </div>
-          <div className="flex items-center gap-1">
-            <Button
-              variant="ghost"
-              size="icon-xs"
-              className="text-muted-foreground"
-              onClick={() => setExpanded(!expanded)}
-              disabled={createIssue.isPending}
-            >
-              {expanded ? <Minimize2 className="h-3.5 w-3.5" /> : <Maximize2 className="h-3.5 w-3.5" />}
-            </Button>
-            <Button
-              variant="ghost"
-              size="icon-xs"
-              className="text-muted-foreground"
-              onClick={() => closeNewIssue()}
-              disabled={createIssue.isPending}
-            >
-              <span className="text-lg leading-none">&times;</span>
-            </Button>
-          </div>
-        </div>
+        <NewIssueDialogHeader
+          companyOpen={companyOpen}
+          companies={companies}
+          dialogCompany={dialogCompany}
+          effectiveCompanyId={effectiveCompanyId}
+          expanded={expanded}
+          isSubIssueMode={isSubIssueMode}
+          pending={createIssue.isPending}
+          onClose={closeNewIssue}
+          onCompanyChange={handleCompanyChange}
+          onCompanyOpenChange={setCompanyOpen}
+          onExpandedChange={setExpanded}
+        />
 
         <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain">
           {/* Title */}
@@ -1350,10 +1277,7 @@ export function NewIssueDialog() {
                 renderTriggerValue={(option) =>
                   option && currentProject ? (
                     <>
-                      <span
-                        className="h-3.5 w-3.5 shrink-0 rounded-sm"
-                        style={{ backgroundColor: currentProject.color ?? "#6366f1" }}
-                      />
+                      <ProjectSwatch color={currentProject.color} />
                       <span className="truncate">{option.label}</span>
                     </>
                   ) : (
@@ -1365,10 +1289,7 @@ export function NewIssueDialog() {
                   const project = orderedProjects.find((item) => item.id === option.id);
                   return (
                     <>
-                      <span
-                        className="h-3.5 w-3.5 shrink-0 rounded-sm"
-                        style={{ backgroundColor: project?.color ?? "#6366f1" }}
-                      />
+                      <ProjectSwatch color={project?.color} />
                       <span className="truncate">{option.label}</span>
                     </>
                   );
@@ -1530,56 +1451,18 @@ export function NewIssueDialog() {
             </div>
           ) : null}
 
-          {currentProject && currentProjectSupportsExecutionWorkspace && (
-            <div className="px-4 py-3 space-y-2">
-            <div className="space-y-1.5">
-              <div className="text-xs font-medium">Execution workspace</div>
-              <div className="text-micro text-muted-foreground">
-                Control whether this issue runs in the shared workspace, a new isolated workspace, or an existing one.
-              </div>
-              <select
-                className="w-full rounded border border-border bg-transparent px-2 py-1.5 text-xs outline-none"
-                value={executionWorkspaceMode}
-                onChange={(e) => {
-                  setExecutionWorkspaceMode(e.target.value);
-                  if (e.target.value !== "reuse_existing") {
-                    setSelectedExecutionWorkspaceId("");
-                  }
-                }}
-              >
-                {EXECUTION_WORKSPACE_MODES.map((option) => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
-              </select>
-              {executionWorkspaceMode === "reuse_existing" && (
-                <select
-                  className="w-full rounded border border-border bg-transparent px-2 py-1.5 text-xs outline-none"
-                  value={selectedExecutionWorkspaceId}
-                  onChange={(e) => setSelectedExecutionWorkspaceId(e.target.value)}
-                >
-                  <option value="">Choose an existing workspace</option>
-                  {deduplicatedReusableWorkspaces.map((workspace) => (
-                    <option key={workspace.id} value={workspace.id}>
-                      {workspace.name} · {workspace.status} · {workspace.branchName ?? workspace.cwd ?? workspace.id.slice(0, 8)}
-                    </option>
-                  ))}
-                </select>
-              )}
-              {executionWorkspaceMode === "reuse_existing" && selectedReusableExecutionWorkspace && (
-                <div className="text-micro text-muted-foreground">
-                  Reusing {selectedReusableExecutionWorkspace.name} from {selectedReusableExecutionWorkspace.branchName ?? selectedReusableExecutionWorkspace.cwd ?? "existing execution workspace"}.
-                </div>
-              )}
-              {showParentWorkspaceWarning ? (
-                <div className="rounded-md border border-amber-300/60 bg-amber-50 px-2 py-1.5 text-micro text-amber-900 dark:border-amber-800/70 dark:bg-amber-950/30 dark:text-amber-100">
-                  Warning: this sub-issue will no longer use the parent issue workspace{parentExecutionWorkspaceLabel ? ` (${parentExecutionWorkspaceLabel})` : ""}.
-                </div>
-              ) : null}
-            </div>
-            </div>
-          )}
+          {currentProject && currentProjectSupportsExecutionWorkspace ? (
+            <ExecutionWorkspaceFields
+              executionWorkspaceMode={executionWorkspaceMode}
+              parentExecutionWorkspaceLabel={parentExecutionWorkspaceLabel}
+              reusableWorkspaces={deduplicatedReusableWorkspaces}
+              selectedExecutionWorkspaceId={selectedExecutionWorkspaceId}
+              selectedReusableExecutionWorkspace={selectedReusableExecutionWorkspace}
+              showParentWorkspaceWarning={showParentWorkspaceWarning}
+              onExecutionWorkspaceModeChange={setExecutionWorkspaceMode}
+              onSelectedExecutionWorkspaceIdChange={setSelectedExecutionWorkspaceId}
+            />
+          ) : null}
 
           {supportsAssigneeOverrides && (
             <div className="px-4 pb-2">

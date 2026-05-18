@@ -4,17 +4,15 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { QuotaBar } from "./QuotaBar";
 import { ClaudeSubscriptionPanel } from "./ClaudeSubscriptionPanel";
 import { CodexSubscriptionPanel } from "./CodexSubscriptionPanel";
-import { MeterBar, MeterFill, QuotaPanelSkeleton } from "./provider-quota-card/ProviderQuotaParts";
+import { ModelBreakdown } from "./provider-quota-card/ModelBreakdown";
+import { MeterBar, QuotaPanelSkeleton } from "./provider-quota-card/ProviderQuotaParts";
+import { RollingWindows } from "./provider-quota-card/RollingWindows";
 import {
-  billingTypeDisplayName,
   formatCents,
   formatTokens,
   providerDisplayName,
   quotaSourceDisplayName,
 } from "@/lib/utils";
-
-// ordered display labels for rolling-window rows
-const ROLLING_WINDOWS = ["5h", "24h", "7d"] as const;
 
 interface ProviderQuotaCardProps {
   provider: string;
@@ -114,15 +112,6 @@ export function ProviderQuotaCard({
 
   const hasBudget = budgetMonthlyCents > 0;
 
-  // memoized so the Map and max are not reconstructed on every parent render tick
-  const windowMap = useMemo(
-    () => new Map(windowRows.map((r) => [r.window, r])),
-    [windowRows],
-  );
-  const maxWindowCents = useMemo(
-    () => Math.max(...windowRows.map((r) => r.costCents), 0),
-    [windowRows],
-  );
   const isClaudeQuotaPanel = provider === "anthropic";
   const isCodexQuotaPanel = provider === "openai" && quotaSource?.startsWith("codex-");
   const supportsSubscriptionQuota = provider === "anthropic" || provider === "openai";
@@ -182,33 +171,7 @@ export function ProviderQuotaCard({
         {windowRows.length > 0 && (
           <>
             <div className="border-t border-border" />
-            <div className="space-y-2">
-              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
-                Rolling windows
-              </p>
-              <div className="space-y-2.5">
-                {ROLLING_WINDOWS.map((w) => {
-                  const row = windowMap.get(w);
-                  // omit windows with no data rather than showing false $0.00 zeros
-                  if (!row) return null;
-                  const cents = row.costCents;
-                  const tokens = row.inputTokens + row.outputTokens;
-                  const barPct = maxWindowCents > 0 ? (cents / maxWindowCents) * 100 : 0;
-                  return (
-                    <div key={w} className="space-y-1">
-                      <div className="flex items-center justify-between gap-2 text-xs">
-                        <span className="font-mono text-muted-foreground w-6 shrink-0">{w}</span>
-                        <span className="text-muted-foreground font-mono flex-1">
-                          {formatTokens(tokens)} tok
-                        </span>
-                        <span className="font-medium tabular-nums">{formatCents(cents)}</span>
-                      </div>
-                      <MeterBar percent={barPct} />
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
+            <RollingWindows rows={windowRows} />
           </>
         )}
 
@@ -249,48 +212,11 @@ export function ProviderQuotaCard({
         {rows.length > 0 && (
           <>
             <div className="border-t border-border" />
-            <div className="space-y-3">
-              {rows.map((row) => {
-                const rowTokens = row.inputTokens + row.outputTokens;
-                const tokenPct = totalTokens > 0 ? (rowTokens / totalTokens) * 100 : 0;
-                const costPct = totalCostCents > 0 ? (row.costCents / totalCostCents) * 100 : 0;
-                return (
-                  <div key={`${row.provider}:${row.model}`} className="space-y-1.5">
-                    {/* model name and cost */}
-                    <div className="flex items-center justify-between gap-2">
-                      <div className="min-w-0">
-                        <span className="text-xs text-muted-foreground truncate font-mono block">
-                          {row.model}
-                        </span>
-                        <span className="text-micro text-muted-foreground truncate block">
-                          {providerDisplayName(row.biller)} · {billingTypeDisplayName(row.billingType)}
-                        </span>
-                      </div>
-                      <div className="flex items-center gap-3 shrink-0 tabular-nums text-xs">
-                        <span className="text-muted-foreground">
-                          {formatTokens(rowTokens)} tok
-                        </span>
-                        <span className="font-medium">{formatCents(row.costCents)}</span>
-                      </div>
-                    </div>
-                    {/* token share bar */}
-                    <div className="relative h-2 w-full border border-border overflow-hidden">
-                      <MeterFill
-                        percent={tokenPct}
-                        className="absolute inset-y-0 left-0 bg-primary/60"
-                        title={`${Math.round(tokenPct)}% of provider tokens`}
-                      />
-                      {/* cost share overlay — narrower, opaque, shows relative cost weight */}
-                      <MeterFill
-                        percent={costPct}
-                        className="absolute inset-y-0 left-0 bg-primary/85"
-                        title={`${Math.round(costPct)}% of provider cost`}
-                      />
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
+            <ModelBreakdown
+              rows={rows}
+              totalTokens={totalTokens}
+              totalCostCents={totalCostCents}
+            />
           </>
         )}
 
