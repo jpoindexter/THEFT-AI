@@ -15,13 +15,13 @@ import { useState } from "react";
 function statusDotColor(status?: string): string {
   switch (status) {
     case "active":
-      return "bg-green-400";
+      return "bg-chart-2";
     case "paused":
-      return "bg-yellow-400";
+      return "bg-chart-3";
     case "archived":
-      return "bg-neutral-400";
+      return "bg-muted-foreground";
     default:
-      return "bg-green-400";
+      return "bg-chart-2";
   }
 }
 
@@ -55,7 +55,7 @@ export function CompanySwitcher({ open: controlledOpen, onOpenChange }: CompanyS
           <ChevronsUpDown className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="start" className="w-[220px]">
+      <DropdownMenuContent align="start" className="w-56">
         <DropdownMenuLabel>Companies</DropdownMenuLabel>
         <DropdownMenuSeparator />
         {sidebarCompanies.map((company) => (

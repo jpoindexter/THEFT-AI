@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 interface CopyTextProps {
@@ -37,8 +38,7 @@ export function CopyText({
         // Fallback for non-secure contexts (e.g. HTTP on non-localhost)
         const textarea = document.createElement("textarea");
         textarea.value = text;
-        textarea.style.position = "fixed";
-        textarea.style.left = "-9999px";
+        textarea.className = "fixed -left-full";
         document.body.appendChild(textarea);
         try {
           textarea.select();
@@ -59,19 +59,21 @@ export function CopyText({
 
   return (
     <span className={cn("relative inline-flex", containerClassName)}>
-      <button
+      <Button
         ref={triggerRef}
         type="button"
+        variant="ghost"
+        size="sm"
         aria-label={ariaLabel}
         title={title}
         className={cn(
-          "cursor-copy hover:text-foreground transition-colors",
+          "h-auto cursor-copy p-0 text-inherit transition-colors hover:bg-transparent hover:text-foreground",
           className,
         )}
         onClick={handleClick}
       >
         {children ?? text}
-      </button>
+      </Button>
       <span
         role="status"
         aria-live="polite"
