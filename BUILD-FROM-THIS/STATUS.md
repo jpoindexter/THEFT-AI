@@ -80,6 +80,7 @@ Current local modularization checkpoint:
 - Extracted agent-config execution, adapter, configuration, run-policy, asset, overlay, model-control, environment-test, and save-bar modules so `AgentConfigForm.tsx` now fits the 300-line guardrail.
 - Extracted MarkdownEditor content normalization, autocomplete utilities, autocomplete hook, plugin assembly, fallback view, autocomplete menu, and rich editor shell so `MarkdownEditor.tsx` now fits the 300-line guardrail.
 - Extracted IssuesList persisted state, remote data loading, lookup assembly, derived model, and content rendering so `IssuesList.tsx` now fits the 300-line guardrail.
+- Extracted IssueDetail page orchestration into primary state, action/effects, and content modules so `IssueDetail.tsx` now fits the 300-line guardrail.
 - Moved the issue-chat composer safe-area dock value into a semantic CSS utility.
 
 Latest verification for the active modularization slices:
@@ -103,6 +104,7 @@ Latest verification for the active modularization slices:
 - Focused AgentConfig/agent payload Vitest passed: 14 tests across 4 files.
 - Focused MarkdownEditor Vitest passed: 24 tests.
 - Focused IssuesList Vitest passed after the route-list orchestration split: 28 tests.
+- Focused IssueDetail Vitest passed after the page orchestration split: 11 tests.
 - Focused Vitest for issue chat, issue documents, and issue detail passed: 78 tests across 4 files.
 - Focused IssueChatThread Vitest passed: 61 tests across 2 files.
 - Focused onboarding utility Vitest passed: 21 tests across 5 files.
@@ -113,7 +115,7 @@ Latest verification for the active modularization slices:
 
 Remaining high-value maintainability work:
 
-- `IssueDetail.tsx` is down to 633 lines, but it is still the largest active page.
+- `IssueDetail.tsx` is down to 15 lines and now fits the 300-line guardrail; primary state, action/effects, and content rendering are split under the guardrail.
 - `IssueChatThread.tsx` is down to 275 lines and now fits the 300-line guardrail.
 - `DepartmentWorkspace.tsx` is down to 282 lines and now fits the 300-line guardrail.
 - `Agents.tsx` is down to 227 lines and now fits the 300-line guardrail.
@@ -145,10 +147,9 @@ Remaining high-value maintainability work:
 
 Next best path:
 
-1. Continue extracting presentation organisms and action panels from `IssueDetail.tsx` while preserving runtime behavior.
-2. Keep smaller issue-chat modules under the guardrail as follow-up changes land.
-3. Keep smaller onboarding modules under the guardrail as follow-up changes land.
-4. Only after those pass gates, revisit broad visual polish. The current priority is architecture/template cleanup, not another visual rewrite.
+1. Continue with oversized support/runtime modules that still show up in the active-route gate: `lib/inbox.ts`, `lib/issue-chat-messages.ts`, and plugin support modules.
+2. Keep active page and organism modules under the guardrail as follow-up changes land.
+3. Only after those pass gates, revisit broad visual polish. The current priority is architecture/template cleanup, not another visual rewrite.
 
 THEFT should become one local app: Paperclip runtime/control plane as the tracked host, with THEFT design, staged onboarding, 8-department company setup, roadmap/canvas, Library, and local skills on top.
 
