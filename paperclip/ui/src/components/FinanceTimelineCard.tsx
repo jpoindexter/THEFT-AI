@@ -20,7 +20,7 @@ export function FinanceTimelineCard({
 }: FinanceTimelineCardProps) {
   return (
     <Card>
-      <CardHeader className="px-4 pt-4 pb-1">
+      <CardHeader className="px-4 pb-1 pt-4">
         <CardTitle className="text-base">Recent financial events</CardTitle>
         <CardDescription>Top-ups, fees, credits, commitments, and other non-request charges.</CardDescription>
       </CardHeader>
@@ -59,7 +59,7 @@ export function FinanceTimelineCard({
                 <div className="text-right tabular-nums">
                   <div className="text-sm font-semibold">{formatCents(row.amountCents)}</div>
                   <div className="text-xs text-muted-foreground">{row.currency}</div>
-                  {row.estimated ? <div className="text-[11px] uppercase tracking-[0.12em] text-amber-600">estimated</div> : null}
+                  {row.estimated ? <div className="theft-label-compact text-muted-foreground">estimated</div> : null}
                 </div>
               </div>
             </div>
