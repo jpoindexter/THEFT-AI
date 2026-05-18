@@ -59,7 +59,11 @@ T119 is now in progress after the active product route launch gate passed. First
 - `RoutineHistoryTab.tsx` now has zero focused scanner findings after replacing the remaining arbitrary revision layout with tokenized flex sizing; the parent remains oversized at 713 lines.
 - `AgentDetail.tsx` continued page-level cleanup with header/actions moved into `pages/agent-detail/AgentDetailHeader.tsx`; the parent is down to 3913 lines and focused findings dropped to 47.
 - `Inbox.tsx` continued page-level cleanup with failed-run row rendering moved into `pages/inbox/FailedRunInboxRow.tsx`; focused `Inbox` scanning now reports zero findings.
-- Repo-wide design drift count is down to 1161 findings after the first forty-one T119 slices.
+- `NewIssueDialog.tsx` continued its split with footer/error/submit rendering moved into `new-issue-dialog/NewIssueDialogFooter.tsx`; the parent is down to 1219 lines and focused scanner remains clean.
+- `RoutineHistoryTab.tsx` continued its structural split with unsaved/historical preview banners and shared lookup/dirty-field types moved into guarded `routine-history-tab/` modules; the parent is down to 621 lines and focused scanner remains clean.
+- `AgentDetail.tsx` continued page-level cleanup with runs-list rendering moved into `pages/agent-detail/RunsTab.tsx`; the parent is down to 3729 lines and focused findings dropped to 40.
+- `CompanyImport.tsx` started page-level cleanup with import source form controls moved into `pages/company-import/ImportSourceSection.tsx`; the parent is down to 1238 lines and focused findings dropped from 29 to 23.
+- Repo-wide design drift count is down to 1148 findings after the first forty-five T119 slices.
 
 The Paperclip app is genuinely large. The remaining drag is mostly not missing MVP capability; it is oversized route/organism code inherited from the Paperclip host plus the THEFT UX migration. The active-route design-system gate currently passes with zero unallowed findings, but several files still exceed the maintainability guardrail and need continued modularization.
 

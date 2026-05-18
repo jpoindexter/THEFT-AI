@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState, type ChangeEvent } from "react";
+import { useEffect, useMemo, useState, type ChangeEvent } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type {
   CompanyPortabilityCollisionStrategy,
@@ -26,14 +26,13 @@ import {
   Check,
   ChevronRight,
   Download,
-  Github,
   Package,
-  Upload,
 } from "lucide-react";
-import { Field, adapterLabels } from "../components/agent-config-primitives";
+import { adapterLabels } from "../components/agent-config-primitives";
 import { getAdapterLabel } from "../adapters/adapter-display-registry";
 import { defaultCreateValues } from "../components/agent-config-defaults";
 import { getUIAdapter, listUIAdapters } from "../adapters";
+import { ImportSourceSection } from "./company-import/ImportSourceSection";
 import type { CreateConfigValues } from "@paperclipai/adapter-utils";
 import {
   type FileTreeNode,
@@ -653,7 +652,6 @@ export function CompanyImport() {
   const { setBreadcrumbs } = useBreadcrumbs();
   const { pushToast } = useToastActions();
   const queryClient = useQueryClient();
-  const packageInputRef = useRef<HTMLInputElement | null>(null);
   const { data: session } = useQuery({
     queryKey: queryKeys.auth.session,
     queryFn: () => authApi.getSession(),
@@ -1091,153 +1089,37 @@ export function CompanyImport() {
 
   return (
     <div>
-      {/* Source form section */}
-      <div className="border-b border-border px-5 py-5 space-y-4">
-        <div>
-          <h2 className="text-base font-semibold">Import source</h2>
-          <p className="text-xs text-muted-foreground mt-1">
-            Choose a GitHub repo or upload a local Paperclip zip package.
-          </p>
-        </div>
-
-        <div className="grid gap-2 md:grid-cols-2">
-          {(
-            [
-              { key: "github", icon: Github, label: "GitHub repo" },
-              { key: "local", icon: Upload, label: "Local zip" },
-            ] as const
-          ).map(({ key, icon: Icon, label }) => (
-            <button
-              key={key}
-              type="button"
-              className={cn(
-                "rounded-md border px-3 py-2 text-left text-sm transition-colors",
-                sourceMode === key
-                  ? "border-foreground bg-accent"
-                  : "border-border hover:bg-accent/50",
-              )}
-              onClick={() => {
-                setSourceMode(key);
-                setImportPreview(null);
-              }}
-            >
-              <div className="flex items-center gap-2">
-                <Icon className="h-4 w-4" />
-                {label}
-              </div>
-            </button>
-          ))}
-        </div>
-
-        {sourceMode === "local" ? (
-          <div className="rounded-md border border-dashed border-border px-3 py-3">
-            <input
-              ref={packageInputRef}
-              type="file"
-              accept=".zip,application/zip"
-              className="hidden"
-              onChange={handleChooseLocalPackage}
-            />
-            <div className="flex flex-wrap items-center gap-2">
-              <Button
-                size="sm"
-                variant="outline"
-                onClick={() => packageInputRef.current?.click()}
-              >
-                Choose zip
-              </Button>
-              {localPackage && (
-                <span className="text-xs text-muted-foreground">
-                  {localPackage.name} with{" "}
-                  {Object.keys(localPackage.files).length} file
-                  {Object.keys(localPackage.files).length === 1 ? "" : "s"}
-                </span>
-              )}
-            </div>
-            {!localPackage && (
-              <p className="mt-2 text-xs text-muted-foreground">
-                {localZipHelpText}
-              </p>
-            )}
-          </div>
-        ) : (
-          <Field
-            label="GitHub URL"
-            hint="Repo tree path or blob URL to COMPANY.md (e.g. github.com/owner/repo/tree/main/company)."
-          >
-            <input
-              className="w-full rounded-md border border-border bg-transparent px-2.5 py-1.5 text-sm outline-none"
-              type="text"
-              value={importUrl}
-              placeholder="https://github.com/owner/repo/tree/main/company"
-              onChange={(e) => {
-                setImportUrl(e.target.value);
-                setImportPreview(null);
-              }}
-            />
-          </Field>
-        )}
-
-        <Field label="Target" hint="Import into this company or create a new one.">
-          <select
-            className="w-full rounded-md border border-border bg-transparent px-2.5 py-1.5 text-sm outline-none"
-            value={targetMode}
-            onChange={(e) => {
-              setTargetMode(e.target.value as "existing" | "new");
-              setImportPreview(null);
-            }}
-          >
-            <option value="new">Create new company</option>
-            <option value="existing">
-              Existing company: {selectedCompany?.name}
-            </option>
-          </select>
-        </Field>
-
-        {targetMode === "new" && (
-          <Field
-            label="New company name"
-            hint="Optional override. Leave blank to use the package name."
-          >
-            <input
-              className="w-full rounded-md border border-border bg-transparent px-2.5 py-1.5 text-sm outline-none"
-              type="text"
-              value={newCompanyName}
-              onChange={(e) => setNewCompanyName(e.target.value)}
-              placeholder="Imported Company"
-            />
-          </Field>
-        )}
-
-        <Field
-          label="Collision strategy"
-          hint="Board imports can rename, skip, or replace matching company content."
-        >
-          <select
-            className="w-full rounded-md border border-border bg-transparent px-2.5 py-1.5 text-sm outline-none"
-            value={collisionStrategy}
-            onChange={(e) => {
-              setCollisionStrategy(e.target.value as CompanyPortabilityCollisionStrategy);
-              setImportPreview(null);
-            }}
-          >
-            <option value="rename">Rename on conflict</option>
-            <option value="skip">Skip on conflict</option>
-            <option value="replace">Replace existing</option>
-          </select>
-        </Field>
-
-        <div className="flex items-center gap-2">
-          <Button
-            size="sm"
-            variant="outline"
-            onClick={() => previewMutation.mutate()}
-            disabled={previewMutation.isPending || !hasSource}
-          >
-            {previewMutation.isPending ? "Previewing..." : "Preview import"}
-          </Button>
-        </div>
-      </div>
+      <ImportSourceSection
+        sourceMode={sourceMode}
+        importUrl={importUrl}
+        localPackage={localPackage}
+        localZipHelpText={localZipHelpText}
+        targetMode={targetMode}
+        selectedCompanyName={selectedCompany?.name}
+        newCompanyName={newCompanyName}
+        collisionStrategy={collisionStrategy}
+        hasSource={hasSource}
+        isPreviewing={previewMutation.isPending}
+        onSourceModeChange={(mode) => {
+          setSourceMode(mode);
+          setImportPreview(null);
+        }}
+        onImportUrlChange={(value) => {
+          setImportUrl(value);
+          setImportPreview(null);
+        }}
+        onChooseLocalPackage={handleChooseLocalPackage}
+        onTargetModeChange={(mode) => {
+          setTargetMode(mode);
+          setImportPreview(null);
+        }}
+        onNewCompanyNameChange={setNewCompanyName}
+        onCollisionStrategyChange={(strategy) => {
+          setCollisionStrategy(strategy);
+          setImportPreview(null);
+        }}
+        onPreview={() => previewMutation.mutate()}
+      />
 
       {/* Preview results */}
       {importPreview && (

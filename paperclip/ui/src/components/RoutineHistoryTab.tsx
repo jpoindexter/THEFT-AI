@@ -29,25 +29,23 @@ import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "./EmptyState";
 import { MarkdownBody } from "./MarkdownBody";
+import { ConflictBanner, HistoricalPreviewBanner } from "./routine-history-tab/RoutineHistoryBanners";
 import { RoutineRevisionDiffModal } from "./routine-history-tab/RoutineRevisionDiffModal";
 import { RoutineRevisionList } from "./routine-history-tab/RoutineRevisionList";
-
-type AgentLookup = Map<string, { id: string; name: string }>;
-type ProjectLookup = Map<string, { id: string; name: string }>;
-
-type DirtyFieldDescriptor = {
-  key: string;
-  label: string;
-};
+import type {
+  RoutineHistoryAgentLookup,
+  RoutineHistoryDirtyFieldDescriptor,
+  RoutineHistoryProjectLookup,
+} from "./routine-history-tab/routineHistoryTypes";
 
 type Props = {
   routine: Routine;
   isEditDirty: boolean;
-  dirtyFields: DirtyFieldDescriptor[];
+  dirtyFields: RoutineHistoryDirtyFieldDescriptor[];
   onDiscardEdits: () => void;
   onSaveEdits: () => void;
-  agents: AgentLookup;
-  projects: ProjectLookup;
+  agents: RoutineHistoryAgentLookup;
+  projects: RoutineHistoryProjectLookup;
   onRestoreSecretMaterials: (response: RestoreRoutineRevisionResponse) => void;
   onRestored?: (response: RestoreRoutineRevisionResponse) => void;
 };
@@ -304,91 +302,6 @@ export function RoutineHistoryTab({
   );
 }
 
-function HistoricalPreviewBanner({
-  revisionNumber,
-  nextRevisionNumber,
-  onReturn,
-  onRestore,
-  pending,
-}: {
-  revisionNumber: number;
-  nextRevisionNumber: number;
-  onReturn: () => void;
-  onRestore: () => void;
-  pending: boolean;
-}) {
-  return (
-    <div className="rounded-md border border-amber-500/30 bg-amber-500/5 px-4 py-3">
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-        <div className="space-y-1">
-          <p className="text-sm font-medium text-amber-200">
-            Viewing revision {revisionNumber} (read-only)
-          </p>
-          <p className="text-xs text-muted-foreground">
-            Restoring this revision creates a new revision {nextRevisionNumber} with the same content.
-            History stays append-only.
-          </p>
-        </div>
-        <div className="flex flex-wrap items-center gap-2">
-          <Button variant="outline" size="sm" onClick={onReturn} disabled={pending}>
-            Return to current
-          </Button>
-          <Button size="sm" onClick={onRestore} disabled={pending}>
-            <RotateCcw className="mr-1.5 h-3.5 w-3.5" />
-            Restore as new revision
-          </Button>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function ConflictBanner({
-  dirtyFields,
-  onDiscard,
-  onSave,
-}: {
-  dirtyFields: DirtyFieldDescriptor[];
-  onDiscard: () => void;
-  onSave: () => void;
-}) {
-  const labels = dirtyFields.length > 0
-    ? dirtyFields.map((field) => field.label)
-    : ["the routine"];
-  const fieldsText = formatDirtyFieldList(labels);
-  return (
-    <div className="rounded-md border border-amber-500/30 bg-amber-500/5 px-4 py-3">
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-        <div className="space-y-1">
-          <p className="text-sm font-medium text-amber-200">Unsaved routine edits</p>
-          <p className="text-xs text-muted-foreground">
-            You changed {fieldsText} but haven&apos;t saved yet. Save or discard before previewing or
-            restoring an older revision.
-          </p>
-        </div>
-        <div className="flex flex-wrap items-center gap-2">
-          <Button variant="outline" size="sm" onClick={onDiscard}>
-            Discard changes
-          </Button>
-          <Button size="sm" onClick={onSave}>
-            Save and continue
-          </Button>
-        </div>
-      </div>
-      {dirtyFields.length > 0 && (
-        <ul className="mt-3 space-y-1 text-xs text-muted-foreground">
-          {dirtyFields.map((field) => (
-            <li key={field.key} className="flex items-center gap-2">
-              <span className="h-1 w-1 rounded-full bg-amber-400" />
-              {field.label}
-            </li>
-          ))}
-        </ul>
-      )}
-    </div>
-  );
-}
-
 function RevisionPreview({
   revision,
   currentRevision,
@@ -403,8 +316,8 @@ function RevisionPreview({
   revision: RoutineRevision;
   currentRevision: RoutineRevision | null;
   isHistorical: boolean;
-  agents: AgentLookup;
-  projects: ProjectLookup;
+  agents: RoutineHistoryAgentLookup;
+  projects: RoutineHistoryProjectLookup;
   onCompare: () => void;
   onRestore: () => void;
   restorePending: boolean;
@@ -661,12 +574,12 @@ function getActorLabel(revision: RoutineRevision): string {
   return "system";
 }
 
-function resolveAgentName(agentId: string | null, lookup: AgentLookup) {
+function resolveAgentName(agentId: string | null, lookup: RoutineHistoryAgentLookup) {
   if (!agentId) return "Unassigned";
   return lookup.get(agentId)?.name ?? agentId;
 }
 
-function resolveProjectName(projectId: string | null, lookup: ProjectLookup) {
+function resolveProjectName(projectId: string | null, lookup: RoutineHistoryProjectLookup) {
   if (!projectId) return "No project";
   return lookup.get(projectId)?.name ?? projectId;
 }
@@ -687,13 +600,6 @@ function formatVariableDefault(variable: RoutineVariable): string {
   return String(variable.defaultValue);
 }
 
-function formatDirtyFieldList(labels: string[]): string {
-  if (labels.length === 0) return "the routine";
-  if (labels.length === 1) return labels[0];
-  if (labels.length === 2) return `${labels[0]} and ${labels[1]}`;
-  return `${labels.slice(0, -1).join(", ")}, and ${labels[labels.length - 1]}`;
-}
-
 function collectWebhookTriggerDifferences(
   target: RoutineRevision,
   current: RoutineRevision,
@@ -708,6 +614,8 @@ export function isUpdateConflictError(error: unknown): error is ApiError {
   return error instanceof ApiError && error.status === 409;
 }
 
-export type RoutineHistoryDirtyFieldDescriptor = DirtyFieldDescriptor;
-export type RoutineHistoryAgentLookup = AgentLookup;
-export type RoutineHistoryProjectLookup = ProjectLookup;
+export type {
+  RoutineHistoryAgentLookup,
+  RoutineHistoryDirtyFieldDescriptor,
+  RoutineHistoryProjectLookup,
+} from "./routine-history-tab/routineHistoryTypes";

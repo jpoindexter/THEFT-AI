@@ -41,7 +41,7 @@ import { PageSkeleton } from "../components/PageSkeleton";
 import { BudgetPolicyCard } from "../components/BudgetPolicyCard";
 import { FileTree, buildFileTree } from "../components/FileTree";
 import { ScrollToBottom } from "../components/ScrollToBottom";
-import { formatCents, formatDate, relativeTime, formatTokens, visibleRunCostUsd } from "../lib/utils";
+import { formatCents, formatDate, relativeTime, formatTokens } from "../lib/utils";
 import { cn } from "../lib/utils";
 import { describeRunRetryState } from "../lib/runRetryState";
 import { Button } from "@/components/ui/button";
@@ -50,11 +50,7 @@ import { Tabs } from "@/components/ui/tabs";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import {
   CheckCircle2,
-  XCircle,
-  Clock,
-  Timer,
   Loader2,
-  Slash,
   RotateCcw,
   Plus,
   Key,
@@ -63,7 +59,6 @@ import {
   Copy,
   ChevronRight,
   ChevronDown,
-  ArrowLeft,
   HelpCircle,
   FolderOpen,
 } from "lucide-react";
@@ -92,16 +87,7 @@ import {
 } from "../lib/agent-skills-state";
 import { WorkspaceOperationsSection } from "./agent-detail/WorkspaceOperationsSection";
 import { AgentDetailHeader } from "./agent-detail/AgentDetailHeader";
-
-const runStatusIcons: Record<string, { icon: typeof CheckCircle2; color: string }> = {
-  succeeded: { icon: CheckCircle2, color: "text-green-600 dark:text-green-400" },
-  failed: { icon: XCircle, color: "text-red-600 dark:text-red-400" },
-  running: { icon: Loader2, color: "text-cyan-600 dark:text-cyan-400" },
-  queued: { icon: Clock, color: "text-yellow-600 dark:text-yellow-400" },
-  scheduled_retry: { icon: Clock, color: "text-sky-600 dark:text-sky-400" },
-  timed_out: { icon: Timer, color: "text-orange-600 dark:text-orange-400" },
-  cancelled: { icon: Slash, color: "text-neutral-500 dark:text-neutral-400" },
-};
+import { RunsTab, defaultRunStatusInfo, runMetrics, runStatusIcons, sourceLabels } from "./agent-detail/RunsTab";
 
 const RUN_LOG_PAGE_BYTES = 256_000;
 
@@ -165,13 +151,6 @@ function formatEnvForDisplay(envValue: unknown, censorUsernameInLogs: boolean): 
     .map((key) => `${key}=${redactEnvValue(key, env[key], censorUsernameInLogs)}`)
     .join("\n");
 }
-
-const sourceLabels: Record<string, string> = {
-  timer: "Timer",
-  assignment: "Assignment",
-  on_demand: "On-demand",
-  automation: "Automation",
-};
 
 const LIVE_SCROLL_BOTTOM_TOLERANCE_PX = 32;
 type ScrollContainer = Window | HTMLElement;
@@ -238,47 +217,12 @@ function parseAgentDetailView(value: string | null): AgentDetailView {
   return "dashboard";
 }
 
-function usageNumber(usage: Record<string, unknown> | null, ...keys: string[]) {
-  if (!usage) return 0;
-  for (const key of keys) {
-    const value = usage[key];
-    if (typeof value === "number" && Number.isFinite(value)) return value;
-  }
-  return 0;
-}
-
 function setsEqual<T>(left: Set<T>, right: Set<T>) {
   if (left.size !== right.size) return false;
   for (const value of left) {
     if (!right.has(value)) return false;
   }
   return true;
-}
-
-function runMetrics(run: HeartbeatRun) {
-  const usage = (run.usageJson ?? null) as Record<string, unknown> | null;
-  const result = (run.resultJson ?? null) as Record<string, unknown> | null;
-  const input = usageNumber(usage, "inputTokens", "input_tokens");
-  const output = usageNumber(usage, "outputTokens", "output_tokens");
-  const cached = usageNumber(
-    usage,
-    "cachedInputTokens",
-    "cached_input_tokens",
-    "cache_read_input_tokens",
-  );
-  const cost =
-    visibleRunCostUsd(usage, result);
-  const provider = asNonEmptyString(usage?.provider) ?? null;
-  const model = asNonEmptyString(usage?.model) ?? null;
-  return {
-    input,
-    output,
-    cached,
-    cost,
-    totalTokens: input + output,
-    provider,
-    model,
-  };
 }
 
 function asRecord(value: unknown): Record<string, unknown> | null {
@@ -817,12 +761,17 @@ export function AgentDetail() {
       {activeView === "runs" && (
         <RunsTab
           runs={heartbeats ?? []}
-          companyId={resolvedCompanyId!}
-          agentId={agent.id}
           agentRouteId={canonicalAgentRef}
           selectedRunId={urlRunId ?? null}
-          adapterType={agent.adapterType}
-          adapterConfig={agent.adapterConfig}
+          renderRunDetail={(run) => (
+            <RunDetail
+              key={run.id}
+              run={run}
+              agentRouteId={canonicalAgentRef}
+              adapterType={agent.adapterType}
+              adapterConfig={agent.adapterConfig}
+            />
+          )}
         />
       )}
 
@@ -861,7 +810,7 @@ function LatestRunCard({ runs, agentId }: { runs: HeartbeatRun[]; agentId: strin
   const liveRun = sorted.find((r) => r.status === "running" || r.status === "queued");
   const run = liveRun ?? sorted[0];
   const isLive = run.status === "running" || run.status === "queued";
-  const statusInfo = runStatusIcons[run.status] ?? { icon: Clock, color: "text-neutral-400" };
+  const statusInfo = runStatusIcons[run.status] ?? defaultRunStatusInfo;
   const StatusIcon = statusInfo.icon;
   const summaryRaw = run.resultJson
     ? String((run.resultJson as Record<string, unknown>).summary ?? (run.resultJson as Record<string, unknown>).result ?? "")
@@ -2559,139 +2508,6 @@ export function AgentSkillsTab({
             )}
           </section>
         </>
-      )}
-    </div>
-  );
-}
-
-/* ---- Runs Tab ---- */
-
-function RunListItem({ run, isSelected, agentId }: { run: HeartbeatRun; isSelected: boolean; agentId: string }) {
-  const statusInfo = runStatusIcons[run.status] ?? { icon: Clock, color: "text-neutral-400" };
-  const StatusIcon = statusInfo.icon;
-  const metrics = runMetrics(run);
-  const summary = run.resultJson
-    ? String((run.resultJson as Record<string, unknown>).summary ?? (run.resultJson as Record<string, unknown>).result ?? "")
-    : run.error ?? "";
-
-  return (
-    <Link
-      to={isSelected ? `/agents/${agentId}/runs` : `/agents/${agentId}/runs/${run.id}`}
-      className={cn(
-        "flex flex-col gap-1 w-full px-3 py-2.5 text-left border-b border-border last:border-b-0 transition-colors no-underline text-inherit",
-        isSelected ? "bg-accent/40" : "hover:bg-accent/20",
-      )}
-    >
-      <div className="flex items-center gap-2">
-        <StatusIcon className={cn("h-3.5 w-3.5 shrink-0", statusInfo.color, run.status === "running" && "animate-spin")} />
-        <span className="font-mono text-xs text-muted-foreground">
-          {run.id.slice(0, 8)}
-        </span>
-        <span className={cn(
-          "inline-flex items-center rounded-full px-1.5 py-0.5 text-[10px] font-medium shrink-0",
-          run.invocationSource === "timer" ? "bg-blue-100 text-blue-700 dark:bg-blue-900/50 dark:text-blue-300"
-            : run.invocationSource === "assignment" ? "bg-violet-100 text-violet-700 dark:bg-violet-900/50 dark:text-violet-300"
-            : run.invocationSource === "on_demand" ? "bg-cyan-100 text-cyan-700 dark:bg-cyan-900/50 dark:text-cyan-300"
-            : "bg-muted text-muted-foreground"
-        )}>
-          {sourceLabels[run.invocationSource] ?? run.invocationSource}
-        </span>
-        <span className="ml-auto text-[11px] text-muted-foreground shrink-0">
-          {relativeTime(run.createdAt)}
-        </span>
-      </div>
-      {summary && (
-        <span className="text-xs text-muted-foreground truncate pl-5.5">
-          {summary.slice(0, 60)}
-        </span>
-      )}
-      {(metrics.totalTokens > 0 || metrics.cost > 0) && (
-        <div className="flex items-center gap-2 pl-5.5 text-[11px] text-muted-foreground tabular-nums">
-          {metrics.totalTokens > 0 && <span>{formatTokens(metrics.totalTokens)} tok</span>}
-          {metrics.cost > 0 && <span>${metrics.cost.toFixed(3)}</span>}
-        </div>
-      )}
-    </Link>
-  );
-}
-
-function RunsTab({
-  runs,
-  companyId,
-  agentId,
-  agentRouteId,
-  selectedRunId,
-  adapterType,
-  adapterConfig,
-}: {
-  runs: HeartbeatRun[];
-  companyId: string;
-  agentId: string;
-  agentRouteId: string;
-  selectedRunId: string | null;
-  adapterType: string;
-  adapterConfig: Record<string, unknown>;
-}) {
-  const { isMobile } = useSidebar();
-
-  if (runs.length === 0) {
-    return <p className="text-sm text-muted-foreground">No runs yet.</p>;
-  }
-
-  // Sort by created descending
-  const sorted = [...runs].sort(
-    (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-  );
-
-  // On mobile, don't auto-select so the list shows first; on desktop, auto-select latest
-  const effectiveRunId = isMobile ? selectedRunId : (selectedRunId ?? sorted[0]?.id ?? null);
-  const selectedRun = sorted.find((r) => r.id === effectiveRunId) ?? null;
-
-  // Mobile: show either run list OR run detail with back button
-  if (isMobile) {
-    if (selectedRun) {
-      return (
-        <div className="space-y-3 min-w-0 overflow-x-hidden">
-          <Link
-            to={`/agents/${agentRouteId}/runs`}
-            className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors no-underline"
-          >
-            <ArrowLeft className="h-3.5 w-3.5" />
-            Back to runs
-          </Link>
-          <RunDetail key={selectedRun.id} run={selectedRun} agentRouteId={agentRouteId} adapterType={adapterType} adapterConfig={adapterConfig} />
-        </div>
-      );
-    }
-    return (
-      <div className="border border-border rounded-lg overflow-x-hidden">
-        {sorted.map((run) => (
-          <RunListItem key={run.id} run={run} isSelected={false} agentId={agentRouteId} />
-        ))}
-      </div>
-    );
-  }
-
-  // Desktop: side-by-side layout
-  return (
-    <div className="flex gap-0">
-      {/* Left: run list — border stretches full height, content sticks */}
-      <div className={cn(
-        "shrink-0 border border-border rounded-lg",
-        selectedRun ? "w-72" : "w-full",
-      )}>
-        <div className="sticky top-4 overflow-y-auto" style={{ maxHeight: "calc(100vh - 2rem)" }}>
-        {sorted.map((run) => (
-          <RunListItem key={run.id} run={run} isSelected={run.id === effectiveRunId} agentId={agentRouteId} />
-        ))}
-        </div>
-      </div>
-
-      {/* Right: run detail — natural height, page scrolls */}
-      {selectedRun && (
-        <div className="flex-1 min-w-0 pl-4">
-          <RunDetail key={selectedRun.id} run={selectedRun} agentRouteId={agentRouteId} adapterType={adapterType} adapterConfig={adapterConfig} />
-        </div>
       )}
     </div>
   );
