@@ -4,6 +4,7 @@ import { ArrowRight, type LucideIcon } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { StatusIcon } from "@/components/StatusIcon";
+import { TheftSurface } from "@/components/theft";
 import { timeAgo } from "@/lib/timeAgo";
 import { cn } from "@/lib/utils";
 
@@ -21,19 +22,19 @@ function statusLabel(status: string) {
 
 export function DepartmentFocusCard({ label, value }: { label: string; value: string }) {
   return (
-    <div className="theft-surface-muted min-w-0 p-3">
+    <TheftSurface tone="muted" padding="sm">
       <p className="theft-label-compact">{label}</p>
       <p className="mt-2 break-words text-sm leading-6 text-foreground [overflow-wrap:anywhere]">{value}</p>
-    </div>
+    </TheftSurface>
   );
 }
 
 export function DepartmentStat({ label, value }: { label: string; value: number }) {
   return (
-    <div className="theft-surface-muted p-3">
+    <TheftSurface tone="muted" padding="sm">
       <p className="text-lg font-semibold">{value}</p>
       <p className="mt-1 text-xs text-muted-foreground">{label}</p>
-    </div>
+    </TheftSurface>
   );
 }
 
@@ -62,7 +63,7 @@ export function WorkPanel({
   tone?: "default" | "attention";
 }) {
   return (
-    <div className="theft-surface-plain min-w-0 p-4">
+    <TheftSurface tone="plain" padding="md">
       <div className="flex items-start justify-between gap-3">
         <div className="flex items-start gap-3">
           <div className={cn("mt-0.5 rounded-md p-2", tone === "attention" ? "bg-destructive/10 text-destructive" : "bg-muted text-foreground")}>
@@ -99,6 +100,6 @@ export function WorkPanel({
           ))
         )}
       </div>
-    </div>
+    </TheftSurface>
   );
 }

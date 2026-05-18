@@ -18,6 +18,7 @@ import { agentsApi } from "../api/agents";
 import { issuesApi } from "../api/issues";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { TheftSurface, TheftWorkbenchTemplate } from "@/components/theft";
 import {
   DepartmentFocusCard,
   DepartmentStat,
@@ -113,8 +114,8 @@ export function DepartmentWorkspace() {
   }
 
   return (
-    <div className="mx-auto max-w-7xl space-y-5">
-      <section className="theft-panel p-5 md:p-6">
+    <TheftWorkbenchTemplate contentClassName="block max-w-7xl space-y-5">
+      <TheftSurface tone="panel" padding="lg">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
           <div>
             <div className="flex flex-wrap items-center gap-2">
@@ -145,7 +146,7 @@ export function DepartmentWorkspace() {
           <DepartmentFocusCard label="Objective contribution" value={objectiveContribution} />
           <DepartmentFocusCard label="Current constraint" value={currentConstraint} />
         </div>
-      </section>
+      </TheftSurface>
 
       <section className="theft-department-workspace-grid grid min-w-0 gap-5">
         <div className="min-w-0 space-y-5">
@@ -183,7 +184,7 @@ export function DepartmentWorkspace() {
         </div>
 
         <aside className="min-w-0 space-y-5">
-          <div className="theft-surface p-4">
+          <TheftSurface padding="md">
             <div className="flex items-start gap-3">
               <div className="mt-0.5 rounded-full border border-border bg-background p-2 text-foreground">
                 <Bot className="h-4 w-4" />
@@ -224,9 +225,9 @@ export function DepartmentWorkspace() {
                 </Link>
               ) : null}
             </div>
-          </div>
+          </TheftSurface>
 
-          <div className="theft-surface p-4">
+          <TheftSurface padding="md">
             <div className="flex items-start gap-3">
               <div className="mt-0.5 rounded-md bg-muted p-2 text-foreground">
                 <Library className="h-4 w-4" />
@@ -255,9 +256,9 @@ export function DepartmentWorkspace() {
                 ))
               )}
             </div>
-          </div>
+          </TheftSurface>
 
-          <div className="theft-surface p-4">
+          <TheftSurface padding="md">
             <div className="flex items-start gap-3">
               <div className="mt-0.5 rounded-md bg-muted p-2 text-foreground">
                 <ListChecks className="h-4 w-4" />
@@ -274,9 +275,9 @@ export function DepartmentWorkspace() {
                 </Badge>
               ))}
             </div>
-          </div>
+          </TheftSurface>
         </aside>
       </section>
-    </div>
+    </TheftWorkbenchTemplate>
   );
 }
