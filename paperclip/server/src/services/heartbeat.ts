@@ -1,7 +1,5 @@
 import fs from "node:fs/promises";
 import path from "node:path";
-import { execFile as execFileCallback } from "node:child_process";
-import { promisify } from "node:util";
 import { randomUUID } from "node:crypto";
 import { and, asc, desc, eq, getTableColumns, gt, inArray, isNull, lt, lte, notInArray, or, sql } from "drizzle-orm";
 import type { Db } from "@paperclipai/db";
@@ -11,9 +9,6 @@ import {
   MODEL_PROFILE_KEYS,
   isEnvironmentDriverSupportedForAdapter,
   type BillingType,
-  type EnvironmentLeaseStatus,
-  type ExecutionWorkspace,
-  type ExecutionWorkspaceConfig,
   type IssueExecutionMonitorClearReason,
   type IssueExecutionMonitorPolicy,
   type IssueExecutionMonitorRecoveryPolicy,
@@ -55,25 +50,21 @@ import type {
   UsageSummary,
 } from "../adapters/index.js";
 import { createLocalAgentJwt } from "../agent-auth-jwt.js";
-import { parseObject, asBoolean, asNumber, appendWithByteCap, MAX_EXCERPT_BYTES } from "../adapters/utils.js";
+import { parseObject, asBoolean, asNumber } from "../adapters/utils.js";
 import { costService } from "./costs.js";
 import { trackAgentFirstHeartbeat } from "@paperclipai/shared/telemetry";
 import { getTelemetryClient } from "../telemetry.js";
 import { companySkillService } from "./company-skills.js";
 import { budgetService, type BudgetEnforcementScope } from "./budgets.js";
 import { secretService } from "./secrets.js";
-import { resolveDefaultAgentWorkspaceDir, resolveManagedProjectWorkspaceDir } from "../home-paths.js";
+import { resolveDefaultAgentWorkspaceDir } from "../home-paths.js";
 import {
   buildHeartbeatRunIssueComment,
-  HEARTBEAT_RUN_RESULT_OUTPUT_MAX_CHARS,
-  HEARTBEAT_RUN_RESULT_SUMMARY_MAX_CHARS,
-  HEARTBEAT_RUN_SAFE_RESULT_JSON_MAX_BYTES,
   mergeHeartbeatRunResultJson,
 } from "./heartbeat-run-summary.js";
 import {
   buildHeartbeatRunStopMetadata,
   mergeHeartbeatRunStopMetadata,
-  normalizeMaxTurnStopReason,
 } from "./heartbeat-stop-metadata.js";
 import {
   classifyRunLiveness,
@@ -88,8 +79,6 @@ import {
   realizeExecutionWorkspace,
   releaseRuntimeServicesForRun,
   type ExecutionWorkspaceInput,
-  type RealizedExecutionWorkspace,
-  sanitizeRuntimeServiceBaseEnv,
 } from "./workspace-runtime.js";
 import { issueService } from "./issues.js";
 import {
@@ -107,7 +96,7 @@ import {
   getIssueContinuationSummaryDocument,
   refreshIssueContinuationSummary,
 } from "./issue-continuation-summary.js";
-import { executionWorkspaceService, mergeExecutionWorkspaceConfig } from "./execution-workspaces.js";
+import { executionWorkspaceService } from "./execution-workspaces.js";
 import { workspaceOperationService } from "./workspace-operations.js";
 import { isProcessGroupAlive, terminateLocalService } from "./local-service-supervisor.js";
 import {
@@ -146,9 +135,89 @@ import { withAgentStartLock } from "./agent-start-lock.js";
 import {
   redactCurrentUserText,
   redactCurrentUserValue,
-  type CurrentUserRedactionOptions,
 } from "../log-redaction.js";
-import { redactEventPayload, redactSensitiveText } from "../redaction.js";
+import { redactEventPayload } from "../redaction.js";
+import {
+  appendExcerpt,
+  boundHeartbeatRunEventPayloadForStorage,
+  compactRunLogChunk,
+  MAX_LIVE_LOG_CHUNK_BYTES,
+} from "./heartbeat-run-log.js";
+import { redactDetectedSuccessfulRunProgressSummaryForBoard } from "./heartbeat-redaction.js";
+import {
+  mergeModelProfileAdapterConfig,
+  mergeModelProfileRunMetadata,
+  modelProfileRunMetadata,
+  normalizeModelProfileWakeContext,
+  resolveModelProfileApplication,
+} from "./heartbeat-model-profile.js";
+import {
+  summarizeHeartbeatRunContextSnapshot,
+  summarizeHeartbeatRunListResultJson,
+} from "./heartbeat-context-summary.js";
+import {
+  applyPersistedExecutionWorkspaceConfig,
+  buildExecutionWorkspaceConfigSnapshot,
+  buildRealizedExecutionWorkspaceFromPersisted,
+  ensureManagedProjectWorkspace,
+  leaseReleaseStatusForRunStatus,
+  mergeExecutionWorkspaceMetadataForPersistence,
+  stripWorkspaceRuntimeFromExecutionRunConfig,
+} from "./heartbeat-workspace.js";
+import {
+  heartbeatRunIssueSummaryColumns,
+  heartbeatRunListColumns,
+  heartbeatRunListContextColumns,
+  heartbeatRunListResultColumns,
+  heartbeatRunLogAccessColumns,
+  heartbeatRunSafeColumns,
+  heartbeatRunSqlAsciiSafeColumns,
+} from "./heartbeat-run-projections.js";
+import {
+  BOUNDED_TRANSIENT_HEARTBEAT_RETRY_MAX_ATTEMPTS,
+  BOUNDED_TRANSIENT_HEARTBEAT_RETRY_REASON,
+  BOUNDED_TRANSIENT_HEARTBEAT_RETRY_WAKE_REASON,
+  MAX_TURN_CONTINUATION_DEFAULT_DELAY_MS,
+  MAX_TURN_CONTINUATION_DEFAULT_MAX_ATTEMPTS,
+  MAX_TURN_CONTINUATION_LIVE_RUN_STATUSES,
+  MAX_TURN_CONTINUATION_MAX_ATTEMPTS_CAP,
+  MAX_TURN_CONTINUATION_MAX_DELAY_MS,
+  MAX_TURN_CONTINUATION_RETRY_REASON,
+  MAX_TURN_CONTINUATION_WAKE_REASON,
+  computeBoundedTransientHeartbeatRetrySchedule,
+  isMaxTurnExhaustionRun,
+  mergeAdapterRecoveryMetadata,
+  readTransientRecoveryContractFromRun,
+  resolveCodexTransientFallbackMode,
+  type MaxTurnContinuationPolicy,
+} from "./heartbeat-retry.js";
+export {
+  boundHeartbeatRunEventPayloadForStorage,
+  compactRunLogChunk,
+} from "./heartbeat-run-log.js";
+export { redactDetectedSuccessfulRunProgressSummaryForBoard } from "./heartbeat-redaction.js";
+export {
+  mergeModelProfileAdapterConfig,
+  normalizeModelProfileWakeContext,
+  resolveModelProfileApplication,
+  type ModelProfileApplication,
+} from "./heartbeat-model-profile.js";
+export {
+  summarizeHeartbeatRunContextSnapshot,
+  summarizeHeartbeatRunListResultJson,
+} from "./heartbeat-context-summary.js";
+export {
+  applyPersistedExecutionWorkspaceConfig,
+  buildRealizedExecutionWorkspaceFromPersisted,
+  mergeExecutionWorkspaceMetadataForPersistence,
+  stripWorkspaceRuntimeFromExecutionRunConfig,
+} from "./heartbeat-workspace.js";
+export {
+  BOUNDED_TRANSIENT_HEARTBEAT_RETRY_DELAYS_MS,
+  MAX_TURN_CONTINUATION_RETRY_REASON,
+  MAX_TURN_CONTINUATION_WAKE_REASON,
+  computeBoundedTransientHeartbeatRetrySchedule,
+} from "./heartbeat-retry.js";
 import {
   hasSessionCompactionThresholds,
   resolveSessionCompactionPolicy,
@@ -164,22 +233,6 @@ import { environmentRuntimeService } from "./environment-runtime.js";
 import { environmentRunOrchestrator } from "./environment-run-orchestrator.js";
 import type { PluginWorkerManager } from "./plugin-worker-manager.js";
 
-const MAX_LIVE_LOG_CHUNK_BYTES = 8 * 1024;
-const MAX_PERSISTED_LOG_CHUNK_CHARS = 64 * 1024;
-const MAX_RUN_EVENT_PAYLOAD_STRING_CHARS = 16 * 1024;
-const MAX_RUN_EVENT_PAYLOAD_ARRAY_ITEMS = 50;
-
-export function redactDetectedSuccessfulRunProgressSummaryForBoard(
-  summary: string,
-  currentUserRedactionOptions?: CurrentUserRedactionOptions,
-) {
-  const normalized = summary.replace(/\s+/g, " ").trim();
-  const redacted = redactSensitiveText(redactCurrentUserText(normalized, currentUserRedactionOptions));
-  return redacted.length <= 280 ? redacted : `${redacted.slice(0, 277)}...`;
-}
-
-const MAX_RUN_EVENT_PAYLOAD_OBJECT_KEYS = 100;
-const MAX_RUN_EVENT_PAYLOAD_DEPTH = 6;
 const HEARTBEAT_MAX_CONCURRENT_RUNS_DEFAULT = AGENT_DEFAULT_MAX_CONCURRENT_RUNS;
 const HEARTBEAT_MAX_CONCURRENT_RUNS_MIN = 1;
 const HEARTBEAT_MAX_CONCURRENT_RUNS_MAX = 50;
@@ -193,11 +246,9 @@ const PAPERCLIP_WAKE_PAYLOAD_KEY = "paperclipWake";
 const PAPERCLIP_HARNESS_CHECKOUT_KEY = "paperclipHarnessCheckedOut";
 const DETACHED_PROCESS_ERROR_CODE = "process_detached";
 const REPO_ONLY_CWD_SENTINEL = "/__paperclip_repo_only__";
-const MANAGED_WORKSPACE_GIT_CLONE_TIMEOUT_MS = 10 * 60 * 1000;
 const MAX_INLINE_WAKE_COMMENTS = 8;
 const MAX_INLINE_WAKE_COMMENT_BODY_CHARS = 4_000;
 const MAX_INLINE_WAKE_COMMENT_BODY_TOTAL_CHARS = 12_000;
-const execFile = promisify(execFileCallback);
 const EXECUTION_PATH_HEARTBEAT_RUN_STATUSES = ["queued", "running", "scheduled_retry"] as const;
 const CANCELLABLE_HEARTBEAT_RUN_STATUSES = ["queued", "running", "scheduled_retry"] as const;
 const HEARTBEAT_RUN_TERMINAL_STATUSES = ["succeeded", "failed", "cancelled", "timed_out"] as const;
@@ -208,106 +259,6 @@ export {
   ACTIVE_RUN_OUTPUT_SUSPICION_THRESHOLD_MS,
 } from "./recovery/service.js";
 export const ACTIVE_RUN_OUTPUT_PROGRESS_FLUSH_INTERVAL_MS = 60 * 1000;
-export const BOUNDED_TRANSIENT_HEARTBEAT_RETRY_DELAYS_MS = [
-  2 * 60 * 1000,
-  10 * 60 * 1000,
-  30 * 60 * 1000,
-  2 * 60 * 60 * 1000,
-] as const;
-const BOUNDED_TRANSIENT_HEARTBEAT_RETRY_JITTER_RATIO = 0.25;
-const BOUNDED_TRANSIENT_HEARTBEAT_RETRY_REASON = "transient_failure";
-const BOUNDED_TRANSIENT_HEARTBEAT_RETRY_WAKE_REASON = "transient_failure_retry";
-const BOUNDED_TRANSIENT_HEARTBEAT_RETRY_MAX_ATTEMPTS = BOUNDED_TRANSIENT_HEARTBEAT_RETRY_DELAYS_MS.length;
-export const MAX_TURN_CONTINUATION_RETRY_REASON = "max_turns_continuation";
-export const MAX_TURN_CONTINUATION_WAKE_REASON = "max_turns_continuation_retry";
-const MAX_TURN_CONTINUATION_DEFAULT_MAX_ATTEMPTS = 2;
-const MAX_TURN_CONTINUATION_MAX_ATTEMPTS_CAP = 10;
-const MAX_TURN_CONTINUATION_DEFAULT_DELAY_MS = 1_000;
-const MAX_TURN_CONTINUATION_MAX_DELAY_MS = 5 * 60 * 1000;
-const MAX_TURN_CONTINUATION_LIVE_RUN_STATUSES = ["scheduled_retry", "queued", "running"] as const;
-type CodexTransientFallbackMode =
-  | "same_session"
-  | "safer_invocation"
-  | "fresh_session"
-  | "fresh_session_safer_invocation";
-
-interface MaxTurnContinuationPolicy {
-  enabled: boolean;
-  maxAttempts: number;
-  delayMs: number;
-}
-
-function resolveCodexTransientFallbackMode(attempt: number): CodexTransientFallbackMode {
-  if (attempt <= 1) return "same_session";
-  if (attempt === 2) return "safer_invocation";
-  if (attempt === 3) return "fresh_session";
-  return "fresh_session_safer_invocation";
-}
-
-function readHeartbeatRunErrorFamily(
-  run: Pick<typeof heartbeatRuns.$inferSelect, "errorCode" | "resultJson">,
-) {
-  const resultJson = parseObject(run.resultJson);
-  const persistedFamily = readNonEmptyString(resultJson.errorFamily);
-  if (persistedFamily) return persistedFamily;
-
-  if (run.errorCode === "codex_transient_upstream" || run.errorCode === "claude_transient_upstream") {
-    return "transient_upstream";
-  }
-  return null;
-}
-
-function isMaxTurnExhaustionRun(
-  run: Pick<typeof heartbeatRuns.$inferSelect, "errorCode" | "resultJson">,
-) {
-  const resultJson = parseObject(run.resultJson);
-  return Boolean(
-    normalizeMaxTurnStopReason(resultJson.stopReason) ??
-      normalizeMaxTurnStopReason(run.errorCode),
-  );
-}
-
-function readTransientRetryNotBeforeFromRun(run: Pick<typeof heartbeatRuns.$inferSelect, "resultJson">) {
-  const resultJson = parseObject(run.resultJson);
-  const value = resultJson.retryNotBefore ?? resultJson.transientRetryNotBefore;
-  if (!(typeof value === "string" || typeof value === "number" || value instanceof Date)) {
-    return null;
-  }
-  const parsed = new Date(value);
-  return Number.isNaN(parsed.getTime()) ? null : parsed;
-}
-
-function readTransientRecoveryContractFromRun(
-  run: Pick<typeof heartbeatRuns.$inferSelect, "errorCode" | "resultJson">,
-) {
-  return readHeartbeatRunErrorFamily(run) === "transient_upstream"
-    ? {
-        errorFamily: "transient_upstream" as const,
-        retryNotBefore: readTransientRetryNotBeforeFromRun(run),
-      }
-    : null;
-}
-
-function mergeAdapterRecoveryMetadata(input: {
-  resultJson: Record<string, unknown> | null | undefined;
-  errorFamily?: string | null;
-  retryNotBefore?: string | null;
-}) {
-  const errorFamily = readNonEmptyString(input.errorFamily);
-  const retryNotBefore = readNonEmptyString(input.retryNotBefore);
-  if (!input.resultJson && !errorFamily && !retryNotBefore) return input.resultJson ?? null;
-
-  return {
-    ...(input.resultJson ?? {}),
-    ...(errorFamily ? { errorFamily } : {}),
-    ...(retryNotBefore
-      ? {
-          retryNotBefore,
-          transientRetryNotBefore: retryNotBefore,
-        }
-      : {}),
-  };
-}
 const RUNNING_ISSUE_WAKE_REASONS_REQUIRING_FOLLOWUP = new Set(["approval_approved"]);
 const SESSIONED_LOCAL_ADAPTERS = new Set([
   "claude_local",
@@ -318,8 +269,6 @@ const SESSIONED_LOCAL_ADAPTERS = new Set([
   "opencode_local",
   "pi_local",
 ]);
-const INLINE_BASE64_IMAGE_DATA_RE = /("type":"image","source":\{"type":"base64","data":")([A-Za-z0-9+/=]{1024,})(")/g;
-
 type RuntimeConfigSecretResolver = Pick<
   ReturnType<typeof secretService>,
   "resolveAdapterConfigForRuntime" | "resolveEnvBindings"
@@ -383,26 +332,6 @@ export function applyRunScopedMentionedSkillKeys(
   ]);
 }
 
-export function computeBoundedTransientHeartbeatRetrySchedule(
-  attempt: number,
-  now = new Date(),
-  random: () => number = Math.random,
-) {
-  if (!Number.isInteger(attempt) || attempt <= 0) return null;
-  const baseDelayMs = BOUNDED_TRANSIENT_HEARTBEAT_RETRY_DELAYS_MS[attempt - 1];
-  if (typeof baseDelayMs !== "number") return null;
-  const sample = Math.min(1, Math.max(0, random()));
-  const jitterMultiplier = 1 + (((sample * 2) - 1) * BOUNDED_TRANSIENT_HEARTBEAT_RETRY_JITTER_RATIO);
-  const delayMs = Math.max(1_000, Math.round(baseDelayMs * jitterMultiplier));
-  return {
-    attempt,
-    baseDelayMs,
-    delayMs,
-    dueAt: new Date(now.getTime() + delayMs),
-    maxAttempts: BOUNDED_TRANSIENT_HEARTBEAT_RETRY_MAX_ATTEMPTS,
-  };
-}
-
 async function resolveRunScopedMentionedSkillKeys(input: {
   db: Db;
   companyId: string;
@@ -454,471 +383,6 @@ async function resolveRunScopedMentionedSkillKeys(input: {
     .filter((skillKey): skillKey is string => Boolean(skillKey));
 }
 
-function leaseReleaseStatusForRunStatus(
-  status: string | null | undefined,
-): Extract<EnvironmentLeaseStatus, "released" | "expired" | "failed"> {
-  return status === "failed" || status === "timed_out" ? "failed" : "released";
-}
-
-export function applyPersistedExecutionWorkspaceConfig(input: {
-  config: Record<string, unknown>;
-  workspaceConfig: ExecutionWorkspaceConfig | null;
-  mode: ReturnType<typeof resolveExecutionWorkspaceMode>;
-}) {
-  const nextConfig = { ...input.config };
-
-  if (input.mode !== "agent_default") {
-    if (input.workspaceConfig?.workspaceRuntime === null) {
-      delete nextConfig.workspaceRuntime;
-    } else if (input.workspaceConfig?.workspaceRuntime) {
-      nextConfig.workspaceRuntime = { ...input.workspaceConfig.workspaceRuntime };
-    }
-    if (input.workspaceConfig?.desiredState === null) {
-      delete nextConfig.desiredState;
-    } else if (input.workspaceConfig?.desiredState) {
-      nextConfig.desiredState = input.workspaceConfig.desiredState;
-    }
-    if (input.workspaceConfig?.serviceStates === null) {
-      delete nextConfig.serviceStates;
-    } else if (input.workspaceConfig?.serviceStates) {
-      nextConfig.serviceStates = { ...input.workspaceConfig.serviceStates };
-    }
-  }
-
-  if (input.workspaceConfig && input.mode === "isolated_workspace") {
-    const nextStrategy = parseObject(nextConfig.workspaceStrategy);
-    if (input.workspaceConfig.provisionCommand === null) delete nextStrategy.provisionCommand;
-    else nextStrategy.provisionCommand = input.workspaceConfig.provisionCommand;
-    if (input.workspaceConfig.teardownCommand === null) delete nextStrategy.teardownCommand;
-    else nextStrategy.teardownCommand = input.workspaceConfig.teardownCommand;
-    nextConfig.workspaceStrategy = nextStrategy;
-  }
-
-  return nextConfig;
-}
-
-export function mergeExecutionWorkspaceMetadataForPersistence(input: {
-  existingMetadata: Record<string, unknown> | null | undefined;
-  source: string;
-  createdByRuntime: boolean;
-  configSnapshot: Record<string, unknown> | null;
-  shouldReuseExisting: boolean;
-}) {
-  const base = {
-    ...(input.existingMetadata ?? {}),
-    source: input.source,
-    createdByRuntime: input.createdByRuntime,
-  } as Record<string, unknown>;
-
-  if (input.shouldReuseExisting || !input.configSnapshot) {
-    return base;
-  }
-
-  return mergeExecutionWorkspaceConfig(base, input.configSnapshot);
-}
-
-export function stripWorkspaceRuntimeFromExecutionRunConfig(config: Record<string, unknown>) {
-  const nextConfig = { ...config };
-  delete nextConfig.workspaceRuntime;
-  return nextConfig;
-}
-
-export function buildRealizedExecutionWorkspaceFromPersisted(input: {
-  base: ExecutionWorkspaceInput;
-  workspace: ExecutionWorkspace;
-}): RealizedExecutionWorkspace | null {
-  const cwd = readNonEmptyString(input.workspace.cwd) ?? readNonEmptyString(input.workspace.providerRef);
-  if (!cwd) {
-    return null;
-  }
-
-  const strategy = input.workspace.strategyType === "git_worktree" ? "git_worktree" : "project_primary";
-  return {
-    baseCwd: input.base.baseCwd,
-    source: input.workspace.mode === "shared_workspace" ? "project_primary" : "task_session",
-    projectId: input.workspace.projectId ?? input.base.projectId,
-    workspaceId: input.workspace.projectWorkspaceId ?? input.base.workspaceId,
-    repoUrl: input.workspace.repoUrl ?? input.base.repoUrl,
-    repoRef: input.workspace.baseRef ?? input.base.repoRef,
-    strategy,
-    cwd,
-    branchName: input.workspace.branchName ?? null,
-    worktreePath: strategy === "git_worktree" ? (readNonEmptyString(input.workspace.providerRef) ?? cwd) : null,
-    warnings: [],
-    created: false,
-  };
-}
-
-function buildExecutionWorkspaceConfigSnapshot(
-  config: Record<string, unknown>,
-  environmentId?: string | null,
-): Partial<ExecutionWorkspaceConfig> | null {
-  const strategy = parseObject(config.workspaceStrategy);
-  const snapshot: Partial<ExecutionWorkspaceConfig> = {};
-  // Persist the resolved environment onto the workspace so reused sessions stay on the
-  // environment they were created against until the workspace itself is recreated/reset.
-  const hasExplicitEnvironmentSelection = environmentId !== undefined;
-
-  if (hasExplicitEnvironmentSelection) {
-    snapshot.environmentId = environmentId ?? null;
-  }
-
-  if ("workspaceStrategy" in config) {
-    snapshot.provisionCommand = typeof strategy.provisionCommand === "string" ? strategy.provisionCommand : null;
-    snapshot.teardownCommand = typeof strategy.teardownCommand === "string" ? strategy.teardownCommand : null;
-  }
-
-  if ("workspaceRuntime" in config) {
-    const workspaceRuntime = parseObject(config.workspaceRuntime);
-    snapshot.workspaceRuntime = Object.keys(workspaceRuntime).length > 0 ? workspaceRuntime : null;
-  }
-  if ("desiredState" in config) {
-    snapshot.desiredState =
-      config.desiredState === "running" || config.desiredState === "stopped" || config.desiredState === "manual"
-        ? config.desiredState
-        : null;
-  }
-  if ("serviceStates" in config) {
-    const serviceStates = parseObject(config.serviceStates);
-    snapshot.serviceStates = Object.keys(serviceStates).length > 0
-      ? Object.fromEntries(
-          Object.entries(serviceStates).filter(([, state]) =>
-            state === "running" || state === "stopped" || state === "manual"
-          ),
-        ) as ExecutionWorkspaceConfig["serviceStates"]
-      : null;
-  }
-
-  const hasSnapshot = Object.values(snapshot).some((value) => {
-    if (value === null) return false;
-    if (typeof value === "object") return Object.keys(value).length > 0;
-    return true;
-  }) || hasExplicitEnvironmentSelection;
-  return hasSnapshot ? snapshot : null;
-}
-
-function deriveRepoNameFromRepoUrl(repoUrl: string | null): string | null {
-  const trimmed = repoUrl?.trim() ?? "";
-  if (!trimmed) return null;
-  try {
-    const parsed = new URL(trimmed);
-    const cleanedPath = parsed.pathname.replace(/\/+$/, "");
-    const repoName = cleanedPath.split("/").filter(Boolean).pop()?.replace(/\.git$/i, "") ?? "";
-    return repoName || null;
-  } catch {
-    return null;
-  }
-}
-
-async function ensureManagedProjectWorkspace(input: {
-  companyId: string;
-  projectId: string;
-  repoUrl: string | null;
-}): Promise<{ cwd: string; warning: string | null }> {
-  const cwd = resolveManagedProjectWorkspaceDir({
-    companyId: input.companyId,
-    projectId: input.projectId,
-    repoName: deriveRepoNameFromRepoUrl(input.repoUrl),
-  });
-  await fs.mkdir(path.dirname(cwd), { recursive: true });
-  const stats = await fs.stat(cwd).catch(() => null);
-
-  if (!input.repoUrl) {
-    if (!stats) {
-      await fs.mkdir(cwd, { recursive: true });
-    }
-    return { cwd, warning: null };
-  }
-
-  const gitDirExists = await fs
-    .stat(path.resolve(cwd, ".git"))
-    .then((entry) => entry.isDirectory())
-    .catch(() => false);
-  if (gitDirExists) {
-    return { cwd, warning: null };
-  }
-
-  if (stats) {
-    const entries = await fs.readdir(cwd).catch(() => []);
-    if (entries.length > 0) {
-      return {
-        cwd,
-        warning: `Managed workspace path "${cwd}" already exists but is not a git checkout. Using it as-is.`,
-      };
-    }
-    await fs.rm(cwd, { recursive: true, force: true });
-  }
-
-  try {
-    await execFile("git", ["clone", input.repoUrl, cwd], {
-      env: sanitizeRuntimeServiceBaseEnv(process.env),
-      timeout: MANAGED_WORKSPACE_GIT_CLONE_TIMEOUT_MS,
-    });
-    return { cwd, warning: null };
-  } catch (error) {
-    const reason = error instanceof Error ? error.message : String(error);
-    throw new Error(`Failed to prepare managed checkout for "${input.repoUrl}" at "${cwd}": ${reason}`);
-  }
-}
-
-const heartbeatRunProcessGroupIdColumn =
-  heartbeatRuns.processGroupId ?? sql<number | null>`NULL`.as("processGroupId");
-
-const heartbeatRunListColumns = {
-  id: heartbeatRuns.id,
-  companyId: heartbeatRuns.companyId,
-  agentId: heartbeatRuns.agentId,
-  invocationSource: heartbeatRuns.invocationSource,
-  triggerDetail: heartbeatRuns.triggerDetail,
-  status: heartbeatRuns.status,
-  startedAt: heartbeatRuns.startedAt,
-  finishedAt: heartbeatRuns.finishedAt,
-  error: heartbeatRuns.error,
-  wakeupRequestId: heartbeatRuns.wakeupRequestId,
-  exitCode: heartbeatRuns.exitCode,
-  signal: heartbeatRuns.signal,
-  usageJson: heartbeatRuns.usageJson,
-  sessionIdBefore: heartbeatRuns.sessionIdBefore,
-  sessionIdAfter: heartbeatRuns.sessionIdAfter,
-  logStore: heartbeatRuns.logStore,
-  logRef: heartbeatRuns.logRef,
-  logBytes: heartbeatRuns.logBytes,
-  logSha256: heartbeatRuns.logSha256,
-  logCompressed: heartbeatRuns.logCompressed,
-  stdoutExcerpt: sql<string | null>`NULL`.as("stdoutExcerpt"),
-  stderrExcerpt: sql<string | null>`NULL`.as("stderrExcerpt"),
-  errorCode: heartbeatRuns.errorCode,
-  externalRunId: heartbeatRuns.externalRunId,
-  processPid: heartbeatRuns.processPid,
-  processGroupId: heartbeatRunProcessGroupIdColumn,
-  processStartedAt: heartbeatRuns.processStartedAt,
-  lastOutputAt: heartbeatRuns.lastOutputAt,
-  lastOutputSeq: heartbeatRuns.lastOutputSeq,
-  lastOutputStream: heartbeatRuns.lastOutputStream,
-  lastOutputBytes: heartbeatRuns.lastOutputBytes,
-  retryOfRunId: heartbeatRuns.retryOfRunId,
-  processLossRetryCount: heartbeatRuns.processLossRetryCount,
-  scheduledRetryAt: heartbeatRuns.scheduledRetryAt,
-  scheduledRetryAttempt: heartbeatRuns.scheduledRetryAttempt,
-  scheduledRetryReason: heartbeatRuns.scheduledRetryReason,
-  livenessState: heartbeatRuns.livenessState,
-  livenessReason: heartbeatRuns.livenessReason,
-  continuationAttempt: heartbeatRuns.continuationAttempt,
-  lastUsefulActionAt: heartbeatRuns.lastUsefulActionAt,
-  nextAction: heartbeatRuns.nextAction,
-  createdAt: heartbeatRuns.createdAt,
-  updatedAt: heartbeatRuns.updatedAt,
-} as const;
-
-const heartbeatRunListContextColumns = {
-  contextIssueId: sql<string | null>`${heartbeatRuns.contextSnapshot} ->> 'issueId'`.as("contextIssueId"),
-  contextTaskId: sql<string | null>`${heartbeatRuns.contextSnapshot} ->> 'taskId'`.as("contextTaskId"),
-  contextTaskKey: sql<string | null>`${heartbeatRuns.contextSnapshot} ->> 'taskKey'`.as("contextTaskKey"),
-  contextCommentId: sql<string | null>`${heartbeatRuns.contextSnapshot} ->> 'commentId'`.as("contextCommentId"),
-  contextWakeCommentId: sql<string | null>`${heartbeatRuns.contextSnapshot} ->> 'wakeCommentId'`.as("contextWakeCommentId"),
-  contextWakeReason: sql<string | null>`${heartbeatRuns.contextSnapshot} ->> 'wakeReason'`.as("contextWakeReason"),
-  contextWakeSource: sql<string | null>`${heartbeatRuns.contextSnapshot} ->> 'wakeSource'`.as("contextWakeSource"),
-  contextWakeTriggerDetail: sql<string | null>`${heartbeatRuns.contextSnapshot} ->> 'wakeTriggerDetail'`.as("contextWakeTriggerDetail"),
-} as const;
-
-const heartbeatRunListResultColumns = {
-  resultSummary: sql<string | null>`left(${heartbeatRuns.resultJson} ->> 'summary', ${HEARTBEAT_RUN_RESULT_SUMMARY_MAX_CHARS})`.as("resultSummary"),
-  resultResult: sql<string | null>`left(${heartbeatRuns.resultJson} ->> 'result', ${HEARTBEAT_RUN_RESULT_SUMMARY_MAX_CHARS})`.as("resultResult"),
-  resultMessage: sql<string | null>`left(${heartbeatRuns.resultJson} ->> 'message', ${HEARTBEAT_RUN_RESULT_SUMMARY_MAX_CHARS})`.as("resultMessage"),
-  resultError: sql<string | null>`left(${heartbeatRuns.resultJson} ->> 'error', ${HEARTBEAT_RUN_RESULT_SUMMARY_MAX_CHARS})`.as("resultError"),
-  resultTotalCostUsd: sql<string | null>`${heartbeatRuns.resultJson} ->> 'total_cost_usd'`.as("resultTotalCostUsd"),
-  resultCostUsd: sql<string | null>`${heartbeatRuns.resultJson} ->> 'cost_usd'`.as("resultCostUsd"),
-  resultCostUsdCamel: sql<string | null>`${heartbeatRuns.resultJson} ->> 'costUsd'`.as("resultCostUsdCamel"),
-} as const;
-
-const heartbeatRunSafeResultJsonColumn = sql<Record<string, unknown> | null>`
-  case
-    when ${heartbeatRuns.resultJson} is null then null
-    when pg_column_size(${heartbeatRuns.resultJson}) <= ${HEARTBEAT_RUN_SAFE_RESULT_JSON_MAX_BYTES}
-      then ${heartbeatRuns.resultJson}
-    else jsonb_strip_nulls(
-      jsonb_build_object(
-        'summary', left(${heartbeatRuns.resultJson} ->> 'summary', ${HEARTBEAT_RUN_RESULT_SUMMARY_MAX_CHARS}),
-        'result', left(${heartbeatRuns.resultJson} ->> 'result', ${HEARTBEAT_RUN_RESULT_SUMMARY_MAX_CHARS}),
-        'message', left(${heartbeatRuns.resultJson} ->> 'message', ${HEARTBEAT_RUN_RESULT_SUMMARY_MAX_CHARS}),
-        'error', left(${heartbeatRuns.resultJson} ->> 'error', ${HEARTBEAT_RUN_RESULT_SUMMARY_MAX_CHARS}),
-        'stdout', left(${heartbeatRuns.resultJson} ->> 'stdout', ${HEARTBEAT_RUN_RESULT_OUTPUT_MAX_CHARS}),
-        'stderr', left(${heartbeatRuns.resultJson} ->> 'stderr', ${HEARTBEAT_RUN_RESULT_OUTPUT_MAX_CHARS}),
-        'stdoutTruncated', case
-          when length(${heartbeatRuns.resultJson} ->> 'stdout') > ${HEARTBEAT_RUN_RESULT_OUTPUT_MAX_CHARS}
-            then to_jsonb(true)
-          else null
-        end,
-        'stderrTruncated', case
-          when length(${heartbeatRuns.resultJson} ->> 'stderr') > ${HEARTBEAT_RUN_RESULT_OUTPUT_MAX_CHARS}
-            then to_jsonb(true)
-          else null
-        end,
-        'costUsd', coalesce(
-          ${heartbeatRuns.resultJson} -> 'costUsd',
-          ${heartbeatRuns.resultJson} -> 'cost_usd',
-          ${heartbeatRuns.resultJson} -> 'total_cost_usd'
-        ),
-        'cost_usd', coalesce(
-          ${heartbeatRuns.resultJson} -> 'cost_usd',
-          ${heartbeatRuns.resultJson} -> 'costUsd',
-          ${heartbeatRuns.resultJson} -> 'total_cost_usd'
-        ),
-        'total_cost_usd', coalesce(
-          ${heartbeatRuns.resultJson} -> 'total_cost_usd',
-          ${heartbeatRuns.resultJson} -> 'cost_usd',
-          ${heartbeatRuns.resultJson} -> 'costUsd'
-        ),
-        'truncated', true,
-        'truncationReason', 'oversized_result_json',
-        'originalSizeBytes', pg_column_size(${heartbeatRuns.resultJson})
-      )
-    )
-  end
-`.as("resultJson");
-
-const heartbeatRunSafeColumns = {
-  ...getTableColumns(heartbeatRuns),
-  processGroupId: heartbeatRunProcessGroupIdColumn,
-  resultJson: heartbeatRunSafeResultJsonColumn,
-} as const;
-
-const heartbeatRunSqlAsciiSafeColumns = {
-  ...getTableColumns(heartbeatRuns),
-  processGroupId: heartbeatRunProcessGroupIdColumn,
-  error: sql<string | null>`NULL`.as("error"),
-  resultJson: sql<Record<string, unknown> | null>`NULL`.as("resultJson"),
-  stdoutExcerpt: sql<string | null>`NULL`.as("stdoutExcerpt"),
-  stderrExcerpt: sql<string | null>`NULL`.as("stderrExcerpt"),
-} as const;
-
-const heartbeatRunLogAccessColumns = {
-  id: heartbeatRuns.id,
-  companyId: heartbeatRuns.companyId,
-  logStore: heartbeatRuns.logStore,
-  logRef: heartbeatRuns.logRef,
-} as const;
-
-const heartbeatRunIssueSummaryColumns = {
-  id: heartbeatRuns.id,
-  status: heartbeatRuns.status,
-  invocationSource: heartbeatRuns.invocationSource,
-  triggerDetail: heartbeatRuns.triggerDetail,
-  contextCommentId: sql<string | null>`${heartbeatRuns.contextSnapshot} ->> 'commentId'`.as("contextCommentId"),
-  contextWakeCommentId: sql<string | null>`${heartbeatRuns.contextSnapshot} ->> 'wakeCommentId'`.as("contextWakeCommentId"),
-  startedAt: heartbeatRuns.startedAt,
-  finishedAt: heartbeatRuns.finishedAt,
-  createdAt: heartbeatRuns.createdAt,
-  agentId: heartbeatRuns.agentId,
-  logBytes: heartbeatRuns.logBytes,
-  processStartedAt: heartbeatRuns.processStartedAt,
-  livenessState: heartbeatRuns.livenessState,
-  livenessReason: heartbeatRuns.livenessReason,
-  continuationAttempt: heartbeatRuns.continuationAttempt,
-  lastUsefulActionAt: heartbeatRuns.lastUsefulActionAt,
-  nextAction: heartbeatRuns.nextAction,
-  lastOutputAt: heartbeatRuns.lastOutputAt,
-  lastOutputSeq: heartbeatRuns.lastOutputSeq,
-  lastOutputStream: heartbeatRuns.lastOutputStream,
-  lastOutputBytes: heartbeatRuns.lastOutputBytes,
-  issueId: sql<string | null>`${heartbeatRuns.contextSnapshot} ->> 'issueId'`.as("issueId"),
-} as const;
-
-function appendExcerpt(prev: string, chunk: string) {
-  return appendWithByteCap(prev, chunk, MAX_EXCERPT_BYTES);
-}
-
-function truncateRunEventString(value: string) {
-  if (value.length <= MAX_RUN_EVENT_PAYLOAD_STRING_CHARS) return value;
-  const omittedChars = value.length - MAX_RUN_EVENT_PAYLOAD_STRING_CHARS;
-  return `${value.slice(0, MAX_RUN_EVENT_PAYLOAD_STRING_CHARS)}\n[truncated ${omittedChars} chars]`;
-}
-
-function boundRunEventValue(value: unknown, depth: number, seen: WeakSet<object>): unknown {
-  if (typeof value === "string") {
-    return truncateRunEventString(value);
-  }
-  if (
-    value === null
-    || typeof value === "number"
-    || typeof value === "boolean"
-  ) {
-    return value;
-  }
-  if (value instanceof Date) {
-    return value.toISOString();
-  }
-  if (Array.isArray(value)) {
-    if (depth >= MAX_RUN_EVENT_PAYLOAD_DEPTH) {
-      return {
-        _truncated: true,
-        type: "array",
-        originalLength: value.length,
-      };
-    }
-    const bounded = value
-      .slice(0, MAX_RUN_EVENT_PAYLOAD_ARRAY_ITEMS)
-      .map((entry) => boundRunEventValue(entry, depth + 1, seen));
-    if (value.length > MAX_RUN_EVENT_PAYLOAD_ARRAY_ITEMS) {
-      bounded.push({
-        _truncated: true,
-        omittedItems: value.length - MAX_RUN_EVENT_PAYLOAD_ARRAY_ITEMS,
-      });
-    }
-    return bounded;
-  }
-  if (typeof value !== "object" || value === undefined) {
-    return null;
-  }
-  if (seen.has(value)) {
-    return "[Circular]";
-  }
-  seen.add(value);
-  const entries = Object.entries(value as Record<string, unknown>);
-  if (depth >= MAX_RUN_EVENT_PAYLOAD_DEPTH) {
-    const bounded = {
-      _truncated: true,
-      type: "object",
-      keys: entries.map(([key]) => key).slice(0, 20),
-    };
-    seen.delete(value);
-    return bounded;
-  }
-
-  const out: Record<string, unknown> = {};
-  for (const [key, entryValue] of entries.slice(0, MAX_RUN_EVENT_PAYLOAD_OBJECT_KEYS)) {
-    out[key] = boundRunEventValue(entryValue, depth + 1, seen);
-  }
-  if (entries.length > MAX_RUN_EVENT_PAYLOAD_OBJECT_KEYS) {
-    out._truncated = true;
-    out._omittedKeys = entries.length - MAX_RUN_EVENT_PAYLOAD_OBJECT_KEYS;
-  }
-  seen.delete(value);
-  return out;
-}
-
-export function boundHeartbeatRunEventPayloadForStorage(payload: Record<string, unknown>): Record<string, unknown> {
-  const bounded = boundRunEventValue(payload, 0, new WeakSet());
-  return parseObject(bounded) ?? { _truncated: true };
-}
-
-function redactInlineBase64ImageData(chunk: string) {
-  return chunk.replace(INLINE_BASE64_IMAGE_DATA_RE, (_match, prefix: string, data: string, suffix: string) =>
-    `${prefix}[omitted base64 image data: ${data.length} chars]${suffix}`,
-  );
-}
-
-export function compactRunLogChunk(chunk: string, maxChars = MAX_PERSISTED_LOG_CHUNK_CHARS) {
-  const normalized = redactInlineBase64ImageData(chunk);
-  if (normalized.length <= maxChars) return normalized;
-
-  const headChars = Math.max(0, Math.floor(maxChars * 0.6));
-  const tailChars = Math.max(0, Math.floor(maxChars * 0.25));
-  const omittedChars = Math.max(0, normalized.length - headChars - tailChars);
-  const marker = `\n[paperclip truncated run log chunk: omitted ${omittedChars} chars]\n`;
-  return `${normalized.slice(0, headChars)}${marker}${normalized.slice(normalized.length - tailChars)}`;
-}
-
 function normalizeMaxConcurrentRuns(value: unknown) {
   const parsed = Math.floor(asNumber(value, HEARTBEAT_MAX_CONCURRENT_RUNS_DEFAULT));
   if (!Number.isFinite(parsed)) return HEARTBEAT_MAX_CONCURRENT_RUNS_DEFAULT;
@@ -955,18 +419,6 @@ interface ParsedIssueAssigneeAdapterOverrides {
   useProjectWorkspace: boolean | null;
 }
 
-type ModelProfileRequestSource = "issue_override" | "wake_context";
-type AppliedModelProfileConfigSource = "agent_runtime" | "adapter_default";
-
-export interface ModelProfileApplication {
-  requested: ModelProfileKey | null;
-  requestedBy: ModelProfileRequestSource | null;
-  applied: ModelProfileKey | null;
-  configSource: AppliedModelProfileConfigSource | null;
-  fallbackReason: string | null;
-  adapterConfig: Record<string, unknown> | null;
-}
-
 export type ResolvedWorkspaceForRun = {
   cwd: string;
   source: "project_primary" | "task_session" | "agent_home";
@@ -999,205 +451,6 @@ export function prioritizeProjectWorkspaceCandidatesForRun<T extends ProjectWork
 
 function readNonEmptyString(value: unknown): string | null {
   return typeof value === "string" && value.trim().length > 0 ? value : null;
-}
-
-function readModelProfileKey(value: unknown): ModelProfileKey | null {
-  return MODEL_PROFILE_KEYS.includes(value as ModelProfileKey)
-    ? (value as ModelProfileKey)
-    : null;
-}
-
-function readContextModelProfile(
-  contextSnapshot: Record<string, unknown> | null | undefined,
-): ModelProfileKey | null {
-  return readModelProfileKey(contextSnapshot?.modelProfile);
-}
-
-export function normalizeModelProfileWakeContext(input: {
-  contextSnapshot: Record<string, unknown>;
-  payload: Record<string, unknown> | null | undefined;
-}): Record<string, unknown> {
-  const modelProfileFromPayload = readModelProfileKey(input.payload?.modelProfile);
-  if (!readContextModelProfile(input.contextSnapshot) && modelProfileFromPayload) {
-    input.contextSnapshot.modelProfile = modelProfileFromPayload;
-  }
-  return input.contextSnapshot;
-}
-
-function readAgentRuntimeModelProfile(
-  runtimeConfig: unknown,
-  key: ModelProfileKey,
-): { enabled: boolean; adapterConfig: Record<string, unknown>; configured: boolean } {
-  const modelProfiles = parseObject(parseObject(runtimeConfig).modelProfiles);
-  const profile = parseObject(modelProfiles[key]);
-  if (Object.keys(profile).length === 0) {
-    return { enabled: true, adapterConfig: {}, configured: false };
-  }
-
-  return {
-    enabled: profile.enabled !== false,
-    adapterConfig: parseObject(profile.adapterConfig),
-    configured: true,
-  };
-}
-
-export function resolveModelProfileApplication(input: {
-  adapterModelProfiles: AdapterModelProfileDefinition[];
-  agentRuntimeConfig: unknown;
-  issueModelProfile: ModelProfileKey | null | undefined;
-  contextSnapshot: Record<string, unknown> | null | undefined;
-  profileResolutionFallbackReason?: string | null;
-}): ModelProfileApplication {
-  const issueModelProfile = input.issueModelProfile ?? null;
-  const contextModelProfile = readContextModelProfile(input.contextSnapshot);
-  const requested = issueModelProfile ?? contextModelProfile;
-  const requestedBy: ModelProfileRequestSource | null = issueModelProfile
-    ? "issue_override"
-    : contextModelProfile
-      ? "wake_context"
-      : null;
-
-  if (!requested) {
-    return {
-      requested: null,
-      requestedBy: null,
-      applied: null,
-      configSource: null,
-      fallbackReason: null,
-      adapterConfig: null,
-    };
-  }
-
-  const adapterProfile = input.adapterModelProfiles.find((profile) => profile.key === requested) ?? null;
-  if (!adapterProfile) {
-    return {
-      requested,
-      requestedBy,
-      applied: null,
-      configSource: null,
-      fallbackReason: input.profileResolutionFallbackReason ?? "adapter_profile_not_supported",
-      adapterConfig: null,
-    };
-  }
-
-  const runtimeProfile = readAgentRuntimeModelProfile(input.agentRuntimeConfig, requested);
-  if (!runtimeProfile.enabled) {
-    return {
-      requested,
-      requestedBy,
-      applied: null,
-      configSource: null,
-      fallbackReason: "agent_runtime_profile_disabled",
-      adapterConfig: null,
-    };
-  }
-
-  return {
-    requested,
-    requestedBy,
-    applied: requested,
-    configSource: runtimeProfile.configured ? "agent_runtime" : "adapter_default",
-    fallbackReason: null,
-    adapterConfig: {
-      ...parseObject(adapterProfile.adapterConfig),
-      ...runtimeProfile.adapterConfig,
-    },
-  };
-}
-
-export function mergeModelProfileAdapterConfig(input: {
-  baseConfig: Record<string, unknown>;
-  modelProfile: ModelProfileApplication;
-  issueAdapterConfig: Record<string, unknown> | null | undefined;
-}): Record<string, unknown> {
-  return {
-    ...input.baseConfig,
-    ...(input.modelProfile.adapterConfig ?? {}),
-    ...(input.issueAdapterConfig ?? {}),
-  };
-}
-
-function modelProfileRunMetadata(
-  modelProfile: ModelProfileApplication,
-): Record<string, unknown> | null {
-  if (!modelProfile.requested) return null;
-  return {
-    requested: modelProfile.requested,
-    requestedBy: modelProfile.requestedBy,
-    applied: modelProfile.applied,
-    configSource: modelProfile.configSource,
-    fallbackReason: modelProfile.fallbackReason,
-  };
-}
-
-function mergeModelProfileRunMetadata(
-  resultJson: Record<string, unknown> | null,
-  modelProfile: ModelProfileApplication,
-): Record<string, unknown> | null {
-  const metadata = modelProfileRunMetadata(modelProfile);
-  if (!metadata) return resultJson;
-  return {
-    ...(resultJson ?? {}),
-    modelProfile: metadata,
-  };
-}
-
-export function summarizeHeartbeatRunContextSnapshot(
-  contextSnapshot: Record<string, unknown> | null | undefined,
-): Record<string, unknown> | null {
-  const summary: Record<string, unknown> = {};
-  const allowedKeys = [
-    "issueId",
-    "taskId",
-    "taskKey",
-    "commentId",
-    "wakeCommentId",
-    "wakeReason",
-    "wakeSource",
-    "wakeTriggerDetail",
-    "modelProfile",
-  ] as const;
-
-  for (const key of allowedKeys) {
-    const value = readNonEmptyString(contextSnapshot?.[key]);
-    if (value) summary[key] = value;
-  }
-
-  return Object.keys(summary).length > 0 ? summary : null;
-}
-
-export function summarizeHeartbeatRunListResultJson(input: {
-  summary?: string | null;
-  result?: string | null;
-  message?: string | null;
-  error?: string | null;
-  totalCostUsd?: string | null;
-  costUsd?: string | null;
-  costUsdCamel?: string | null;
-}): Record<string, unknown> | null {
-  const summary: Record<string, unknown> = {};
-  for (const [key, value] of [
-    ["summary", input.summary],
-    ["result", input.result],
-    ["message", input.message],
-    ["error", input.error],
-  ] as const) {
-    const normalized = readNonEmptyString(value);
-    if (normalized) summary[key] = normalized;
-  }
-
-  for (const [key, value] of [
-    ["total_cost_usd", input.totalCostUsd],
-    ["cost_usd", input.costUsd],
-    ["costUsd", input.costUsdCamel],
-  ] as const) {
-    const normalized = readNonEmptyString(value);
-    if (!normalized) continue;
-    const parsed = Number(normalized);
-    if (Number.isFinite(parsed)) summary[key] = parsed;
-  }
-
-  return Object.keys(summary).length > 0 ? summary : null;
 }
 
 function summarizeRunFailureForIssueComment(
