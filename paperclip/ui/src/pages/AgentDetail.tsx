@@ -43,7 +43,6 @@ import { FileTree, buildFileTree } from "../components/FileTree";
 import { ScrollToBottom } from "../components/ScrollToBottom";
 import { formatCents, formatDate, relativeTime, formatTokens } from "../lib/utils";
 import { cn } from "../lib/utils";
-import { describeRunRetryState } from "../lib/runRetryState";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs } from "@/components/ui/tabs";
@@ -51,7 +50,6 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip
 import {
   CheckCircle2,
   Loader2,
-  RotateCcw,
   Plus,
   Key,
   Eye,
@@ -88,6 +86,7 @@ import {
 import { WorkspaceOperationsSection } from "./agent-detail/WorkspaceOperationsSection";
 import { AgentDetailHeader } from "./agent-detail/AgentDetailHeader";
 import { RunsTab, defaultRunStatusInfo, runMetrics, runStatusIcons, sourceLabels } from "./agent-detail/RunsTab";
+import { RunSummaryCard } from "./agent-detail/RunSummaryCard";
 
 const RUN_LOG_PAGE_BYTES = 256_000;
 
@@ -2538,7 +2537,6 @@ function RunDetail({ run: initialRun, agentRouteId, adapterType, adapterConfig }
       queryClient.invalidateQueries({ queryKey: queryKeys.heartbeats(run.companyId, run.agentId) });
     },
   });
-  const canResumeLostRun = run.errorCode === "process_lost" && run.status === "failed";
   const resumePayload = useMemo(() => {
     const payload: Record<string, unknown> = {
       resumeFromRunId: run.id,
@@ -2574,7 +2572,6 @@ function RunDetail({ run: initialRun, agentRouteId, adapterType, adapterConfig }
     },
   });
 
-  const canRetryRun = run.status === "failed" || run.status === "timed_out";
   const retryPayload = useMemo(() => {
     const payload: Record<string, unknown> = {};
     const context = asRecord(run.contextSnapshot);
@@ -2659,272 +2656,44 @@ function RunDetail({ run: initialRun, agentRouteId, adapterType, adapterConfig }
     : null;
   const displayDurationSec = durationSec ?? (isRunning ? elapsedSec : null);
   const hasMetrics = metrics.input > 0 || metrics.output > 0 || metrics.cached > 0 || metrics.cost > 0;
-  const hasSession = !!(run.sessionIdBefore || run.sessionIdAfter);
-  const sessionChanged = run.sessionIdBefore && run.sessionIdAfter && run.sessionIdBefore !== run.sessionIdAfter;
-  const sessionId = run.sessionIdAfter || run.sessionIdBefore;
-  const hasNonZeroExit = run.exitCode !== null && run.exitCode !== 0;
-  const retryState = describeRunRetryState(run);
 
   return (
     <div className="space-y-4 min-w-0">
-      {/* Run summary card */}
-      <div className="border border-border rounded-lg overflow-hidden">
-        <div className="flex flex-col sm:flex-row">
-          {/* Left column: status + timing */}
-          <div className="flex-1 p-4 space-y-3">
-            <div className="flex items-center gap-2">
-              <StatusBadge status={run.status} />
-              {(run.status === "running" || run.status === "queued") && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="text-destructive hover:text-destructive text-xs h-6 px-2"
-                  onClick={() => cancelRun.mutate()}
-                  disabled={cancelRun.isPending}
-                >
-                  {cancelRun.isPending ? "Cancelling…" : "Cancel"}
-                </Button>
-              )}
-              {canResumeLostRun && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="text-xs h-6 px-2"
-                  onClick={() => resumeRun.mutate()}
-                  disabled={resumeRun.isPending}
-                >
-                  <RotateCcw className="h-3.5 w-3.5 mr-1" />
-                  {resumeRun.isPending ? "Resuming…" : "Resume"}
-                </Button>
-              )}
-              {canRetryRun && !canResumeLostRun && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="text-xs h-6 px-2"
-                  onClick={() => retryRun.mutate()}
-                  disabled={retryRun.isPending}
-                >
-                  <RotateCcw className="h-3.5 w-3.5 mr-1" />
-                  {retryRun.isPending ? "Retrying…" : "Retry"}
-                </Button>
-              )}
-            </div>
-            {/* Adapter type · provider · model */}
-            {(() => {
-              const displayProvider = metrics.provider
-                ?? asNonEmptyString(adapterConfig?.provider);
-              const displayModel = metrics.model
-                ?? asNonEmptyString(adapterConfig?.model);
-              if (!adapterType && !displayProvider && !displayModel) return null;
-              return (
-                <div className="text-[11px] text-muted-foreground font-mono flex items-center gap-1.5 flex-wrap">
-                  {adapterType && (
-                    <span className="bg-muted rounded px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wide">{adapterType.replace(/_/g, " ")}</span>
-                  )}
-                  {displayProvider && displayModel && (
-                    <span>{displayProvider}/{displayModel}</span>
-                  )}
-                  {!displayProvider && displayModel && (
-                    <span>{displayModel}</span>
-                  )}
-                </div>
-              );
-            })()}
-            {resumeRun.isError && (
-              <div className="text-xs text-destructive">
-                {resumeRun.error instanceof Error ? resumeRun.error.message : "Failed to resume run"}
-              </div>
-            )}
-            {retryRun.isError && (
-              <div className="text-xs text-destructive">
-                {retryRun.error instanceof Error ? retryRun.error.message : "Failed to retry run"}
-              </div>
-            )}
-            {startTime && (
-              <div className="space-y-0.5">
-                <div className="text-sm font-mono">
-                  {startTime}
-                  {endTime && <span className="text-muted-foreground"> &rarr; </span>}
-                  {endTime}
-                </div>
-                <div className="text-[11px] text-muted-foreground">
-                  {relativeTime(run.startedAt!)}
-                  {run.finishedAt && <> &rarr; {relativeTime(run.finishedAt)}</>}
-                </div>
-                {displayDurationSec !== null && (
-                  <div className="text-xs text-muted-foreground">
-                    Duration: {displayDurationSec >= 60 ? `${Math.floor(displayDurationSec / 60)}m ${displayDurationSec % 60}s` : `${displayDurationSec}s`}
-                  </div>
-                )}
-              </div>
-            )}
-            {run.error && (
-              <div className="text-xs">
-                <span className="text-red-600 dark:text-red-400">{run.error}</span>
-                {run.errorCode && <span className="text-muted-foreground ml-1">({run.errorCode})</span>}
-              </div>
-            )}
-            {run.errorCode === "claude_auth_required" && adapterType === "claude_local" && (
-              <div className="space-y-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="h-7 px-2 text-xs"
-                  onClick={() => runClaudeLogin.mutate()}
-                  disabled={runClaudeLogin.isPending}
-                >
-                  {runClaudeLogin.isPending ? "Running claude login..." : "Login to Claude Code"}
-                </Button>
-                {runClaudeLogin.isError && (
-                  <p className="text-xs text-destructive">
-                    {runClaudeLogin.error instanceof Error
-                      ? runClaudeLogin.error.message
-                      : "Failed to run Claude login"}
-                  </p>
-                )}
-                {claudeLoginResult?.loginUrl && (
-                  <p className="text-xs">
-                    Login URL:
-                    <a
-                      href={claudeLoginResult.loginUrl}
-                      className="text-blue-600 underline underline-offset-2 ml-1 break-all dark:text-blue-400"
-                      target="_blank"
-                      rel="noreferrer"
-                    >
-                      {claudeLoginResult.loginUrl}
-                    </a>
-                  </p>
-                )}
-                {claudeLoginResult && (
-                  <>
-                    {!!claudeLoginResult.stdout && (
-                      <pre className="bg-neutral-100 dark:bg-neutral-950 rounded-md p-3 text-xs font-mono text-foreground overflow-x-auto whitespace-pre-wrap">
-                        {claudeLoginResult.stdout}
-                      </pre>
-                    )}
-                    {!!claudeLoginResult.stderr && (
-                      <pre className="bg-neutral-100 dark:bg-neutral-950 rounded-md p-3 text-xs font-mono text-red-700 dark:text-red-300 overflow-x-auto whitespace-pre-wrap">
-                        {claudeLoginResult.stderr}
-                      </pre>
-                    )}
-                  </>
-                )}
-              </div>
-            )}
-            {hasNonZeroExit && (
-              <div className="text-xs text-red-600 dark:text-red-400">
-                Exit code {run.exitCode}
-                {run.signal && <span className="text-muted-foreground ml-1">(signal: {run.signal})</span>}
-              </div>
-            )}
-            {retryState && (
-              <div className="rounded-md border border-border/70 bg-accent/20 px-3 py-2 text-xs leading-5">
-                <div className="flex flex-wrap items-center gap-2">
-                  <span
-                    className={cn(
-                      "rounded-md border px-1.5 py-0.5 text-[11px] font-medium",
-                      retryState.tone,
-                    )}
-                  >
-                    {retryState.badgeLabel}
-                  </span>
-                  {retryState.retryOfRunId ? (
-                    <Link
-                      to={`/agents/${agentRouteId}/runs/${retryState.retryOfRunId}`}
-                      className="font-mono text-foreground hover:underline"
-                    >
-                      {retryState.retryOfRunId.slice(0, 8)}
-                    </Link>
-                  ) : null}
-                </div>
-                {retryState.detail ? <p className="mt-2 text-muted-foreground">{retryState.detail}</p> : null}
-                {retryState.secondary ? <p className="text-muted-foreground">{retryState.secondary}</p> : null}
-              </div>
-            )}
-          </div>
-
-          {/* Right column: metrics */}
-          {hasMetrics && (
-            <div className="border-t sm:border-t-0 sm:border-l border-border p-4 grid grid-cols-2 gap-x-4 sm:gap-x-8 gap-y-3 content-center tabular-nums">
-              <div>
-                <div className="text-xs text-muted-foreground">Input</div>
-                <div className="text-sm font-medium font-mono">{formatTokens(metrics.input)}</div>
-              </div>
-              <div>
-                <div className="text-xs text-muted-foreground">Output</div>
-                <div className="text-sm font-medium font-mono">{formatTokens(metrics.output)}</div>
-              </div>
-              <div>
-                <div className="text-xs text-muted-foreground">Cached</div>
-                <div className="text-sm font-medium font-mono">{formatTokens(metrics.cached)}</div>
-              </div>
-              <div>
-                <div className="text-xs text-muted-foreground">Cost</div>
-                <div className="text-sm font-medium font-mono">{metrics.cost > 0 ? `$${metrics.cost.toFixed(4)}` : "-"}</div>
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* Collapsible session row */}
-        {hasSession && (
-          <div className="border-t border-border">
-            <button
-              className="flex items-center gap-1.5 w-full px-4 py-2 text-xs text-muted-foreground hover:text-foreground transition-colors"
-              onClick={() => setSessionOpen((v) => !v)}
-            >
-              <ChevronRight className={cn("h-3 w-3 transition-transform", sessionOpen && "rotate-90")} />
-              Session
-              {sessionChanged && <span className="text-yellow-400 ml-1">(changed)</span>}
-            </button>
-            {sessionOpen && (
-              <div className="px-4 pb-3 space-y-1 text-xs">
-                {run.sessionIdBefore && (
-                  <div className="flex items-center gap-2">
-                    <span className="text-muted-foreground w-12">{sessionChanged ? "Before" : "ID"}</span>
-                    <CopyText text={run.sessionIdBefore} className="font-mono" />
-                  </div>
-                )}
-                {sessionChanged && run.sessionIdAfter && (
-                  <div className="flex items-center gap-2">
-                    <span className="text-muted-foreground w-12">After</span>
-                    <CopyText text={run.sessionIdAfter} className="font-mono" />
-                  </div>
-                )}
-                {touchedIssueIds.length > 0 && (
-                  <div className="pt-1">
-                    <button
-                      type="button"
-                      className="text-[11px] text-muted-foreground underline underline-offset-2 hover:text-foreground disabled:opacity-60"
-                      disabled={clearSessionsForTouchedIssues.isPending}
-                      onClick={() => {
-                        const issueCount = touchedIssueIds.length;
-                        const confirmed = window.confirm(
-                          `Clear session for ${issueCount} issue${issueCount === 1 ? "" : "s"} touched by this run?`,
-                        );
-                        if (!confirmed) return;
-                        clearSessionsForTouchedIssues.mutate();
-                      }}
-                    >
-                      {clearSessionsForTouchedIssues.isPending
-                        ? "clearing session..."
-                        : "clear session for these issues"}
-                    </button>
-                    {clearSessionsForTouchedIssues.isError && (
-                      <p className="text-[11px] text-destructive mt-1">
-                        {clearSessionsForTouchedIssues.error instanceof Error
-                          ? clearSessionsForTouchedIssues.error.message
-                          : "Failed to clear sessions"}
-                      </p>
-                    )}
-                  </div>
-                )}
-              </div>
-            )}
-          </div>
-        )}
-      </div>
+      <RunSummaryCard
+        run={run}
+        agentRouteId={agentRouteId}
+        adapterType={adapterType}
+        adapterConfig={adapterConfig}
+        metrics={metrics}
+        startTime={startTime}
+        endTime={endTime}
+        displayDurationSec={displayDurationSec}
+        hasMetrics={hasMetrics}
+        sessionOpen={sessionOpen}
+        onSessionOpenChange={setSessionOpen}
+        touchedIssueIds={touchedIssueIds}
+        claudeLoginResult={claudeLoginResult}
+        cancelRun={{ isPending: cancelRun.isPending, error: cancelRun.isError ? cancelRun.error : null }}
+        resumeRun={{ isPending: resumeRun.isPending, error: resumeRun.isError ? resumeRun.error : null }}
+        retryRun={{ isPending: retryRun.isPending, error: retryRun.isError ? retryRun.error : null }}
+        runClaudeLogin={{ isPending: runClaudeLogin.isPending, error: runClaudeLogin.isError ? runClaudeLogin.error : null }}
+        clearSessionsForTouchedIssues={{
+          isPending: clearSessionsForTouchedIssues.isPending,
+          error: clearSessionsForTouchedIssues.isError ? clearSessionsForTouchedIssues.error : null,
+        }}
+        onCancelRun={() => cancelRun.mutate()}
+        onResumeRun={() => resumeRun.mutate()}
+        onRetryRun={() => retryRun.mutate()}
+        onRunClaudeLogin={() => runClaudeLogin.mutate()}
+        onClearSessionsForTouchedIssues={() => {
+          const issueCount = touchedIssueIds.length;
+          const confirmed = window.confirm(
+            `Clear session for ${issueCount} issue${issueCount === 1 ? "" : "s"} touched by this run?`,
+          );
+          if (!confirmed) return;
+          clearSessionsForTouchedIssues.mutate();
+        }}
+      />
 
       {/* Issues touched by this run */}
       {touchedIssues && touchedIssues.length > 0 && (

@@ -29,9 +29,6 @@ import {
   Dialog,
   DialogContent,
 } from "@/components/ui/dialog";
-import {
-  ListTree,
-} from "lucide-react";
 import { cn } from "../lib/utils";
 import { extractProviderIdWithFallback } from "../lib/model-utils";
 import type { MarkdownEditorRef, MentionOption } from "./MarkdownEditor";
@@ -44,6 +41,7 @@ import { IssueAssigneeOptionsPanel } from "./new-issue-dialog/IssueAssigneeOptio
 import { IssuePropertyChips } from "./new-issue-dialog/IssuePropertyChips";
 import { NewIssueDescriptionSection, type StagedIssueFile } from "./new-issue-dialog/NewIssueDescriptionSection";
 import { NewIssueTitleSection } from "./new-issue-dialog/NewIssueTitleSection";
+import { NewIssueParentIssueNotice } from "./new-issue-dialog/NewIssueParentIssueNotice";
 
 const DRAFT_KEY = "paperclip:issue-draft";
 const DEBOUNCE_MS = 800;
@@ -1116,22 +1114,11 @@ export function NewIssueDialog() {
             }}
           />
 
-          {isSubIssueMode ? (
-            <div className="px-4 pb-2">
-            <div className="max-w-full rounded-md border border-border bg-muted/30 px-2.5 py-1.5 text-xs text-muted-foreground">
-              <div className="flex items-center gap-1.5">
-                <ListTree className="h-3.5 w-3.5 shrink-0" />
-                <span className="shrink-0">Sub-issue of</span>
-                <span className="font-medium text-foreground">{parentIssueLabel}</span>
-              </div>
-              {newIssueDefaults.parentTitle ? (
-                <div className="pl-5 text-foreground/80 truncate">
-                  {newIssueDefaults.parentTitle}
-                </div>
-              ) : null}
-            </div>
-            </div>
-          ) : null}
+          <NewIssueParentIssueNotice
+            isSubIssueMode={isSubIssueMode}
+            parentIssueLabel={parentIssueLabel}
+            parentTitle={newIssueDefaults.parentTitle}
+          />
 
           {currentProject && currentProjectSupportsExecutionWorkspace ? (
             <ExecutionWorkspaceFields

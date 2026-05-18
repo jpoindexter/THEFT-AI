@@ -116,6 +116,7 @@ import { StatusBadge } from "@/components/StatusBadge";
 import { StatusIcon } from "@/components/StatusIcon";
 import { PriorityIcon } from "@/components/PriorityIcon";
 import { agentStatusDot, agentStatusDotDefault } from "@/lib/status-colors";
+import { cn } from "@/lib/utils";
 import { EntityRow } from "@/components/EntityRow";
 import { EmptyState } from "@/components/EmptyState";
 import { MetricCard } from "@/components/MetricCard";
@@ -154,13 +155,32 @@ function SubSection({ title, children }: { title: string; children: React.ReactN
 /*  Color swatch                                                       */
 /* ------------------------------------------------------------------ */
 
+const swatchClasses: Record<string, string> = {
+  "--background": "bg-background",
+  "--foreground": "bg-foreground",
+  "--card": "bg-card",
+  "--primary": "bg-primary",
+  "--primary-foreground": "bg-primary-foreground",
+  "--secondary": "bg-secondary",
+  "--muted": "bg-muted",
+  "--muted-foreground": "bg-muted-foreground",
+  "--accent": "bg-accent",
+  "--destructive": "bg-destructive",
+  "--border": "bg-border",
+  "--ring": "bg-ring",
+  "--sidebar": "bg-sidebar",
+  "--sidebar-border": "bg-sidebar-border",
+  "--chart-1": "bg-chart-1",
+  "--chart-2": "bg-chart-2",
+  "--chart-3": "bg-chart-3",
+  "--chart-4": "bg-chart-4",
+  "--chart-5": "bg-chart-5",
+};
+
 function Swatch({ name, cssVar }: { name: string; cssVar: string }) {
   return (
     <div className="flex items-center gap-3">
-      <div
-        className="h-8 w-8 rounded-md border border-border shrink-0"
-        style={{ backgroundColor: `var(${cssVar})` }}
-      />
+      <div className={cn("h-8 w-8 shrink-0 rounded-md border border-border", swatchClasses[cssVar])} />
       <div>
         <p className="text-xs font-mono">{cssVar}</p>
         <p className="text-xs text-muted-foreground">{name}</p>
@@ -214,7 +234,7 @@ export function DesignGuide() {
                 "command", "dialog", "dropdown-menu", "input", "label", "popover", "scroll-area",
                 "select", "separator", "sheet", "skeleton", "tabs", "textarea", "tooltip",
               ].map((name) => (
-                <Badge key={name} variant="outline" className="font-mono text-[10px]">
+                <Badge key={name} variant="outline" className="font-mono text-micro">
                   {name}
                 </Badge>
               ))}
@@ -227,7 +247,7 @@ export function DesignGuide() {
                 "FilterBar", "InlineEditor", "PageSkeleton", "Identity", "CommentThread", "MarkdownEditor",
                 "PropertiesPanel", "Sidebar", "CommandPalette",
               ].map((name) => (
-                <Badge key={name} variant="ghost" className="font-mono text-[10px]">
+                <Badge key={name} variant="ghost" className="font-mono text-micro">
                   {name}
                 </Badge>
               ))}
@@ -308,17 +328,14 @@ export function DesignGuide() {
       <Section title="Radius">
         <div className="flex items-end gap-4 flex-wrap">
           {[
-            ["sm", "var(--radius-sm)"],
-            ["md", "var(--radius-md)"],
-            ["lg", "var(--radius-lg)"],
-            ["xl", "var(--radius-xl)"],
-            ["full", "9999px"],
-          ].map(([label, radius]) => (
+            ["sm", "rounded-sm"],
+            ["md", "rounded-md"],
+            ["lg", "rounded-lg"],
+            ["xl", "rounded-xl"],
+            ["full", "rounded-full"],
+          ].map(([label, radiusClass]) => (
             <div key={label} className="flex flex-col items-center gap-1">
-              <div
-                className="h-12 w-12 bg-primary"
-                style={{ borderRadius: radius }}
-              />
+              <div className={cn("h-12 w-12 bg-primary", radiusClass)} />
               <span className="text-xs text-muted-foreground">{label}</span>
             </div>
           ))}
@@ -461,7 +478,7 @@ export function DesignGuide() {
               ["on_demand", "bg-cyan-100 text-cyan-700 dark:bg-cyan-900/50 dark:text-cyan-300"],
               ["automation", "bg-muted text-muted-foreground"],
             ].map(([label, cls]) => (
-              <span key={label} className={`rounded-full px-1.5 py-0.5 text-[10px] font-medium ${cls}`}>
+              <span key={label} className={`rounded-full px-1.5 py-0.5 text-micro font-medium ${cls}`}>
                 {label}
               </span>
             ))}
@@ -1054,8 +1071,11 @@ export function DesignGuide() {
               </div>
               <div className="w-full h-2 bg-muted rounded-full overflow-hidden">
                 <div
-                  className={`h-full rounded-full transition-[width,background-color] duration-150 ${color}`}
-                  style={{ width: `${pct}%` }}
+                  className={cn(
+                    "h-full rounded-full transition-[width,background-color] duration-150",
+                    pct === 40 ? "w-2/5" : pct === 75 ? "w-3/4" : "w-11/12",
+                    color,
+                  )}
                 />
               </div>
             </div>
@@ -1142,14 +1162,14 @@ export function DesignGuide() {
 
         <SubSection title="View toggle">
           <div className="flex items-center border border-border rounded-md w-fit">
-            <button className="px-3 py-1.5 text-xs font-medium bg-accent text-foreground rounded-l-md">
+            <Button variant="secondary" size="sm" className="rounded-r-none">
               <ListTodo className="h-3.5 w-3.5 inline mr-1" />
               List
-            </button>
-            <button className="px-3 py-1.5 text-xs font-medium text-muted-foreground hover:bg-accent/50 rounded-r-md">
+            </Button>
+            <Button variant="ghost" size="sm" className="rounded-l-none text-muted-foreground">
               <Target className="h-3.5 w-3.5 inline mr-1" />
               Org
-            </button>
+            </Button>
           </div>
         </SubSection>
       </Section>
@@ -1312,7 +1332,7 @@ export function DesignGuide() {
             return (
               <div key={name as string} className="flex flex-col items-center gap-1.5 p-2">
                 <LucideIcon className="h-4 w-4 text-muted-foreground" />
-                <span className="text-[10px] text-muted-foreground font-mono">{name as string}</span>
+                <span className="font-mono text-micro text-muted-foreground">{name as string}</span>
               </div>
             );
           })}

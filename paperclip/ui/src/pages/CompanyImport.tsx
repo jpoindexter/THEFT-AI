@@ -19,20 +19,20 @@ import { getAgentOrderStorageKey, writeAgentOrder } from "../lib/agent-order";
 import { MarkdownBody } from "../components/MarkdownBody";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "../components/EmptyState";
-import { AgentConfigForm } from "../components/AgentConfigForm";
 import { cn } from "../lib/utils";
 import {
-  ArrowRight,
-  Check,
-  ChevronRight,
   Download,
   Package,
 } from "lucide-react";
-import { adapterLabels } from "../components/agent-config-primitives";
-import { getAdapterLabel } from "../adapters/adapter-display-registry";
 import { defaultCreateValues } from "../components/agent-config-defaults";
-import { getUIAdapter, listUIAdapters } from "../adapters";
+import { getUIAdapter } from "../adapters";
 import { ImportSourceSection } from "./company-import/ImportSourceSection";
+import {
+  AdapterPickerList,
+  ConflictResolutionList,
+  type AdapterPickerItem,
+  type ConflictItem,
+} from "./company-import/ImportReviewSetup";
 import type { CreateConfigValues } from "@paperclipai/adapter-utils";
 import {
   type FileTreeNode,
@@ -262,17 +262,6 @@ function ImportPreviewPane({
   );
 }
 
-// ── Conflict item type ───────────────────────────────────────────────
-
-interface ConflictItem {
-  slug: string;
-  kind: "agent" | "project" | "issue" | "skill";
-  originalName: string;
-  plannedName: string;
-  filePath: string | null;
-  action: "rename" | "update";
-}
-
 function buildConflictList(
   preview: CompanyPortabilityPreviewResult,
 ): ConflictItem[] {
@@ -382,242 +371,6 @@ async function applyImportedSidebarOrder(
   if (orderedProjectIds.length > 0) {
     await sidebarPreferencesApi.updateProjectOrder(result.company.id, { orderedIds: orderedProjectIds });
   }
-}
-
-// ── Conflict resolution UI ───────────────────────────────────────────
-
-function ConflictResolutionList({
-  conflicts,
-  nameOverrides,
-  skippedSlugs,
-  confirmedSlugs,
-  onRename,
-  onToggleSkip,
-  onToggleConfirm,
-}: {
-  conflicts: ConflictItem[];
-  nameOverrides: Record<string, string>;
-  skippedSlugs: Set<string>;
-  confirmedSlugs: Set<string>;
-  onRename: (slug: string, newName: string) => void;
-  onToggleSkip: (slug: string, filePath: string | null) => void;
-  onToggleConfirm: (slug: string) => void;
-}) {
-  if (conflicts.length === 0) return null;
-
-  return (
-    <div className="mx-5 mt-3">
-      <div className="rounded-md border border-border">
-        <div className="flex items-center gap-2 border-b border-border px-4 py-2.5">
-          <h3 className="text-sm font-medium">
-            Renames
-          </h3>
-          <span className="text-xs text-muted-foreground">
-            {conflicts.length} item{conflicts.length === 1 ? "" : "s"}
-          </span>
-        </div>
-        <div className="divide-y divide-border">
-          {conflicts.map((item) => {
-            const isSkipped = skippedSlugs.has(item.slug);
-            const isConfirmed = confirmedSlugs.has(item.slug);
-            const currentName = nameOverrides[item.slug] ?? item.plannedName;
-            return (
-              <div
-                key={item.slug}
-                className={cn(
-                  "flex items-center gap-3 px-4 py-2.5 text-sm",
-                  isSkipped && "opacity-40",
-                  isConfirmed && !isSkipped && "bg-emerald-500/5",
-                )}
-              >
-                {/* Skip button on the left */}
-                <button
-                  type="button"
-                  className={cn(
-                    "shrink-0 rounded-md border px-2.5 py-1 text-xs transition-colors",
-                    isSkipped
-                      ? "border-foreground bg-accent text-foreground"
-                      : "border-border text-muted-foreground hover:bg-accent/50",
-                  )}
-                  onClick={() => onToggleSkip(item.slug, item.filePath)}
-                >
-                  {isSkipped ? "skipped" : "skip"}
-                </button>
-
-                <span className={cn(
-                  "shrink-0 rounded-full border px-2 py-0.5 text-[10px] uppercase tracking-wide",
-                  isSkipped
-                    ? "text-muted-foreground border-border"
-                    : isConfirmed
-                      ? "text-emerald-500 border-emerald-500/30"
-                      : "text-amber-500 border-amber-500/30",
-                )}>
-                  {item.kind}
-                </span>
-
-                <span className={cn(
-                  "shrink-0 font-mono text-xs",
-                  isSkipped ? "text-muted-foreground line-through" : "text-muted-foreground",
-                )}>
-                  {item.originalName}
-                </span>
-
-                {!isSkipped && (
-                  <>
-                    <ArrowRight className="h-3 w-3 shrink-0 text-muted-foreground" />
-                    {isConfirmed ? (
-                      <span className="min-w-0 flex-1 font-mono text-xs text-emerald-500">
-                        {currentName}
-                      </span>
-                    ) : (
-                      <input
-                        className="min-w-0 flex-1 rounded-md border border-border bg-transparent px-2 py-1 font-mono text-xs outline-none focus:border-foreground"
-                        value={currentName}
-                        onChange={(e) => onRename(item.slug, e.target.value)}
-                      />
-                    )}
-                  </>
-                )}
-
-                {/* Confirm rename button on the right */}
-                {!isSkipped && (
-                  <button
-                    type="button"
-                    className={cn(
-                      "ml-auto shrink-0 rounded-md border px-2.5 py-1 text-xs transition-colors inline-flex items-center gap-1.5",
-                      isConfirmed
-                        ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-500"
-                        : "border-border text-muted-foreground hover:bg-accent/50",
-                    )}
-                    onClick={() => onToggleConfirm(item.slug)}
-                  >
-                    {isConfirmed ? (
-                      <>
-                        <Check className="h-3 w-3" />
-                        confirmed
-                      </>
-                    ) : (
-                      "confirm rename"
-                    )}
-                  </button>
-                )}
-              </div>
-            );
-          })}
-        </div>
-      </div>
-    </div>
-  );
-}
-
-// ── Adapter type options for import ───────────────────────────────────
-
-const IMPORT_ADAPTER_OPTIONS: { value: string; label: string }[] = listUIAdapters().map((adapter) => ({
-  value: adapter.type,
-  label: adapterLabels[adapter.type] ?? getAdapterLabel(adapter.type),
-}));
-
-// ── Adapter picker for imported agents ───────────────────────────────
-
-interface AdapterPickerItem {
-  slug: string;
-  name: string;
-  adapterType: string;
-}
-
-function AdapterPickerList({
-  agents,
-  adapterOverrides,
-  expandedSlugs,
-  configValues,
-  onChangeAdapter,
-  onToggleExpand,
-  onChangeConfig,
-}: {
-  agents: AdapterPickerItem[];
-  adapterOverrides: Record<string, string>;
-  expandedSlugs: Set<string>;
-  configValues: Record<string, CreateConfigValues>;
-  onChangeAdapter: (slug: string, adapterType: string) => void;
-  onToggleExpand: (slug: string) => void;
-  onChangeConfig: (slug: string, patch: Partial<CreateConfigValues>) => void;
-}) {
-  if (agents.length === 0) return null;
-
-  return (
-    <div className="mx-5 mt-3">
-      <div className="rounded-md border border-border">
-        <div className="flex items-center gap-2 border-b border-border px-4 py-2.5">
-          <h3 className="text-sm font-medium">Adapters</h3>
-          <span className="text-xs text-muted-foreground">
-            {agents.length} agent{agents.length === 1 ? "" : "s"}
-          </span>
-        </div>
-        <div className="divide-y divide-border">
-          {agents.map((agent) => {
-            const selectedType = adapterOverrides[agent.slug] ?? agent.adapterType;
-            const isExpanded = expandedSlugs.has(agent.slug);
-            const vals = configValues[agent.slug] ?? { ...defaultCreateValues, adapterType: selectedType };
-
-            return (
-              <div key={agent.slug}>
-                <div className="flex items-center gap-3 px-4 py-2.5 text-sm">
-                  <span className={cn(
-                    "shrink-0 rounded-full border px-2 py-0.5 text-[10px] uppercase tracking-wide",
-                    "text-blue-500 border-blue-500/30",
-                  )}>
-                    agent
-                  </span>
-                  <span className="shrink-0 font-mono text-xs text-muted-foreground">
-                    {agent.name}
-                  </span>
-                  <ArrowRight className="h-3 w-3 shrink-0 text-muted-foreground" />
-                  <select
-                    className="min-w-0 flex-1 rounded-md border border-border bg-transparent px-2 py-1 text-xs outline-none focus:border-foreground"
-                    value={selectedType}
-                    onChange={(e) => onChangeAdapter(agent.slug, e.target.value)}
-                  >
-                    {IMPORT_ADAPTER_OPTIONS.map((opt) => (
-                      <option key={opt.value} value={opt.value}>
-                        {opt.label}
-                      </option>
-                    ))}
-                  </select>
-                  <button
-                    type="button"
-                    className={cn(
-                      "ml-auto shrink-0 rounded-md border px-2.5 py-1 text-xs transition-colors inline-flex items-center gap-1.5",
-                      isExpanded
-                        ? "border-foreground bg-accent text-foreground"
-                        : "border-border text-muted-foreground hover:bg-accent/50",
-                    )}
-                    onClick={() => onToggleExpand(agent.slug)}
-                  >
-                    <ChevronRight className={cn("h-3 w-3 transition-transform", isExpanded && "rotate-90")} />
-                    configure adapter
-                  </button>
-                </div>
-                {isExpanded && (
-                  <div className="border-t border-border bg-accent/10 px-4 py-3 space-y-3">
-                    <AgentConfigForm
-                      mode="create"
-                      values={vals}
-                      onChange={(patch) => onChangeConfig(agent.slug, patch)}
-                      showAdapterTypeField={false}
-                      showAdapterTestEnvironmentButton={false}
-                      showCreateRunPolicySection={false}
-                      hideInstructionsFile
-                      sectionLayout="cards"
-                    />
-                  </div>
-                )}
-              </div>
-            );
-          })}
-        </div>
-      </div>
-    </div>
-  );
 }
 
 // ── Helpers ───────────────────────────────────────────────────────────
