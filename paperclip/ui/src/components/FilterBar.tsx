@@ -23,12 +23,16 @@ export function FilterBar({ filters, onRemove, onClear }: FilterBarProps) {
         <Badge key={f.key} variant="secondary" className="gap-1 pr-1">
           <span className="text-muted-foreground">{f.label}:</span>
           <span>{f.value}</span>
-          <button
-            className="ml-1 rounded-full hover:bg-accent p-0.5"
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon-xs"
+            className="ml-1 h-5 w-5 rounded-full p-0.5"
             onClick={() => onRemove(f.key)}
+            aria-label={`Remove ${f.label} filter`}
           >
             <X className="h-3 w-3" />
-          </button>
+          </Button>
         </Badge>
       ))}
       <Button variant="ghost" size="sm" className="text-xs h-6" onClick={onClear}>

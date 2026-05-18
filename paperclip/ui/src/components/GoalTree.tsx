@@ -4,6 +4,7 @@ import { StatusBadge } from "./StatusBadge";
 import { ChevronRight } from "lucide-react";
 import { cn } from "../lib/utils";
 import { useState } from "react";
+import { Button } from "./ui/button";
 
 interface GoalTreeProps {
   goals: Goal[];
@@ -20,6 +21,21 @@ interface GoalNodeProps {
   onSelect?: (goal: Goal) => void;
 }
 
+const GOAL_TREE_DEPTH_INDENT_CLASSES = [
+  "pl-3",
+  "pl-7",
+  "pl-11",
+  "pl-15",
+  "pl-19",
+  "pl-23",
+  "pl-27",
+  "pl-31",
+];
+
+function goalDepthIndentClass(depth: number) {
+  return GOAL_TREE_DEPTH_INDENT_CLASSES[Math.min(depth, GOAL_TREE_DEPTH_INDENT_CLASSES.length - 1)];
+}
+
 function GoalNode({ goal, children, allGoals, depth, goalLink, onSelect }: GoalNodeProps) {
   const [expanded, setExpanded] = useState(true);
   const hasChildren = children.length > 0;
@@ -28,8 +44,11 @@ function GoalNode({ goal, children, allGoals, depth, goalLink, onSelect }: GoalN
   const inner = (
     <>
       {hasChildren ? (
-        <button
-          className="p-0.5"
+        <Button
+          type="button"
+          variant="ghost"
+          size="icon-xs"
+          className="h-5 w-5 p-0.5"
           onClick={(e) => {
             e.preventDefault();
             e.stopPropagation();
@@ -39,7 +58,7 @@ function GoalNode({ goal, children, allGoals, depth, goalLink, onSelect }: GoalN
           <ChevronRight
             className={cn("h-3 w-3 transition-transform", expanded && "rotate-90")}
           />
-        </button>
+        </Button>
       ) : (
         <span className="w-4" />
       )}
@@ -51,6 +70,7 @@ function GoalNode({ goal, children, allGoals, depth, goalLink, onSelect }: GoalN
 
   const classes = cn(
     "flex items-center gap-2 px-3 py-1.5 text-sm transition-colors cursor-pointer hover:bg-accent/50",
+    goalDepthIndentClass(depth),
   );
 
   return (
@@ -59,14 +79,12 @@ function GoalNode({ goal, children, allGoals, depth, goalLink, onSelect }: GoalN
         <Link
           to={link}
           className={cn(classes, "no-underline text-inherit")}
-          style={{ paddingLeft: `${depth * 16 + 12}px` }}
         >
           {inner}
         </Link>
       ) : (
         <div
           className={classes}
-          style={{ paddingLeft: `${depth * 16 + 12}px` }}
           onClick={() => onSelect?.(goal)}
         >
           {inner}

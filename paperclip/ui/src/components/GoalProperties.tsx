@@ -46,9 +46,14 @@ function PickerButton({
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
-        <button className="cursor-pointer hover:opacity-80 transition-opacity">
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          className="h-auto p-0 transition-opacity hover:bg-transparent hover:opacity-80"
+        >
           {children}
-        </button>
+        </Button>
       </PopoverTrigger>
       <PopoverContent className="w-40 p-1" align="end">
         {options.map((opt) => (
