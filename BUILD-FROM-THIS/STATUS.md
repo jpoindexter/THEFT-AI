@@ -11,6 +11,15 @@ Canonical direction now lives in `SOURCE-OF-TRUTH.md` and `PARITY-DELTA.md`.
 
 Current active branch: `codex-current-design-migration`.
 
+## 2026-05-18 Runtime/Admin Drift Cleanup
+
+T119 is now in progress after the active product route launch gate passed. First cleanup slice normalized the finance/admin budget cards:
+
+- `AccountingModelCard.tsx` no longer uses route-local gradient surfaces or arbitrary title tracking.
+- `BudgetIncidentCard.tsx` now uses semantic destructive/card tokens instead of red custom panels.
+- `BudgetPolicyCard.tsx` was split at the 150-line guardrail, with metric/progress/pause sections moved to `budget-policy-card/BudgetPolicySections.tsx`.
+- Focused scanner for the four touched modules reports zero findings; active-route `pnpm design:gate` still passes with only the reviewed runtime exceptions.
+
 The Paperclip app is genuinely large. The remaining drag is mostly not missing MVP capability; it is oversized route/organism code inherited from the Paperclip host plus the THEFT UX migration. The active-route design-system gate currently passes with zero unallowed findings, but several files still exceed the maintainability guardrail and need continued modularization.
 
 Recent pushed checkpoints:
