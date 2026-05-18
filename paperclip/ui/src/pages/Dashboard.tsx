@@ -16,7 +16,7 @@ import {
   OperatorDock,
   OperatorDrawer,
   OutcomesPanel,
-  TheftPageShell,
+  TheftWorkbenchTemplate,
   StrategyMapPanel,
 } from "@/components/theft";
 import { EmptyState } from "../components/EmptyState";
@@ -215,7 +215,7 @@ export function Dashboard() {
   const isFreshCompany = (issues?.length ?? 0) === 0 && latestLibraryDocuments.length === 0;
 
   return (
-    <TheftPageShell
+    <TheftWorkbenchTemplate
       className="min-h-0 bg-background text-foreground"
       contentClassName="theft-dashboard-container block space-y-6 overflow-x-hidden px-1 pb-28 md:px-3"
     >
@@ -290,6 +290,6 @@ export function Dashboard() {
         isPending={createTaskMutation.isPending}
         canSubmit={!!operatorDraft.trim()}
       />
-    </TheftPageShell>
+    </TheftWorkbenchTemplate>
   );
 }

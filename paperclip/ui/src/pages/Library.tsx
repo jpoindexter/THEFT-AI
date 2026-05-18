@@ -8,7 +8,7 @@ import {
 import { agentsApi } from "../api/agents";
 import { issuesApi } from "../api/issues";
 import { EmptyState } from "../components/EmptyState";
-import { LibraryControls, LibraryWorkspace, TheftPageShell } from "@/components/theft";
+import { LibraryControls, LibraryWorkspace, TheftWorkbenchTemplate } from "@/components/theft";
 import { Button } from "@/components/ui/button";
 import { useBreadcrumbs } from "../context/BreadcrumbContext";
 import { useCompany } from "../context/CompanyContext";
@@ -151,7 +151,7 @@ export function Library() {
   }
 
   return (
-    <TheftPageShell
+    <TheftWorkbenchTemplate
       eyebrow="Company memory"
       title="Outcomes Library"
       description="Durable company output, provenance, and source tasks grouped by department."
@@ -209,6 +209,6 @@ export function Library() {
           saving={saveDocument.isPending}
         />
       )}
-    </TheftPageShell>
+    </TheftWorkbenchTemplate>
   );
 }

@@ -12,7 +12,7 @@ import { queryKeys } from "../lib/queryKeys";
 import { createIssueDetailLocationState } from "../lib/issueDetailBreadcrumb";
 import { EmptyState } from "../components/EmptyState";
 import { IssuesList } from "../components/IssuesList";
-import { TasksMissionHeader, TheftPageShell } from "@/components/theft";
+import { TasksMissionHeader, TheftWorkbenchTemplate } from "@/components/theft";
 import { CircleDot } from "lucide-react";
 import {
   ISSUES_PAGE_SIZE,
@@ -154,7 +154,7 @@ export function Issues() {
   }
 
   return (
-    <TheftPageShell
+    <TheftWorkbenchTemplate
       className="min-h-0 bg-background text-foreground"
       contentClassName="block space-y-5 overflow-x-hidden px-1 pb-24 md:px-3"
     >
@@ -186,6 +186,6 @@ export function Issues() {
         createIssueLabel="Task"
         defaultSortField="workflow"
       />
-    </TheftPageShell>
+    </TheftWorkbenchTemplate>
   );
 }

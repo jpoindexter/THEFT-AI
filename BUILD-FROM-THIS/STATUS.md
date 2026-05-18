@@ -91,6 +91,7 @@ Current local modularization checkpoint:
 - Added `pnpm verify:active-ui`, compact viewport route smoke support, and THEFT page-shell viewport assertions for active product screens.
 - Converted Department Workspace to `TheftWorkbenchTemplate` plus `TheftSurface` atoms for its hero, stat, focus, work, Operator, Library, and capability panels.
 - Extracted Tech Tree detail metrics, evidence gate, link rows, property toggle, and link helpers so `GoalDetail.tsx` now fits the 300-line guardrail and uses shared template composition.
+- Converted Dashboard, Tasks, Library, and Tech Tree route bodies to `TheftWorkbenchTemplate` so active MVP routes now compose through shared THEFT templates.
 - Moved the issue-chat composer safe-area dock value into a semantic CSS utility.
 
 Latest verification for the active modularization slices:
@@ -125,6 +126,7 @@ Latest verification for the active modularization slices:
 - `THEFT_CHROME_PATH='/Applications/Google Chrome.app/Contents/MacOS/Google Chrome' pnpm verify:active-ui` passed: design gate plus desktop, mobile, and short-height MVP route smokes.
 - Focused active route Vitest and `verify:active-ui` passed after the Department Workspace template/atom migration.
 - Focused active route Vitest and `verify:active-ui` passed after the Goal Detail template/primitive split.
+- Focused active route Vitest and `verify:active-ui` passed after the active route workbench-template conversion.
 - Focused Vitest for issue chat, issue documents, and issue detail passed: 78 tests across 4 files.
 - Focused IssueChatThread Vitest passed: 61 tests across 2 files.
 - Focused onboarding utility Vitest passed: 21 tests across 5 files.

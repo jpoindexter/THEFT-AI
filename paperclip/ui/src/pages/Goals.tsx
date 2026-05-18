@@ -11,7 +11,7 @@ import { queryKeys } from "../lib/queryKeys";
 import { EmptyState } from "../components/EmptyState";
 import { PageSkeleton } from "../components/PageSkeleton";
 import { Button } from "@/components/ui/button";
-import { TechTreeStrategyMap, TheftPageShell } from "@/components/theft";
+import { TechTreeStrategyMap, TheftWorkbenchTemplate } from "@/components/theft";
 import { Plus, Target } from "lucide-react";
 import { buildTechTreeNodeViews, getNextTechTreeNode } from "../lib/techTree";
 
@@ -64,7 +64,7 @@ export function Goals() {
   }
 
   return (
-    <TheftPageShell
+    <TheftWorkbenchTemplate
       eyebrow="Strategy map / Tech Tree"
       title="Tech Tree"
       description="Company build order, dependencies, evidence, and next unlocks."
@@ -96,6 +96,6 @@ export function Goals() {
           }}
         />
       )}
-    </TheftPageShell>
+    </TheftWorkbenchTemplate>
   );
 }
