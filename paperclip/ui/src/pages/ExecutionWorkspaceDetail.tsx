@@ -1,27 +1,24 @@
 import { useEffect, useMemo, useState } from "react";
-import { Navigate, useLocation, useNavigate, useParams } from "@/lib/router";
+import { useLocation, useNavigate, useParams } from "@/lib/router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs } from "@/components/ui/tabs";
 import { ExecutionWorkspaceCloseDialog } from "../components/ExecutionWorkspaceCloseDialog";
 import { executionWorkspacesApi } from "../api/execution-workspaces";
-import { issuesApi } from "../api/issues";
-import { projectsApi } from "../api/projects";
-import { PageTabBar } from "../components/PageTabBar";
 import {
   buildWorkspaceRuntimeControlSections,
-  WorkspaceRuntimeQuickControls,
   WorkspaceRuntimeControls,
   type WorkspaceRuntimeControlRequest,
 } from "../components/WorkspaceRuntimeControls";
 import { useBreadcrumbs } from "../context/BreadcrumbContext";
 import { useCompany } from "../context/CompanyContext";
 import { queryKeys } from "../lib/queryKeys";
-import { formatDateTime, projectRouteRef } from "../lib/utils";
+import { projectRouteRef } from "../lib/utils";
 import { WorkspaceContextCards } from "./execution-workspace-detail/WorkspaceContextCards";
+import { ExecutionWorkspaceHeader } from "./execution-workspace-detail/ExecutionWorkspaceHeader";
 import { ExecutionWorkspaceIssuesList } from "./execution-workspace-detail/ExecutionWorkspaceIssuesList";
 import { ExecutionWorkspaceRoutinesList } from "./execution-workspace-detail/ExecutionWorkspaceRoutinesList";
 import { WorkspaceSettingsCard } from "./execution-workspace-detail/WorkspaceSettingsCard";
+import { WorkspaceRuntimeLogsCard } from "./execution-workspace-detail/WorkspaceRuntimeLogsCard";
+import { useExecutionWorkspaceData } from "./execution-workspace-detail/useExecutionWorkspaceData";
 import {
   buildWorkspacePatch,
   formStateFromWorkspace,
@@ -29,38 +26,11 @@ import {
   type WorkspaceFormState,
 } from "./execution-workspace-detail/workspaceForm";
 import {
-  StatusPill,
-} from "./execution-workspace-detail/WorkspaceDetailPrimitives";
-
-type ExecutionWorkspaceTab = "services" | "configuration" | "runtime_logs" | "issues" | "routines";
-
-function resolveExecutionWorkspaceTab(pathname: string, workspaceId: string): ExecutionWorkspaceTab | null {
-  const segments = pathname.split("/").filter(Boolean);
-  const executionWorkspacesIndex = segments.indexOf("execution-workspaces");
-  if (executionWorkspacesIndex === -1 || segments[executionWorkspacesIndex + 1] !== workspaceId) return null;
-  const tab = segments[executionWorkspacesIndex + 2];
-  if (tab === "services") return "services";
-  if (tab === "issues") return "issues";
-  if (tab === "routines") return "routines";
-  if (tab === "runtime-logs") return "runtime_logs";
-  if (tab === "configuration") return "configuration";
-  return null;
-}
-
-function executionWorkspaceTabPath(workspaceId: string, tab: ExecutionWorkspaceTab) {
-  const segment = tab === "runtime_logs" ? "runtime-logs" : tab;
-  return `/execution-workspaces/${workspaceId}/${segment}`;
-}
-
-function LegacyWorkspaceTabRedirect({ workspaceId }: { workspaceId: string }) {
-  useEffect(() => {
-    try {
-      localStorage.removeItem(`paperclip:execution-workspace-tab:${workspaceId}`);
-    } catch {}
-  }, [workspaceId]);
-
-  return <Navigate to={executionWorkspaceTabPath(workspaceId, "issues")} replace />;
-}
+  executionWorkspaceTabPath,
+  LegacyWorkspaceTabRedirect,
+  resolveExecutionWorkspaceTab,
+  type ExecutionWorkspaceTab,
+} from "./execution-workspace-detail/workspaceTabs";
 
 export function ExecutionWorkspaceDetail() {
   const { workspaceId } = useParams<{ workspaceId: string }>();
@@ -75,49 +45,16 @@ export function ExecutionWorkspaceDetail() {
   const [runtimeActionErrorMessage, setRuntimeActionErrorMessage] = useState<string | null>(null);
   const [runtimeActionMessage, setRuntimeActionMessage] = useState<string | null>(null);
   const activeTab = workspaceId ? resolveExecutionWorkspaceTab(location.pathname, workspaceId) : null;
-
-  const workspaceQuery = useQuery({
-    queryKey: queryKeys.executionWorkspaces.detail(workspaceId!),
-    queryFn: () => executionWorkspacesApi.get(workspaceId!),
-    enabled: Boolean(workspaceId),
-  });
-  const workspace = workspaceQuery.data ?? null;
-
-  const projectQuery = useQuery({
-    queryKey: workspace ? [...queryKeys.projects.detail(workspace.projectId), workspace.companyId] : ["projects", "detail", "__pending__"],
-    queryFn: () => projectsApi.get(workspace!.projectId, workspace!.companyId),
-    enabled: Boolean(workspace?.projectId),
-  });
-  const project = projectQuery.data ?? null;
-
-  const sourceIssueQuery = useQuery({
-    queryKey: workspace?.sourceIssueId ? queryKeys.issues.detail(workspace.sourceIssueId) : ["issues", "detail", "__none__"],
-    queryFn: () => issuesApi.get(workspace!.sourceIssueId!),
-    enabled: Boolean(workspace?.sourceIssueId),
-  });
-  const sourceIssue = sourceIssueQuery.data ?? null;
-
-  const derivedWorkspaceQuery = useQuery({
-    queryKey: workspace?.derivedFromExecutionWorkspaceId
-      ? queryKeys.executionWorkspaces.detail(workspace.derivedFromExecutionWorkspaceId)
-      : ["execution-workspaces", "detail", "__none__"],
-    queryFn: () => executionWorkspacesApi.get(workspace!.derivedFromExecutionWorkspaceId!),
-    enabled: Boolean(workspace?.derivedFromExecutionWorkspaceId),
-  });
-  const derivedWorkspace = derivedWorkspaceQuery.data ?? null;
-  const linkedIssuesQuery = useQuery({
-    queryKey: workspace
-      ? queryKeys.issues.listByExecutionWorkspace(workspace.companyId, workspace.id)
-      : ["issues", "__execution-workspace__", "__none__"],
-    queryFn: () => issuesApi.list(workspace!.companyId, { executionWorkspaceId: workspace!.id }),
-    enabled: Boolean(workspace?.companyId),
-  });
-  const linkedIssues = linkedIssuesQuery.data ?? [];
-
-  const linkedProjectWorkspace = useMemo(
-    () => project?.workspaces.find((item) => item.id === workspace?.projectWorkspaceId) ?? null,
-    [project, workspace?.projectWorkspaceId],
-  );
+  const {
+    workspaceQuery,
+    workspace,
+    project,
+    sourceIssue,
+    derivedWorkspace,
+    linkedIssuesQuery,
+    linkedIssues,
+    linkedProjectWorkspace,
+  } = useExecutionWorkspaceData(workspaceId);
   const inheritedRuntimeConfig = linkedProjectWorkspace?.runtimeConfig?.workspaceRuntime ?? null;
   const effectiveRuntimeConfig = workspace?.config?.workspaceRuntime ?? inheritedRuntimeConfig;
   const runtimeConfigSource =
@@ -252,37 +189,17 @@ export function ExecutionWorkspaceDetail() {
   return (
     <>
       <div className="space-y-4 overflow-hidden sm:space-y-6">
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-          <div className="min-w-0 space-y-2">
-            <div className="text-xs font-medium uppercase tracking-widest text-muted-foreground">
-              Execution workspace
-            </div>
-            <h1 className="truncate text-xl font-semibold sm:text-2xl">{workspace.name}</h1>
-          </div>
-          <WorkspaceRuntimeQuickControls
-            sections={runtimeControlSections}
-            isPending={controlRuntimeServices.isPending}
-            pendingRequest={pendingRuntimeAction}
-            onAction={(request) => controlRuntimeServices.mutate(request)}
-          />
-        </div>
-        {runtimeActionErrorMessage ? <p className="text-sm text-destructive">{runtimeActionErrorMessage}</p> : null}
-        {!runtimeActionErrorMessage && runtimeActionMessage ? <p className="text-sm text-muted-foreground">{runtimeActionMessage}</p> : null}
-
-        <Tabs value={activeTab ?? "issues"} onValueChange={(value) => handleTabChange(value as ExecutionWorkspaceTab)}>
-          <PageTabBar
-            items={[
-              { value: "issues", label: "Issues" },
-              { value: "services", label: "Services" },
-              { value: "configuration", label: "Configuration" },
-              { value: "runtime_logs", label: "Runtime logs" },
-              { value: "routines", label: "Routines" },
-            ]}
-            align="start"
-            value={activeTab ?? "issues"}
-            onValueChange={(value) => handleTabChange(value as ExecutionWorkspaceTab)}
-          />
-        </Tabs>
+        <ExecutionWorkspaceHeader
+          workspaceName={workspace.name}
+          activeTab={activeTab}
+          runtimeControlSections={runtimeControlSections}
+          isRuntimePending={controlRuntimeServices.isPending}
+          pendingRuntimeAction={pendingRuntimeAction}
+          runtimeActionErrorMessage={runtimeActionErrorMessage}
+          runtimeActionMessage={runtimeActionMessage}
+          onRuntimeAction={(request) => controlRuntimeServices.mutate(request)}
+          onTabChange={handleTabChange}
+        />
 
         {activeTab === "services" ? (
           <WorkspaceRuntimeControls
@@ -334,47 +251,11 @@ export function ExecutionWorkspaceDetail() {
             />
           </div>
         ) : activeTab === "runtime_logs" ? (
-          <Card>
-            <CardHeader>
-              <CardTitle>Runtime and cleanup logs</CardTitle>
-              <CardDescription>Recent operations</CardDescription>
-            </CardHeader>
-            <CardContent>
-            {workspaceOperationsQuery.isLoading ? (
-              <p className="text-sm text-muted-foreground">Loading workspace operations…</p>
-            ) : workspaceOperationsQuery.error ? (
-              <p className="text-sm text-destructive">
-                {workspaceOperationsQuery.error instanceof Error
-                  ? workspaceOperationsQuery.error.message
-                  : "Failed to load workspace operations."}
-              </p>
-            ) : workspaceOperationsQuery.data && workspaceOperationsQuery.data.length > 0 ? (
-              <div className="space-y-3">
-                {workspaceOperationsQuery.data.map((operation) => (
-                  <div key={operation.id} className="rounded-md border border-border/80 bg-background px-4 py-3">
-                    <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-                      <div className="space-y-1">
-                        <div className="text-sm font-medium">{operation.command ?? operation.phase}</div>
-                        <div className="text-xs text-muted-foreground">
-                          {formatDateTime(operation.startedAt)}
-                          {operation.finishedAt ? ` → ${formatDateTime(operation.finishedAt)}` : ""}
-                        </div>
-                        {operation.stderrExcerpt ? (
-                          <div className="whitespace-pre-wrap break-words text-xs text-destructive">{operation.stderrExcerpt}</div>
-                        ) : operation.stdoutExcerpt ? (
-                          <div className="whitespace-pre-wrap break-words text-xs text-muted-foreground">{operation.stdoutExcerpt}</div>
-                        ) : null}
-                      </div>
-                      <StatusPill className="self-start">{operation.status}</StatusPill>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <p className="text-sm text-muted-foreground">No workspace operations have been recorded yet.</p>
-            )}
-            </CardContent>
-          </Card>
+          <WorkspaceRuntimeLogsCard
+            operations={workspaceOperationsQuery.data}
+            isLoading={workspaceOperationsQuery.isLoading}
+            error={workspaceOperationsQuery.error as Error | null}
+          />
         ) : activeTab === "issues" ? (
           <ExecutionWorkspaceIssuesList
             companyId={workspace.companyId}
