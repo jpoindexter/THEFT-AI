@@ -3,7 +3,6 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import type { IssueWorkMode } from "@paperclipai/shared";
 import { useDialog } from "../context/DialogContext";
 import { useCompany } from "../context/CompanyContext";
-import { useAdapterCapabilities } from "../adapters/use-adapter-capabilities";
 import { executionWorkspacesApi } from "../api/execution-workspaces";
 import { issuesApi } from "../api/issues";
 import { instanceSettingsApi } from "../api/instanceSettings";
@@ -12,28 +11,24 @@ import { agentsApi } from "../api/agents";
 import { accessApi } from "../api/access";
 import { authApi } from "../api/auth";
 import { assetsApi } from "../api/assets";
-import { buildCompanyUserInlineOptions, buildMarkdownMentionOptions } from "../lib/company-members";
 import { queryKeys } from "../lib/queryKeys";
 import { orderReusableExecutionWorkspaces } from "../lib/reusable-execution-workspaces";
 import { useProjectOrder } from "../hooks/useProjectOrder";
-import { getRecentAssigneeIds, sortAgentsByRecency, trackRecentAssignee } from "../lib/recent-assignees";
+import { trackRecentAssignee } from "../lib/recent-assignees";
 import { getRecentProjectIds, trackRecentProject } from "../lib/recent-projects";
 import { buildExecutionPolicy } from "../lib/issue-execution-policy";
 import { useToastActions } from "../context/ToastContext";
 import {
   assigneeValueFromSelection,
-  currentUserAssigneeOption,
   parseAssigneeValue,
 } from "../lib/assignees";
-import { extractProviderIdWithFallback } from "../lib/model-utils";
-import type { MarkdownEditorRef, MentionOption } from "./MarkdownEditor";
+import type { MarkdownEditorRef } from "./MarkdownEditor";
 import type { InlineEntityOption } from "./InlineEntitySelector";
 import { NewIssueDialogSurface } from "./new-issue-dialog/NewIssueDialogSurface";
 import {
   defaultExecutionWorkspaceModeForIssueDefaults,
   defaultExecutionWorkspaceModeForProject,
   defaultProjectWorkspaceIdForProject,
-  ISSUE_THINKING_EFFORT_OPTIONS,
   issueExecutionWorkspaceModeForExistingWorkspace,
 } from "./new-issue-dialog/issueDialogDefaults";
 import { useStagedIssueFiles, type StagedIssueFile } from "./new-issue-dialog/useStagedIssueFiles";
@@ -43,10 +38,10 @@ import {
   loadIssueDraft,
   useIssueDraftState,
 } from "./new-issue-dialog/useIssueDraftState";
+import { useNewIssueAssigneeData } from "./new-issue-dialog/useNewIssueAssigneeData";
 
 import {
   buildAssigneeAdapterOverrides,
-  ISSUE_OVERRIDE_ADAPTER_TYPES,
   type IssueModelLane,
 } from "../lib/issue-assignee-overrides";
 
@@ -187,49 +182,35 @@ export function NewIssueDialog() {
     companyId: effectiveCompanyId,
     userId: currentUserId,
   });
-
-  const selectedAssignee = useMemo(() => parseAssigneeValue(assigneeValue), [assigneeValue]);
-  const selectedAssigneeAgentId = selectedAssignee.assigneeAgentId;
-  const selectedAssigneeUserId = selectedAssignee.assigneeUserId;
-
-  const assigneeAdapterType = (agents ?? []).find((agent) => agent.id === selectedAssigneeAgentId)?.adapterType ?? null;
-  const supportsAssigneeOverrides = Boolean(
-    assigneeAdapterType && ISSUE_OVERRIDE_ADAPTER_TYPES.has(assigneeAdapterType),
-  );
-  const getAdapterCapabilities = useAdapterCapabilities();
-  const assigneeAdapterCapabilities = assigneeAdapterType
-    ? getAdapterCapabilities(assigneeAdapterType)
-    : null;
-  const assigneeSupportsCheapLane = Boolean(
-    supportsAssigneeOverrides && assigneeAdapterCapabilities?.supportsModelProfiles,
-  );
-
-  const { data: assigneeCheapProfiles } = useQuery({
-    queryKey: effectiveCompanyId && assigneeAdapterType
-      ? queryKeys.agents.adapterModelProfiles(effectiveCompanyId, assigneeAdapterType)
-      : ["agents", "none", "adapter-model-profiles", assigneeAdapterType ?? "none"],
-    queryFn: () => agentsApi.adapterModelProfiles(effectiveCompanyId!, assigneeAdapterType!),
-    enabled: Boolean(effectiveCompanyId) && newIssueOpen && assigneeSupportsCheapLane,
-  });
-  const assigneeCheapProfile = useMemo(
-    () => (assigneeCheapProfiles ?? []).find((profile) => profile.key === "cheap") ?? null,
-    [assigneeCheapProfiles],
-  );
-  const mentionOptions = useMemo<MentionOption[]>(() => {
-    return buildMarkdownMentionOptions({
-      agents,
-      projects: orderedProjects,
-      members: companyMembers?.users,
-    });
-  }, [agents, companyMembers?.users, orderedProjects]);
-
-  const { data: assigneeAdapterModels } = useQuery({
-    queryKey:
-      effectiveCompanyId && assigneeAdapterType
-        ? queryKeys.agents.adapterModels(effectiveCompanyId, assigneeAdapterType)
-        : ["agents", "none", "adapter-models", assigneeAdapterType ?? "none"],
-    queryFn: () => agentsApi.adapterModels(effectiveCompanyId!, assigneeAdapterType!),
-    enabled: Boolean(effectiveCompanyId) && newIssueOpen && supportsAssigneeOverrides,
+  const {
+    assigneeAdapterType,
+    assigneeCheapProfile,
+    assigneeOptions,
+    assigneeOptionsTitle,
+    assigneeSupportsCheapLane,
+    currentAssignee,
+    mentionOptions,
+    modelOverrideOptions,
+    recentAssigneeOptionIds,
+    selectedAssigneeAgentId,
+    selectedAssigneeUserId,
+    supportsAssigneeOverrides,
+    thinkingEffortOptions,
+  } = useNewIssueAssigneeData({
+    companyId: effectiveCompanyId,
+    newIssueOpen,
+    agents: agents ?? [],
+    orderedProjects,
+    companyMembers,
+    currentUserId,
+    assigneeValue,
+    assigneeModelLane,
+    assigneeThinkingEffort,
+    onAssigneeOptionsOpenChange: setAssigneeOptionsOpen,
+    onAssigneeModelLaneChange: setAssigneeModelLane,
+    onAssigneeModelOverrideChange: setAssigneeModelOverride,
+    onAssigneeThinkingEffortChange: setAssigneeThinkingEffort,
+    onAssigneeChromeChange: setAssigneeChrome,
   });
 
   const createIssue = useMutation({
@@ -430,36 +411,6 @@ export function NewIssueDialog() {
     }
   }, [newIssueOpen, newIssueDefaults, orderedProjects, selectedCompanyId, setIssueText]);
 
-  useEffect(() => {
-    if (!supportsAssigneeOverrides) {
-      setAssigneeOptionsOpen(false);
-      setAssigneeModelLane("primary");
-      setAssigneeModelOverride("");
-      setAssigneeThinkingEffort("");
-      setAssigneeChrome(false);
-      return;
-    }
-    if (!assigneeSupportsCheapLane && assigneeModelLane === "cheap") {
-      setAssigneeModelLane("primary");
-    }
-
-    const validThinkingValues =
-      assigneeAdapterType === "codex_local"
-        ? ISSUE_THINKING_EFFORT_OPTIONS.codex_local
-        : assigneeAdapterType === "opencode_local"
-          ? ISSUE_THINKING_EFFORT_OPTIONS.opencode_local
-          : ISSUE_THINKING_EFFORT_OPTIONS.claude_local;
-    if (!validThinkingValues.some((option) => option.value === assigneeThinkingEffort)) {
-      setAssigneeThinkingEffort("");
-    }
-  }, [
-    supportsAssigneeOverrides,
-    assigneeAdapterType,
-    assigneeThinkingEffort,
-    assigneeSupportsCheapLane,
-    assigneeModelLane,
-  ]);
-
   function reset() {
     setIssueText("", "");
     setStatus("todo");
@@ -580,9 +531,6 @@ export function NewIssueDialog() {
   }
 
   const hasDraft = draftHasText || stagedFiles.length > 0;
-  const currentAssignee = selectedAssigneeAgentId
-    ? (agents ?? []).find((a) => a.id === selectedAssigneeAgentId) ?? null
-    : null;
   const currentProject = orderedProjects.find((project) => project.id === projectId);
   const currentProjectExecutionWorkspacePolicy =
     experimentalSettings?.enableIsolatedWorkspaces === true
@@ -602,41 +550,7 @@ export function NewIssueDialog() {
     && currentProjectSupportsExecutionWorkspace
     && Boolean(parentExecutionWorkspaceId)
     && !isUsingParentExecutionWorkspace;
-  const assigneeOptionsTitle =
-    assigneeAdapterType === "claude_local"
-      ? "Claude options"
-      : assigneeAdapterType === "codex_local"
-        ? "Codex options"
-        : assigneeAdapterType === "opencode_local"
-          ? "OpenCode options"
-        : "Agent options";
-  const thinkingEffortOptions =
-    assigneeAdapterType === "codex_local"
-      ? ISSUE_THINKING_EFFORT_OPTIONS.codex_local
-      : assigneeAdapterType === "opencode_local"
-        ? ISSUE_THINKING_EFFORT_OPTIONS.opencode_local
-      : ISSUE_THINKING_EFFORT_OPTIONS.claude_local;
-  const recentAssigneeIds = useMemo(() => getRecentAssigneeIds(), [newIssueOpen]);
-  const recentAssigneeOptionIds = useMemo(
-    () => recentAssigneeIds.map((id) => assigneeValueFromSelection({ assigneeAgentId: id })),
-    [recentAssigneeIds],
-  );
   const recentProjectIds = useMemo(() => getRecentProjectIds(), [newIssueOpen]);
-  const assigneeOptions = useMemo<InlineEntityOption[]>(
-    () => [
-      ...currentUserAssigneeOption(currentUserId),
-      ...buildCompanyUserInlineOptions(companyMembers?.users, { excludeUserIds: [currentUserId] }),
-      ...sortAgentsByRecency(
-        (agents ?? []).filter((agent) => agent.status !== "terminated"),
-        recentAssigneeIds,
-      ).map((agent) => ({
-        id: assigneeValueFromSelection({ assigneeAgentId: agent.id }),
-        label: agent.name,
-        searchText: `${agent.name} ${agent.role} ${agent.title ?? ""}`,
-      })),
-    ],
-    [agents, companyMembers?.users, currentUserId, recentAssigneeIds],
-  );
   const projectOptions = useMemo<InlineEntityOption[]>(
     () =>
       orderedProjects.map((project) => ({
@@ -675,24 +589,6 @@ export function NewIssueDialog() {
     setExecutionWorkspaceMode(defaultExecutionWorkspaceModeForProject(project));
     setSelectedExecutionWorkspaceId("");
   }, [newIssueOpen, orderedProjects, projectId, selectedExecutionWorkspaceId]);
-  const modelOverrideOptions = useMemo<InlineEntityOption[]>(
-    () => {
-      return [...(assigneeAdapterModels ?? [])]
-        .sort((a, b) => {
-          const providerA = extractProviderIdWithFallback(a.id);
-          const providerB = extractProviderIdWithFallback(b.id);
-          const byProvider = providerA.localeCompare(providerB);
-          if (byProvider !== 0) return byProvider;
-          return a.id.localeCompare(b.id);
-        })
-        .map((model) => ({
-          id: model.id,
-          label: model.label,
-          searchText: `${model.id} ${extractProviderIdWithFallback(model.id)}`,
-        }));
-    },
-    [assigneeAdapterModels],
-  );
   return (
     <NewIssueDialogSurface
       adapterType={assigneeAdapterType}

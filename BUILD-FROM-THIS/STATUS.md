@@ -86,6 +86,10 @@ T119 is now in progress after the active product route launch gate passed. First
   - `CompanyImport.tsx` now fits under 300 lines after moving import source/package state and conflict rename/skip/confirm state into guarded route-local hooks. Focused `CompanyImport` scanner reports zero findings.
   - `NewIssueDialog.tsx` continued structural cleanup with execution workspace defaults and thinking-effort option constants moved into `new-issue-dialog/issueDialogDefaults.ts`; the parent is down to 826 lines and focused scanner remains clean.
   - Active-route `pnpm design:gate`, focused `NewIssueDialog` Vitest, typecheck, and `git diff --check` passed. Repo-wide scanner remains at 1057 findings because this slice mostly reduced module size, not scanner-count drift.
+- T120 continued with scanner-clean structural splits:
+  - `NewIssueDialog.tsx` moved assignee/model derived data, adapter capability/model queries, mention options, and override normalization into `new-issue-dialog/useNewIssueAssigneeData.ts`; the parent is down to 722 lines.
+  - `Inbox.tsx` moved approval and join-request decision rows into `pages/inbox/InboxDecisionRows.tsx`; the parent is down to 2198 lines and focused `Inbox` scanning remains clean.
+  - Focused `NewIssueDialog` and `Inbox` Vitest passed, typecheck passed, active-route `pnpm design:gate` passed, and repo-wide scanner remains at 1057 findings.
 
 The Paperclip app is genuinely large. The remaining drag is mostly not missing MVP capability; it is oversized route/organism code inherited from the Paperclip host plus the THEFT UX migration. The active-route design-system gate currently passes with zero unallowed findings, but several files still exceed the maintainability guardrail and need continued modularization.
 
