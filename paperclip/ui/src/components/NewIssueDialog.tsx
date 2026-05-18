@@ -1378,18 +1378,19 @@ export function NewIssueDialog() {
               {/* Three-dot menu to add Reviewer / Approver rows */}
               <Popover open={participantMenuOpen} onOpenChange={setParticipantMenuOpen}>
                 <PopoverTrigger asChild>
-                  <button
-                    type="button"
-                    className="inline-flex items-center justify-center rounded-md p-1 text-muted-foreground hover:bg-accent/50 transition-colors"
+                  <Button
+                    type="button" variant="ghost" size="icon-xs"
+                    className="text-muted-foreground hover:bg-accent/50"
                     title="Add reviewer or approver"
                   >
                     <MoreHorizontal className="h-4 w-4" />
-                  </button>
+                  </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-44 p-1" align="start">
-                  <button
+                  <Button
+                    type="button" variant="ghost" size="xs"
                     className={cn(
-                      "flex items-center gap-2 w-full px-2 py-1.5 text-xs rounded hover:bg-accent/50",
+                      "w-full justify-start font-normal hover:bg-accent/50",
                       showReviewerRow && "bg-accent",
                     )}
                     onClick={() => {
@@ -1400,10 +1401,11 @@ export function NewIssueDialog() {
                   >
                     <Eye className="h-3 w-3" />
                     Reviewer
-                  </button>
-                  <button
+                  </Button>
+                  <Button
+                    type="button" variant="ghost" size="xs"
                     className={cn(
-                      "flex items-center gap-2 w-full px-2 py-1.5 text-xs rounded hover:bg-accent/50",
+                      "w-full justify-start font-normal hover:bg-accent/50",
                       showApproverRow && "bg-accent",
                     )}
                     onClick={() => {
@@ -1414,7 +1416,7 @@ export function NewIssueDialog() {
                   >
                     <ShieldCheck className="h-3 w-3" />
                     Approver
-                  </button>
+                  </Button>
                 </PopoverContent>
               </Popover>
               </div>
@@ -1581,13 +1583,14 @@ export function NewIssueDialog() {
 
           {supportsAssigneeOverrides && (
             <div className="px-4 pb-2">
-            <button
-              className="inline-flex items-center gap-1.5 text-xs font-medium text-muted-foreground hover:text-foreground transition-colors"
+            <Button
+              type="button" variant="ghost" size="xs"
+              className="-ml-1 h-auto px-1 py-0 text-xs font-medium text-muted-foreground hover:bg-transparent hover:text-foreground"
               onClick={() => setAssigneeOptionsOpen((open) => !open)}
             >
               {assigneeOptionsOpen ? <ChevronDown className="h-3 w-3" /> : <ChevronRight className="h-3 w-3" />}
               {assigneeOptionsTitle}
-            </button>
+            </Button>
             {assigneeOptionsOpen && (
               <div className="mt-2 rounded-md border border-border p-3 bg-muted/20 space-y-3">
                 <div className="space-y-1.5">
@@ -1598,13 +1601,13 @@ export function NewIssueDialog() {
                     aria-label="Model lane"
                   >
                     {(["primary", ...(assigneeSupportsCheapLane ? (["cheap"] as const) : ([] as const)), "custom"] as const).map((lane) => (
-                      <button
+                      <Button
                         key={lane}
-                        type="button"
+                        type="button" variant="ghost" size="xs"
                         role="radio"
                         aria-checked={assigneeModelLane === lane}
                         className={cn(
-                          "flex-1 px-2 py-1 text-xs capitalize transition-colors hover:bg-accent/40",
+                          "h-auto flex-1 px-2 py-1 text-xs capitalize hover:bg-accent/40",
                           assigneeModelLane === lane && "bg-accent text-foreground",
                         )}
                         onClick={() => setAssigneeModelLane(lane)}
@@ -1614,7 +1617,7 @@ export function NewIssueDialog() {
                           : lane === "cheap"
                             ? "Cheap"
                             : "Custom"}
-                      </button>
+                      </Button>
                     ))}
                   </div>
                   {assigneeModelLane === "cheap" && (
@@ -1654,16 +1657,17 @@ export function NewIssueDialog() {
                     <div className="text-xs text-muted-foreground">Thinking effort</div>
                     <div className="flex items-center gap-1.5 flex-wrap">
                       {thinkingEffortOptions.map((option) => (
-                        <button
+                        <Button
                           key={option.value || "default"}
+                          type="button" variant="outline" size="xs"
                           className={cn(
-                            "px-2 py-1 rounded-md text-xs border border-border hover:bg-accent/50 transition-colors",
+                            "font-normal hover:bg-accent/50",
                             assigneeThinkingEffort === option.value && "bg-accent"
                           )}
                           onClick={() => setAssigneeThinkingEffort(option.value)}
                         >
                           {option.label}
-                        </button>
+                        </Button>
                       ))}
                     </div>
                   </div>

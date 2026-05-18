@@ -1,10 +1,10 @@
 import { useMemo } from "react";
 import type { CostByProviderModel, CostWindowSpendRow, QuotaWindow } from "@paperclipai/shared";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Skeleton } from "@/components/ui/skeleton";
 import { QuotaBar } from "./QuotaBar";
 import { ClaudeSubscriptionPanel } from "./ClaudeSubscriptionPanel";
 import { CodexSubscriptionPanel } from "./CodexSubscriptionPanel";
+import { MeterBar, MeterFill, QuotaPanelSkeleton } from "./provider-quota-card/ProviderQuotaParts";
 import {
   billingTypeDisplayName,
   formatCents,
@@ -203,12 +203,7 @@ export function ProviderQuotaCard({
                         </span>
                         <span className="font-medium tabular-nums">{formatCents(cents)}</span>
                       </div>
-                      <div className="h-2 w-full border border-border overflow-hidden">
-                        <div
-                          className="h-full bg-primary/60 transition-[width] duration-150"
-                          style={{ width: `${barPct}%` }}
-                        />
-                      </div>
+                      <MeterBar percent={barPct} />
                     </div>
                   );
                 })}
@@ -240,12 +235,7 @@ export function ProviderQuotaCard({
               </p>
               {subSharePct > 0 && (
                 <>
-                  <div className="h-1.5 w-full border border-border overflow-hidden">
-                    <div
-                      className="h-full bg-primary/60 transition-[width] duration-150"
-                      style={{ width: `${subSharePct}%` }}
-                    />
-                  </div>
+                  <MeterBar percent={subSharePct} heightClassName="h-1.5" />
                   <p className="text-xs text-muted-foreground">
                     {Math.round(subSharePct)}% of token usage via subscription
                   </p>
@@ -272,7 +262,7 @@ export function ProviderQuotaCard({
                         <span className="text-xs text-muted-foreground truncate font-mono block">
                           {row.model}
                         </span>
-                        <span className="text-[11px] text-muted-foreground truncate block">
+                        <span className="text-micro text-muted-foreground truncate block">
                           {providerDisplayName(row.biller)} · {billingTypeDisplayName(row.billingType)}
                         </span>
                       </div>
@@ -285,15 +275,15 @@ export function ProviderQuotaCard({
                     </div>
                     {/* token share bar */}
                     <div className="relative h-2 w-full border border-border overflow-hidden">
-                      <div
-                        className="absolute inset-y-0 left-0 bg-primary/60 transition-[width] duration-150"
-                        style={{ width: `${tokenPct}%` }}
+                      <MeterFill
+                        percent={tokenPct}
+                        className="absolute inset-y-0 left-0 bg-primary/60"
                         title={`${Math.round(tokenPct)}% of provider tokens`}
                       />
                       {/* cost share overlay — narrower, opaque, shows relative cost weight */}
-                      <div
-                        className="absolute inset-y-0 left-0 bg-primary/85 transition-[width] duration-150"
-                        style={{ width: `${costPct}%` }}
+                      <MeterFill
+                        percent={costPct}
+                        className="absolute inset-y-0 left-0 bg-primary/85"
                         title={`${Math.round(costPct)}% of provider cost`}
                       />
                     </div>
@@ -314,7 +304,7 @@ export function ProviderQuotaCard({
                   Subscription quota
                 </p>
                 {quotaSource && !isClaudeQuotaPanel && !isCodexQuotaPanel ? (
-                  <span className="text-[10px] uppercase tracking-[0.16em] text-muted-foreground">
+                  <span className="text-nano uppercase tracking-wide text-muted-foreground">
                     {quotaSourceDisplayName(quotaSource)}
                   </span>
                 ) : null}
@@ -354,12 +344,7 @@ export function ProviderQuotaCard({
                             ) : null}
                           </div>
                           {qw.usedPercent != null && fillColor != null && (
-                            <div className="h-2 w-full border border-border overflow-hidden">
-                              <div
-                                className={`h-full transition-[width] duration-150 ${fillColor}`}
-                                style={{ width: `${qw.usedPercent}%` }}
-                              />
-                            </div>
+                            <MeterBar percent={qw.usedPercent} fillClassName={fillColor} />
                           )}
                           {qw.detail ? (
                             <p className="text-xs text-muted-foreground">
@@ -381,36 +366,5 @@ export function ProviderQuotaCard({
         )}
       </CardContent>
     </Card>
-  );
-}
-
-function QuotaPanelSkeleton() {
-  return (
-    <div className="border border-border px-4 py-4">
-      <div className="flex items-start justify-between gap-3 border-b border-border pb-3">
-        <div className="min-w-0 space-y-2">
-          <Skeleton className="h-3 w-36" />
-          <Skeleton className="h-4 w-64 max-w-full" />
-        </div>
-        <Skeleton className="h-7 w-28" />
-      </div>
-      <div className="mt-4 space-y-3">
-        {Array.from({ length: 3 }).map((_, index) => (
-          <div
-            key={index}
-            className="border border-border px-3.5 py-3"
-          >
-            <div className="flex items-start justify-between gap-3">
-              <div className="min-w-0 space-y-2">
-                <Skeleton className="h-4 w-32" />
-                <Skeleton className="h-3 w-44 max-w-full" />
-              </div>
-              <Skeleton className="h-4 w-20" />
-            </div>
-            <Skeleton className="mt-3 h-2 w-full" />
-          </div>
-        ))}
-      </div>
-    </div>
   );
 }
