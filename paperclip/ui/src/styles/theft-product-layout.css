@@ -1,0 +1,253 @@
+.theft-launcher-shell {
+  height: 100dvh;
+  overflow: hidden;
+}
+
+.theft-launcher-grid {
+  display: grid;
+  grid-template-columns: var(--theft-rail-width) minmax(0, 1fr);
+  height: 100%;
+}
+
+.theft-launcher-main {
+  align-items: flex-start;
+  display: flex;
+  justify-content: center;
+  min-height: 0;
+  min-width: 0;
+  overflow-y: auto;
+  padding: var(--theft-space-2);
+}
+
+.theft-launcher-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--theft-radius-surface);
+  gap: 0;
+  box-shadow: var(--theft-shadow-soft);
+  max-width: var(--theft-launcher-card-max-width);
+  min-width: 0;
+  padding: var(--theft-space-3);
+  width: 100%;
+}
+
+.theft-onboarding-shell {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.theft-onboarding-body {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.theft-onboarding-header {
+  height: var(--theft-header-height);
+  padding-inline: var(--theft-space-2);
+}
+
+.theft-onboarding-panel-inner {
+  max-width: var(--theft-onboarding-panel-max-width);
+  padding: var(--theft-space-2);
+}
+
+.theft-assembly-grid {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.theft-tech-tree-layout {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.theft-tech-tree-stats {
+  min-width: min(100%, var(--theft-tech-tree-stat-min-width));
+}
+
+.theft-tech-tree-node-card {
+  border-radius: var(--theft-radius-surface);
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.theft-tech-tree-detail-grid {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.theft-tech-tree-build-column {
+  grid-template-rows:
+    var(--theft-tech-tree-phase-height)
+    repeat(3, var(--theft-tech-tree-node-height));
+}
+
+.theft-tech-tree-phase-card {
+  min-height: var(--theft-tech-tree-phase-height);
+}
+
+.theft-tech-tree-build-node {
+  min-height: var(--theft-tech-tree-node-height);
+}
+
+.theft-tech-tree-artifact-card {
+  min-height: var(--theft-tech-tree-artifact-height);
+}
+
+.theft-department-stat-grid {
+  min-width: min(100%, var(--theft-department-stat-width));
+}
+
+.theft-tasks-mission-grid {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.theft-tasks-next-grid {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.theft-library-workspace {
+  height: var(--theft-library-workspace-height);
+  min-height: var(--theft-library-workspace-min-height);
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.theft-library-editor {
+  min-height: var(--theft-library-editor-min-height);
+}
+
+.theft-dashboard-container {
+  max-width: var(--theft-dashboard-max-width);
+}
+
+.theft-strategy-map-panel {
+  min-height: var(--theft-strategy-map-min-height);
+}
+
+.theft-operator-drawer {
+  max-height: var(--theft-operator-drawer-max-height);
+  min-height: var(--theft-operator-drawer-min-height);
+}
+
+.theft-operator-dock {
+  background: color-mix(in oklab, var(--card) 94%, transparent);
+  border: 1px solid var(--border);
+  border-radius: var(--theft-radius-surface);
+  box-shadow: var(--theft-shadow-dock);
+}
+
+.theft-dashboard-shell-grid,
+.theft-dashboard-content-grid,
+.theft-fresh-company-grid,
+.theft-department-workspace-grid {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.theft-objective-card {
+  background: var(--card);
+  border-radius: var(--theft-radius-surface);
+  box-shadow: var(--theft-shadow-soft);
+}
+
+.theft-next-move-card {
+  background: var(--primary);
+  border-radius: var(--theft-radius-surface);
+  box-shadow: var(--theft-shadow-dock);
+}
+
+@media (min-width: 768px) {
+  .theft-onboarding-shell {
+    grid-template-columns: var(--theft-rail-width) minmax(0, 1fr);
+  }
+
+  .theft-onboarding-header {
+    padding-inline: var(--theft-space-3);
+  }
+
+  .theft-onboarding-panel-inner {
+    padding-inline: var(--theft-space-3);
+  }
+
+  .theft-launcher-main {
+    padding: var(--theft-space-5);
+  }
+
+  .theft-launcher-card {
+    padding: var(--theft-space-5);
+  }
+}
+
+@media (min-width: 1024px) {
+  .theft-onboarding-body {
+    grid-template-columns: minmax(0, 1fr) var(--theft-onboarding-panel-width);
+  }
+
+  .theft-tech-tree-node-card {
+    grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr) minmax(0, 1fr);
+  }
+
+  .theft-tasks-next-grid {
+    grid-template-columns: minmax(0, 1fr) calc(var(--theft-space-1) * 37.5);
+  }
+
+  .theft-fresh-company-grid {
+    grid-template-columns: minmax(0, 1fr) var(--theft-fresh-company-action-width);
+  }
+}
+
+@media (min-width: 1024px) {
+  .theft-library-workspace {
+    grid-template-columns: minmax(var(--theft-library-list-min-width), 0.9fr) minmax(0, 1.1fr);
+  }
+
+  .theft-tasks-mission-grid {
+    grid-template-columns: minmax(0, 1fr) var(--theft-tasks-side-width);
+  }
+}
+
+@media (min-width: 1280px) {
+  .theft-onboarding-canvas-frame {
+    padding: var(--theft-space-3);
+  }
+
+  .theft-onboarding-body {
+    grid-template-columns: minmax(0, 1fr) var(--theft-onboarding-panel-width-xl);
+  }
+
+  .theft-map-node {
+    height: var(--theft-onboarding-node-size-xl);
+    width: var(--theft-onboarding-node-size-xl);
+  }
+
+  .theft-assembly-grid {
+    grid-template-columns:
+      var(--theft-assembly-left-width)
+      minmax(0, 1fr)
+      var(--theft-assembly-right-width);
+  }
+
+  .theft-tech-tree-layout {
+    grid-template-columns:
+      var(--theft-tech-tree-filter-width)
+      minmax(0, 1fr)
+      var(--theft-tech-tree-inspector-width);
+  }
+
+  .theft-tech-tree-detail-grid {
+    grid-template-columns: minmax(0, 1fr) var(--theft-tech-tree-detail-side-width);
+  }
+
+  .theft-tasks-stat-grid {
+    width: var(--theft-tasks-stat-width);
+  }
+
+  .theft-operator-dock {
+    width: var(--theft-operator-dock-width);
+  }
+
+  .theft-dashboard-shell-grid[data-operator-open="true"] {
+    grid-template-columns: minmax(0, 1fr) var(--theft-dashboard-operator-width);
+  }
+
+  .theft-dashboard-content-grid[data-operator-open="false"] {
+    grid-template-columns: minmax(0, 1fr) var(--theft-dashboard-side-width);
+  }
+
+  .theft-department-workspace-grid {
+    grid-template-columns: minmax(0, 1fr) var(--theft-department-side-width);
+  }
+}

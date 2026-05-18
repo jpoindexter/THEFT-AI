@@ -1,0 +1,179 @@
+.theft-shell {
+  background: var(--background);
+}
+
+.theft-main-surface {
+  background: var(--background);
+}
+
+.dark .theft-shell {
+  background: var(--background);
+}
+
+.dark .theft-main-surface {
+  background: var(--background);
+}
+
+.theft-card {
+  border: 1px solid var(--border);
+  background: var(--card);
+  border-radius: var(--theft-radius-surface);
+  box-shadow: var(--theft-shadow-hairline);
+  color: var(--card-foreground);
+}
+
+.theft-panel {
+  border: 1px solid var(--border);
+  background: var(--card);
+  border-radius: var(--theft-radius-surface);
+  box-shadow: var(--theft-shadow-soft);
+}
+
+.theft-surface {
+  border: 1px solid var(--border);
+  background: var(--card);
+  border-radius: var(--theft-radius-surface);
+  box-shadow: var(--theft-shadow-soft);
+}
+
+.theft-surface-muted {
+  border: 1px solid var(--border);
+  background: var(--secondary);
+  border-radius: var(--theft-radius-surface);
+}
+
+.theft-surface-plain {
+  border: 1px solid var(--border);
+  background: var(--card);
+  border-radius: var(--theft-radius-surface);
+  box-shadow: none;
+  color: var(--card-foreground);
+}
+
+.theft-selected-surface {
+  border-color: var(--primary);
+  background: var(--accent);
+}
+
+.theft-pixelated-image {
+  image-rendering: pixelated;
+}
+
+.theft-inset-surface {
+  border: 1px solid var(--border);
+  background: var(--card);
+  border-radius: var(--theft-radius-surface);
+}
+
+.theft-control-surface {
+  border: 1px solid var(--border);
+  background: var(--background);
+  border-radius: var(--theft-radius-control);
+}
+
+[data-slot="button"],
+[data-slot="input"],
+[data-slot="textarea"],
+[data-slot="select-trigger"],
+[data-slot="checkbox"],
+[data-slot="command-input"] {
+  border-radius: var(--theft-radius-control);
+  box-shadow: none;
+}
+
+[data-slot="dropdown-menu-content"],
+[data-slot="dropdown-menu-sub-content"],
+[data-slot="select-content"],
+[data-slot="popover-content"],
+[data-slot="dialog-content"] {
+  border-radius: var(--theft-radius-surface);
+  box-shadow: none;
+}
+
+[data-slot="dropdown-menu-item"],
+[data-slot="dropdown-menu-checkbox-item"],
+[data-slot="dropdown-menu-radio-item"],
+[data-slot="dropdown-menu-sub-trigger"],
+[data-slot="select-item"],
+[data-slot="command-item"] {
+  border-radius: var(--theft-radius-small);
+}
+
+.theft-chip {
+  align-items: center;
+  border: 1px solid var(--border);
+  border-radius: var(--theft-radius-pill);
+  display: inline-flex;
+  gap: calc(var(--theft-space-1) * 0.75);
+  min-width: 0;
+  padding: calc(var(--theft-space-1) * 0.5) calc(var(--theft-space-1) * 1.5);
+}
+
+.theft-chip-muted {
+  background: color-mix(in oklab, var(--muted) 45%, transparent);
+  color: var(--muted-foreground);
+}
+
+.theft-chip-important {
+  background: color-mix(in oklab, var(--theft-amber) 16%, var(--card));
+  color: color-mix(in oklab, var(--theft-amber) 62%, var(--foreground));
+}
+
+.theft-elevation-soft {
+  box-shadow: var(--theft-shadow-soft);
+}
+
+.theft-label {
+  color: var(--muted-foreground);
+  font-size: var(--text-caption);
+  font-weight: 500;
+  letter-spacing: var(--theft-label-tracking);
+  line-height: var(--leading-caption);
+  text-transform: uppercase;
+}
+
+.theft-label-compact {
+  color: var(--muted-foreground);
+  font-size: var(--theft-text-micro);
+  letter-spacing: var(--theft-label-tracking);
+  line-height: var(--leading-caption);
+  text-transform: uppercase;
+}
+
+.theft-label-nano {
+  color: var(--muted-foreground);
+  font-size: var(--theft-text-nano);
+  letter-spacing: var(--theft-label-tracking);
+  line-height: var(--leading-caption);
+  text-transform: uppercase;
+}
+
+.issue-chat-composer-dock {
+  bottom: calc(env(safe-area-inset-bottom) + calc(var(--theft-space-1) * 2.5));
+}
+
+.theft-mobile-action-bar-inner {
+  padding-bottom: max(env(safe-area-inset-bottom), var(--theft-space-1));
+}
+
+.agent-run-transcript-panel {
+  max-height: calc(var(--theft-space-1) * 76);
+}
+
+.agent-instructions-pane-grid {
+  grid-template-columns: var(--agent-instructions-file-width, 18rem) 0.5rem minmax(0, 1fr);
+}
+
+.max-h-dialog-list {
+  max-height: var(--theft-dialog-list-max-height);
+}
+
+.workspace-runtime-square-corners {
+  border-radius: 0;
+}
+
+@media (min-width: 40rem) {
+  .settings-control-grid {
+    grid-template-columns: minmax(var(--theft-settings-control-label-width), max-content) 1fr;
+  }
+}

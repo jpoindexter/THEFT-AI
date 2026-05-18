@@ -1,0 +1,58 @@
+@layer base {
+  * {
+    border-color: var(--border);
+  }
+  html {
+    height: 100%;
+    font-size: var(--theft-root-font-size);
+    -webkit-tap-highlight-color: color-mix(in oklab, var(--foreground) 20%, transparent);
+  }
+  body {
+    background-color: var(--background);
+    color: var(--foreground);
+    font-family: var(--font-sana-sans);
+    font-feature-settings: "lnum" 1, "tnum" 1;
+    font-size: var(--text-body);
+    font-weight: var(--font-weight-regular);
+    -webkit-font-smoothing: antialiased;
+    line-height: var(--leading-body);
+    -moz-osx-font-smoothing: grayscale;
+    height: 100%;
+    overflow: hidden;
+  }
+  h1,
+  h2,
+  h3 {
+    text-wrap: balance;
+  }
+  /* Prevent double-tap-to-zoom on interactive elements for mobile */
+  a,
+  button,
+  [role="button"],
+  input,
+  select,
+  textarea,
+  label {
+    touch-action: manipulation;
+  }
+  /* Let font-mono (utilities layer) override for monospace editors */
+  .paperclip-mdxeditor [class*="_placeholder_"],
+  .paperclip-mdxeditor-content {
+    font-family: inherit;
+  }
+}
+
+@media (pointer: coarse) {
+  button,
+  [role="button"],
+  input,
+  select,
+  textarea,
+  [data-slot="select-trigger"] {
+    min-height: 44px;
+  }
+
+  [data-slot="toggle"] {
+    min-height: 0;
+  }
+}

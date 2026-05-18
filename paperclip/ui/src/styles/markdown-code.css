@@ -1,0 +1,94 @@
+.paperclip-markdown {
+  --tw-prose-pre-bg: #1e1e2e;
+  --tw-prose-pre-code: #cdd6f4;
+  --tw-prose-invert-pre-bg: #1e1e2e;
+  --tw-prose-invert-pre-code: #cdd6f4;
+}
+
+.paperclip-markdown pre {
+  border: 1px solid color-mix(in oklab, var(--foreground) 12%, transparent) !important;
+  border-radius: calc(var(--radius) - 3px) !important;
+  background-color: #1e1e2e !important;
+  color: #cdd6f4 !important;
+  padding: 0.5rem 0.65rem !important;
+  margin: 0.4rem 0 !important;
+  font-size: 1em !important;
+  overflow-x: auto;
+  white-space: pre;
+}
+
+.paperclip-markdown code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  font-size: 1em;
+}
+
+.paperclip-markdown pre code {
+  font-size: inherit;
+  color: inherit;
+  background: none;
+}
+
+/* Copy-to-clipboard button on fenced code blocks */
+.paperclip-markdown-codeblock {
+  position: relative;
+}
+
+.paperclip-markdown-codeblock-copy {
+  position: absolute;
+  top: 0.4rem;
+  right: 0.4rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.2rem 0.4rem;
+  border-radius: calc(var(--radius) - 4px);
+  border: 1px solid color-mix(in oklab, var(--foreground) 14%, transparent);
+  background-color: color-mix(in oklab, var(--muted) 92%, var(--background) 8%);
+  color: var(--muted-foreground);
+  font-size: 0.7rem;
+  line-height: 1;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.12s ease, background-color 0.12s ease, color 0.12s ease;
+}
+
+.paperclip-markdown-codeblock:hover .paperclip-markdown-codeblock-copy,
+.paperclip-markdown-codeblock-copy:focus-visible,
+.paperclip-markdown-codeblock-copy[data-copied] {
+  opacity: 1;
+}
+
+.paperclip-markdown-codeblock-copy:hover {
+  background-color: var(--accent);
+  color: var(--accent-foreground);
+}
+
+.paperclip-markdown-codeblock-copy[data-copied] {
+  color: var(--primary);
+}
+
+.paperclip-markdown-codeblock-copy[data-failed] {
+  color: var(--destructive);
+}
+
+.paperclip-markdown-codeblock-copy-label {
+  font-weight: 500;
+}
+
+/* Remove backtick pseudo-elements from inline code (prose default adds them) */
+.prose code::before,
+.prose code::after {
+  content: none;
+}
+
+/* Inline code background (not inside a code block) */
+.prose :not(pre) > code {
+  background-color: color-mix(in oklab, var(--accent) 60%, transparent);
+  padding: 0.15em 0.35em;
+  border-radius: 3px;
+  font-weight: 500;
+}
+
+.dark .prose :not(pre) > code {
+  background-color: #ffffff0f;
+}

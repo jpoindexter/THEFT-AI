@@ -1,0 +1,114 @@
+.theft-grid-bg {
+  background-image:
+    linear-gradient(
+      to right,
+      color-mix(in oklab, var(--foreground) 4%, transparent) 1px,
+      transparent 1px
+    ),
+    linear-gradient(
+      to bottom,
+      color-mix(in oklab, var(--foreground) 4%, transparent) 1px,
+      transparent 1px
+    );
+  background-size: var(--theft-grid-unit) var(--theft-grid-unit);
+}
+
+.theft-map-node-top {
+  left: 50%;
+  top: 0;
+  transform: translateX(-50%);
+}
+
+.theft-map-node-bottom {
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.theft-map-node-left-upper {
+  left: var(--theft-map-x-mid);
+  top: var(--theft-map-y-upper);
+}
+
+.theft-map-node-right-upper {
+  right: var(--theft-map-x-mid);
+  top: var(--theft-map-y-upper);
+}
+
+.theft-map-node-left-middle {
+  left: var(--theft-map-x-edge);
+  top: var(--theft-map-y-middle);
+}
+
+.theft-map-node-right-middle {
+  right: var(--theft-map-x-edge);
+  top: var(--theft-map-y-middle);
+}
+
+.theft-map-node-left-lower {
+  bottom: var(--theft-map-y-lower);
+  left: var(--theft-map-x-diagonal);
+}
+
+.theft-map-node-right-lower {
+  bottom: var(--theft-map-y-lower);
+  right: var(--theft-map-x-diagonal);
+}
+
+.theft-map-node-default-left {
+  left: var(--theft-map-x-inner);
+  top: var(--theft-map-y-default);
+}
+
+.theft-map-node-default-right {
+  right: var(--theft-map-x-inner);
+  top: var(--theft-map-y-default);
+}
+
+.theft-map-node-default-left-lower {
+  bottom: var(--theft-map-y-default-lower);
+  left: var(--theft-map-x-lower);
+}
+
+.theft-map-node-default-right-lower {
+  bottom: var(--theft-map-y-default-lower);
+  right: var(--theft-map-x-lower);
+}
+
+.theft-onboarding-canvas-frame {
+  min-height: var(--theft-onboarding-canvas-min-height);
+  padding: var(--theft-space-2);
+}
+
+.theft-onboarding-map {
+  height: var(--theft-onboarding-map-height);
+  inset-inline: var(--theft-space-3);
+}
+
+.theft-map-ring-outer,
+.theft-map-ring-middle,
+.theft-map-ring-inner {
+  height: var(--theft-map-ring-size);
+  width: var(--theft-map-ring-size);
+}
+
+.theft-map-ring-outer {
+  --theft-map-ring-size: var(--theft-onboarding-map-outer);
+}
+
+.theft-map-ring-middle {
+  --theft-map-ring-size: var(--theft-onboarding-map-middle);
+}
+
+.theft-map-ring-inner {
+  --theft-map-ring-size: var(--theft-onboarding-map-inner);
+}
+
+.theft-map-center-card {
+  width: var(--theft-onboarding-center-width);
+}
+
+.theft-map-node {
+  height: var(--theft-onboarding-node-size);
+  width: var(--theft-onboarding-node-size);
+}
