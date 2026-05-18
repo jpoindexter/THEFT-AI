@@ -83,6 +83,7 @@ Current local modularization checkpoint:
 - Extracted IssueDetail page orchestration into primary state, action/effects, and content modules so `IssueDetail.tsx` now fits the 300-line guardrail.
 - Extracted inbox support types, storage, navigation, activity, search/workspace, grouping, keyboard, and badge helpers so `lib/inbox.ts` now fits the 300-line guardrail.
 - Extracted issue-chat message types, timing, transcript parts, message factories, run messages, stability, and assembly helpers so `lib/issue-chat-messages.ts` now fits the 300-line guardrail.
+- Extracted plugin bridge types, context, data/action hooks, navigation hooks, toast/stream hooks, and serialization/error helpers so `plugins/bridge.ts` now fits the 300-line guardrail.
 - Moved the issue-chat composer safe-area dock value into a semantic CSS utility.
 
 Latest verification for the active modularization slices:
@@ -109,6 +110,7 @@ Latest verification for the active modularization slices:
 - Focused IssueDetail Vitest passed after the page orchestration split: 11 tests.
 - Focused inbox utility Vitest passed after the inbox support split: 51 tests.
 - Focused issue-chat message/thread Vitest passed after the message assembly split: 79 tests across 3 files.
+- Focused plugin API/settings/page Vitest passed after the plugin bridge split: 11 tests across 3 files.
 - Focused Vitest for issue chat, issue documents, and issue detail passed: 78 tests across 4 files.
 - Focused IssueChatThread Vitest passed: 61 tests across 2 files.
 - Focused onboarding utility Vitest passed: 21 tests across 5 files.
@@ -122,6 +124,7 @@ Remaining high-value maintainability work:
 - `IssueDetail.tsx` is down to 15 lines and now fits the 300-line guardrail; primary state, action/effects, and content rendering are split under the guardrail.
 - `lib/inbox.ts` is down to 8 lines and now fits the 300-line guardrail; inbox types, storage, navigation, activity, search/workspace, grouping, keyboard, and badge helpers are split under the guardrail.
 - `lib/issue-chat-messages.ts` is down to 11 lines and now fits the 300-line guardrail; message types, timing, transcript parts, message factories, run messages, stability, and assembly helpers are split under the guardrail.
+- `plugins/bridge.ts` is down to 29 lines and now fits the 300-line guardrail; bridge types, context, data/action hooks, navigation hooks, toast/stream hooks, and serialization/error helpers are split under the guardrail.
 - `IssueChatThread.tsx` is down to 275 lines and now fits the 300-line guardrail.
 - `DepartmentWorkspace.tsx` is down to 282 lines and now fits the 300-line guardrail.
 - `Agents.tsx` is down to 227 lines and now fits the 300-line guardrail.
@@ -153,7 +156,7 @@ Remaining high-value maintainability work:
 
 Next best path:
 
-1. Continue with oversized plugin support modules that still show up in the active-route gate: `plugins/slots.tsx`, `plugins/launchers.tsx`, and `plugins/bridge.ts`.
+1. Continue with oversized plugin support modules that still show up in the active-route gate: `plugins/slots.tsx` and `plugins/launchers.tsx`.
 2. Keep active page and organism modules under the guardrail as follow-up changes land.
 3. Only after those pass gates, revisit broad visual polish. The current priority is architecture/template cleanup, not another visual rewrite.
 
