@@ -6,6 +6,7 @@ import { executionWorkspacesApi } from "../api/execution-workspaces";
 import { useToastActions } from "../context/ToastContext";
 import { queryKeys } from "../lib/queryKeys";
 import { formatDateTime, issueUrl } from "../lib/utils";
+import { ExecutionWorkspaceGitStatus } from "./execution-workspace-close-dialog/ExecutionWorkspaceGitStatus";
 import { Button } from "./ui/button";
 import {
   Dialog,
@@ -88,7 +89,7 @@ export function ExecutionWorkspaceCloseDialog({
     <Dialog open={open} onOpenChange={(nextOpen) => {
       if (!closeWorkspace.isPending) onOpenChange(nextOpen);
     }}>
-      <DialogContent className="max-h-[85vh] overflow-y-auto sm:max-w-2xl">
+      <DialogContent className="max-h-dvh overflow-y-auto sm:max-w-2xl">
         <DialogHeader>
           <DialogTitle>{actionLabel}</DialogTitle>
           <DialogDescription className="break-words">
@@ -172,39 +173,7 @@ export function ExecutionWorkspaceCloseDialog({
             ) : null}
 
             {readiness.git ? (
-              <section className="space-y-2">
-                <h3 className="text-sm font-medium">Git status</h3>
-                <div className="rounded-xl border border-border bg-background px-4 py-3 text-sm">
-                  <div className="grid gap-2 sm:grid-cols-2">
-                    <div>
-                      <div className="text-xs uppercase tracking-[0.16em] text-muted-foreground">Branch</div>
-                      <div className="font-mono text-xs">{readiness.git.branchName ?? "Unknown"}</div>
-                    </div>
-                    <div>
-                      <div className="text-xs uppercase tracking-[0.16em] text-muted-foreground">Base ref</div>
-                      <div className="font-mono text-xs">{readiness.git.baseRef ?? "Not set"}</div>
-                    </div>
-                    <div>
-                      <div className="text-xs uppercase tracking-[0.16em] text-muted-foreground">Merged into base</div>
-                      <div>{readiness.git.isMergedIntoBase == null ? "Unknown" : readiness.git.isMergedIntoBase ? "Yes" : "No"}</div>
-                    </div>
-                    <div>
-                      <div className="text-xs uppercase tracking-[0.16em] text-muted-foreground">Ahead / behind</div>
-                      <div>
-                        {(readiness.git.aheadCount ?? 0).toString()} / {(readiness.git.behindCount ?? 0).toString()}
-                      </div>
-                    </div>
-                    <div>
-                      <div className="text-xs uppercase tracking-[0.16em] text-muted-foreground">Dirty tracked files</div>
-                      <div>{readiness.git.dirtyEntryCount}</div>
-                    </div>
-                    <div>
-                      <div className="text-xs uppercase tracking-[0.16em] text-muted-foreground">Untracked files</div>
-                      <div>{readiness.git.untrackedEntryCount}</div>
-                    </div>
-                  </div>
-                </div>
-              </section>
+              <ExecutionWorkspaceGitStatus git={readiness.git} />
             ) : null}
 
             {otherLinkedIssues.length > 0 ? (
