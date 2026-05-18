@@ -54,11 +54,11 @@ import {
 import { IssueFiltersPopover } from "../components/IssueFiltersPopover";
 import { IssueRow } from "../components/IssueRow";
 import { SwipeToArchive } from "../components/SwipeToArchive";
+import { FailedRunInboxRow } from "./inbox/FailedRunInboxRow";
 import { ReviewModePanel } from "./inbox/ReviewModePanel";
 
 import { StatusIcon } from "../components/StatusIcon";
 import { cn } from "../lib/utils";
-import { StatusBadge } from "../components/StatusBadge";
 import { approvalLabel, defaultTypeIcon, typeIcon } from "../components/ApprovalPayload";
 import { timeAgo } from "../lib/timeAgo";
 import { Button } from "@/components/ui/button";
@@ -86,9 +86,7 @@ import {
   Check,
   ChevronRight,
   Layers,
-  XCircle,
   X,
-  RotateCcw,
   UserPlus,
   Search,
   ListTree,
@@ -149,6 +147,7 @@ import { useDismissedInboxAlerts, useInboxDismissals, useReadInboxItems } from "
 
 export { InboxIssueMetaLeading, InboxIssueTrailingColumns } from "../components/IssueColumns";
 export { IssueGroupHeader as InboxGroupHeader } from "../components/IssueGroupHeader";
+export { FailedRunInboxRow } from "./inbox/FailedRunInboxRow";
 type SectionKey =
   | "work_items"
   | "alerts";
@@ -262,164 +261,6 @@ export function formatJoinRequestInboxLabel(
 
 type NonIssueUnreadState = "visible" | "fading" | "hidden" | null;
 
-export function FailedRunInboxRow({
-  run,
-  issueById,
-  agentName: linkedAgentName,
-  issueLinkState,
-  onDismiss,
-  onRetry,
-  isRetrying,
-  unreadState = null,
-  onMarkRead,
-  onArchive,
-  archiveDisabled,
-  selected = false,
-  className,
-}: {
-  run: HeartbeatRun;
-  issueById: Map<string, Issue>;
-  agentName: string | null;
-  issueLinkState: unknown;
-  onDismiss: () => void;
-  onRetry: () => void;
-  isRetrying: boolean;
-  unreadState?: NonIssueUnreadState;
-  onMarkRead?: () => void;
-  onArchive?: () => void;
-  archiveDisabled?: boolean;
-  selected?: boolean;
-  className?: string;
-}) {
-  const issueId = readIssueIdFromRun(run);
-  const issue = issueId ? issueById.get(issueId) ?? null : null;
-  const displayError = runFailureMessage(run);
-  const showUnreadSlot = unreadState !== null;
-  const showUnreadDot = unreadState === "visible" || unreadState === "fading";
-
-  return (
-    <div className={cn(
-      "group border-b border-border px-2 py-2.5 last:border-b-0 sm:px-1 sm:pr-3 sm:py-2",
-      className,
-    )}>
-      <div className="flex items-start gap-2 sm:items-center">
-        {showUnreadSlot ? (
-          <span className="hidden sm:inline-flex h-4 w-4 shrink-0 items-center justify-center self-center">
-            {showUnreadDot ? (
-              <button
-                type="button"
-                onClick={onMarkRead}
-                className={cn(
-                  "inline-flex h-4 w-4 items-center justify-center rounded-full transition-colors",
-                  "hover:bg-blue-500/20",
-                )}
-                aria-label="Mark as read"
-              >
-                <span className={cn(
-                  "block h-2 w-2 rounded-full transition-opacity duration-300",
-                  "bg-blue-600 dark:bg-blue-400",
-                  unreadState === "fading" ? "opacity-0" : "opacity-100",
-                )} />
-              </button>
-            ) : onArchive ? (
-              <button
-                type="button"
-                onClick={onArchive}
-                disabled={archiveDisabled}
-                className="inline-flex h-4 w-4 items-center justify-center rounded-md text-muted-foreground opacity-0 transition-opacity hover:text-foreground group-hover:opacity-100 disabled:pointer-events-none disabled:opacity-30"
-                aria-label="Dismiss from inbox"
-              >
-                <X className="h-3.5 w-3.5" />
-              </button>
-            ) : (
-              <span className="inline-flex h-4 w-4" aria-hidden="true" />
-            )}
-          </span>
-        ) : null}
-        <Link
-          to={`/agents/${run.agentId}/runs/${run.id}`}
-          className={cn(
-            "flex min-w-0 flex-1 items-start gap-2 no-underline text-inherit transition-colors",
-            selected ? "hover:bg-transparent" : "hover:bg-accent/50",
-          )}
-        >
-          {!showUnreadSlot && <span className="hidden h-2 w-2 shrink-0 sm:inline-flex" aria-hidden="true" />}
-          <span className="hidden h-3.5 w-3.5 shrink-0 sm:inline-flex" aria-hidden="true" />
-          <span className="mt-0.5 shrink-0 rounded-md bg-red-500/20 p-1.5 sm:mt-0">
-            <XCircle className="h-4 w-4 text-red-600 dark:text-red-400" />
-          </span>
-          <span className="min-w-0 flex-1">
-            <span className="line-clamp-2 text-sm font-medium sm:truncate sm:line-clamp-none">
-              {issue ? (
-                <>
-                  <span className="font-mono text-muted-foreground mr-1.5">
-                    {issue.identifier ?? issue.id.slice(0, 8)}
-                  </span>
-                  {issue.title}
-                </>
-              ) : (
-                <>Failed run{linkedAgentName ? ` — ${linkedAgentName}` : ""}</>
-              )}
-            </span>
-            <span className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-muted-foreground">
-              <StatusBadge status={run.status} />
-              {linkedAgentName && issue ? <span>{linkedAgentName}</span> : null}
-              <span className="max-w-xs truncate">{displayError}</span>
-              <span>{timeAgo(run.createdAt)}</span>
-            </span>
-          </span>
-        </Link>
-        <div className="hidden shrink-0 items-center gap-2 sm:flex">
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            className="h-8 shrink-0 px-2.5"
-            onClick={onRetry}
-            disabled={isRetrying}
-          >
-            <RotateCcw className="mr-1.5 h-3.5 w-3.5" />
-            {isRetrying ? "Retrying…" : "Retry"}
-          </Button>
-          {!showUnreadSlot && (
-            <button
-              type="button"
-              onClick={onDismiss}
-              className="rounded-md p-1 text-muted-foreground opacity-0 transition-opacity hover:bg-accent hover:text-foreground group-hover:opacity-100"
-              aria-label="Dismiss"
-            >
-              <X className="h-4 w-4" />
-            </button>
-          )}
-        </div>
-      </div>
-      <div className="mt-3 flex gap-2 sm:hidden">
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          className="h-8 shrink-0 px-2.5"
-          onClick={onRetry}
-          disabled={isRetrying}
-        >
-          <RotateCcw className="mr-1.5 h-3.5 w-3.5" />
-          {isRetrying ? "Retrying…" : "Retry"}
-        </Button>
-        {!showUnreadSlot && (
-          <button
-            type="button"
-            onClick={onDismiss}
-            className="rounded-md p-1 text-muted-foreground hover:bg-accent hover:text-foreground"
-            aria-label="Dismiss"
-          >
-            <X className="h-4 w-4" />
-          </button>
-        )}
-      </div>
-    </div>
-  );
-}
-
 function ApprovalInboxRow({
   approval,
   requesterName,
@@ -462,13 +303,12 @@ function ApprovalInboxRow({
         {showUnreadSlot ? (
           <span className="hidden sm:inline-flex h-4 w-4 shrink-0 items-center justify-center self-center">
             {showUnreadDot ? (
-              <button
+              <Button
                 type="button"
+                variant="ghost"
+                size="icon-xs"
                 onClick={onMarkRead}
-                className={cn(
-                  "inline-flex h-4 w-4 items-center justify-center rounded-full transition-colors",
-                  "hover:bg-blue-500/20",
-                )}
+                className="h-4 w-4 rounded-full p-0 hover:bg-blue-500/20"
                 aria-label="Mark as read"
               >
                 <span className={cn(
@@ -476,17 +316,19 @@ function ApprovalInboxRow({
                   "bg-blue-600 dark:bg-blue-400",
                   unreadState === "fading" ? "opacity-0" : "opacity-100",
                 )} />
-              </button>
+              </Button>
             ) : onArchive ? (
-              <button
+              <Button
                 type="button"
+                variant="ghost"
+                size="icon-xs"
                 onClick={onArchive}
                 disabled={archiveDisabled}
-                className="inline-flex h-4 w-4 items-center justify-center rounded-md text-muted-foreground opacity-0 transition-opacity hover:text-foreground group-hover:opacity-100 disabled:pointer-events-none disabled:opacity-30"
+                className="h-4 w-4 rounded-md p-0 text-muted-foreground opacity-0 hover:bg-transparent hover:text-foreground group-hover:opacity-100 disabled:pointer-events-none disabled:opacity-30"
                 aria-label="Dismiss from inbox"
               >
                 <X className="h-3.5 w-3.5" />
-              </button>
+              </Button>
             ) : (
               <span className="inline-flex h-4 w-4" aria-hidden="true" />
             )}
@@ -598,13 +440,12 @@ function JoinRequestInboxRow({
         {showUnreadSlot ? (
           <span className="hidden sm:inline-flex h-4 w-4 shrink-0 items-center justify-center self-center">
             {showUnreadDot ? (
-              <button
+              <Button
                 type="button"
+                variant="ghost"
+                size="icon-xs"
                 onClick={onMarkRead}
-                className={cn(
-                  "inline-flex h-4 w-4 items-center justify-center rounded-full transition-colors",
-                  "hover:bg-blue-500/20",
-                )}
+                className="h-4 w-4 rounded-full p-0 hover:bg-blue-500/20"
                 aria-label="Mark as read"
               >
                 <span className={cn(
@@ -612,17 +453,19 @@ function JoinRequestInboxRow({
                   "bg-blue-600 dark:bg-blue-400",
                   unreadState === "fading" ? "opacity-0" : "opacity-100",
                 )} />
-              </button>
+              </Button>
             ) : onArchive ? (
-              <button
+              <Button
                 type="button"
+                variant="ghost"
+                size="icon-xs"
                 onClick={onArchive}
                 disabled={archiveDisabled}
-                className="inline-flex h-4 w-4 items-center justify-center rounded-md text-muted-foreground opacity-0 transition-opacity hover:text-foreground group-hover:opacity-100 disabled:pointer-events-none disabled:opacity-30"
+                className="h-4 w-4 rounded-md p-0 text-muted-foreground opacity-0 hover:bg-transparent hover:text-foreground group-hover:opacity-100 disabled:pointer-events-none disabled:opacity-30"
                 aria-label="Dismiss from inbox"
               >
                 <X className="h-3.5 w-3.5" />
-              </button>
+              </Button>
             ) : (
               <span className="inline-flex h-4 w-4" aria-hidden="true" />
             )}
@@ -2055,18 +1898,20 @@ export function Inbox() {
                   ["project", "Project"],
                   ...(isolatedWorkspacesEnabled ? ([["workspace", "Workspace"]] as const) : []),
                 ] as const).map(([value, label]) => (
-                  <button
+                  <Button
                     key={value}
                     type="button"
+                    variant="ghost"
+                    size="sm"
                     className={cn(
-                      "flex w-full items-center justify-between rounded-sm px-2 py-1.5 text-sm",
+                      "h-auto w-full justify-between rounded-sm px-2 py-1.5 text-sm",
                       groupBy === value ? "bg-accent/50 text-foreground" : "text-muted-foreground hover:bg-accent/50",
                     )}
                     onClick={() => updateGroupBy(value)}
                   >
                     <span>{label}</span>
                     {groupBy === value ? <Check className="h-3.5 w-3.5" /> : null}
-                  </button>
+                  </Button>
                 ))}
               </div>
             </PopoverContent>
@@ -2228,9 +2073,11 @@ export function Inbox() {
                         <>
                           {nestingEnabled ? (
                             depth === 0 && hasChildren && collapseParentId ? (
-                              <button
+                              <Button
                                 type="button"
-                                className="hidden w-4 shrink-0 items-center justify-center sm:inline-flex"
+                                variant="ghost"
+                                size="icon-xs"
+                                className="hidden h-4 w-4 shrink-0 p-0 sm:inline-flex"
                                 onClick={(event) => {
                                   event.preventDefault();
                                   event.stopPropagation();
@@ -2238,7 +2085,7 @@ export function Inbox() {
                                 }}
                               >
                                 <ChevronRight className={cn("h-3.5 w-3.5 transition-transform", isExpanded && "rotate-90")} />
-                              </button>
+                              </Button>
                             ) : (
                               <span className="hidden w-4 shrink-0 sm:block" />
                             )
@@ -2260,8 +2107,11 @@ export function Inbox() {
                       mobileMeta={issueActivityText(issue).toLowerCase()}
                       mobileLeading={
                         depth === 0 && hasChildren && collapseParentId ? (
-                          <button
+                          <Button
                             type="button"
+                            variant="ghost"
+                            size="icon-xs"
+                            className="h-6 w-6 p-0"
                             onClick={(event) => {
                               event.preventDefault();
                               event.stopPropagation();
@@ -2269,7 +2119,7 @@ export function Inbox() {
                             }}
                           >
                             <ChevronRight className={cn("h-3.5 w-3.5 transition-transform", isExpanded && "rotate-90")} />
-                          </button>
+                          </Button>
                         ) : undefined
                       }
                       unreadState={isUnread ? "visible" : isFading ? "fading" : "hidden"}
@@ -2603,14 +2453,16 @@ export function Inbox() {
                       {dashboard!.agents.error === 1 ? "agent has" : "agents have"} errors
                     </span>
                   </Link>
-                  <button
+                  <Button
                     type="button"
+                    variant="ghost"
+                    size="icon-xs"
                     onClick={() => dismissAlert("alert:agent-errors")}
-                    className="rounded-md p-1 text-muted-foreground opacity-0 transition-opacity hover:bg-accent hover:text-foreground group-hover/alert:opacity-100"
+                    className="h-6 w-6 text-muted-foreground opacity-0 hover:bg-accent hover:text-foreground group-hover/alert:opacity-100"
                     aria-label="Dismiss"
                   >
                     <X className="h-3.5 w-3.5" />
-                  </button>
+                  </Button>
                 </div>
               )}
               {showBudgetAlert && (
@@ -2626,14 +2478,16 @@ export function Inbox() {
                       utilization this month
                     </span>
                   </Link>
-                  <button
+                  <Button
                     type="button"
+                    variant="ghost"
+                    size="icon-xs"
                     onClick={() => dismissAlert("alert:budget")}
-                    className="rounded-md p-1 text-muted-foreground opacity-0 transition-opacity hover:bg-accent hover:text-foreground group-hover/alert:opacity-100"
+                    className="h-6 w-6 text-muted-foreground opacity-0 hover:bg-accent hover:text-foreground group-hover/alert:opacity-100"
                     aria-label="Dismiss"
                   >
                     <X className="h-3.5 w-3.5" />
-                  </button>
+                  </Button>
                 </div>
               )}
             </div>

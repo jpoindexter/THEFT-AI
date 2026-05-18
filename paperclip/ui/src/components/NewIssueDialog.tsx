@@ -1,4 +1,4 @@
-import { memo, useState, useEffect, useRef, useCallback, useMemo, type ChangeEvent, type DragEvent, type RefObject } from "react";
+import { useState, useEffect, useRef, useCallback, useMemo, type ChangeEvent, type DragEvent } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import type { IssueWorkMode } from "@paperclipai/shared";
 import { useDialog } from "../context/DialogContext";
@@ -30,7 +30,6 @@ import {
   DialogContent,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
 import {
   Loader2,
   ListTree,
@@ -45,6 +44,7 @@ import { NewIssueDialogHeader } from "./new-issue-dialog/NewIssueDialogHeader";
 import { IssueAssigneeOptionsPanel } from "./new-issue-dialog/IssueAssigneeOptionsPanel";
 import { IssuePropertyChips } from "./new-issue-dialog/IssuePropertyChips";
 import { NewIssueDescriptionSection, type StagedIssueFile } from "./new-issue-dialog/NewIssueDescriptionSection";
+import { NewIssueTitleSection } from "./new-issue-dialog/NewIssueTitleSection";
 
 const DRAFT_KEY = "paperclip:issue-draft";
 const DEBOUNCE_MS = 800;
@@ -206,73 +206,6 @@ function defaultExecutionWorkspaceModeForIssueDefaults(
     ? defaults.executionWorkspaceMode
     : defaultExecutionWorkspaceModeForProject(project);
 }
-
-const IssueTitleTextarea = memo(function IssueTitleTextarea({
-  value,
-  pending,
-  assigneeValue,
-  projectId,
-  descriptionEditorRef,
-  assigneeSelectorRef,
-  projectSelectorRef,
-  onChange,
-}: {
-  value: string;
-  pending: boolean;
-  assigneeValue: string;
-  projectId: string;
-  descriptionEditorRef: RefObject<MarkdownEditorRef | null>;
-  assigneeSelectorRef: RefObject<HTMLButtonElement | null>;
-  projectSelectorRef: RefObject<HTMLButtonElement | null>;
-  onChange: (value: string) => void;
-}) {
-  const [draftValue, setDraftValue] = useState(value);
-
-  useEffect(() => {
-    setDraftValue(value);
-  }, [value]);
-
-  return (
-    <Textarea
-      className="min-h-0 w-full resize-none overflow-hidden border-0 bg-transparent px-0 py-0 text-lg font-semibold shadow-none outline-none placeholder:text-muted-foreground/50 focus-visible:border-transparent focus-visible:ring-0 md:text-lg"
-      placeholder="Issue title"
-      rows={1}
-      value={draftValue}
-      onChange={(e) => {
-        const nextValue = e.target.value;
-        setDraftValue(nextValue);
-        onChange(nextValue);
-        e.target.style.height = "auto";
-        e.target.style.height = `${e.target.scrollHeight}px`;
-      }}
-      readOnly={pending}
-      onKeyDown={(e) => {
-        if (
-          e.key === "Enter" &&
-          !e.metaKey &&
-          !e.ctrlKey &&
-          !e.nativeEvent.isComposing
-        ) {
-          e.preventDefault();
-          descriptionEditorRef.current?.focus();
-        }
-        if (e.key === "Tab" && !e.shiftKey) {
-          e.preventDefault();
-          if (assigneeValue) {
-            if (projectId) {
-              descriptionEditorRef.current?.focus();
-            } else {
-              projectSelectorRef.current?.focus();
-            }
-          } else {
-            assigneeSelectorRef.current?.focus();
-          }
-        }
-      }}
-      autoFocus
-    />
-  );
-});
 
 function issueExecutionWorkspaceModeForExistingWorkspace(mode: string | null | undefined) {
   if (mode === "isolated_workspace" || mode === "operator_branch" || mode === "shared_workspace") {
@@ -1122,19 +1055,16 @@ export function NewIssueDialog() {
         />
 
         <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain">
-          {/* Title */}
-          <div className="px-4 pt-4 pb-2">
-            <IssueTitleTextarea
-              value={title}
-              pending={createIssue.isPending}
-              assigneeValue={assigneeValue}
-              projectId={projectId}
-              descriptionEditorRef={descriptionEditorRef}
-              assigneeSelectorRef={assigneeSelectorRef}
-              projectSelectorRef={projectSelectorRef}
-              onChange={handleTitleChange}
-            />
-          </div>
+          <NewIssueTitleSection
+            value={title}
+            pending={createIssue.isPending}
+            assigneeValue={assigneeValue}
+            projectId={projectId}
+            descriptionEditorRef={descriptionEditorRef}
+            assigneeSelectorRef={assigneeSelectorRef}
+            projectSelectorRef={projectSelectorRef}
+            onChange={handleTitleChange}
+          />
 
           <NewIssueAssignmentRows
             agents={agents ?? []}

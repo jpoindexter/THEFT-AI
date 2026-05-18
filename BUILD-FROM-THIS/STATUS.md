@@ -55,7 +55,11 @@ T119 is now in progress after the active product route launch gate passed. First
 - `RoutineHistoryTab.tsx` continued its split with the revision rail moved into `routine-history-tab/RoutineRevisionList.tsx`; focused findings dropped from 24 to 2, both remaining grid-layout utilities in the parent.
 - `AgentDetail.tsx` started page-level cleanup with workspace operation log rendering moved into `pages/agent-detail/WorkspaceOperationsSection.tsx`; the parent is down to 4007 lines and focused findings dropped from 60 to 53.
 - `Inbox.tsx` started page-level cleanup with review-mode rendering moved into `pages/inbox/ReviewModePanel.tsx`; arbitrary sizing/text findings were removed and focused findings dropped to the remaining native row controls.
-- Repo-wide design drift count is down to 1182 findings after the first thirty-seven T119 slices.
+- `NewIssueDialog.tsx` continued its split with title editor rendering moved into `new-issue-dialog/NewIssueTitleSection.tsx`; the parent is down to 1247 lines and focused scanner remains clean.
+- `RoutineHistoryTab.tsx` now has zero focused scanner findings after replacing the remaining arbitrary revision layout with tokenized flex sizing; the parent remains oversized at 713 lines.
+- `AgentDetail.tsx` continued page-level cleanup with header/actions moved into `pages/agent-detail/AgentDetailHeader.tsx`; the parent is down to 3913 lines and focused findings dropped to 47.
+- `Inbox.tsx` continued page-level cleanup with failed-run row rendering moved into `pages/inbox/FailedRunInboxRow.tsx`; focused `Inbox` scanning now reports zero findings.
+- Repo-wide design drift count is down to 1161 findings after the first forty-one T119 slices.
 
 The Paperclip app is genuinely large. The remaining drag is mostly not missing MVP capability; it is oversized route/organism code inherited from the Paperclip host plus the THEFT UX migration. The active-route design-system gate currently passes with zero unallowed findings, but several files still exceed the maintainability guardrail and need continued modularization.
 

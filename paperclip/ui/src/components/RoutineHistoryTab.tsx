@@ -173,13 +173,13 @@ export function RoutineHistoryTab({
 
   if (revisionsQuery.isLoading) {
     return (
-      <div className="grid gap-5 md:grid-cols-[300px_minmax(0,1fr)]">
-        <div className="space-y-2">
+      <div className="grid gap-5 md:flex">
+        <div className="space-y-2 md:w-72 md:shrink-0">
           {Array.from({ length: 5 }).map((_, idx) => (
             <Skeleton key={idx} className="h-10 w-full" />
           ))}
         </div>
-        <Skeleton className="h-32 w-full" />
+        <Skeleton className="h-32 w-full md:flex-1" />
       </div>
     );
   }
@@ -205,19 +205,21 @@ export function RoutineHistoryTab({
   const onlyBootstrapRevision = revisions.length <= 1;
 
   return (
-    <div className="grid gap-5 md:grid-cols-[300px_minmax(0,1fr)]">
-      <RoutineRevisionList
-        revisions={visibleRevisions}
-        latestRevisionId={routine.latestRevisionId}
-        selectedRevisionId={selectedRevisionId}
-        highlightedRevisionId={highlightedRevisionId}
-        isEditDirty={isEditDirty}
-        totalRevisions={sortedRevisions.length}
-        onSelect={handleSelectRevision}
-        onShowOlder={() => setShowOlder(true)}
-        showOlder={showOlder}
-      />
-      <div className="space-y-4 min-w-0">
+    <div className="grid gap-5 md:flex">
+      <div className="md:w-72 md:shrink-0">
+        <RoutineRevisionList
+          revisions={visibleRevisions}
+          latestRevisionId={routine.latestRevisionId}
+          selectedRevisionId={selectedRevisionId}
+          highlightedRevisionId={highlightedRevisionId}
+          isEditDirty={isEditDirty}
+          totalRevisions={sortedRevisions.length}
+          onSelect={handleSelectRevision}
+          onShowOlder={() => setShowOlder(true)}
+          showOlder={showOlder}
+        />
+      </div>
+      <div className="min-w-0 space-y-4 md:flex-1">
         {isEditDirty && (
           <ConflictBanner
             dirtyFields={dirtyFields}
