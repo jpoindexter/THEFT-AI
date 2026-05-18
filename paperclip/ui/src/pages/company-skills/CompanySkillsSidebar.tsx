@@ -1,5 +1,6 @@
 import type { CompanySkillCreateRequest, CompanySkillListItem } from "@paperclipai/shared";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Plus, RefreshCw, Search } from "lucide-react";
 import { PageSkeleton } from "../../components/PageSkeleton";
 import { cn } from "../../lib/utils";
@@ -83,20 +84,20 @@ export function CompanySkillsSidebar({
 
         <div className="mt-3 flex items-center gap-2 border-b border-border pb-2">
           <Search className="h-4 w-4 text-muted-foreground" />
-          <input
+          <Input
             value={skillFilter}
             onChange={(event) => onSkillFilterChange(event.target.value)}
             placeholder="Filter skills"
-            className="w-full bg-transparent text-sm outline-none placeholder:text-muted-foreground"
+            className="h-8 w-full border-0 bg-transparent px-0 text-sm shadow-none focus-visible:ring-0"
           />
         </div>
 
         <div className="mt-3 flex items-center gap-2 border-b border-border pb-2">
-          <input
+          <Input
             value={source}
             onChange={(event) => onSourceChange(event.target.value)}
             placeholder="Paste path, GitHub URL, or skills.sh command"
-            className="w-full bg-transparent text-sm outline-none placeholder:text-muted-foreground"
+            className="h-8 w-full border-0 bg-transparent px-0 text-sm shadow-none focus-visible:ring-0"
           />
           <Button size="sm" variant="ghost" onClick={onAddSkillSource} disabled={importPending}>
             {importPending ? <RefreshCw className="h-4 w-4 animate-spin" /> : "Add"}

@@ -148,6 +148,76 @@
   text-transform: uppercase;
 }
 
+.match-source-chip {
+  border-color: var(--chip-match-title-border);
+  background: var(--chip-match-title-bg);
+  color: var(--chip-match-title-fg);
+  font-size: var(--theft-text-nano);
+  line-height: 1;
+}
+
+.match-source-chip-title {
+  border-color: var(--chip-match-title-border);
+  background: var(--chip-match-title-bg);
+  color: var(--chip-match-title-fg);
+}
+
+.match-source-chip-identifier {
+  border-color: var(--chip-match-identifier-border);
+  background: var(--chip-match-identifier-bg);
+  color: var(--chip-match-identifier-fg);
+}
+
+.match-source-chip-comment {
+  border-color: var(--chip-match-comment-border);
+  background: var(--chip-match-comment-bg);
+  color: var(--chip-match-comment-fg);
+}
+
+.match-source-chip-document {
+  border-color: var(--chip-match-document-border);
+  background: var(--chip-match-document-bg);
+  color: var(--chip-match-document-fg);
+}
+
+.skill-pane-content-min {
+  min-height: 35rem;
+}
+
+.skill-pane-editor-min {
+  min-height: 32.5rem;
+}
+
+.search-result-preview-image {
+  width: 5.5rem;
+  height: 5.5rem;
+}
+
+.profile-card-shell {
+  border-radius: calc(var(--radius-xl) + var(--theft-space-2));
+}
+
+.profile-card-accent {
+  background:
+    linear-gradient(
+      135deg,
+      var(--primary) 0%,
+      var(--accent) 58%,
+      color-mix(in oklab, var(--background) 76%, white 24%) 100%
+    );
+}
+
+.profile-card-radials {
+  background:
+    radial-gradient(circle at top right, color-mix(in oklab, white 22%, transparent) 0%, transparent 34%),
+    radial-gradient(circle at bottom left, color-mix(in oklab, white 8%, transparent) 0%, transparent 36%);
+}
+
+.profile-card-panel {
+  border-radius: calc(var(--radius-xl) + var(--theft-space-1));
+  box-shadow: var(--theft-shadow-soft);
+}
+
 .issue-chat-composer-dock {
   bottom: calc(env(safe-area-inset-bottom) + calc(var(--theft-space-1) * 2.5));
 }

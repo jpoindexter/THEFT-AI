@@ -59,7 +59,7 @@ export function ProjectWorkspaceSummaryCard({
         <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
           <div className="min-w-0 space-y-2">
             <div className="flex flex-wrap items-center gap-2">
-              <span className="inline-flex items-center rounded-full border border-border bg-background px-2.5 py-1 text-[11px] font-medium uppercase tracking-[0.14em] text-muted-foreground">
+              <span className="inline-flex items-center rounded-full border border-border bg-background px-2.5 py-1 theft-label-nano font-medium">
                 {workspaceKindLabel(summary.kind)}
               </span>
               <span className="inline-flex items-center rounded-full border border-border/70 bg-background px-2.5 py-1 text-xs text-muted-foreground">
@@ -98,7 +98,7 @@ export function ProjectWorkspaceSummaryCard({
           </div>
 
           <div
-            className="flex flex-col gap-2 min-[420px]:flex-row lg:w-auto lg:justify-end"
+            className="flex flex-col gap-2 sm:flex-row lg:w-auto lg:justify-end"
             data-testid="workspace-summary-actions"
           >
             {summary.hasRuntimeConfig ? (
@@ -149,7 +149,7 @@ export function ProjectWorkspaceSummaryCard({
               <div className="flex items-start gap-2">
                 <GitBranch className="mt-0.5 h-3.5 w-3.5 shrink-0 text-muted-foreground" />
                 <div className="min-w-0 flex-1">
-                  <div className="text-[11px] uppercase tracking-[0.14em] text-muted-foreground">Branch</div>
+                  <div className="theft-label-nano">Branch</div>
                   <div className="flex items-start gap-2">
                     <CopyText
                       text={summary.branchName}
@@ -176,7 +176,7 @@ export function ProjectWorkspaceSummaryCard({
               <div className="flex items-start gap-2">
                 <FolderOpen className="mt-0.5 h-3.5 w-3.5 shrink-0 text-muted-foreground" />
                 <div className="min-w-0 flex-1">
-                  <div className="text-[11px] uppercase tracking-[0.14em] text-muted-foreground">Path</div>
+                  <div className="theft-label-nano">Path</div>
                   <div className="flex items-start gap-2">
                     <CopyText
                       text={summary.cwd}
@@ -204,7 +204,7 @@ export function ProjectWorkspaceSummaryCard({
               <div className="flex items-start gap-2">
                 <ExternalLink className="mt-0.5 h-3.5 w-3.5 shrink-0 text-muted-foreground" />
                 <div className="min-w-0">
-                  <div className="text-[11px] uppercase tracking-[0.14em] text-muted-foreground">Service</div>
+                  <div className="theft-label-nano">Service</div>
                   <a
                     href={summary.primaryServiceUrl}
                     target="_blank"
@@ -226,7 +226,7 @@ export function ProjectWorkspaceSummaryCard({
 
         {summary.issues.length > 0 ? (
           <div className="space-y-2">
-            <div className="text-[11px] font-medium uppercase tracking-[0.14em] text-muted-foreground">
+            <div className="theft-label-nano font-medium">
               Linked issues
             </div>
             <div className="flex flex-wrap gap-2">

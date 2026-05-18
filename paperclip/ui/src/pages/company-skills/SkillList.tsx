@@ -1,4 +1,5 @@
 import type { CompanySkillListItem } from "@paperclipai/shared";
+import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { Link } from "@/lib/router";
 import { ChevronDown, ChevronRight } from "lucide-react";
@@ -51,14 +52,11 @@ export function SkillList({
         return (
           <div key={skill.id} className="border-b border-border">
             <div
-              className={cn(
-                "group grid grid-cols-[minmax(0,1fr)_2.25rem] items-center gap-x-1 px-3 py-1.5 hover:bg-accent/30",
-                skill.id === selectedSkillId && "text-foreground",
-              )}
+              className={cn("group flex items-center gap-x-1 px-3 py-1.5 hover:bg-accent/30", skill.id === selectedSkillId && "text-foreground")}
             >
               <Link
                 to={skillRoute(skill.id)}
-                className="flex min-w-0 items-center self-stretch pr-2 text-left no-underline"
+                className="flex min-w-0 flex-1 items-center self-stretch pr-2 text-left no-underline"
                 onClick={() => onSelectSkill(skill.id)}
               >
                 <span className="flex min-w-0 items-center gap-2 self-center">
@@ -71,19 +69,21 @@ export function SkillList({
                     </TooltipTrigger>
                     <TooltipContent side="top">{source.managedLabel}</TooltipContent>
                   </Tooltip>
-                  <span className="min-w-0 overflow-hidden text-[13px] font-medium leading-5 [display:-webkit-box] [-webkit-box-orient:vertical] [-webkit-line-clamp:3]">
+                  <span className="min-w-0 overflow-hidden text-sm font-medium leading-5 [display:-webkit-box] [-webkit-box-orient:vertical] [-webkit-line-clamp:3]">
                     {skill.name}
                   </span>
                 </span>
               </Link>
-              <button
+              <Button
                 type="button"
-                className="flex h-9 w-9 shrink-0 items-center justify-center self-center rounded-sm text-muted-foreground opacity-80 transition-[background-color,color,opacity] hover:bg-accent hover:text-foreground group-hover:opacity-100"
+                variant="ghost"
+                size="icon-sm"
+                className="shrink-0 self-center text-muted-foreground opacity-80 transition-[background-color,color,opacity] hover:bg-accent hover:text-foreground group-hover:opacity-100"
                 onClick={() => onToggleSkill(skill.id)}
                 aria-label={expanded ? `Collapse ${skill.name}` : `Expand ${skill.name}`}
               >
                 {expanded ? <ChevronDown className="h-3.5 w-3.5" /> : <ChevronRight className="h-3.5 w-3.5" />}
-              </button>
+              </Button>
             </div>
             <div
               aria-hidden={!expanded}

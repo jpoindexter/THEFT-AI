@@ -2,6 +2,7 @@ import { useCallback, useMemo, useState } from "react";
 import { NavLink, useLocation } from "@/lib/router";
 import { useQuery } from "@tanstack/react-query";
 import { ChevronRight, Plus } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import {
   DndContext,
   MouseSensor,
@@ -84,7 +85,7 @@ function SortableProjectItem({
             if (isMobile) setSidebarOpen(false);
           }}
           className={cn(
-            "flex items-center gap-2.5 px-3 py-1.5 text-[13px] font-medium transition-colors",
+            "flex items-center gap-2.5 px-3 py-1.5 text-sm font-medium transition-colors",
             activeProjectRef === routeRef || activeProjectRef === project.id
               ? "bg-sidebar-accent text-sidebar-accent-foreground"
               : "text-sidebar-foreground/75 hover:bg-sidebar-accent/70 hover:text-sidebar-accent-foreground",
@@ -92,7 +93,7 @@ function SortableProjectItem({
         >
           <span
             className="shrink-0 h-3.5 w-3.5 rounded-sm"
-            style={{ backgroundColor: project.color ?? "#6366f1" }}
+            style={{ backgroundColor: project.color ?? "var(--primary)" }}
           />
           <span className="flex-1 truncate">{project.name}</span>
           {project.pauseReason === "budget" ? <BudgetSidebarMarker title="Project paused by budget" /> : null}
@@ -191,20 +192,23 @@ export function SidebarProjects() {
                 open && "rotate-90"
               )}
             />
-            <span className="text-[10px] font-medium uppercase tracking-widest font-mono text-muted-foreground">
+            <span className="theft-label-nano font-mono font-medium">
               Projects
             </span>
           </CollapsibleTrigger>
-          <button
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon-xs"
             onClick={(e) => {
               e.stopPropagation();
               openNewProject();
             }}
-            className="flex items-center justify-center h-4 w-4 rounded text-muted-foreground hover:text-foreground hover:bg-sidebar-accent/70 transition-colors"
+            className="text-muted-foreground transition-colors hover:bg-sidebar-accent/70 hover:text-foreground"
             aria-label="New project"
           >
             <Plus className="h-3 w-3" />
-          </button>
+          </Button>
         </div>
       </div>
 

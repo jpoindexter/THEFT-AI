@@ -104,13 +104,16 @@ export function SkillPane({
               {deletePending ? "Removing..." : "Remove"}
             </Button>
             {detail.editable ? (
-              <button
-                className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground"
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                className="gap-2 text-muted-foreground hover:text-foreground"
                 onClick={() => setEditMode(!editMode)}
               >
                 <Pencil className="h-3.5 w-3.5" />
                 {editMode ? "Stop editing" : "Edit"}
-              </button>
+              </Button>
             ) : (
               <div className="text-sm text-muted-foreground">{detail.editableReason}</div>
             )}
@@ -120,19 +123,22 @@ export function SkillPane({
         <div className="mt-4 space-y-3 border-t border-border pt-4 text-sm">
           <div className="flex flex-wrap items-center gap-x-6 gap-y-2">
             <div className="flex items-center gap-2">
-              <span className="text-[11px] uppercase tracking-[0.18em] text-muted-foreground">Source</span>
+              <span className="theft-label-nano">Source</span>
               <span className="flex items-center gap-2">
                 <SourceIcon className="h-3.5 w-3.5 text-muted-foreground" />
                 {detail.sourcePath ? (
-                  <button
-                    className="truncate hover:text-foreground text-muted-foreground transition-colors cursor-pointer"
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="xs"
+                    className="h-auto min-w-0 truncate p-0 text-muted-foreground hover:bg-transparent hover:text-foreground"
                     onClick={() => {
                       navigator.clipboard.writeText(detail.sourcePath!);
                       pushToast({ title: "Copied path to workspace" });
                     }}
                   >
                     {source.label}
-                  </button>
+                  </Button>
                 ) : (
                   <span className="truncate">{source.label}</span>
                 )}
@@ -140,7 +146,7 @@ export function SkillPane({
             </div>
             {detail.sourceType === "github" && (
               <div className="flex flex-wrap items-center gap-2">
-                <span className="text-[11px] uppercase tracking-[0.18em] text-muted-foreground">Pin</span>
+                <span className="theft-label-nano">Pin</span>
                 <span className="font-mono text-xs">{currentPin ?? "untracked"}</span>
                 {updateStatus?.trackingRef && (
                   <span className="text-xs text-muted-foreground">tracking {updateStatus.trackingRef}</span>
@@ -169,16 +175,16 @@ export function SkillPane({
               </div>
             )}
             <div className="flex items-center gap-2">
-              <span className="text-[11px] uppercase tracking-[0.18em] text-muted-foreground">Key</span>
+              <span className="theft-label-nano">Key</span>
               <span className="font-mono text-xs">{detail.key}</span>
             </div>
             <div className="flex items-center gap-2">
-              <span className="text-[11px] uppercase tracking-[0.18em] text-muted-foreground">Mode</span>
+              <span className="theft-label-nano">Mode</span>
               <span>{detail.editable ? "Editable" : "Read only"}</span>
             </div>
           </div>
           <div className="flex flex-wrap items-start gap-x-3 gap-y-1">
-            <span className="text-[11px] uppercase tracking-[0.18em] text-muted-foreground">Used by</span>
+            <span className="theft-label-nano">Used by</span>
             {usedBy.length === 0 ? (
               <span className="text-muted-foreground">No agents attached</span>
             ) : (
@@ -206,24 +212,30 @@ export function SkillPane({
           <div className="flex items-center gap-2">
             {file?.markdown && !editMode && (
               <div className="flex items-center border border-border">
-                <button
-                  className={cn("px-3 py-1.5 text-sm", viewMode === "preview" && "text-foreground", viewMode !== "preview" && "text-muted-foreground")}
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  className={cn("rounded-sm px-3 py-1.5", viewMode === "preview" && "text-foreground", viewMode !== "preview" && "text-muted-foreground")}
                   onClick={() => setViewMode("preview")}
                 >
                   <span className="flex items-center gap-1.5">
                     <Eye className="h-3.5 w-3.5" />
                     View
                   </span>
-                </button>
-                <button
-                  className={cn("border-l border-border px-3 py-1.5 text-sm", viewMode === "code" && "text-foreground", viewMode !== "code" && "text-muted-foreground")}
+                </Button>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  className={cn("rounded-sm border-l border-border px-3 py-1.5", viewMode === "code" && "text-foreground", viewMode !== "code" && "text-muted-foreground")}
                   onClick={() => setViewMode("code")}
                 >
                   <span className="flex items-center gap-1.5">
                     <Code2 className="h-3.5 w-3.5" />
                     Code
                   </span>
-                </button>
+                </Button>
               </div>
             )}
             {editMode && file?.editable && (
@@ -241,19 +253,19 @@ export function SkillPane({
         </div>
       </div>
 
-      <div className="min-h-[560px] px-5 py-5">
+      <div className="skill-pane-content-min px-5 py-5">
         {fileLoading ? (
           <PageSkeleton variant="detail" />
         ) : !file ? (
           <div className="text-sm text-muted-foreground">Select a file to inspect.</div>
         ) : editMode && file.editable ? (
           file.markdown ? (
-            <MarkdownEditor value={draft} onChange={setDraft} bordered={false} className="min-h-[520px]" />
+            <MarkdownEditor value={draft} onChange={setDraft} bordered={false} className="skill-pane-editor-min" />
           ) : (
             <Textarea
               value={draft}
               onChange={(event) => setDraft(event.target.value)}
-              className="min-h-[520px] rounded-none border-0 bg-transparent px-0 py-0 font-mono text-sm shadow-none focus-visible:ring-0"
+              className="skill-pane-editor-min rounded-sm border-0 bg-transparent px-0 py-0 font-mono text-sm shadow-none focus-visible:ring-0"
             />
           )
         ) : file.markdown && viewMode === "preview" ? (
