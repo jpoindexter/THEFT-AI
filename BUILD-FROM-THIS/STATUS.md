@@ -111,6 +111,11 @@ T119 is now in progress after the active product route launch gate passed. First
   - `PluginManager.tsx` is down to 225 lines with install, example list, installed list, error detail, and uninstall rendering moved under `pages/plugin-manager/`.
   - `WorkspaceRuntimeControls.tsx` is down to 155 lines with runtime model helpers, command sections, action buttons, and quick controls moved under `components/workspace-runtime-controls/`.
   - Focused scanner for all three targets reports zero findings; focused `WorkspaceRuntimeControls` Vitest passed 13 tests; typecheck, active-route design gate, `git diff --check`, and repo-wide scanner passed. Repo-wide scanner is down to 993 findings.
+- T120 continued with the next smaller runtime/settings pages:
+  - `InstanceGeneralSettings.tsx` is down to 136 lines with deployment/auth, toggles, backup retention, feedback sharing, and sign-out sections moved under `pages/instance-general-settings/`.
+  - `CompanyInvites.tsx` is down to 178 lines with role selection, latest invite, and invite history rendering moved under `pages/company-invites/`.
+  - `ApprovalDetail.tsx` is down to 211 lines with resolved banner, approval summary/actions/linked issues, and comments rendering moved under `pages/approval-detail/`.
+  - Focused scanner for all three targets reports zero findings; focused `CompanyInvites` Vitest passed 2 tests; typecheck, active-route design gate, and `git diff --check` passed. Repo-wide scanner is down to 984 findings.
 
 The Paperclip app is genuinely large. The remaining drag is mostly not missing MVP capability; it is oversized route/organism code inherited from the Paperclip host plus the THEFT UX migration. The active-route design-system gate currently passes with zero unallowed findings, but several files still exceed the maintainability guardrail and need continued modularization.
 

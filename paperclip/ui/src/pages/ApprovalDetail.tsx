@@ -1,20 +1,15 @@
 import { useEffect, useMemo, useState } from "react";
-import { Link, useNavigate, useParams, useSearchParams } from "@/lib/router";
+import { useNavigate, useParams, useSearchParams } from "@/lib/router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { approvalsApi } from "../api/approvals";
 import { agentsApi } from "../api/agents";
 import { useCompany } from "../context/CompanyContext";
 import { useBreadcrumbs } from "../context/BreadcrumbContext";
 import { queryKeys } from "../lib/queryKeys";
-import { StatusBadge } from "../components/StatusBadge";
-import { Identity } from "../components/Identity";
-import { approvalLabel, typeIcon, defaultTypeIcon, ApprovalPayloadRenderer } from "../components/ApprovalPayload";
 import { PageSkeleton } from "../components/PageSkeleton";
-import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
-import { CheckCircle2, ChevronRight, Sparkles } from "lucide-react";
-import type { ApprovalComment } from "@paperclipai/shared";
-import { MarkdownBody } from "../components/MarkdownBody";
+import { ApprovalCommentsCard } from "./approval-detail/ApprovalCommentsCard";
+import { ApprovalResolvedBanner } from "./approval-detail/ApprovalResolvedBanner";
+import { ApprovalSummaryCard } from "./approval-detail/ApprovalSummaryCard";
 
 export function ApprovalDetail() {
   const { approvalId } = useParams<{ approvalId: string }>();
@@ -148,7 +143,6 @@ export function ApprovalDetail() {
   const linkedAgentId = typeof payload.agentId === "string" ? payload.agentId : null;
   const isActionable = approval.status === "pending" || approval.status === "revision_requested";
   const isBudgetApproval = approval.type === "budget_override_required";
-  const TypeIcon = typeIcon[approval.type] ?? defaultTypeIcon;
   const showApprovedBanner = searchParams.get("resolved") === "approved" && approval.status === "approved";
   const primaryLinkedIssue = linkedIssues?.[0] ?? null;
   const resolvedCta =
@@ -172,197 +166,46 @@ export function ApprovalDetail() {
 
   return (
     <div className="space-y-6 max-w-3xl">
-      {showApprovedBanner && (
-        <div className="border border-green-300 dark:border-green-700/40 bg-green-50 dark:bg-green-900/20 rounded-lg px-4 py-3 animate-in fade-in zoom-in-95 duration-300">
-          <div className="flex items-start justify-between gap-3">
-            <div className="flex items-start gap-2">
-              <div className="relative mt-0.5">
-                <CheckCircle2 className="h-4 w-4 text-green-600 dark:text-green-300" />
-                <Sparkles className="h-3 w-3 text-green-500 dark:text-green-200 absolute -right-2 -top-1 animate-pulse" />
-              </div>
-              <div>
-                <p className="text-sm text-green-800 dark:text-green-100 font-medium">Approval confirmed</p>
-                <p className="text-xs text-green-700 dark:text-green-200/90">
-                  Requesting agent was notified to review this approval and linked issues.
-                </p>
-              </div>
-            </div>
-            <Button
-              size="sm"
-              variant="outline"
-              className="border-green-400 dark:border-green-600/50 text-green-800 dark:text-green-100 hover:bg-green-100 dark:hover:bg-green-900/30"
-              onClick={() => navigate(resolvedCta.to)}
-            >
-              {resolvedCta.label}
-            </Button>
-          </div>
-        </div>
-      )}
-      <div className="border border-border rounded-lg p-4 space-y-3">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <TypeIcon className="h-5 w-5 text-muted-foreground shrink-0" />
-            <div>
-              <h2 className="text-lg font-semibold">{approvalLabel(approval.type, approval.payload as Record<string, unknown> | null)}</h2>
-              <p className="text-xs text-muted-foreground font-mono">{approval.id}</p>
-            </div>
-          </div>
-          <StatusBadge status={approval.status} />
-        </div>
-        <div className="text-sm space-y-1">
-          {approval.requestedByAgentId && (
-            <div className="flex items-center gap-2">
-              <span className="text-muted-foreground text-xs">Requested by</span>
-              <Identity
-                name={agentNameById.get(approval.requestedByAgentId) ?? approval.requestedByAgentId.slice(0, 8)}
-                size="sm"
-              />
-            </div>
-          )}
-          <ApprovalPayloadRenderer type={approval.type} payload={payload} />
-          <button
-            type="button"
-            className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors mt-2"
-            onClick={() => setShowRawPayload((v) => !v)}
-          >
-            <ChevronRight className={`h-3 w-3 transition-transform ${showRawPayload ? "rotate-90" : ""}`} />
-            See full request
-          </button>
-          {showRawPayload && (
-            <pre className="text-xs bg-muted/40 rounded-md p-3 overflow-x-auto">
-              {JSON.stringify(payload, null, 2)}
-            </pre>
-          )}
-          {approval.decisionNote && (
-            <p className="text-xs text-muted-foreground">Decision note: {approval.decisionNote}</p>
-          )}
-        </div>
-        {error && <p className="text-sm text-destructive">{error}</p>}
-        {linkedIssues && linkedIssues.length > 0 && (
-          <div className="pt-2 border-t border-border/60">
-            <p className="text-xs text-muted-foreground mb-1.5">Linked Issues</p>
-            <div className="space-y-1.5">
-              {linkedIssues.map((issue) => (
-                <Link
-                  key={issue.id}
-                  to={`/issues/${issue.identifier ?? issue.id}`}
-                  className="block text-xs rounded border border-border/70 px-2 py-1.5 hover:bg-accent/20"
-                >
-                  <span className="font-mono text-muted-foreground mr-2">
-                    {issue.identifier ?? issue.id.slice(0, 8)}
-                  </span>
-                  <span>{issue.title}</span>
-                </Link>
-              ))}
-            </div>
-            <p className="text-[11px] text-muted-foreground mt-2">
-              Linked issues remain open until the requesting agent follows up and closes them.
-            </p>
-          </div>
-        )}
-        <div className="flex flex-wrap items-center gap-2">
-          {isActionable && !isBudgetApproval && (
-            <>
-              <Button
-                size="sm"
-                className="bg-green-700 hover:bg-green-600 text-white"
-                onClick={() => approveMutation.mutate()}
-                disabled={approveMutation.isPending}
-              >
-                Approve
-              </Button>
-              <Button
-                variant="destructive"
-                size="sm"
-                onClick={() => rejectMutation.mutate()}
-                disabled={rejectMutation.isPending}
-              >
-                Reject
-              </Button>
-            </>
-          )}
-          {isBudgetApproval && approval.status === "pending" && (
-            <p className="text-sm text-muted-foreground">
-              Resolve this budget stop from the budget controls on <Link to="/costs" className="underline underline-offset-2">/costs</Link>.
-            </p>
-          )}
-          {approval.status === "pending" && (
-            <Button
-              size="sm"
-              variant="outline"
-              onClick={() => revisionMutation.mutate()}
-              disabled={revisionMutation.isPending}
-            >
-              Request revision
-            </Button>
-          )}
-          {approval.status === "revision_requested" && (
-            <Button
-              size="sm"
-              variant="outline"
-              onClick={() => resubmitMutation.mutate()}
-              disabled={resubmitMutation.isPending}
-            >
-              Mark resubmitted
-            </Button>
-          )}
-          {approval.status === "rejected" && approval.type === "hire_agent" && linkedAgentId && (
-            <Button
-              size="sm"
-              variant="outline"
-              className="text-destructive border-destructive/40"
-              onClick={() => {
-                if (!window.confirm("Delete this disapproved agent? This cannot be undone.")) return;
-                deleteAgentMutation.mutate(linkedAgentId);
-              }}
-              disabled={deleteAgentMutation.isPending}
-            >
-              Delete disapproved agent
-            </Button>
-          )}
-        </div>
-      </div>
+      {showApprovedBanner ? (
+        <ApprovalResolvedBanner cta={resolvedCta} onNavigate={(to) => navigate(to)} />
+      ) : null}
+      <ApprovalSummaryCard
+        approval={approval}
+        payload={payload}
+        linkedIssues={linkedIssues ?? []}
+        linkedAgentId={linkedAgentId}
+        agentNameById={agentNameById}
+        showRawPayload={showRawPayload}
+        error={error}
+        isActionable={isActionable}
+        isBudgetApproval={isBudgetApproval}
+        pending={{
+          approve: approveMutation.isPending,
+          reject: rejectMutation.isPending,
+          revision: revisionMutation.isPending,
+          resubmit: resubmitMutation.isPending,
+          deleteAgent: deleteAgentMutation.isPending,
+        }}
+        onToggleRawPayload={() => setShowRawPayload((value) => !value)}
+        onApprove={() => approveMutation.mutate()}
+        onReject={() => rejectMutation.mutate()}
+        onRequestRevision={() => revisionMutation.mutate()}
+        onResubmit={() => resubmitMutation.mutate()}
+        onDeleteAgent={() => {
+          if (!linkedAgentId) return;
+          if (!window.confirm("Delete this disapproved agent? This cannot be undone.")) return;
+          deleteAgentMutation.mutate(linkedAgentId);
+        }}
+      />
 
-      <div className="border border-border rounded-lg p-4 space-y-3">
-        <h3 className="text-sm font-medium">Comments ({comments?.length ?? 0})</h3>
-        <div className="space-y-2">
-          {(comments ?? []).map((comment: ApprovalComment) => (
-            <div key={comment.id} className="border border-border/60 rounded-md p-3">
-              <div className="flex items-center justify-between mb-1">
-                {comment.authorAgentId ? (
-                  <Link to={`/agents/${comment.authorAgentId}`} className="hover:underline">
-                    <Identity
-                      name={agentNameById.get(comment.authorAgentId) ?? comment.authorAgentId.slice(0, 8)}
-                      size="sm"
-                    />
-                  </Link>
-                ) : (
-                  <Identity name="Board" size="sm" />
-                )}
-                <span className="text-xs text-muted-foreground">
-                  {new Date(comment.createdAt).toLocaleString()}
-                </span>
-              </div>
-              <MarkdownBody className="text-sm">{comment.body}</MarkdownBody>
-            </div>
-          ))}
-        </div>
-        <Textarea
-          value={commentBody}
-          onChange={(e) => setCommentBody(e.target.value)}
-          placeholder="Add a comment..."
-          rows={3}
-        />
-        <div className="flex justify-end">
-          <Button
-            size="sm"
-            onClick={() => addCommentMutation.mutate()}
-            disabled={!commentBody.trim() || addCommentMutation.isPending}
-          >
-            {addCommentMutation.isPending ? "Posting…" : "Post comment"}
-          </Button>
-        </div>
-      </div>
+      <ApprovalCommentsCard
+        comments={comments ?? []}
+        commentBody={commentBody}
+        agentNameById={agentNameById}
+        isPosting={addCommentMutation.isPending}
+        onCommentBodyChange={setCommentBody}
+        onPostComment={() => addCommentMutation.mutate()}
+      />
     </div>
   );
 }

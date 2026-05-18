@@ -171,9 +171,10 @@ describe("CompanyInvites", () => {
     expect(container.textContent).toContain("View more");
 
     await act(async () => {
-      const viewerRadio = container.querySelector('input[type="radio"][value="viewer"]') as HTMLInputElement | null;
-      viewerRadio?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
-      viewerRadio?.dispatchEvent(new Event("change", { bubbles: true }));
+      const viewerButton = Array.from(container.querySelectorAll("button")).find(
+        (button) => button.textContent?.includes("Viewer"),
+      );
+      viewerButton?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
     });
 
     const buttons = Array.from(container.querySelectorAll("button"));
