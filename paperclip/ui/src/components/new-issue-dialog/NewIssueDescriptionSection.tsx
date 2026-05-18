@@ -4,14 +4,7 @@ import { FileText, Paperclip, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "../../lib/utils";
 import { MarkdownEditor, type MarkdownEditorRef, type MentionOption } from "../MarkdownEditor";
-
-export type StagedIssueFile = {
-  id: string;
-  file: File;
-  kind: "document" | "attachment";
-  documentKey?: string;
-  title?: string | null;
-};
+import type { StagedIssueFile } from "./useStagedIssueFiles";
 
 type NewIssueDescriptionSectionProps = {
   value: string;

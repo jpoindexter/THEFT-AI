@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback, useMemo, type ChangeEvent, type DragEvent } from "react";
+import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import type { IssueWorkMode } from "@paperclipai/shared";
 import { useDialog } from "../context/DialogContext";
@@ -39,9 +39,10 @@ import { NewIssueDialogFooter } from "./new-issue-dialog/NewIssueDialogFooter";
 import { NewIssueDialogHeader } from "./new-issue-dialog/NewIssueDialogHeader";
 import { IssueAssigneeOptionsPanel } from "./new-issue-dialog/IssueAssigneeOptionsPanel";
 import { IssuePropertyChips } from "./new-issue-dialog/IssuePropertyChips";
-import { NewIssueDescriptionSection, type StagedIssueFile } from "./new-issue-dialog/NewIssueDescriptionSection";
+import { NewIssueDescriptionSection } from "./new-issue-dialog/NewIssueDescriptionSection";
 import { NewIssueTitleSection } from "./new-issue-dialog/NewIssueTitleSection";
 import { NewIssueParentIssueNotice } from "./new-issue-dialog/NewIssueParentIssueNotice";
+import { useStagedIssueFiles, type StagedIssueFile } from "./new-issue-dialog/useStagedIssueFiles";
 
 const DRAFT_KEY = "paperclip:issue-draft";
 const DEBOUNCE_MS = 800;
@@ -122,53 +123,6 @@ function clearDraft() {
   localStorage.removeItem(DRAFT_KEY);
 }
 
-function isTextDocumentFile(file: File) {
-  const name = file.name.toLowerCase();
-  return (
-    name.endsWith(".md") ||
-    name.endsWith(".markdown") ||
-    name.endsWith(".txt") ||
-    file.type === "text/markdown" ||
-    file.type === "text/plain"
-  );
-}
-
-function fileBaseName(filename: string) {
-  return filename.replace(/\.[^.]+$/, "");
-}
-
-function slugifyDocumentKey(input: string) {
-  const slug = input
-    .trim()
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "");
-  return slug || "document";
-}
-
-function titleizeFilename(input: string) {
-  return input
-    .split(/[-_ ]+/g)
-    .filter(Boolean)
-    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
-    .join(" ");
-}
-
-function createUniqueDocumentKey(baseKey: string, stagedFiles: StagedIssueFile[]) {
-  const existingKeys = new Set(
-    stagedFiles
-      .filter((file) => file.kind === "document")
-      .map((file) => file.documentKey)
-      .filter((key): key is string => Boolean(key)),
-  );
-  if (!existingKeys.has(baseKey)) return baseKey;
-  let suffix = 2;
-  while (existingKeys.has(`${baseKey}-${suffix}`)) {
-    suffix += 1;
-  }
-  return `${baseKey}-${suffix}`;
-}
-
 function defaultProjectWorkspaceIdForProject(project: { workspaces?: Array<{ id: string; isPrimary: boolean }>; executionWorkspacePolicy?: { defaultProjectWorkspaceId?: string | null } | null } | null | undefined) {
   if (!project) return "";
   return project.executionWorkspacePolicy?.defaultProjectWorkspaceId
@@ -245,11 +199,21 @@ export function NewIssueDialog() {
   const [workMode, setWorkMode] = useState<IssueWorkMode>("standard");
   const [expanded, setExpanded] = useState(false);
   const [dialogCompanyId, setDialogCompanyId] = useState<string | null>(null);
-  const [stagedFiles, setStagedFiles] = useState<StagedIssueFile[]>([]);
-  const [isFileDragOver, setIsFileDragOver] = useState(false);
   const draftTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const executionWorkspaceDefaultProjectId = useRef<string | null>(null);
   const initializationKeyRef = useRef<string | null>(null);
+  const {
+    stagedFiles,
+    isFileDragOver,
+    stageFileInputRef,
+    handleStageFilesPicked,
+    handleFileDragEnter,
+    handleFileDragOver,
+    handleFileDragLeave,
+    handleFileDrop,
+    removeStagedFile,
+    resetStagedFiles,
+  } = useStagedIssueFiles();
 
   const effectiveCompanyId = dialogCompanyId ?? selectedCompanyId;
   const dialogCompany = companies.find((c) => c.id === effectiveCompanyId) ?? selectedCompany;
@@ -266,7 +230,6 @@ export function NewIssueDialog() {
   const [moreOpen, setMoreOpen] = useState(false);
   const [companyOpen, setCompanyOpen] = useState(false);
   const descriptionEditorRef = useRef<MarkdownEditorRef>(null);
-  const stageFileInputRef = useRef<HTMLInputElement | null>(null);
   const assigneeSelectorRef = useRef<HTMLButtonElement | null>(null);
   const projectSelectorRef = useRef<HTMLButtonElement | null>(null);
 
@@ -720,8 +683,7 @@ export function NewIssueDialog() {
     setWorkMode("standard");
     setExpanded(false);
     setDialogCompanyId(null);
-    setStagedFiles([]);
-    setIsFileDragOver(false);
+    resetStagedFiles();
     setCompanyOpen(false);
     executionWorkspaceDefaultProjectId.current = null;
     initializationKeyRef.current = null;
@@ -817,69 +779,6 @@ export function NewIssueDialog() {
       e.preventDefault();
       handleSubmit();
     }
-  }
-
-  function stageFiles(files: File[]) {
-    if (files.length === 0) return;
-    setStagedFiles((current) => {
-      const next = [...current];
-      for (const file of files) {
-        if (isTextDocumentFile(file)) {
-          const baseName = fileBaseName(file.name);
-          const documentKey = createUniqueDocumentKey(slugifyDocumentKey(baseName), next);
-          next.push({
-            id: `${file.name}:${file.size}:${file.lastModified}:${documentKey}`,
-            file,
-            kind: "document",
-            documentKey,
-            title: titleizeFilename(baseName),
-          });
-          continue;
-        }
-        next.push({
-          id: `${file.name}:${file.size}:${file.lastModified}`,
-          file,
-          kind: "attachment",
-        });
-      }
-      return next;
-    });
-  }
-
-  function handleStageFilesPicked(evt: ChangeEvent<HTMLInputElement>) {
-    stageFiles(Array.from(evt.target.files ?? []));
-    if (stageFileInputRef.current) {
-      stageFileInputRef.current.value = "";
-    }
-  }
-
-  function handleFileDragEnter(evt: DragEvent<HTMLDivElement>) {
-    if (!evt.dataTransfer.types.includes("Files")) return;
-    evt.preventDefault();
-    setIsFileDragOver(true);
-  }
-
-  function handleFileDragOver(evt: DragEvent<HTMLDivElement>) {
-    if (!evt.dataTransfer.types.includes("Files")) return;
-    evt.preventDefault();
-    evt.dataTransfer.dropEffect = "copy";
-    setIsFileDragOver(true);
-  }
-
-  function handleFileDragLeave(evt: DragEvent<HTMLDivElement>) {
-    if (evt.currentTarget.contains(evt.relatedTarget as Node | null)) return;
-    setIsFileDragOver(false);
-  }
-
-  function handleFileDrop(evt: DragEvent<HTMLDivElement>) {
-    if (!evt.dataTransfer.files.length) return;
-    evt.preventDefault();
-    setIsFileDragOver(false);
-    stageFiles(Array.from(evt.dataTransfer.files));
-  }
-
-  function removeStagedFile(id: string) {
-    setStagedFiles((current) => current.filter((file) => file.id !== id));
   }
 
   const hasDraft = draftHasText || stagedFiles.length > 0;

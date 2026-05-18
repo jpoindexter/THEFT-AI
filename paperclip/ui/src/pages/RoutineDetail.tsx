@@ -54,6 +54,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/component
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
   SelectContent,
@@ -747,9 +748,9 @@ export function RoutineDetail() {
       {/* Header: editable title + actions */}
       <div className="flex items-start gap-4">
         <div className="min-w-0 flex-1 space-y-2">
-          <textarea
+          <Textarea
             ref={titleInputRef}
-            className="w-full resize-none overflow-hidden bg-transparent text-xl font-bold outline-none placeholder:text-muted-foreground/50"
+            className="min-h-0 resize-none overflow-hidden border-0 px-0 py-0 text-xl font-bold shadow-none focus-visible:ring-0"
             placeholder="Routine title"
             rows={1}
             value={editDraft.title}
@@ -780,7 +781,7 @@ export function RoutineDetail() {
           {routine.managedByPlugin ? (
             <Badge variant="outline" className="gap-1 text-xs text-muted-foreground">
               Managed by {routine.managedByPlugin.pluginDisplayName}
-              <span className="font-mono text-[10px]">{routine.managedByPlugin.resourceKey}</span>
+              <span className="font-mono text-micro">{routine.managedByPlugin.resourceKey}</span>
             </Badge>
           ) : null}
         </div>
@@ -808,7 +809,7 @@ export function RoutineDetail() {
             disabled={automationToggleDisabled}
             aria-label={automationEnabled ? "Pause automatic triggers" : "Enable automatic triggers"}
           />
-          <span className={`min-w-[3.75rem] text-sm font-medium ${automationLabelClassName}`}>
+          <span className={`min-w-16 text-sm font-medium ${automationLabelClassName}`}>
             {automationLabel}
           </span>
         </div>
@@ -952,10 +953,7 @@ export function RoutineDetail() {
             renderTriggerValue={(option) =>
               option && currentProject ? (
                 <>
-                  <span
-                    className="h-3.5 w-3.5 shrink-0 rounded-sm"
-                    style={{ backgroundColor: currentProject.color ?? "#64748b" }}
-                  />
+                  <span className="h-3.5 w-3.5 shrink-0 rounded-sm bg-muted-foreground" />
                   <span className="truncate">{option.label}</span>
                 </>
               ) : (
@@ -967,10 +965,7 @@ export function RoutineDetail() {
               const project = projectById.get(option.id);
               return (
                 <>
-                  <span
-                    className="h-3.5 w-3.5 shrink-0 rounded-sm"
-                    style={{ backgroundColor: project?.color ?? "#64748b" }}
-                  />
+                  <span className="h-3.5 w-3.5 shrink-0 rounded-sm bg-muted-foreground" />
                   <span className="truncate">{option.label}</span>
                 </>
               );
@@ -986,7 +981,7 @@ export function RoutineDetail() {
         onChange={(description) => setEditDraft((current) => ({ ...current, description }))}
         placeholder="Add instructions..."
         bordered={false}
-        contentClassName="min-h-[120px] text-[15px] leading-7"
+        contentClassName="min-h-32 text-sm leading-7"
         mentions={mentionOptions}
         onSubmit={() => {
           if (!saveRoutine.isPending && editDraft.title.trim()) {
@@ -1011,7 +1006,7 @@ export function RoutineDetail() {
         <CollapsibleContent className="pt-3">
           <div className="grid gap-4 md:grid-cols-2">
             <div className="space-y-2">
-              <p className="text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">Concurrency</p>
+              <p className="theft-label-compact text-muted-foreground">Concurrency</p>
               <Select
                 value={editDraft.concurrencyPolicy}
                 onValueChange={(concurrencyPolicy) => setEditDraft((current) => ({ ...current, concurrencyPolicy }))}
@@ -1028,7 +1023,7 @@ export function RoutineDetail() {
               <p className="text-xs text-muted-foreground">{concurrencyPolicyDescriptions[editDraft.concurrencyPolicy]}</p>
             </div>
             <div className="space-y-2">
-              <p className="text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">Catch-up</p>
+              <p className="theft-label-compact text-muted-foreground">Catch-up</p>
               <Select
                 value={editDraft.catchUpPolicy}
                 onValueChange={(catchUpPolicy) => setEditDraft((current) => ({ ...current, catchUpPolicy }))}

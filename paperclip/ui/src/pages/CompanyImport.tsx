@@ -16,16 +16,11 @@ import { agentsApi } from "../api/agents";
 import { sidebarPreferencesApi } from "../api/sidebarPreferences";
 import { queryKeys } from "../lib/queryKeys";
 import { getAgentOrderStorageKey, writeAgentOrder } from "../lib/agent-order";
-import { MarkdownBody } from "../components/MarkdownBody";
-import { Button } from "@/components/ui/button";
 import { EmptyState } from "../components/EmptyState";
-import { cn } from "../lib/utils";
-import {
-  Download,
-  Package,
-} from "lucide-react";
+import { Download } from "lucide-react";
 import { defaultCreateValues } from "../components/agent-config-defaults";
 import { getUIAdapter } from "../adapters";
+import { ImportPreviewWorkspace } from "./company-import/ImportPreviewWorkspace";
 import { ImportSourceSection } from "./company-import/ImportSourceSection";
 import {
   AdapterPickerList,
@@ -36,16 +31,11 @@ import {
 import type { CreateConfigValues } from "@paperclipai/adapter-utils";
 import {
   type FileTreeNode,
-  type FrontmatterData,
   buildFileTree,
   countFiles,
   collectAllPaths,
-  parseFrontmatter,
-  FRONTMATTER_FIELD_LABELS,
-  FileTree,
 } from "../components/FileTree";
 import { readZipArchive } from "../lib/zip";
-import { getPortableFileDataUrl, getPortableFileText, isPortableImageFile } from "../lib/portable-files";
 
 // ── Import-specific helpers ───────────────────────────────────────────
 
@@ -100,166 +90,6 @@ function buildActionMap(preview: CompanyPortabilityPreviewResult): Map<string, s
 
 function ensureMarkdownPath(p: string): string {
   return p.endsWith(".md") ? p : `${p}.md`;
-}
-
-const ACTION_COLORS: Record<string, string> = {
-  create: "text-emerald-500 border-emerald-500/30",
-  update: "text-amber-500 border-amber-500/30",
-  overwrite: "text-red-500 border-red-500/30",
-  replace: "text-red-500 border-red-500/30",
-  skip: "text-muted-foreground border-border",
-  none: "text-muted-foreground border-border",
-};
-
-function FrontmatterCard({ data }: { data: FrontmatterData }) {
-  return (
-    <div className="rounded-md border border-border bg-accent/20 px-4 py-3 mb-4">
-      <dl className="grid grid-cols-[auto_minmax(0,1fr)] gap-x-4 gap-y-1.5 text-sm">
-        {Object.entries(data).map(([key, value]) => (
-          <div key={key} className="contents">
-            <dt className="text-muted-foreground whitespace-nowrap py-0.5">
-              {FRONTMATTER_FIELD_LABELS[key] ?? key}
-            </dt>
-            <dd className="py-0.5">
-              {Array.isArray(value) ? (
-                <div className="flex flex-wrap gap-1.5">
-                  {value.map((item) => (
-                    <span
-                      key={item}
-                      className="inline-flex items-center rounded-md border border-border bg-background px-2 py-0.5 text-xs"
-                    >
-                      {item}
-                    </span>
-                  ))}
-                </div>
-              ) : (
-                <span>{value}</span>
-              )}
-            </dd>
-          </div>
-        ))}
-      </dl>
-    </div>
-  );
-}
-
-// ── Import file tree customization ───────────────────────────────────
-
-function renderImportFileExtra(node: FileTreeNode, checked: boolean, renameMap: Map<string, string>) {
-  // Show rename indicator only on directories (folders), not individual files
-  const renamedTo = node.kind === "dir" ? renameMap.get(node.path) : undefined;
-  const actionBadge = node.action ? (
-    <span className={cn(
-      "shrink-0 rounded-full border px-2 py-0.5 text-[10px] uppercase tracking-wide",
-      ACTION_COLORS[node.action] ?? ACTION_COLORS.skip,
-    )}>
-      {checked ? node.action : "skip"}
-    </span>
-  ) : null;
-
-  if (!actionBadge && !renamedTo) return null;
-
-  return (
-    <span className="inline-flex items-center gap-1.5 shrink-0">
-      {renamedTo && checked && (
-        <span className="text-[10px] text-cyan-500 font-mono truncate max-w-[7rem]" title={renamedTo}>
-          &rarr; {renamedTo}
-        </span>
-      )}
-      {actionBadge}
-    </span>
-  );
-}
-
-function importFileRowClassName(_node: FileTreeNode, checked: boolean) {
-  return !checked ? "opacity-50" : undefined;
-}
-
-// ── Preview pane ──────────────────────────────────────────────────────
-
-function ImportPreviewPane({
-  selectedFile,
-  content,
-  allFiles,
-  action,
-  renamedTo,
-}: {
-  selectedFile: string | null;
-  content: CompanyPortabilityFileEntry | null;
-  allFiles: Record<string, CompanyPortabilityFileEntry>;
-  action: string | null;
-  renamedTo: string | null;
-}) {
-  if (!selectedFile || content === null) {
-    return (
-      <EmptyState icon={Package} message="Select a file to preview its contents." />
-    );
-  }
-
-  const textContent = getPortableFileText(content);
-  const isMarkdown = selectedFile.endsWith(".md") && textContent !== null;
-  const parsed = isMarkdown && textContent ? parseFrontmatter(textContent) : null;
-  const imageSrc = isPortableImageFile(selectedFile, content) ? getPortableFileDataUrl(selectedFile, content) : null;
-  const actionColor = action ? (ACTION_COLORS[action] ?? ACTION_COLORS.skip) : "";
-
-  // Resolve relative image paths within the import package
-  const resolveImageSrc = isMarkdown
-    ? (src: string) => {
-        if (/^(?:https?:|data:)/i.test(src)) return null;
-        const dir = selectedFile.includes("/") ? selectedFile.slice(0, selectedFile.lastIndexOf("/") + 1) : "";
-        const resolved = dir + src;
-        const entry = allFiles[resolved] ?? allFiles[src];
-        if (!entry) return null;
-        return getPortableFileDataUrl(resolved in allFiles ? resolved : src, entry);
-      }
-    : undefined;
-
-  return (
-    <div className="min-w-0">
-      <div className="border-b border-border px-5 py-3">
-        <div className="flex items-center justify-between gap-3">
-          <div className="min-w-0 flex items-center gap-2">
-            <span className="truncate font-mono text-sm">{selectedFile}</span>
-            {renamedTo && (
-              <span className="shrink-0 font-mono text-sm text-cyan-500">
-                &rarr; {renamedTo}
-              </span>
-            )}
-          </div>
-          {action && (
-            <span className={cn(
-              "shrink-0 rounded-full border px-2 py-0.5 text-xs uppercase tracking-wide",
-              actionColor,
-            )}>
-              {action}
-            </span>
-          )}
-        </div>
-      </div>
-      <div className="min-h-[560px] px-5 py-5">
-        {parsed ? (
-          <>
-            <FrontmatterCard data={parsed.data} />
-            {parsed.body.trim() && <MarkdownBody resolveImageSrc={resolveImageSrc} softBreaks={false} linkIssueReferences={false}>{parsed.body}</MarkdownBody>}
-          </>
-        ) : isMarkdown ? (
-          <MarkdownBody resolveImageSrc={resolveImageSrc} softBreaks={false} linkIssueReferences={false}>{textContent ?? ""}</MarkdownBody>
-        ) : imageSrc ? (
-          <div className="flex min-h-[520px] items-center justify-center rounded-lg border border-border bg-accent/10 p-6">
-            <img src={imageSrc} alt={selectedFile} className="max-h-[480px] max-w-full object-contain" />
-          </div>
-        ) : textContent !== null ? (
-          <pre className="overflow-x-auto whitespace-pre-wrap break-words border-0 bg-transparent p-0 font-mono text-sm text-foreground">
-            <code>{textContent}</code>
-          </pre>
-        ) : (
-          <div className="rounded-lg border border-border bg-accent/10 px-4 py-3 text-sm text-muted-foreground">
-            Binary asset preview is not available for this file type.
-          </div>
-        )}
-      </div>
-    </div>
-  );
 }
 
 function buildConflictList(
@@ -921,69 +751,26 @@ export function CompanyImport() {
             onChangeConfig={handleAdapterConfigChange}
           />
 
-          {/* Import button — below renames */}
-          <div className="mx-5 mt-3 flex justify-end">
-            <Button
-              size="sm"
-              onClick={() => importMutation.mutate()}
-              disabled={importMutation.isPending || hasErrors || selectedCount === 0}
-            >
-              <Download className="mr-1.5 h-3.5 w-3.5" />
-              {importMutation.isPending
-                ? "Importing..."
-                : `Import ${selectedCount} file${selectedCount === 1 ? "" : "s"}`}
-            </Button>
-          </div>
-
-          {/* Warnings */}
-          {importPreview.warnings.length > 0 && (
-            <div className="mx-5 mt-3 rounded-md border border-amber-500/30 bg-amber-500/5 px-4 py-3">
-              {importPreview.warnings.map((w) => (
-                <div key={w} className="text-xs text-amber-500">{w}</div>
-              ))}
-            </div>
-          )}
-
-          {/* Errors */}
-          {importPreview.errors.length > 0 && (
-            <div className="mx-5 mt-3 rounded-md border border-destructive/30 bg-destructive/5 px-4 py-3">
-              {importPreview.errors.map((e) => (
-                <div key={e} className="text-xs text-destructive">{e}</div>
-              ))}
-            </div>
-          )}
-
-          {/* Two-column layout */}
-          <div className="grid h-[calc(100vh-16rem)] gap-0 xl:grid-cols-[19rem_minmax(0,1fr)]">
-            <aside className="flex flex-col border-r border-border overflow-hidden">
-              <div className="border-b border-border px-4 py-3 shrink-0">
-                <h2 className="text-base font-semibold">Package files</h2>
-              </div>
-              <div className="flex-1 overflow-y-auto">
-                <FileTree
-                  nodes={tree}
-                  selectedFile={selectedFile}
-                  expandedDirs={expandedDirs}
-                  checkedFiles={checkedFiles}
-                  onToggleDir={handleToggleDir}
-                  onSelectFile={setSelectedFile}
-                  onToggleCheck={handleToggleCheck}
-                  renderFileExtra={(node, checked) => renderImportFileExtra(node, checked, renameMap)}
-                  fileRowClassName={importFileRowClassName}
-                  wrapLabels={false}
-                />
-              </div>
-            </aside>
-            <div className="min-w-0 overflow-y-auto pl-6">
-              <ImportPreviewPane
-                selectedFile={selectedFile}
-                content={previewContent}
-                allFiles={importPreview?.files ?? {}}
-                action={selectedAction}
-                renamedTo={selectedFile ? (renameMap.get(selectedFile) ?? null) : null}
-              />
-            </div>
-          </div>
+          <ImportPreviewWorkspace
+            importPreview={importPreview}
+            tree={tree}
+            selectedFile={selectedFile}
+            expandedDirs={expandedDirs}
+            checkedFiles={checkedFiles}
+            selectedCount={selectedCount}
+            totalFiles={totalFiles}
+            conflictCount={conflicts.length}
+            hasErrors={hasErrors}
+            isImporting={importMutation.isPending}
+            selectedAction={selectedAction}
+            renamedTo={selectedFile ? (renameMap.get(selectedFile) ?? null) : null}
+            previewContent={previewContent}
+            renameMap={renameMap}
+            onToggleDir={handleToggleDir}
+            onSelectFile={setSelectedFile}
+            onToggleCheck={handleToggleCheck}
+            onImport={() => importMutation.mutate()}
+          />
         </>
       )}
     </div>

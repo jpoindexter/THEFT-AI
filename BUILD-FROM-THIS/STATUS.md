@@ -67,7 +67,11 @@ T119 is now in progress after the active product route launch gate passed. First
 - `AgentDetail.tsx` continued page-level cleanup with run detail summary/session rendering moved into `pages/agent-detail/RunSummaryCard.tsx`; the parent is down to 3498 lines and focused findings dropped to 26.
 - `CompanyImport.tsx` continued page-level cleanup with rename conflict and adapter override setup moved into `pages/company-import/ImportReviewSetup.tsx`; the parent is down to 991 lines and focused native-control findings are gone.
 - `DesignGuide.tsx` now has zero focused scanner findings after replacing demo inline styles/native buttons and arbitrary micro text with tokenized classes/primitives.
-- Repo-wide design drift count is down to 1111 findings after the first forty-nine T119 slices.
+- `NewIssueDialog.tsx` continued its split with staged-file/drop handling moved into `new-issue-dialog/useStagedIssueFiles.ts`; the parent is down to 1105 lines and focused scanner remains clean.
+- `AgentDetail.tsx` continued page-level cleanup with configuration revision controls moved into `pages/agent-detail/ConfigurationRevisionsSection.tsx`; the parent is down to 3433 lines and focused findings dropped to 25.
+- `CompanyImport.tsx` continued page-level cleanup with preview/results workspace rendering moved into `pages/company-import/ImportPreviewWorkspace.tsx`; the parent is down to 778 lines and focused scanner now reports zero findings.
+- `RoutineDetail.tsx` now has zero focused scanner findings after replacing title/native controls and project swatch drift with shared primitives/token classes.
+- Repo-wide design drift count is down to 1082 findings after the first fifty-three T119 slices.
 
 The Paperclip app is genuinely large. The remaining drag is mostly not missing MVP capability; it is oversized route/organism code inherited from the Paperclip host plus the THEFT UX migration. The active-route design-system gate currently passes with zero unallowed findings, but several files still exceed the maintainability guardrail and need continued modularization.
 
