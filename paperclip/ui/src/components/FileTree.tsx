@@ -1,4 +1,4 @@
-import type { KeyboardEvent, ReactNode } from "react";
+import type { KeyboardEvent } from "react";
 import { useMemo, useRef, useState } from "react";
 import { cn } from "../lib/utils";
 import {
@@ -11,251 +11,53 @@ import {
 } from "lucide-react";
 import { statusBadge, statusBadgeDefault } from "../lib/status-colors";
 import { Button } from "./ui/button";
+import { Checkbox } from "./ui/checkbox";
 import { Skeleton } from "./ui/skeleton";
+import type { FileTreeNode, FileTreeProps } from "./file-tree/fileTreeModel";
+import {
+  TREE_ROW_HEIGHT_CLASS,
+  checkboxState,
+  fileTreeToneClass,
+  flattenVisibleNodes,
+} from "./file-tree/fileTreeModel";
 
-// -- Tree types --------------------------------------------------------------
-
-export type FileTreeNode = {
-  name: string;
-  path: string;
-  kind: "dir" | "file";
-  children: FileTreeNode[];
-  /** Optional per-node metadata (e.g. import action) */
-  action?: string | null;
-};
-
-export type FileTreeBadgeVariant = "ok" | "warning" | "error" | "info" | "pending";
-
-export type FileTreeBadge = {
-  label: string;
-  status: FileTreeBadgeVariant;
-  tooltip?: string;
-};
-
-export type FileTreeTone = "default" | "warning" | "error" | "muted";
-
-export type FileTreeEmptyState = {
-  title?: string;
-  description?: string;
-};
-
-export type FileTreeErrorState = {
-  message: string;
-  retry?: () => void;
-};
-
-type VisibleFileTreeNode = {
-  node: FileTreeNode;
-  depth: number;
-};
-
-const TREE_BASE_INDENT = 16;
-const TREE_STEP_INDENT = 24;
-const TREE_ROW_HEIGHT_CLASS = "min-h-9";
-
-const fileTreeToneClass: Record<FileTreeTone, string | undefined> = {
-  default: undefined,
-  warning: "bg-amber-500/5 text-amber-700 dark:text-amber-300",
-  error: "bg-destructive/5 text-destructive",
-  muted: "opacity-50",
-};
-
-// -- Helpers -----------------------------------------------------------------
-
-export function buildFileTree(
-  files: Record<string, unknown>,
-  actionMap?: Map<string, string>,
-): FileTreeNode[] {
-  const root: FileTreeNode = { name: "", path: "", kind: "dir", children: [] };
-
-  for (const filePath of Object.keys(files)) {
-    const segments = filePath.split("/").filter(Boolean);
-    let current = root;
-    let currentPath = "";
-    for (let i = 0; i < segments.length; i++) {
-      const segment = segments[i];
-      currentPath = currentPath ? `${currentPath}/${segment}` : segment;
-      const isLeaf = i === segments.length - 1;
-      let next = current.children.find((c) => c.name === segment);
-      if (!next) {
-        next = {
-          name: segment,
-          path: currentPath,
-          kind: isLeaf ? "file" : "dir",
-          children: [],
-          action: isLeaf ? (actionMap?.get(filePath) ?? null) : null,
-        };
-        current.children.push(next);
-      }
-      current = next;
-    }
-  }
-
-  function sortNode(node: FileTreeNode) {
-    node.children.sort((a, b) => {
-      // Files before directories so PROJECT.md appears above tasks/
-      if (a.kind !== b.kind) return a.kind === "file" ? -1 : 1;
-      return a.name.localeCompare(b.name);
-    });
-    node.children.forEach(sortNode);
-  }
-
-  sortNode(root);
-  return root.children;
-}
-
-export function countFiles(nodes: FileTreeNode[]): number {
-  let count = 0;
-  for (const node of nodes) {
-    if (node.kind === "file") count++;
-    else count += countFiles(node.children);
-  }
-  return count;
-}
-
-export function collectAllPaths(
-  nodes: FileTreeNode[],
-  type: "file" | "dir" | "all" = "all",
-): Set<string> {
-  const paths = new Set<string>();
-  for (const node of nodes) {
-    if (type === "all" || node.kind === type) paths.add(node.path);
-    for (const p of collectAllPaths(node.children, type)) paths.add(p);
-  }
-  return paths;
-}
+export type {
+  FileTreeBadge,
+  FileTreeBadgeVariant,
+  FileTreeEmptyState,
+  FileTreeErrorState,
+  FileTreeNode,
+  FileTreeProps,
+  FileTreeTone,
+  FrontmatterData,
+} from "./file-tree/fileTreeModel";
+export {
+  FRONTMATTER_FIELD_LABELS,
+  buildFileTree,
+  collectAllPaths,
+  countFiles,
+  parseFrontmatter,
+} from "./file-tree/fileTreeModel";
 
 function fileIcon(name: string) {
   if (name.endsWith(".yaml") || name.endsWith(".yml")) return FileCode2;
   return FileText;
 }
 
-function flattenVisibleNodes(
-  nodes: FileTreeNode[],
-  expandedDirs: Set<string>,
-  depth = 0,
-): VisibleFileTreeNode[] {
-  const flattened: VisibleFileTreeNode[] = [];
-  for (const node of nodes) {
-    flattened.push({ node, depth });
-    if (node.kind === "dir" && expandedDirs.has(node.path)) {
-      flattened.push(...flattenVisibleNodes(node.children, expandedDirs, depth + 1));
-    }
-  }
-  return flattened;
+const FILE_TREE_DEPTH_INDENT_CLASSES = [
+  "pl-2",
+  "pl-8",
+  "pl-14",
+  "pl-20",
+  "pl-26",
+  "pl-32",
+  "pl-38",
+  "pl-44",
+];
+
+function depthIndentClass(depth: number) {
+  return FILE_TREE_DEPTH_INDENT_CLASSES[Math.min(depth, FILE_TREE_DEPTH_INDENT_CLASSES.length - 1)];
 }
-
-function checkboxState(node: FileTreeNode, checkedFiles: Set<string>) {
-  if (node.kind === "file") {
-    return {
-      allChecked: checkedFiles.has(node.path),
-      someChecked: false,
-    };
-  }
-
-  const childFiles = collectAllPaths(node.children, "file");
-  const childFilePaths = [...childFiles];
-  const allChecked = childFilePaths.length > 0 && childFilePaths.every((p) => checkedFiles.has(p));
-  const someChecked = childFilePaths.some((p) => checkedFiles.has(p));
-  return { allChecked, someChecked: someChecked && !allChecked };
-}
-
-// -- Frontmatter helpers -----------------------------------------------------
-
-export type FrontmatterData = Record<string, string | string[]>;
-
-export function parseFrontmatter(content: string): { data: FrontmatterData; body: string } | null {
-  const match = content.match(/^---\r?\n([\s\S]*?)\r?\n---\r?\n?([\s\S]*)$/);
-  if (!match) return null;
-
-  const data: FrontmatterData = {};
-  const rawYaml = match[1];
-  const body = match[2];
-
-  let currentKey: string | null = null;
-  let currentList: string[] | null = null;
-
-  for (const line of rawYaml.split("\n")) {
-    const trimmed = line.trim();
-    if (!trimmed || trimmed.startsWith("#")) continue;
-
-    if (trimmed.startsWith("- ") && currentKey) {
-      if (!currentList) currentList = [];
-      currentList.push(trimmed.slice(2).trim().replace(/^["']|["']$/g, ""));
-      continue;
-    }
-
-    if (currentKey && currentList) {
-      data[currentKey] = currentList;
-      currentList = null;
-      currentKey = null;
-    }
-
-    const kvMatch = trimmed.match(/^([a-zA-Z_][\w-]*)\s*:\s*(.*)$/);
-    if (kvMatch) {
-      const key = kvMatch[1];
-      const val = kvMatch[2].trim().replace(/^["']|["']$/g, "");
-      if (val === "null") {
-        currentKey = null;
-        continue;
-      }
-      if (val) {
-        data[key] = val;
-        currentKey = null;
-      } else {
-        currentKey = key;
-      }
-    }
-  }
-
-  if (currentKey && currentList) {
-    data[currentKey] = currentList;
-  }
-
-  return Object.keys(data).length > 0 ? { data, body } : null;
-}
-
-export const FRONTMATTER_FIELD_LABELS: Record<string, string> = {
-  name: "Name",
-  title: "Title",
-  kind: "Kind",
-  reportsTo: "Reports to",
-  skills: "Skills",
-  status: "Status",
-  description: "Description",
-  priority: "Priority",
-  assignee: "Assignee",
-  project: "Project",
-  recurring: "Recurring",
-  targetDate: "Target date",
-};
-
-// -- File tree component -----------------------------------------------------
-
-export type FileTreeProps = {
-  nodes: FileTreeNode[];
-  selectedFile: string | null;
-  expandedDirs: Set<string>;
-  checkedFiles?: Set<string>;
-  onToggleDir: (path: string) => void;
-  onSelectFile: (path: string) => void;
-  onToggleCheck?: (path: string, kind: "file" | "dir") => void;
-  /** Serializable badge metadata keyed by path. This is safe to expose through plugin UI contracts. */
-  fileBadges?: Record<string, FileTreeBadge | undefined>;
-  /** Closed row tone metadata keyed by path. This avoids raw host class names in public contracts. */
-  fileTones?: Record<string, FileTreeTone | undefined>;
-  /** Internal-only escape hatch for current host call sites that need richer row content. */
-  renderFileExtra?: (node: FileTreeNode, checked: boolean) => ReactNode;
-  /** @deprecated Use fileTones for public surfaces. Kept for compatibility with host-only callers. */
-  fileRowClassName?: (node: FileTreeNode, checked: boolean) => string | undefined;
-  showCheckboxes?: boolean;
-  /** Allow long file and directory names to wrap instead of forcing horizontal overflow. */
-  wrapLabels?: boolean;
-  loading?: boolean;
-  error?: FileTreeErrorState | null;
-  empty?: FileTreeEmptyState;
-  ariaLabel?: string;
-};
 
 export function FileTree({
   nodes,
@@ -416,19 +218,15 @@ export function FileTree({
             tabIndex={(focusedPath ?? visibleNodes[0]?.node.path) === node.path ? 0 : -1}
             className={cn(
               node.kind === "dir"
-                ? showCheckboxes
-                  ? "group grid w-full grid-cols-[auto_minmax(0,1fr)_2.25rem] items-center gap-x-1 pr-3 text-left text-sm text-muted-foreground hover:bg-accent/30 hover:text-foreground"
-                  : "group grid w-full grid-cols-[minmax(0,1fr)_2.25rem] items-center gap-x-1 pr-3 text-left text-sm text-muted-foreground hover:bg-accent/30 hover:text-foreground max-[480px]:grid-cols-[minmax(0,1fr)]"
+                ? "group flex w-full items-center gap-1 pr-3 text-left text-sm text-muted-foreground hover:bg-accent/30 hover:text-foreground"
                 : "group flex w-full items-center gap-1 pr-3 text-left text-sm text-muted-foreground hover:bg-accent/30 hover:text-foreground cursor-pointer",
+              depthIndentClass(depth),
               TREE_ROW_HEIGHT_CLASS,
               isSelected && "text-foreground bg-accent/20",
               fileTreeToneClass[tone],
               extraClassName,
               "outline-none focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:ring-inset",
             )}
-            style={{
-              paddingInlineStart: `${TREE_BASE_INDENT + depth * TREE_STEP_INDENT - 8}px`,
-            }}
             onFocus={() => setFocusedPath(node.path)}
             onClick={() => toggleNode(node)}
             onKeyDown={(event) => handleRowKeyDown(event, index, node)}
@@ -436,14 +234,10 @@ export function FileTree({
           >
             {showCheckboxes && (
               <label className="flex items-center pl-2" onClick={(event) => event.stopPropagation()}>
-                <input
-                  type="checkbox"
-                  checked={allChecked}
-                  ref={(element) => {
-                    if (element) element.indeterminate = someChecked;
-                  }}
-                  onChange={() => onToggleCheck?.(node.path, node.kind)}
-                  className="mr-2 accent-foreground"
+                <Checkbox
+                  checked={someChecked ? "indeterminate" : allChecked}
+                  onCheckedChange={() => onToggleCheck?.(node.path, node.kind)}
+                  className="mr-2"
                 />
               </label>
             )}
@@ -466,7 +260,7 @@ export function FileTree({
             {badge && (
               <span
                 className={cn(
-                  "ml-3 shrink-0 rounded-full px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide",
+                  "ml-3 shrink-0 rounded-full px-2 py-0.5 text-micro font-medium uppercase tracking-wide",
                   statusBadge[badge.status] ?? statusBadgeDefault,
                 )}
                 title={badge.tooltip}
@@ -476,9 +270,11 @@ export function FileTree({
             )}
             {node.kind === "file" && renderFileExtra?.(node, allChecked)}
             {node.kind === "dir" && (
-              <button
+              <Button
                 type="button"
-                className="flex h-9 w-9 items-center justify-center self-center rounded-sm text-muted-foreground opacity-70 transition-[background-color,color,opacity] hover:bg-accent hover:text-foreground group-hover:opacity-100 focus-visible:ring-2 focus-visible:ring-ring/50 max-[480px]:hidden"
+                variant="ghost"
+                size="icon-sm"
+                className="ml-auto self-center text-muted-foreground opacity-70 transition-[background-color,color,opacity] group-hover:opacity-100 max-sm:hidden"
                 onClick={(event) => {
                   event.stopPropagation();
                   onToggleDir(node.path);
@@ -490,7 +286,7 @@ export function FileTree({
                 ) : (
                   <ChevronRight className="h-3.5 w-3.5" />
                 )}
-              </button>
+              </Button>
             )}
           </div>
         );
