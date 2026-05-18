@@ -132,6 +132,10 @@ T119 is now in progress after the active product route launch gate passed. First
 - T120 continued with a small fixture guardrail cleanup:
   - `issueChatUxFixtures.ts` is down to 278 lines after moving transcript fixtures into `issueChatUxTranscriptFixtures.ts`.
   - The focused fixture scanner reports zero findings, typecheck passed, and repo-wide scanner is down to 516 findings.
+- T120 cleared the remaining small oversized source module:
+  - `issueThreadInteractionFixtures.ts` is down from 540 lines to a 30-line fixture index after moving factories, suggested-task fixtures, question fixtures, confirmation fixtures, and feed fixtures under `fixtures/issue-thread-interactions/`.
+  - Focused `IssueThreadInteractionCard` Vitest passed 11 tests, typecheck passed, and the focused fixture scanner reports zero findings.
+  - There are now no remaining non-test source modules in the 301-600 line range under `paperclip/ui/src`; the next oversized targets start at `Routines.tsx`/`LiveUpdatesProvider.tsx` and larger.
 
 The Paperclip app is genuinely large. The remaining drag is mostly not missing MVP capability; it is oversized route/organism code inherited from the Paperclip host plus the THEFT UX migration. The active-route design-system gate currently passes with zero unallowed findings, but several files still exceed the maintainability guardrail and need continued modularization.
 
