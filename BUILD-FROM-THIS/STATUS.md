@@ -85,6 +85,7 @@ Current local modularization checkpoint:
 - Extracted issue-chat message types, timing, transcript parts, message factories, run messages, stability, and assembly helpers so `lib/issue-chat-messages.ts` now fits the 300-line guardrail.
 - Extracted plugin bridge types, context, data/action hooks, navigation hooks, toast/stream hooks, and serialization/error helpers so `plugins/bridge.ts` now fits the 300-line guardrail.
 - Extracted plugin launcher discovery, types, utilities, and modal shell rendering so `plugins/launchers.tsx` now fits the 300-line guardrail, and moved the reviewed launcher inline-style exceptions to the modal shell module path.
+- Extracted plugin slot registry, module loader, module shims, discovery hook, slot mount, and outlet rendering so `plugins/slots.tsx` now fits the 300-line guardrail.
 - Moved the issue-chat composer safe-area dock value into a semantic CSS utility.
 
 Latest verification for the active modularization slices:
@@ -113,6 +114,7 @@ Latest verification for the active modularization slices:
 - Focused issue-chat message/thread Vitest passed after the message assembly split: 79 tests across 3 files.
 - Focused plugin API/settings/page Vitest passed after the plugin bridge split: 11 tests across 3 files.
 - Focused plugin launcher-adjacent Vitest passed after the launcher split: 18 tests across plugin API/settings/page, Layout, and ProjectDetail.
+- Focused plugin slot consumer Vitest passed after the slots split: 35 tests across 7 files.
 - Focused Vitest for issue chat, issue documents, and issue detail passed: 78 tests across 4 files.
 - Focused IssueChatThread Vitest passed: 61 tests across 2 files.
 - Focused onboarding utility Vitest passed: 21 tests across 5 files.
@@ -128,6 +130,7 @@ Remaining high-value maintainability work:
 - `lib/issue-chat-messages.ts` is down to 11 lines and now fits the 300-line guardrail; message types, timing, transcript parts, message factories, run messages, stability, and assembly helpers are split under the guardrail.
 - `plugins/bridge.ts` is down to 29 lines and now fits the 300-line guardrail; bridge types, context, data/action hooks, navigation hooks, toast/stream hooks, and serialization/error helpers are split under the guardrail.
 - `plugins/launchers.tsx` is down to 281 lines and now fits the 300-line guardrail; launcher discovery, types, utilities, and modal shell rendering are split under the guardrail.
+- `plugins/slots.tsx` is down to 37 lines and now fits the 300-line guardrail; slot types, registry, loader, shims, hook, mount, and outlet modules are split under the guardrail.
 - `IssueChatThread.tsx` is down to 275 lines and now fits the 300-line guardrail.
 - `DepartmentWorkspace.tsx` is down to 282 lines and now fits the 300-line guardrail.
 - `Agents.tsx` is down to 227 lines and now fits the 300-line guardrail.
@@ -159,9 +162,9 @@ Remaining high-value maintainability work:
 
 Next best path:
 
-1. Continue with the remaining oversized plugin support module in the active-route gate: `plugins/slots.tsx`.
-2. Keep active page and organism modules under the guardrail as follow-up changes land.
-3. Only after those pass gates, revisit broad visual polish. The current priority is architecture/template cleanup, not another visual rewrite.
+1. Keep active page, organism, and plugin runtime modules under the guardrail as follow-up changes land.
+2. Treat `index.css` as the current token/source-of-truth file; do not split it casually until token ownership is fully stable.
+3. Revisit broad visual polish now that the active-route structure is cleaner. The current priority remains architecture/template cleanup, not another visual rewrite.
 
 THEFT should become one local app: Paperclip runtime/control plane as the tracked host, with THEFT design, staged onboarding, 8-department company setup, roadmap/canvas, Library, and local skills on top.
 
