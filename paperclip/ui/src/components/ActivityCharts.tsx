@@ -15,15 +15,39 @@ function formatDayLabel(dateStr: string): string {
   return `${d.getMonth() + 1}/${d.getDate()}`;
 }
 
+const BAR_HEIGHT_CLASSES = [
+  "h-0",
+  "h-1",
+  "h-2",
+  "h-3",
+  "h-4",
+  "h-5",
+  "h-6",
+  "h-7",
+  "h-8",
+  "h-9",
+  "h-10",
+  "h-12",
+  "h-14",
+  "h-16",
+  "h-20",
+];
+
+function barHeightClass(value: number, maxValue: number) {
+  if (value <= 0 || maxValue <= 0) return BAR_HEIGHT_CLASSES[0];
+  const clamped = Math.min(Math.max(value / maxValue, 0), 1);
+  return BAR_HEIGHT_CLASSES[Math.round(clamped * (BAR_HEIGHT_CLASSES.length - 1))];
+}
+
 /* ---- Sub-components ---- */
 
 function DateLabels({ days }: { days: string[] }) {
   return (
-    <div className="flex gap-[3px] mt-1.5">
+    <div className="mt-1.5 flex gap-1">
       {days.map((day, i) => (
         <div key={day} className="flex-1 text-center">
           {(i === 0 || i === 6 || i === 13) ? (
-            <span className="text-[9px] text-muted-foreground tabular-nums">{formatDayLabel(day)}</span>
+            <span className="text-nano tabular-nums text-muted-foreground">{formatDayLabel(day)}</span>
           ) : null}
         </div>
       ))}
@@ -31,12 +55,12 @@ function DateLabels({ days }: { days: string[] }) {
   );
 }
 
-function ChartLegend({ items }: { items: { color: string; label: string }[] }) {
+function ChartLegend({ items }: { items: { className: string; label: string }[] }) {
   return (
-    <div className="flex flex-wrap gap-x-2.5 gap-y-0.5 mt-2">
+    <div className="mt-2 flex flex-wrap gap-x-2.5 gap-y-0.5">
       {items.map(item => (
-        <span key={item.label} className="flex items-center gap-1 text-[9px] text-muted-foreground">
-          <span className="h-1.5 w-1.5 rounded-full shrink-0" style={{ backgroundColor: item.color }} />
+        <span key={item.label} className="flex items-center gap-1 text-nano text-muted-foreground">
+          <span className={`h-1.5 w-1.5 shrink-0 rounded-full ${item.className}`} />
           {item.label}
         </span>
       ))}
@@ -49,7 +73,7 @@ export function ChartCard({ title, subtitle, children }: { title: string; subtit
     <div className="border border-border rounded-lg p-4 space-y-3">
       <div>
         <h3 className="text-xs font-medium text-muted-foreground">{title}</h3>
-        {subtitle && <span className="text-[10px] text-muted-foreground/60">{subtitle}</span>}
+        {subtitle && <span className="text-nano text-muted-foreground/60">{subtitle}</span>}
       </div>
       {children}
     </div>
@@ -96,21 +120,20 @@ export function RunActivityChart(props: RunChartProps) {
 
   return (
     <div>
-      <div className="flex items-end gap-[3px] h-20">
+      <div className="flex h-20 items-end gap-1">
         {days.map(day => {
           const entry = grouped.get(day) ?? { date: day, succeeded: 0, failed: 0, other: 0, total: 0 };
           const total = entry.total;
-          const heightPct = (total / maxValue) * 100;
           return (
-            <div key={day} className="flex-1 h-full flex flex-col justify-end" title={`${day}: ${total} runs`}>
+            <div key={day} className="flex h-full flex-1 flex-col justify-end" title={`${day}: ${total} runs`}>
               {total > 0 ? (
-                <div className="flex flex-col-reverse gap-px overflow-hidden" style={{ height: `${heightPct}%`, minHeight: 2 }}>
-                  {entry.succeeded > 0 && <div className="bg-emerald-500" style={{ flex: entry.succeeded }} />}
-                  {entry.failed > 0 && <div className="bg-red-500" style={{ flex: entry.failed }} />}
-                  {entry.other > 0 && <div className="bg-neutral-500" style={{ flex: entry.other }} />}
+                <div className="flex flex-col-reverse overflow-hidden">
+                  {entry.succeeded > 0 && <div className={`bg-chart-2 ${barHeightClass(entry.succeeded, maxValue)}`} />}
+                  {entry.failed > 0 && <div className={`bg-destructive ${barHeightClass(entry.failed, maxValue)}`} />}
+                  {entry.other > 0 && <div className={`bg-muted-foreground ${barHeightClass(entry.other, maxValue)}`} />}
                 </div>
               ) : (
-                <div className="bg-muted/30 rounded-sm" style={{ height: 2 }} />
+                <div className="h-0.5 rounded-sm bg-muted/30" />
               )}
             </div>
           );
@@ -121,11 +144,11 @@ export function RunActivityChart(props: RunChartProps) {
   );
 }
 
-const priorityColors: Record<string, string> = {
-  critical: "#ef4444",
-  high: "#f97316",
-  medium: "#eab308",
-  low: "#6b7280",
+const priorityClasses: Record<string, string> = {
+  critical: "bg-destructive",
+  high: "bg-chart-1",
+  medium: "bg-chart-3",
+  low: "bg-muted-foreground",
 };
 
 const priorityOrder = ["critical", "high", "medium", "low"] as const;
@@ -148,40 +171,39 @@ export function PriorityChart({ issues }: { issues: { priority: string; createdA
 
   return (
     <div>
-      <div className="flex items-end gap-[3px] h-20">
+      <div className="flex h-20 items-end gap-1">
         {days.map(day => {
           const entry = grouped.get(day)!;
           const total = Object.values(entry).reduce((a, b) => a + b, 0);
-          const heightPct = (total / maxValue) * 100;
           return (
-            <div key={day} className="flex-1 h-full flex flex-col justify-end" title={`${day}: ${total} issues`}>
+            <div key={day} className="flex h-full flex-1 flex-col justify-end" title={`${day}: ${total} issues`}>
               {total > 0 ? (
-                <div className="flex flex-col-reverse gap-px overflow-hidden" style={{ height: `${heightPct}%`, minHeight: 2 }}>
+                <div className="flex flex-col-reverse overflow-hidden">
                   {priorityOrder.map(p => entry[p] > 0 ? (
-                    <div key={p} style={{ flex: entry[p], backgroundColor: priorityColors[p] }} />
+                    <div key={p} className={`${priorityClasses[p]} ${barHeightClass(entry[p], maxValue)}`} />
                   ) : null)}
                 </div>
               ) : (
-                <div className="bg-muted/30 rounded-sm" style={{ height: 2 }} />
+                <div className="h-0.5 rounded-sm bg-muted/30" />
               )}
             </div>
           );
         })}
       </div>
       <DateLabels days={days} />
-      <ChartLegend items={priorityOrder.map(p => ({ color: priorityColors[p], label: p.charAt(0).toUpperCase() + p.slice(1) }))} />
+      <ChartLegend items={priorityOrder.map(p => ({ className: priorityClasses[p], label: p.charAt(0).toUpperCase() + p.slice(1) }))} />
     </div>
   );
 }
 
-const statusColors: Record<string, string> = {
-  todo: "#3b82f6",
-  in_progress: "#8b5cf6",
-  in_review: "#a855f7",
-  done: "#10b981",
-  blocked: "#ef4444",
-  cancelled: "#6b7280",
-  backlog: "#64748b",
+const statusClasses: Record<string, string> = {
+  todo: "bg-chart-1",
+  in_progress: "bg-chart-3",
+  in_review: "bg-chart-4",
+  done: "bg-chart-2",
+  blocked: "bg-destructive",
+  cancelled: "bg-muted-foreground",
+  backlog: "bg-muted-foreground/60",
 };
 
 const statusLabels: Record<string, string> = {
@@ -215,28 +237,27 @@ export function IssueStatusChart({ issues }: { issues: { status: string; created
 
   return (
     <div>
-      <div className="flex items-end gap-[3px] h-20">
+      <div className="flex h-20 items-end gap-1">
         {days.map(day => {
           const entry = grouped.get(day)!;
           const total = Object.values(entry).reduce((a, b) => a + b, 0);
-          const heightPct = (total / maxValue) * 100;
           return (
-            <div key={day} className="flex-1 h-full flex flex-col justify-end" title={`${day}: ${total} issues`}>
+            <div key={day} className="flex h-full flex-1 flex-col justify-end" title={`${day}: ${total} issues`}>
               {total > 0 ? (
-                <div className="flex flex-col-reverse gap-px overflow-hidden" style={{ height: `${heightPct}%`, minHeight: 2 }}>
+                <div className="flex flex-col-reverse overflow-hidden">
                   {statusOrder.map(s => (entry[s] ?? 0) > 0 ? (
-                    <div key={s} style={{ flex: entry[s], backgroundColor: statusColors[s] ?? "#6b7280" }} />
+                    <div key={s} className={`${statusClasses[s] ?? "bg-muted-foreground"} ${barHeightClass(entry[s] ?? 0, maxValue)}`} />
                   ) : null)}
                 </div>
               ) : (
-                <div className="bg-muted/30 rounded-sm" style={{ height: 2 }} />
+                <div className="h-0.5 rounded-sm bg-muted/30" />
               )}
             </div>
           );
         })}
       </div>
       <DateLabels days={days} />
-      <ChartLegend items={statusOrder.map(s => ({ color: statusColors[s] ?? "#6b7280", label: statusLabels[s] ?? s }))} />
+      <ChartLegend items={statusOrder.map(s => ({ className: statusClasses[s] ?? "bg-muted-foreground", label: statusLabels[s] ?? s }))} />
     </div>
   );
 }
@@ -251,17 +272,17 @@ export function SuccessRateChart(props: RunChartProps) {
 
   return (
     <div>
-      <div className="flex items-end gap-[3px] h-20">
+      <div className="flex h-20 items-end gap-1">
         {days.map(day => {
           const entry = grouped.get(day) ?? { date: day, succeeded: 0, failed: 0, other: 0, total: 0 };
           const rate = entry.total > 0 ? entry.succeeded / entry.total : 0;
-          const color = entry.total === 0 ? undefined : rate >= 0.8 ? "#10b981" : rate >= 0.5 ? "#eab308" : "#ef4444";
+          const tone = rate >= 0.8 ? "bg-chart-2" : rate >= 0.5 ? "bg-chart-3" : "bg-destructive";
           return (
-            <div key={day} className="flex-1 h-full flex flex-col justify-end" title={`${day}: ${entry.total > 0 ? Math.round(rate * 100) : 0}% (${entry.succeeded}/${entry.total})`}>
+            <div key={day} className="flex h-full flex-1 flex-col justify-end" title={`${day}: ${entry.total > 0 ? Math.round(rate * 100) : 0}% (${entry.succeeded}/${entry.total})`}>
               {entry.total > 0 ? (
-                <div style={{ height: `${rate * 100}%`, minHeight: 2, backgroundColor: color }} />
+                <div className={`${tone} ${barHeightClass(rate, 1)}`} />
               ) : (
-                <div className="bg-muted/30 rounded-sm" style={{ height: 2 }} />
+                <div className="h-0.5 rounded-sm bg-muted/30" />
               )}
             </div>
           );
