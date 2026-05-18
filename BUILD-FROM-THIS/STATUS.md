@@ -125,6 +125,10 @@ T119 is now in progress after the active product route launch gate passed. First
   - `SidebarAgents.tsx`, `RunTranscriptUxLab.tsx`, `RoutineVariablesEditor.tsx`, `ScheduleEditor.tsx`, and `plugins/bridge-init.ts` now fit under the 300-line guardrail.
   - New guarded modules under `components/sidebar-agents/`, `pages/run-transcript-ux-lab/`, `components/routine-variables-editor/`, `components/schedule-editor/`, and plugin bridge split files keep each moved module under 300 lines.
   - Focused scanner for the touched targets reports zero findings and no oversized modules. Focused Vitest passed 13 tests across `SidebarAgents` and plugin bridge. Typecheck, active-route design gate, and `git diff --check` passed. Repo-wide scanner is down to 636 findings.
+- T120 continued with invite surface cleanup:
+  - `InviteLanding.tsx` is down from 827 lines to 296 lines, with invite model helpers, terminal/result panels, shell panels, and form rendering moved under `pages/invite-landing/`.
+  - `InviteUxLab.tsx` is down from 927 lines to 57 lines, with fixture data, lab shell, invite-flow previews, result previews, and auth/settings previews moved under `pages/invite-ux-lab/`.
+  - Every touched invite module fits under the 300-line guardrail; focused scanner for both invite targets reports zero findings. Focused invite Vitest passed 9 tests, typecheck passed, and repo-wide scanner is down to 517 findings.
 
 The Paperclip app is genuinely large. The remaining drag is mostly not missing MVP capability; it is oversized route/organism code inherited from the Paperclip host plus the THEFT UX migration. The active-route design-system gate currently passes with zero unallowed findings, but several files still exceed the maintainability guardrail and need continued modularization.
 
