@@ -90,6 +90,7 @@ Current local modularization checkpoint:
 - Replaced remaining active-route arbitrary Tech Tree detail sizing and label typography with THEFT token utilities.
 - Added `pnpm verify:active-ui`, compact viewport route smoke support, and THEFT page-shell viewport assertions for active product screens.
 - Converted Department Workspace to `TheftWorkbenchTemplate` plus `TheftSurface` atoms for its hero, stat, focus, work, Operator, Library, and capability panels.
+- Extracted Tech Tree detail metrics, evidence gate, link rows, property toggle, and link helpers so `GoalDetail.tsx` now fits the 300-line guardrail and uses shared template composition.
 - Moved the issue-chat composer safe-area dock value into a semantic CSS utility.
 
 Latest verification for the active modularization slices:
@@ -123,6 +124,7 @@ Latest verification for the active modularization slices:
 - Focused active route token cleanup Vitest passed: 24 tests across Dashboard, Issues, GoalDetail, library-items, and Layout.
 - `THEFT_CHROME_PATH='/Applications/Google Chrome.app/Contents/MacOS/Google Chrome' pnpm verify:active-ui` passed: design gate plus desktop, mobile, and short-height MVP route smokes.
 - Focused active route Vitest and `verify:active-ui` passed after the Department Workspace template/atom migration.
+- Focused active route Vitest and `verify:active-ui` passed after the Goal Detail template/primitive split.
 - Focused Vitest for issue chat, issue documents, and issue detail passed: 78 tests across 4 files.
 - Focused IssueChatThread Vitest passed: 61 tests across 2 files.
 - Focused onboarding utility Vitest passed: 21 tests across 5 files.
@@ -139,6 +141,7 @@ Remaining high-value maintainability work:
 - `plugins/bridge.ts` is down to 29 lines and now fits the 300-line guardrail; bridge types, context, data/action hooks, navigation hooks, toast/stream hooks, and serialization/error helpers are split under the guardrail.
 - `plugins/launchers.tsx` is down to 281 lines and now fits the 300-line guardrail; launcher discovery, types, utilities, and modal shell rendering are split under the guardrail.
 - `plugins/slots.tsx` is down to 37 lines and now fits the 300-line guardrail; slot types, registry, loader, shims, hook, mount, and outlet modules are split under the guardrail.
+- `GoalDetail.tsx` is down to 289 lines and now fits the 300-line guardrail; repeated Tech Tree detail primitives and link helpers are split under the guardrail.
 - `IssueChatThread.tsx` is down to 275 lines and now fits the 300-line guardrail.
 - `DepartmentWorkspace.tsx` is down to 282 lines and now fits the 300-line guardrail.
 - `Agents.tsx` is down to 227 lines and now fits the 300-line guardrail.

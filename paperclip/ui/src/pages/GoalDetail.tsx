@@ -1,6 +1,5 @@
 import { useEffect } from "react";
-import type { ReactNode } from "react";
-import { Link, useParams } from "@/lib/router";
+import { useParams } from "@/lib/router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { agentsApi } from "../api/agents";
 import { goalsApi } from "../api/goals";
@@ -17,49 +16,17 @@ import { StatusBadge } from "../components/StatusBadge";
 import { InlineEditor } from "../components/InlineEditor";
 import { EntityRow } from "../components/EntityRow";
 import { PageSkeleton } from "../components/PageSkeleton";
+import { TechTreeEvidenceGate, TechTreeLinkRow, TechTreeMetric, TheftWorkbenchTemplate } from "@/components/theft";
 import { buildTechTreeNodeViews } from "../lib/techTree";
-import { cn, projectUrl } from "../lib/utils";
+import { projectUrl } from "../lib/utils";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ArrowRight, CheckCircle2, FileText, GitBranch, Layers3, Plus, Route, SlidersHorizontal, Users } from "lucide-react";
-import type { Goal, Issue, Project } from "@paperclipai/shared";
+import { CheckCircle2, FileText, GitBranch, Plus, Route, Users } from "lucide-react";
+import { GoalPropertiesToggleButton } from "./goal-detail/GoalPropertiesToggleButton";
+import { getGoalLinkedIssues, getGoalLinkedProjects } from "./goal-detail/goalDetailLinks";
 
-interface GoalPropertiesToggleButtonProps {
-  panelVisible: boolean;
-  onShowProperties: () => void;
-}
-
-export function getGoalLinkedProjects(goalId: string, projects: Project[]) {
-  return projects.filter((project) => {
-    if (project.goalIds.includes(goalId)) return true;
-    if (project.goals.some((goalRef) => goalRef.id === goalId)) return true;
-    return project.goalId === goalId;
-  });
-}
-
-export function getGoalLinkedIssues(goalId: string, issues: Issue[]) {
-  return issues.filter((issue) => issue.goalId === goalId);
-}
-
-export function GoalPropertiesToggleButton({
-  panelVisible,
-  onShowProperties,
-}: GoalPropertiesToggleButtonProps) {
-  return (
-    <Button
-      variant="ghost"
-      size="icon-xs"
-      className={cn(
-        "hidden md:inline-flex shrink-0 transition-opacity duration-200",
-        panelVisible ? "opacity-0 pointer-events-none w-0 overflow-hidden" : "opacity-100",
-      )}
-      onClick={onShowProperties}
-      title="Show properties"
-    >
-      <SlidersHorizontal className="h-4 w-4" />
-    </Button>
-  );
-}
+export { GoalPropertiesToggleButton } from "./goal-detail/GoalPropertiesToggleButton";
+export { getGoalLinkedIssues, getGoalLinkedProjects } from "./goal-detail/goalDetailLinks";
 
 export function GoalDetail() {
   const { goalId } = useParams<{ goalId: string }>();
@@ -171,7 +138,7 @@ export function GoalDetail() {
   const openIssueCount = linkedIssues.filter((issue) => !["done", "cancelled"].includes(issue.status)).length;
 
   return (
-    <div className="space-y-6">
+    <TheftWorkbenchTemplate contentClassName="block space-y-6">
       <section className="theft-panel overflow-hidden">
         <div className="flex flex-col gap-4 border-b border-border bg-card/75 p-4 lg:flex-row lg:items-start lg:justify-between">
           <div className="min-w-0 max-w-4xl">
@@ -224,26 +191,16 @@ export function GoalDetail() {
 
         <div className="theft-tech-tree-detail-grid grid gap-3 p-3">
           <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
-            <RoadmapMetric icon={Users} label="Owner" value={nodeView?.owner ?? "Operator"} />
-            <RoadmapMetric icon={GitBranch} label="Dependency" value={nodeView?.dependency ?? "Root roadmap node"} />
-            <RoadmapMetric icon={FileText} label="Evidence" value={nodeView?.evidence ?? "No evidence linked yet"} />
-            <RoadmapMetric icon={Route} label="Next action" value={nodeView?.nextAction ?? "Create first department task"} />
+            <TechTreeMetric icon={Users} label="Owner" value={nodeView?.owner ?? "Operator"} />
+            <TechTreeMetric icon={GitBranch} label="Dependency" value={nodeView?.dependency ?? "Root roadmap node"} />
+            <TechTreeMetric icon={FileText} label="Evidence" value={nodeView?.evidence ?? "No evidence linked yet"} />
+            <TechTreeMetric icon={Route} label="Next action" value={nodeView?.nextAction ?? "Create first department task"} />
           </div>
-          <aside className="border border-border bg-card p-3">
-            <div className="flex items-center gap-2 text-sm font-medium">
-              <Layers3 className="h-4 w-4 text-foreground" />
-              Evidence gate
-            </div>
-            <p className="mt-2 text-sm leading-6 text-muted-foreground">
-              This node is real when work exists under it: department tasks, linked projects, Library outputs, or an
-              explicit next action.
-            </p>
-            <div className="mt-3 grid grid-cols-3 border border-border text-center">
-              <RoadmapMiniStat value={childGoals.length} label="children" />
-              <RoadmapMiniStat value={linkedProjects.length} label="projects" />
-              <RoadmapMiniStat value={linkedIssues.length} label="tasks" />
-            </div>
-          </aside>
+          <TechTreeEvidenceGate
+            childrenCount={childGoals.length}
+            projectCount={linkedProjects.length}
+            taskCount={linkedIssues.length}
+          />
         </div>
       </section>
 
@@ -276,9 +233,9 @@ export function GoalDetail() {
           ) : (
             <div className="space-y-2">
               {childGoals.map((child) => (
-                <RoadmapLinkRow key={child.id} title={child.title} subtitle={`${child.level} node`} to={`/goals/${child.id}`}>
+                <TechTreeLinkRow key={child.id} title={child.title} subtitle={`${child.level} node`} to={`/goals/${child.id}`}>
                   <StatusBadge status={child.status} />
-                </RoadmapLinkRow>
+                </TechTreeLinkRow>
               ))}
             </div>
           )}
@@ -308,74 +265,25 @@ export function GoalDetail() {
           ) : (
             <>
               <div className="grid gap-2 sm:grid-cols-2">
-                <RoadmapMetric icon={CheckCircle2} label="Completed tasks" value={`${doneIssueCount}/${linkedIssues.length}`} />
-                <RoadmapMetric icon={Route} label="Open tasks" value={`${openIssueCount}`} />
+                <TechTreeMetric icon={CheckCircle2} label="Completed tasks" value={`${doneIssueCount}/${linkedIssues.length}`} />
+                <TechTreeMetric icon={Route} label="Open tasks" value={`${openIssueCount}`} />
               </div>
               <div className="space-y-2">
                 {linkedIssues.map((issue) => (
-                  <RoadmapLinkRow
+                  <TechTreeLinkRow
                     key={issue.id}
                     title={issue.title}
                     subtitle={issue.identifier ?? issue.id.slice(0, 8)}
                     to={`/issues/${issue.identifier ?? issue.id}`}
                   >
                     <StatusBadge status={issue.status} />
-                  </RoadmapLinkRow>
+                  </TechTreeLinkRow>
                 ))}
               </div>
             </>
           )}
         </TabsContent>
       </Tabs>
-    </div>
-  );
-}
-
-function RoadmapMetric({ icon: Icon, label, value }: { icon: typeof Users; label: string; value: string }) {
-  return (
-    <div className="min-w-0 border border-border bg-card p-3">
-      <div className="theft-label-compact flex items-center gap-2 font-medium">
-        <Icon className="h-3.5 w-3.5 text-foreground" />
-        {label}
-      </div>
-      <div className="mt-2 truncate text-sm font-medium text-foreground">{value}</div>
-    </div>
-  );
-}
-
-function RoadmapMiniStat({ value, label }: { value: number; label: string }) {
-  return (
-    <div className="border-r border-border px-2 py-2 last:border-r-0">
-      <div className="text-base font-semibold tabular-nums">{value}</div>
-      <div className="theft-label-nano">{label}</div>
-    </div>
-  );
-}
-
-function RoadmapLinkRow({
-  title,
-  subtitle,
-  to,
-  children,
-}: {
-  title: string;
-  subtitle: string;
-  to: string;
-  children: ReactNode;
-}) {
-  return (
-    <Link
-      to={to}
-      className="group flex items-center justify-between gap-3 border border-border bg-card px-3 py-2 text-sm text-inherit no-underline hover:border-primary/70 hover:bg-accent/40"
-    >
-      <span className="min-w-0">
-        <span className="block truncate font-medium">{title}</span>
-        <span className="block truncate text-xs text-muted-foreground">{subtitle}</span>
-      </span>
-      <span className="flex shrink-0 items-center gap-2">
-        {children}
-        <ArrowRight className="h-4 w-4 text-muted-foreground transition-transform group-hover:translate-x-0.5 group-hover:text-foreground" />
-      </span>
-    </Link>
+    </TheftWorkbenchTemplate>
   );
 }

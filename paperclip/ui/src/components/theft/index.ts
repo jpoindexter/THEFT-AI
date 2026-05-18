@@ -30,7 +30,7 @@ export {
   LibraryWorkspace,
 } from "./organisms/library"
 export { TasksMissionHeader } from "./organisms/tasks"
-export { TechTreeStrategyMap } from "./organisms/tech-tree"
+export { TechTreeEvidenceGate, TechTreeLinkRow, TechTreeMetric, TechTreeStrategyMap } from "./organisms/tech-tree"
 export { TheftDetailReviewTemplate } from "./templates/TheftDetailReviewTemplate"
 export type { TheftDetailReviewTemplateProps } from "./templates/TheftDetailReviewTemplate"
 export { TheftLauncherTemplate } from "./templates/TheftLauncherTemplate"
