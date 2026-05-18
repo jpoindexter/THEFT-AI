@@ -24,7 +24,8 @@ T119 is now in progress after the active product route launch gate passed. First
 - `BudgetSidebarMarker.tsx` and `AsciiArtAnimation.tsx` now scan clean; ASCII animation helpers moved to `ascii-art-animation/asciiArtModel.ts` so the component fits under 300 lines.
 - `FinanceBillerCard.tsx` and `FinanceTimelineCard.tsx` now use shared label utilities instead of hardcoded micro type/tracking.
 - `CommentThread.tsx` was split into `comment-thread/` render/data modules. The parent is now 287 lines; each extracted module fits under 300; focused scanner has zero findings; focused CommentThread tests pass.
-- Repo-wide design drift count is down to 1538 findings after the first six T119 slices.
+- `ProjectProperties.tsx` started its split: save/status/archive/property primitives and exported field types moved into `project-properties/`, reducing the parent from 1184 to 1004 lines while keeping typecheck and the active design gate green.
+- Repo-wide design drift count is down to 1531 findings after the first seven T119 slices.
 
 The Paperclip app is genuinely large. The remaining drag is mostly not missing MVP capability; it is oversized route/organism code inherited from the Paperclip host plus the THEFT UX migration. The active-route design-system gate currently passes with zero unallowed findings, but several files still exceed the maintainability guardrail and need continued modularization.
 
