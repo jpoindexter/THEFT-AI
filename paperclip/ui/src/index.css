@@ -1652,6 +1652,14 @@ a.paperclip-mention-chip[data-mention-kind="agent"]::before {
   background: transparent;
 }
 
+.theft-routine-composer-dialog {
+  max-height: calc(100dvh - 2rem);
+}
+
+.theft-routine-description-editor {
+  min-height: 10rem;
+}
+
 /* Mention chips rendered inline in prose (MarkdownBody or inline anchors) */
 a.paperclip-mention-chip,
 a.paperclip-project-mention-chip,
