@@ -266,9 +266,9 @@ describe("RoutineRunVariablesDialog", () => {
     });
 
     const dialogContent = Array.from(document.body.querySelectorAll("div")).find((element) =>
-      typeof element.className === "string" && element.className.includes("max-h-[calc(100dvh-2rem)]"),
+      typeof element.className === "string" && element.className.includes("max-h-screen"),
     );
-    expect(dialogContent?.className).toContain("h-[calc(100dvh-2rem)]");
+    expect(dialogContent?.className).toContain("max-w-xl");
     expect(dialogContent?.className).toContain("overflow-hidden");
 
     const notesInput = document.querySelector("textarea");

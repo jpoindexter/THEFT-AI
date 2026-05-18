@@ -103,6 +103,9 @@ T119 is now in progress after the active product route launch gate passed. First
 - T120 continued with the next guardrail slice:
   - `ExecutionWorkspaceDetail.tsx` now fits under the 300-line guardrail after moving tab routing, header/tab chrome, data queries, and runtime log rendering into guarded route-local modules.
   - The focused `ExecutionWorkspaceDetail` scanner reports zero findings; `pnpm -C paperclip --filter @paperclipai/ui typecheck`, `pnpm design:gate`, and `git diff --check` passed.
+- T120 continued with `RoutineRunVariablesDialog.tsx`:
+  - The dialog now fits under the 300-line guardrail after moving run/workspace model helpers, assignment selectors, variable fields, and footer submission handling into guarded modules.
+  - Focused scanner for the dialog target reports zero findings; focused `RoutineRunVariablesDialog` Vitest passed 4 tests; typecheck, active-route design gate, and `git diff --check` passed.
 
 The Paperclip app is genuinely large. The remaining drag is mostly not missing MVP capability; it is oversized route/organism code inherited from the Paperclip host plus the THEFT UX migration. The active-route design-system gate currently passes with zero unallowed findings, but several files still exceed the maintainability guardrail and need continued modularization.
 
