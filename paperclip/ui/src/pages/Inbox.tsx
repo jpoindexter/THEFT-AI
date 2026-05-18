@@ -54,6 +54,7 @@ import {
 import { IssueFiltersPopover } from "../components/IssueFiltersPopover";
 import { IssueRow } from "../components/IssueRow";
 import { SwipeToArchive } from "../components/SwipeToArchive";
+import { ReviewModePanel } from "./inbox/ReviewModePanel";
 
 import { StatusIcon } from "../components/StatusIcon";
 import { cn } from "../lib/utils";
@@ -82,15 +83,9 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import {
   Inbox as InboxIcon,
   AlertTriangle,
-  Bot,
   Check,
   ChevronRight,
-  CircleDot,
-  Clock3,
-  FileText,
   Layers,
-  MessageSquare,
-  ShieldCheck,
   XCircle,
   X,
   RotateCcw,
@@ -369,7 +364,7 @@ export function FailedRunInboxRow({
             <span className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-muted-foreground">
               <StatusBadge status={run.status} />
               {linkedAgentName && issue ? <span>{linkedAgentName}</span> : null}
-              <span className="truncate max-w-[300px]">{displayError}</span>
+              <span className="max-w-xs truncate">{displayError}</span>
               <span>{timeAgo(run.createdAt)}</span>
             </span>
           </span>
@@ -688,139 +683,6 @@ function JoinRequestInboxRow({
           Reject
         </Button>
       </div>
-    </div>
-  );
-}
-
-function ReviewModePanel({
-  items,
-  agentById,
-  issueById,
-}: {
-  items: InboxWorkItem[];
-  agentById: Map<string, string>;
-  issueById: Map<string, Issue>;
-}) {
-  const selectedItem = items[0] ?? null;
-  const stats = [
-    { label: "Approvals", value: items.filter((item) => item.kind === "approval").length, icon: ShieldCheck },
-    { label: "Clarifications", value: items.filter((item) => item.kind === "join_request" || reviewItemCategory(item) === "Clarification").length, icon: MessageSquare },
-    { label: "Ready outputs", value: items.filter((item) => reviewItemCategory(item) === "Ready output").length, icon: FileText },
-    { label: "Failed runs", value: items.filter((item) => item.kind === "failed_run").length, icon: AlertTriangle },
-    { label: "Blocked", value: items.filter((item) => reviewItemCategory(item) === "Blocked dependency").length, icon: Clock3 },
-  ];
-
-  return (
-    <section className="theft-panel overflow-hidden p-0">
-      <div className="grid gap-0 lg:grid-cols-[260px_minmax(0,1fr)_300px]">
-        <aside className="border-b border-border bg-card/70 p-4 lg:border-b-0 lg:border-r">
-          <p className="text-xs font-medium uppercase tracking-[0.08em] text-muted-foreground">Review queue</p>
-          <div className="mt-3 grid gap-2">
-            {stats.map(({ label, value, icon: Icon }) => (
-              <div key={label} className="flex items-center justify-between gap-3 border border-border bg-background px-3 py-2">
-                <span className="flex min-w-0 items-center gap-2 text-sm">
-                  <Icon className="h-4 w-4 shrink-0 text-muted-foreground" />
-                  <span className="truncate">{label}</span>
-                </span>
-                <span className="rounded-full bg-muted px-2 py-0.5 text-xs tabular-nums text-muted-foreground">{value}</span>
-              </div>
-            ))}
-          </div>
-        </aside>
-
-        <div className="min-w-0 p-5 md:p-6">
-          <div className="flex flex-wrap items-start justify-between gap-3">
-            <div className="min-w-0">
-              <p className="text-xs font-medium uppercase tracking-[0.08em] text-muted-foreground">Decision cockpit</p>
-              <h1 className="mt-1 text-2xl font-semibold tracking-tight text-foreground">Review mode</h1>
-              <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">
-                Process approvals, clarifications, ready outputs, failed runs, and blocked dependencies without hunting through tasks.
-              </p>
-            </div>
-            <div className="rounded-full border border-border bg-muted/30 px-3 py-1 text-xs text-muted-foreground">
-              {items.length > 0 ? `1 of ${items.length} review items` : "0 review items"}
-            </div>
-          </div>
-
-          <div className="mt-5 border border-border bg-background p-4">
-            {selectedItem ? (
-              <>
-                <div className="flex flex-wrap items-center gap-2">
-                  <span className="rounded-full border border-border bg-muted/30 px-2.5 py-1 text-xs text-muted-foreground">
-                    {reviewItemCategory(selectedItem)}
-                  </span>
-                  <span className="text-xs text-muted-foreground">{reviewItemDetail(selectedItem, agentById, issueById)}</span>
-                </div>
-                <h2 className="mt-3 break-words text-lg font-semibold leading-7 text-foreground">
-                  {reviewItemTitle(selectedItem, agentById, issueById)}
-                </h2>
-                <div className="mt-4 grid gap-3 sm:grid-cols-3">
-                  <ReviewEvidence label="Task context" value={selectedItem.kind === "issue" ? selectedItem.issue.identifier ?? "Task" : reviewItemCategory(selectedItem)} />
-                  <ReviewEvidence label="Artifact preview" value={selectedItem.kind === "issue" ? selectedItem.issue.status.replace(/_/g, " ") : "Open detail"} />
-                  <ReviewEvidence label="Decision needed" value={selectedItem.kind === "failed_run" ? "Retry or reroute" : "Approve or respond"} />
-                </div>
-              </>
-            ) : (
-              <div className="flex items-center gap-3 text-sm text-muted-foreground">
-                <Check className="h-4 w-4" />
-                Nothing needs review right now.
-              </div>
-            )}
-          </div>
-        </div>
-
-        <aside className="border-t border-border bg-muted/20 p-5 lg:border-l lg:border-t-0">
-          <div className="flex items-center gap-2">
-            <span className="flex h-9 w-9 items-center justify-center rounded-full border border-border bg-background">
-              <Bot className="h-4 w-4" />
-            </span>
-            <div>
-              <h2 className="text-base font-semibold text-foreground">Recommendation</h2>
-              <p className="text-xs text-muted-foreground">Choose the next decision.</p>
-            </div>
-          </div>
-          <p className="mt-4 text-sm leading-6 text-muted-foreground">
-            {selectedItem
-              ? "Open the selected item, inspect the evidence, then approve, revise, ask Operator, snooze, or mark done."
-              : "No active queue pressure. Return to Mission Control for the next move."}
-          </p>
-          <div className="mt-4 grid gap-2">
-            {selectedItem ? (
-              <Button asChild className="rounded-none">
-                <Link to={reviewItemHref(selectedItem)}>
-                  Open selected
-                  <ChevronRight className="h-4 w-4" />
-                </Link>
-              </Button>
-            ) : null}
-            <Button variant="outline" className="justify-start rounded-none">
-              <Check className="h-4 w-4" />
-              Approve
-            </Button>
-            <Button variant="outline" className="justify-start rounded-none">
-              <RotateCcw className="h-4 w-4" />
-              Request revision
-            </Button>
-            <Button variant="outline" className="justify-start rounded-none">
-              <MessageSquare className="h-4 w-4" />
-              Ask Operator
-            </Button>
-            <Button variant="ghost" className="justify-start rounded-none">
-              <CircleDot className="h-4 w-4" />
-              Snooze / Mark done
-            </Button>
-          </div>
-        </aside>
-      </div>
-    </section>
-  );
-}
-
-function ReviewEvidence({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="border border-border bg-muted/25 px-3 py-2">
-      <p className="text-xs text-muted-foreground">{label}</p>
-      <p className="mt-1 truncate text-sm font-medium text-foreground">{value}</p>
     </div>
   );
 }
@@ -2092,7 +1954,15 @@ export function Inbox() {
             data-page-search-target="true"
           />
         </div>
-        <ReviewModePanel items={reviewModeItems} agentById={agentById} issueById={issueById} />
+        <ReviewModePanel
+          items={reviewModeItems}
+          agentById={agentById}
+          issueById={issueById}
+          getCategory={reviewItemCategory}
+          getDetail={reviewItemDetail}
+          getHref={reviewItemHref}
+          getTitle={reviewItemTitle}
+        />
         <div className="flex flex-wrap items-center justify-between gap-2">
         <Tabs value={tab} onValueChange={(value) => navigate(`/inbox/${value}`)}>
           <PageTabBar
@@ -2136,7 +2006,7 @@ export function Inbox() {
                   e.currentTarget.blur();
                 }
               }}
-              className="h-8 w-[220px] pl-8 text-xs"
+              className="h-8 w-56 pl-8 text-xs"
               data-page-search-target="true"
             />
           </div>
@@ -2256,7 +2126,7 @@ export function Inbox() {
             value={allCategoryFilter}
             onValueChange={(value) => updateAllCategoryFilter(value as InboxCategoryFilter)}
           >
-            <SelectTrigger className="h-8 w-[170px] text-xs">
+            <SelectTrigger className="h-8 w-44 text-xs">
               <SelectValue placeholder="Category" />
             </SelectTrigger>
             <SelectContent>
@@ -2274,7 +2144,7 @@ export function Inbox() {
               value={allApprovalFilter}
               onValueChange={(value) => updateAllApprovalFilter(value as InboxApprovalFilter)}
             >
-              <SelectTrigger className="h-8 w-[170px] text-xs">
+              <SelectTrigger className="h-8 w-44 text-xs">
                 <SelectValue placeholder="Approval status" />
               </SelectTrigger>
               <SelectContent>
@@ -2449,7 +2319,7 @@ export function Inbox() {
                         className="flex items-center gap-3 border-y border-border/70 bg-muted/30 px-4 py-2"
                       >
                         <div className="h-px flex-1 bg-border/80" />
-                        <span className="shrink-0 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+                        <span className="shrink-0 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
                           {group.searchSection === "archived" ? "Archived" : "Other results"}
                         </span>
                         <div className="h-px flex-1 bg-border/80" />
@@ -2507,7 +2377,7 @@ export function Inbox() {
                       elements.push(
                         <div key={`today-divider-${group.key}-${index}`} className="my-2 flex items-center gap-3 px-4">
                           <div className="flex-1 border-t border-zinc-600" />
-                          <span className="shrink-0 text-[11px] font-medium uppercase tracking-wider text-zinc-500">
+                          <span className="shrink-0 text-xs font-medium uppercase tracking-wider text-zinc-500">
                             Earlier
                           </span>
                         </div>,

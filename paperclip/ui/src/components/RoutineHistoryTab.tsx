@@ -30,6 +30,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "./EmptyState";
 import { MarkdownBody } from "./MarkdownBody";
 import { RoutineRevisionDiffModal } from "./routine-history-tab/RoutineRevisionDiffModal";
+import { RoutineRevisionList } from "./routine-history-tab/RoutineRevisionList";
 
 type AgentLookup = Map<string, { id: string; name: string }>;
 type ProjectLookup = Map<string, { id: string; name: string }>;
@@ -205,7 +206,7 @@ export function RoutineHistoryTab({
 
   return (
     <div className="grid gap-5 md:grid-cols-[300px_minmax(0,1fr)]">
-      <RevisionList
+      <RoutineRevisionList
         revisions={visibleRevisions}
         latestRevisionId={routine.latestRevisionId}
         selectedRevisionId={selectedRevisionId}
@@ -386,89 +387,6 @@ function ConflictBanner({
   );
 }
 
-function RevisionList({
-  revisions,
-  latestRevisionId,
-  selectedRevisionId,
-  highlightedRevisionId,
-  isEditDirty,
-  totalRevisions,
-  onSelect,
-  onShowOlder,
-  showOlder,
-}: {
-  revisions: RoutineRevision[];
-  latestRevisionId: string | null;
-  selectedRevisionId: string | null;
-  highlightedRevisionId: string | null;
-  isEditDirty: boolean;
-  totalRevisions: number;
-  onSelect: (revisionId: string) => void;
-  onShowOlder: () => void;
-  showOlder: boolean;
-}) {
-  return (
-    <aside className="space-y-1">
-      <header className="flex items-center justify-between pb-2">
-        <p className="text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
-          Revisions
-        </p>
-        <span className="text-[11px] text-muted-foreground">{totalRevisions} total</span>
-      </header>
-      {revisions.map((revision) => {
-        const isSelected = revision.id === selectedRevisionId;
-        const isCurrent = revision.id === latestRevisionId;
-        const isHistorical = !isCurrent;
-        const isHighlighted = revision.id === highlightedRevisionId;
-        const blockedByEdits = isEditDirty && isHistorical;
-        const baseClass = "w-full rounded-md border px-3 py-2 text-left transition-colors";
-        const stateClass = isHighlighted
-          ? "border-emerald-500/40 bg-emerald-500/10"
-          : isSelected && isHistorical
-          ? "border-amber-500/40 bg-amber-500/10"
-          : isSelected
-          ? "border-border bg-accent/40"
-          : blockedByEdits
-          ? "border-amber-500/30 bg-amber-500/5 opacity-70 cursor-not-allowed"
-          : "border-border/60 hover:bg-accent/40";
-        return (
-          <button
-            key={revision.id}
-            type="button"
-            disabled={blockedByEdits}
-            onClick={() => onSelect(revision.id)}
-            className={`${baseClass} ${stateClass}`}
-            data-testid={`revision-row-${revision.revisionNumber}`}
-          >
-            <div className="flex items-center gap-2 text-sm font-medium">
-              <span>rev {revision.revisionNumber}</span>
-              {isCurrent && (
-                <span className="rounded-full border border-border px-1.5 text-[10px] uppercase tracking-[0.12em] text-muted-foreground">
-                  Current
-                </span>
-              )}
-              {revision.restoredFromRevisionId && (
-                <span className="rounded-full border border-amber-500/40 bg-amber-500/10 px-1.5 text-[10px] uppercase tracking-[0.12em] text-amber-200">
-                  Restored
-                </span>
-              )}
-            </div>
-            <div className="text-xs text-muted-foreground truncate">
-              {relativeTime(revision.createdAt)} • {getActorLabel(revision)}
-              {revision.changeSummary ? ` • ${revision.changeSummary}` : ""}
-            </div>
-          </button>
-        );
-      })}
-      {totalRevisions > revisions.length && !showOlder && (
-        <Button variant="ghost" size="sm" className="w-full" onClick={onShowOlder}>
-          Show {totalRevisions - revisions.length} older…
-        </Button>
-      )}
-    </aside>
-  );
-}
-
 function RevisionPreview({
   revision,
   currentRevision,
@@ -574,17 +492,17 @@ function RevisionPreview({
       </header>
 
       <div className={`${cardWrapper} p-3`}>
-        <p className="pb-2 text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
+        <p className="theft-label-compact pb-2 text-muted-foreground">
           Structured fields
         </p>
         <div className="grid gap-3 md:grid-cols-2 divide-y md:divide-y-0 divide-border">
           {fieldRows.map((row) => (
             <div key={row.key} className="space-y-1 p-2">
-              <p className="text-[11px] uppercase tracking-wide text-muted-foreground">{row.label}</p>
+              <p className="theft-label-nano text-muted-foreground">{row.label}</p>
               <p className="text-sm">
                 {row.value || <span className="text-muted-foreground">—</span>}
                 {row.differs && (
-                  <span className="ml-2 rounded-full border border-amber-500/40 bg-amber-500/10 px-1.5 text-[10px] uppercase tracking-[0.12em] text-amber-200">
+                  <span className="theft-label-nano ml-2 rounded-full border border-amber-500/40 bg-amber-500/10 px-1.5 text-amber-200">
                     differs from current
                   </span>
                 )}
@@ -595,7 +513,7 @@ function RevisionPreview({
       </div>
 
       <div className={`${cardWrapper} p-3 space-y-2`}>
-        <p className="text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
+        <p className="theft-label-compact text-muted-foreground">
           Description
         </p>
         <div className="rounded-md bg-background/40 p-3 text-sm leading-7">
@@ -608,7 +526,7 @@ function RevisionPreview({
       </div>
 
       <div className={`${cardWrapper} p-3 space-y-2`}>
-        <p className="text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
+        <p className="theft-label-compact text-muted-foreground">
           Triggers ({triggers.length})
         </p>
         {triggers.length === 0 ? (
@@ -617,7 +535,7 @@ function RevisionPreview({
           <ul className="divide-y divide-border">
             {triggers.map((trigger) => (
               <li key={trigger.id} className="py-2 flex flex-wrap items-center gap-2 text-sm">
-                <span className="rounded-full border border-border px-2 py-0.5 text-[10px] uppercase tracking-[0.12em] text-muted-foreground">
+                <span className="theft-label-nano rounded-full border border-border px-2 py-0.5 text-muted-foreground">
                   {trigger.kind}
                 </span>
                 <span className="font-medium">{trigger.label ?? trigger.kind}</span>
@@ -641,7 +559,7 @@ function RevisionPreview({
 
       {snapshot.variables.length > 0 && (
         <div className={`${cardWrapper} p-3 space-y-2`}>
-          <p className="text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
+          <p className="theft-label-compact text-muted-foreground">
             Variables ({snapshot.variables.length})
           </p>
           <ul className="divide-y divide-border">

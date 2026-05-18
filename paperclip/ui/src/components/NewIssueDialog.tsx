@@ -32,24 +32,15 @@ import {
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import {
-  MoreHorizontal,
   Loader2,
   ListTree,
-  Eye,
-  ShieldCheck,
 } from "lucide-react";
 import { cn } from "../lib/utils";
 import { extractProviderIdWithFallback } from "../lib/model-utils";
 import type { MarkdownEditorRef, MentionOption } from "./MarkdownEditor";
-import { AgentIcon } from "./AgentIconPicker";
-import { InlineEntitySelector, type InlineEntityOption } from "./InlineEntitySelector";
-import { ProjectSwatch } from "./issue-properties/PropertyControls";
+import type { InlineEntityOption } from "./InlineEntitySelector";
 import { ExecutionWorkspaceFields } from "./new-issue-dialog/ExecutionWorkspaceFields";
+import { NewIssueAssignmentRows } from "./new-issue-dialog/NewIssueAssignmentRows";
 import { NewIssueDialogHeader } from "./new-issue-dialog/NewIssueDialogHeader";
 import { IssueAssigneeOptionsPanel } from "./new-issue-dialog/IssueAssigneeOptionsPanel";
 import { IssuePropertyChips } from "./new-issue-dialog/IssuePropertyChips";
@@ -963,7 +954,7 @@ export function NewIssueDialog() {
 
   const hasDraft = draftHasText || stagedFiles.length > 0;
   const currentAssignee = selectedAssigneeAgentId
-    ? (agents ?? []).find((a) => a.id === selectedAssigneeAgentId)
+    ? (agents ?? []).find((a) => a.id === selectedAssigneeAgentId) ?? null
     : null;
   const currentProject = orderedProjects.find((project) => project.id === projectId);
   const currentProjectExecutionWorkspacePolicy =
@@ -1145,235 +1136,56 @@ export function NewIssueDialog() {
             />
           </div>
 
-          <div className="px-4 pb-2">
-            <div className="overflow-x-auto overscroll-x-contain">
-              <div className="inline-flex items-center gap-2 text-sm text-muted-foreground flex-wrap sm:flex-nowrap sm:min-w-max">
-              <span className="w-6 shrink-0 text-center">For</span>
-              <InlineEntitySelector
-                ref={assigneeSelectorRef}
-                value={assigneeValue}
-                options={assigneeOptions}
-                recentOptionIds={recentAssigneeOptionIds}
-                placeholder="Assignee"
-                disablePortal
-                noneLabel="No assignee"
-                searchPlaceholder="Search assignees..."
-                emptyMessage="No assignees found."
-                onChange={(value) => {
-                  const nextAssignee = parseAssigneeValue(value);
-                  if (nextAssignee.assigneeAgentId) {
-                    trackRecentAssignee(nextAssignee.assigneeAgentId);
-                  }
-                  setAssigneeValue(value);
-                }}
-                onConfirm={() => {
-                  if (projectId) {
-                    descriptionEditorRef.current?.focus();
-                  } else {
-                    projectSelectorRef.current?.focus();
-                  }
-                }}
-                renderTriggerValue={(option) =>
-                  option ? (
-                    currentAssignee ? (
-                      <>
-                        <AgentIcon icon={currentAssignee.icon} className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
-                        <span className="truncate">{option.label}</span>
-                      </>
-                    ) : (
-                      <span className="truncate">{option.label}</span>
-                    )
-                  ) : (
-                    <span className="text-muted-foreground">Assignee</span>
-                  )
-                }
-                renderOption={(option) => {
-                  if (!option.id) return <span className="truncate">{option.label}</span>;
-                  const assignee = parseAssigneeValue(option.id).assigneeAgentId
-                    ? (agents ?? []).find((agent) => agent.id === parseAssigneeValue(option.id).assigneeAgentId)
-                    : null;
-                  return (
-                    <>
-                      {assignee ? <AgentIcon icon={assignee.icon} className="h-3.5 w-3.5 shrink-0 text-muted-foreground" /> : null}
-                      <span className="truncate">{option.label}</span>
-                    </>
-                  );
-                }}
-              />
-              <span>in</span>
-              <InlineEntitySelector
-                ref={projectSelectorRef}
-                value={projectId}
-                options={projectOptions}
-                recentOptionIds={recentProjectIds}
-                placeholder="Project"
-                disablePortal
-                noneLabel="No project"
-                searchPlaceholder="Search projects..."
-                emptyMessage="No projects found."
-                onChange={handleProjectChange}
-                onConfirm={() => {
-                  descriptionEditorRef.current?.focus();
-                }}
-                renderTriggerValue={(option) =>
-                  option && currentProject ? (
-                    <>
-                      <ProjectSwatch color={currentProject.color} />
-                      <span className="truncate">{option.label}</span>
-                    </>
-                  ) : (
-                    <span className="text-muted-foreground">Project</span>
-                  )
-                }
-                renderOption={(option) => {
-                  if (!option.id) return <span className="truncate">{option.label}</span>;
-                  const project = orderedProjects.find((item) => item.id === option.id);
-                  return (
-                    <>
-                      <ProjectSwatch color={project?.color} />
-                      <span className="truncate">{option.label}</span>
-                    </>
-                  );
-                }}
-              />
-
-              {/* Three-dot menu to add Reviewer / Approver rows */}
-              <Popover open={participantMenuOpen} onOpenChange={setParticipantMenuOpen}>
-                <PopoverTrigger asChild>
-                  <Button
-                    type="button" variant="ghost" size="icon-xs"
-                    className="text-muted-foreground hover:bg-accent/50"
-                    title="Add reviewer or approver"
-                  >
-                    <MoreHorizontal className="h-4 w-4" />
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-44 p-1" align="start">
-                  <Button
-                    type="button" variant="ghost" size="xs"
-                    className={cn(
-                      "w-full justify-start font-normal hover:bg-accent/50",
-                      showReviewerRow && "bg-accent",
-                    )}
-                    onClick={() => {
-                      setShowReviewerRow((v) => !v);
-                      if (showReviewerRow) setReviewerValue("");
-                      setParticipantMenuOpen(false);
-                    }}
-                  >
-                    <Eye className="h-3 w-3" />
-                    Reviewer
-                  </Button>
-                  <Button
-                    type="button" variant="ghost" size="xs"
-                    className={cn(
-                      "w-full justify-start font-normal hover:bg-accent/50",
-                      showApproverRow && "bg-accent",
-                    )}
-                    onClick={() => {
-                      setShowApproverRow((v) => !v);
-                      if (showApproverRow) setApproverValue("");
-                      setParticipantMenuOpen(false);
-                    }}
-                  >
-                    <ShieldCheck className="h-3 w-3" />
-                    Approver
-                  </Button>
-                </PopoverContent>
-              </Popover>
-              </div>
-            </div>
-
-            {/* Reviewer row */}
-            {showReviewerRow && (
-              <div className="flex items-center gap-2 text-sm text-muted-foreground mt-1">
-                <span className="w-6 shrink-0 flex items-center justify-center"><Eye className="h-3.5 w-3.5" /></span>
-                <InlineEntitySelector
-                value={reviewerValue}
-                options={assigneeOptions}
-                recentOptionIds={recentAssigneeOptionIds}
-                placeholder="Reviewer"
-                disablePortal
-                noneLabel="No reviewer"
-                searchPlaceholder="Search reviewers..."
-                emptyMessage="No reviewers found."
-                onChange={setReviewerValue}
-                renderTriggerValue={(option) =>
-                  option ? (
-                    <>
-                      {(() => {
-                        const reviewer = parseAssigneeValue(option.id).assigneeAgentId
-                          ? (agents ?? []).find((a) => a.id === parseAssigneeValue(option.id).assigneeAgentId)
-                          : null;
-                        return reviewer ? <AgentIcon icon={reviewer.icon} className="h-3.5 w-3.5 shrink-0 text-muted-foreground" /> : null;
-                      })()}
-                      <span className="truncate">{option.label}</span>
-                    </>
-                  ) : (
-                    <span className="text-muted-foreground">Reviewer</span>
-                  )
-                }
-                renderOption={(option) => {
-                  if (!option.id) return <span className="truncate">{option.label}</span>;
-                  const reviewer = parseAssigneeValue(option.id).assigneeAgentId
-                    ? (agents ?? []).find((agent) => agent.id === parseAssigneeValue(option.id).assigneeAgentId)
-                    : null;
-                  return (
-                    <>
-                      {reviewer ? <AgentIcon icon={reviewer.icon} className="h-3.5 w-3.5 shrink-0 text-muted-foreground" /> : null}
-                      <span className="truncate">{option.label}</span>
-                    </>
-                  );
-                }}
-                />
-              </div>
-            )}
-
-            {/* Approver row */}
-            {showApproverRow && (
-              <div className="flex items-center gap-2 text-sm text-muted-foreground mt-1">
-                <span className="w-6 shrink-0 flex items-center justify-center"><ShieldCheck className="h-3.5 w-3.5" /></span>
-                <InlineEntitySelector
-                value={approverValue}
-                options={assigneeOptions}
-                recentOptionIds={recentAssigneeOptionIds}
-                placeholder="Approver"
-                disablePortal
-                noneLabel="No approver"
-                searchPlaceholder="Search approvers..."
-                emptyMessage="No approvers found."
-                onChange={setApproverValue}
-                renderTriggerValue={(option) =>
-                  option ? (
-                    <>
-                      {(() => {
-                        const approver = parseAssigneeValue(option.id).assigneeAgentId
-                          ? (agents ?? []).find((a) => a.id === parseAssigneeValue(option.id).assigneeAgentId)
-                          : null;
-                        return approver ? <AgentIcon icon={approver.icon} className="h-3.5 w-3.5 shrink-0 text-muted-foreground" /> : null;
-                      })()}
-                      <span className="truncate">{option.label}</span>
-                    </>
-                  ) : (
-                    <span className="text-muted-foreground">Approver</span>
-                  )
-                }
-                renderOption={(option) => {
-                  if (!option.id) return <span className="truncate">{option.label}</span>;
-                  const approver = parseAssigneeValue(option.id).assigneeAgentId
-                    ? (agents ?? []).find((agent) => agent.id === parseAssigneeValue(option.id).assigneeAgentId)
-                    : null;
-                  return (
-                    <>
-                      {approver ? <AgentIcon icon={approver.icon} className="h-3.5 w-3.5 shrink-0 text-muted-foreground" /> : null}
-                      <span className="truncate">{option.label}</span>
-                    </>
-                  );
-                }}
-                />
-              </div>
-            )}
-          </div>
+          <NewIssueAssignmentRows
+            agents={agents ?? []}
+            assigneeOptions={assigneeOptions}
+            assigneeSelectorRef={assigneeSelectorRef}
+            assigneeValue={assigneeValue}
+            approverValue={approverValue}
+            currentAssignee={currentAssignee}
+            currentProject={currentProject}
+            participantMenuOpen={participantMenuOpen}
+            projectId={projectId}
+            projectOptions={projectOptions}
+            projectSelectorRef={projectSelectorRef}
+            projects={orderedProjects}
+            recentAssigneeOptionIds={recentAssigneeOptionIds}
+            recentProjectIds={recentProjectIds}
+            reviewerValue={reviewerValue}
+            showApproverRow={showApproverRow}
+            showReviewerRow={showReviewerRow}
+            onApproverChange={setApproverValue}
+            onApproverRowToggle={() => {
+              setShowApproverRow((value) => !value);
+              if (showApproverRow) setApproverValue("");
+              setParticipantMenuOpen(false);
+            }}
+            onAssigneeChange={(value) => {
+              const nextAssignee = parseAssigneeValue(value);
+              if (nextAssignee.assigneeAgentId) {
+                trackRecentAssignee(nextAssignee.assigneeAgentId);
+              }
+              setAssigneeValue(value);
+            }}
+            onAssigneeConfirm={() => {
+              if (projectId) {
+                descriptionEditorRef.current?.focus();
+              } else {
+                projectSelectorRef.current?.focus();
+              }
+            }}
+            onParticipantMenuOpenChange={setParticipantMenuOpen}
+            onProjectChange={handleProjectChange}
+            onProjectConfirm={() => {
+              descriptionEditorRef.current?.focus();
+            }}
+            onReviewerChange={setReviewerValue}
+            onReviewerRowToggle={() => {
+              setShowReviewerRow((value) => !value);
+              if (showReviewerRow) setReviewerValue("");
+              setParticipantMenuOpen(false);
+            }}
+          />
 
           {isSubIssueMode ? (
             <div className="px-4 pb-2">
