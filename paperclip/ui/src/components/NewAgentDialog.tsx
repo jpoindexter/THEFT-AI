@@ -156,24 +156,30 @@ export function NewAgentDialog() {
 
               {/* Advanced link */}
               <div className="text-center">
-                <button
-                  className="text-xs text-muted-foreground hover:text-foreground underline underline-offset-2 transition-colors"
+                <Button
+                  type="button"
+                  variant="link"
+                  size="sm"
+                  className="h-auto p-0 text-xs text-muted-foreground hover:text-foreground"
                   onClick={handleAdvancedConfig}
                 >
                   I want advanced configuration myself
-                </button>
+                </Button>
               </div>
             </>
           ) : (
             <>
               <div className="space-y-2">
-                <button
-                  className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors"
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="xs"
+                  className="h-auto px-0 text-xs text-muted-foreground hover:bg-transparent hover:text-foreground"
                   onClick={() => setShowAdvancedCards(false)}
                 >
                   <ArrowLeft className="h-3.5 w-3.5" />
                   Back
-                </button>
+                </Button>
                 <p className="text-sm text-muted-foreground">
                   Choose your adapter type for advanced setup.
                 </p>
@@ -181,10 +187,13 @@ export function NewAgentDialog() {
 
               <div className="grid grid-cols-2 gap-2">
                 {adapterGrid.map((opt) => (
-                  <button
+                  <Button
                     key={opt.value}
+                    type="button"
+                    variant="outline"
+                    size="sm"
                     className={cn(
-                      "flex flex-col items-center gap-1.5 rounded-md border border-border p-3 text-xs transition-colors hover:bg-accent/50 relative",
+                      "relative h-auto flex-col items-center gap-1.5 p-3 text-xs hover:bg-accent/50",
                       opt.comingSoon && "opacity-40 cursor-not-allowed",
                     )}
                     disabled={!!opt.comingSoon}
@@ -194,16 +203,16 @@ export function NewAgentDialog() {
                     }}
                   >
                     {opt.recommended && (
-                      <span className="absolute -top-1.5 right-1.5 bg-green-500 text-white text-[9px] font-semibold px-1.5 py-0.5 rounded-full leading-none">
+                      <span className="absolute -top-1.5 right-1.5 rounded-full bg-green-500 px-1.5 py-0.5 text-nano font-semibold leading-none text-white">
                         Recommended
                       </span>
                     )}
                     <opt.icon className="h-4 w-4" />
                     <span className="font-medium">{opt.label}</span>
-                    <span className="text-muted-foreground text-[10px]">
+                    <span className="text-micro text-muted-foreground">
                       {opt.desc}
                     </span>
-                  </button>
+                  </Button>
                 ))}
               </div>
             </>

@@ -32,7 +32,8 @@ T119 is now in progress after the active product route launch gate passed. First
 - `FileTree.tsx` now scans clean and fits under 300 lines after moving public model/frontmatter helpers into `file-tree/fileTreeModel.ts`, replacing row indentation inline styles with depth classes, and using shadcn checkbox/button primitives.
 - `FilterBar.tsx`, `GoalProperties.tsx`, and `GoalTree.tsx` now scan clean after replacing native controls with shadcn buttons and swapping GoalTree inline indentation for depth classes.
 - `LiveRunWidget.tsx` now scans clean after replacing arbitrary shadow/tracking/text/height utilities and moving the stop action to the shared button primitive.
-- Repo-wide design drift count is down to 1451 findings after the first fourteen T119 slices.
+- `NewAgentDialog.tsx` now scans clean after moving advanced/back/adapter card controls to shadcn buttons and replacing arbitrary micro text sizes with token utilities.
+- Repo-wide design drift count is down to 1444 findings after the first fifteen T119 slices.
 
 The Paperclip app is genuinely large. The remaining drag is mostly not missing MVP capability; it is oversized route/organism code inherited from the Paperclip host plus the THEFT UX migration. The active-route design-system gate currently passes with zero unallowed findings, but several files still exceed the maintainability guardrail and need continued modularization.
 
