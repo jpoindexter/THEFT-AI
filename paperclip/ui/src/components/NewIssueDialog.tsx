@@ -43,15 +43,6 @@ import {
   MoreHorizontal,
   ChevronRight,
   ChevronDown,
-  CircleDot,
-  ClipboardList,
-  Hammer,
-  Minus,
-  ArrowUp,
-  ArrowDown,
-  AlertTriangle,
-  Tag,
-  Calendar,
   Paperclip,
   FileText,
   Loader2,
@@ -62,10 +53,10 @@ import {
 } from "lucide-react";
 import { cn } from "../lib/utils";
 import { extractProviderIdWithFallback } from "../lib/model-utils";
-import { issueStatusText, issueStatusTextDefault, priorityColor, priorityColorDefault } from "../lib/status-colors";
 import { MarkdownEditor, type MarkdownEditorRef, type MentionOption } from "./MarkdownEditor";
 import { AgentIcon } from "./AgentIconPicker";
 import { InlineEntitySelector, type InlineEntityOption } from "./InlineEntitySelector";
+import { IssuePropertyChips } from "./new-issue-dialog/IssuePropertyChips";
 
 const DRAFT_KEY = "paperclip:issue-draft";
 const DEBOUNCE_MS = 800;
@@ -106,8 +97,6 @@ import {
   type IssueModelLane,
 } from "../lib/issue-assignee-overrides";
 
-const STAGED_FILE_ACCEPT = "image/*,application/pdf,text/plain,text/markdown,application/json,text/csv,text/html,.md,.markdown";
-
 const ISSUE_THINKING_EFFORT_OPTIONS = {
   claude_local: [
     { value: "", label: "Default" },
@@ -137,15 +126,6 @@ const ISSUE_THINKING_EFFORT_OPTIONS = {
 function isIssueWorkMode(value: unknown): value is IssueWorkMode {
   return value === "standard" || value === "planning";
 }
-
-const ISSUE_WORK_MODE_OPTIONS: ReadonlyArray<{
-  value: IssueWorkMode;
-  label: string;
-  icon: typeof Hammer;
-}> = [
-  { value: "standard", label: "Standard", icon: Hammer },
-  { value: "planning", label: "Planning", icon: ClipboardList },
-];
 
 function loadDraft(): IssueDraft | null {
   try {
@@ -217,21 +197,6 @@ function formatFileSize(file: File) {
   if (file.size < 1024 * 1024) return `${(file.size / 1024).toFixed(1)} KB`;
   return `${(file.size / (1024 * 1024)).toFixed(1)} MB`;
 }
-
-const statuses = [
-  { value: "backlog", label: "Backlog", color: issueStatusText.backlog ?? issueStatusTextDefault },
-  { value: "todo", label: "Todo", color: issueStatusText.todo ?? issueStatusTextDefault },
-  { value: "in_progress", label: "In Progress", color: issueStatusText.in_progress ?? issueStatusTextDefault },
-  { value: "in_review", label: "In Review", color: issueStatusText.in_review ?? issueStatusTextDefault },
-  { value: "done", label: "Done", color: issueStatusText.done ?? issueStatusTextDefault },
-];
-
-const priorities = [
-  { value: "critical", label: "Critical", icon: AlertTriangle, color: priorityColor.critical ?? priorityColorDefault },
-  { value: "high", label: "High", icon: ArrowUp, color: priorityColor.high ?? priorityColorDefault },
-  { value: "medium", label: "Medium", icon: Minus, color: priorityColor.medium ?? priorityColorDefault },
-  { value: "low", label: "Low", icon: ArrowDown, color: priorityColor.low ?? priorityColorDefault },
-];
 
 const EXECUTION_WORKSPACE_MODES = [
   { value: "shared_workspace", label: "Project default" },
@@ -373,7 +338,7 @@ const IssueDescriptionEditor = memo(function IssueDescriptionEditor({
       placeholder="Add description..."
       bordered={false}
       mentions={mentions}
-      contentClassName={cn("text-sm text-muted-foreground pb-12", expanded ? "min-h-[220px]" : "min-h-[120px]")}
+      contentClassName={cn("text-sm text-muted-foreground pb-12", expanded ? "min-h-56" : "min-h-32")}
       imageUploadHandler={imageUploadHandler}
     />
   );
@@ -1058,8 +1023,6 @@ export function NewIssueDialog() {
   }
 
   const hasDraft = draftHasText || stagedFiles.length > 0;
-  const currentStatus = statuses.find((s) => s.value === status) ?? statuses[1]!;
-  const currentPriority = priorities.find((p) => p.value === priority);
   const currentAssignee = selectedAssigneeAgentId
     ? (agents ?? []).find((a) => a.id === selectedAssigneeAgentId)
     : null;
@@ -1178,9 +1141,6 @@ export function NewIssueDialog() {
     },
     [assigneeAdapterModels],
   );
-  const currentWorkMode = ISSUE_WORK_MODE_OPTIONS[workMode === "planning" ? 1 : 0]!;
-  const CurrentWorkModeIcon = currentWorkMode.icon;
-
   return (
     <Dialog
       open={newIssueOpen}
@@ -1258,7 +1218,7 @@ export function NewIssueDialog() {
                   >
                     <span
                       className={cn(
-                        "px-1 py-0.5 rounded text-[10px] font-semibold leading-none",
+                        "px-1 py-0.5 rounded text-nano font-semibold leading-none",
                         !c.brandColor && "bg-muted",
                       )}
                       style={
@@ -1572,7 +1532,7 @@ export function NewIssueDialog() {
             <div className="px-4 py-3 space-y-2">
             <div className="space-y-1.5">
               <div className="text-xs font-medium">Execution workspace</div>
-              <div className="text-[11px] text-muted-foreground">
+              <div className="text-micro text-muted-foreground">
                 Control whether this issue runs in the shared workspace, a new isolated workspace, or an existing one.
               </div>
               <select
@@ -1606,12 +1566,12 @@ export function NewIssueDialog() {
                 </select>
               )}
               {executionWorkspaceMode === "reuse_existing" && selectedReusableExecutionWorkspace && (
-                <div className="text-[11px] text-muted-foreground">
+                <div className="text-micro text-muted-foreground">
                   Reusing {selectedReusableExecutionWorkspace.name} from {selectedReusableExecutionWorkspace.branchName ?? selectedReusableExecutionWorkspace.cwd ?? "existing execution workspace"}.
                 </div>
               )}
               {showParentWorkspaceWarning ? (
-                <div className="rounded-md border border-amber-300/60 bg-amber-50 px-2 py-1.5 text-[11px] text-amber-900 dark:border-amber-800/70 dark:bg-amber-950/30 dark:text-amber-100">
+                <div className="rounded-md border border-amber-300/60 bg-amber-50 px-2 py-1.5 text-micro text-amber-900 dark:border-amber-800/70 dark:bg-amber-950/30 dark:text-amber-100">
                   Warning: this sub-issue will no longer use the parent issue workspace{parentExecutionWorkspaceLabel ? ` (${parentExecutionWorkspaceLabel})` : ""}.
                 </div>
               ) : null}
@@ -1658,7 +1618,7 @@ export function NewIssueDialog() {
                     ))}
                   </div>
                   {assigneeModelLane === "cheap" && (
-                    <p className="text-[11px] text-muted-foreground">
+                    <p className="text-micro text-muted-foreground">
                       Sends <code>modelProfile: "cheap"</code>{" "}
                       {assigneeCheapProfile?.adapterConfig && typeof (assigneeCheapProfile.adapterConfig as Record<string, unknown>).model === "string"
                         ? <>· adapter default <code>{String((assigneeCheapProfile.adapterConfig as Record<string, unknown>).model)}</code></>
@@ -1668,10 +1628,10 @@ export function NewIssueDialog() {
                     </p>
                   )}
                   {assigneeModelLane === "primary" && (
-                    <p className="text-[11px] text-muted-foreground">Runs on the agent's primary model.</p>
+                    <p className="text-micro text-muted-foreground">Runs on the agent's primary model.</p>
                   )}
                   {assigneeModelLane === "custom" && (
-                    <p className="text-[11px] text-muted-foreground">Override the model and effort for this issue only.</p>
+                    <p className="text-micro text-muted-foreground">Override the model and effort for this issue only.</p>
                   )}
                 </div>
                 {assigneeModelLane === "custom" && (
@@ -1755,12 +1715,12 @@ export function NewIssueDialog() {
                       <div key={file.id} className="flex items-start justify-between gap-3 rounded-md border border-border/70 px-3 py-2">
                         <div className="min-w-0">
                           <div className="flex items-center gap-2">
-                            <span className="rounded-full border border-border px-2 py-0.5 font-mono text-[10px] uppercase tracking-[0.16em] text-muted-foreground">
+                            <span className="rounded-full border border-border px-2 py-0.5 font-mono text-nano uppercase tracking-wide text-muted-foreground">
                               {file.documentKey}
                             </span>
                             <span className="truncate text-sm">{file.file.name}</span>
                           </div>
-                          <div className="mt-1 flex items-center gap-2 text-[11px] text-muted-foreground">
+                          <div className="mt-1 flex items-center gap-2 text-micro text-muted-foreground">
                             <FileText className="h-3.5 w-3.5" />
                             <span>{file.title || file.file.name}</span>
                             <span>•</span>
@@ -1794,7 +1754,7 @@ export function NewIssueDialog() {
                             <Paperclip className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
                             <span className="truncate text-sm">{file.file.name}</span>
                           </div>
-                          <div className="mt-1 text-[11px] text-muted-foreground">
+                          <div className="mt-1 text-micro text-muted-foreground">
                             {file.file.type || "application/octet-stream"} • {formatFileSize(file.file)}
                           </div>
                         </div>
@@ -1818,151 +1778,25 @@ export function NewIssueDialog() {
           </div>
         </div>
 
-        {/* Property chips bar */}
-        <div className="flex items-center gap-1.5 px-4 py-2 border-t border-border flex-wrap shrink-0">
-          {/* Status chip */}
-          <Popover open={statusOpen} onOpenChange={setStatusOpen}>
-            <PopoverTrigger asChild>
-              <button className="inline-flex items-center gap-1.5 rounded-md border border-border px-2 py-1 text-xs hover:bg-accent/50 transition-colors">
-                <CircleDot className={cn("h-3 w-3", currentStatus.color)} />
-                {currentStatus.label}
-              </button>
-            </PopoverTrigger>
-            <PopoverContent className="w-36 p-1" align="start">
-              {statuses.map((s) => (
-                <button
-                  key={s.value}
-                  className={cn(
-                    "flex items-center gap-2 w-full px-2 py-1.5 text-xs rounded hover:bg-accent/50",
-                    s.value === status && "bg-accent"
-                  )}
-                  onClick={() => { setStatus(s.value); setStatusOpen(false); }}
-                >
-                  <CircleDot className={cn("h-3 w-3", s.color)} />
-                  {s.label}
-                </button>
-              ))}
-            </PopoverContent>
-          </Popover>
-
-          {/* Priority chip */}
-          <Popover open={priorityOpen} onOpenChange={setPriorityOpen}>
-            <PopoverTrigger asChild>
-              <button className="inline-flex items-center gap-1.5 rounded-md border border-border px-2 py-1 text-xs hover:bg-accent/50 transition-colors">
-                {currentPriority ? (
-                  <>
-                    <currentPriority.icon className={cn("h-3 w-3", currentPriority.color)} />
-                    {currentPriority.label}
-                  </>
-                ) : (
-                  <>
-                    <Minus className="h-3 w-3 text-muted-foreground" />
-                    Priority
-                  </>
-                )}
-              </button>
-            </PopoverTrigger>
-            <PopoverContent className="w-36 p-1" align="start">
-              {priorities.map((p) => (
-                <button
-                  key={p.value}
-                  className={cn(
-                    "flex items-center gap-2 w-full px-2 py-1.5 text-xs rounded hover:bg-accent/50",
-                    p.value === priority && "bg-accent"
-                  )}
-                  onClick={() => { setPriority(p.value); setPriorityOpen(false); }}
-                >
-                  <p.icon className={cn("h-3 w-3", p.color)} />
-                  {p.label}
-                </button>
-              ))}
-            </PopoverContent>
-          </Popover>
-
-          {/* Labels chip — disabled, not wired up yet */}
-          {/* <button className="inline-flex items-center gap-1.5 rounded-md border border-border px-2 py-1 text-xs hover:bg-accent/50 transition-colors text-muted-foreground">
-            <Tag className="h-3 w-3" />
-            Labels
-          </button> */}
-
-          <input
-            ref={stageFileInputRef}
-            type="file"
-            accept={STAGED_FILE_ACCEPT}
-            className="hidden"
-            onChange={handleStageFilesPicked}
-            multiple
-          />
-          <button
-            className="inline-flex items-center gap-1.5 rounded-md border border-border px-2 py-1 text-xs hover:bg-accent/50 transition-colors text-muted-foreground"
-            onClick={() => stageFileInputRef.current?.click()}
-            disabled={createIssue.isPending}
-          >
-            <Paperclip className="h-3 w-3" />
-            Upload
-          </button>
-
-          {/* Work mode chip */}
-          <Popover open={workModeOpen} onOpenChange={setWorkModeOpen}>
-            <PopoverTrigger asChild>
-              <button
-                type="button"
-                data-issue-work-mode-chip={workMode}
-                className={cn(
-                  "inline-flex items-center gap-1.5 rounded-md border px-2 py-1 text-xs transition-colors",
-                  workMode === "planning"
-                    ? "border-amber-500/60 bg-amber-500/15 text-amber-800 hover:bg-amber-500/25 dark:border-amber-500/50 dark:bg-amber-500/15 dark:text-amber-200 dark:hover:bg-amber-500/25"
-                    : "border-border text-muted-foreground hover:bg-accent/50",
-                )}
-              >
-                <CurrentWorkModeIcon className="h-3 w-3" />
-                {currentWorkMode.label}
-              </button>
-            </PopoverTrigger>
-            <PopoverContent className="w-36 p-1" align="start">
-              {ISSUE_WORK_MODE_OPTIONS.map((option) => {
-                const Icon = option.icon;
-                return (
-                  <button
-                    key={option.value}
-                    data-issue-work-mode={option.value}
-                    className={cn(
-                      "flex w-full items-center gap-2 rounded px-2 py-1.5 text-xs hover:bg-accent/50",
-                      option.value === workMode && "bg-accent",
-                      option.value === "planning" && "text-amber-700 dark:text-amber-300",
-                    )}
-                    onClick={() => {
-                      setWorkMode(option.value);
-                      setWorkModeOpen(false);
-                    }}
-                  >
-                    <Icon className="h-3 w-3" />
-                    {option.label}
-                  </button>
-                );
-              })}
-            </PopoverContent>
-          </Popover>
-
-          {/* More (dates) */}
-          <Popover open={moreOpen} onOpenChange={setMoreOpen}>
-            <PopoverTrigger asChild>
-              <button className="inline-flex items-center justify-center rounded-md border border-border p-1 text-xs hover:bg-accent/50 transition-colors text-muted-foreground">
-                <MoreHorizontal className="h-3 w-3" />
-              </button>
-            </PopoverTrigger>
-            <PopoverContent className="w-44 p-1" align="start">
-              <button className="flex items-center gap-2 w-full px-2 py-1.5 text-xs rounded hover:bg-accent/50 text-muted-foreground">
-                <Calendar className="h-3 w-3" />
-                Start date
-              </button>
-              <button className="flex items-center gap-2 w-full px-2 py-1.5 text-xs rounded hover:bg-accent/50 text-muted-foreground">
-                <Calendar className="h-3 w-3" />
-                Due date
-              </button>
-            </PopoverContent>
-          </Popover>
-        </div>
+        <IssuePropertyChips
+          status={status}
+          statusOpen={statusOpen}
+          priority={priority}
+          priorityOpen={priorityOpen}
+          stageFileInputRef={stageFileInputRef}
+          uploadDisabled={createIssue.isPending}
+          workMode={workMode}
+          workModeOpen={workModeOpen}
+          moreOpen={moreOpen}
+          onStatusChange={setStatus}
+          onStatusOpenChange={setStatusOpen}
+          onPriorityChange={setPriority}
+          onPriorityOpenChange={setPriorityOpen}
+          onStageFilesPicked={handleStageFilesPicked}
+          onWorkModeChange={setWorkMode}
+          onWorkModeOpenChange={setWorkModeOpen}
+          onMoreOpenChange={setMoreOpen}
+        />
 
         {/* Footer */}
         <div className="flex items-center justify-between px-4 py-2.5 border-t border-border shrink-0">
@@ -1988,7 +1822,7 @@ export function NewIssueDialog() {
             </div>
             <Button
               size="sm"
-              className="min-w-[8.5rem] disabled:opacity-100"
+              className="min-w-36 disabled:opacity-100"
               disabled={!titleHasText || createIssue.isPending}
               onClick={handleSubmit}
               aria-busy={createIssue.isPending}
