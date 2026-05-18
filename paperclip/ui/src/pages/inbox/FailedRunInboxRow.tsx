@@ -47,7 +47,7 @@ export function FailedRunInboxRow({
   className,
 }: {
   run: HeartbeatRun;
-  issueById: Map<string, Issue>;
+  issueById: ReadonlyMap<string, Issue>;
   agentName: string | null;
   issueLinkState: unknown;
   onDismiss: () => void;

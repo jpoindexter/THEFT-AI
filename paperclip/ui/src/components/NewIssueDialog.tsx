@@ -1,22 +1,19 @@
 import { useState, useEffect, useRef, useCallback, useMemo, type KeyboardEvent } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import type { IssueWorkMode } from "@paperclipai/shared";
 import { useDialog } from "../context/DialogContext";
 import { useCompany } from "../context/CompanyContext";
 import { executionWorkspacesApi } from "../api/execution-workspaces";
-import { issuesApi } from "../api/issues";
 import { instanceSettingsApi } from "../api/instanceSettings";
 import { projectsApi } from "../api/projects";
 import { agentsApi } from "../api/agents";
 import { accessApi } from "../api/access";
 import { authApi } from "../api/auth";
-import { assetsApi } from "../api/assets";
 import { queryKeys } from "../lib/queryKeys";
 import { orderReusableExecutionWorkspaces } from "../lib/reusable-execution-workspaces";
 import { useProjectOrder } from "../hooks/useProjectOrder";
 import { trackRecentAssignee } from "../lib/recent-assignees";
 import { getRecentProjectIds, trackRecentProject } from "../lib/recent-projects";
-import { buildExecutionPolicy } from "../lib/issue-execution-policy";
 import { useToastActions } from "../context/ToastContext";
 import {
   assigneeValueFromSelection,
@@ -29,9 +26,8 @@ import {
   defaultExecutionWorkspaceModeForIssueDefaults,
   defaultExecutionWorkspaceModeForProject,
   defaultProjectWorkspaceIdForProject,
-  issueExecutionWorkspaceModeForExistingWorkspace,
 } from "./new-issue-dialog/issueDialogDefaults";
-import { useStagedIssueFiles, type StagedIssueFile } from "./new-issue-dialog/useStagedIssueFiles";
+import { useStagedIssueFiles } from "./new-issue-dialog/useStagedIssueFiles";
 import {
   clearIssueDraft,
   isIssueWorkMode,
@@ -39,16 +35,13 @@ import {
   useIssueDraftState,
 } from "./new-issue-dialog/useIssueDraftState";
 import { useNewIssueAssigneeData } from "./new-issue-dialog/useNewIssueAssigneeData";
+import { useNewIssueSubmission } from "./new-issue-dialog/useNewIssueSubmission";
 
-import {
-  buildAssigneeAdapterOverrides,
-  type IssueModelLane,
-} from "../lib/issue-assignee-overrides";
+import type { IssueModelLane } from "../lib/issue-assignee-overrides";
 
 export function NewIssueDialog() {
   const { newIssueOpen, newIssueDefaults, closeNewIssue } = useDialog();
   const { companies, selectedCompanyId, selectedCompany } = useCompany();
-  const queryClient = useQueryClient();
   const { pushToast } = useToastActions();
   const [status, setStatus] = useState("todo");
   const [priority, setPriority] = useState("");
@@ -212,71 +205,6 @@ export function NewIssueDialog() {
     onAssigneeThinkingEffortChange: setAssigneeThinkingEffort,
     onAssigneeChromeChange: setAssigneeChrome,
   });
-
-  const createIssue = useMutation({
-    mutationFn: async ({
-      companyId,
-      stagedFiles: pendingStagedFiles,
-      ...data
-    }: { companyId: string; stagedFiles: StagedIssueFile[] } & Record<string, unknown>) => {
-      const issue = await issuesApi.create(companyId, data);
-      const failures: string[] = [];
-
-      for (const stagedFile of pendingStagedFiles) {
-        try {
-          if (stagedFile.kind === "document") {
-            const body = await stagedFile.file.text();
-            await issuesApi.upsertDocument(issue.id, stagedFile.documentKey ?? "document", {
-              title: stagedFile.documentKey === "plan" ? null : stagedFile.title ?? null,
-              format: "markdown",
-              body,
-              baseRevisionId: null,
-            });
-          } else {
-            await issuesApi.uploadAttachment(companyId, issue.id, stagedFile.file);
-          }
-        } catch {
-          failures.push(stagedFile.file.name);
-        }
-      }
-
-      return { issue, companyId, failures };
-    },
-    onSuccess: ({ issue, companyId, failures }) => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.issues.list(companyId) });
-      queryClient.invalidateQueries({ queryKey: queryKeys.issues.listMineByMe(companyId) });
-      queryClient.invalidateQueries({ queryKey: queryKeys.issues.listTouchedByMe(companyId) });
-      queryClient.invalidateQueries({ queryKey: queryKeys.issues.listUnreadTouchedByMe(companyId) });
-      queryClient.invalidateQueries({ queryKey: queryKeys.sidebarBadges(companyId) });
-      clearPendingDraftSave();
-      if (failures.length > 0) {
-        const prefix = (companies.find((company) => company.id === companyId)?.issuePrefix ?? "").trim();
-        const issueRef = issue.identifier ?? issue.id;
-        pushToast({
-          title: `Created ${issueRef} with upload warnings`,
-          body: `${failures.length} staged ${failures.length === 1 ? "file" : "files"} could not be added.`,
-          tone: "warn",
-          action: prefix
-            ? { label: `Open ${issueRef}`, href: `/${prefix}/issues/${issueRef}` }
-            : undefined,
-        });
-      }
-      clearIssueDraft();
-      reset();
-      closeNewIssue();
-    },
-  });
-
-  const uploadDescriptionImage = useMutation({
-    mutationFn: async (file: File) => {
-      if (!effectiveCompanyId) throw new Error("No company selected");
-      return assetsApi.uploadImage(effectiveCompanyId, file, "issues/drafts");
-    },
-  });
-  const uploadDescriptionImageHandler = useCallback(async (file: File) => {
-    const asset = await uploadDescriptionImage.mutateAsync(file);
-    return asset.contentPath;
-  }, [uploadDescriptionImage.mutateAsync]);
 
   // Restore draft or apply defaults when dialog opens
   useEffect(() => {
@@ -464,72 +392,6 @@ export function NewIssueDialog() {
     closeNewIssue();
   }
 
-  function handleSubmit() {
-    const currentTitle = titleRef.current.trim();
-    const currentDescription = descriptionRef.current.trim();
-    if (!effectiveCompanyId || !currentTitle || createIssue.isPending) return;
-    const effectiveLane = assigneeSupportsCheapLane
-      ? assigneeModelLane
-      : assigneeModelLane === "cheap"
-        ? "primary"
-        : assigneeModelLane;
-    const assigneeAdapterOverrides = buildAssigneeAdapterOverrides({
-      adapterType: assigneeAdapterType,
-      lane: effectiveLane,
-      modelOverride: assigneeModelOverride,
-      thinkingEffortOverride: assigneeThinkingEffort,
-      chrome: assigneeChrome,
-    });
-    const selectedProject = orderedProjects.find((project) => project.id === projectId);
-    const executionWorkspacePolicy =
-      experimentalSettings?.enableIsolatedWorkspaces === true
-        ? selectedProject?.executionWorkspacePolicy ?? null
-        : null;
-    const selectedReusableExecutionWorkspace = deduplicatedReusableWorkspaces.find(
-      (workspace) => workspace.id === selectedExecutionWorkspaceId,
-    );
-    const requestedExecutionWorkspaceMode =
-      executionWorkspaceMode === "reuse_existing"
-        ? issueExecutionWorkspaceModeForExistingWorkspace(selectedReusableExecutionWorkspace?.mode)
-        : executionWorkspaceMode;
-    const executionWorkspaceSettings = executionWorkspacePolicy?.enabled
-      ? { mode: requestedExecutionWorkspaceMode }
-      : null;
-    const executionPolicy = buildExecutionPolicy({
-      reviewerValues: reviewerValue ? [reviewerValue] : [],
-      approverValues: approverValue ? [approverValue] : [],
-    });
-    createIssue.mutate({
-      companyId: effectiveCompanyId,
-      stagedFiles,
-      title: currentTitle,
-      description: currentDescription || undefined,
-      status,
-      priority: priority || "medium",
-      workMode,
-      ...(selectedAssigneeAgentId ? { assigneeAgentId: selectedAssigneeAgentId } : {}),
-      ...(selectedAssigneeUserId ? { assigneeUserId: selectedAssigneeUserId } : {}),
-      ...(newIssueDefaults.parentId ? { parentId: newIssueDefaults.parentId } : {}),
-      ...(newIssueDefaults.goalId ? { goalId: newIssueDefaults.goalId } : {}),
-      ...(projectId ? { projectId } : {}),
-      ...(projectWorkspaceId ? { projectWorkspaceId } : {}),
-      ...(assigneeAdapterOverrides ? { assigneeAdapterOverrides } : {}),
-      ...(executionWorkspacePolicy?.enabled ? { executionWorkspacePreference: executionWorkspaceMode } : {}),
-      ...(executionWorkspaceMode === "reuse_existing" && selectedExecutionWorkspaceId
-        ? { executionWorkspaceId: selectedExecutionWorkspaceId }
-        : {}),
-      ...(executionWorkspaceSettings ? { executionWorkspaceSettings } : {}),
-      ...(executionPolicy ? { executionPolicy } : {}),
-    });
-  }
-
-  function handleKeyDown(e: KeyboardEvent<HTMLDivElement>) {
-    if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) {
-      e.preventDefault();
-      handleSubmit();
-    }
-  }
-
   const hasDraft = draftHasText || stagedFiles.length > 0;
   const currentProject = orderedProjects.find((project) => project.id === projectId);
   const currentProjectExecutionWorkspacePolicy =
@@ -561,8 +423,52 @@ export function NewIssueDialog() {
     [orderedProjects],
   );
   const canDiscardDraft = hasDraft || hasSavedDraft;
-  const createIssueErrorMessage =
-    createIssue.error instanceof Error ? createIssue.error.message : "Failed to create issue. Try again.";
+  const {
+    errorMessage: createIssueErrorMessage,
+    handleSubmit,
+    isError: createIssueIsError,
+    isPending: createIssueIsPending,
+    uploadDescriptionImageHandler,
+  } = useNewIssueSubmission({
+    assigneeAdapterType,
+    assigneeChrome,
+    assigneeModelLane,
+    assigneeModelOverride,
+    assigneeSupportsCheapLane,
+    assigneeThinkingEffort,
+    approverValue,
+    companies,
+    descriptionRef,
+    effectiveCompanyId,
+    executionWorkspaceMode,
+    experimentalSettings,
+    newIssueDefaults,
+    orderedProjects,
+    priority,
+    projectId,
+    projectWorkspaceId,
+    pushToast,
+    reviewerValue,
+    selectedAssigneeAgentId,
+    selectedAssigneeUserId,
+    selectedExecutionWorkspaceId,
+    selectedReusableExecutionWorkspace,
+    stagedFiles,
+    status,
+    titleRef,
+    workMode,
+    onClearPendingDraftSave: clearPendingDraftSave,
+    onClose: closeNewIssue,
+    onReset: reset,
+  });
+
+  function handleKeyDown(e: KeyboardEvent<HTMLDivElement>) {
+    if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) {
+      e.preventDefault();
+      handleSubmit();
+    }
+  }
+
   const handleProjectChange = useCallback((nextProjectId: string) => {
     if (nextProjectId) trackRecentProject(nextProjectId);
     setProjectId(nextProjectId);
@@ -613,7 +519,7 @@ export function NewIssueDialog() {
       descriptionEditorRef={descriptionEditorRef}
       dialogCompany={dialogCompany}
       effectiveCompanyId={effectiveCompanyId}
-      errorMessage={createIssue.isError ? createIssueErrorMessage : null}
+      errorMessage={createIssueIsError ? createIssueErrorMessage : null}
       expanded={expanded}
       imageUploadHandler={uploadDescriptionImageHandler}
       isFileDragOver={isFileDragOver}
@@ -628,7 +534,7 @@ export function NewIssueDialog() {
       parentIssueLabel={parentIssueLabel}
       parentTitle={newIssueDefaults.parentTitle}
       participantMenuOpen={participantMenuOpen}
-      pending={createIssue.isPending}
+      pending={createIssueIsPending}
       priority={priority}
       priorityOpen={priorityOpen}
       projectId={projectId}
@@ -653,7 +559,7 @@ export function NewIssueDialog() {
       thinkingEffortOptions={thinkingEffortOptions}
       title={title}
       titleHasText={titleHasText}
-      uploadDisabled={createIssue.isPending}
+      uploadDisabled={createIssueIsPending}
       workMode={workMode}
       workModeOpen={workModeOpen}
       executionWorkspaceMode={executionWorkspaceMode}

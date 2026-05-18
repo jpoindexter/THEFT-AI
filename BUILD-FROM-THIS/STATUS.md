@@ -90,6 +90,16 @@ T119 is now in progress after the active product route launch gate passed. First
   - `NewIssueDialog.tsx` moved assignee/model derived data, adapter capability/model queries, mention options, and override normalization into `new-issue-dialog/useNewIssueAssigneeData.ts`; the parent is down to 722 lines.
   - `Inbox.tsx` moved approval and join-request decision rows into `pages/inbox/InboxDecisionRows.tsx`; the parent is down to 2198 lines and focused `Inbox` scanning remains clean.
   - Focused `NewIssueDialog` and `Inbox` Vitest passed, typecheck passed, active-route `pnpm design:gate` passed, and repo-wide scanner remains at 1057 findings.
+- T120 continued with parallel runtime/admin splits:
+  - `CompanySkills.tsx` is down from 1296 lines to 260 lines with dialogs, sidebar, tree/list, editor pane, routing/source helpers, and mutation handling moved under `pages/company-skills/`.
+  - `PluginSettings.tsx` is down from 1209 lines to 174 lines with configuration/status/runtime/local-folder sections moved under `pages/plugin-settings/`.
+  - `RoutineDetail.tsx` is down from 1297 lines to 169 lines with the controller, mutations, header, tabs, trigger editor, banners, assignment row, and model helpers moved under `pages/routine-detail/`.
+  - `CompanyExport.tsx` is down from 1020 lines to 59 lines with export controller, action bar, file sidebar, preview pane, download/readme/tree/yaml helpers moved under `pages/company-export/`; focused `CompanyExport` scanning now reports zero findings.
+  - `ExecutionWorkspaceDetail.tsx` is down from 1159 lines to 415 lines with form state/patching, primitive rows, issues list, routines list, settings card, and context cards moved under `pages/execution-workspace-detail/`; focused scanner reports zero findings for that target.
+  - `NewIssueDialog.tsx` moved issue submission/upload/cache invalidation into `new-issue-dialog/useNewIssueSubmission.ts`; the parent is down to 628 lines and focused scanner remains clean.
+  - `Inbox.tsx` moved work-item rendering into `pages/inbox/InboxWorkItemsSection.tsx` and `InboxIssueWorkItemRow.tsx`; the parent is down to 1830 lines and focused scanner remains clean.
+  - Verification passed: `pnpm -C paperclip --filter @paperclipai/ui typecheck`, focused `NewIssueDialog` and `PluginSettings` Vitest (14 tests), `pnpm design:gate`, `git diff --check`, and the desktop MVP route smoke with system Chrome.
+  - Repo-wide scanner is down to 1015 findings. Remaining top oversized runtime/admin targets include `AgentDetail.tsx`, `Inbox.tsx`, `index.css`, `DesignGuide.tsx`, `Costs.tsx`, `LiveUpdatesProvider.tsx`, `Routines.tsx`, `CompanyEnvironments.tsx`, `ProjectDetail.tsx`, `CompanySettings.tsx`, `AdapterManager.tsx`, `CompanyAccess.tsx`, `ProjectWorkspaceDetail.tsx`, `Search.tsx`, `NewIssueDialog.tsx`, and `ExecutionWorkspaceDetail.tsx`.
 
 The Paperclip app is genuinely large. The remaining drag is mostly not missing MVP capability; it is oversized route/organism code inherited from the Paperclip host plus the THEFT UX migration. The active-route design-system gate currently passes with zero unallowed findings, but several files still exceed the maintainability guardrail and need continued modularization.
 
