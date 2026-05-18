@@ -147,7 +147,7 @@
 | T109 | Split `OnboardingWizard.tsx` into modules that follow the 300 / 150 / 50 maintainability guardrail | ✅ done |
 | T110 | Split dashboard, task detail, and Library product surfaces into reusable section/card modules | ✅ done |
 | T111 | Replace touched one-off colors, shadows, radii, and arbitrary layout values with THEFT tokens or shadcn variants | ✅ done |
-| T112 | Add lint/smoke checks for active product screens: shadcn primitive usage, no hex TSX, no horizontal overflow, and scrollable short viewports | ☐ todo |
+| T112 | Add lint/smoke checks for active product screens: shadcn primitive usage, no hex TSX, no horizontal overflow, and scrollable short viewports | ✅ done |
 
 ## Slice 1.2 — One Atomic Design System
 

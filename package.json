@@ -13,6 +13,7 @@
     "typecheck": "pnpm -C paperclip --filter @paperclipai/ui typecheck",
     "design:gate": "node .agents/skills/atomic-design-system/scripts/audit-design-system.mjs --active-routes --drift-only --allowlist .agents/skills/atomic-design-system/allowlists/theft-active-runtime-exceptions.json --fail-on medium",
     "design:audit": "node .agents/skills/atomic-design-system/scripts/audit-design-system.mjs paperclip/ui/src",
+    "verify:active-ui": "pnpm design:gate && node paperclip/scripts/smoke/theft-mvp-route-smoke.mjs && node paperclip/scripts/smoke/theft-mvp-route-smoke.mjs --mobile && node paperclip/scripts/smoke/theft-mvp-route-smoke.mjs --short",
     "test": "pnpm -C paperclip test:run",
     "test:e2e": "pnpm -C paperclip test:e2e",
     "smoke:health": "node paperclip/scripts/smoke/theft-local-health.mjs",

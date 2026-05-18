@@ -47,6 +47,7 @@ function parseArgs(argv) {
     screenshotDir: process.env.THEFT_MVP_SCREENSHOT_DIR ?? null,
     viewport: { width: 1440, height: 900 },
     mobile: false,
+    short: false,
   };
 
   for (let index = 0; index < argv.length; index += 1) {
@@ -72,6 +73,15 @@ function parseArgs(argv) {
       parsed.viewport = { width: 390, height: 844 };
       continue;
     }
+    if (arg === "--short") {
+      parsed.short = true;
+      parsed.viewport = { width: 1024, height: 620 };
+      continue;
+    }
+    if (arg === "--viewport") {
+      parsed.viewport = parseViewport(argv[++index], parsed.viewport);
+      continue;
+    }
     if (arg === "--help" || arg === "-h") {
       printUsage();
       process.exit(0);
@@ -83,18 +93,33 @@ function parseArgs(argv) {
   return parsed;
 }
 
+function parseViewport(value, fallback) {
+  if (!value) return fallback;
+  const match = /^(\d+)x(\d+)$/i.exec(value.trim());
+  if (!match) {
+    throw new Error(`Expected --viewport WIDTHxHEIGHT, got: ${value}`);
+  }
+  return {
+    width: Number(match[1]),
+    height: Number(match[2]),
+  };
+}
+
 function printUsage() {
   console.log(`
 Usage:
   node paperclip/scripts/smoke/theft-mvp-route-smoke.mjs
   node paperclip/scripts/smoke/theft-mvp-route-smoke.mjs --company-prefix THE --screenshot-dir /private/tmp/theft-mvp
   node paperclip/scripts/smoke/theft-mvp-route-smoke.mjs --mobile --company-prefix THE
+  node paperclip/scripts/smoke/theft-mvp-route-smoke.mjs --short --company-prefix THE
+  node paperclip/scripts/smoke/theft-mvp-route-smoke.mjs --viewport 1024x620 --company-prefix THE
   node paperclip/scripts/smoke/theft-mvp-route-smoke.mjs --chrome-path /Applications/Google\\ Chrome.app/Contents/MacOS/Google\\ Chrome
 
 Checks the already-running Paperclip host for the THEFT MVP product path:
 Mission Control, Tasks, Tech Tree, Library, Department Workspace, and System.
 This is a zero-quota browser smoke. It does not invoke agents or LLM adapters.
 Uses Playwright bundled Chromium by default. Pass --chrome-path only to force a system browser.
+The --short preset verifies compact desktop height without horizontal overflow or page-shell scroll regressions.
 `);
 }
 
@@ -132,7 +157,10 @@ function safeScreenshotName(routeName) {
 async function checkRoute({ page, baseUrl, companyPrefix, route, screenshotDir }) {
   const url = routeUrl(baseUrl, companyPrefix, route.path);
   await page.goto(url, { waitUntil: "domcontentloaded", timeout: 15_000 });
-  await page.waitForTimeout(2_000);
+  await page.waitForFunction(() => document.body.innerText.trim().length >= 20, null, {
+    timeout: 10_000,
+  });
+  await page.waitForTimeout(3_000);
 
   const result = await page.evaluate((expectedText) => {
     const bodyText = document.body.innerText;
@@ -143,11 +171,26 @@ async function checkRoute({ page, baseUrl, companyPrefix, route, screenshotDir }
       clientWidth: root.clientWidth,
       scrollWidth: root.scrollWidth,
       missingText: expectedText.filter((text) => !bodyText.toLowerCase().includes(text.toLowerCase())),
+      theftViewportIssue: getTheftViewportIssue(),
       rightOverflowCount: [...document.querySelectorAll("body *")].filter((element) => {
         const rect = element.getBoundingClientRect();
         return rect.right > root.clientWidth + 2;
       }).length,
     };
+
+    function getTheftViewportIssue() {
+      const viewport = document.querySelector('[data-slot="theft-page-viewport"]');
+      if (!viewport) return null;
+      const style = window.getComputedStyle(viewport);
+      const rect = viewport.getBoundingClientRect();
+      if (!style.overflowY.includes("auto") && !style.overflowY.includes("scroll")) {
+        return `THEFT page viewport is not scrollable: overflow-y=${style.overflowY}`;
+      }
+      if (rect.height > window.innerHeight + 2) {
+        return `THEFT page viewport exceeds window height: ${rect.height} > ${window.innerHeight}`;
+      }
+      return null;
+    }
   }, route.expectedText);
 
   if (result.bodyText.trim().length < 20) {
@@ -161,6 +204,9 @@ async function checkRoute({ page, baseUrl, companyPrefix, route, screenshotDir }
   }
   if (result.rightOverflowCount > 0) {
     throw new Error(`${route.name} has ${result.rightOverflowCount} right-edge overflow element(s).`);
+  }
+  if (result.theftViewportIssue) {
+    throw new Error(`${route.name} has a page-shell scroll issue: ${result.theftViewportIssue}`);
   }
 
   if (screenshotDir) {

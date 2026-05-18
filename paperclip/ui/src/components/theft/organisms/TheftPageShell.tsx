@@ -54,7 +54,10 @@ const TheftPageShell = React.forwardRef<HTMLElement, TheftPageShellProps>(
             />
           </div>
         ) : null}
-        <div className={cn("min-h-0 flex-1 overflow-y-auto overscroll-contain", viewportClassName)}>
+        <div
+          data-slot="theft-page-viewport"
+          className={cn("min-h-0 flex-1 overflow-y-auto overscroll-contain", viewportClassName)}
+        >
           <div
             className={cn(
               "mx-auto grid w-full max-w-screen-2xl gap-6 px-6 py-6",

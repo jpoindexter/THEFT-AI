@@ -88,6 +88,7 @@ Current local modularization checkpoint:
 - Extracted plugin slot registry, module loader, module shims, discovery hook, slot mount, and outlet rendering so `plugins/slots.tsx` now fits the 300-line guardrail.
 - Moved active route scroll/content wrapper contracts into `TheftPageShell` slots so Dashboard, Tasks, Library, and Tech Tree use shared template composition instead of page-local wrapper divs.
 - Replaced remaining active-route arbitrary Tech Tree detail sizing and label typography with THEFT token utilities.
+- Added `pnpm verify:active-ui`, compact viewport route smoke support, and THEFT page-shell viewport assertions for active product screens.
 - Moved the issue-chat composer safe-area dock value into a semantic CSS utility.
 
 Latest verification for the active modularization slices:
@@ -119,6 +120,7 @@ Latest verification for the active modularization slices:
 - Focused plugin slot consumer Vitest passed after the slots split: 35 tests across 7 files.
 - Focused active route shell Vitest passed after the template scroll-contract cleanup: 24 tests across Dashboard, Issues, GoalDetail, library-items, and Layout.
 - Focused active route token cleanup Vitest passed: 24 tests across Dashboard, Issues, GoalDetail, library-items, and Layout.
+- `THEFT_CHROME_PATH='/Applications/Google Chrome.app/Contents/MacOS/Google Chrome' pnpm verify:active-ui` passed: design gate plus desktop, mobile, and short-height MVP route smokes.
 - Focused Vitest for issue chat, issue documents, and issue detail passed: 78 tests across 4 files.
 - Focused IssueChatThread Vitest passed: 61 tests across 2 files.
 - Focused onboarding utility Vitest passed: 21 tests across 5 files.
