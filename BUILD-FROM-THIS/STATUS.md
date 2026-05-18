@@ -144,6 +144,11 @@ T119 is now in progress after the active product route launch gate passed. First
   - `LiveUpdatesProvider.tsx` is down from 1025 lines to 159 lines after moving live-event handling, invalidation, visible-issue routing, comment hydration, toast builders, toast gating, and socket cleanup under `context/live-updates/`.
   - Every touched live-updates module fits under the 300-line guardrail; focused live-updates scanner reports zero findings.
   - Focused `LiveUpdatesProvider` Vitest passed 14 tests, typecheck passed, active-route design gate passed, and repo-wide scanner remains at 503 findings because this slice reduced module size rather than drift count.
+- T120 continued with the next small/medium runtime pages:
+  - `Costs.tsx` is down from 1111 lines to 51 lines after moving the runtime usage controller, header, overview, budget, provider/biller, finance, and model helpers under `pages/costs/`.
+  - `DesignGuide.tsx` is down from 1367 lines to 28 lines after moving guide sections and primitives under `pages/design-guide/`.
+  - Every touched costs/design-guide module fits under the 300-line guardrail; focused scanner reports zero findings; typecheck, active-route design gate, and `git diff --check` passed.
+  - Repo-wide scanner is down to 487 findings. Remaining top oversized source modules are `AgentDetail.tsx`, `Inbox.tsx`, and `index.css`.
 
 The Paperclip app is genuinely large. The remaining drag is mostly not missing MVP capability; it is oversized route/organism code inherited from the Paperclip host plus the THEFT UX migration. The active-route design-system gate currently passes with zero unallowed findings, but several files still exceed the maintainability guardrail and need continued modularization.
 
