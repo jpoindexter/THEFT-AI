@@ -207,6 +207,52 @@ vi.mock("@/components/ui/toggle-switch", () => ({
   ),
 }));
 
+vi.mock("@/components/ui/select", async () => {
+  const React = await import("react");
+  const SelectContext = React.createContext<{
+    value: string;
+    onValueChange: (value: string) => void;
+  } | null>(null);
+
+  return {
+    Select: ({
+      children,
+      value,
+      onValueChange,
+    }: {
+      children: ReactNode;
+      value: string;
+      onValueChange: (value: string) => void;
+    }) => (
+      <SelectContext.Provider value={{ value, onValueChange }}>
+        <div>{children}</div>
+      </SelectContext.Provider>
+    ),
+    SelectTrigger: ({ children }: { children: ReactNode }) => (
+      <button type="button">{children}</button>
+    ),
+    SelectValue: ({ placeholder }: { placeholder?: string }) => <span>{placeholder}</span>,
+    SelectContent: ({ children }: { children: ReactNode }) => {
+      const context = React.useContext(SelectContext);
+      return (
+        <select
+          value={context?.value ?? ""}
+          onChange={(event) => context?.onValueChange(event.target.value)}
+        >
+          {children}
+        </select>
+      );
+    },
+    SelectItem: ({
+      children,
+      value,
+    }: {
+      children: ReactNode;
+      value: string;
+    }) => <option value={value}>{children}</option>,
+  };
+});
+
 vi.mock("@/components/ui/popover", () => ({
   Popover: ({ children }: { children: ReactNode }) => <div>{children}</div>,
   PopoverTrigger: ({ children }: { children: ReactNode }) => <>{children}</>,
@@ -668,9 +714,9 @@ describe("NewIssueDialog", () => {
     await flush();
 
     const dialogContent = Array.from(container.querySelectorAll("div")).find((element) =>
-      typeof element.className === "string" && element.className.includes("max-h-[calc(100dvh-2rem)]"),
+      typeof element.className === "string" && element.className.includes("max-h-dvh"),
     );
-    expect(dialogContent?.className).toContain("h-[calc(100dvh-2rem)]");
+    expect(dialogContent?.className).toContain("h-dvh");
     expect(dialogContent?.className).toContain("overflow-hidden");
 
     const titleInput = container.querySelector('textarea[placeholder="Issue title"]');

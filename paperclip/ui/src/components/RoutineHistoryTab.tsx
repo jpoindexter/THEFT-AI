@@ -1,37 +1,22 @@
 import { useEffect, useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { History as HistoryIcon, RotateCcw, Search } from "lucide-react";
-import type {
-  Routine,
-  RoutineRevision,
-  RoutineRevisionSnapshotTriggerV1,
-  RoutineVariable,
-} from "@paperclipai/shared";
+import { History as HistoryIcon } from "lucide-react";
+import type { Routine } from "@paperclipai/shared";
 import {
   routinesApi,
   type RestoreRoutineRevisionResponse,
 } from "../api/routines";
 import { ApiError } from "../api/client";
 import { queryKeys } from "../lib/queryKeys";
-import { relativeTime } from "../lib/utils";
 import { useToastActions } from "../context/ToastContext";
 import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "./EmptyState";
-import { MarkdownBody } from "./MarkdownBody";
 import { ConflictBanner, HistoricalPreviewBanner } from "./routine-history-tab/RoutineHistoryBanners";
+import { RestoreRoutineRevisionDialog } from "./routine-history-tab/RestoreRoutineRevisionDialog";
 import { RoutineRevisionDiffModal } from "./routine-history-tab/RoutineRevisionDiffModal";
 import { RoutineRevisionList } from "./routine-history-tab/RoutineRevisionList";
+import { RoutineRevisionPreview } from "./routine-history-tab/RoutineRevisionPreview";
 import type {
   RoutineHistoryAgentLookup,
   RoutineHistoryDirtyFieldDescriptor,
@@ -248,7 +233,7 @@ export function RoutineHistoryTab({
                   pending={restoreMutation.isPending}
                 />
               )}
-              <RevisionPreview
+              <RoutineRevisionPreview
                 revision={selectedRevision}
                 currentRevision={currentRevision}
                 isHistorical={isHistoricalSelected}
@@ -265,19 +250,15 @@ export function RoutineHistoryTab({
       </div>
 
       {selectedRevision && currentRevision && (
-        <RestoreConfirmDialog
+        <RestoreRoutineRevisionDialog
           open={confirmOpen}
           onOpenChange={setConfirmOpen}
           target={selectedRevision}
-          currentRevisionNumber={currentRevision.revisionNumber}
+          current={currentRevision}
           changeSummary={restoreSummary}
           onChangeSummaryChange={setRestoreSummary}
           onConfirm={confirmRestore}
           pending={restoreMutation.isPending}
-          recreatedWebhookLabels={collectWebhookTriggerDifferences(
-            selectedRevision,
-            currentRevision,
-          )}
         />
       )}
 
@@ -300,314 +281,6 @@ export function RoutineHistoryTab({
       )}
     </div>
   );
-}
-
-function RevisionPreview({
-  revision,
-  currentRevision,
-  isHistorical,
-  agents,
-  projects,
-  onCompare,
-  onRestore,
-  restorePending,
-  highlighted,
-}: {
-  revision: RoutineRevision;
-  currentRevision: RoutineRevision | null;
-  isHistorical: boolean;
-  agents: RoutineHistoryAgentLookup;
-  projects: RoutineHistoryProjectLookup;
-  onCompare: () => void;
-  onRestore: () => void;
-  restorePending: boolean;
-  highlighted: boolean;
-}) {
-  const snapshot = revision.snapshot.routine;
-  const triggers = revision.snapshot.triggers;
-  const currentSnapshot = currentRevision?.snapshot.routine ?? null;
-  const restoreLabel = isHistorical ? "Restore this revision" : "Restore this revision";
-  const cardWrapper = `rounded-md border transition-colors duration-1000 ${
-    highlighted ? "border-emerald-500/40 bg-emerald-500/10" : "border-border"
-  }`;
-
-  const fieldRows: Array<{ key: string; label: string; value: string; differs: boolean }> = [
-    {
-      key: "title",
-      label: "Title",
-      value: snapshot.title,
-      differs: !!currentSnapshot && currentSnapshot.title !== snapshot.title,
-    },
-    {
-      key: "priority",
-      label: "Priority",
-      value: snapshot.priority,
-      differs: !!currentSnapshot && currentSnapshot.priority !== snapshot.priority,
-    },
-    {
-      key: "status",
-      label: "Status",
-      value: snapshot.status,
-      differs: !!currentSnapshot && currentSnapshot.status !== snapshot.status,
-    },
-    {
-      key: "assigneeAgentId",
-      label: "Default agent",
-      value: resolveAgentName(snapshot.assigneeAgentId, agents),
-      differs: !!currentSnapshot && currentSnapshot.assigneeAgentId !== snapshot.assigneeAgentId,
-    },
-    {
-      key: "projectId",
-      label: "Project",
-      value: resolveProjectName(snapshot.projectId, projects),
-      differs: !!currentSnapshot && currentSnapshot.projectId !== snapshot.projectId,
-    },
-    {
-      key: "concurrencyPolicy",
-      label: "Concurrency",
-      value: snapshot.concurrencyPolicy.replaceAll("_", " "),
-      differs: !!currentSnapshot && currentSnapshot.concurrencyPolicy !== snapshot.concurrencyPolicy,
-    },
-    {
-      key: "catchUpPolicy",
-      label: "Catch-up",
-      value: snapshot.catchUpPolicy.replaceAll("_", " "),
-      differs: !!currentSnapshot && currentSnapshot.catchUpPolicy !== snapshot.catchUpPolicy,
-    },
-  ];
-
-  return (
-    <div className="space-y-4">
-      <header className={`${cardWrapper} p-4 space-y-2`}>
-        <div className="flex flex-wrap items-start justify-between gap-3">
-          <div className="space-y-1 min-w-0">
-            <p className="text-sm font-medium">rev {revision.revisionNumber}</p>
-            <p className="text-xs text-muted-foreground truncate">
-              Saved {relativeTime(revision.createdAt)} by {getActorLabel(revision)}
-              {revision.changeSummary ? ` · ${revision.changeSummary}` : ""}
-            </p>
-          </div>
-          <div className="flex flex-wrap items-center gap-2">
-            <Button variant="outline" size="sm" onClick={onCompare}>
-              <Search className="mr-1.5 h-3.5 w-3.5" />
-              Compare with current
-            </Button>
-            <Button
-              size="sm"
-              onClick={onRestore}
-              disabled={!isHistorical || restorePending}
-              aria-label={restoreLabel}
-              className={!isHistorical ? "text-muted-foreground/60" : undefined}
-            >
-              <RotateCcw className="mr-1.5 h-3.5 w-3.5" />
-              {restoreLabel}
-            </Button>
-          </div>
-        </div>
-      </header>
-
-      <div className={`${cardWrapper} p-3`}>
-        <p className="theft-label-compact pb-2 text-muted-foreground">
-          Structured fields
-        </p>
-        <div className="grid gap-3 md:grid-cols-2 divide-y md:divide-y-0 divide-border">
-          {fieldRows.map((row) => (
-            <div key={row.key} className="space-y-1 p-2">
-              <p className="theft-label-nano text-muted-foreground">{row.label}</p>
-              <p className="text-sm">
-                {row.value || <span className="text-muted-foreground">—</span>}
-                {row.differs && (
-                  <span className="theft-label-nano ml-2 rounded-full border border-amber-500/40 bg-amber-500/10 px-1.5 text-amber-200">
-                    differs from current
-                  </span>
-                )}
-              </p>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      <div className={`${cardWrapper} p-3 space-y-2`}>
-        <p className="theft-label-compact text-muted-foreground">
-          Description
-        </p>
-        <div className="rounded-md bg-background/40 p-3 text-sm leading-7">
-          {snapshot.description ? (
-            <MarkdownBody>{snapshot.description}</MarkdownBody>
-          ) : (
-            <span className="text-muted-foreground">No description</span>
-          )}
-        </div>
-      </div>
-
-      <div className={`${cardWrapper} p-3 space-y-2`}>
-        <p className="theft-label-compact text-muted-foreground">
-          Triggers ({triggers.length})
-        </p>
-        {triggers.length === 0 ? (
-          <p className="text-sm text-muted-foreground">No triggers in this revision.</p>
-        ) : (
-          <ul className="divide-y divide-border">
-            {triggers.map((trigger) => (
-              <li key={trigger.id} className="py-2 flex flex-wrap items-center gap-2 text-sm">
-                <span className="theft-label-nano rounded-full border border-border px-2 py-0.5 text-muted-foreground">
-                  {trigger.kind}
-                </span>
-                <span className="font-medium">{trigger.label ?? trigger.kind}</span>
-                <span className="text-xs text-muted-foreground">
-                  {summarizeTriggerSnapshot(trigger)}
-                </span>
-                <span
-                  className={`ml-auto text-xs ${trigger.enabled ? "text-emerald-400" : "text-muted-foreground"}`}
-                >
-                  {trigger.enabled ? "enabled" : "disabled"}
-                </span>
-              </li>
-            ))}
-          </ul>
-        )}
-        <p className="text-xs text-muted-foreground">
-          Webhook secrets are not stored in revisions. If a restored webhook trigger needs re-creation,
-          Paperclip mints fresh secret material at restore time.
-        </p>
-      </div>
-
-      {snapshot.variables.length > 0 && (
-        <div className={`${cardWrapper} p-3 space-y-2`}>
-          <p className="theft-label-compact text-muted-foreground">
-            Variables ({snapshot.variables.length})
-          </p>
-          <ul className="divide-y divide-border">
-            {snapshot.variables.map((variable) => (
-              <li key={variable.name} className="py-2 flex items-center justify-between text-sm">
-                <span className="font-mono text-xs">{variable.name}</span>
-                <span className="text-xs text-muted-foreground">
-                  default: {formatVariableDefault(variable)}
-                </span>
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
-    </div>
-  );
-}
-
-function RestoreConfirmDialog({
-  open,
-  onOpenChange,
-  target,
-  currentRevisionNumber,
-  changeSummary,
-  onChangeSummaryChange,
-  onConfirm,
-  pending,
-  recreatedWebhookLabels,
-}: {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  target: RoutineRevision;
-  currentRevisionNumber: number;
-  changeSummary: string;
-  onChangeSummaryChange: (value: string) => void;
-  onConfirm: () => void;
-  pending: boolean;
-  recreatedWebhookLabels: string[];
-}) {
-  const newRevisionNumber = currentRevisionNumber + 1;
-  return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md">
-        <DialogHeader>
-          <DialogTitle>Restore revision {target.revisionNumber}?</DialogTitle>
-          <DialogDescription>
-            This creates a new revision {newRevisionNumber} with the same content as revision{" "}
-            {target.revisionNumber}. Revisions {target.revisionNumber}–{currentRevisionNumber} stay
-            in history and are not modified.
-          </DialogDescription>
-        </DialogHeader>
-        <ul className="space-y-2 text-sm">
-          <li className="flex items-start gap-2">
-            <span className="mt-1 inline-block h-1.5 w-1.5 rounded-full bg-emerald-400" />
-            Routine field values, variables, and schedule cron will revert.
-          </li>
-          <li className="flex items-start gap-2">
-            <span className="mt-1 inline-block h-1.5 w-1.5 rounded-full bg-emerald-400" />
-            Previous run history is preserved.
-          </li>
-          {recreatedWebhookLabels.map((label) => (
-            <li key={label} className="flex items-start gap-2 text-amber-200">
-              <span className="mt-1 inline-block h-1.5 w-1.5 rounded-full bg-amber-400" />
-              The webhook trigger {label} will be recreated with a new URL and secret. Paperclip will
-              show the secret once after restore — copy it before closing.
-            </li>
-          ))}
-        </ul>
-        <div className="space-y-1.5">
-          <Label htmlFor="restore-change-summary" className="text-xs">
-            Change summary (optional)
-          </Label>
-          <Input
-            id="restore-change-summary"
-            value={changeSummary}
-            placeholder="Why are you restoring? Visible in history."
-            onChange={(event) => onChangeSummaryChange(event.target.value)}
-          />
-        </div>
-        <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)} disabled={pending}>
-            Cancel
-          </Button>
-          <Button onClick={onConfirm} disabled={pending}>
-            <RotateCcw className="mr-1.5 h-3.5 w-3.5" />
-            {pending ? "Restoring…" : `Restore as revision ${newRevisionNumber}`}
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
-  );
-}
-
-function getActorLabel(revision: RoutineRevision): string {
-  if (revision.createdByUserId) return "board";
-  if (revision.createdByAgentId) return "agent";
-  return "system";
-}
-
-function resolveAgentName(agentId: string | null, lookup: RoutineHistoryAgentLookup) {
-  if (!agentId) return "Unassigned";
-  return lookup.get(agentId)?.name ?? agentId;
-}
-
-function resolveProjectName(projectId: string | null, lookup: RoutineHistoryProjectLookup) {
-  if (!projectId) return "No project";
-  return lookup.get(projectId)?.name ?? projectId;
-}
-
-function summarizeTriggerSnapshot(trigger: RoutineRevisionSnapshotTriggerV1): string {
-  if (trigger.kind === "schedule") {
-    return [trigger.cronExpression, trigger.timezone].filter(Boolean).join(" · ");
-  }
-  if (trigger.kind === "webhook") {
-    const replay = trigger.replayWindowSec != null ? `replay ${trigger.replayWindowSec}s` : "";
-    return [trigger.signingMode, replay].filter(Boolean).join(" · ");
-  }
-  return "API";
-}
-
-function formatVariableDefault(variable: RoutineVariable): string {
-  if (variable.defaultValue == null) return "—";
-  return String(variable.defaultValue);
-}
-
-function collectWebhookTriggerDifferences(
-  target: RoutineRevision,
-  current: RoutineRevision,
-): string[] {
-  const currentIds = new Set(current.snapshot.triggers.map((t) => t.id));
-  return target.snapshot.triggers
-    .filter((trigger) => trigger.kind === "webhook" && !currentIds.has(trigger.id))
-    .map((trigger) => trigger.label ?? "webhook");
 }
 
 export function isUpdateConflictError(error: unknown): error is ApiError {

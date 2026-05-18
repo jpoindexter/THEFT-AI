@@ -71,7 +71,11 @@ T119 is now in progress after the active product route launch gate passed. First
 - `AgentDetail.tsx` continued page-level cleanup with configuration revision controls moved into `pages/agent-detail/ConfigurationRevisionsSection.tsx`; the parent is down to 3433 lines and focused findings dropped to 25.
 - `CompanyImport.tsx` continued page-level cleanup with preview/results workspace rendering moved into `pages/company-import/ImportPreviewWorkspace.tsx`; the parent is down to 778 lines and focused scanner now reports zero findings.
 - `RoutineDetail.tsx` now has zero focused scanner findings after replacing title/native controls and project swatch drift with shared primitives/token classes.
-- Repo-wide design drift count is down to 1082 findings after the first fifty-three T119 slices.
+- `RoutineHistoryTab.tsx` now fits under the 300-line guardrail after moving revision preview, restore confirmation, and history formatting into guarded `routine-history-tab/` modules. Focused scanner reports zero findings.
+- `NewIssueDialog.tsx` continued its structural split with draft/local text persistence moved into `new-issue-dialog/useIssueDraftState.ts`; the parent is down to 978 lines and focused scanner reports zero findings.
+- `AgentDetail.tsx` continued page-level cleanup with skills tab state/rendering moved into guarded `pages/agent-detail/AgentSkillsTab.tsx` and `AgentSkillRows.tsx`; the parent is down to 3009 lines.
+- `CompanyImport.tsx` continued page-level cleanup with preview result rendering and import helper logic moved into guarded `pages/company-import/` modules; the parent is down to 557 lines and focused scanner remains clean.
+- T119 has reached a clean checkpoint sufficient to move the roadmap into T120: active product route gate is still green, focused tests for the touched dialog pass, and repo-wide drift is down to 1081 findings. Remaining drift is mostly runtime/admin/page-level debt to handle through the T120 migration sequence rather than unbounded ad hoc cleanup.
 
 The Paperclip app is genuinely large. The remaining drag is mostly not missing MVP capability; it is oversized route/organism code inherited from the Paperclip host plus the THEFT UX migration. The active-route design-system gate currently passes with zero unallowed findings, but several files still exceed the maintainability guardrail and need continued modularization.
 

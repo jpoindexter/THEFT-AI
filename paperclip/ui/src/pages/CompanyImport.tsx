@@ -2,7 +2,6 @@ import { useEffect, useMemo, useState, type ChangeEvent } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type {
   CompanyPortabilityCollisionStrategy,
-  CompanyPortabilityFileEntry,
   CompanyPortabilityPreviewResult,
   CompanyPortabilitySource,
   CompanyPortabilityAdapterOverride,
@@ -13,21 +12,26 @@ import { useToastActions } from "../context/ToastContext";
 import { authApi } from "../api/auth";
 import { companiesApi } from "../api/companies";
 import { agentsApi } from "../api/agents";
-import { sidebarPreferencesApi } from "../api/sidebarPreferences";
 import { queryKeys } from "../lib/queryKeys";
-import { getAgentOrderStorageKey, writeAgentOrder } from "../lib/agent-order";
 import { EmptyState } from "../components/EmptyState";
 import { Download } from "lucide-react";
 import { defaultCreateValues } from "../components/agent-config-defaults";
 import { getUIAdapter } from "../adapters";
-import { ImportPreviewWorkspace } from "./company-import/ImportPreviewWorkspace";
+import { ImportPreviewResults } from "./company-import/ImportPreviewResults";
 import { ImportSourceSection } from "./company-import/ImportSourceSection";
 import {
-  AdapterPickerList,
-  ConflictResolutionList,
   type AdapterPickerItem,
-  type ConflictItem,
 } from "./company-import/ImportReviewSetup";
+import {
+  applyImportedSidebarOrder,
+  buildActionMap,
+  buildConflictList,
+  deriveSourcePrefix,
+  ensureMarkdownPath,
+  prefixedName,
+  readLocalPackageZip,
+  type LocalCompanyImportPackage,
+} from "./company-import/importPreviewModel";
 import type { CreateConfigValues } from "@paperclipai/adapter-utils";
 import {
   type FileTreeNode,
@@ -35,194 +39,6 @@ import {
   countFiles,
   collectAllPaths,
 } from "../components/FileTree";
-import { readZipArchive } from "../lib/zip";
-
-// ── Import-specific helpers ───────────────────────────────────────────
-
-/** Build a map from file path → planned action (create/update/skip) using the manifest + plan */
-function buildActionMap(preview: CompanyPortabilityPreviewResult): Map<string, string> {
-  const map = new Map<string, string>();
-  const manifest = preview.manifest;
-
-  for (const ap of preview.plan.agentPlans) {
-    const agent = manifest.agents.find((a) => a.slug === ap.slug);
-    if (agent) {
-      const path = ensureMarkdownPath(agent.path);
-      map.set(path, ap.action);
-    }
-  }
-
-  for (const pp of preview.plan.projectPlans) {
-    const project = manifest.projects.find((p) => p.slug === pp.slug);
-    if (project) {
-      const path = ensureMarkdownPath(project.path);
-      map.set(path, pp.action);
-    }
-  }
-
-  for (const ip of preview.plan.issuePlans) {
-    const issue = manifest.issues.find((i) => i.slug === ip.slug);
-    if (issue) {
-      const path = ensureMarkdownPath(issue.path);
-      map.set(path, ip.action);
-    }
-  }
-
-  for (const skill of manifest.skills) {
-    const path = ensureMarkdownPath(skill.path);
-    map.set(path, "create");
-    // Also mark skill file inventory
-    for (const file of skill.fileInventory) {
-      if (preview.files[file.path]) {
-        map.set(file.path, "create");
-      }
-    }
-  }
-
-  // Company file
-  if (manifest.company) {
-    const path = ensureMarkdownPath(manifest.company.path);
-    map.set(path, preview.plan.companyAction === "none" ? "skip" : preview.plan.companyAction);
-  }
-
-  return map;
-}
-
-function ensureMarkdownPath(p: string): string {
-  return p.endsWith(".md") ? p : `${p}.md`;
-}
-
-function buildConflictList(
-  preview: CompanyPortabilityPreviewResult,
-): ConflictItem[] {
-  const conflicts: ConflictItem[] = [];
-  const manifest = preview.manifest;
-
-  // Agents with collisions
-  for (const ap of preview.plan.agentPlans) {
-    if (ap.existingAgentId) {
-      const agent = manifest.agents.find((a) => a.slug === ap.slug);
-      conflicts.push({
-        slug: ap.slug,
-        kind: "agent",
-        originalName: agent?.name ?? ap.slug,
-        plannedName: ap.plannedName,
-        filePath: agent ? ensureMarkdownPath(agent.path) : null,
-        action: ap.action === "update" ? "update" : "rename",
-      });
-    }
-  }
-
-  // Projects with collisions
-  for (const pp of preview.plan.projectPlans) {
-    if (pp.existingProjectId) {
-      const project = manifest.projects.find((p) => p.slug === pp.slug);
-      conflicts.push({
-        slug: pp.slug,
-        kind: "project",
-        originalName: project?.name ?? pp.slug,
-        plannedName: pp.plannedName,
-        filePath: project ? ensureMarkdownPath(project.path) : null,
-        action: pp.action === "update" ? "update" : "rename",
-      });
-    }
-  }
-
-  return conflicts;
-}
-
-/** Extract a prefix from the import source URL or uploaded zip package name */
-function deriveSourcePrefix(
-  sourceMode: string,
-  importUrl: string,
-  localPackageName: string | null,
-  localRootPath: string | null,
-): string | null {
-  if (sourceMode === "local") {
-    if (localRootPath) return localRootPath.split("/").pop() ?? null;
-    if (!localPackageName) return null;
-    return localPackageName.replace(/\.zip$/i, "") || null;
-  }
-  if (sourceMode === "github") {
-    const url = importUrl.trim();
-    if (!url) return null;
-    try {
-      const pathname = new URL(url.startsWith("http") ? url : `https://${url}`).pathname;
-      // For github URLs like /owner/repo/tree/branch/path - take last segment
-      const segments = pathname.split("/").filter(Boolean);
-      return segments.length > 0 ? segments[segments.length - 1] : null;
-    } catch {
-      return null;
-    }
-  }
-  return null;
-}
-
-/** Generate a prefix-based rename: e.g. "gstack" + "CEO" → "gstack-CEO" */
-function prefixedName(prefix: string | null, originalName: string): string {
-  if (!prefix) return originalName;
-  return `${prefix}-${originalName}`;
-}
-
-async function applyImportedSidebarOrder(
-  preview: CompanyPortabilityPreviewResult | null,
-  result: {
-    company: { id: string };
-    agents: Array<{ slug: string; id: string | null }>;
-    projects: Array<{ slug: string; id: string | null }>;
-  },
-  userId: string | null | undefined,
-) {
-  const sidebar = preview?.manifest.sidebar;
-  if (!sidebar) return;
-  if (!userId?.trim()) return;
-
-  const agentIdBySlug = new Map(
-    result.agents
-      .filter((agent): agent is { slug: string; id: string } => typeof agent.id === "string" && agent.id.length > 0)
-      .map((agent) => [agent.slug, agent.id]),
-  );
-  const projectIdBySlug = new Map(
-    result.projects
-      .filter((project): project is { slug: string; id: string } => typeof project.id === "string" && project.id.length > 0)
-      .map((project) => [project.slug, project.id]),
-  );
-
-  const orderedAgentIds = sidebar.agents
-    .map((slug) => agentIdBySlug.get(slug))
-    .filter((id): id is string => Boolean(id));
-  const orderedProjectIds = sidebar.projects
-    .map((slug) => projectIdBySlug.get(slug))
-    .filter((id): id is string => Boolean(id));
-
-  if (orderedAgentIds.length > 0) {
-    writeAgentOrder(getAgentOrderStorageKey(result.company.id, userId), orderedAgentIds);
-  }
-  if (orderedProjectIds.length > 0) {
-    await sidebarPreferencesApi.updateProjectOrder(result.company.id, { orderedIds: orderedProjectIds });
-  }
-}
-
-// ── Helpers ───────────────────────────────────────────────────────────
-
-async function readLocalPackageZip(file: File): Promise<{
-  name: string;
-  rootPath: string | null;
-  files: Record<string, CompanyPortabilityFileEntry>;
-}> {
-  if (!/\.zip$/i.test(file.name)) {
-    throw new Error("Select a .zip company package.");
-  }
-  const archive = await readZipArchive(await file.arrayBuffer());
-  if (Object.keys(archive.files).length === 0) {
-    throw new Error("No package files were found in the selected zip archive.");
-  }
-  return {
-    name: file.name,
-    rootPath: archive.rootPath,
-    files: archive.files,
-  };
-}
 
 // ── Main page ─────────────────────────────────────────────────────────
 
@@ -244,11 +60,7 @@ export function CompanyImport() {
   // Source state
   const [sourceMode, setSourceMode] = useState<"github" | "local">("github");
   const [importUrl, setImportUrl] = useState("");
-  const [localPackage, setLocalPackage] = useState<{
-    name: string;
-    rootPath: string | null;
-    files: Record<string, CompanyPortabilityFileEntry>;
-  } | null>(null);
+  const [localPackage, setLocalPackage] = useState<LocalCompanyImportPackage | null>(null);
 
   // Target state
   const [targetMode, setTargetMode] = useState<"existing" | "new">("new");
@@ -706,72 +518,39 @@ export function CompanyImport() {
 
       {/* Preview results */}
       {importPreview && (
-        <>
-          {/* Sticky import action bar */}
-          <div className="sticky top-0 z-10 border-b border-border bg-background px-5 py-3">
-            <div className="flex flex-wrap items-center gap-4 text-sm">
-              <span className="font-medium">
-                Import preview
-              </span>
-              <span className="text-muted-foreground">
-                {selectedCount} / {totalFiles} file{totalFiles === 1 ? "" : "s"} selected
-              </span>
-              {conflicts.length > 0 && (
-                <span className="text-amber-500">
-                  {conflicts.length} conflict{conflicts.length === 1 ? "" : "s"}
-                </span>
-              )}
-              {importPreview.errors.length > 0 && (
-                <span className="text-destructive">
-                  {importPreview.errors.length} error{importPreview.errors.length === 1 ? "" : "s"}
-                </span>
-              )}
-            </div>
-          </div>
-
-          {/* Conflict resolution list */}
-          <ConflictResolutionList
-            conflicts={conflicts}
-            nameOverrides={nameOverrides}
-            skippedSlugs={skippedSlugs}
-            confirmedSlugs={confirmedSlugs}
-            onRename={handleConflictRename}
-            onToggleSkip={handleConflictToggleSkip}
-            onToggleConfirm={handleConflictToggleConfirm}
-          />
-
-          {/* Adapter picker list */}
-          <AdapterPickerList
-            agents={adapterAgents}
-            adapterOverrides={adapterOverrides}
-            expandedSlugs={adapterExpandedSlugs}
-            configValues={adapterConfigValues}
-            onChangeAdapter={handleAdapterChange}
-            onToggleExpand={handleAdapterToggleExpand}
-            onChangeConfig={handleAdapterConfigChange}
-          />
-
-          <ImportPreviewWorkspace
-            importPreview={importPreview}
-            tree={tree}
-            selectedFile={selectedFile}
-            expandedDirs={expandedDirs}
-            checkedFiles={checkedFiles}
-            selectedCount={selectedCount}
-            totalFiles={totalFiles}
-            conflictCount={conflicts.length}
-            hasErrors={hasErrors}
-            isImporting={importMutation.isPending}
-            selectedAction={selectedAction}
-            renamedTo={selectedFile ? (renameMap.get(selectedFile) ?? null) : null}
-            previewContent={previewContent}
-            renameMap={renameMap}
-            onToggleDir={handleToggleDir}
-            onSelectFile={setSelectedFile}
-            onToggleCheck={handleToggleCheck}
-            onImport={() => importMutation.mutate()}
-          />
-        </>
+        <ImportPreviewResults
+          importPreview={importPreview}
+          tree={tree}
+          selectedFile={selectedFile}
+          expandedDirs={expandedDirs}
+          checkedFiles={checkedFiles}
+          selectedCount={selectedCount}
+          totalFiles={totalFiles}
+          conflicts={conflicts}
+          hasErrors={hasErrors}
+          isImporting={importMutation.isPending}
+          selectedAction={selectedAction}
+          renamedTo={selectedFile ? (renameMap.get(selectedFile) ?? null) : null}
+          previewContent={previewContent}
+          renameMap={renameMap}
+          nameOverrides={nameOverrides}
+          skippedSlugs={skippedSlugs}
+          confirmedSlugs={confirmedSlugs}
+          adapterAgents={adapterAgents}
+          adapterOverrides={adapterOverrides}
+          adapterExpandedSlugs={adapterExpandedSlugs}
+          adapterConfigValues={adapterConfigValues}
+          onConflictRename={handleConflictRename}
+          onConflictToggleSkip={handleConflictToggleSkip}
+          onConflictToggleConfirm={handleConflictToggleConfirm}
+          onAdapterChange={handleAdapterChange}
+          onAdapterToggleExpand={handleAdapterToggleExpand}
+          onAdapterConfigChange={handleAdapterConfigChange}
+          onToggleDir={handleToggleDir}
+          onSelectFile={setSelectedFile}
+          onToggleCheck={handleToggleCheck}
+          onImport={() => importMutation.mutate()}
+        />
       )}
     </div>
   );

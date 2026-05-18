@@ -43,31 +43,12 @@ import { NewIssueDescriptionSection } from "./new-issue-dialog/NewIssueDescripti
 import { NewIssueTitleSection } from "./new-issue-dialog/NewIssueTitleSection";
 import { NewIssueParentIssueNotice } from "./new-issue-dialog/NewIssueParentIssueNotice";
 import { useStagedIssueFiles, type StagedIssueFile } from "./new-issue-dialog/useStagedIssueFiles";
-
-const DRAFT_KEY = "paperclip:issue-draft";
-const DEBOUNCE_MS = 800;
-
-
-interface IssueDraft {
-  title: string;
-  description: string;
-  status: string;
-  priority: string;
-  assigneeValue: string;
-  reviewerValue: string;
-  approverValue: string;
-  assigneeId?: string;
-  projectId: string;
-  projectWorkspaceId?: string;
-  assigneeModelLane?: IssueModelLane;
-  assigneeModelOverride: string;
-  assigneeThinkingEffort: string;
-  assigneeChrome: boolean;
-  executionWorkspaceMode?: string;
-  selectedExecutionWorkspaceId?: string;
-  useIsolatedExecutionWorkspace?: boolean;
-  workMode?: IssueWorkMode;
-}
+import {
+  clearIssueDraft,
+  isIssueWorkMode,
+  loadIssueDraft,
+  useIssueDraftState,
+} from "./new-issue-dialog/useIssueDraftState";
 
 import {
   buildAssigneeAdapterOverrides,
@@ -100,28 +81,6 @@ const ISSUE_THINKING_EFFORT_OPTIONS = {
     { value: "max", label: "Max" },
   ],
 } as const;
-
-function isIssueWorkMode(value: unknown): value is IssueWorkMode {
-  return value === "standard" || value === "planning";
-}
-
-function loadDraft(): IssueDraft | null {
-  try {
-    const raw = localStorage.getItem(DRAFT_KEY);
-    if (!raw) return null;
-    return JSON.parse(raw) as IssueDraft;
-  } catch {
-    return null;
-  }
-}
-
-function saveDraft(draft: IssueDraft) {
-  localStorage.setItem(DRAFT_KEY, JSON.stringify(draft));
-}
-
-function clearDraft() {
-  localStorage.removeItem(DRAFT_KEY);
-}
 
 function defaultProjectWorkspaceIdForProject(project: { workspaces?: Array<{ id: string; isPrimary: boolean }>; executionWorkspacePolicy?: { defaultProjectWorkspaceId?: string | null } | null } | null | undefined) {
   if (!project) return "";
@@ -173,12 +132,6 @@ export function NewIssueDialog() {
   const { companies, selectedCompanyId, selectedCompany } = useCompany();
   const queryClient = useQueryClient();
   const { pushToast } = useToastActions();
-  const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
-  const titleRef = useRef("");
-  const descriptionRef = useRef("");
-  const [titleHasText, setTitleHasText] = useState(false);
-  const [draftHasText, setDraftHasText] = useState(false);
   const [status, setStatus] = useState("todo");
   const [priority, setPriority] = useState("");
   const [assigneeValue, setAssigneeValue] = useState("");
@@ -197,9 +150,37 @@ export function NewIssueDialog() {
   const [executionWorkspaceMode, setExecutionWorkspaceMode] = useState<string>("shared_workspace");
   const [selectedExecutionWorkspaceId, setSelectedExecutionWorkspaceId] = useState("");
   const [workMode, setWorkMode] = useState<IssueWorkMode>("standard");
+  const {
+    title,
+    description,
+    titleRef,
+    descriptionRef,
+    titleHasText,
+    draftHasText,
+    hasSavedDraft,
+    setIssueText,
+    handleTitleChange,
+    handleDescriptionChange,
+    clearPendingDraftSave,
+  } = useIssueDraftState({
+    newIssueOpen,
+    status,
+    priority,
+    assigneeValue,
+    reviewerValue,
+    approverValue,
+    projectId,
+    projectWorkspaceId,
+    assigneeModelLane,
+    assigneeModelOverride,
+    assigneeThinkingEffort,
+    assigneeChrome,
+    executionWorkspaceMode,
+    selectedExecutionWorkspaceId,
+    workMode,
+  });
   const [expanded, setExpanded] = useState(false);
   const [dialogCompanyId, setDialogCompanyId] = useState<string | null>(null);
-  const draftTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const executionWorkspaceDefaultProjectId = useRef<string | null>(null);
   const initializationKeyRef = useRef<string | null>(null);
   const {
@@ -363,7 +344,7 @@ export function NewIssueDialog() {
       queryClient.invalidateQueries({ queryKey: queryKeys.issues.listTouchedByMe(companyId) });
       queryClient.invalidateQueries({ queryKey: queryKeys.issues.listUnreadTouchedByMe(companyId) });
       queryClient.invalidateQueries({ queryKey: queryKeys.sidebarBadges(companyId) });
-      if (draftTimer.current) clearTimeout(draftTimer.current);
+      clearPendingDraftSave();
       if (failures.length > 0) {
         const prefix = (companies.find((company) => company.id === companyId)?.issuePrefix ?? "").trim();
         const issueRef = issue.identifier ?? issue.id;
@@ -376,7 +357,7 @@ export function NewIssueDialog() {
             : undefined,
         });
       }
-      clearDraft();
+      clearIssueDraft();
       reset();
       closeNewIssue();
     },
@@ -393,105 +374,6 @@ export function NewIssueDialog() {
     return asset.contentPath;
   }, [uploadDescriptionImage.mutateAsync]);
 
-  // Debounced draft saving
-  const scheduleSave = useCallback(
-    (draft: IssueDraft) => {
-      if (draftTimer.current) clearTimeout(draftTimer.current);
-      draftTimer.current = setTimeout(() => {
-        if (draft.title.trim()) saveDraft(draft);
-      }, DEBOUNCE_MS);
-    },
-    [],
-  );
-
-  const setIssueText = useCallback((nextTitle: string, nextDescription: string) => {
-    titleRef.current = nextTitle;
-    descriptionRef.current = nextDescription;
-    setTitle(nextTitle);
-    setDescription(nextDescription);
-    setTitleHasText(nextTitle.trim().length > 0);
-    setDraftHasText(nextTitle.trim().length > 0 || nextDescription.trim().length > 0);
-  }, []);
-
-  const queueDraftSave = useCallback((overrides: { title?: string; description?: string } = {}) => {
-    if (!newIssueOpen) return;
-    const nextTitle = overrides.title ?? titleRef.current;
-    const nextDescription = overrides.description ?? descriptionRef.current;
-    scheduleSave({
-      title: nextTitle,
-      description: nextDescription,
-      status,
-      priority,
-      assigneeValue,
-      reviewerValue,
-      approverValue,
-      projectId,
-      projectWorkspaceId,
-      assigneeModelLane,
-      assigneeModelOverride,
-      assigneeThinkingEffort,
-      assigneeChrome,
-      executionWorkspaceMode,
-      selectedExecutionWorkspaceId,
-      workMode,
-    });
-  }, [
-    newIssueOpen,
-    scheduleSave,
-    status,
-    priority,
-    assigneeValue,
-    reviewerValue,
-    approverValue,
-    projectId,
-    projectWorkspaceId,
-    assigneeModelOverride,
-    assigneeThinkingEffort,
-    assigneeChrome,
-    executionWorkspaceMode,
-    selectedExecutionWorkspaceId,
-    workMode,
-  ]);
-
-  const handleTitleChange = useCallback((nextTitle: string) => {
-    titleRef.current = nextTitle;
-    const nextTitleHasText = nextTitle.trim().length > 0;
-    const nextDraftHasText = nextTitleHasText || descriptionRef.current.trim().length > 0;
-    setTitleHasText((current) => current === nextTitleHasText ? current : nextTitleHasText);
-    setDraftHasText((current) => current === nextDraftHasText ? current : nextDraftHasText);
-    queueDraftSave({ title: nextTitle });
-  }, [queueDraftSave]);
-
-  const handleDescriptionChange = useCallback((nextDescription: string) => {
-    descriptionRef.current = nextDescription;
-    const nextDraftHasText = titleRef.current.trim().length > 0 || nextDescription.trim().length > 0;
-    setDraftHasText((current) => current === nextDraftHasText ? current : nextDraftHasText);
-    queueDraftSave({ description: nextDescription });
-  }, [queueDraftSave]);
-
-  // Save draft on meaningful changes
-  useEffect(() => {
-    if (!newIssueOpen) return;
-    queueDraftSave();
-  }, [
-    status,
-    priority,
-    assigneeValue,
-    reviewerValue,
-    approverValue,
-    projectId,
-    projectWorkspaceId,
-    assigneeModelLane,
-    assigneeModelOverride,
-    assigneeThinkingEffort,
-    assigneeChrome,
-    executionWorkspaceMode,
-    selectedExecutionWorkspaceId,
-    workMode,
-    newIssueOpen,
-    queueDraftSave,
-  ]);
-
   // Restore draft or apply defaults when dialog opens
   useEffect(() => {
     if (!newIssueOpen) {
@@ -504,7 +386,7 @@ export function NewIssueDialog() {
     setDialogCompanyId(selectedCompanyId);
     executionWorkspaceDefaultProjectId.current = null;
 
-    const draft = loadDraft();
+    const draft = loadIssueDraft();
     if (newIssueDefaults.parentId) {
       const nextWorkMode = isIssueWorkMode(newIssueDefaults.workMode) ? newIssueDefaults.workMode : "standard";
       const defaultProjectId = newIssueDefaults.projectId ?? "";
@@ -655,13 +537,6 @@ export function NewIssueDialog() {
     assigneeModelLane,
   ]);
 
-  // Cleanup timer on unmount
-  useEffect(() => {
-    return () => {
-      if (draftTimer.current) clearTimeout(draftTimer.current);
-    };
-  }, []);
-
   function reset() {
     setIssueText("", "");
     setStatus("todo");
@@ -710,7 +585,7 @@ export function NewIssueDialog() {
   }
 
   function discardDraft() {
-    clearDraft();
+    clearIssueDraft();
     reset();
     closeNewIssue();
   }
@@ -848,8 +723,6 @@ export function NewIssueDialog() {
       })),
     [orderedProjects],
   );
-  const savedDraft = useMemo(() => newIssueOpen ? loadDraft() : null, [newIssueOpen]);
-  const hasSavedDraft = Boolean(savedDraft?.title.trim() || savedDraft?.description.trim());
   const canDiscardDraft = hasDraft || hasSavedDraft;
   const createIssueErrorMessage =
     createIssue.error instanceof Error ? createIssue.error.message : "Failed to create issue. Try again.";

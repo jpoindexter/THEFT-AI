@@ -159,5 +159,5 @@
 | T116 | Create active-route no-new-drift gate from the atomic design-system scanner | ✅ done |
 | T117 | Promote repeated atoms/molecules/organisms into shared design-system modules | ✅ done |
 | T118 | Convert active MVP routes to template-only page composition | ✅ done |
-| T119 | Pay down runtime/admin/lab design drift after active product routes pass the launch gate | ▶ doing |
-| T120 | Execute the 3-pass migration sequence in `BUILD-FROM-THIS/DESIGN-SYSTEM-MIGRATION-MAP.md` with strict worker ownership | ☐ todo |
+| T119 | Pay down runtime/admin/lab design drift after active product routes pass the launch gate | ✅ done |
+| T120 | Execute the 3-pass migration sequence in `BUILD-FROM-THIS/DESIGN-SYSTEM-MIGRATION-MAP.md` with strict worker ownership | ▶ doing |
