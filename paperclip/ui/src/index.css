@@ -132,6 +132,7 @@
   --theft-assembly-right-width: calc(var(--theft-space-1) * 38);
   --theft-tech-tree-filter-width: calc(var(--theft-space-1) * 21);
   --theft-tech-tree-inspector-width: calc(var(--theft-space-1) * 40);
+  --theft-tech-tree-detail-side-width: calc(var(--theft-space-1) * 40);
   --theft-tech-tree-stat-min-width: calc(var(--theft-space-1) * 32);
   --theft-tech-tree-phase-height: calc(var(--theft-space-1) * 10);
   --theft-tech-tree-node-height: calc(var(--theft-space-1) * 9);
@@ -470,6 +471,14 @@
   text-transform: uppercase;
 }
 
+.theft-label-nano {
+  color: var(--muted-foreground);
+  font-size: var(--theft-text-nano);
+  letter-spacing: var(--theft-label-tracking);
+  line-height: var(--leading-caption);
+  text-transform: uppercase;
+}
+
 .issue-chat-composer-dock {
   bottom: calc(env(safe-area-inset-bottom) + calc(var(--theft-space-1) * 2.5));
 }
@@ -657,6 +666,10 @@
   grid-template-columns: minmax(0, 1fr);
 }
 
+.theft-tech-tree-detail-grid {
+  grid-template-columns: minmax(0, 1fr);
+}
+
 .theft-tech-tree-build-column {
   grid-template-rows:
     var(--theft-tech-tree-phase-height)
@@ -812,6 +825,10 @@
       var(--theft-tech-tree-filter-width)
       minmax(0, 1fr)
       var(--theft-tech-tree-inspector-width);
+  }
+
+  .theft-tech-tree-detail-grid {
+    grid-template-columns: minmax(0, 1fr) var(--theft-tech-tree-detail-side-width);
   }
 
   .theft-tasks-stat-grid {

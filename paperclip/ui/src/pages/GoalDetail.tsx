@@ -222,7 +222,7 @@ export function GoalDetail() {
           </div>
         </div>
 
-        <div className="grid gap-3 p-3 lg:grid-cols-[minmax(0,1fr)_320px]">
+        <div className="theft-tech-tree-detail-grid grid gap-3 p-3">
           <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
             <RoadmapMetric icon={Users} label="Owner" value={nodeView?.owner ?? "Operator"} />
             <RoadmapMetric icon={GitBranch} label="Dependency" value={nodeView?.dependency ?? "Root roadmap node"} />
@@ -334,7 +334,7 @@ export function GoalDetail() {
 function RoadmapMetric({ icon: Icon, label, value }: { icon: typeof Users; label: string; value: string }) {
   return (
     <div className="min-w-0 border border-border bg-card p-3">
-      <div className="flex items-center gap-2 text-[11px] font-medium uppercase tracking-[0.12em] text-muted-foreground">
+      <div className="theft-label-compact flex items-center gap-2 font-medium">
         <Icon className="h-3.5 w-3.5 text-foreground" />
         {label}
       </div>
@@ -347,7 +347,7 @@ function RoadmapMiniStat({ value, label }: { value: number; label: string }) {
   return (
     <div className="border-r border-border px-2 py-2 last:border-r-0">
       <div className="text-base font-semibold tabular-nums">{value}</div>
-      <div className="text-[10px] uppercase tracking-[0.12em] text-muted-foreground">{label}</div>
+      <div className="theft-label-nano">{label}</div>
     </div>
   );
 }
