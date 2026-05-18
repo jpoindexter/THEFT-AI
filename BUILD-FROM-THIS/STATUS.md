@@ -1,6 +1,6 @@
 # STATUS — What actually exists
 
-> Audit-derived, not assumed. Last updated 2026-05-17 by Codex session.
+> Audit-derived, not assumed. Last updated 2026-05-18 by Codex session.
 > Update when something changes status. Don't fabricate.
 
 ## Current Direction — Paperclip-Host Merge
@@ -79,6 +79,7 @@ Current local modularization checkpoint:
 - Extracted MarkdownBody wiki-link parsing, link helpers, issue links, code-block copy UI, and Mermaid rendering into guarded modules so `MarkdownBody.tsx` now fits the 300-line guardrail.
 - Extracted agent-config execution, adapter, configuration, run-policy, asset, overlay, model-control, environment-test, and save-bar modules so `AgentConfigForm.tsx` now fits the 300-line guardrail.
 - Extracted MarkdownEditor content normalization, autocomplete utilities, autocomplete hook, plugin assembly, fallback view, autocomplete menu, and rich editor shell so `MarkdownEditor.tsx` now fits the 300-line guardrail.
+- Extracted IssuesList persisted state, remote data loading, lookup assembly, derived model, and content rendering so `IssuesList.tsx` now fits the 300-line guardrail.
 - Moved the issue-chat composer safe-area dock value into a semantic CSS utility.
 
 Latest verification for the active modularization slices:
@@ -101,6 +102,7 @@ Latest verification for the active modularization slices:
 - Focused MarkdownBody Vitest passed after updating stale expectations to the current tokenized renderer contract: 36 tests.
 - Focused AgentConfig/agent payload Vitest passed: 14 tests across 4 files.
 - Focused MarkdownEditor Vitest passed: 24 tests.
+- Focused IssuesList Vitest passed after the route-list orchestration split: 28 tests.
 - Focused Vitest for issue chat, issue documents, and issue detail passed: 78 tests across 4 files.
 - Focused IssueChatThread Vitest passed: 61 tests across 2 files.
 - Focused onboarding utility Vitest passed: 21 tests across 5 files.
@@ -137,6 +139,7 @@ Remaining high-value maintainability work:
 - `MarkdownBody.tsx` is down to 225 lines and now fits the 300-line guardrail; wiki-link parsing, link helpers, issue links, code-block copy UI, and Mermaid rendering are split into guarded modules.
 - `AgentConfigForm.tsx` is down to 298 lines and now fits the 300-line guardrail; execution, adapter, configuration, run-policy, asset, overlay, model-control, environment-test, and save-bar modules are split under the guardrail.
 - `MarkdownEditor.tsx` is down to 268 lines and now fits the 300-line guardrail; content normalization, autocomplete utilities, autocomplete hook, plugin assembly, fallback view, autocomplete menu, and rich editor shell are split under the guardrail.
+- `IssuesList.tsx` is down to 142 lines and now fits the 300-line guardrail; persisted view state, remote data, lookup assembly, derived model, and content rendering are split under the guardrail.
 - `IssueDocumentsSection.tsx` is down to 207 lines and now fits the 300-line guardrail.
 - `index.css` is large because it is the current token/source-of-truth file; do not split it casually before token ownership is fully stable.
 
