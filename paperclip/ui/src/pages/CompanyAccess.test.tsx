@@ -58,11 +58,44 @@ vi.mock("@/context/ToastContext", () => ({
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 (globalThis as any).IS_REACT_ACT_ENVIRONMENT = true;
 
+if (!globalThis.PointerEvent) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  (globalThis as any).PointerEvent = MouseEvent;
+}
+
+if (!HTMLElement.prototype.hasPointerCapture) {
+  HTMLElement.prototype.hasPointerCapture = () => false;
+}
+
+if (!HTMLElement.prototype.scrollIntoView) {
+  HTMLElement.prototype.scrollIntoView = () => undefined;
+}
+
 async function flushReact() {
   await act(async () => {
     await Promise.resolve();
     await new Promise((resolve) => window.setTimeout(resolve, 0));
   });
+}
+
+async function chooseSelectOption(label: string) {
+  const trigger = document.body.querySelector('[role="combobox"]');
+  expect(trigger).toBeTruthy();
+  await act(async () => {
+    trigger?.dispatchEvent(new PointerEvent("pointerdown", { bubbles: true, button: 0 }));
+    trigger?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+  });
+  await flushReact();
+
+  const option = Array.from(document.body.querySelectorAll('[role="option"]')).find(
+    (item) => item.textContent === label,
+  );
+  expect(option).toBeTruthy();
+  await act(async () => {
+    option?.dispatchEvent(new PointerEvent("pointerup", { bubbles: true, button: 0 }));
+    option?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+  });
+  await flushReact();
 }
 
 describe("CompanyAccess", () => {
@@ -297,12 +330,7 @@ describe("CompanyAccess", () => {
     expect(document.body.textContent).toContain("Remove member");
     expect(document.body.textContent).toContain("Assigned to removed user");
 
-    const reassignmentSelect = document.body.querySelector("select");
-    expect(reassignmentSelect).toBeTruthy();
-    await act(async () => {
-      reassignmentSelect!.value = "user:user-2";
-      reassignmentSelect!.dispatchEvent(new Event("change", { bubbles: true }));
-    });
+    await chooseSelectOption("Board User");
 
     const confirmButton = Array.from(document.body.querySelectorAll("button")).find(
       (button) => button.textContent === "Remove member",

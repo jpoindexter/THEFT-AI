@@ -10,7 +10,7 @@ import { NewIssueDialogHeader } from "./NewIssueDialogHeader";
 
 type DialogCompany = Pick<Company, "id" | "name" | "brandColor" | "status">;
 
-type NewIssueDialogSurfaceProps = NewIssueDialogBodyProps & {
+export type NewIssueDialogSurfaceProps = NewIssueDialogBodyProps & {
   canDiscardDraft: boolean;
   closeNewIssue: () => void;
   companies: DialogCompany[];

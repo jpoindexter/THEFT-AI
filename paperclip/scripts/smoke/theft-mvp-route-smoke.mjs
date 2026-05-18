@@ -239,6 +239,25 @@ async function launchBrowser(chromePath) {
   }
 }
 
+async function closeBrowser(browser) {
+  const browserProcess = typeof browser.process === "function" ? browser.process() : null;
+  let timeoutId;
+  try {
+    await Promise.race([
+      browser.close(),
+      new Promise((_, reject) => {
+        timeoutId = setTimeout(() => reject(new Error("Timed out waiting for browser.close()")), 5_000);
+      }),
+    ]);
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    console.warn(`warn - ${message}; forcing browser process shutdown`);
+    browserProcess?.kill?.("SIGKILL");
+  } finally {
+    clearTimeout(timeoutId);
+  }
+}
+
 async function main() {
   const options = parseArgs(process.argv.slice(2));
   const companyPrefix = await resolveCompanyPrefix(options.baseUrl, options.companyPrefix);
@@ -258,11 +277,13 @@ async function main() {
       });
     }
   } finally {
-    await browser.close();
+    await closeBrowser(browser);
   }
 }
 
-main().catch((error) => {
-  console.error(error instanceof Error ? error.message : String(error));
-  process.exit(1);
-});
+main()
+  .then(() => process.exit(0))
+  .catch((error) => {
+    console.error(error instanceof Error ? error.message : String(error));
+    process.exit(1);
+  });

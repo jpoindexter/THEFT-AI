@@ -98,11 +98,43 @@ vi.mock("../context/CompanyContext", () => ({
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 (globalThis as any).IS_REACT_ACT_ENVIRONMENT = true;
 
+if (!globalThis.PointerEvent) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  (globalThis as any).PointerEvent = MouseEvent;
+}
+
+if (!HTMLElement.prototype.hasPointerCapture) {
+  HTMLElement.prototype.hasPointerCapture = () => false;
+}
+
+if (!HTMLElement.prototype.scrollIntoView) {
+  HTMLElement.prototype.scrollIntoView = () => undefined;
+}
+
 async function flushReact() {
   await act(async () => {
     await Promise.resolve();
     await new Promise((resolve) => window.setTimeout(resolve, 0));
   });
+}
+
+async function chooseSelectOption(triggerLabel: string, optionLabel: string) {
+  const trigger = document.body.querySelector(`[role="combobox"][aria-label="${triggerLabel}"]`);
+  expect(trigger).toBeTruthy();
+  await act(async () => {
+    trigger?.dispatchEvent(new PointerEvent("pointerdown", { bubbles: true, button: 0 }));
+    trigger?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+  });
+  await flushReact();
+
+  const option = Array.from(document.body.querySelectorAll('[role="option"]'))
+    .find((item) => item.textContent === optionLabel);
+  expect(option).toBeTruthy();
+  await act(async () => {
+    option?.dispatchEvent(new PointerEvent("pointerup", { bubbles: true, button: 0 }));
+    option?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+  });
+  await flushReact();
 }
 
 describe("CompanyEnvironments", () => {
@@ -229,15 +261,7 @@ describe("CompanyEnvironments", () => {
     });
     await flushReact();
 
-    const providerSelect = Array.from(container.querySelectorAll("select"))
-      .find((select) => Array.from(select.options).some((option) => option.value === "secure-plugin")) as HTMLSelectElement | undefined;
-    expect(providerSelect).toBeTruthy();
-
-    await act(async () => {
-      providerSelect!.value = "secure-plugin";
-      providerSelect!.dispatchEvent(new Event("change", { bubbles: true }));
-    });
-    await flushReact();
+    await chooseSelectOption("Sandbox provider", "Secure Sandbox");
 
     const templateInput = Array.from(container.querySelectorAll("input"))
       .find((input) => (input as HTMLInputElement).value === "saved-template") as HTMLInputElement | undefined;
