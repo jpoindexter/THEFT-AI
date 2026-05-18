@@ -1,5 +1,6 @@
 import type { QuotaWindow } from "@paperclipai/shared";
-import { cn, quotaSourceDisplayName } from "@/lib/utils";
+import { quotaSourceDisplayName } from "@/lib/utils";
+import { QuotaProgressBar } from "./quota/QuotaProgressBar";
 
 interface ClaudeSubscriptionPanelProps {
   windows: QuotaWindow[];
@@ -44,13 +45,6 @@ function orderedWindows(windows: QuotaWindow[]): QuotaWindow[] {
   });
 }
 
-function fillClass(usedPercent: number | null): string {
-  if (usedPercent == null) return "bg-zinc-700";
-  if (usedPercent >= 90) return "bg-red-400";
-  if (usedPercent >= 70) return "bg-amber-400";
-  return "bg-primary/70";
-}
-
 export function ClaudeSubscriptionPanel({
   windows,
   source = null,
@@ -62,7 +56,7 @@ export function ClaudeSubscriptionPanel({
     <div className="border border-border px-4 py-4">
       <div className="flex items-start justify-between gap-3 border-b border-border pb-3">
         <div className="min-w-0">
-          <div className="text-[11px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">
+          <div className="theft-label-compact font-semibold">
             Anthropic subscription
           </div>
           <div className="mt-1 text-sm text-muted-foreground">
@@ -70,7 +64,7 @@ export function ClaudeSubscriptionPanel({
           </div>
         </div>
         {source ? (
-          <span className="shrink-0 border border-border px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+          <span className="theft-label-nano shrink-0 border border-border px-2.5 py-1 font-semibold">
             {quotaSourceDisplayName(source)}
           </span>
         ) : null}
@@ -105,7 +99,6 @@ export function ClaudeSubscriptionPanel({
             );
           }
 
-          const width = Math.min(100, Math.max(0, window.usedPercent ?? 0));
           return (
             <div
               key={window.label}
@@ -125,12 +118,7 @@ export function ClaudeSubscriptionPanel({
                 ) : null}
               </div>
 
-              <div className="mt-3 h-2 overflow-hidden bg-muted">
-                <div
-                  className={cn("h-full transition-[width] duration-200", fillClass(window.usedPercent))}
-                  style={{ width: `${width}%` }}
-                />
-              </div>
+              <QuotaProgressBar usedPercent={window.usedPercent} />
             </div>
           );
         })}
