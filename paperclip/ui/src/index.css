@@ -137,6 +137,8 @@
   --theft-tech-tree-phase-height: calc(var(--theft-space-1) * 10);
   --theft-tech-tree-node-height: calc(var(--theft-space-1) * 9);
   --theft-tech-tree-artifact-height: calc(var(--theft-space-1) * 7);
+  --theft-dialog-list-max-height: min(calc(var(--theft-space-1) * 56), 65vh);
+  --theft-settings-control-label-width: calc(var(--theft-space-1) * 18);
   --theft-dashboard-side-width: calc(var(--theft-space-1) * 48.75);
   --theft-dashboard-operator-width: calc(var(--theft-space-1) * 52.5);
   --theft-dashboard-max-width: calc(var(--theft-space-1) * 220);
@@ -493,6 +495,20 @@
 
 .agent-instructions-pane-grid {
   grid-template-columns: var(--agent-instructions-file-width, 18rem) 0.5rem minmax(0, 1fr);
+}
+
+.max-h-dialog-list {
+  max-height: var(--theft-dialog-list-max-height);
+}
+
+.workspace-runtime-square-corners {
+  border-radius: 0;
+}
+
+@media (min-width: 40rem) {
+  .settings-control-grid {
+    grid-template-columns: minmax(var(--theft-settings-control-label-width), max-content) 1fr;
+  }
 }
 
 .theft-grid-bg {

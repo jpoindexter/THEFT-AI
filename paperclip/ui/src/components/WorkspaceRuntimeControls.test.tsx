@@ -445,10 +445,10 @@ describe("WorkspaceRuntimeControls", () => {
     const startButton = Array.from(container.querySelectorAll("button"))
       .find((button) => button.textContent?.trim() === "Start");
 
-    expect(summaryPanel?.className).toContain("rounded-none");
+    expect(summaryPanel?.className).toContain("workspace-runtime-square-corners");
     expect(summaryPanel?.className).not.toContain("bg-background/60");
-    expect(servicePanel?.className).toContain("rounded-none");
-    expect(startButton?.className).toContain("rounded-none");
+    expect(servicePanel?.className).toContain("workspace-runtime-square-corners");
+    expect(startButton?.className).toContain("workspace-runtime-square-corners");
 
     act(() => root.unmount());
   });
