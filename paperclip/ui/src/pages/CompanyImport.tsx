@@ -1,9 +1,8 @@
-import { useEffect, useMemo, useState, type ChangeEvent } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type {
   CompanyPortabilityCollisionStrategy,
   CompanyPortabilityPreviewResult,
-  CompanyPortabilitySource,
 } from "@paperclipai/shared";
 import { useCompany } from "../context/CompanyContext";
 import { useBreadcrumbs } from "../context/BreadcrumbContext";
@@ -16,16 +15,11 @@ import { EmptyState } from "../components/EmptyState";
 import { Download } from "lucide-react";
 import { ImportPreviewResults } from "./company-import/ImportPreviewResults";
 import { ImportSourceSection } from "./company-import/ImportSourceSection";
-import {
-  applyImportedSidebarOrder,
-  buildConflictList,
-  deriveSourcePrefix,
-  prefixedName,
-  readLocalPackageZip,
-  type LocalCompanyImportPackage,
-} from "./company-import/importPreviewModel";
+import { applyImportedSidebarOrder } from "./company-import/importPreviewModel";
 import { useImportAdapterOverrides } from "./company-import/useImportAdapterOverrides";
+import { useImportConflictState } from "./company-import/useImportConflictState";
 import { useImportPreviewState } from "./company-import/useImportPreviewState";
+import { useImportSourceState } from "./company-import/useImportSourceState";
 
 // ── Main page ─────────────────────────────────────────────────────────
 
@@ -44,11 +38,6 @@ export function CompanyImport() {
   });
   const currentUserId = session?.user?.id ?? session?.session?.userId ?? null;
 
-  // Source state
-  const [sourceMode, setSourceMode] = useState<"github" | "local">("github");
-  const [importUrl, setImportUrl] = useState("");
-  const [localPackage, setLocalPackage] = useState<LocalCompanyImportPackage | null>(null);
-
   // Target state
   const [targetMode, setTargetMode] = useState<"existing" | "new">("new");
   const [newCompanyName, setNewCompanyName] = useState("");
@@ -57,17 +46,29 @@ export function CompanyImport() {
   const [importPreview, setImportPreview] =
     useState<CompanyPortabilityPreviewResult | null>(null);
 
-  // Conflict resolution state
-  const [nameOverrides, setNameOverrides] = useState<Record<string, string>>({});
-  const [skippedSlugs, setSkippedSlugs] = useState<Set<string>>(new Set());
-  const [confirmedSlugs, setConfirmedSlugs] = useState<Set<string>>(new Set());
   const [collisionStrategy, setCollisionStrategy] = useState<CompanyPortabilityCollisionStrategy>("rename");
+  const sourceState = useImportSourceState({
+    onResetPreview: () => setImportPreview(null),
+    onReadError: (err) => {
+      pushToast({
+        tone: "error",
+        title: "Package read failed",
+        body: err instanceof Error ? err.message : "Failed to read folder.",
+      });
+    },
+  });
+  const conflictState = useImportConflictState({
+    importUrl: sourceState.importUrl,
+    localPackageName: sourceState.localPackage?.name ?? null,
+    localPackageRootPath: sourceState.localPackage?.rootPath ?? null,
+    sourceMode: sourceState.sourceMode,
+  });
 
   const previewState = useImportPreviewState({
     importPreview,
     targetMode,
-    nameOverrides,
-    skippedSlugs,
+    nameOverrides: conflictState.nameOverrides,
+    skippedSlugs: conflictState.skippedSlugs,
   });
   const adapterState = useImportAdapterOverrides({ importPreview });
 
@@ -83,9 +84,6 @@ export function CompanyImport() {
     return ceo?.adapterType ?? "claude_local";
   }, [companyAgents]);
 
-  const localZipHelpText =
-    "Upload a .zip exported directly from Paperclip. Re-zipped archives created by Finder, Explorer, or other zip tools may not import correctly.";
-
   useEffect(() => {
     setBreadcrumbs([
       { label: "Org Chart", href: "/org" },
@@ -93,20 +91,10 @@ export function CompanyImport() {
     ]);
   }, [setBreadcrumbs]);
 
-  function buildSource(): CompanyPortabilitySource | null {
-    if (sourceMode === "local") {
-      if (!localPackage) return null;
-      return { type: "inline", rootPath: localPackage.rootPath, files: localPackage.files };
-    }
-    const url = importUrl.trim();
-    if (!url) return null;
-    return { type: "github", url };
-  }
-
   // Preview mutation
   const previewMutation = useMutation({
     mutationFn: () => {
-      const source = buildSource();
+      const source = sourceState.buildSource();
       if (!source) throw new Error("No source configured.");
       return companiesApi.importPreview({
         source,
@@ -120,27 +108,7 @@ export function CompanyImport() {
     },
     onSuccess: (result) => {
       setImportPreview(result);
-
-      // Build conflicts and set default name overrides with prefix
-      const conflicts = buildConflictList(result);
-      const prefix = deriveSourcePrefix(
-        sourceMode,
-        importUrl,
-        localPackage?.name ?? null,
-        localPackage?.rootPath ?? null,
-      );
-      const defaultOverrides: Record<string, string> = {};
-
-      for (const c of conflicts) {
-        if (c.action === "rename" && prefix) {
-          // Use prefix-based default rename
-          defaultOverrides[c.slug] = prefixedName(prefix, c.originalName);
-        }
-      }
-      setNameOverrides(defaultOverrides);
-      setSkippedSlugs(new Set());
-      setConfirmedSlugs(new Set());
-
+      conflictState.initializeForPreview(result);
       adapterState.initializeAdapterOverrides(result, ceoAdapterType);
       previewState.initializeForPreview(result);
     },
@@ -153,18 +121,6 @@ export function CompanyImport() {
     },
   });
 
-  // Build the final nameOverrides to send (only overrides that differ from plannedName)
-  function buildFinalNameOverrides(): Record<string, string> | undefined {
-    if (!importPreview) return undefined;
-    const overrides: Record<string, string> = {};
-    for (const [slug, name] of Object.entries(nameOverrides)) {
-      if (name.trim()) {
-        overrides[slug] = name.trim();
-      }
-    }
-    return Object.keys(overrides).length > 0 ? overrides : undefined;
-  }
-
   function buildSelectedFiles(): string[] | undefined {
     const selected = Array.from(previewState.checkedFiles).sort();
     return selected.length > 0 ? selected : undefined;
@@ -173,7 +129,7 @@ export function CompanyImport() {
   // Apply mutation
   const importMutation = useMutation({
     mutationFn: () => {
-      const source = buildSource();
+      const source = sourceState.buildSource();
       if (!source) throw new Error("No source configured.");
       return companiesApi.importBundle({
         source,
@@ -183,7 +139,7 @@ export function CompanyImport() {
             ? { mode: "new_company", newCompanyName: newCompanyName || null }
             : { mode: "existing_company", companyId: selectedCompanyId! },
         collisionStrategy,
-        nameOverrides: buildFinalNameOverrides(),
+        nameOverrides: conflictState.buildFinalNameOverrides(),
         selectedFiles: buildSelectedFiles(),
         adapterOverrides: adapterState.buildFinalAdapterOverrides(),
       });
@@ -221,71 +177,20 @@ export function CompanyImport() {
     },
   });
 
-  async function handleChooseLocalPackage(e: ChangeEvent<HTMLInputElement>) {
-    const fileList = e.target.files;
-    if (!fileList || fileList.length === 0) return;
-    try {
-      const pkg = await readLocalPackageZip(fileList[0]!);
-      setLocalPackage(pkg);
-      setImportPreview(null);
-    } catch (err) {
-      pushToast({
-        tone: "error",
-        title: "Package read failed",
-        body: err instanceof Error ? err.message : "Failed to read folder.",
-      });
-    }
-  }
-
-  function handleConflictRename(slug: string, newName: string) {
-    setNameOverrides((prev) => ({ ...prev, [slug]: newName }));
-    // Editing the name un-confirms
-    setConfirmedSlugs((prev) => {
-      if (!prev.has(slug)) return prev;
-      const next = new Set(prev);
-      next.delete(slug);
-      return next;
-    });
-  }
-
-  function handleConflictToggleConfirm(slug: string) {
-    setConfirmedSlugs((prev) => {
-      const next = new Set(prev);
-      if (next.has(slug)) next.delete(slug);
-      else next.add(slug);
-      return next;
-    });
-  }
-
   function handleConflictToggleSkip(slug: string, filePath: string | null) {
-    setSkippedSlugs((prev) => {
-      const next = new Set(prev);
-      const wasSkipped = next.has(slug);
-      if (wasSkipped) {
-        next.delete(slug);
-      } else {
-        next.add(slug);
-      }
-
-      // Sync with file tree checkboxes
-      if (filePath) {
-        previewState.setCheckedFiles((prevChecked) => {
-          const nextChecked = new Set(prevChecked);
-          if (wasSkipped) {
-            nextChecked.add(filePath);
-          } else {
-            nextChecked.delete(filePath);
-          }
-          return nextChecked;
-        });
-      }
-
-      return next;
+    conflictState.handleConflictToggleSkip(slug, filePath, (path, skipped) => {
+      previewState.setCheckedFiles((prevChecked) => {
+        const nextChecked = new Set(prevChecked);
+        if (skipped) {
+          nextChecked.delete(path);
+        } else {
+          nextChecked.add(path);
+        }
+        return nextChecked;
+      });
     });
   }
 
-  const hasSource =
-    sourceMode === "local" ? !!localPackage : importUrl.trim().length > 0;
   const hasErrors = importPreview ? importPreview.errors.length > 0 : false;
 
   if (!selectedCompanyId) {
@@ -295,25 +200,19 @@ export function CompanyImport() {
   return (
     <div>
       <ImportSourceSection
-        sourceMode={sourceMode}
-        importUrl={importUrl}
-        localPackage={localPackage}
-        localZipHelpText={localZipHelpText}
+        sourceMode={sourceState.sourceMode}
+        importUrl={sourceState.importUrl}
+        localPackage={sourceState.localPackage}
+        localZipHelpText={sourceState.localZipHelpText}
         targetMode={targetMode}
         selectedCompanyName={selectedCompany?.name}
         newCompanyName={newCompanyName}
         collisionStrategy={collisionStrategy}
-        hasSource={hasSource}
+        hasSource={sourceState.hasSource}
         isPreviewing={previewMutation.isPending}
-        onSourceModeChange={(mode) => {
-          setSourceMode(mode);
-          setImportPreview(null);
-        }}
-        onImportUrlChange={(value) => {
-          setImportUrl(value);
-          setImportPreview(null);
-        }}
-        onChooseLocalPackage={handleChooseLocalPackage}
+        onSourceModeChange={sourceState.setSourceMode}
+        onImportUrlChange={sourceState.setImportUrl}
+        onChooseLocalPackage={sourceState.handleChooseLocalPackage}
         onTargetModeChange={(mode) => {
           setTargetMode(mode);
           setImportPreview(null);
@@ -343,16 +242,16 @@ export function CompanyImport() {
           renamedTo={previewState.renamedTo}
           previewContent={previewState.previewContent}
           renameMap={previewState.renameMap}
-          nameOverrides={nameOverrides}
-          skippedSlugs={skippedSlugs}
-          confirmedSlugs={confirmedSlugs}
+          nameOverrides={conflictState.nameOverrides}
+          skippedSlugs={conflictState.skippedSlugs}
+          confirmedSlugs={conflictState.confirmedSlugs}
           adapterAgents={adapterState.adapterAgents}
           adapterOverrides={adapterState.adapterOverrides}
           adapterExpandedSlugs={adapterState.adapterExpandedSlugs}
           adapterConfigValues={adapterState.adapterConfigValues}
-          onConflictRename={handleConflictRename}
+          onConflictRename={conflictState.handleConflictRename}
           onConflictToggleSkip={handleConflictToggleSkip}
-          onConflictToggleConfirm={handleConflictToggleConfirm}
+          onConflictToggleConfirm={conflictState.handleConflictToggleConfirm}
           onAdapterChange={adapterState.handleAdapterChange}
           onAdapterToggleExpand={adapterState.handleAdapterToggleExpand}
           onAdapterConfigChange={adapterState.handleAdapterConfigChange}

@@ -82,6 +82,10 @@ T119 is now in progress after the active product route launch gate passed. First
   - `AgentDetail.tsx` moved latest-run rendering into `pages/agent-detail/LatestRunCard.tsx`, converted touched instructions/run-log controls to shadcn/token utilities, and now has zero focused scanner findings for the `AgentDetail` target.
   - Shared semantic CSS utilities were added for the mobile action bar, run transcript height, and resizable instructions pane. Active-route `pnpm design:gate` still reports zero findings.
 - Repo-wide design drift is down to 1057 findings after this T120 batch. Remaining oversized targets are still mostly runtime/admin pages: `AgentDetail`, `Inbox`, `CompanySkills`, `PluginSettings`, `ExecutionWorkspaceDetail`, `Costs`, and related settings/runtime surfaces.
+- T120 continued with the closest remaining guardrail targets:
+  - `CompanyImport.tsx` now fits under 300 lines after moving import source/package state and conflict rename/skip/confirm state into guarded route-local hooks. Focused `CompanyImport` scanner reports zero findings.
+  - `NewIssueDialog.tsx` continued structural cleanup with execution workspace defaults and thinking-effort option constants moved into `new-issue-dialog/issueDialogDefaults.ts`; the parent is down to 826 lines and focused scanner remains clean.
+  - Active-route `pnpm design:gate`, focused `NewIssueDialog` Vitest, typecheck, and `git diff --check` passed. Repo-wide scanner remains at 1057 findings because this slice mostly reduced module size, not scanner-count drift.
 
 The Paperclip app is genuinely large. The remaining drag is mostly not missing MVP capability; it is oversized route/organism code inherited from the Paperclip host plus the THEFT UX migration. The active-route design-system gate currently passes with zero unallowed findings, but several files still exceed the maintainability guardrail and need continued modularization.
 
