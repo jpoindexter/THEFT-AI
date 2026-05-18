@@ -21,7 +21,8 @@ T119 is now in progress after the active product route launch gate passed. First
 - Focused scanner for the four touched modules reports zero findings; active-route `pnpm design:gate` still passes with only the reviewed runtime exceptions.
 - `ActivityCharts.tsx` no longer uses raw hex chart colors or inline bar geometry; focused scanner and focused Vitest pass.
 - `ActiveAgentsPanel.tsx`, `ClaudeSubscriptionPanel.tsx`, and `CodexSubscriptionPanel.tsx` now use semantic tokens and a shared quantized `QuotaProgressBar` instead of arbitrary card shadows, micro text overrides, and inline quota widths.
-- Repo-wide design drift count is down to 1589 findings after the first three T119 slices.
+- `BudgetSidebarMarker.tsx` and `AsciiArtAnimation.tsx` now scan clean; ASCII animation helpers moved to `ascii-art-animation/asciiArtModel.ts` so the component fits under 300 lines.
+- Repo-wide design drift count is down to 1585 findings after the first four T119 slices.
 
 The Paperclip app is genuinely large. The remaining drag is mostly not missing MVP capability; it is oversized route/organism code inherited from the Paperclip host plus the THEFT UX migration. The active-route design-system gate currently passes with zero unallowed findings, but several files still exceed the maintainability guardrail and need continued modularization.
 

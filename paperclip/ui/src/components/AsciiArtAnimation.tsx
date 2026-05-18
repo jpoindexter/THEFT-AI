@@ -1,63 +1,12 @@
 import { useEffect, useRef } from "react";
-
-const CHARS = [" ", ".", "·", "▪", "▫", "○"] as const;
-const TARGET_FPS = 24;
-const FRAME_INTERVAL_MS = 1000 / TARGET_FPS;
-
-const PAPERCLIP_SPRITES = [
-  [
-    "  ╭────╮ ",
-    " ╭╯╭──╮│ ",
-    " │ │  ││ ",
-    " │ │  ││ ",
-    " │ │  ││ ",
-    " │ │  ││ ",
-    " │ ╰──╯│ ",
-    " ╰─────╯ ",
-  ],
-  [
-    " ╭─────╮ ",
-    " │╭──╮╰╮ ",
-    " ││  │ │ ",
-    " ││  │ │ ",
-    " ││  │ │ ",
-    " ││  │ │ ",
-    " │╰──╯ │ ",
-    " ╰────╯  ",
-  ],
-] as const;
-
-type PaperclipSprite = (typeof PAPERCLIP_SPRITES)[number];
-
-interface Clip {
-  x: number;
-  y: number;
-  vx: number;
-  vy: number;
-  life: number;
-  maxLife: number;
-  drift: number;
-  sprite: PaperclipSprite;
-  width: number;
-  height: number;
-}
-
-function measureChar(container: HTMLElement): { w: number; h: number } {
-  const span = document.createElement("span");
-  span.textContent = "M";
-  span.style.cssText =
-    "position:absolute;visibility:hidden;white-space:pre;font-size:11px;font-family:monospace;line-height:1;";
-  container.appendChild(span);
-  const rect = span.getBoundingClientRect();
-  container.removeChild(span);
-  return { w: rect.width, h: rect.height };
-}
-
-function spriteSize(sprite: PaperclipSprite): { width: number; height: number } {
-  let width = 0;
-  for (const row of sprite) width = Math.max(width, row.length);
-  return { width, height: sprite.length };
-}
+import {
+  CHARS,
+  FRAME_INTERVAL_MS,
+  PAPERCLIP_SPRITES,
+  type Clip,
+  measureChar,
+  spriteSize,
+} from "./ascii-art-animation/asciiArtModel";
 
 export function AsciiArtAnimation() {
   const preRef = useRef<HTMLPreElement>(null);
@@ -340,8 +289,7 @@ export function AsciiArtAnimation() {
   return (
     <pre
       ref={preRef}
-      className="w-full h-full m-0 p-0 overflow-hidden text-muted-foreground/60 select-none leading-none"
-      style={{ fontSize: "11px", fontFamily: "monospace" }}
+      className="m-0 h-full w-full select-none overflow-hidden p-0 font-mono text-micro leading-none text-muted-foreground/60"
       aria-hidden="true"
     />
   );
