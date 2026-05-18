@@ -41,23 +41,21 @@ import {
   MoreHorizontal,
   ChevronRight,
   ChevronDown,
-  Paperclip,
-  FileText,
   Loader2,
   ListTree,
-  X,
   Eye,
   ShieldCheck,
 } from "lucide-react";
 import { cn } from "../lib/utils";
 import { extractProviderIdWithFallback } from "../lib/model-utils";
-import { MarkdownEditor, type MarkdownEditorRef, type MentionOption } from "./MarkdownEditor";
+import type { MarkdownEditorRef, MentionOption } from "./MarkdownEditor";
 import { AgentIcon } from "./AgentIconPicker";
 import { InlineEntitySelector, type InlineEntityOption } from "./InlineEntitySelector";
 import { ProjectSwatch } from "./issue-properties/PropertyControls";
 import { ExecutionWorkspaceFields } from "./new-issue-dialog/ExecutionWorkspaceFields";
 import { NewIssueDialogHeader } from "./new-issue-dialog/NewIssueDialogHeader";
 import { IssuePropertyChips } from "./new-issue-dialog/IssuePropertyChips";
+import { NewIssueDescriptionSection, type StagedIssueFile } from "./new-issue-dialog/NewIssueDescriptionSection";
 
 const DRAFT_KEY = "paperclip:issue-draft";
 const DEBOUNCE_MS = 800;
@@ -83,14 +81,6 @@ interface IssueDraft {
   useIsolatedExecutionWorkspace?: boolean;
   workMode?: IssueWorkMode;
 }
-
-type StagedIssueFile = {
-  id: string;
-  file: File;
-  kind: "document" | "attachment";
-  documentKey?: string;
-  title?: string | null;
-};
 
 import {
   buildAssigneeAdapterOverrides,
@@ -193,12 +183,6 @@ function createUniqueDocumentKey(baseKey: string, stagedFiles: StagedIssueFile[]
   return `${baseKey}-${suffix}`;
 }
 
-function formatFileSize(file: File) {
-  if (file.size < 1024) return `${file.size} B`;
-  if (file.size < 1024 * 1024) return `${(file.size / 1024).toFixed(1)} KB`;
-  return `${(file.size / (1024 * 1024)).toFixed(1)} MB`;
-}
-
 function defaultProjectWorkspaceIdForProject(project: { workspaces?: Array<{ id: string; isPrimary: boolean }>; executionWorkspacePolicy?: { defaultProjectWorkspaceId?: string | null } | null } | null | undefined) {
   if (!project) return "";
   return project.executionWorkspacePolicy?.defaultProjectWorkspaceId
@@ -297,44 +281,6 @@ const IssueTitleTextarea = memo(function IssueTitleTextarea({
         }
       }}
       autoFocus
-    />
-  );
-});
-
-const IssueDescriptionEditor = memo(function IssueDescriptionEditor({
-  value,
-  expanded,
-  mentions,
-  descriptionEditorRef,
-  imageUploadHandler,
-  onChange,
-}: {
-  value: string;
-  expanded: boolean;
-  mentions: MentionOption[];
-  descriptionEditorRef: RefObject<MarkdownEditorRef | null>;
-  imageUploadHandler: (file: File) => Promise<string>;
-  onChange: (value: string) => void;
-}) {
-  const [draftValue, setDraftValue] = useState(value);
-
-  useEffect(() => {
-    setDraftValue(value);
-  }, [value]);
-
-  return (
-    <MarkdownEditor
-      ref={descriptionEditorRef}
-      value={draftValue}
-      onChange={(nextValue) => {
-        setDraftValue(nextValue);
-        onChange(nextValue);
-      }}
-      placeholder="Add description..."
-      bordered={false}
-      mentions={mentions}
-      contentClassName={cn("text-sm text-muted-foreground pb-12", expanded ? "min-h-56" : "min-h-32")}
-      imageUploadHandler={imageUploadHandler}
     />
   );
 });
@@ -1089,9 +1035,6 @@ export function NewIssueDialog() {
   const canDiscardDraft = hasDraft || hasSavedDraft;
   const createIssueErrorMessage =
     createIssue.error instanceof Error ? createIssue.error.message : "Failed to create issue. Try again.";
-  const stagedDocuments = stagedFiles.filter((file) => file.kind === "document");
-  const stagedAttachments = stagedFiles.filter((file) => file.kind === "attachment");
-
   const handleProjectChange = useCallback((nextProjectId: string) => {
     if (nextProjectId) trackRecentProject(nextProjectId);
     setProjectId(nextProjectId);
@@ -1569,100 +1512,22 @@ export function NewIssueDialog() {
             </div>
           )}
 
-          {/* Description */}
-          <div
-            className="border-t border-border/60 px-4 pb-2 pt-3"
+          <NewIssueDescriptionSection
+            value={description}
+            expanded={expanded}
+            mentions={mentionOptions}
+            descriptionEditorRef={descriptionEditorRef}
+            imageUploadHandler={uploadDescriptionImageHandler}
+            stagedFiles={stagedFiles}
+            isFileDragOver={isFileDragOver}
+            pending={createIssue.isPending}
+            onChange={handleDescriptionChange}
             onDragEnter={handleFileDragEnter}
             onDragOver={handleFileDragOver}
             onDragLeave={handleFileDragLeave}
             onDrop={handleFileDrop}
-          >
-            <div
-              className={cn(
-                "rounded-md transition-colors",
-                isFileDragOver && "bg-accent/20",
-              )}
-            >
-              <IssueDescriptionEditor
-                value={description}
-                expanded={expanded}
-                mentions={mentionOptions}
-                descriptionEditorRef={descriptionEditorRef}
-                imageUploadHandler={uploadDescriptionImageHandler}
-                onChange={handleDescriptionChange}
-              />
-            </div>
-            {stagedFiles.length > 0 ? (
-              <div className="mt-4 space-y-3 rounded-lg border border-border/70 p-3">
-              {stagedDocuments.length > 0 ? (
-                <div className="space-y-2">
-                  <div className="text-xs font-medium text-muted-foreground">Documents</div>
-                  <div className="space-y-2">
-                    {stagedDocuments.map((file) => (
-                      <div key={file.id} className="flex items-start justify-between gap-3 rounded-md border border-border/70 px-3 py-2">
-                        <div className="min-w-0">
-                          <div className="flex items-center gap-2">
-                            <span className="rounded-full border border-border px-2 py-0.5 font-mono text-nano uppercase tracking-wide text-muted-foreground">
-                              {file.documentKey}
-                            </span>
-                            <span className="truncate text-sm">{file.file.name}</span>
-                          </div>
-                          <div className="mt-1 flex items-center gap-2 text-micro text-muted-foreground">
-                            <FileText className="h-3.5 w-3.5" />
-                            <span>{file.title || file.file.name}</span>
-                            <span>•</span>
-                            <span>{formatFileSize(file.file)}</span>
-                          </div>
-                        </div>
-                        <Button
-                          variant="ghost"
-                          size="icon-xs"
-                          className="shrink-0 text-muted-foreground"
-                          onClick={() => removeStagedFile(file.id)}
-                          disabled={createIssue.isPending}
-                          title="Remove document"
-                        >
-                          <X className="h-3.5 w-3.5" />
-                        </Button>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              ) : null}
-
-              {stagedAttachments.length > 0 ? (
-                <div className="space-y-2">
-                  <div className="text-xs font-medium text-muted-foreground">Attachments</div>
-                  <div className="space-y-2">
-                    {stagedAttachments.map((file) => (
-                      <div key={file.id} className="flex items-start justify-between gap-3 rounded-md border border-border/70 px-3 py-2">
-                        <div className="min-w-0">
-                          <div className="flex items-center gap-2">
-                            <Paperclip className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
-                            <span className="truncate text-sm">{file.file.name}</span>
-                          </div>
-                          <div className="mt-1 text-micro text-muted-foreground">
-                            {file.file.type || "application/octet-stream"} • {formatFileSize(file.file)}
-                          </div>
-                        </div>
-                        <Button
-                          variant="ghost"
-                          size="icon-xs"
-                          className="shrink-0 text-muted-foreground"
-                          onClick={() => removeStagedFile(file.id)}
-                          disabled={createIssue.isPending}
-                          title="Remove attachment"
-                        >
-                          <X className="h-3.5 w-3.5" />
-                        </Button>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              ) : null}
-              </div>
-            ) : null}
-          </div>
+            onRemoveStagedFile={removeStagedFile}
+          />
         </div>
 
         <IssuePropertyChips

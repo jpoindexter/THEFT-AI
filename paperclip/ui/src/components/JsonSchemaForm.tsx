@@ -1,13 +1,9 @@
-import React, { useCallback, useMemo, useState } from "react";
-import {
-  ChevronDown,
-  ChevronRight,
-  Plus,
-  Trash2,
-} from "lucide-react";
+import React, { useCallback, useMemo } from "react";
 import { cn } from "@/lib/utils";
-import { Label } from "@/components/ui/label";
-import { Button } from "@/components/ui/button";
+import {
+  ArrayField,
+  ObjectField,
+} from "@/components/json-schema-form/complex-fields";
 import {
   BooleanField,
   EnumField,
@@ -16,7 +12,6 @@ import {
   StringField,
 } from "@/components/json-schema-form/primitive-fields";
 import {
-  getDefaultForSchema,
   labelFromKey,
   resolveType,
   type JsonSchemaFormProps,
@@ -44,194 +39,6 @@ interface FormFieldProps {
   errors: Record<string, string>; // needed for recursion
   path: string; // needed for recursion error filtering
 }
-
-/**
- * Specialized field for array values, handling dynamic addition and removal of items.
- */
-const ArrayField = React.memo(({
-  propSchema,
-  value,
-  onChange,
-  error,
-  disabled,
-  label,
-  errors,
-  path,
-}: {
-  propSchema: JsonSchemaNode;
-  value: unknown;
-  onChange: (val: unknown) => void;
-  error?: string;
-  disabled: boolean;
-  label: string;
-  errors: Record<string, string>;
-  path: string;
-}) => {
-  const items = Array.isArray(value) ? value : [];
-  const itemSchema = propSchema.items as JsonSchemaNode;
-  const isComplex = resolveType(itemSchema) === "object";
-
-  return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <div>
-          <Label className="text-sm font-medium">{label}</Label>
-          {propSchema.description && (
-            <p className="text-xs text-muted-foreground">
-              {propSchema.description}
-            </p>
-          )}
-        </div>
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          disabled={
-            disabled ||
-            (propSchema.maxItems !== undefined &&
-              items.length >= (propSchema.maxItems as number))
-          }
-          onClick={() => {
-            const newItem = getDefaultForSchema(itemSchema);
-            onChange([...items, newItem]);
-          }}
-        >
-          <Plus className="mr-2 h-4 w-4" />
-          {isComplex ? "Add item" : "Add"}
-        </Button>
-      </div>
-
-      <div className="space-y-3">
-        {items.map((item, index) => (
-          <div
-            key={index}
-            className="group relative flex items-start space-x-2 rounded-lg border p-3"
-          >
-            <div className="flex-1">
-              <div className="mb-2 text-xs font-medium text-muted-foreground">
-                Item {index + 1}
-              </div>
-              <FormField
-                propSchema={itemSchema}
-                value={item}
-                label=""
-                path={`${path}/${index}`}
-                onChange={(newVal) => {
-                  const newItems = [...items];
-                  newItems[index] = newVal;
-                  onChange(newItems);
-                }}
-                disabled={disabled}
-                errors={errors}
-              />
-            </div>
-            <Button
-              type="button"
-              variant="ghost"
-              size="icon"
-              className="h-8 w-8 text-muted-foreground hover:text-destructive"
-              disabled={
-                disabled ||
-                (propSchema.minItems !== undefined &&
-                  items.length <= (propSchema.minItems as number))
-              }
-              onClick={() => {
-                const newItems = [...items];
-                newItems.splice(index, 1);
-                onChange(newItems);
-              }}
-            >
-              <Trash2 className="h-4 w-4" />
-              <span className="sr-only">Remove item</span>
-            </Button>
-          </div>
-        ))}
-        {items.length === 0 && (
-          <div className="rounded-lg border border-dashed p-4 text-center text-xs text-muted-foreground">
-            No items added yet.
-          </div>
-        )}
-      </div>
-      {error && (
-        <p className="text-xs font-medium text-destructive">{error}</p>
-      )}
-    </div>
-  );
-});
-
-ArrayField.displayName = "ArrayField";
-
-/**
- * Specialized field for object values, handling recursive rendering of nested properties.
- */
-const ObjectField = React.memo(({
-  propSchema,
-  value,
-  onChange,
-  disabled,
-  label,
-  errors,
-  path,
-}: {
-  propSchema: JsonSchemaNode;
-  value: unknown;
-  onChange: (val: unknown) => void;
-  disabled: boolean;
-  label: string;
-  errors: Record<string, string>;
-  path: string;
-}) => {
-  const [isCollapsed, setIsCollapsed] = useState(false);
-  const handleObjectChange = (newVal: Record<string, unknown>) => {
-    onChange(newVal);
-  };
-
-  return (
-    <div className="space-y-3 rounded-lg border p-4">
-      <Button
-        type="button"
-        variant="ghost"
-        className="h-auto w-full justify-between p-0 text-left hover:bg-transparent"
-        aria-expanded={!isCollapsed}
-        onClick={() => setIsCollapsed(!isCollapsed)}
-      >
-        <div className="text-left">
-          <Label className="cursor-pointer text-sm font-semibold">
-            {label}
-          </Label>
-          {propSchema.description && (
-            <p className="text-xs text-muted-foreground">
-              {propSchema.description}
-            </p>
-          )}
-        </div>
-        {isCollapsed ? (
-          <ChevronRight className="h-4 w-4 text-muted-foreground" />
-        ) : (
-          <ChevronDown className="h-4 w-4 text-muted-foreground" />
-        )}
-      </Button>
-
-      {!isCollapsed && (
-        <div className="pt-2">
-          <JsonSchemaForm
-            schema={propSchema}
-            values={(value as Record<string, unknown>) ?? {}}
-            onChange={handleObjectChange}
-            disabled={disabled}
-            errors={Object.fromEntries(
-              Object.entries(errors)
-                .filter(([errPath]) => errPath.startsWith(`${path}/`))
-                .map(([errPath, err]) => [errPath.replace(path, ""), err]),
-            )}
-          />
-        </div>
-      )}
-    </div>
-  );
-});
-
-ObjectField.displayName = "ObjectField";
 
 /**
  * Orchestrator component that selects and renders the appropriate field type based on the schema node.
@@ -318,8 +125,25 @@ const FormField = React.memo(({
           error={error}
           disabled={isReadOnly}
           label={label}
-          errors={errors}
-          path={path}
+          renderItem={(item, index) => {
+            const items = Array.isArray(value) ? value : [];
+            const itemSchema = propSchema.items as JsonSchemaNode;
+            return (
+              <FormField
+                propSchema={itemSchema}
+                value={item}
+                label=""
+                path={`${path}/${index}`}
+                onChange={(newVal) => {
+                  const newItems = [...items];
+                  newItems[index] = newVal;
+                  onChange(newItems);
+                }}
+                disabled={isReadOnly}
+                errors={errors}
+              />
+            );
+          }}
         />
       );
 
@@ -327,13 +151,20 @@ const FormField = React.memo(({
       return (
         <ObjectField
           propSchema={propSchema}
-          value={value}
-          onChange={onChange}
-          disabled={isReadOnly}
           label={label}
-          errors={errors}
-          path={path}
-        />
+        >
+          <JsonSchemaForm
+            schema={propSchema}
+            values={(value as Record<string, unknown>) ?? {}}
+            onChange={(newVal) => onChange(newVal)}
+            disabled={isReadOnly}
+            errors={Object.fromEntries(
+              Object.entries(errors)
+                .filter(([errPath]) => errPath.startsWith(`${path}/`))
+                .map(([errPath, err]) => [errPath.replace(path, ""), err]),
+            )}
+          />
+        </ObjectField>
       );
 
     default: // string

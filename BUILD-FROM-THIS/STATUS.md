@@ -45,7 +45,10 @@ T119 is now in progress after the active product route launch gate passed. First
 - `NewIssueDialog.tsx` continued its split with dialog header/company switching and execution workspace controls moved into guarded `new-issue-dialog/` modules. Focused `NewIssueDialog` scanning now reports zero findings; the parent remains oversized at 1727 lines.
 - `ProviderQuotaCard.tsx` now fits under 300 lines after moving model breakdown and rolling-window rows into guarded `provider-quota-card/` modules. Focused scanner reports zero findings.
 - `RunTranscriptView.tsx` moved raw transcript virtualization into `transcript/RawTranscriptView.tsx`, reducing the parent to 830 lines while preserving the two known runtime spacer findings in the smaller raw-view module.
-- Repo-wide design drift count is down to 1243 findings after the first twenty-seven T119 slices.
+- `JsonSchemaForm.tsx` now fits under 300 lines after moving recursive array/object field chrome into `json-schema-form/complex-fields.tsx`; all schema-form modules scan clean.
+- `NewIssueDialog.tsx` continued its split with description/editor and staged file rendering moved into `new-issue-dialog/NewIssueDescriptionSection.tsx`; the parent is down to 1592 lines and focused scanner remains clean.
+- `RunTranscriptView.tsx` continued its split with command/tool group renderers moved into `transcript/TranscriptToolGroups.tsx`; the parent is down to 563 lines and only the two raw virtualization spacer findings remain in the transcript target.
+- Repo-wide design drift count is at 1243 findings after the first thirty T119 slices.
 
 The Paperclip app is genuinely large. The remaining drag is mostly not missing MVP capability; it is oversized route/organism code inherited from the Paperclip host plus the THEFT UX migration. The active-route design-system gate currently passes with zero unallowed findings, but several files still exceed the maintainability guardrail and need continued modularization.
 
