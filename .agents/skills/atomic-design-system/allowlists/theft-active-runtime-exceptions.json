@@ -100,16 +100,16 @@
       "reason": "Worktree branding colors are generated runtime context."
     },
     {
-      "file": "paperclip/ui/src/plugins/launchers.tsx",
+      "file": "paperclip/ui/src/plugins/launchers/LauncherModalShell.tsx",
       "check": "inline-style",
-      "line": 536,
+      "line": 212,
       "sample": "style={",
       "reason": "Plugin launcher stack z-index and bounds are runtime geometry."
     },
     {
-      "file": "paperclip/ui/src/plugins/launchers.tsx",
+      "file": "paperclip/ui/src/plugins/launchers/LauncherModalShell.tsx",
       "check": "inline-style",
-      "line": 551,
+      "line": 227,
       "sample": "style={",
       "reason": "Plugin launcher popover anchoring comes from DOMRect runtime geometry."
     }
