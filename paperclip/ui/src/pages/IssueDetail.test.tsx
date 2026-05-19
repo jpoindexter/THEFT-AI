@@ -958,6 +958,18 @@ describe("IssueDetail", () => {
     expect(text).toContain("Where the work should land");
     expect(text).toContain("Ask Operator to publish output");
     expect(text).toContain("No output to approve");
+    expect(text).toContain("Start execution");
+    expect(text).toContain("Ready to run");
+
+    const startExecutionButton = Array.from(container.querySelectorAll("button"))
+      .find((button) => button.textContent?.trim() === "Start execution");
+    expect(startExecutionButton).toBeDefined();
+
+    await act(async () => {
+      startExecutionButton!.click();
+    });
+    await flushReact();
+    expect(container.textContent).toContain("Chat thread");
   });
 
   it("passes blocker attention to the issue detail header status icon", async () => {

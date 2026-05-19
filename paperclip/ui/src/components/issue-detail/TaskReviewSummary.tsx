@@ -18,6 +18,7 @@ type TaskReviewSummaryProps = {
   hasLiveRuns: boolean;
   hasBlocker: boolean;
   approving: boolean;
+  onStartExecution: () => void;
   onApprove: () => void;
   onAskRevision: () => void;
   onAskOperator: () => void;
@@ -39,6 +40,7 @@ export function TaskReviewSummary({
   hasLiveRuns,
   hasBlocker,
   approving,
+  onStartExecution,
   onApprove,
   onAskRevision,
   onAskOperator,
@@ -50,7 +52,14 @@ export function TaskReviewSummary({
   const outputLabel = outputCount > 0
     ? `${outputCount} Library artifact${outputCount === 1 ? "" : "s"}`
     : "No Library artifact yet";
-  const runLabel = hasLiveRuns ? "Live run active" : issue.executionRunId ? "Run attached" : "No active run";
+  const canStartExecution = !hasLiveRuns && !hasBlocker && !["done", "cancelled"].includes(issue.status);
+  const runLabel = hasLiveRuns
+    ? "Live run active"
+    : issue.executionRunId
+      ? "Run attached"
+      : canStartExecution
+      ? "Ready to run"
+      : "No active run";
   const taskStateLabel = hasBlocker
     ? "Blocked until next action"
     : issue.status === "done"
@@ -148,6 +157,10 @@ export function TaskReviewSummary({
             </p>
           </div>
           <div className="grid gap-2">
+            <Button variant="outline" size="sm" disabled={!canStartExecution} onClick={onStartExecution}>
+              <Activity className="h-4 w-4" />
+              {canStartExecution ? "Start execution" : "Execution unavailable"}
+            </Button>
             <Button size="sm" disabled={!canApprove || approving} onClick={onApprove}>
               <Check className="h-4 w-4" />
               {approveLabel}

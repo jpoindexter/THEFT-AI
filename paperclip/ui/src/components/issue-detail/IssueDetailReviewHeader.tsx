@@ -32,6 +32,7 @@ type IssueDetailReviewHeaderProps = {
   hasLiveRuns: boolean;
   hasBlocker: boolean;
   approving: boolean;
+  onStartExecution: () => void;
   onApprove: () => void;
   onAskRevision: () => void;
   onAskOperator: () => void;
@@ -61,6 +62,7 @@ export function IssueDetailReviewHeader({
   hasLiveRuns,
   hasBlocker,
   approving,
+  onStartExecution,
   onApprove,
   onAskRevision,
   onAskOperator,
@@ -128,6 +130,7 @@ export function IssueDetailReviewHeader({
         hasLiveRuns={hasLiveRuns}
         hasBlocker={hasBlocker}
         approving={approving}
+        onStartExecution={onStartExecution}
         onApprove={onApprove}
         onAskRevision={onAskRevision}
         onAskOperator={onAskOperator}

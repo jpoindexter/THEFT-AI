@@ -23,6 +23,14 @@ function buildRevisionPrompt(issueTitle: string) {
   return `Please revise "${issueTitle}". I need a concrete saved output in the Library, not just a completed status. Include the artifact link or explain what is blocking it.`;
 }
 
+function buildExecutionPrompt(issueTitle: string) {
+  return [
+    `Execute "${issueTitle}" now.`,
+    "Use the current issue objective and dependencies.",
+    "Before marking complete, publish a concrete Library artifact and summarize exactly what was delivered.",
+  ].join("\n");
+}
+
 export function IssueDetailContent({
   primary,
   actions,
@@ -46,6 +54,9 @@ export function IssueDetailContent({
   };
   const askForRevision = () => {
     primary.focusCommentComposerFromShortcut(buildRevisionPrompt(issue.title));
+  };
+  const startExecution = () => {
+    primary.focusCommentComposerFromShortcut(buildExecutionPrompt(issue.title));
   };
 
   return (
@@ -71,6 +82,7 @@ export function IssueDetailContent({
           hasLiveRuns={primary.hasLiveRuns}
           hasBlocker={issue.status === "blocked" || (issue.blockedBy?.length ?? 0) > 0}
           approving={actions.updateIssue.isPending}
+          onStartExecution={startExecution}
           onApprove={() => actions.updateIssue.mutate({ status: "done" })}
           onAskRevision={askForRevision}
           onAskOperator={askWhereOutputLanded}
