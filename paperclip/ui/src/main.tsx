@@ -1,7 +1,7 @@
 import * as React from "react";
 import { StrictMode } from "react";
 import * as ReactDOM from "react-dom";
-import { createRoot } from "react-dom/client";
+import { createRoot, type Root } from "react-dom/client";
 import { BrowserRouter } from "@/lib/router";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { App } from "./App";
@@ -29,7 +29,22 @@ import "./styles/markdown-code.css";
 import "./styles/markdown-content.css";
 import "./styles/markdown-chips-popups.css";
 
-if ("serviceWorker" in navigator) {
+const ROOT_ELEMENT_ID = "root";
+const ROOT_INSTANCE_KEY = "__paperclipRoot";
+
+type RootHostElement = HTMLElement & {
+  [ROOT_INSTANCE_KEY]?: Root;
+};
+
+if ("serviceWorker" in navigator && import.meta.env.DEV) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.getRegistrations()
+      .then((registrations) => Promise.all(registrations.map((registration) => registration.unregister())))
+      .catch(() => {
+        // Ignore service worker cleanup failures in local dev.
+      });
+  });
+} else if ("serviceWorker" in navigator) {
   window.addEventListener("load", () => {
     navigator.serviceWorker.register("/sw.js");
   });
@@ -57,7 +72,13 @@ async function bootstrap() {
     console.error("Failed to initialize plugin bridge", error);
   }
 
-  createRoot(document.getElementById("root")!).render(
+  const rootElement = document.getElementById(ROOT_ELEMENT_ID) as RootHostElement | null;
+  if (!rootElement) {
+    throw new Error(`Missing #${ROOT_ELEMENT_ID} root element`);
+  }
+  const root = rootElement[ROOT_INSTANCE_KEY] ?? createRoot(rootElement);
+  rootElement[ROOT_INSTANCE_KEY] = root;
+  root.render(
     <StrictMode>
       <QueryClientProvider client={queryClient}>
         <ThemeProvider>

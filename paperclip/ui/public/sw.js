@@ -1,4 +1,4 @@
-const CACHE_NAME = "paperclip-v2";
+const CACHE_NAME = "paperclip-v3";
 
 self.addEventListener("install", () => {
   self.skipWaiting();
@@ -32,11 +32,24 @@ self.addEventListener("fetch", (event) => {
         }
         return response;
       })
-      .catch(() => {
+      .catch(async () => {
+        const cached = await caches.match(request);
+        if (cached) return cached;
+
         if (request.mode === "navigate") {
-          return caches.match("/") || new Response("Offline", { status: 503 });
+          const root = await caches.match("/");
+          if (root) return root;
+          return new Response("Offline", {
+            status: 503,
+            statusText: "Service Unavailable",
+            headers: { "Content-Type": "text/plain; charset=utf-8" },
+          });
         }
-        return caches.match(request);
+
+        return new Response("", {
+          status: 504,
+          statusText: "Gateway Timeout",
+        });
       })
   );
 });
