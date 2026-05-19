@@ -29,6 +29,6 @@ Expected result: task review shows artifact titles, lets the founder open Librar
 ```bash
 pnpm -C paperclip --filter @paperclipai/ui typecheck
 pnpm design:gate
-THEFT_CHROME_PATH='/Applications/Google Chrome.app/Contents/MacOS/Google Chrome' node paperclip/scripts/smoke/theft-mvp-route-smoke.mjs --short --company-prefix THFT
+node paperclip/scripts/smoke/theft-mvp-route-smoke.mjs --short --company-prefix THFT
 git diff --check
 ```

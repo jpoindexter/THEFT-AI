@@ -87,7 +87,7 @@
 - [x] T016 Run `pnpm -C paperclip --filter @paperclipai/ui typecheck`
 - [x] T017 Run `pnpm design:gate`
 - [x] T018 Run `git diff --check`
-- [x] T019 Run `THEFT_CHROME_PATH='/Applications/Google Chrome.app/Contents/MacOS/Google Chrome' node paperclip/scripts/smoke/theft-mvp-route-smoke.mjs --short --company-prefix THFT`
+- [x] T019 Run `node paperclip/scripts/smoke/theft-mvp-route-smoke.mjs --short --company-prefix THFT`
 - [x] T020 Commit the founder happy-path slice with spec artifacts and implementation
 
 ---
