@@ -110,10 +110,14 @@ export function useIssueDetailIssueActions({
       }
     },
   });
+  const updateIssueRef = useRef(updateIssue);
+  useEffect(() => {
+    updateIssueRef.current = updateIssue;
+  }, [updateIssue]);
 
   const handleIssuePropertiesUpdate = useCallback((data: Record<string, unknown>) => {
-    updateIssue.mutate(data);
-  }, [updateIssue]);
+    updateIssueRef.current.mutate(data);
+  }, []);
 
   const updateChildIssue = useMutation({
     mutationFn: ({ id, data }: { id: string; data: Record<string, unknown> }) => issuesApi.update(id, data),
@@ -131,10 +135,14 @@ export function useIssueDetailIssueActions({
       });
     },
   });
+  const updateChildIssueRef = useRef(updateChildIssue);
+  useEffect(() => {
+    updateChildIssueRef.current = updateChildIssue;
+  }, [updateChildIssue]);
 
   const handleChildIssueUpdate = useCallback((id: string, data: Record<string, unknown>) => {
-    updateChildIssue.mutate({ id, data });
-  }, [updateChildIssue]);
+    updateChildIssueRef.current.mutate({ id, data });
+  }, []);
 
   const checkIssueMonitorNow = useMutation({
     mutationFn: () => issuesApi.checkMonitorNow(issueId!),
@@ -171,17 +179,21 @@ export function useIssueDetailIssueActions({
       });
     },
   });
-
-  const archiveIssueFromInbox = useCallback((id: string) => {
-    if (!archiveFromInbox.isPending) archiveFromInbox.mutate(id);
+  const archiveFromInboxRef = useRef(archiveFromInbox);
+  useEffect(() => {
+    archiveFromInboxRef.current = archiveFromInbox;
   }, [archiveFromInbox]);
 
+  const archiveIssueFromInbox = useCallback((id: string) => {
+    if (!archiveFromInboxRef.current.isPending) archiveFromInboxRef.current.mutate(id);
+  }, []);
+
   const hideIssue = useCallback(() => {
-    updateIssue.mutate(
+    updateIssueRef.current.mutate(
       { hiddenAt: new Date().toISOString() },
       { onSuccess: () => navigate("/issues/all") },
     );
-  }, [navigate, updateIssue]);
+  }, [navigate]);
 
   return {
     archiveIssueFromInbox,

@@ -63,6 +63,7 @@ const mockInstanceSettingsApi = vi.hoisted(() => ({
 }));
 
 const mockNavigate = vi.hoisted(() => vi.fn());
+const mockOpenNewIssue = vi.hoisted(() => vi.fn());
 const mockOpenPanel = vi.hoisted(() => vi.fn());
 const mockClosePanel = vi.hoisted(() => vi.fn());
 const mockSetBreadcrumbs = vi.hoisted(() => vi.fn());
@@ -134,10 +135,10 @@ vi.mock("../context/CompanyContext", () => ({
 
 vi.mock("../context/DialogContext", () => ({
   useDialog: () => ({
-    openNewIssue: vi.fn(),
+    openNewIssue: mockOpenNewIssue,
   }),
   useDialogActions: () => ({
-    openNewIssue: vi.fn(),
+    openNewIssue: mockOpenNewIssue,
   }),
 }));
 
@@ -806,6 +807,9 @@ describe("IssueDetail", () => {
       keyboardShortcuts: false,
       feedbackDataSharingPreference: "prompt",
     });
+    mockOpenNewIssue.mockClear();
+    mockOpenPanel.mockClear();
+    mockClosePanel.mockClear();
     mockIssuesListRender.mockClear();
     mockIssueChatThreadRender.mockClear();
   });
@@ -840,6 +844,35 @@ describe("IssueDetail", () => {
     expect(container.textContent).toContain("Context");
     expect(container.textContent).toContain("Runtime diagnostics");
     expect(consoleErrorSpy).not.toHaveBeenCalled();
+  });
+
+  it("does not reopen the properties panel on stable issue detail rerenders", async () => {
+    mockIssuesApi.get.mockResolvedValue(createIssue());
+
+    await act(async () => {
+      root.render(
+        <QueryClientProvider client={queryClient}>
+          <IssueDetail />
+        </QueryClientProvider>,
+      );
+    });
+    await waitForAssertion(() => {
+      expect(container.textContent).toContain("Issue detail smoke");
+    });
+
+    const openPanelCountAfterLoad = mockOpenPanel.mock.calls.length;
+    expect(openPanelCountAfterLoad).toBeGreaterThan(0);
+
+    await act(async () => {
+      root.render(
+        <QueryClientProvider client={queryClient}>
+          <IssueDetail />
+        </QueryClientProvider>,
+      );
+    });
+    await flushReact();
+
+    expect(mockOpenPanel).toHaveBeenCalledTimes(openPanelCountAfterLoad);
   });
 
   it("frames the issue detail header as a THEFT task review", async () => {
