@@ -945,6 +945,61 @@ describe("IssueDetail", () => {
     expect(text).not.toContain("Hide this Issue");
   });
 
+  it("renders task review output cards without key warnings when document titles repeat", async () => {
+    mockIssuesApi.get.mockResolvedValue(createIssue({
+      assigneeAgentId: "agent-1",
+      documentSummaries: [
+        {
+          id: "doc-plan",
+          companyId: "company-1",
+          issueId: "issue-1",
+          key: "plan",
+          title: "THFT-12 First Sales Website Page",
+          format: "markdown",
+          latestRevisionId: null,
+          latestRevisionNumber: 1,
+          createdByAgentId: "agent-1",
+          createdByUserId: null,
+          updatedByAgentId: "agent-1",
+          updatedByUserId: null,
+          createdAt: new Date("2026-04-21T00:00:00.000Z"),
+          updatedAt: new Date("2026-04-21T00:00:00.000Z"),
+        },
+        {
+          id: "doc-output",
+          companyId: "company-1",
+          issueId: "issue-1",
+          key: "output",
+          title: "THFT-12 First Sales Website Page",
+          format: "markdown",
+          latestRevisionId: null,
+          latestRevisionNumber: 1,
+          createdByAgentId: "agent-1",
+          createdByUserId: null,
+          updatedByAgentId: "agent-1",
+          updatedByUserId: null,
+          createdAt: new Date("2026-04-21T00:00:00.000Z"),
+          updatedAt: new Date("2026-04-21T00:00:00.000Z"),
+        },
+      ],
+    }));
+    mockAgentsApi.list.mockResolvedValue([
+      createAgent({ id: "agent-1", name: "Engineering Lead", title: "Engineering" }),
+    ]);
+
+    await act(async () => {
+      root.render(
+        <QueryClientProvider client={queryClient}>
+          <IssueDetail />
+        </QueryClientProvider>,
+      );
+    });
+    await flushReact();
+
+    expect(container.textContent).toContain("THFT-12 First Sales Website Page");
+    expect(consoleErrorSpy).not.toHaveBeenCalled();
+  });
+
   it("blocks approval when task review has no Library output", async () => {
     mockIssuesApi.get.mockResolvedValue(createIssue({
       assigneeAgentId: "agent-1",
