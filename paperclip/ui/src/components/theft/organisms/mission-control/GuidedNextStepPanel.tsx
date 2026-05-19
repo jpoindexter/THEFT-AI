@@ -3,13 +3,15 @@ import { Link } from "@/lib/router";
 import { Button } from "@/components/ui/button";
 import { TheftChip, TheftSectionHeader } from "@/components/theft";
 import { MissionControlPanel } from "./MissionControlPanel";
-import type { MissionControlNextStep } from "./missionControlNextStep";
+import type { MissionControlNextStep, MissionControlPlanSummary } from "./missionControlNextStep";
 
 export function GuidedNextStepPanel({
   nextStep,
+  planSummary,
   onAskOperator,
 }: {
   nextStep: MissionControlNextStep;
+  planSummary: MissionControlPlanSummary;
   onAskOperator: () => void;
 }) {
   const primaryAction = nextStep.actionHref ? (
@@ -47,6 +49,16 @@ export function GuidedNextStepPanel({
             Explain this
           </Button>
         </div>
+      </div>
+
+      <div className="theft-surface-muted min-w-0 p-3">
+        <div className="flex flex-wrap items-center gap-2">
+          <TheftChip tone="muted">{planSummary.setupLabel}</TheftChip>
+          <p className="min-w-0 break-words text-sm font-medium [overflow-wrap:anywhere]">
+            {planSummary.title}
+          </p>
+        </div>
+        <p className="mt-2 text-xs leading-5 text-muted-foreground">{planSummary.detail}</p>
       </div>
 
       <p className="text-xs leading-5 text-muted-foreground">{nextStep.secondaryLabel}</p>

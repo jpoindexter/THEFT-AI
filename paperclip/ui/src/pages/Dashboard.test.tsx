@@ -29,9 +29,12 @@ const company = {
     "",
     buildOnboardingContextBlock({
       stage: "building",
-      initialBrief: "A local AI company OS.",
-      operatorName: "Operator",
-      setupItems: [{ key: "first-customer", label: "First customer", status: "todo" }],
+          initialBrief: "A local AI company OS.",
+          operatorName: "Operator",
+      setupItems: [
+        { key: "company-name", label: "Company name", status: "done", note: "THEFT Studio" },
+        { key: "first-customer", label: "First customer", status: "todo" },
+      ],
     }),
   ].join("\n"),
 } as Company;
@@ -212,6 +215,9 @@ describe("Dashboard", () => {
     expect(text).toContain("Idea");
     expect(text).toContain("Departments");
     expect(text).toContain("Library");
+    expect(text).toContain("building plan");
+    expect(text).toContain("A local AI company OS.");
+    expect(text).toContain("Company name: THEFT Studio");
     expect(text).toContain("Task output should land in Library before approval.");
     expect(text).toContain("Next Move");
     expect(text).toContain("Blocked task");

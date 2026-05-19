@@ -57,9 +57,9 @@
 
 ### Implementation for User Story 2
 
-- [ ] T010 [P] [US2] Review onboarding plan section data in `paperclip/ui/src/components/onboarding/useOnboardingPlanSections.ts`
-- [ ] T011 [US2] Surface accepted plan summary on Mission Control in `paperclip/ui/src/components/theft/organisms/mission-control/GuidedNextStepPanel.tsx`
-- [ ] T012 [US2] Connect plan context from company onboarding description in `paperclip/ui/src/pages/Dashboard.tsx`
+- [x] T010 [P] [US2] Review onboarding plan section data in `paperclip/ui/src/components/onboarding/useOnboardingPlanSections.ts`
+- [x] T011 [US2] Surface accepted plan summary on Mission Control in `paperclip/ui/src/components/theft/organisms/mission-control/GuidedNextStepPanel.tsx`
+- [x] T012 [US2] Connect plan context from company onboarding description in `paperclip/ui/src/pages/Dashboard.tsx`
 
 ---
 

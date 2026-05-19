@@ -19,6 +19,7 @@ import {
   OutcomesPanel,
   TheftWorkbenchTemplate,
   StrategyMapPanel,
+  buildMissionControlPlanSummary,
   buildMissionControlNextStep,
 } from "@/components/theft";
 import { EmptyState } from "../components/EmptyState";
@@ -151,6 +152,10 @@ export function Dashboard() {
       }),
     [bottleneck, latestLibraryDocuments.length, nextTasks, objectiveTitle, profile.setupItems],
   );
+  const planSummary = useMemo(
+    () => buildMissionControlPlanSummary({ profile, objective: objectiveTitle }),
+    [objectiveTitle, profile],
+  );
 
   const createTaskMutation = useMutation({
     mutationFn: async () => {
@@ -227,6 +232,7 @@ export function Dashboard() {
 
           <GuidedNextStepPanel
             nextStep={nextStep}
+            planSummary={planSummary}
             onAskOperator={() => setOperatorOpen(true)}
           />
 

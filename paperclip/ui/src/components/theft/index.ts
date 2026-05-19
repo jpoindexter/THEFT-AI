@@ -23,9 +23,10 @@ export {
   OperatorDrawer,
   OutcomesPanel,
   StrategyMapPanel,
+  buildMissionControlPlanSummary,
   buildMissionControlNextStep,
 } from "./organisms/mission-control"
-export type { MissionControlNextStep } from "./organisms/mission-control"
+export type { MissionControlNextStep, MissionControlPlanSummary } from "./organisms/mission-control"
 export {
   LibraryControls,
   LibraryDetail,

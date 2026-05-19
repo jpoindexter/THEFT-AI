@@ -12,4 +12,5 @@ export { OperatorDock } from "./OperatorDock";
 export { OperatorDrawer } from "./OperatorDrawer";
 export { StrategyMapPanel } from "./StrategyMapPanel";
 export { buildMissionControlNextStep } from "./missionControlNextStep";
-export type { MissionControlNextStep } from "./missionControlNextStep";
+export { buildMissionControlPlanSummary } from "./missionControlNextStep";
+export type { MissionControlNextStep, MissionControlPlanSummary } from "./missionControlNextStep";

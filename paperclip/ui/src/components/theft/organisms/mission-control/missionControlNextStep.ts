@@ -11,6 +11,34 @@ export type MissionControlNextStep = {
   secondaryLabel: string;
 };
 
+export type MissionControlPlanSummary = {
+  title: string;
+  detail: string;
+  setupLabel: string;
+};
+
+export function buildMissionControlPlanSummary(input: {
+  profile: CompanyProfileSummary;
+  objective: string;
+}): MissionControlPlanSummary {
+  const completedSetup = input.profile.setupItems
+    .filter((item) => item.status === "done" && (item.note || item.label))
+    .slice(0, 2)
+    .map((item) => item.note ? `${item.label}: ${item.note}` : item.label);
+
+  return {
+    title: input.profile.brief ?? input.objective,
+    detail:
+      completedSetup.length > 0
+        ? completedSetup.join(" · ")
+        : "Accepted from onboarding. Operator uses this context to activate departments and starter work.",
+    setupLabel:
+      input.profile.stage
+        ? `${input.profile.stage.replace(/-/g, " ")} plan`
+        : "Company plan",
+  };
+}
+
 export function buildMissionControlNextStep(input: {
   bottleneck: CompanyBottleneck;
   setupItems: CompanyProfileSummary["setupItems"];
