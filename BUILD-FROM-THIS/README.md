@@ -7,24 +7,25 @@
 1. **`HANDOFF.md`** — resume state, pushed commits, current implementation status, next exact tasks
 2. **`SOURCE-OF-TRUTH.md`** — canonical merge decision: THEFT product layer on a Paperclip runtime host
 3. **`PARITY-DELTA.md`** — feature parity, product deltas, gaps, and build order
-4. **`UX-DIRECTION.md`** — product UX direction tying Paperclip, Cofounder, Hyperagent, skills, and THEFT happy path together
-5. **`MISSION-CONTROL-UX.md`** — current interface target: streamlining into Mission Control without removing Paperclip/runtime features
-6. **`VISUAL-UX-REFERENCES.md`** — MagicPath, local reference board, cthdrl, Sana, and strategy-interface visual direction
-7. **`DESIGN-SYSTEM.md`** — active token contract: Sana-style white workbench, 8px grid, no hardcoded product UI constants
-8. **`STYLE-TARGET-099.md`** — density/structure reference only: 099 terminal workbench, black/white/gray, mono, no neon/HUD skin
-9. **`GPT-IMAGE-SCREEN-PROMPTS.md`** — exact GPT Image prompts for Mission Control screens and visual acceptance criteria
-10. **`GPT-IMAGE-RENDER-DECISIONS.md`** — reviewed render set, structure references, drift warnings, and implementation order
-11. **`MVP-EXECUTION-PLAN.md`** — fastest path to a usable MVP, screen order, acceptance gates, and lightweight verification policy
-12. **`MVP-DOGFOODING-FEEDBACK.md`** — live dogfood friction, confusing prompts, AI-helper ideas, and bugs to turn into tasks
-13. **`UX-SCREEN-PROMPTS.md`** — reusable prompts for generating and critiquing screen flows before implementation
-14. **`UX-POLISH-DECISIONS.md`** — accepted Phase 3 prompt outcomes and implementation deltas
-15. **`UX-BUILD-TASKS.md`** — model-lane task list for the UX build and smoke handoff
-16. **`ROADMAP.md`** — ordered slices. Sequential, not parallel.
-17. **`TASKS.md`** — concrete task list. Working file.
-18. **`STATUS.md`** — what actually exists vs is stubbed/broken (audit-derived)
-19. **`DECISIONS.md`** — locked choices, append-only, no re-litigating
-20. **`PAPERCLIP-HOST-PROMOTION.md`** — how Paperclip became tracked source in this repo
-21. **`SKILL-AUDIT.md`** — THEFT skill packs and default department mappings
+4. **`COFOUNDER-HAPPY-PATH-MVP.md`** — canonical MVP contract: Paperclip engine under a Cofounder-style artifact-producing flow
+5. **`UX-DIRECTION.md`** — product UX direction tying Paperclip, Cofounder, Hyperagent, skills, and THEFT happy path together
+6. **`MISSION-CONTROL-UX.md`** — current interface target: streamlining into Mission Control without removing Paperclip/runtime features
+7. **`VISUAL-UX-REFERENCES.md`** — MagicPath, local reference board, cthdrl, Sana, and strategy-interface visual direction
+8. **`DESIGN-SYSTEM.md`** — active token contract: Sana-style white workbench, 8px grid, no hardcoded product UI constants
+9. **`STYLE-TARGET-099.md`** — density/structure reference only: 099 terminal workbench, black/white/gray, mono, no neon/HUD skin
+10. **`GPT-IMAGE-SCREEN-PROMPTS.md`** — exact GPT Image prompts for Mission Control screens and visual acceptance criteria
+11. **`GPT-IMAGE-RENDER-DECISIONS.md`** — reviewed render set, structure references, drift warnings, and implementation order
+12. **`MVP-EXECUTION-PLAN.md`** — fastest path to a usable MVP, screen order, acceptance gates, and lightweight verification policy
+13. **`MVP-DOGFOODING-FEEDBACK.md`** — live dogfood friction, confusing prompts, AI-helper ideas, and bugs to turn into tasks
+14. **`UX-SCREEN-PROMPTS.md`** — reusable prompts for generating and critiquing screen flows before implementation
+15. **`UX-POLISH-DECISIONS.md`** — accepted Phase 3 prompt outcomes and implementation deltas
+16. **`UX-BUILD-TASKS.md`** — model-lane task list for the UX build and smoke handoff
+17. **`ROADMAP.md`** — ordered slices. Sequential, not parallel.
+18. **`TASKS.md`** — concrete task list. Working file.
+19. **`STATUS.md`** — what actually exists vs is stubbed/broken (audit-derived)
+20. **`DECISIONS.md`** — locked choices, append-only, no re-litigating
+21. **`PAPERCLIP-HOST-PROMOTION.md`** — how Paperclip became tracked source in this repo
+22. **`SKILL-AUDIT.md`** — THEFT skill packs and default department mappings
 
 ## How to use this folder
 
