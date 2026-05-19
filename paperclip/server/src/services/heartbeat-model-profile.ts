@@ -17,6 +17,12 @@ export interface ModelProfileApplication {
   adapterConfig: Record<string, unknown> | null;
 }
 
+export interface ParsedIssueAssigneeAdapterOverrides {
+  modelProfile: ModelProfileKey | null;
+  adapterConfig: Record<string, unknown> | null;
+  useProjectWorkspace: boolean | null;
+}
+
 function readModelProfileKey(value: unknown): ModelProfileKey | null {
   return MODEL_PROFILE_KEYS.includes(value as ModelProfileKey)
     ? (value as ModelProfileKey)
@@ -38,6 +44,26 @@ export function normalizeModelProfileWakeContext(input: {
     input.contextSnapshot.modelProfile = modelProfileFromPayload;
   }
   return input.contextSnapshot;
+}
+
+export function parseIssueAssigneeAdapterOverrides(
+  raw: unknown,
+): ParsedIssueAssigneeAdapterOverrides | null {
+  const parsed = parseObject(raw);
+  const modelProfile = readModelProfileKey(parsed.modelProfile);
+  const parsedAdapterConfig = parseObject(parsed.adapterConfig);
+  const adapterConfig =
+    Object.keys(parsedAdapterConfig).length > 0 ? parsedAdapterConfig : null;
+  const useProjectWorkspace =
+    typeof parsed.useProjectWorkspace === "boolean"
+      ? parsed.useProjectWorkspace
+      : null;
+  if (!modelProfile && !adapterConfig && useProjectWorkspace === null) return null;
+  return {
+    modelProfile,
+    adapterConfig,
+    useProjectWorkspace,
+  };
 }
 
 function readAgentRuntimeModelProfile(

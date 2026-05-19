@@ -4,12 +4,10 @@ import { and, asc, desc, eq, getTableColumns, gt, inArray, isNull, lt, lte, notI
 import type { Db } from "@paperclipai/db";
 import {
   ISSUE_CONTINUATION_SUMMARY_DOCUMENT_KEY,
-  MODEL_PROFILE_KEYS,
   isEnvironmentDriverSupportedForAdapter,
   type IssueExecutionMonitorClearReason,
   type IssueExecutionMonitorPolicy,
   type IssueExecutionMonitorRecoveryPolicy,
-  type ModelProfileKey,
   type RunLivenessState,
 } from "@paperclipai/shared";
 import {
@@ -125,11 +123,7 @@ import {
 import { recoveryService } from "./recovery/service.js";
 import { productivityReviewService } from "./productivity-review.js";
 import { withAgentStartLock } from "./agent-start-lock.js";
-import {
-  redactCurrentUserText,
-  redactCurrentUserValue,
-} from "../log-redaction.js";
-import { redactEventPayload } from "../redaction.js";
+import { redactCurrentUserText } from "../log-redaction.js";
 import {
   appendExcerpt,
   boundHeartbeatRunEventPayloadForStorage,
@@ -141,6 +135,7 @@ import {
   mergeModelProfileAdapterConfig,
   mergeModelProfileRunMetadata,
   modelProfileRunMetadata,
+  parseIssueAssigneeAdapterOverrides,
   resolveModelProfileApplication,
 } from "./heartbeat-model-profile.js";
 import {
@@ -255,6 +250,7 @@ import {
   runTaskKey,
   summarizeRunFailureForIssueComment,
 } from "./heartbeat-run-utils.js";
+import { createHeartbeatRunEventController } from "./heartbeat-run-events.js";
 export {
   boundHeartbeatRunEventPayloadForStorage,
   compactRunLogChunk,
@@ -336,36 +332,8 @@ interface WakeupOptions {
   contextSnapshot?: Record<string, unknown>;
 }
 
-interface ParsedIssueAssigneeAdapterOverrides {
-  modelProfile: ModelProfileKey | null;
-  adapterConfig: Record<string, unknown> | null;
-  useProjectWorkspace: boolean | null;
-}
-
 function readNonEmptyString(value: unknown): string | null {
   return typeof value === "string" && value.trim().length > 0 ? value : null;
-}
-
-function parseIssueAssigneeAdapterOverrides(
-  raw: unknown,
-): ParsedIssueAssigneeAdapterOverrides | null {
-  const parsed = parseObject(raw);
-  const modelProfile = MODEL_PROFILE_KEYS.includes(parsed.modelProfile as ModelProfileKey)
-    ? parsed.modelProfile as ModelProfileKey
-    : null;
-  const parsedAdapterConfig = parseObject(parsed.adapterConfig);
-  const adapterConfig =
-    Object.keys(parsedAdapterConfig).length > 0 ? parsedAdapterConfig : null;
-  const useProjectWorkspace =
-    typeof parsed.useProjectWorkspace === "boolean"
-      ? parsed.useProjectWorkspace
-      : null;
-  if (!modelProfile && !adapterConfig && useProjectWorkspace === null) return null;
-  return {
-    modelProfile,
-    adapterConfig,
-    useProjectWorkspace,
-  };
 }
 
 export type HeartbeatEnvironmentRuntime = ReturnType<typeof environmentRuntimeService>;
@@ -404,6 +372,16 @@ export function heartbeatService(db: Db, options: HeartbeatServiceOptions = {}) 
   const recovery = recoveryService(db, { enqueueWakeup });
   const productivityReviews = productivityReviewService(db, { enqueueWakeup });
   let unsafeTextProjectionPromise: Promise<boolean> | null = null;
+  const {
+    appendRunEvent,
+    nextRunEventSeq,
+    persistRunProcessMetadata,
+    clearDetachedRunWarning,
+  } = createHeartbeatRunEventController({
+    db,
+    detachedProcessErrorCode: DETACHED_PROCESS_ERROR_CODE,
+    getCurrentUserRedactionOptions,
+  });
 
   async function releaseEnvironmentLeasesForRun(input: {
     runId: string;
@@ -2028,108 +2006,6 @@ export function heartbeatService(db: Db, options: HeartbeatServiceOptions = {}) 
         issue: issueUiLink(issue),
       },
     });
-  }
-
-  async function appendRunEvent(
-    run: typeof heartbeatRuns.$inferSelect,
-    seq: number,
-    event: {
-      eventType: string;
-      stream?: "system" | "stdout" | "stderr";
-      level?: "info" | "warn" | "error";
-      color?: string;
-      message?: string;
-      payload?: Record<string, unknown>;
-    },
-  ) {
-    const currentUserRedactionOptions = await getCurrentUserRedactionOptions();
-    const sanitizedMessage = event.message
-      ? redactCurrentUserText(event.message, currentUserRedactionOptions)
-      : event.message;
-    const boundedPayload = event.payload
-      ? boundHeartbeatRunEventPayloadForStorage(event.payload)
-      : event.payload;
-    const secretSanitizedPayload = boundedPayload ? redactEventPayload(boundedPayload) : boundedPayload;
-    const sanitizedPayload = secretSanitizedPayload
-      ? redactCurrentUserValue(secretSanitizedPayload, currentUserRedactionOptions)
-      : secretSanitizedPayload;
-
-    await db.insert(heartbeatRunEvents).values({
-      companyId: run.companyId,
-      runId: run.id,
-      agentId: run.agentId,
-      seq,
-      eventType: event.eventType,
-      stream: event.stream,
-      level: event.level,
-      color: event.color,
-      message: sanitizedMessage,
-      payload: sanitizedPayload,
-    });
-
-    publishLiveEvent({
-      companyId: run.companyId,
-      type: "heartbeat.run.event",
-      payload: {
-        runId: run.id,
-        agentId: run.agentId,
-        seq,
-        eventType: event.eventType,
-        stream: event.stream ?? null,
-        level: event.level ?? null,
-        color: event.color ?? null,
-        message: sanitizedMessage ?? null,
-        payload: sanitizedPayload ?? null,
-      },
-    });
-  }
-
-  async function nextRunEventSeq(runId: string) {
-    const [row] = await db
-      .select({ maxSeq: sql<number | null>`max(${heartbeatRunEvents.seq})` })
-      .from(heartbeatRunEvents)
-      .where(eq(heartbeatRunEvents.runId, runId));
-    return Number(row?.maxSeq ?? 0) + 1;
-  }
-
-  async function persistRunProcessMetadata(
-    runId: string,
-    meta: { pid: number; processGroupId: number | null; startedAt: string },
-  ) {
-    const startedAt = new Date(meta.startedAt);
-    return db
-      .update(heartbeatRuns)
-      .set({
-        processPid: meta.pid,
-        processGroupId: meta.processGroupId,
-        processStartedAt: Number.isNaN(startedAt.getTime()) ? new Date() : startedAt,
-        updatedAt: new Date(),
-      })
-      .where(eq(heartbeatRuns.id, runId))
-      .returning()
-      .then((rows) => rows[0] ?? null);
-  }
-
-  async function clearDetachedRunWarning(runId: string) {
-    const updated = await db
-      .update(heartbeatRuns)
-      .set({
-        error: null,
-        errorCode: null,
-        updatedAt: new Date(),
-      })
-      .where(and(eq(heartbeatRuns.id, runId), eq(heartbeatRuns.status, "running"), eq(heartbeatRuns.errorCode, DETACHED_PROCESS_ERROR_CODE)))
-      .returning()
-      .then((rows) => rows[0] ?? null);
-    if (!updated) return null;
-
-    await appendRunEvent(updated, await nextRunEventSeq(updated.id), {
-      eventType: "lifecycle",
-      stream: "system",
-      level: "info",
-      message: "Detached child process reported activity; cleared detached warning",
-    });
-    return updated;
   }
 
   async function patchRunIssueCommentStatus(
