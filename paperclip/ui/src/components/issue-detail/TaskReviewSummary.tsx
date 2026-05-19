@@ -114,8 +114,8 @@ export function TaskReviewSummary({
           </div>
           {outputTitles.length > 0 ? (
             <div className="space-y-2">
-              {outputTitles.slice(0, 3).map((title) => (
-                <TheftSurface key={title} tone="muted" padding="sm" className="flex items-start gap-2 text-sm">
+              {outputTitles.slice(0, 3).map((title, index) => (
+                <TheftSurface key={`${title}:${index}`} tone="muted" padding="sm" className="flex items-start gap-2 text-sm">
                   <FileText className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" />
                   <span className="line-clamp-2">{title}</span>
                 </TheftSurface>
