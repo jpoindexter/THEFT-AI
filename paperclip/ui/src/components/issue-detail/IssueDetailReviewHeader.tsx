@@ -32,11 +32,13 @@ type IssueDetailReviewHeaderProps = {
   hasLiveRuns: boolean;
   hasBlocker: boolean;
   approving: boolean;
+  publishingOutput: boolean;
   onStartExecution: () => void;
   onApprove: () => void;
   onAskRevision: () => void;
   onAskOperator: () => void;
   onOpenLibrary: () => void;
+  onPublishOutput: () => void;
   onResume: () => void;
   onViewAffected: () => void;
   onCancelSubtree: () => void;
@@ -62,11 +64,13 @@ export function IssueDetailReviewHeader({
   hasLiveRuns,
   hasBlocker,
   approving,
+  publishingOutput,
   onStartExecution,
   onApprove,
   onAskRevision,
   onAskOperator,
   onOpenLibrary,
+  onPublishOutput,
   onResume,
   onViewAffected,
   onCancelSubtree,
@@ -130,11 +134,13 @@ export function IssueDetailReviewHeader({
         hasLiveRuns={hasLiveRuns}
         hasBlocker={hasBlocker}
         approving={approving}
+        publishingOutput={publishingOutput}
         onStartExecution={onStartExecution}
         onApprove={onApprove}
         onAskRevision={onAskRevision}
         onAskOperator={onAskOperator}
         onOpenLibrary={onOpenLibrary}
+        onPublishOutput={onPublishOutput}
       />
     </>
   );

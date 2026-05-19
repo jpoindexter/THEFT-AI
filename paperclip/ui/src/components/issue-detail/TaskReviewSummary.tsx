@@ -18,11 +18,13 @@ type TaskReviewSummaryProps = {
   hasLiveRuns: boolean;
   hasBlocker: boolean;
   approving: boolean;
+  publishingOutput: boolean;
   onStartExecution: () => void;
   onApprove: () => void;
   onAskRevision: () => void;
   onAskOperator: () => void;
   onOpenLibrary: () => void;
+  onPublishOutput: () => void;
 };
 
 function formatTaskStatus(status: string) {
@@ -40,11 +42,13 @@ export function TaskReviewSummary({
   hasLiveRuns,
   hasBlocker,
   approving,
+  publishingOutput,
   onStartExecution,
   onApprove,
   onAskRevision,
   onAskOperator,
   onOpenLibrary,
+  onPublishOutput,
 }: TaskReviewSummaryProps) {
   const ownerLabel = owner
     ? `${owner.title ?? "Department lead"} · ${owner.name}`
@@ -131,11 +135,18 @@ export function TaskReviewSummary({
             variant="outline"
             size="sm"
             className="w-fit"
-            onClick={hasOutput ? onOpenLibrary : onAskOperator}
+            onClick={hasOutput ? onOpenLibrary : onPublishOutput}
+            disabled={!hasOutput && publishingOutput}
           >
-            {hasOutput ? <Library className="h-4 w-4" /> : <MessageSquare className="h-4 w-4" />}
-            {hasOutput ? "Open Library artifact" : "Ask Operator to publish output"}
+            {hasOutput ? <Library className="h-4 w-4" /> : <FileText className="h-4 w-4" />}
+            {hasOutput ? "Open Library artifact" : (publishingOutput ? "Publishing..." : "Publish to Library")}
           </Button>
+          {!hasOutput ? (
+            <Button variant="ghost" size="sm" className="w-fit" onClick={onAskOperator}>
+              <MessageSquare className="h-4 w-4" />
+              Ask Operator to publish output
+            </Button>
+          ) : null}
           <TheftSurface tone="muted" padding="sm">
             <p className="theft-label-compact">Objective</p>
             <p className="mt-2 line-clamp-4 text-xs leading-5 text-muted-foreground">

@@ -82,11 +82,13 @@ export function IssueDetailContent({
           hasLiveRuns={primary.hasLiveRuns}
           hasBlocker={issue.status === "blocked" || (issue.blockedBy?.length ?? 0) > 0}
           approving={actions.updateIssue.isPending}
+          publishingOutput={actions.publishOutputDraft.isPending}
           onStartExecution={startExecution}
           onApprove={() => actions.updateIssue.mutate({ status: "done" })}
           onAskRevision={askForRevision}
           onAskOperator={askWhereOutputLanded}
           onOpenLibrary={() => primary.navigate("/library")}
+          onPublishOutput={() => actions.publishOutputDraft.mutate()}
           onResume={primary.openResumeControl}
           onViewAffected={primary.openResumeControl}
           onCancelSubtree={primary.openCancelSubtreeControl}

@@ -785,6 +785,16 @@ describe("IssueDetail", () => {
     mockIssuesApi.listAttachments.mockResolvedValue([]);
     mockIssuesApi.listFeedbackVotes.mockResolvedValue([]);
     mockIssuesApi.markRead.mockResolvedValue({ id: "issue-1", lastReadAt: new Date().toISOString() });
+    mockIssuesApi.upsertDocument.mockResolvedValue({
+      id: "doc-output",
+      companyId: "company-1",
+      issueId: "issue-1",
+      key: "output",
+      title: "PAP-1 Output",
+      format: "markdown",
+      latestRevisionId: "rev-1",
+      latestRevisionNumber: 1,
+    });
     mockIssuesApi.getTreeControlState.mockResolvedValue({ activePauseHold: null });
     mockIssuesApi.listTreeHolds.mockResolvedValue([]);
     mockActivityApi.forIssue.mockResolvedValue([]);
@@ -970,6 +980,40 @@ describe("IssueDetail", () => {
     });
     await flushReact();
     expect(container.textContent).toContain("Chat thread");
+  });
+
+  it("can publish a missing task output directly to Library", async () => {
+    mockIssuesApi.get.mockResolvedValue(createIssue({
+      assigneeAgentId: "agent-1",
+      documentSummaries: [],
+    }));
+
+    await act(async () => {
+      root.render(
+        <QueryClientProvider client={queryClient}>
+          <IssueDetail />
+        </QueryClientProvider>,
+      );
+    });
+    await flushReact();
+
+    const publishButton = Array.from(container.querySelectorAll("button"))
+      .find((button) => button.textContent?.trim() === "Publish to Library");
+    expect(publishButton).toBeDefined();
+
+    await act(async () => {
+      publishButton!.click();
+    });
+    await flushReact();
+
+    expect(mockIssuesApi.upsertDocument).toHaveBeenCalledWith(
+      "issue-1",
+      "output",
+      expect.objectContaining({
+        format: "markdown",
+        title: "PAP-1 Output",
+      }),
+    );
   });
 
   it("passes blocker attention to the issue detail header status icon", async () => {

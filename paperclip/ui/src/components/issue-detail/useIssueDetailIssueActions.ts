@@ -195,6 +195,51 @@ export function useIssueDetailIssueActions({
     );
   }, [navigate]);
 
+  const publishOutputDraft = useMutation({
+    mutationFn: async () => {
+      if (!issueId || !issue) throw new Error("Issue context is required");
+      const issueLabel = issue.identifier ?? issue.id;
+      const objective = issue.description?.trim() || "Add the concrete delivered output for this task.";
+      const body = [
+        `# ${issueLabel} Output`,
+        "",
+        "## Summary",
+        "",
+        "_Describe what was delivered._",
+        "",
+        "## Objective",
+        "",
+        objective,
+        "",
+        "## Deliverable",
+        "",
+        "_Link files, URLs, or artifacts produced by this task._",
+      ].join("\n");
+      return issuesApi.upsertDocument(issue.id, "output", {
+        title: `${issueLabel} Output`,
+        format: "markdown",
+        body,
+        baseRevisionId: null,
+      });
+    },
+    onSuccess: () => {
+      invalidateIssueDetail();
+      queryClient.invalidateQueries({ queryKey: queryKeys.issues.documents(issueId!) });
+      pushToast({
+        title: "Library draft created",
+        body: "A task output draft is now attached to this issue.",
+        tone: "success",
+      });
+    },
+    onError: (err) => {
+      pushToast({
+        title: "Publish failed",
+        body: err instanceof Error ? err.message : "Unable to create the Library draft",
+        tone: "error",
+      });
+    },
+  });
+
   return {
     archiveIssueFromInbox,
     archivePending: archiveFromInbox.isPending,
@@ -203,6 +248,7 @@ export function useIssueDetailIssueActions({
     handleIssuePropertiesUpdate,
     hideIssue,
     issueHidden: !!issue?.hiddenAt,
+    publishOutputDraft,
     updateIssue,
   };
 }
