@@ -1,5 +1,4 @@
 import fs from "node:fs/promises";
-import path from "node:path";
 import { randomUUID } from "node:crypto";
 import { and, asc, desc, eq, getTableColumns, gt, inArray, isNull, lt, lte, notInArray, or, sql } from "drizzle-orm";
 import type { Db } from "@paperclipai/db";
@@ -22,7 +21,6 @@ import {
   agentWakeupRequests,
   activityLog,
   approvals,
-  companySkills as companySkillsTable,
   documentRevisions,
   issueDocuments,
   heartbeatRunEvents,
@@ -46,8 +44,6 @@ import type {
   AdapterExecutionResult,
   AdapterInvocationMeta,
   AdapterModelProfileDefinition,
-  AdapterSessionCodec,
-  UsageSummary,
 } from "../adapters/index.js";
 import { createLocalAgentJwt } from "../agent-auth-jwt.js";
 import { parseObject, asBoolean, asNumber } from "../adapters/utils.js";
@@ -177,6 +173,37 @@ import {
   shouldResetTaskSessionForWake,
 } from "./heartbeat-task-key.js";
 import {
+  buildExplicitResumeSessionOverride,
+  getAdapterSessionCodec,
+  hasSessionCompactionThresholds,
+  normalizeSessionParams,
+  parseSessionCompactionPolicy,
+  resolveNextSessionState,
+  resolveRuntimeSessionParamsForWorkspace,
+  truncateDisplayId,
+  type ResolvedWorkspaceForRun,
+  type SessionCompactionDecision,
+} from "./heartbeat-session.js";
+import {
+  deriveNormalizedUsageDelta,
+  formatCount,
+  normalizeUsageTotals,
+  readRawUsageTotals,
+  type UsageTotals,
+} from "./heartbeat-usage.js";
+import {
+  applyRunScopedMentionedSkillKeys,
+  extractMentionedSkillIdsFromSources,
+  resolveExecutionRunAdapterConfig,
+  resolveRunScopedMentionedSkillKeys,
+} from "./heartbeat-skill-sync.js";
+import {
+  normalizeBilledCostCents,
+  normalizeLedgerBillingType,
+  resolveLedgerBiller,
+  resolveLedgerScopeForRun,
+} from "./heartbeat-ledger.js";
+import {
   PAPERCLIP_HARNESS_CHECKOUT_KEY,
   PAPERCLIP_WAKE_PAYLOAD_KEY,
   deriveCommentId,
@@ -245,20 +272,22 @@ export {
   shouldResetTaskSessionForWake,
 } from "./heartbeat-task-key.js";
 export {
+  buildExplicitResumeSessionOverride,
+  parseSessionCompactionPolicy,
+  resolveRuntimeSessionParamsForWorkspace,
+  type ResolvedWorkspaceForRun,
+} from "./heartbeat-session.js";
+export {
   extractWakeCommentIds,
   mergeCoalescedContextSnapshot,
 } from "./heartbeat-wake-comments.js";
 export { formatRuntimeWorkspaceWarningLog } from "./heartbeat-wake-context.js";
-import {
-  hasSessionCompactionThresholds,
-  resolveSessionCompactionPolicy,
-  type SessionCompactionPolicy,
-} from "@paperclipai/adapter-utils";
-import {
-  readPaperclipSkillSyncPreference,
-  writePaperclipSkillSyncPreference,
-} from "@paperclipai/adapter-utils/server-utils";
-import { extractSkillMentionIds } from "@paperclipai/shared";
+export {
+  applyRunScopedMentionedSkillKeys,
+  extractMentionedSkillIdsFromSources,
+  resolveExecutionRunAdapterConfig,
+} from "./heartbeat-skill-sync.js";
+import { type SessionCompactionPolicy } from "@paperclipai/adapter-utils";
 import { environmentService } from "./environments.js";
 import { environmentRuntimeService } from "./environment-runtime.js";
 import { environmentRunOrchestrator } from "./environment-run-orchestrator.js";
@@ -293,120 +322,6 @@ const SESSIONED_LOCAL_ADAPTERS = new Set([
   "opencode_local",
   "pi_local",
 ]);
-type RuntimeConfigSecretResolver = Pick<
-  ReturnType<typeof secretService>,
-  "resolveAdapterConfigForRuntime" | "resolveEnvBindings"
->;
-
-export async function resolveExecutionRunAdapterConfig(input: {
-  companyId: string;
-  executionRunConfig: Record<string, unknown>;
-  projectEnv: unknown;
-  secretsSvc: RuntimeConfigSecretResolver;
-}) {
-  const { config: resolvedConfig, secretKeys } = await input.secretsSvc.resolveAdapterConfigForRuntime(
-    input.companyId,
-    input.executionRunConfig,
-  );
-  const projectEnvResolution = input.projectEnv
-    ? await input.secretsSvc.resolveEnvBindings(input.companyId, input.projectEnv)
-    : { env: {}, secretKeys: new Set<string>() };
-  if (Object.keys(projectEnvResolution.env).length > 0) {
-    resolvedConfig.env = {
-      ...parseObject(resolvedConfig.env),
-      ...projectEnvResolution.env,
-    };
-    for (const key of projectEnvResolution.secretKeys) {
-      secretKeys.add(key);
-    }
-  }
-  return { resolvedConfig, secretKeys };
-}
-
-export function extractMentionedSkillIdsFromSources(
-  sources: Array<string | null | undefined>,
-): string[] {
-  const mentionedIds = new Set<string>();
-  for (const source of sources) {
-    if (typeof source !== "string" || source.length === 0) continue;
-    for (const skillId of extractSkillMentionIds(source)) {
-      mentionedIds.add(skillId);
-    }
-  }
-  return [...mentionedIds];
-}
-
-export function applyRunScopedMentionedSkillKeys(
-  config: Record<string, unknown>,
-  skillKeys: string[],
-): Record<string, unknown> {
-  const normalizedSkillKeys = Array.from(
-    new Set(
-      skillKeys
-        .map((value) => value.trim())
-        .filter(Boolean),
-    ),
-  );
-  if (normalizedSkillKeys.length === 0) return config;
-
-  const existingPreference = readPaperclipSkillSyncPreference(config);
-  return writePaperclipSkillSyncPreference(config, [
-    ...existingPreference.desiredSkills,
-    ...normalizedSkillKeys,
-  ]);
-}
-
-async function resolveRunScopedMentionedSkillKeys(input: {
-  db: Db;
-  companyId: string;
-  issueId: string | null;
-}): Promise<string[]> {
-  if (!input.issueId) return [];
-
-  const issue = await input.db
-    .select({
-      title: issues.title,
-      description: issues.description,
-    })
-    .from(issues)
-    .where(and(eq(issues.id, input.issueId), eq(issues.companyId, input.companyId)))
-    .then((rows) => rows[0] ?? null);
-  if (!issue) return [];
-
-  const comments = await input.db
-    .select({ body: issueComments.body })
-    .from(issueComments)
-    .where(
-      and(
-        eq(issueComments.issueId, input.issueId),
-        eq(issueComments.companyId, input.companyId),
-      ),
-    );
-  const mentionedSkillIds = extractMentionedSkillIdsFromSources([
-    issue.title,
-    issue.description ?? "",
-    ...comments.map((comment) => comment.body),
-  ]);
-  if (mentionedSkillIds.length === 0) return [];
-
-  const skillRows = await input.db
-    .select({
-      id: companySkillsTable.id,
-      key: companySkillsTable.key,
-    })
-    .from(companySkillsTable)
-    .where(
-      and(
-        eq(companySkillsTable.companyId, input.companyId),
-        inArray(companySkillsTable.id, mentionedSkillIds),
-      ),
-    );
-  const skillKeyById = new Map(skillRows.map((row) => [row.id, row.key]));
-  return mentionedSkillIds
-    .map((skillId) => skillKeyById.get(skillId) ?? null)
-    .filter((skillKey): skillKey is string => Boolean(skillKey));
-}
-
 function normalizeMaxConcurrentRuns(value: unknown) {
   const parsed = Math.floor(asNumber(value, HEARTBEAT_MAX_CONCURRENT_RUNS_DEFAULT));
   if (!Number.isFinite(parsed)) return HEARTBEAT_MAX_CONCURRENT_RUNS_DEFAULT;
@@ -424,40 +339,11 @@ interface WakeupOptions {
   contextSnapshot?: Record<string, unknown>;
 }
 
-type UsageTotals = {
-  inputTokens: number;
-  cachedInputTokens: number;
-  outputTokens: number;
-};
-
-type SessionCompactionDecision = {
-  rotate: boolean;
-  reason: string | null;
-  handoffMarkdown: string | null;
-  previousRunId: string | null;
-};
-
 interface ParsedIssueAssigneeAdapterOverrides {
   modelProfile: ModelProfileKey | null;
   adapterConfig: Record<string, unknown> | null;
   useProjectWorkspace: boolean | null;
 }
-
-export type ResolvedWorkspaceForRun = {
-  cwd: string;
-  source: "project_primary" | "task_session" | "agent_home";
-  projectId: string | null;
-  workspaceId: string | null;
-  repoUrl: string | null;
-  repoRef: string | null;
-  workspaceHints: Array<{
-    workspaceId: string;
-    cwd: string | null;
-    repoUrl: string | null;
-    repoRef: string | null;
-  }>;
-  warnings: string[];
-};
 
 type ProjectWorkspaceCandidate = {
   id: string;
@@ -515,247 +401,6 @@ function didAutomaticRecoveryFail(
       latestRun.status as (typeof UNSUCCESSFUL_HEARTBEAT_RUN_TERMINAL_STATUSES)[number],
     )
   );
-}
-
-function normalizeLedgerBillingType(value: unknown): BillingType {
-  const raw = readNonEmptyString(value);
-  switch (raw) {
-    case "api":
-    case "metered_api":
-      return "metered_api";
-    case "subscription":
-    case "subscription_included":
-      return "subscription_included";
-    case "subscription_overage":
-      return "subscription_overage";
-    case "credits":
-      return "credits";
-    case "fixed":
-      return "fixed";
-    default:
-      return "unknown";
-  }
-}
-
-function resolveLedgerBiller(result: AdapterExecutionResult): string {
-  return readNonEmptyString(result.biller) ?? readNonEmptyString(result.provider) ?? "unknown";
-}
-
-function normalizeBilledCostCents(costUsd: number | null | undefined, billingType: BillingType): number {
-  if (billingType === "subscription_included") return 0;
-  if (typeof costUsd !== "number" || !Number.isFinite(costUsd)) return 0;
-  return Math.max(0, Math.round(costUsd * 100));
-}
-
-async function resolveLedgerScopeForRun(
-  db: Db,
-  companyId: string,
-  run: typeof heartbeatRuns.$inferSelect,
-) {
-  const context = parseObject(run.contextSnapshot);
-  const contextIssueId = readNonEmptyString(context.issueId);
-  const contextProjectId = readNonEmptyString(context.projectId);
-
-  if (!contextIssueId) {
-    return {
-      issueId: null,
-      projectId: contextProjectId,
-    };
-  }
-
-  const issue = await db
-    .select({
-      id: issues.id,
-      projectId: issues.projectId,
-    })
-    .from(issues)
-    .where(and(eq(issues.id, contextIssueId), eq(issues.companyId, companyId)))
-    .then((rows) => rows[0] ?? null);
-
-  return {
-    issueId: issue?.id ?? null,
-    projectId: issue?.projectId ?? contextProjectId,
-  };
-}
-
-type ResumeSessionRow = {
-  sessionParamsJson: Record<string, unknown> | null;
-  sessionDisplayId: string | null;
-  lastRunId: string | null;
-};
-
-export function buildExplicitResumeSessionOverride(input: {
-  resumeFromRunId: string;
-  resumeRunSessionIdBefore: string | null;
-  resumeRunSessionIdAfter: string | null;
-  taskSession: ResumeSessionRow | null;
-  sessionCodec: AdapterSessionCodec;
-}) {
-  const desiredDisplayId = truncateDisplayId(
-    input.resumeRunSessionIdAfter ?? input.resumeRunSessionIdBefore,
-  );
-  const taskSessionParams = normalizeSessionParams(
-    input.sessionCodec.deserialize(input.taskSession?.sessionParamsJson ?? null),
-  );
-  const taskSessionDisplayId = truncateDisplayId(
-    input.taskSession?.sessionDisplayId ??
-      (input.sessionCodec.getDisplayId ? input.sessionCodec.getDisplayId(taskSessionParams) : null) ??
-      readNonEmptyString(taskSessionParams?.sessionId),
-  );
-  const canReuseTaskSessionParams =
-    input.taskSession != null &&
-    (
-      input.taskSession.lastRunId === input.resumeFromRunId ||
-      (!!desiredDisplayId && taskSessionDisplayId === desiredDisplayId)
-    );
-  const sessionParams =
-    canReuseTaskSessionParams
-      ? taskSessionParams
-      : desiredDisplayId
-        ? { sessionId: desiredDisplayId }
-        : null;
-  const sessionDisplayId = desiredDisplayId ?? (canReuseTaskSessionParams ? taskSessionDisplayId : null);
-
-  if (!sessionDisplayId && !sessionParams) return null;
-  return {
-    sessionDisplayId,
-    sessionParams,
-  };
-}
-
-function normalizeUsageTotals(usage: UsageSummary | null | undefined): UsageTotals | null {
-  if (!usage) return null;
-  return {
-    inputTokens: Math.max(0, Math.floor(asNumber(usage.inputTokens, 0))),
-    cachedInputTokens: Math.max(0, Math.floor(asNumber(usage.cachedInputTokens, 0))),
-    outputTokens: Math.max(0, Math.floor(asNumber(usage.outputTokens, 0))),
-  };
-}
-
-function readRawUsageTotals(usageJson: unknown): UsageTotals | null {
-  const parsed = parseObject(usageJson);
-  if (Object.keys(parsed).length === 0) return null;
-
-  const inputTokens = Math.max(
-    0,
-    Math.floor(asNumber(parsed.rawInputTokens, asNumber(parsed.inputTokens, 0))),
-  );
-  const cachedInputTokens = Math.max(
-    0,
-    Math.floor(asNumber(parsed.rawCachedInputTokens, asNumber(parsed.cachedInputTokens, 0))),
-  );
-  const outputTokens = Math.max(
-    0,
-    Math.floor(asNumber(parsed.rawOutputTokens, asNumber(parsed.outputTokens, 0))),
-  );
-
-  if (inputTokens <= 0 && cachedInputTokens <= 0 && outputTokens <= 0) {
-    return null;
-  }
-
-  return {
-    inputTokens,
-    cachedInputTokens,
-    outputTokens,
-  };
-}
-
-function deriveNormalizedUsageDelta(current: UsageTotals | null, previous: UsageTotals | null): UsageTotals | null {
-  if (!current) return null;
-  if (!previous) return { ...current };
-
-  const inputTokens = current.inputTokens >= previous.inputTokens
-    ? current.inputTokens - previous.inputTokens
-    : current.inputTokens;
-  const cachedInputTokens = current.cachedInputTokens >= previous.cachedInputTokens
-    ? current.cachedInputTokens - previous.cachedInputTokens
-    : current.cachedInputTokens;
-  const outputTokens = current.outputTokens >= previous.outputTokens
-    ? current.outputTokens - previous.outputTokens
-    : current.outputTokens;
-
-  return {
-    inputTokens: Math.max(0, inputTokens),
-    cachedInputTokens: Math.max(0, cachedInputTokens),
-    outputTokens: Math.max(0, outputTokens),
-  };
-}
-
-function formatCount(value: number | null | undefined) {
-  if (typeof value !== "number" || !Number.isFinite(value)) return "0";
-  return value.toLocaleString("en-US");
-}
-
-export function parseSessionCompactionPolicy(agent: typeof agents.$inferSelect): SessionCompactionPolicy {
-  return resolveSessionCompactionPolicy(agent.adapterType, agent.runtimeConfig).policy;
-}
-
-export function resolveRuntimeSessionParamsForWorkspace(input: {
-  agentId: string;
-  previousSessionParams: Record<string, unknown> | null;
-  resolvedWorkspace: ResolvedWorkspaceForRun;
-}) {
-  const { agentId, previousSessionParams, resolvedWorkspace } = input;
-  const previousSessionId = readNonEmptyString(previousSessionParams?.sessionId);
-  const previousCwd = readNonEmptyString(previousSessionParams?.cwd);
-  if (!previousSessionId || !previousCwd) {
-    return {
-      sessionParams: previousSessionParams,
-      warning: null as string | null,
-    };
-  }
-  if (resolvedWorkspace.source !== "project_primary") {
-    return {
-      sessionParams: previousSessionParams,
-      warning: null as string | null,
-    };
-  }
-  const projectCwd = readNonEmptyString(resolvedWorkspace.cwd);
-  if (!projectCwd) {
-    return {
-      sessionParams: previousSessionParams,
-      warning: null as string | null,
-    };
-  }
-  const fallbackAgentHomeCwd = resolveDefaultAgentWorkspaceDir(agentId);
-  if (path.resolve(previousCwd) !== path.resolve(fallbackAgentHomeCwd)) {
-    return {
-      sessionParams: previousSessionParams,
-      warning: null as string | null,
-    };
-  }
-  if (path.resolve(projectCwd) === path.resolve(previousCwd)) {
-    return {
-      sessionParams: previousSessionParams,
-      warning: null as string | null,
-    };
-  }
-  const previousWorkspaceId = readNonEmptyString(previousSessionParams?.workspaceId);
-  if (
-    previousWorkspaceId &&
-    resolvedWorkspace.workspaceId &&
-    previousWorkspaceId !== resolvedWorkspace.workspaceId
-  ) {
-    return {
-      sessionParams: previousSessionParams,
-      warning: null as string | null,
-    };
-  }
-
-  const migratedSessionParams: Record<string, unknown> = {
-    ...(previousSessionParams ?? {}),
-    cwd: projectCwd,
-  };
-  if (resolvedWorkspace.workspaceId) migratedSessionParams.workspaceId = resolvedWorkspace.workspaceId;
-  if (resolvedWorkspace.repoUrl) migratedSessionParams.repoUrl = resolvedWorkspace.repoUrl;
-  if (resolvedWorkspace.repoRef) migratedSessionParams.repoRef = resolvedWorkspace.repoRef;
-
-  return {
-    sessionParams: migratedSessionParams,
-    warning:
-      `Project workspace "${projectCwd}" is now available. ` +
-      `Attempting to resume session "${previousSessionId}" that was previously saved in fallback workspace "${previousCwd}".`,
-  };
 }
 
 function parseIssueAssigneeAdapterOverrides(
@@ -926,99 +571,10 @@ function buildProcessLossMessage(run: {
   return "Process lost -- server may have restarted";
 }
 
-function truncateDisplayId(value: string | null | undefined, max = 128) {
-  if (!value) return null;
-  return value.length > max ? value.slice(0, max) : value;
-}
-
 function normalizeAgentNameKey(value: string | null | undefined) {
   if (typeof value !== "string") return null;
   const normalized = value.trim().toLowerCase();
   return normalized.length > 0 ? normalized : null;
-}
-
-const defaultSessionCodec: AdapterSessionCodec = {
-  deserialize(raw: unknown) {
-    const asObj = parseObject(raw);
-    if (Object.keys(asObj).length > 0) return asObj;
-    const sessionId = readNonEmptyString((raw as Record<string, unknown> | null)?.sessionId);
-    if (sessionId) return { sessionId };
-    return null;
-  },
-  serialize(params: Record<string, unknown> | null) {
-    if (!params || Object.keys(params).length === 0) return null;
-    return params;
-  },
-  getDisplayId(params: Record<string, unknown> | null) {
-    return readNonEmptyString(params?.sessionId);
-  },
-};
-
-function getAdapterSessionCodec(adapterType: string) {
-  const adapter = getServerAdapter(adapterType);
-  return adapter.sessionCodec ?? defaultSessionCodec;
-}
-
-function normalizeSessionParams(params: Record<string, unknown> | null | undefined) {
-  if (!params) return null;
-  return Object.keys(params).length > 0 ? params : null;
-}
-
-function resolveNextSessionState(input: {
-  codec: AdapterSessionCodec;
-  adapterResult: AdapterExecutionResult;
-  previousParams: Record<string, unknown> | null;
-  previousDisplayId: string | null;
-  previousLegacySessionId: string | null;
-}) {
-  const { codec, adapterResult, previousParams, previousDisplayId, previousLegacySessionId } = input;
-
-  if (adapterResult.clearSession) {
-    return {
-      params: null as Record<string, unknown> | null,
-      displayId: null as string | null,
-      legacySessionId: null as string | null,
-    };
-  }
-
-  const explicitParams = adapterResult.sessionParams;
-  const hasExplicitParams = adapterResult.sessionParams !== undefined;
-  const hasExplicitSessionId = adapterResult.sessionId !== undefined;
-  const explicitSessionId = readNonEmptyString(adapterResult.sessionId);
-  const hasExplicitDisplay = adapterResult.sessionDisplayId !== undefined;
-  const explicitDisplayId = readNonEmptyString(adapterResult.sessionDisplayId);
-  const shouldUsePrevious = !hasExplicitParams && !hasExplicitSessionId && !hasExplicitDisplay;
-
-  const candidateParams =
-    hasExplicitParams
-      ? explicitParams
-      : hasExplicitSessionId
-        ? (explicitSessionId ? { sessionId: explicitSessionId } : null)
-        : previousParams;
-
-  const serialized = normalizeSessionParams(codec.serialize(normalizeSessionParams(candidateParams) ?? null));
-  const deserialized = normalizeSessionParams(codec.deserialize(serialized));
-
-  const displayId = truncateDisplayId(
-    explicitDisplayId ??
-      (codec.getDisplayId ? codec.getDisplayId(deserialized) : null) ??
-      readNonEmptyString(deserialized?.sessionId) ??
-      (shouldUsePrevious ? previousDisplayId : null) ??
-      explicitSessionId ??
-      (shouldUsePrevious ? previousLegacySessionId : null),
-  );
-
-  const legacySessionId =
-    explicitSessionId ??
-    readNonEmptyString(deserialized?.sessionId) ??
-    displayId ??
-    (shouldUsePrevious ? previousLegacySessionId : null);
-
-  return {
-    params: serialized,
-    displayId,
-    legacySessionId,
-  };
 }
 
 export type HeartbeatEnvironmentRuntime = ReturnType<typeof environmentRuntimeService>;
