@@ -31,22 +31,28 @@ import "./styles/markdown-chips-popups.css";
 
 const ROOT_ELEMENT_ID = "root";
 const ROOT_INSTANCE_KEY = "__paperclipRoot";
+const GLOBAL_ROOT_STATE_KEY = "__paperclipRootState";
 
 type RootHostElement = HTMLElement & {
   [ROOT_INSTANCE_KEY]?: Root;
 };
 
-if ("serviceWorker" in navigator && import.meta.env.DEV) {
+type GlobalRootState = {
+  root: Root;
+  rootElement: HTMLElement;
+};
+
+type RootWindow = Window & {
+  [GLOBAL_ROOT_STATE_KEY]?: GlobalRootState;
+};
+
+if ("serviceWorker" in navigator) {
   window.addEventListener("load", () => {
     navigator.serviceWorker.getRegistrations()
       .then((registrations) => Promise.all(registrations.map((registration) => registration.unregister())))
       .catch(() => {
         // Ignore service worker cleanup failures in local dev.
       });
-  });
-} else if ("serviceWorker" in navigator) {
-  window.addEventListener("load", () => {
-    navigator.serviceWorker.register("/sw.js");
   });
 }
 
@@ -69,8 +75,14 @@ async function bootstrap() {
   if (!rootElement) {
     throw new Error(`Missing #${ROOT_ELEMENT_ID} root element`);
   }
+  const rootWindow = window as RootWindow;
+  const globalRootState = rootWindow[GLOBAL_ROOT_STATE_KEY];
+  if (globalRootState?.rootElement === rootElement) {
+    rootElement[ROOT_INSTANCE_KEY] = globalRootState.root;
+  }
   const root = rootElement[ROOT_INSTANCE_KEY] ?? createRoot(rootElement);
   rootElement[ROOT_INSTANCE_KEY] = root;
+  rootWindow[GLOBAL_ROOT_STATE_KEY] = { root, rootElement };
 
   try {
     const { initPluginBridge } = await import("./plugins/bridge-init");
