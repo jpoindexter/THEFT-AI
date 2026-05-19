@@ -123,6 +123,16 @@ describe("MarkdownBody", () => {
     expect(html).not.toContain("javascript:");
   });
 
+  it("routes local Paperclip project artifact links through the artifact API", () => {
+    const artifactPath = "/Users/jasonpoindexter/.paperclip/instances/default/projects/company/project/_default/index.html";
+    const html = renderMarkdown(`[index.html](${artifactPath})`);
+
+    expect(html).toContain(
+      `href="/api/local-artifacts/content?path=${encodeURIComponent(artifactPath)}"`,
+    );
+    expect(html).not.toContain(`href="${artifactPath}"`);
+  });
+
   it("renders raw HTML tags as escaped text", () => {
     const html = renderMarkdown(
       '<script>fetch("/api/secrets")</script>\n<iframe src="https://example.com"></iframe>\n<p onclick="steal()">Plain text</p>',
