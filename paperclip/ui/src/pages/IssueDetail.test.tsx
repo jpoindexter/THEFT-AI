@@ -920,6 +920,8 @@ describe("IssueDetail", () => {
     expect(text).toContain("Output and decision");
     expect(text).toContain("Output & Evidence");
     expect(text).toContain("Launch brief");
+    expect(text).toContain("Saved output is available in Library.");
+    expect(text).toContain("Open Library artifact");
     expect(text).toContain("Decision");
     expect(text).toContain("Approve");
     expect(text).toContain("Ask for revision");
@@ -930,6 +932,32 @@ describe("IssueDetail", () => {
     expect(text).toContain("1 Library artifact");
     expect(text).toContain("Review state");
     expect(text).not.toContain("Hide this Issue");
+  });
+
+  it("blocks approval when task review has no Library output", async () => {
+    mockIssuesApi.get.mockResolvedValue(createIssue({
+      assigneeAgentId: "agent-1",
+      documentSummaries: [],
+    }));
+    mockAgentsApi.list.mockResolvedValue([
+      createAgent({ id: "agent-1", name: "Marketing Lead", title: "Marketing" }),
+    ]);
+
+    await act(async () => {
+      root.render(
+        <QueryClientProvider client={queryClient}>
+          <IssueDetail />
+        </QueryClientProvider>,
+      );
+    });
+    await flushReact();
+
+    const text = container.textContent ?? "";
+    expect(text).toContain("No Library artifact yet");
+    expect(text).toContain("This task can only be approved after the department publishes a concrete Library artifact.");
+    expect(text).toContain("Where the work should land");
+    expect(text).toContain("Ask Operator to publish output");
+    expect(text).toContain("No output to approve");
   });
 
   it("passes blocker attention to the issue detail header status icon", async () => {

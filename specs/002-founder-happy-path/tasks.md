@@ -71,12 +71,12 @@
 
 ### Tests for User Story 3
 
-- [ ] T013 [P] [US3] Extend IssueDetail focused tests in `paperclip/ui/src/pages/IssueDetail.test.tsx` for missing output language and Library artifact language
+- [x] T013 [P] [US3] Extend IssueDetail focused tests in `paperclip/ui/src/pages/IssueDetail.test.tsx` for missing output language and Library artifact language
 
 ### Implementation for User Story 3
 
-- [ ] T014 [US3] Refine missing-output and artifact-ready states in `paperclip/ui/src/components/issue-detail/TaskReviewSummary.tsx`
-- [ ] T015 [US3] Ensure ask/revise actions focus Operator/chat with draft context through `paperclip/ui/src/components/issue-detail/IssueDetailContent.tsx`
+- [x] T014 [US3] Refine missing-output and artifact-ready states in `paperclip/ui/src/components/issue-detail/TaskReviewSummary.tsx`
+- [x] T015 [US3] Ensure ask/revise actions focus Operator/chat with draft context through `paperclip/ui/src/components/issue-detail/IssueDetailContent.tsx`
 
 ---
 
@@ -88,7 +88,7 @@
 - [x] T017 Run `pnpm design:gate`
 - [x] T018 Run `git diff --check`
 - [x] T019 Run `THEFT_CHROME_PATH='/Applications/Google Chrome.app/Contents/MacOS/Google Chrome' node paperclip/scripts/smoke/theft-mvp-route-smoke.mjs --short --company-prefix THFT`
-- [ ] T020 Commit the founder happy-path slice with spec artifacts and implementation
+- [x] T020 Commit the founder happy-path slice with spec artifacts and implementation
 
 ---
 
