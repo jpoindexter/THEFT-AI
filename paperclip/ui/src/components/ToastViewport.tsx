@@ -51,9 +51,9 @@ function AnimatedToast({
       <div className="flex items-start gap-3 px-3 py-2.5">
         <span className={cn("mt-1 h-2 w-2 shrink-0 rounded-full", toneDotClasses[toast.tone])} />
         <div className="min-w-0 flex-1">
-          <p className="text-sm font-semibold leading-5">{toast.title}</p>
+          <p className="break-words text-sm font-semibold leading-5">{toast.title}</p>
           {toast.body && (
-            <p className="mt-1 text-xs leading-4 opacity-70">
+            <p className="mt-1 break-words text-xs leading-4 opacity-70">
               {toast.body}
             </p>
           )}
@@ -61,7 +61,7 @@ function AnimatedToast({
             <Link
               to={toast.action.href}
               onClick={() => onDismiss(toast.id)}
-              className="mt-2 inline-flex text-xs font-medium underline underline-offset-4 hover:opacity-90"
+              className="mt-2 inline-flex break-all text-xs font-medium underline underline-offset-4 hover:opacity-90"
             >
               {toast.action.label}
             </Link>

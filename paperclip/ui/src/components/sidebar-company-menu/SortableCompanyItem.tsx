@@ -87,7 +87,11 @@ export function SortableCompanyItem({
         </Button>
       ) : (
         <>
-          <Badge variant="secondary" className="shrink-0 rounded-sm font-mono text-nano text-muted-foreground">
+          <Badge
+            variant="secondary"
+            title={company.issuePrefix}
+            className="max-w-16 shrink-0 truncate rounded-sm font-mono text-nano text-muted-foreground"
+          >
             {company.issuePrefix}
           </Badge>
           {isSelected ? <Check className="size-4 text-muted-foreground" /> : null}

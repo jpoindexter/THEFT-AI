@@ -32,8 +32,9 @@ import {
 import { notFound, unprocessable } from "../errors.js";
 import { environmentService } from "./environments.js";
 
+const ISSUE_PREFIX_FALLBACK = "CMP";
+
 export function companyService(db: Db) {
-  const ISSUE_PREFIX_FALLBACK = "CMP";
   const environmentsSvc = environmentService(db);
 
   const companySelection = {
@@ -114,16 +115,6 @@ export function companyService(db: Db) {
       .leftJoin(companyLogos, eq(companyLogos.companyId, companies.id));
   }
 
-  function deriveIssuePrefixBase(name: string) {
-    const normalized = name.toUpperCase().replace(/[^A-Z]/g, "");
-    return normalized.slice(0, 3) || ISSUE_PREFIX_FALLBACK;
-  }
-
-  function suffixForAttempt(attempt: number) {
-    if (attempt <= 1) return "";
-    return "A".repeat(attempt - 1);
-  }
-
   function isIssuePrefixConflict(error: unknown) {
     const constraint = typeof error === "object" && error !== null && "constraint" in error
       ? (error as { constraint?: string }).constraint
@@ -139,9 +130,9 @@ export function companyService(db: Db) {
 
   async function createCompanyWithUniquePrefix(data: typeof companies.$inferInsert) {
     const base = deriveIssuePrefixBase(data.name);
-    let suffix = 1;
-    while (suffix < 10000) {
-      const candidate = `${base}${suffixForAttempt(suffix)}`;
+    let attempt = 1;
+    while (attempt < 10000) {
+      const candidate = buildIssuePrefixCandidate(base, attempt);
       try {
         const rows = await db
           .insert(companies)
@@ -151,7 +142,7 @@ export function companyService(db: Db) {
       } catch (error) {
         if (!isIssuePrefixConflict(error)) throw error;
       }
-      suffix += 1;
+      attempt += 1;
     }
     throw new Error("Unable to allocate unique issue prefix");
   }
@@ -323,4 +314,14 @@ export function companyService(db: Db) {
         return result;
       }),
   };
+}
+
+export function deriveIssuePrefixBase(name: string) {
+  const normalized = name.toUpperCase().replace(/[^A-Z]/g, "");
+  return normalized.slice(0, 3) || ISSUE_PREFIX_FALLBACK;
+}
+
+export function buildIssuePrefixCandidate(base: string, attempt: number) {
+  if (attempt <= 1) return base;
+  return `${base}${attempt}`;
 }
