@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { useMutation, useQueries, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQueries, useQuery } from "@tanstack/react-query";
 import type { IssueThreadInteraction } from "@paperclipai/shared";
 import { Building2 } from "lucide-react";
 import { agentsApi } from "../api/agents";
@@ -39,6 +39,7 @@ import {
   parseCompanyProfileSummary,
 } from "../lib/theft-canvas";
 import { useDashboardLibraryDocuments } from "./dashboard/useDashboardLibraryDocuments";
+import { useMissionControlOperatorTask } from "./dashboard/useMissionControlOperatorTask";
 
 const ATTENTION_INTERACTION_ISSUE_LIMIT = 12;
 
@@ -46,8 +47,6 @@ export function Dashboard() {
   const { selectedCompanyId, selectedCompany, companies } = useCompany();
   const { openOnboarding } = useDialogActions();
   const { setBreadcrumbs } = useBreadcrumbs();
-  const queryClient = useQueryClient();
-  const [operatorDraft, setOperatorDraft] = useState("");
   const [operatorOpen, setOperatorOpen] = useState(false);
   const [selectedDepartmentKey, setSelectedDepartmentKey] = useState("engineering");
 
@@ -156,36 +155,12 @@ export function Dashboard() {
     () => buildMissionControlPlanSummary({ profile, objective: objectiveTitle }),
     [objectiveTitle, profile],
   );
-
-  const createTaskMutation = useMutation({
-    mutationFn: async () => {
-      if (!selectedCompanyId || !selectedDepartment) {
-        throw new Error("Select a company and department first.");
-      }
-      const title = operatorDraft.trim();
-      if (!title) {
-        throw new Error("Describe the task first.");
-      }
-      return issuesApi.create(selectedCompanyId, {
-        title,
-        description: [
-          `Created from THEFT Operator dock for ${selectedDepartment.title}.`,
-          operator ? `Operator: ${operator.name}` : null,
-        ].filter(Boolean).join("\n"),
-        status: "todo",
-        priority: "medium",
-        assigneeAgentId: selectedDepartment.agent?.id ?? null,
-      });
-    },
-    onSuccess: async () => {
-      setOperatorDraft("");
-      if (!selectedCompanyId) return;
-      await Promise.all([
-        queryClient.invalidateQueries({ queryKey: queryKeys.issues.list(selectedCompanyId) }),
-        queryClient.invalidateQueries({ queryKey: queryKeys.dashboard(selectedCompanyId) }),
-        queryClient.invalidateQueries({ queryKey: queryKeys.activity(selectedCompanyId) }),
-      ]);
-    },
+  const operatorTask = useMissionControlOperatorTask({
+    selectedCompanyId,
+    selectedDepartment,
+    operator,
+    nextMove: bottleneck,
+    objective: objectiveTitle,
   });
 
   if (!selectedCompanyId) {
@@ -270,13 +245,17 @@ export function Dashboard() {
             departments={departmentRows}
             selectedDepartmentKey={selectedDepartmentKey}
             setSelectedDepartmentKey={setSelectedDepartmentKey}
-            operatorDraft={operatorDraft}
-            setOperatorDraft={setOperatorDraft}
-            createTask={() => createTaskMutation.mutate()}
-            error={createTaskMutation.error?.message}
-            isPending={createTaskMutation.isPending}
-            canSubmit={!!operatorDraft.trim()}
+            operatorDraft={operatorTask.operatorDraft}
+            setOperatorDraft={operatorTask.setOperatorDraft}
+            applyDraft={operatorTask.applyDraft}
+            createTask={operatorTask.createTask}
+            createdIssue={operatorTask.createdIssue}
+            clearCreatedIssue={operatorTask.clearCreatedIssue}
+            error={operatorTask.error}
+            isPending={operatorTask.isPending}
+            canSubmit={operatorTask.canSubmit}
             nextMove={bottleneck}
+            objective={objectiveTitle}
             onClose={() => setOperatorOpen(false)}
           />
         ) : null}
@@ -285,11 +264,11 @@ export function Dashboard() {
       <OperatorDock
         open={operatorOpen}
         onToggle={() => setOperatorOpen((value) => !value)}
-        operatorDraft={operatorDraft}
-        setOperatorDraft={setOperatorDraft}
-        createTask={() => createTaskMutation.mutate()}
-        isPending={createTaskMutation.isPending}
-        canSubmit={!!operatorDraft.trim()}
+        operatorDraft={operatorTask.operatorDraft}
+        setOperatorDraft={operatorTask.setOperatorDraft}
+        createTask={operatorTask.createTask}
+        isPending={operatorTask.isPending}
+        canSubmit={operatorTask.canSubmit}
       />
     </TheftWorkbenchTemplate>
   );

@@ -233,4 +233,53 @@ describe("Dashboard", () => {
     expect(text).not.toContain("Paperclip agents and assigned issues");
     expect(text).not.toContain("Create Paperclip task");
   });
+
+  it("lets Operator helper prompts create a real routed task from Mission Control", async () => {
+    const rendered = renderDashboard();
+    root = rendered.root;
+
+    await act(async () => {
+      await vi.waitFor(() => expect(rendered.container.textContent).toContain("Operator dock"));
+    });
+
+    const openGuide = Array.from(rendered.container.querySelectorAll("button"))
+      .find((button) => button.textContent?.includes("Operator dock"));
+    await act(async () => {
+      openGuide?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+    });
+
+    await act(async () => {
+      await vi.waitFor(() => expect(rendered.container.textContent).toContain("Compare options"));
+    });
+
+    const compareButton = Array.from(rendered.container.querySelectorAll("button"))
+      .find((button) => button.textContent?.includes("Compare options"));
+    await act(async () => {
+      compareButton?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+    });
+
+    const draft = rendered.container.querySelector("textarea") as HTMLTextAreaElement | null;
+    expect(draft?.value).toContain("Compare the next two moves");
+
+    const createButton = Array.from(rendered.container.querySelectorAll("button"))
+      .find((button) => button.textContent?.includes("Create task"));
+    await act(async () => {
+      createButton?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+    });
+
+    await act(async () => {
+      await vi.waitFor(() => expect(mockIssueCreate).toHaveBeenCalledTimes(1));
+      await vi.waitFor(() => expect(rendered.container.textContent).toContain("Task created"));
+    });
+
+    expect(mockIssueCreate).toHaveBeenCalledWith(company.id, expect.objectContaining({
+      title: "Compare the next two moves for Launch first offer.",
+      assigneeAgentId: "engineering",
+      status: "todo",
+      priority: "medium",
+    }));
+    expect(mockIssueCreate.mock.calls[0][1].description).toContain("Founder request:");
+    expect(mockIssueCreate.mock.calls[0][1].description).toContain("Expected Library output:");
+    expect(rendered.container.innerHTML).toContain('href="/issues/THE-1"');
+  });
 });

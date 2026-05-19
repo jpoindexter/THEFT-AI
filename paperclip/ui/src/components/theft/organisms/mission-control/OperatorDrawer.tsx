@@ -1,10 +1,13 @@
-import type { Agent } from "@paperclipai/shared";
-import { Send, X } from "lucide-react";
+import type { Agent, Issue } from "@paperclipai/shared";
+import { ExternalLink, Send, X } from "lucide-react";
+import { Link } from "@/lib/router";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { TheftChip, TheftSurface } from "@/components/theft";
 import type { CompanyBottleneck, DepartmentCanvasRow } from "@/lib/theft-canvas";
+import { createIssueDetailPath } from "@/lib/issueDetailBreadcrumb";
 import { cn } from "@/lib/utils";
+import type { OperatorTaskDraftKind } from "./operatorTaskDraft";
 
 export function OperatorDrawer({
   operator,
@@ -13,10 +16,15 @@ export function OperatorDrawer({
   setSelectedDepartmentKey,
   operatorDraft,
   setOperatorDraft,
+  applyDraft,
   createTask,
+  createdIssue,
+  clearCreatedIssue,
   error,
   isPending,
+  canSubmit,
   nextMove,
+  objective,
   onClose,
 }: {
   operator: Agent | null;
@@ -25,11 +33,15 @@ export function OperatorDrawer({
   setSelectedDepartmentKey: (key: string) => void;
   operatorDraft: string;
   setOperatorDraft: (value: string) => void;
+  applyDraft: (kind: OperatorTaskDraftKind) => void;
   createTask: () => void;
+  createdIssue: Issue | null;
+  clearCreatedIssue: () => void;
   error: string | undefined;
   isPending: boolean;
   canSubmit: boolean;
   nextMove: CompanyBottleneck;
+  objective: string;
   onClose: () => void;
 }) {
   const selectedDepartment =
@@ -62,7 +74,7 @@ export function OperatorDrawer({
 
       <div className="min-h-0 flex-1 overflow-y-auto px-5 pb-5 md:px-6">
         <div className="space-y-4">
-          <OperatorPromptPreview nextMove={nextMove} selectedDepartment={selectedDepartment} />
+          <OperatorPromptPreview nextMove={nextMove} selectedDepartment={selectedDepartment} objective={objective} />
           <ProposedTasks tasks={proposedTasks} />
           <DepartmentPicker
             departments={departments}
@@ -75,18 +87,22 @@ export function OperatorDrawer({
       <div className="border-t border-border p-5 md:p-6">
         <Textarea
           value={operatorDraft}
-          onChange={(event) => setOperatorDraft(event.target.value)}
+          onChange={(event) => {
+            clearCreatedIssue();
+            setOperatorDraft(event.target.value);
+          }}
           placeholder="Ask Operator about this recommendation..."
           className="min-h-24 resize-none border-0 bg-secondary p-4"
         />
+        {createdIssue ? <CreatedTaskNotice issue={createdIssue} /> : null}
         {error ? <p className="text-sm text-destructive">{error}</p> : null}
         <div className="mt-3 grid grid-cols-2 gap-2">
-          <Button className="col-span-2" disabled={isPending} onClick={createTask}>
+          <Button className="col-span-2" disabled={!canSubmit || isPending} onClick={createTask}>
             <Send className="h-4 w-4" />
-            {isPending ? "Routing..." : "Create recommended task"}
+            {isPending ? "Routing..." : "Create task"}
           </Button>
-          <Button variant="outline" size="sm">Compare options</Button>
-          <Button variant="outline" size="sm">Explain risk</Button>
+          <Button variant="outline" size="sm" onClick={() => applyDraft("compare")}>Compare options</Button>
+          <Button variant="outline" size="sm" onClick={() => applyDraft("risk")}>Explain risk</Button>
         </div>
       </div>
     </TheftSurface>
@@ -96,9 +112,11 @@ export function OperatorDrawer({
 function OperatorPromptPreview({
   nextMove,
   selectedDepartment,
+  objective,
 }: {
   nextMove: CompanyBottleneck;
   selectedDepartment: DepartmentCanvasRow | null;
+  objective: string;
 }) {
   return (
     <>
@@ -127,6 +145,7 @@ function OperatorPromptPreview({
           <p className="theft-label-compact">Rationale</p>
           <ul className="mt-2 space-y-1.5 text-sm leading-5 text-muted-foreground">
             <li>Locks the current bottleneck into one concrete action.</li>
+            <li>Moves the current objective: {objective}</li>
             <li>Uses latest execution state and Library evidence.</li>
             <li>Creates a reviewable artifact instead of more status.</li>
           </ul>
@@ -151,6 +170,24 @@ function OperatorPromptPreview({
         </div>
       </div>
     </>
+  );
+}
+
+function CreatedTaskNotice({ issue }: { issue: Issue }) {
+  const issuePathId = issue.identifier ?? issue.id;
+  return (
+    <div className="mt-3 theft-selected-surface p-3 text-sm">
+      <p className="font-medium">Task created</p>
+      <p className="mt-1 text-xs text-muted-foreground">
+        {issue.identifier ?? "New task"} · {issue.title}
+      </p>
+      <Button asChild variant="outline" size="sm" className="mt-3 w-full justify-center">
+        <Link to={createIssueDetailPath(issuePathId)}>
+          <ExternalLink className="h-4 w-4" />
+          Open task
+        </Link>
+      </Button>
+    </div>
   );
 }
 
