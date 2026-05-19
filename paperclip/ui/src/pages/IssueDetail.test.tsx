@@ -820,6 +820,7 @@ describe("IssueDetail", () => {
     mockOpenNewIssue.mockClear();
     mockOpenPanel.mockClear();
     mockClosePanel.mockClear();
+    mockNavigate.mockClear();
     mockIssuesListRender.mockClear();
     mockIssueChatThreadRender.mockClear();
   });
@@ -1014,6 +1015,7 @@ describe("IssueDetail", () => {
         title: "PAP-1 Output",
       }),
     );
+    expect(mockNavigate).toHaveBeenCalledWith("/issues/PAP-1#document-output", { replace: true });
   });
 
   it("passes blocker attention to the issue detail header status icon", async () => {

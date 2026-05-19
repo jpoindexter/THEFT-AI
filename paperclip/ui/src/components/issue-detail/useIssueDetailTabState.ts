@@ -27,9 +27,12 @@ export function useIssueDetailTabState({ locationHash }: UseIssueDetailTabStateI
   useEffect(() => {
     if (!locationHash.startsWith("#document-")) return;
     const documentKey = decodeURIComponent(locationHash.slice("#document-".length));
-    if (documentKey !== ISSUE_CONTINUATION_SUMMARY_DOCUMENT_KEY) return;
-    setDetailTab("activity");
-    setHandoffFocusSignal((current) => current + 1);
+    if (documentKey === ISSUE_CONTINUATION_SUMMARY_DOCUMENT_KEY) {
+      setDetailTab("activity");
+      setHandoffFocusSignal((current) => current + 1);
+      return;
+    }
+    setDetailTab("related-work");
   }, [locationHash]);
 
   useEffect(() => {

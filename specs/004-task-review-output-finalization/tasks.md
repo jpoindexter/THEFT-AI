@@ -20,9 +20,9 @@
 
 **Goal**: founder lands directly in artifact finalization after publish.
 
-- [ ] T009 [US3] Focus artifact/docs workflow on newly created `output` draft after publish in `paperclip/ui/src/components/issue-detail/IssueDetailContent.tsx` and tab/state helpers
-- [ ] T010 [US3] Add focused test coverage for publish-success artifact focus behavior in `paperclip/ui/src/pages/IssueDetail.test.tsx`
-- [ ] T011 [US3] Run focused IssueDetail tests and active UI verification gates
+- [x] T009 [US3] Focus artifact/docs workflow on newly created `output` draft after publish in `paperclip/ui/src/components/issue-detail/IssueDetailContent.tsx` and tab/state helpers
+- [x] T010 [US3] Add focused test coverage for publish-success artifact focus behavior in `paperclip/ui/src/pages/IssueDetail.test.tsx`
+- [x] T011 [US3] Run focused IssueDetail tests and active UI verification gates
 
 ## Final Phase: Process Integrity
 

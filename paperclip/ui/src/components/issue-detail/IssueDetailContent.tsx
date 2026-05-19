@@ -58,6 +58,10 @@ export function IssueDetailContent({
   const startExecution = () => {
     primary.focusCommentComposerFromShortcut(buildExecutionPrompt(issue.title));
   };
+  const focusPublishedOutputDraft = () => {
+    primary.setDetailTab("related-work");
+    primary.navigate(`${primary.location.pathname}${primary.location.search}#document-output`, { replace: true });
+  };
 
   return (
     <TheftDetailReviewTemplate className="min-h-0">
@@ -88,7 +92,10 @@ export function IssueDetailContent({
           onAskRevision={askForRevision}
           onAskOperator={askWhereOutputLanded}
           onOpenLibrary={() => primary.navigate("/library")}
-          onPublishOutput={() => actions.publishOutputDraft.mutate()}
+          onPublishOutput={() =>
+            actions.publishOutputDraft.mutate(undefined, {
+              onSuccess: focusPublishedOutputDraft,
+            })}
           onResume={primary.openResumeControl}
           onViewAffected={primary.openResumeControl}
           onCancelSubtree={primary.openCancelSubtreeControl}
