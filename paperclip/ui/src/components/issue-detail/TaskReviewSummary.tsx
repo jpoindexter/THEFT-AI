@@ -1,4 +1,4 @@
-import { Activity, AlertTriangle, Check, FileText, MessageSquare, Repeat, UserRound } from "lucide-react";
+import { Activity, AlertTriangle, Check, FileText, Library, MessageSquare, Repeat, UserRound } from "lucide-react";
 import type { Agent, Issue } from "@paperclipai/shared";
 
 import { Button } from "@/components/ui/button";
@@ -17,6 +17,11 @@ type TaskReviewSummaryProps = {
   childTaskCount: number;
   hasLiveRuns: boolean;
   hasBlocker: boolean;
+  approving: boolean;
+  onApprove: () => void;
+  onAskRevision: () => void;
+  onAskOperator: () => void;
+  onOpenLibrary: () => void;
 };
 
 function formatTaskStatus(status: string) {
@@ -33,6 +38,11 @@ export function TaskReviewSummary({
   childTaskCount,
   hasLiveRuns,
   hasBlocker,
+  approving,
+  onApprove,
+  onAskRevision,
+  onAskOperator,
+  onOpenLibrary,
 }: TaskReviewSummaryProps) {
   const ownerLabel = owner
     ? `${owner.title ?? "Department lead"} · ${owner.name}`
@@ -53,6 +63,18 @@ export function TaskReviewSummary({
       : outputCount > 0
         ? "Review output"
         : "Await output";
+  const hasOutput = outputCount > 0;
+  const canApprove = !hasBlocker && hasOutput && issue.status !== "done";
+  const approveLabel = issue.status === "done"
+    ? "Completed"
+    : !hasOutput
+      ? "No output to approve"
+      : approving
+        ? "Approving..."
+        : "Approve";
+  const outputHelp = hasOutput
+    ? "Saved output is available in Library. Open it there to inspect the durable artifact."
+    : "This task has thread activity, but no saved Library artifact yet. Ask Operator to publish the result or explain where the work landed.";
 
   return (
     <TheftSurface padding="lg" className="space-y-4 text-foreground">
@@ -85,9 +107,18 @@ export function TaskReviewSummary({
             </div>
           ) : (
             <p className="text-xs leading-5 text-muted-foreground">
-              Saved documents and work products appear here as soon as the department publishes output.
+              {outputHelp}
             </p>
           )}
+          <Button
+            variant="outline"
+            size="sm"
+            className="w-fit"
+            onClick={hasOutput ? onOpenLibrary : onAskOperator}
+          >
+            {hasOutput ? <Library className="h-4 w-4" /> : <MessageSquare className="h-4 w-4" />}
+            {hasOutput ? "Open Library" : "Ask where output is"}
+          </Button>
           <TheftSurface tone="muted" padding="sm">
             <p className="theft-label-compact">Objective</p>
             <p className="mt-2 line-clamp-4 text-xs leading-5 text-muted-foreground">
@@ -109,15 +140,15 @@ export function TaskReviewSummary({
             </p>
           </div>
           <div className="grid gap-2">
-            <Button size="sm" disabled={hasBlocker || outputCount === 0}>
+            <Button size="sm" disabled={!canApprove || approving} onClick={onApprove}>
               <Check className="h-4 w-4" />
-              Approve
+              {approveLabel}
             </Button>
-            <Button variant="outline" size="sm">
+            <Button variant="outline" size="sm" onClick={onAskRevision}>
               <Repeat className="h-4 w-4" />
               Ask for revision
             </Button>
-            <Button variant="outline" size="sm">
+            <Button variant="outline" size="sm" onClick={onAskOperator}>
               <MessageSquare className="h-4 w-4" />
               Ask Operator
             </Button>

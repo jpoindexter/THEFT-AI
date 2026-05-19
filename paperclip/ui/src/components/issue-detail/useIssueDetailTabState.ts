@@ -11,13 +11,15 @@ export function useIssueDetailTabState({ locationHash }: UseIssueDetailTabStateI
   const [detailTab, setDetailTab] = useState("related-work");
   const [handoffFocusSignal, setHandoffFocusSignal] = useState(0);
   const [pendingCommentComposerFocusKey, setPendingCommentComposerFocusKey] = useState(0);
+  const pendingCommentDraftRef = useRef<string | null>(null);
   const commentComposerRef = useRef<IssueChatComposerHandle | null>(null);
 
   const restoreQueuedCommentDraft = useCallback((body: string) => {
     commentComposerRef.current?.restoreDraft(body);
   }, []);
 
-  const focusCommentComposerFromShortcut = useCallback(() => {
+  const focusCommentComposerFromShortcut = useCallback((draft?: string) => {
+    pendingCommentDraftRef.current = draft?.trim() ? draft : null;
     setDetailTab("chat");
     setPendingCommentComposerFocusKey((current) => current + 1);
   }, []);
@@ -33,7 +35,20 @@ export function useIssueDetailTabState({ locationHash }: UseIssueDetailTabStateI
   useEffect(() => {
     if (pendingCommentComposerFocusKey === 0) return;
     if (detailTab !== "chat") return;
-    commentComposerRef.current?.focus();
+    const focusOrRestore = () => {
+      const pendingDraft = pendingCommentDraftRef.current;
+      if (pendingDraft && commentComposerRef.current) {
+        pendingCommentDraftRef.current = null;
+        commentComposerRef.current.restoreDraft(pendingDraft);
+        return;
+      }
+      if (!pendingDraft) {
+        commentComposerRef.current?.focus();
+      }
+    };
+    focusOrRestore();
+    const frameId = requestAnimationFrame(focusOrRestore);
+    return () => cancelAnimationFrame(frameId);
   }, [detailTab, pendingCommentComposerFocusKey]);
 
   return {

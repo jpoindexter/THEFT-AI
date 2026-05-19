@@ -15,6 +15,14 @@ import type { IssueDetailPrimaryState } from "./useIssueDetailPrimaryState";
 
 const FEEDBACK_TERMS_URL = import.meta.env.VITE_FEEDBACK_TERMS_URL?.trim() || "https://paperclip.ing/tos";
 
+function buildMissingOutputPrompt(issueTitle: string) {
+  return `Where did the output for "${issueTitle}" land? If it is only in the task thread, publish a concrete artifact to the Library and tell me exactly what changed.`;
+}
+
+function buildRevisionPrompt(issueTitle: string) {
+  return `Please revise "${issueTitle}". I need a concrete saved output in the Library, not just a completed status. Include the artifact link or explain what is blocking it.`;
+}
+
 export function IssueDetailContent({
   primary,
   actions,
@@ -33,6 +41,12 @@ export function IssueDetailContent({
   ];
   const taskReviewOutputCount = taskReviewOutputTitles.length;
   const taskReviewDecisionCount = primary.interactions.filter((interaction) => interaction.status === "pending").length;
+  const askWhereOutputLanded = () => {
+    primary.focusCommentComposerFromShortcut(buildMissingOutputPrompt(issue.title));
+  };
+  const askForRevision = () => {
+    primary.focusCommentComposerFromShortcut(buildRevisionPrompt(issue.title));
+  };
 
   return (
     <TheftDetailReviewTemplate className="min-h-0">
@@ -56,6 +70,11 @@ export function IssueDetailContent({
           commentCount={primary.threadComments.length}
           hasLiveRuns={primary.hasLiveRuns}
           hasBlocker={issue.status === "blocked" || (issue.blockedBy?.length ?? 0) > 0}
+          approving={actions.updateIssue.isPending}
+          onApprove={() => actions.updateIssue.mutate({ status: "done" })}
+          onAskRevision={askForRevision}
+          onAskOperator={askWhereOutputLanded}
+          onOpenLibrary={() => primary.navigate("/library")}
           onResume={primary.openResumeControl}
           onViewAffected={primary.openResumeControl}
           onCancelSubtree={primary.openCancelSubtreeControl}

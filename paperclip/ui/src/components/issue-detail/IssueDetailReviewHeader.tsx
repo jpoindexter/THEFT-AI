@@ -31,6 +31,11 @@ type IssueDetailReviewHeaderProps = {
   commentCount: number;
   hasLiveRuns: boolean;
   hasBlocker: boolean;
+  approving: boolean;
+  onApprove: () => void;
+  onAskRevision: () => void;
+  onAskOperator: () => void;
+  onOpenLibrary: () => void;
   onResume: () => void;
   onViewAffected: () => void;
   onCancelSubtree: () => void;
@@ -55,6 +60,11 @@ export function IssueDetailReviewHeader({
   commentCount,
   hasLiveRuns,
   hasBlocker,
+  approving,
+  onApprove,
+  onAskRevision,
+  onAskOperator,
+  onOpenLibrary,
   onResume,
   onViewAffected,
   onCancelSubtree,
@@ -117,6 +127,11 @@ export function IssueDetailReviewHeader({
         childTaskCount={childIssueCount}
         hasLiveRuns={hasLiveRuns}
         hasBlocker={hasBlocker}
+        approving={approving}
+        onApprove={onApprove}
+        onAskRevision={onAskRevision}
+        onAskOperator={onAskOperator}
+        onOpenLibrary={onOpenLibrary}
       />
     </>
   );
