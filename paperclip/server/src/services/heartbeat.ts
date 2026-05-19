@@ -3,11 +3,9 @@ import { randomUUID } from "node:crypto";
 import { and, asc, desc, eq, getTableColumns, gt, inArray, isNull, lt, lte, notInArray, or, sql } from "drizzle-orm";
 import type { Db } from "@paperclipai/db";
 import {
-  AGENT_DEFAULT_MAX_CONCURRENT_RUNS,
   ISSUE_CONTINUATION_SUMMARY_DOCUMENT_KEY,
   MODEL_PROFILE_KEYS,
   isEnvironmentDriverSupportedForAdapter,
-  type BillingType,
   type IssueExecutionMonitorClearReason,
   type IssueExecutionMonitorPolicy,
   type IssueExecutionMonitorRecoveryPolicy,
@@ -46,7 +44,7 @@ import type {
   AdapterModelProfileDefinition,
 } from "../adapters/index.js";
 import { createLocalAgentJwt } from "../agent-auth-jwt.js";
-import { parseObject, asBoolean, asNumber } from "../adapters/utils.js";
+import { parseObject, asNumber } from "../adapters/utils.js";
 import { costService } from "./costs.js";
 import { trackAgentFirstHeartbeat } from "@paperclipai/shared/telemetry";
 import { getTelemetryClient } from "../telemetry.js";
@@ -156,6 +154,7 @@ import {
   ensureManagedProjectWorkspace,
   leaseReleaseStatusForRunStatus,
   mergeExecutionWorkspaceMetadataForPersistence,
+  prioritizeProjectWorkspaceCandidatesForRun,
   stripWorkspaceRuntimeFromExecutionRunConfig,
 } from "./heartbeat-workspace.js";
 import {
@@ -203,6 +202,12 @@ import {
   resolveLedgerBiller,
   resolveLedgerScopeForRun,
 } from "./heartbeat-ledger.js";
+import {
+  issueMonitorLimitClearReason,
+  monitorRecoveryComment,
+  monitorRecoveryDetails,
+  monitorRecoveryPolicy,
+} from "./heartbeat-issue-monitor.js";
 import { buildPaperclipTaskMarkdown } from "./heartbeat-task-markdown.js";
 import {
   buildProcessLossMessage,
@@ -232,11 +237,7 @@ import {
   BOUNDED_TRANSIENT_HEARTBEAT_RETRY_MAX_ATTEMPTS,
   BOUNDED_TRANSIENT_HEARTBEAT_RETRY_REASON,
   BOUNDED_TRANSIENT_HEARTBEAT_RETRY_WAKE_REASON,
-  MAX_TURN_CONTINUATION_DEFAULT_DELAY_MS,
-  MAX_TURN_CONTINUATION_DEFAULT_MAX_ATTEMPTS,
   MAX_TURN_CONTINUATION_LIVE_RUN_STATUSES,
-  MAX_TURN_CONTINUATION_MAX_ATTEMPTS_CAP,
-  MAX_TURN_CONTINUATION_MAX_DELAY_MS,
   MAX_TURN_CONTINUATION_RETRY_REASON,
   MAX_TURN_CONTINUATION_WAKE_REASON,
   computeBoundedTransientHeartbeatRetrySchedule,
@@ -244,8 +245,21 @@ import {
   mergeAdapterRecoveryMetadata,
   readTransientRecoveryContractFromRun,
   resolveCodexTransientFallbackMode,
-  type MaxTurnContinuationPolicy,
 } from "./heartbeat-retry.js";
+import {
+  issueRunPriorityRank,
+  parseHeartbeatPolicy,
+  parseMaxTurnContinuationPolicy,
+} from "./heartbeat-policy.js";
+import {
+  didAutomaticRecoveryFail,
+  isHeartbeatRunTerminalStatus,
+  isSameTaskScope,
+  isTrackedLocalChildProcessAdapter,
+  normalizeAgentNameKey,
+  runTaskKey,
+  summarizeRunFailureForIssueComment,
+} from "./heartbeat-run-utils.js";
 export {
   boundHeartbeatRunEventPayloadForStorage,
   compactRunLogChunk,
@@ -265,6 +279,7 @@ export {
   applyPersistedExecutionWorkspaceConfig,
   buildRealizedExecutionWorkspaceFromPersisted,
   mergeExecutionWorkspaceMetadataForPersistence,
+  prioritizeProjectWorkspaceCandidatesForRun,
   stripWorkspaceRuntimeFromExecutionRunConfig,
 } from "./heartbeat-workspace.js";
 export {
@@ -300,9 +315,6 @@ import { environmentRuntimeService } from "./environment-runtime.js";
 import { environmentRunOrchestrator } from "./environment-run-orchestrator.js";
 import type { PluginWorkerManager } from "./plugin-worker-manager.js";
 
-const HEARTBEAT_MAX_CONCURRENT_RUNS_DEFAULT = AGENT_DEFAULT_MAX_CONCURRENT_RUNS;
-const HEARTBEAT_MAX_CONCURRENT_RUNS_MIN = 1;
-const HEARTBEAT_MAX_CONCURRENT_RUNS_MAX = 50;
 const LIVENESS_BOOKKEEPING_ACTIVITY_ACTIONS = [
   "environment.lease_acquired",
   "environment.lease_released",
@@ -312,29 +324,12 @@ const DETACHED_PROCESS_ERROR_CODE = "process_detached";
 const REPO_ONLY_CWD_SENTINEL = "/__paperclip_repo_only__";
 const EXECUTION_PATH_HEARTBEAT_RUN_STATUSES = ["queued", "running", "scheduled_retry"] as const;
 const CANCELLABLE_HEARTBEAT_RUN_STATUSES = ["queued", "running", "scheduled_retry"] as const;
-const HEARTBEAT_RUN_TERMINAL_STATUSES = ["succeeded", "failed", "cancelled", "timed_out"] as const;
-const UNSUCCESSFUL_HEARTBEAT_RUN_TERMINAL_STATUSES = ["failed", "cancelled", "timed_out"] as const;
 export {
   ACTIVE_RUN_OUTPUT_CONTINUE_REARM_MS,
   ACTIVE_RUN_OUTPUT_CRITICAL_THRESHOLD_MS,
   ACTIVE_RUN_OUTPUT_SUSPICION_THRESHOLD_MS,
 } from "./recovery/service.js";
 export const ACTIVE_RUN_OUTPUT_PROGRESS_FLUSH_INTERVAL_MS = 60 * 1000;
-const SESSIONED_LOCAL_ADAPTERS = new Set([
-  "claude_local",
-  "codex_local",
-  "cursor",
-  "gemini_local",
-  "hermes_local",
-  "opencode_local",
-  "pi_local",
-]);
-function normalizeMaxConcurrentRuns(value: unknown) {
-  const parsed = Math.floor(asNumber(value, HEARTBEAT_MAX_CONCURRENT_RUNS_DEFAULT));
-  if (!Number.isFinite(parsed)) return HEARTBEAT_MAX_CONCURRENT_RUNS_DEFAULT;
-  return Math.max(HEARTBEAT_MAX_CONCURRENT_RUNS_MIN, Math.min(HEARTBEAT_MAX_CONCURRENT_RUNS_MAX, parsed));
-}
-
 interface WakeupOptions {
   source?: "timer" | "assignment" | "on_demand" | "automation";
   triggerDetail?: "manual" | "ping" | "callback" | "system";
@@ -352,62 +347,8 @@ interface ParsedIssueAssigneeAdapterOverrides {
   useProjectWorkspace: boolean | null;
 }
 
-type ProjectWorkspaceCandidate = {
-  id: string;
-};
-
-export function prioritizeProjectWorkspaceCandidatesForRun<T extends ProjectWorkspaceCandidate>(
-  rows: T[],
-  preferredWorkspaceId: string | null | undefined,
-): T[] {
-  if (!preferredWorkspaceId) return rows;
-  const preferredIndex = rows.findIndex((row) => row.id === preferredWorkspaceId);
-  if (preferredIndex <= 0) return rows;
-  return [rows[preferredIndex]!, ...rows.slice(0, preferredIndex), ...rows.slice(preferredIndex + 1)];
-}
-
 function readNonEmptyString(value: unknown): string | null {
   return typeof value === "string" && value.trim().length > 0 ? value : null;
-}
-
-function summarizeRunFailureForIssueComment(
-  run: Pick<typeof heartbeatRuns.$inferSelect, "error" | "errorCode"> | null | undefined,
-) {
-  if (!run) return null;
-
-  const errorCode = readNonEmptyString(run.errorCode)?.trim() ?? null;
-  const rawError = readNonEmptyString(run.error)?.trim() ?? null;
-  const apiMessageMatch = rawError?.match(/"message"\s*:\s*"([^"]+)"/);
-  const firstLine = rawError
-    ?.split(/\r?\n/)
-    .map((line) => line.trim())
-    .find(Boolean) ?? null;
-  const summarySource = apiMessageMatch?.[1] ?? firstLine;
-  const summary =
-    summarySource && summarySource.length > 240
-      ? `${summarySource.slice(0, 237)}...`
-      : summarySource;
-
-  if (errorCode && summary) return ` Latest retry failure: \`${errorCode}\` - ${summary}.`;
-  if (errorCode) return ` Latest retry failure: \`${errorCode}\`.`;
-  if (summary) return ` Latest retry failure: ${summary}.`;
-  return null;
-}
-
-function didAutomaticRecoveryFail(
-  latestRun: Pick<typeof heartbeatRuns.$inferSelect, "status" | "contextSnapshot"> | null,
-  expectedRetryReason: "assignment_recovery" | "issue_continuation_needed",
-) {
-  if (!latestRun) return false;
-
-  const latestContext = parseObject(latestRun.contextSnapshot);
-  const latestRetryReason = readNonEmptyString(latestContext.retryReason);
-  return (
-    latestRetryReason === expectedRetryReason &&
-    UNSUCCESSFUL_HEARTBEAT_RUN_TERMINAL_STATUSES.includes(
-      latestRun.status as (typeof UNSUCCESSFUL_HEARTBEAT_RUN_TERMINAL_STATUSES)[number],
-    )
-  );
 }
 
 function parseIssueAssigneeAdapterOverrides(
@@ -430,32 +371,6 @@ function parseIssueAssigneeAdapterOverrides(
     adapterConfig,
     useProjectWorkspace,
   };
-}
-
-function runTaskKey(run: typeof heartbeatRuns.$inferSelect) {
-  return deriveTaskKey(run.contextSnapshot as Record<string, unknown> | null, null);
-}
-
-function isSameTaskScope(left: string | null, right: string | null) {
-  return (left ?? null) === (right ?? null);
-}
-
-function isTrackedLocalChildProcessAdapter(adapterType: string) {
-  return SESSIONED_LOCAL_ADAPTERS.has(adapterType);
-}
-
-function isHeartbeatRunTerminalStatus(
-  status: string | null | undefined,
-): status is (typeof HEARTBEAT_RUN_TERMINAL_STATUSES)[number] {
-  return HEARTBEAT_RUN_TERMINAL_STATUSES.includes(
-    status as (typeof HEARTBEAT_RUN_TERMINAL_STATUSES)[number],
-  );
-}
-
-function normalizeAgentNameKey(value: string | null | undefined) {
-  if (typeof value !== "string") return null;
-  const normalized = value.trim().toLowerCase();
-  return normalized.length > 0 ? normalized : null;
 }
 
 export type HeartbeatEnvironmentRuntime = ReturnType<typeof environmentRuntimeService>;
@@ -687,85 +602,6 @@ export function heartbeatService(db: Db, options: HeartbeatServiceOptions = {}) 
     monitorAttemptCount: number | null;
     monitorNotes: string | null;
     monitorScheduledBy: string | null;
-  }
-
-  function parseMonitorDate(value: string | null | undefined) {
-    if (!value) return null;
-    const date = new Date(value);
-    return Number.isNaN(date.getTime()) ? null : date;
-  }
-
-  function issueMonitorLimitClearReason(input: {
-    monitor: IssueExecutionMonitorPolicy | null;
-    nextAttemptCount: number;
-    now: Date;
-  }): IssueExecutionMonitorClearReason | null {
-    const timeoutAt = parseMonitorDate(input.monitor?.timeoutAt ?? null);
-    if (timeoutAt && input.now.getTime() >= timeoutAt.getTime()) {
-      return "timeout_exceeded";
-    }
-    const maxAttempts = input.monitor?.maxAttempts ?? null;
-    if (maxAttempts !== null && input.nextAttemptCount > maxAttempts) {
-      return "max_attempts_exhausted";
-    }
-    return null;
-  }
-
-  function monitorRecoveryPolicy(
-    monitor: IssueExecutionMonitorPolicy | null,
-  ): IssueExecutionMonitorRecoveryPolicy {
-    return monitor?.recoveryPolicy ?? "wake_owner";
-  }
-
-  function monitorRecoveryDetails(input: {
-    claimed: IssueMonitorDispatchRow;
-    scheduledAtIso: string;
-    nextAttemptCount: number;
-    clearReason: IssueExecutionMonitorClearReason;
-    recoveryPolicy: IssueExecutionMonitorRecoveryPolicy;
-    monitor: IssueExecutionMonitorPolicy | null;
-    source: "manual" | "scheduled";
-  }) {
-    return {
-      identifier: input.claimed.identifier,
-      nextCheckAt: input.scheduledAtIso,
-      attemptedAttemptCount: input.nextAttemptCount,
-      notes: input.claimed.monitorNotes ?? null,
-      serviceName: input.monitor?.serviceName ?? null,
-      timeoutAt: input.monitor?.timeoutAt ?? null,
-      maxAttempts: input.monitor?.maxAttempts ?? null,
-      clearReason: input.clearReason,
-      recoveryPolicy: input.recoveryPolicy,
-      source: input.source,
-    };
-  }
-
-  function formatIssueIdentifierLink(identifier: string | null, fallback: string) {
-    if (!identifier) return fallback;
-    const prefix = identifier.split("-")[0];
-    if (!prefix || !/^[A-Z][A-Z0-9]*-\d+$/.test(identifier)) return identifier;
-    return `[${identifier}](/${prefix}/issues/${identifier})`;
-  }
-
-  function monitorRecoveryComment(input: {
-    issue: IssueMonitorDispatchRow;
-    clearReason: IssueExecutionMonitorClearReason;
-    recoveryPolicy: IssueExecutionMonitorRecoveryPolicy;
-    nextAttemptCount: number;
-  }) {
-    const label = formatIssueIdentifierLink(input.issue.identifier, input.issue.id);
-    const reason =
-      input.clearReason === "timeout_exceeded"
-        ? "its timeout was reached"
-        : "its maximum attempt count was reached";
-    return [
-      `Paperclip cleared the scheduled external-service monitor for ${label} because ${reason}.`,
-      "",
-      `- Attempt count: ${input.nextAttemptCount}`,
-      `- Recovery policy: ${input.recoveryPolicy}`,
-      "",
-      "Next action: inspect the external service state, record the result on this issue, and restore an explicit execution or waiting path if more work remains.",
-    ].join("\n");
   }
 
   async function findOpenIssueMonitorRecoveryIssue(claimed: IssueMonitorDispatchRow) {
@@ -3653,47 +3489,6 @@ export function heartbeatService(db: Db, options: HeartbeatServiceOptions = {}) 
       promoted: promotedRunIds.length,
       runIds: promotedRunIds,
     };
-  }
-
-  function parseHeartbeatPolicy(agent: typeof agents.$inferSelect) {
-    const runtimeConfig = parseObject(agent.runtimeConfig);
-    const heartbeat = parseObject(runtimeConfig.heartbeat);
-
-    return {
-      enabled: asBoolean(heartbeat.enabled, false),
-      intervalSec: Math.max(0, asNumber(heartbeat.intervalSec, 0)),
-      wakeOnDemand: asBoolean(heartbeat.wakeOnDemand ?? heartbeat.wakeOnAssignment ?? heartbeat.wakeOnOnDemand ?? heartbeat.wakeOnAutomation, true),
-      maxConcurrentRuns: normalizeMaxConcurrentRuns(heartbeat.maxConcurrentRuns),
-    };
-  }
-
-  function parseMaxTurnContinuationPolicy(agent: typeof agents.$inferSelect): MaxTurnContinuationPolicy {
-    const runtimeConfig = parseObject(agent.runtimeConfig);
-    const heartbeat = parseObject(runtimeConfig.heartbeat);
-    const configured = parseObject(heartbeat.maxTurnContinuation);
-    const rawMaxAttempts = Math.floor(asNumber(configured.maxAttempts, MAX_TURN_CONTINUATION_DEFAULT_MAX_ATTEMPTS));
-    const rawDelayMs = Math.floor(asNumber(configured.delayMs, MAX_TURN_CONTINUATION_DEFAULT_DELAY_MS));
-
-    return {
-      enabled: asBoolean(configured.enabled, true),
-      maxAttempts: Math.max(0, Math.min(MAX_TURN_CONTINUATION_MAX_ATTEMPTS_CAP, rawMaxAttempts)),
-      delayMs: Math.max(0, Math.min(MAX_TURN_CONTINUATION_MAX_DELAY_MS, rawDelayMs)),
-    };
-  }
-
-  function issueRunPriorityRank(priority: string | null | undefined) {
-    switch (priority) {
-      case "critical":
-        return 0;
-      case "high":
-        return 1;
-      case "medium":
-        return 2;
-      case "low":
-        return 3;
-      default:
-        return 4;
-    }
   }
 
   async function listQueuedRunDependencyReadiness(

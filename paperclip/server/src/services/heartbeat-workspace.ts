@@ -24,6 +24,20 @@ function readNonEmptyString(value: unknown): string | null {
   return typeof value === "string" && value.trim().length > 0 ? value : null;
 }
 
+type ProjectWorkspaceCandidate = {
+  id: string;
+};
+
+export function prioritizeProjectWorkspaceCandidatesForRun<T extends ProjectWorkspaceCandidate>(
+  rows: T[],
+  preferredWorkspaceId: string | null | undefined,
+): T[] {
+  if (!preferredWorkspaceId) return rows;
+  const preferredIndex = rows.findIndex((row) => row.id === preferredWorkspaceId);
+  if (preferredIndex <= 0) return rows;
+  return [rows[preferredIndex]!, ...rows.slice(0, preferredIndex), ...rows.slice(preferredIndex + 1)];
+}
+
 function deriveRepoNameFromRepoUrl(repoUrl: string | null): string | null {
   const trimmed = repoUrl?.trim() ?? "";
   if (!trimmed) return null;
