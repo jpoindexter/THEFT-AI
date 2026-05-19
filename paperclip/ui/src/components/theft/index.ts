@@ -15,6 +15,7 @@ export {
   DecisionsPanel,
   ExecutionStatePanel,
   FreshCompanyPanel,
+  GuidedNextStepPanel,
   MissionControlPanel,
   NextMovePanel,
   ObjectiveHeader,
@@ -22,7 +23,9 @@ export {
   OperatorDrawer,
   OutcomesPanel,
   StrategyMapPanel,
+  buildMissionControlNextStep,
 } from "./organisms/mission-control"
+export type { MissionControlNextStep } from "./organisms/mission-control"
 export {
   LibraryControls,
   LibraryDetail,

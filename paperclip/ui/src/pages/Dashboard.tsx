@@ -11,6 +11,7 @@ import {
   DecisionsPanel,
   ExecutionStatePanel,
   FreshCompanyPanel,
+  GuidedNextStepPanel,
   NextMovePanel,
   ObjectiveHeader,
   OperatorDock,
@@ -18,6 +19,7 @@ import {
   OutcomesPanel,
   TheftWorkbenchTemplate,
   StrategyMapPanel,
+  buildMissionControlNextStep,
 } from "@/components/theft";
 import { EmptyState } from "../components/EmptyState";
 import { PageSkeleton } from "../components/PageSkeleton";
@@ -35,9 +37,9 @@ import {
   getRoadmapGoals,
   parseCompanyProfileSummary,
 } from "../lib/theft-canvas";
+import { useDashboardLibraryDocuments } from "./dashboard/useDashboardLibraryDocuments";
 
 const ATTENTION_INTERACTION_ISSUE_LIMIT = 12;
-const LIBRARY_ISSUE_LIMIT = 8;
 
 export function Dashboard() {
   const { selectedCompanyId, selectedCompany, companies } = useCompany();
@@ -107,13 +109,7 @@ export function Dashboard() {
   const nextTasks = [...openIssues]
     .sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime())
     .slice(0, 5);
-  const libraryIssueCandidates = useMemo(
-    () =>
-      [...(issues ?? [])]
-        .sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime())
-        .slice(0, LIBRARY_ISSUE_LIMIT),
-    [issues],
-  );
+  const latestLibraryDocuments = useDashboardLibraryDocuments({ selectedCompanyId, issues });
 
   const interactionIssueIds = attentionIssues
     .slice(0, ATTENTION_INTERACTION_ISSUE_LIMIT)
@@ -144,22 +140,16 @@ export function Dashboard() {
       }),
     [attentionIssues, approvals?.length, openIssues, pendingInteractions.length, profile.setupItems],
   );
-  const libraryDocumentQueries = useQueries({
-    queries: libraryIssueCandidates.map((issue) => ({
-      queryKey: queryKeys.issues.documents(issue.id),
-      queryFn: () => issuesApi.listDocuments(issue.id),
-      enabled: !!selectedCompanyId,
-    })),
-  });
-  const latestLibraryDocuments = useMemo(
+  const nextStep = useMemo(
     () =>
-      libraryIssueCandidates
-        .flatMap((issue, index) =>
-          (libraryDocumentQueries[index]?.data ?? []).map((document) => ({ issue, document })),
-        )
-        .sort((a, b) => new Date(b.document.updatedAt).getTime() - new Date(a.document.updatedAt).getTime())
-        .slice(0, 4),
-    [libraryDocumentQueries, libraryIssueCandidates],
+      buildMissionControlNextStep({
+        bottleneck,
+        setupItems: profile.setupItems,
+        nextTasks,
+        outcomeCount: latestLibraryDocuments.length,
+        objective: objectiveTitle,
+      }),
+    [bottleneck, latestLibraryDocuments.length, nextTasks, objectiveTitle, profile.setupItems],
   );
 
   const createTaskMutation = useMutation({
@@ -234,6 +224,11 @@ export function Dashboard() {
           {isFreshCompany ? (
             <FreshCompanyPanel onAskOperator={() => setOperatorOpen(true)} />
           ) : null}
+
+          <GuidedNextStepPanel
+            nextStep={nextStep}
+            onAskOperator={() => setOperatorOpen(true)}
+          />
 
           <div className="theft-dashboard-content-grid grid min-w-0 gap-6" data-operator-open={String(operatorOpen)}>
             <StrategyMapPanel

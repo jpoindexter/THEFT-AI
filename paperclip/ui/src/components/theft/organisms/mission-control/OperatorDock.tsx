@@ -30,16 +30,16 @@ export function OperatorDock({
         variant="secondary"
         className="h-11 shrink-0 justify-start gap-2 px-3 text-left text-sm md:h-12 md:px-4"
       >
-        <Bot className="h-5 w-5" />
-        <span>
-          <span className="theft-label-compact block">Operator dock</span>
-          <span className="block text-xs">Collapsed</span>
-        </span>
-      </Button>
+          <Bot className="h-5 w-5" />
+          <span>
+            <span className="theft-label-compact block">Operator dock</span>
+            <span className="block text-xs">Open guide</span>
+          </span>
+        </Button>
       <Input
         value={operatorDraft}
         onChange={(event) => setOperatorDraft(event.target.value)}
-        placeholder="Ask Operator..."
+        placeholder="Ask Operator what to do next..."
         className="hidden h-12 min-w-0 flex-1 bg-secondary px-5 text-base shadow-none sm:block"
       />
       <Button variant="ghost" onClick={onToggle} className="hidden h-12 gap-2 px-3 sm:inline-flex" aria-label="Explain next move">

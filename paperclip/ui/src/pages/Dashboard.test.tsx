@@ -207,6 +207,12 @@ describe("Dashboard", () => {
     expect(mockSetBreadcrumbs).toHaveBeenCalledWith([{ label: "Mission Control" }]);
     expect(text).toContain("Objective");
     expect(text).toContain("Launch first offer");
+    expect(text).toContain("Operator guide");
+    expect(text).toContain("Unblock launch page");
+    expect(text).toContain("Idea");
+    expect(text).toContain("Departments");
+    expect(text).toContain("Library");
+    expect(text).toContain("Task output should land in Library before approval.");
     expect(text).toContain("Next Move");
     expect(text).toContain("Blocked task");
     expect(text).toContain("Unblock launch page");
@@ -216,6 +222,7 @@ describe("Dashboard", () => {
     expect(text).toContain("Execution state");
     expect(text).toContain("Outcomes");
     expect(text).toContain("Operator dock");
+    expect(text).toContain("Open guide");
     expect(text).toContain("Tech Tree");
     expect(text).not.toContain("Paperclip agents and assigned issues");
     expect(text).not.toContain("Create Paperclip task");
