@@ -65,6 +65,13 @@ function CompanyAwareBreadcrumbProvider({ children }: { children: React.ReactNod
 }
 
 async function bootstrap() {
+  const rootElement = document.getElementById(ROOT_ELEMENT_ID) as RootHostElement | null;
+  if (!rootElement) {
+    throw new Error(`Missing #${ROOT_ELEMENT_ID} root element`);
+  }
+  const root = rootElement[ROOT_INSTANCE_KEY] ?? createRoot(rootElement);
+  rootElement[ROOT_INSTANCE_KEY] = root;
+
   try {
     const { initPluginBridge } = await import("./plugins/bridge-init");
     initPluginBridge(React, ReactDOM);
@@ -72,12 +79,6 @@ async function bootstrap() {
     console.error("Failed to initialize plugin bridge", error);
   }
 
-  const rootElement = document.getElementById(ROOT_ELEMENT_ID) as RootHostElement | null;
-  if (!rootElement) {
-    throw new Error(`Missing #${ROOT_ELEMENT_ID} root element`);
-  }
-  const root = rootElement[ROOT_INSTANCE_KEY] ?? createRoot(rootElement);
-  rootElement[ROOT_INSTANCE_KEY] = root;
   root.render(
     <StrictMode>
       <QueryClientProvider client={queryClient}>

@@ -66,15 +66,15 @@ export function TaskReviewSummary({
   const hasOutput = outputCount > 0;
   const canApprove = !hasBlocker && hasOutput && issue.status !== "done";
   const approveLabel = issue.status === "done"
-    ? "Completed"
+    ? "Approved"
     : !hasOutput
       ? "No output to approve"
       : approving
         ? "Approving..."
-        : "Approve";
+        : "Approve output";
   const outputHelp = hasOutput
-    ? "Saved output is available in Library. Open it there to inspect the durable artifact."
-    : "This task has thread activity, but no saved Library artifact yet. Ask Operator to publish the result or explain where the work landed.";
+    ? "Saved output is available in Library. Open it there to inspect the durable artifact before approving."
+    : "This task can only be approved after the department publishes a concrete Library artifact.";
 
   return (
     <TheftSurface padding="lg" className="space-y-4 text-foreground">
@@ -95,6 +95,9 @@ export function TaskReviewSummary({
           <div>
             <p className="theft-label-compact">Output & Evidence</p>
             <p className="mt-2 text-sm">{outputLabel}</p>
+            <p className="mt-2 text-xs leading-5 text-muted-foreground">
+              {outputHelp}
+            </p>
           </div>
           {outputTitles.length > 0 ? (
             <div className="space-y-2">
@@ -106,9 +109,14 @@ export function TaskReviewSummary({
               ))}
             </div>
           ) : (
-            <p className="text-xs leading-5 text-muted-foreground">
-              {outputHelp}
-            </p>
+            <TheftSurface tone="muted" padding="sm" className="space-y-2">
+              <p className="text-xs font-medium text-foreground">Where the work should land</p>
+              <div className="grid gap-2 text-xs leading-5 text-muted-foreground sm:grid-cols-3">
+                <span>1. Department produces work.</span>
+                <span>2. Operator saves it to Library.</span>
+                <span>3. Founder approves or asks for revision.</span>
+              </div>
+            </TheftSurface>
           )}
           <Button
             variant="outline"
@@ -117,7 +125,7 @@ export function TaskReviewSummary({
             onClick={hasOutput ? onOpenLibrary : onAskOperator}
           >
             {hasOutput ? <Library className="h-4 w-4" /> : <MessageSquare className="h-4 w-4" />}
-            {hasOutput ? "Open Library" : "Ask where output is"}
+            {hasOutput ? "Open Library artifact" : "Ask Operator to publish output"}
           </Button>
           <TheftSurface tone="muted" padding="sm">
             <p className="theft-label-compact">Objective</p>
@@ -135,8 +143,8 @@ export function TaskReviewSummary({
               {hasBlocker
                 ? "Unblock this task before approving output."
                 : outputCount > 0
-                  ? "Approve the result, ask for revision, or complete the task."
-                  : "Wait for department output or ask Operator to adjust the task."}
+                  ? "Approve the saved artifact or send a revision note into the task thread."
+                  : "Ask Operator to publish the missing output before this task is marked complete."}
             </p>
           </div>
           <div className="grid gap-2">
