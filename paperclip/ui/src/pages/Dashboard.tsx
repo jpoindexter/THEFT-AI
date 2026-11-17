@@ -162,6 +162,10 @@ export function Dashboard() {
     nextMove: bottleneck,
     objective: objectiveTitle,
   });
+  const openOperatorWithDraft = (kind: Parameters<typeof operatorTask.applyDraft>[0]) => {
+    operatorTask.applyDraft(kind);
+    setOperatorOpen(true);
+  };
 
   if (!selectedCompanyId) {
     if (companies.length === 0) {
@@ -202,13 +206,13 @@ export function Dashboard() {
           />
 
           {isFreshCompany ? (
-            <FreshCompanyPanel onAskOperator={() => setOperatorOpen(true)} />
+            <FreshCompanyPanel onAskOperator={() => openOperatorWithDraft("recommended")} />
           ) : null}
 
           <GuidedNextStepPanel
             nextStep={nextStep}
             planSummary={planSummary}
-            onAskOperator={() => setOperatorOpen(true)}
+            onAskOperator={() => openOperatorWithDraft("recommended")}
           />
 
           <div className="theft-dashboard-content-grid grid min-w-0 gap-6" data-operator-open={String(operatorOpen)}>
@@ -264,6 +268,7 @@ export function Dashboard() {
       <OperatorDock
         open={operatorOpen}
         onToggle={() => setOperatorOpen((value) => !value)}
+        openWithDraft={openOperatorWithDraft}
         operatorDraft={operatorTask.operatorDraft}
         setOperatorDraft={operatorTask.setOperatorDraft}
         createTask={operatorTask.createTask}

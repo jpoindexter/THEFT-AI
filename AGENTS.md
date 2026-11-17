@@ -114,6 +114,16 @@ structure may differ from model training data. Read the relevant guide in
 
 ## Harness Notes
 
+Agent OS skills:
+
+- Use `systematic-debugging` for runtime, Paperclip, build, smoke, or test
+  failures.
+- Use `verification-before-completion` before claiming checks pass.
+- Use `design-taste-frontend` for active UI work.
+- Use `karpathy-guidelines` for scoped implementation and refactors.
+- Use `startup-pressure-test` for product wedge, ICP, MVP, and first-customer
+  planning.
+
 Codex:
 
 - Use `deep` for architecture and migration work.

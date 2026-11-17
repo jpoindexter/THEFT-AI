@@ -1,10 +1,12 @@
 import { Bot, CheckCircle2, Route, Send, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import type { OperatorTaskDraftKind } from "./operatorTaskDraft";
 
 export function OperatorDock({
   open,
   onToggle,
+  openWithDraft,
   operatorDraft,
   setOperatorDraft,
   createTask,
@@ -13,6 +15,7 @@ export function OperatorDock({
 }: {
   open: boolean;
   onToggle: () => void;
+  openWithDraft: (kind: OperatorTaskDraftKind) => void;
   operatorDraft: string;
   setOperatorDraft: (value: string) => void;
   createTask: () => void;
@@ -42,15 +45,30 @@ export function OperatorDock({
         placeholder="Ask Operator what to do next..."
         className="hidden h-12 min-w-0 flex-1 bg-secondary px-5 text-base shadow-none sm:block"
       />
-      <Button variant="ghost" onClick={onToggle} className="hidden h-12 gap-2 px-3 sm:inline-flex" aria-label="Explain next move">
+      <Button
+        variant="ghost"
+        onClick={() => openWithDraft("risk")}
+        className="hidden h-12 gap-2 px-3 sm:inline-flex"
+        aria-label="Explain next move"
+      >
         <Sparkles className="h-4 w-4" />
         <span className="hidden text-xs lg:inline">Explain</span>
       </Button>
-      <Button variant="ghost" onClick={onToggle} className="hidden h-12 gap-2 px-3 sm:inline-flex" aria-label="Route work">
+      <Button
+        variant="ghost"
+        onClick={() => openWithDraft("recommended")}
+        className="hidden h-12 gap-2 px-3 sm:inline-flex"
+        aria-label="Route work"
+      >
         <Route className="h-4 w-4" />
         <span className="hidden text-xs lg:inline">Route</span>
       </Button>
-      <Button variant="ghost" onClick={onToggle} className="hidden h-12 gap-2 px-3 sm:inline-flex" aria-label="Review work">
+      <Button
+        variant="ghost"
+        onClick={() => openWithDraft("compare")}
+        className="hidden h-12 gap-2 px-3 sm:inline-flex"
+        aria-label="Review work"
+      >
         <CheckCircle2 className="h-4 w-4" />
         <span className="hidden text-xs lg:inline">Review</span>
       </Button>

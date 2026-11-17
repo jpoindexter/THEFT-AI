@@ -34,6 +34,7 @@ export {
   LibraryWorkspace,
 } from "./organisms/library"
 export { TasksMissionHeader } from "./organisms/tasks"
+export type { TasksOperatorPromptKind } from "./organisms/tasks"
 export { TechTreeEvidenceGate, TechTreeLinkRow, TechTreeMetric, TechTreeStrategyMap } from "./organisms/tech-tree"
 export { TheftDetailReviewTemplate } from "./templates/TheftDetailReviewTemplate"
 export type { TheftDetailReviewTemplateProps } from "./templates/TheftDetailReviewTemplate"

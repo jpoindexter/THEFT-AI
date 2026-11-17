@@ -282,4 +282,27 @@ describe("Dashboard", () => {
     expect(mockIssueCreate.mock.calls[0][1].description).toContain("Expected Library output:");
     expect(rendered.container.innerHTML).toContain('href="/issues/THE-1"');
   });
+
+  it("opens the Operator drawer with a recommended draft from the dock route action", async () => {
+    const rendered = renderDashboard();
+    root = rendered.root;
+
+    await act(async () => {
+      await vi.waitFor(() => expect(rendered.container.textContent).toContain("Operator dock"));
+    });
+
+    const routeButton = Array.from(rendered.container.querySelectorAll("button"))
+      .find((button) => button.getAttribute("aria-label") === "Route work");
+    await act(async () => {
+      routeButton?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+    });
+
+    await act(async () => {
+      await vi.waitFor(() => expect(rendered.container.textContent).toContain("Compare options"));
+    });
+
+    const draft = rendered.container.querySelector("textarea") as HTMLTextAreaElement | null;
+    expect(draft?.value).toContain("Route this to Engineering");
+    expect(draft?.value).toContain("Create a durable Library artifact before founder approval.");
+  });
 });

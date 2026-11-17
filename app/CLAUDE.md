@@ -27,7 +27,13 @@ pnpm test             # vitest (all tests)
 pnpm test -- src/lib/db/store.test.ts   # single test file
 pnpm lint             # eslint
 pnpm exec tsc --noEmit   # type-check — run after every change
+pnpm gate             # local release gate: vitest + prod build + 9 route smoke checks + onboarding API validation
 ```
+
+## Tests
+- Unit tests: co-located in `src/lib/` (e.g. `store.test.ts` next to `store.ts`)
+- API integration tests: `src/app/api/__tests__/` — test full route handlers against the live file store
+- `vitest.config.ts` runs in `node` environment with `@` alias pointing to `src/`
 
 ## Routing
 ```
@@ -48,10 +54,14 @@ All `[org]/api/...` routes are scoped to an org: `src/app/api/[org]/<resource>/r
 - `src/lib/agent/tools.ts` — Anthropic tool definitions (server-exec + client-pause patterns)
 - `src/lib/agent/anthropic.ts` — backend abstraction (Anthropic / Ollama / claude-cli)
 - `src/lib/agent/compose-prompt.ts` — `composeAgentPromptForDept()`: resolves dept → agent → loads attached `SKILL.md` files
+- `src/lib/engine/tool-dispatcher.ts` — `EngineToolDispatcher` class; the extension point for adding new agent tools. Call `.register({ descriptor, handler })` to add a tool; `executeEngineTool` / `listEngineTools` are the exported singletons used by `run.ts`
 - `src/lib/orgs/bootstrap.ts` — seeds default depts + agents on org creation
 - `src/lib/db/store.ts` — file-backed JSON store; `db.*` is the only way to read/write data
 - `src/lib/db/agent-state.ts` — persists Operator conversation state (Anthropic history + `AgentTurn[]` + pause)
 - `src/lib/db/task-state.ts` — same shape for per-task agent runs
+
+## Auth
+Dev-only cookie gate. `src/lib/auth/session.ts` exports `hasLocalSession()` — returns `true` if the `theft-dev-session` cookie equals `"dev"`. No real auth exists yet; route handlers call this to guard writes.
 
 ## Store types (defined in `lib/db/store.ts`)
 `Org`, `Department`, `Agent`, `Task`, `Message`, `Artifact`, `TechTreeNode`, `TechTreeStatus`, `MemoryItem`, `ApiKey`, `Webhook`, `ApprovalRule`, `EvalSuite`, `Approval`, `TeamMember`, `Routine`, `UsageRecord`

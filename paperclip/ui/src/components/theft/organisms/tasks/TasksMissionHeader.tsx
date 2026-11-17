@@ -19,16 +19,20 @@ import { TheftChip, TheftSectionHeader, TheftStat, TheftSurface } from "@/compon
 import type { createIssueDetailLocationState } from "@/lib/issueDetailBreadcrumb";
 import type { FounderTaskBuckets } from "@/lib/issuesPage";
 
+export type TasksOperatorPromptKind = "summarize" | "route" | "approval";
+
 export function TasksMissionHeader({
   buckets,
   isLoading,
   issueLinkState,
   agents,
+  onOperatorPrompt,
 }: {
   buckets: FounderTaskBuckets;
   isLoading: boolean;
   issueLinkState: ReturnType<typeof createIssueDetailLocationState>;
   agents?: Agent[];
+  onOperatorPrompt?: (kind: TasksOperatorPromptKind, issue: Issue | null) => void;
 }) {
   const nextIssue = buckets.needsAction[0] ?? buckets.ongoing[0] ?? buckets.todo[0] ?? null;
   const secondaryIssues = buckets.needsAction.slice(1, 5);
@@ -53,7 +57,7 @@ export function TasksMissionHeader({
             <QueuedTasksCard issues={secondaryIssues} issueLinkState={issueLinkState} />
           </div>
         </div>
-        <TasksOperatorPanel />
+        <TasksOperatorPanel issue={nextIssue} onOperatorPrompt={onOperatorPrompt} />
       </div>
     </TheftSurface>
   );
@@ -186,7 +190,13 @@ function QueuedTasksCard({
   );
 }
 
-function TasksOperatorPanel() {
+function TasksOperatorPanel({
+  issue,
+  onOperatorPrompt,
+}: {
+  issue: Issue | null;
+  onOperatorPrompt?: (kind: TasksOperatorPromptKind, issue: Issue | null) => void;
+}) {
   return (
     <aside className="border-t border-border bg-muted/20 p-5 md:p-6 lg:border-l lg:border-t-0">
       <div className="flex items-center gap-2">
@@ -199,13 +209,25 @@ function TasksOperatorPanel() {
         </div>
       </div>
       <div className="mt-5 space-y-3">
-        <Button variant="outline" className="h-auto w-full justify-start px-3 py-3 text-left text-sm font-normal">
+        <Button
+          variant="outline"
+          className="h-auto w-full justify-start px-3 py-3 text-left text-sm font-normal"
+          onClick={() => onOperatorPrompt?.("summarize", issue)}
+        >
           Summarize the bottleneck
         </Button>
-        <Button variant="outline" className="h-auto w-full justify-start px-3 py-3 text-left text-sm font-normal">
+        <Button
+          variant="outline"
+          className="h-auto w-full justify-start px-3 py-3 text-left text-sm font-normal"
+          onClick={() => onOperatorPrompt?.("route", issue)}
+        >
           Route this to a department
         </Button>
-        <Button variant="outline" className="h-auto w-full justify-start px-3 py-3 text-left text-sm font-normal">
+        <Button
+          variant="outline"
+          className="h-auto w-full justify-start px-3 py-3 text-left text-sm font-normal"
+          onClick={() => onOperatorPrompt?.("approval", issue)}
+        >
           Draft the approval comment
         </Button>
       </div>

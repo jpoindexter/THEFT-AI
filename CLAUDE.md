@@ -1,6 +1,8 @@
 # CLAUDE.md
 
-Root-level guidance for Claude Code. Read on every session start.
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+
+Root-level guidance. Read on every session start.
 
 ## Read first, before any code
 
